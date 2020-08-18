@@ -69,7 +69,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -89,7 +88,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private ShortcutManager mShortcutManager;
     private PackageManager mPm;
     private ConversationIconFactory mIconFactory;
-    private VisualStabilityManager mVisualStabilityManager;
+    private OnUserInteractionCallback mOnUserInteractionCallback;
     private Handler mMainHandler;
     private Handler mBgHandler;
     private BubbleController mBubbleController;
@@ -207,7 +206,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             ShortcutManager shortcutManager,
             PackageManager pm,
             INotificationManager iNotificationManager,
-            VisualStabilityManager visualStabilityManager,
+            OnUserInteractionCallback onUserInteractionCallback,
             String pkg,
             NotificationChannel notificationChannel,
             NotificationEntry entry,
@@ -224,7 +223,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             BubbleController bubbleController) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
-        mVisualStabilityManager = visualStabilityManager;
+        mOnUserInteractionCallback = onUserInteractionCallback;
         mPackageName = pkg;
         mEntry = entry;
         mSbn = entry.getSbn();
@@ -513,7 +512,7 @@ public class NotificationConversationInfo extends LinearLayout implements
                         mAppUid, mSelectedAction, mNotificationChannel));
         mEntry.markForUserTriggeredMovement(true);
         mMainHandler.postDelayed(
-                mVisualStabilityManager::temporarilyAllowReordering,
+                () -> mOnUserInteractionCallback.onImportanceChanged(mEntry),
                 StackStateAnimator.ANIMATION_DURATION_STANDARD);
     }
 

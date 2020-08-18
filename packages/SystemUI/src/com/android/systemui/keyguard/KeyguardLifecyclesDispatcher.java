@@ -19,13 +19,14 @@ package com.android.systemui.keyguard;
 import android.os.Handler;
 import android.os.Message;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Dispatches the lifecycles keyguard gets from WindowManager on the main thread.
  */
-@Singleton
+@SysUISingleton
 public class KeyguardLifecyclesDispatcher {
 
     static final int SCREEN_TURNING_ON = 0;

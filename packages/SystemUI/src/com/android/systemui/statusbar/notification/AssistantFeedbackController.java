@@ -30,10 +30,10 @@ import android.provider.Settings;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Determines whether to show any indicators or controls related to notification assistant.
@@ -41,7 +41,7 @@ import javax.inject.Singleton;
  * Flags protect any changes from being shown. Notifications that are adjusted by the assistant
  * should show an indicator.
  */
-@Singleton
+@SysUISingleton
 public class AssistantFeedbackController extends ContentObserver {
     private final Uri FEEDBACK_URI
             = Settings.Global.getUriFor(Settings.Global.NOTIFICATION_FEEDBACK_ENABLED);

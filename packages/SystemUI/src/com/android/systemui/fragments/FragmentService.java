@@ -21,6 +21,7 @@ import android.util.ArrayMap;
 import android.view.View;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -30,7 +31,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Subcomponent;
 
@@ -38,7 +38,7 @@ import dagger.Subcomponent;
  * Holds a map of root views to FragmentHostStates and generates them as needed.
  * Also dispatches the configuration changes to all current FragmentHostStates.
  */
-@Singleton
+@SysUISingleton
 public class FragmentService implements Dumpable {
 
     private static final String TAG = "FragmentService";

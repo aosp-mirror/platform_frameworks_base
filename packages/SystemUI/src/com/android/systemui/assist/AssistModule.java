@@ -25,13 +25,13 @@ import androidx.annotation.Nullable;
 import androidx.slice.Clock;
 
 import com.android.internal.app.AssistUtils;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.navigationbar.NavigationBarController;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -44,7 +44,7 @@ public abstract class AssistModule {
     static final String UPTIME_NAME = "uptime";
 
     @Provides
-    @Singleton
+    @SysUISingleton
     @Named(ASSIST_HANDLE_THREAD_NAME)
     static Handler provideBackgroundHandler() {
         final HandlerThread backgroundHandlerThread =
@@ -54,7 +54,7 @@ public abstract class AssistModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static Map<AssistHandleBehavior, AssistHandleBehaviorController.BehaviorController>
             provideAssistHandleBehaviorControllerMap(
                     AssistHandleOffBehavior offBehavior,
@@ -76,13 +76,13 @@ public abstract class AssistModule {
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     static AssistUtils provideAssistUtils(Context context) {
         return new AssistUtils(context);
     }
 
     @Provides
-    @Singleton
+    @SysUISingleton
     @Named(UPTIME_NAME)
     static Clock provideSystemClock() {
         return SystemClock::uptimeMillis;

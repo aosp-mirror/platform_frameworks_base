@@ -74,7 +74,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -114,7 +113,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private MetricsLogger mMetricsLogger;
-    @Mock private VisualStabilityManager mVisualStabilityManager;
+    @Mock private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private NotificationListContainer mNotificationListContainer;
@@ -143,19 +142,21 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectTestDependency(
+                OnUserInteractionCallback.class,
+                mOnUserInteractionCallback);
         mDependency.injectTestDependency(BubbleController.class, mBubbleController);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
-        mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
+        mGutsManager = new NotificationGutsManager(mContext,
                 () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
                 mINotificationManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mProvider,
                 mAssistantFeedbackController, mBubbleController,
-                new UiEventLoggerFake());
+                new UiEventLoggerFake(), mOnUserInteractionCallback);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -360,7 +361,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
                 any(INotificationManager.class),
-                eq(mVisualStabilityManager),
+                eq(mOnUserInteractionCallback),
                 eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
@@ -394,7 +395,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
                 any(INotificationManager.class),
-                eq(mVisualStabilityManager),
+                eq(mOnUserInteractionCallback),
                 eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
@@ -426,7 +427,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
                 any(INotificationManager.class),
-                eq(mVisualStabilityManager),
+                eq(mOnUserInteractionCallback),
                 eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),

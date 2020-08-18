@@ -19,6 +19,7 @@ package com.android.systemui.onehanded;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.animation.Interpolator;
@@ -31,8 +32,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Controller class of OneHanded animations (both from and to OneHanded mode).
@@ -62,10 +61,8 @@ public class OneHandedAnimationController {
     /**
      * Constructor of OneHandedAnimationController
      */
-    @Inject
-    public OneHandedAnimationController(
-            OneHandedSurfaceTransactionHelper surfaceTransactionHelper) {
-        mSurfaceTransactionHelper = surfaceTransactionHelper;
+    public OneHandedAnimationController(Context context) {
+        mSurfaceTransactionHelper = new OneHandedSurfaceTransactionHelper(context);
         mOvershootInterpolator = new OvershootInterpolator();
     }
 

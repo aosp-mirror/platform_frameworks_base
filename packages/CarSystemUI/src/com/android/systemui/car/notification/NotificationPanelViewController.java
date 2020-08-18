@@ -49,6 +49,7 @@ import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.window.OverlayPanelViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -59,10 +60,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** View controller for the notification panel. */
-@Singleton
+@SysUISingleton
 public class NotificationPanelViewController extends OverlayPanelViewController
         implements CommandQueue.Callbacks {
 

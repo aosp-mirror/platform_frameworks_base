@@ -29,11 +29,11 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.tv.micdisclosure.AudioRecordingDisclosureBar;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -46,7 +46,7 @@ import dagger.Lazy;
  * recording, discloses the responsible applications </li>
  * </ul>
  */
-@Singleton
+@SysUISingleton
 public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
 
     private static final String ACTION_OPEN_TV_NOTIFICATIONS_PANEL =

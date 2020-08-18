@@ -23,6 +23,7 @@ import android.view.WindowManager;
 
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -32,12 +33,11 @@ import com.android.systemui.statusbar.StatusBarState;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /** An implementation of {@link com.android.systemui.statusbar.phone.ShadeController}. */
-@Singleton
+@SysUISingleton
 public class ShadeControllerImpl implements ShadeController {
 
     private static final String TAG = "ShadeControllerImpl";

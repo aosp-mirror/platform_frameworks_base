@@ -20,13 +20,13 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A stage that binds all content views for an already inflated {@link ExpandableNotificationRow}.
@@ -34,7 +34,7 @@ import javax.inject.Singleton;
  * In the farther future, the binder logic and consequently this stage should be broken into
  * smaller stages.
  */
-@Singleton
+@SysUISingleton
 public class RowContentBindStage extends BindStage<RowContentBindParams> {
     private final NotificationRowContentBinder mBinder;
     private final NotifInflationErrorManager mNotifInflationErrorManager;

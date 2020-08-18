@@ -31,6 +31,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dock.DockManager;
@@ -48,14 +49,13 @@ import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Simple passthrough implementation of {@link FalsingManager} allowing plugins to swap in.
  *
  * {@link FalsingManagerImpl} is used when a Plugin is not loaded.
  */
-@Singleton
+@SysUISingleton
 public class FalsingManagerProxy implements FalsingManager, Dumpable {
 
     private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";

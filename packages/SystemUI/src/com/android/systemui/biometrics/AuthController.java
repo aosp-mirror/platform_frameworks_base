@@ -49,6 +49,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -56,13 +57,12 @@ import com.android.systemui.statusbar.CommandQueue;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
  * appropriate biometric UI (e.g. BiometricDialogView).
  */
-@Singleton
+@SysUISingleton
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         AuthDialogCallback, DozeReceiver {
 

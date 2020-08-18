@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.wmshell;
+
+import android.content.Context;
+import android.os.Handler;
+import android.view.IWindowManager;
+
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TransactionPool;
+
+import dagger.Module;
+import dagger.Provides;
+
+/**
+ * Provides basic dependencies from {@link com.android.wm.shell}, the dependencies declared here
+ * should be shared among different branches of SystemUI.
+ */
+// TODO(b/162923491): Move most of these dependencies into WMSingleton scope.
+@Module
+public class WMShellBaseModule {
+    @SysUISingleton
+    @Provides
+    static TransactionPool provideTransactionPool() {
+        return new TransactionPool();
+    }
+
+    @SysUISingleton
+    @Provides
+    static DisplayController provideDisplayController(Context context, @Main Handler handler,
+            IWindowManager wmService) {
+        return new DisplayController(context, handler, wmService);
+    }
+
+    @SysUISingleton
+    @Provides
+    static SystemWindows provideSystemWindows(DisplayController displayController,
+            IWindowManager wmService) {
+        return new SystemWindows(displayController, wmService);
+    }
+}

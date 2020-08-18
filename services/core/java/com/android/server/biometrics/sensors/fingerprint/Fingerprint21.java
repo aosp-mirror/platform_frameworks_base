@@ -336,7 +336,10 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         final @FingerprintSensorProperties.SensorType int sensorType =
                 isUdfps ? FingerprintSensorProperties.TYPE_UDFPS
                         : FingerprintSensorProperties.TYPE_REAR;
-        mSensorProperties = new FingerprintSensorProperties(sensorId, sensorType);
+        // resetLockout is controlled by the framework, so hardwareAuthToken is not required
+        final boolean resetLockoutRequiresHardwareAuthToken = false;
+        mSensorProperties = new FingerprintSensorProperties(sensorId, sensorType,
+                resetLockoutRequiresHardwareAuthToken);
     }
 
     static Fingerprint21 newInstance(@NonNull Context context, int sensorId,
@@ -469,7 +472,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         });
     }
 
-    void scheduleResetLockout(int userId, byte[] hardwareAuthToken) {
+    void scheduleResetLockout(int userId) {
         // Fingerprint2.1 keeps track of lockout in the framework. Let's just do it on the handler
         // thread.
         mHandler.post(() -> {

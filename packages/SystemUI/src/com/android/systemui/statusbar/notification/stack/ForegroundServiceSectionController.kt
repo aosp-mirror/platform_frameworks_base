@@ -26,23 +26,21 @@ import android.service.notification.NotificationListenerService.REASON_GROUP_SUM
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
-
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController
 import com.android.systemui.statusbar.notification.NotificationEntryListener
 import com.android.systemui.statusbar.notification.NotificationEntryManager
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.DungeonRow
 import com.android.systemui.util.Assert
-
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Controller for the bottom area of NotificationStackScrollLayout. It owns swiped-away foreground
  * service notifications and can reinstantiate them when requested.
  */
-@Singleton
+@SysUISingleton
 class ForegroundServiceSectionController @Inject constructor(
     val entryManager: NotificationEntryManager,
     val featureController: ForegroundServiceDismissalFeatureController

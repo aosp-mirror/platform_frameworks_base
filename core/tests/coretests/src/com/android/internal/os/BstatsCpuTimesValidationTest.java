@@ -52,7 +52,9 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.DebugUtils;
+import android.util.KeyValueListParser;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -104,8 +106,6 @@ public class BstatsCpuTimesValidationTest {
 
     private static final int WORK_DURATION_MS = 2000;
 
-    private static final String DESIRED_PROC_STATE_CPU_TIMES_DELAY = "0";
-
     private static boolean sBatteryStatsConstsUpdated;
     private static String sOriginalBatteryStatsConsts;
 
@@ -124,10 +124,12 @@ public class BstatsCpuTimesValidationTest {
         sContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_PKG, 0);
+
+        final ArrayMap<String, String> desiredConstants = new ArrayMap<>();
+        desiredConstants.put(KEY_TRACK_CPU_TIMES_BY_PROC_STATE, Boolean.toString(true));
+        desiredConstants.put(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS, Integer.toString(0));
+        updateBatteryStatsConstants(desiredConstants);
         checkCpuTimesAvailability();
-        if (sPerProcStateTimesAvailable && sCpuFreqTimesAvailable) {
-            setDesiredReadyDelay();
-        }
     }
 
     @AfterClass
@@ -139,26 +141,33 @@ public class BstatsCpuTimesValidationTest {
         batteryReset();
     }
 
-    private static void setDesiredReadyDelay() {
+    private static void updateBatteryStatsConstants(ArrayMap<String, String> desiredConstants) {
         sOriginalBatteryStatsConsts = Settings.Global.getString(sContext.getContentResolver(),
                 Settings.Global.BATTERY_STATS_CONSTANTS);
-        String newBatteryStatsConstants;
-        final String newConstant = KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS
-                + "=" + DESIRED_PROC_STATE_CPU_TIMES_DELAY;
-        if (sOriginalBatteryStatsConsts == null || "null".equals(sOriginalBatteryStatsConsts)) {
-            // battery_stats_constants is initially empty, so just assign the desired value.
-            newBatteryStatsConstants = newConstant;
-        } else if (sOriginalBatteryStatsConsts.contains(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS)) {
-            // battery_stats_constants contains delay duration, so replace it
-            // with the desired value.
-            newBatteryStatsConstants = sOriginalBatteryStatsConsts.replaceAll(
-                    KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS + "=\\d+", newConstant);
-        } else {
-            // battery_stats_constants didn't contain any delay, so append the desired value.
-            newBatteryStatsConstants = sOriginalBatteryStatsConsts + "," + newConstant;
+        final char delimiter = ',';
+        final KeyValueListParser parser = new KeyValueListParser(delimiter);
+        parser.setString(sOriginalBatteryStatsConsts);
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0, size = parser.size(); i < size; ++i) {
+            final String key = parser.keyAt(i);
+            final String value = desiredConstants.getOrDefault(key,
+                    parser.getString(key, null));
+            if (sb.length() > 0) {
+                sb.append(delimiter);
+            }
+            sb.append(key + "=" + value);
+            desiredConstants.remove(key);
         }
+        desiredConstants.forEach((key, value) -> {
+            if (sb.length() > 0) {
+                sb.append(delimiter);
+            }
+            sb.append(key + '=' + value);
+        });
         Settings.Global.putString(sContext.getContentResolver(),
-                Settings.Global.BATTERY_STATS_CONSTANTS, newBatteryStatsConstants);
+                Settings.Global.BATTERY_STATS_CONSTANTS, sb.toString());
+        Log.d(TAG, "Updated value of '" + Settings.Global.BATTERY_STATS_CONSTANTS + "': "
+                + sb.toString());
         sBatteryStatsConstsUpdated = true;
     }
 

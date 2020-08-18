@@ -22,6 +22,7 @@ import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -38,13 +39,8 @@ import static org.mockito.ArgumentMatchers.eq;
 
 import android.app.WaitResult;
 import android.content.pm.ActivityInfo;
-import android.graphics.PixelFormat;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.VirtualDisplay;
-import android.media.ImageReader;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
-import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
 
@@ -180,53 +176,28 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
                 eq(true) /* focused */);
     }
 
+    /**
+     * Ensures that a trusted display can launch arbitrary activity and an untrusted display can't.
+     */
     @Test
-    /** Ensures that a trusted virtual display can launch arbitrary activities. */
-    public void testTrustedVirtualDisplayCanLaunchActivities() {
-        final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final Task stack = new StackBuilder(mRootWindowContainer)
-                .setDisplay(newDisplay).build();
-        final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
-        VirtualDisplay virtualDisplay = createVirtualDisplay(true);
-        final boolean allowed = mSupervisor.isCallerAllowedToLaunchOnDisplay(1234, 1234,
-                virtualDisplay.getDisplay().getDisplayId(), unresizableActivity.info);
+    public void testDisplayCanLaunchActivities() {
+        final Display display = mDisplayContent.mDisplay;
+        // An empty info without FLAG_ALLOW_EMBEDDED.
+        final ActivityInfo activityInfo = new ActivityInfo();
+        final int callingPid = 12345;
+        final int callingUid = 12345;
+        spyOn(display);
 
-        assertThat(allowed).isTrue();
+        doReturn(true).when(display).isTrusted();
+        final boolean allowedOnTrusted = mSupervisor.isCallerAllowedToLaunchOnDisplay(callingPid,
+                callingUid, display.getDisplayId(), activityInfo);
 
-        virtualDisplay.release();
-    }
+        assertThat(allowedOnTrusted).isTrue();
 
-    @Test
-    /** Ensures that an untrusted virtual display cannot launch arbitrary activities. */
-    public void testUntrustedVirtualDisplayCannotLaunchActivities() {
-        final DisplayContent newDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final Task stack = new StackBuilder(mRootWindowContainer)
-                .setDisplay(newDisplay).build();
-        final ActivityRecord unresizableActivity = stack.getTopNonFinishingActivity();
-        VirtualDisplay virtualDisplay = createVirtualDisplay(false);
-        final boolean allowed = mSupervisor.isCallerAllowedToLaunchOnDisplay(1234, 1234,
-                virtualDisplay.getDisplay().getDisplayId(), unresizableActivity.info);
+        doReturn(false).when(display).isTrusted();
+        final boolean allowedOnUntrusted = mSupervisor.isCallerAllowedToLaunchOnDisplay(callingPid,
+                callingUid, display.getDisplayId(), activityInfo);
 
-        assertThat(allowed).isFalse();
-
-        virtualDisplay.release();
-    }
-
-    private VirtualDisplay createVirtualDisplay(boolean trusted) {
-        final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-        final DisplayInfo displayInfo = new DisplayInfo();
-        final Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
-        defaultDisplay.getDisplayInfo(displayInfo);
-        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
-        if (trusted) {
-            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
-        }
-
-        final ImageReader imageReader = ImageReader.newInstance(
-                displayInfo.logicalWidth, displayInfo.logicalHeight, PixelFormat.RGBA_8888, 2);
-
-        return dm.createVirtualDisplay("virtualDisplay", displayInfo.logicalWidth,
-                displayInfo.logicalHeight,
-                displayInfo.logicalDensityDpi, imageReader.getSurface(), flags);
+        assertThat(allowedOnUntrusted).isFalse();
     }
 }

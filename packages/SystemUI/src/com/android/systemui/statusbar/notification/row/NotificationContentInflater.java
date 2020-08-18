@@ -36,6 +36,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.MediaDataManagerKt;
 import com.android.systemui.media.MediaFeatureFlag;
@@ -58,7 +59,6 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -66,7 +66,7 @@ import dagger.Lazy;
  * {@link NotificationContentInflater} binds content to a {@link ExpandableNotificationRow} by
  * asynchronously building the content's {@link RemoteViews} and applying it to the row.
  */
-@Singleton
+@SysUISingleton
 @VisibleForTesting(visibility = PACKAGE)
 public class NotificationContentInflater implements NotificationRowContentBinder {
 

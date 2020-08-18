@@ -40,6 +40,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -47,12 +48,11 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A service that controls UI of the one handed mode function.
  */
-@Singleton
+@SysUISingleton
 public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dumpable {
     private static final String TAG = "OneHandedUI";
     private static final String ONE_HANDED_MODE_GESTURAL_OVERLAY =

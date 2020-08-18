@@ -23,14 +23,14 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.car.hvac.HvacController;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /** A single class which controls the navigation bar views. */
-@Singleton
+@SysUISingleton
 public class CarNavigationBarController {
 
     private final Context mContext;

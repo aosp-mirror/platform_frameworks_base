@@ -364,6 +364,10 @@ public class PipResizeGestureHandler {
         mUserResizeBounds.set(bounds);
     }
 
+    void invalidateUserResizeBounds() {
+        mUserResizeBounds.setEmpty();
+    }
+
     Rect getUserResizeBounds() {
         return mUserResizeBounds;
     }

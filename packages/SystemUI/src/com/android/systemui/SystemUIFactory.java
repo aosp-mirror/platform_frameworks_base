@@ -27,24 +27,15 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
-import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.concurrent.Executor;
@@ -100,7 +91,7 @@ public class SystemUIFactory {
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
-        Dependency dependency = mRootComponent.createDependency();
+        Dependency dependency = mSysUIComponent.createDependency();
         dependency.start();
     }
 
@@ -112,6 +103,10 @@ public class SystemUIFactory {
 
     public GlobalRootComponent getRootComponent() {
         return mRootComponent;
+    }
+
+    public SysUIComponent getSysUIComponent() {
+        return mSysUIComponent;
     }
 
     /** Returns the list of system UI components that should be started. */
@@ -146,20 +141,5 @@ public class SystemUIFactory {
                 expansionCallback, keyguardStateController,
                 Dependency.get(KeyguardUpdateMonitor.class), bypassController,
                 new Handler(Looper.getMainLooper()));
-    }
-
-    public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar,
-            NotificationWakeUpCoordinator wakeUpCoordinator,
-            KeyguardBypassController keyguardBypassController,
-            StatusBarStateController statusBarStateController,
-            DemoModeController demoModeController) {
-        return new NotificationIconAreaController(context, statusBar, statusBarStateController,
-                wakeUpCoordinator, keyguardBypassController,
-                Dependency.get(NotificationMediaManager.class),
-                Dependency.get(NotificationListener.class),
-                Dependency.get(DozeParameters.class),
-                Dependency.get(BubbleController.class),
-                demoModeController);
     }
 }

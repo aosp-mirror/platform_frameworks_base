@@ -29,17 +29,17 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls the expansion state of the primary window which will contain all of the fullscreen sysui
  * behavior. This window still has a collapsed state in order to watch for swipe events to expand
  * this window for the notification panel.
  */
-@Singleton
+@SysUISingleton
 public class SystemUIOverlayWindowController implements
         ConfigurationController.ConfigurationListener {
 

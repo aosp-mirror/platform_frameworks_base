@@ -40,6 +40,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.appops.AppOpItem;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.Utils;
@@ -48,12 +49,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * A controller to manage changes of location related states and update the views accordingly.
  */
-@Singleton
+@SysUISingleton
 public class LocationControllerImpl extends BroadcastReceiver implements LocationController,
         AppOpsController.Callback {
 

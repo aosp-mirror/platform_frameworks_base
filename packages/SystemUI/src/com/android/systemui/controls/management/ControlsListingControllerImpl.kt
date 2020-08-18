@@ -27,11 +27,11 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.applications.ServiceListing
 import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private fun createServiceListing(context: Context): ServiceListing {
     return ServiceListing.Builder(context).apply {
@@ -52,7 +52,7 @@ private fun createServiceListing(context: Context): ServiceListing {
  * * Has an intent-filter responding to [ControlsProviderService.CONTROLS_ACTION]
  * * Has the bind permission `android.permission.BIND_CONTROLS`
  */
-@Singleton
+@SysUISingleton
 class ControlsListingControllerImpl @VisibleForTesting constructor(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,

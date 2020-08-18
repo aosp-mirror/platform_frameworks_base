@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import com.android.systemui.Interpolators
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -37,7 +38,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Similarly to isShown but also excludes views that have 0 alpha
@@ -65,7 +65,7 @@ val View.isShownNotFaded: Boolean
  * This manager is responsible for placement of the unique media view between the different hosts
  * and animate the positions of the views to achieve seamless transitions.
  */
-@Singleton
+@SysUISingleton
 class MediaHierarchyManager @Inject constructor(
     private val context: Context,
     private val statusBarStateController: SysuiStatusBarStateController,

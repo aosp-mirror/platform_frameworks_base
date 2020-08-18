@@ -46,7 +46,14 @@ data class ListAttachState private constructor(
     /**
      * The [NotifPromoter] promoting this entry to top-level, if any. Always null for [GroupEntry]s.
      */
-    var promoter: NotifPromoter?
+    var promoter: NotifPromoter?,
+
+    /**
+     * If the [VisualStabilityManager] is suppressing group or section changes for this entry,
+     * suppressedChanges will contain the new parent or section that we would have assigned to
+     * the entry had it not been suppressed by the VisualStabilityManager.
+     */
+    var suppressedChanges: SuppressedAttachState
 ) {
 
     /** Copies the state of another instance. */
@@ -56,6 +63,7 @@ data class ListAttachState private constructor(
         sectionIndex = other.sectionIndex
         excludingFilter = other.excludingFilter
         promoter = other.promoter
+        suppressedChanges.clone(other.suppressedChanges)
     }
 
     /** Resets back to a "clean" state (the same as created by the factory method) */
@@ -65,6 +73,7 @@ data class ListAttachState private constructor(
         sectionIndex = -1
         excludingFilter = null
         promoter = null
+        suppressedChanges.reset()
     }
 
     companion object {
@@ -75,7 +84,8 @@ data class ListAttachState private constructor(
                     null,
                     -1,
                     null,
-                    null)
+                    null,
+                SuppressedAttachState.create())
         }
     }
 }

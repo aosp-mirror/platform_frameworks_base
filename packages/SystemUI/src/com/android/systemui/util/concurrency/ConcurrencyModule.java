@@ -22,6 +22,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -29,8 +30,6 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import javax.inject.Singleton;
 
 import dagger.Binds;
 import dagger.Module;
@@ -43,7 +42,7 @@ import dagger.Provides;
 public abstract class ConcurrencyModule {
     /** Background Looper */
     @Provides
-    @Singleton
+    @SysUISingleton
     @Background
     public static Looper provideBgLooper() {
         HandlerThread thread = new HandlerThread("SysUiBg",
@@ -54,7 +53,7 @@ public abstract class ConcurrencyModule {
 
     /** Long running tasks Looper */
     @Provides
-    @Singleton
+    @SysUISingleton
     @LongRunning
     public static Looper provideLongRunningLooper() {
         HandlerThread thread = new HandlerThread("SysUiLng",
@@ -96,7 +95,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     public static Executor provideExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
     }
@@ -105,7 +104,7 @@ public abstract class ConcurrencyModule {
      * Provide a Long running Executor by default.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @LongRunning
     public static Executor provideLongRunningExecutor(@LongRunning Looper looper) {
         return new ExecutorImpl(looper);
@@ -115,7 +114,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @Background
     public static Executor provideBackgroundExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
@@ -134,7 +133,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     public static DelayableExecutor provideDelayableExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
     }
@@ -143,7 +142,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @Background
     public static DelayableExecutor provideBackgroundDelayableExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
@@ -153,7 +152,7 @@ public abstract class ConcurrencyModule {
      * Provide a Main-Thread Executor.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @Main
     public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
         return new ExecutorImpl(looper);
@@ -163,7 +162,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor by default.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     public static RepeatableExecutor provideRepeatableExecutor(@Background DelayableExecutor exec) {
         return new RepeatableExecutorImpl(exec);
     }
@@ -172,7 +171,7 @@ public abstract class ConcurrencyModule {
      * Provide a Background-Thread Executor.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @Background
     public static RepeatableExecutor provideBackgroundRepeatableExecutor(
             @Background DelayableExecutor exec) {
@@ -183,7 +182,7 @@ public abstract class ConcurrencyModule {
      * Provide a Main-Thread Executor.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @Main
     public static RepeatableExecutor provideMainRepeatableExecutor(@Main DelayableExecutor exec) {
         return new RepeatableExecutorImpl(exec);
@@ -195,7 +194,7 @@ public abstract class ConcurrencyModule {
      * Keep submitted runnables short and to the point, just as with any other UI code.
      */
     @Provides
-    @Singleton
+    @SysUISingleton
     @UiBackground
     public static Executor provideUiBackgroundExecutor() {
         return Executors.newSingleThreadExecutor();

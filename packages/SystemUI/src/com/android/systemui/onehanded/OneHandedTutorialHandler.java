@@ -39,16 +39,12 @@ import com.android.systemui.R;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Manages the user tutorial handling for One Handed operations, including animations synchronized
  * with one-handed translation.
  * Refer {@link OneHandedGestureHandler} and {@link OneHandedTouchHandler} to see start and stop
  * one handed gesture
  */
-@Singleton
 public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Dumpable {
     private static final String TAG = "OneHandedTutorialHandler";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -76,7 +72,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
         }
     };
 
-    @Inject
     public OneHandedTutorialHandler(Context context) {
         context.getDisplay().getRealSize(mDisplaySize);
         mContentResolver = context.getContentResolver();

@@ -33,17 +33,17 @@ import android.widget.ToastPresenter;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls display of text toasts.
  */
-@Singleton
+@SysUISingleton
 public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "ToastUI";
 

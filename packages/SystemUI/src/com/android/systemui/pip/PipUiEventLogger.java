@@ -20,15 +20,15 @@ import android.app.TaskInfo;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 
 /**
  * Helper class that ends PiP log to UiEvent, see also go/uievent
  */
-@Singleton
+@SysUISingleton
 public class PipUiEventLogger {
 
     private final UiEventLogger mUiEventLogger;

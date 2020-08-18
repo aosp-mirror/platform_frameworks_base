@@ -119,6 +119,18 @@ public class StagedInstallInternalTest {
         assertSessionReady(sessionId);
     }
 
+    @Test
+    public void testAbandonStagedSessionShouldCleanUp() throws Exception {
+        int id1 = Install.single(TestApp.A1).setStaged().createSession();
+        InstallUtils.getPackageInstaller().abandonSession(id1);
+        int id2 = Install.multi(TestApp.A1).setStaged().createSession();
+        InstallUtils.getPackageInstaller().abandonSession(id2);
+        int id3 = Install.single(TestApp.A1).setStaged().commit();
+        InstallUtils.getPackageInstaller().abandonSession(id3);
+        int id4 = Install.multi(TestApp.A1).setStaged().commit();
+        InstallUtils.getPackageInstaller().abandonSession(id4);
+    }
+
     private static void assertSessionReady(int sessionId) {
         assertSessionState(sessionId,
                 (session) -> assertThat(session.isStagedSessionReady()).isTrue());

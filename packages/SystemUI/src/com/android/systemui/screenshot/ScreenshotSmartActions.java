@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.util.Collections;
@@ -40,12 +41,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Collects the static functions for retrieving and acting on smart actions.
  */
-@Singleton
+@SysUISingleton
 public class ScreenshotSmartActions {
     private static final String TAG = "ScreenshotSmartActions";
 

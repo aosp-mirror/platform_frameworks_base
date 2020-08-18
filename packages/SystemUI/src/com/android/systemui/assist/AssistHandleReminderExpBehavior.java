@@ -36,6 +36,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -54,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -63,7 +63,7 @@ import dagger.Lazy;
  * shows the handles when on lockscreen, and shows the handles temporarily when changing tasks or
  * entering overview.
  */
-@Singleton
+@SysUISingleton
 final class AssistHandleReminderExpBehavior implements BehaviorController {
 
     private static final String LEARNING_TIME_ELAPSED_KEY = "reminder_exp_learning_time_elapsed";

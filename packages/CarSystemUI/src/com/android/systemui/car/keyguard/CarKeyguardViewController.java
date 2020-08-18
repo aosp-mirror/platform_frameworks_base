@@ -38,6 +38,7 @@ import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.car.window.OverlayViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
@@ -49,7 +50,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -57,7 +57,7 @@ import dagger.Lazy;
  * Automotive implementation of the {@link KeyguardViewController}. It controls the Keyguard View
  * that is mounted to the SystemUIOverlayWindow.
  */
-@Singleton
+@SysUISingleton
 public class CarKeyguardViewController extends OverlayViewController implements
         KeyguardViewController {
     private static final String TAG = "CarKeyguardViewController";

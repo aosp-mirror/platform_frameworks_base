@@ -81,6 +81,7 @@ import android.widget.Toast;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -89,12 +90,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Class for handling device screen shots
  */
-@Singleton
+@SysUISingleton
 public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInsetsListener {
 
     /**

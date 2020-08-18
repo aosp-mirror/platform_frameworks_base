@@ -21,6 +21,7 @@ import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -28,13 +29,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /**
  * Registers {@link OverlayViewMediator}(s) and synchronizes their calls to hide/show {@link
  * OverlayViewController}(s) to allow for the correct visibility of system bars.
  */
-@Singleton
+@SysUISingleton
 public class SystemUIOverlayWindowManager extends SystemUI {
     private static final String TAG = "SystemUIOverlayWM";
     private final Map<Class<?>, Provider<OverlayViewMediator>>

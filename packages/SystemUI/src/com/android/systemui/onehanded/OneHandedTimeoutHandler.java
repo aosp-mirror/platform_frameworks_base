@@ -33,12 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Singleton;
-
 /**
  * Timeout handler for stop one handed mode operations.
  */
-@Singleton
 public class OneHandedTimeoutHandler implements Dumpable {
     private static final String TAG = "OneHandedTimeoutHandler";
     private static boolean sIsDragging = false;

@@ -16,13 +16,33 @@
 
 package com.android.systemui.dagger;
 
+import com.android.systemui.BootCompleteCacheImpl;
+import com.android.systemui.Dependency;
+import com.android.systemui.InitController;
+import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.onehanded.dagger.OneHandedModule;
+import com.android.systemui.pip.phone.dagger.PipModule;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.InjectionInflationController;
+
 import dagger.Subcomponent;
 
 /**
  * Dagger Subcomponent for Core SysUI.
  */
 @SysUISingleton
-@Subcomponent(modules = {})
+@Subcomponent(modules = {
+        DefaultComponentBinder.class,
+        DependencyProvider.class,
+        DependencyBinder.class,
+        OneHandedModule.class,
+        PipModule.class,
+        SystemServicesModule.class,
+        SystemUIBinder.class,
+        SystemUIModule.class,
+        SystemUIDefaultModule.class})
 public interface SysUIComponent {
 
     /**
@@ -32,4 +52,53 @@ public interface SysUIComponent {
     interface Builder {
         SysUIComponent build();
     }
+
+    /**
+     * Provides a BootCompleteCache.
+     */
+    @SysUISingleton
+    BootCompleteCacheImpl provideBootCacheImpl();
+
+    /**
+     * Creates a ContextComponentHelper.
+     */
+    @SysUISingleton
+    ConfigurationController getConfigurationController();
+
+    /**
+     * Creates a ContextComponentHelper.
+     */
+    @SysUISingleton
+    ContextComponentHelper getContextComponentHelper();
+
+    /**
+     * Main dependency providing module.
+     */
+    @SysUISingleton
+    Dependency createDependency();
+
+    /** */
+    @SysUISingleton
+    DumpManager createDumpManager();
+
+    /**
+     * Creates a InitController.
+     */
+    @SysUISingleton
+    InitController getInitController();
+
+    /**
+     * ViewInstanceCreator generates all Views that need injection.
+     */
+    InjectionInflationController.ViewInstanceCreator.Factory createViewInstanceCreatorFactory();
+
+    /**
+     * Member injection into the supplied argument.
+     */
+    void inject(SystemUIAppComponentFactory factory);
+
+    /**
+     * Member injection into the supplied argument.
+     */
+    void inject(KeyguardSliceProvider keyguardSliceProvider);
 }

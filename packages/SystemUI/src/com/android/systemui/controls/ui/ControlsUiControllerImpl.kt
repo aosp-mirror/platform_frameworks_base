@@ -52,6 +52,7 @@ import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
@@ -62,11 +63,10 @@ import dagger.Lazy
 import java.text.Collator
 import java.util.function.Consumer
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private data class ControlKey(val componentName: ComponentName, val controlId: String)
 
-@Singleton
+@SysUISingleton
 class ControlsUiControllerImpl @Inject constructor (
     val controlsController: Lazy<ControlsController>,
     val context: Context,

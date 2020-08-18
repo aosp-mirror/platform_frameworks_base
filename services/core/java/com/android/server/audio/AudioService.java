@@ -1283,7 +1283,6 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (isPlatformTelevision()) {
-                checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI, caller);
                 synchronized (mHdmiClientLock) {
                     if (mHdmiManager != null && mHdmiPlaybackClient != null) {
                         updateHdmiCecSinkLocked(mHdmiCecSink | false);
@@ -1303,22 +1302,54 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void checkAddAllFixedVolumeDevices(int device, String caller) {
+    /**
+     * Update volume states for the given device.
+     *
+     * This will initialize the volume index if no volume index is available.
+     * If the device is the currently routed device, fixed/full volume policies will be applied.
+     *
+     * @param device a single audio device, ensure that this is not a devices bitmask
+     * @param caller caller of this method
+     */
+    private void updateVolumeStatesForAudioDevice(int device, String caller) {
         final int numStreamTypes = AudioSystem.getNumStreamTypes();
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
-            if (!mStreamStates[streamType].hasIndexForDevice(device)) {
-                // set the default value, if device is affected by a full/fix/abs volume rule, it
-                // will taken into account in checkFixedVolumeDevices()
-                mStreamStates[streamType].setIndex(
-                        mStreamStates[mStreamVolumeAlias[streamType]]
-                                .getIndex(AudioSystem.DEVICE_OUT_DEFAULT),
-                        device, caller, true /*hasModifyAudioSettings*/);
-            }
-            mStreamStates[streamType].checkFixedVolumeDevices();
+            updateVolumeStates(device, streamType, caller);
+        }
+    }
 
-            // Unmute streams if device is full volume
-            if (mFullVolumeDevices.contains(device)) {
-                mStreamStates[streamType].mute(false);
+    /**
+     * Update volume states for the given device and given stream.
+     *
+     * This will initialize the volume index if no volume index is available.
+     * If the device is the currently routed device, fixed/full volume policies will be applied.
+     *
+     * @param device a single audio device, ensure that this is not a devices bitmask
+     * @param streamType streamType to be updated
+     * @param caller caller of this method
+     */
+    private void updateVolumeStates(int device, int streamType, String caller) {
+        if (!mStreamStates[streamType].hasIndexForDevice(device)) {
+            // set the default value, if device is affected by a full/fix/abs volume rule, it
+            // will taken into account in checkFixedVolumeDevices()
+            mStreamStates[streamType].setIndex(
+                    mStreamStates[mStreamVolumeAlias[streamType]]
+                            .getIndex(AudioSystem.DEVICE_OUT_DEFAULT),
+                    device, caller, true /*hasModifyAudioSettings*/);
+        }
+
+        // Check if device to be updated is routed for the given audio stream
+        List<AudioDeviceAttributes> devicesForAttributes = getDevicesForAttributesInt(
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
+        for (AudioDeviceAttributes deviceAttributes : devicesForAttributes) {
+            if (deviceAttributes.getType() == AudioDeviceInfo.convertInternalDeviceToDeviceType(
+                    device)) {
+                mStreamStates[streamType].checkFixedVolumeDevices();
+
+                // Unmute streams if required if device is full volume
+                if (isStreamMute(streamType) && mFullVolumeDevices.contains(device)) {
+                    mStreamStates[streamType].mute(false);
+                }
             }
         }
     }
@@ -1868,8 +1899,13 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
-        Objects.requireNonNull(attributes);
         enforceModifyAudioRoutingPermission();
+        return getDevicesForAttributesInt(attributes);
+    }
+
+    protected @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesInt(
+            @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
         return AudioSystem.getDevicesForAttributes(attributes);
     }
 
@@ -4916,7 +4952,15 @@ public class AudioService extends IAudioService.Stub
         synchronized (VolumeStreamState.class) {
             for (int stream = 0; stream < mStreamStates.length; stream++) {
                 if (stream != skipStream) {
-                    mStreamStates[stream].observeDevicesForStream_syncVSS(false /*checkOthers*/);
+                    int devices = mStreamStates[stream].observeDevicesForStream_syncVSS(
+                            false /*checkOthers*/);
+
+                    Set<Integer> devicesSet = AudioSystem.generateAudioDeviceTypesSet(devices);
+                    for (Integer device : devicesSet) {
+                        // Update volume states for devices routed for the stream
+                        updateVolumeStates(device, stream,
+                                "AudioService#observeDevicesForStreams");
+                    }
                 }
             }
         }
@@ -4985,7 +5029,7 @@ public class AudioService extends IAudioService.Stub
                       + Integer.toHexString(audioSystemDeviceOut) + " from:" + caller));
         // make sure we have a volume entry for this device, and that volume is updated according
         // to volume behavior
-        checkAddAllFixedVolumeDevices(audioSystemDeviceOut, "setDeviceVolumeBehavior:" + caller);
+        updateVolumeStatesForAudioDevice(audioSystemDeviceOut, "setDeviceVolumeBehavior:" + caller);
     }
 
     /**
@@ -7207,10 +7251,9 @@ public class AudioService extends IAudioService.Stub
                 // HDMI output
                 removeAudioSystemDeviceOutFromFullVolumeDevices(AudioSystem.DEVICE_OUT_HDMI);
             }
+            updateVolumeStatesForAudioDevice(AudioSystem.DEVICE_OUT_HDMI,
+                    "HdmiPlaybackClient.DisplayStatusCallback");
         }
-
-        checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI,
-                "HdmiPlaybackClient.DisplayStatusCallback");
     }
 
     private class MyHdmiControlStatusChangeListenerCallback

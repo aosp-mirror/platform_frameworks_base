@@ -37,6 +37,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -54,10 +55,9 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Controls the {@link LockIcon} in the lockscreen. */
-@Singleton
+@SysUISingleton
 public class LockscreenLockIconController {
 
     private final LockscreenGestureLogger mLockscreenGestureLogger;

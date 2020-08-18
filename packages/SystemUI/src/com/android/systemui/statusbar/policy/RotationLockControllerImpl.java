@@ -22,14 +22,14 @@ import android.os.UserHandle;
 import androidx.annotation.NonNull;
 
 import com.android.internal.view.RotationPolicy;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Platform implementation of the rotation lock controller. **/
-@Singleton
+@SysUISingleton
 public final class RotationLockControllerImpl implements RotationLockController {
     private final Context mContext;
     private final CopyOnWriteArrayList<RotationLockControllerCallback> mCallbacks =

@@ -17,6 +17,7 @@
 package com.android.systemui.media
 
 import android.view.View
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
@@ -24,13 +25,12 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A class that controls the media notifications on the lock screen, handles its visibility and
  * is responsible for the embedding of he media experience.
  */
-@Singleton
+@SysUISingleton
 class KeyguardMediaController @Inject constructor(
     private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController,

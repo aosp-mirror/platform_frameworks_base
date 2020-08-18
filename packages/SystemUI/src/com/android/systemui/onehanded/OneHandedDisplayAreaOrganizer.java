@@ -48,8 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import javax.inject.Inject;
-
 /**
  * Manages OneHanded display areas such as offset.
  *
@@ -149,7 +147,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     /**
      * Constructor of OneHandedDisplayAreaOrganizer
      */
-    @Inject
     public OneHandedDisplayAreaOrganizer(Context context,
             DisplayController displayController,
             OneHandedAnimationController animationController,

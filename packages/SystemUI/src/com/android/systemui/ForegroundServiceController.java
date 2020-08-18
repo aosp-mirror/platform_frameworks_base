@@ -24,20 +24,16 @@ import android.util.SparseArray;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.Assert;
 
-import java.util.Set;
-
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Tracks state of foreground services and notifications related to foreground services per user.
  */
-@Singleton
+@SysUISingleton
 public class ForegroundServiceController {
     public static final int[] APP_OPS = new int[] {AppOpsManager.OP_SYSTEM_ALERT_WINDOW};
 

@@ -31,6 +31,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,11 +39,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class KeyguardStateControllerImpl implements KeyguardStateController, Dumpable {
 
     private static final boolean DEBUG_AUTH_WITH_ADB = false;

@@ -269,21 +269,6 @@ public class AuthServiceTest {
                 eq(callback), eq(UserHandle.getCallingUserId()));
     }
 
-    @Test
-    public void testResetLockout_callsBiometricServiceResetLockout() throws
-            Exception {
-        mAuthService = new AuthService(mContext, mInjector);
-        mAuthService.onStart();
-
-        final int userId = 100;
-        final byte[] token = new byte[0];
-
-        mAuthService.mImpl.resetLockout(userId, token);
-
-        waitForIdle();
-        verify(mBiometricService).resetLockout(eq(userId), AdditionalMatchers.aryEq(token));
-    }
-
     private static void waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }

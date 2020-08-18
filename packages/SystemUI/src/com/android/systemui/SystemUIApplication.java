@@ -33,6 +33,7 @@ import android.util.TimingsTraceLog;
 
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
+import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.NotificationChannels;
 
@@ -58,6 +59,7 @@ public class SystemUIApplication extends Application implements
     private boolean mServicesStarted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
     private GlobalRootComponent mRootComponent;
+    private SysUIComponent mSysUIComponent;
 
     public SystemUIApplication() {
         super();
@@ -75,8 +77,9 @@ public class SystemUIApplication extends Application implements
         log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
         mRootComponent = SystemUIFactory.getInstance().getRootComponent();
-        mComponentHelper = mRootComponent.getContextComponentHelper();
-        mBootCompleteCache = mRootComponent.provideBootCacheImpl();
+        mSysUIComponent = SystemUIFactory.getInstance().getSysUIComponent();
+        mComponentHelper = mSysUIComponent.getContextComponentHelper();
+        mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
         log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
@@ -172,7 +175,7 @@ public class SystemUIApplication extends Application implements
             }
         }
 
-        final DumpManager dumpManager = mRootComponent.createDumpManager();
+        final DumpManager dumpManager = mSysUIComponent.createDumpManager();
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
@@ -215,7 +218,7 @@ public class SystemUIApplication extends Application implements
 
             dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
         }
-        mRootComponent.getInitController().executePostInitTasks();
+        mSysUIComponent.getInitController().executePostInitTasks();
         log.traceEnd();
 
         mServicesStarted = true;
@@ -224,7 +227,7 @@ public class SystemUIApplication extends Application implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            mRootComponent.getConfigurationController().onConfigurationChanged(newConfig);
+            mSysUIComponent.getConfigurationController().onConfigurationChanged(newConfig);
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {

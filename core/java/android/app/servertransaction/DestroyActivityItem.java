@@ -18,8 +18,6 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
-import android.annotation.NonNull;
-import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -40,10 +38,10 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
+    public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
-        client.handleDestroyActivity(r, mFinished, mConfigChanges,
+        client.handleDestroyActivity(token, mFinished, mConfigChanges,
                 false /* getNonConfigInstance */, "DestroyActivityItem");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -94,7 +92,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         mConfigChanges = in.readInt();
     }
 
-    public static final @NonNull Creator<DestroyActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<DestroyActivityItem> CREATOR =
             new Creator<DestroyActivityItem>() {
         public DestroyActivityItem createFromParcel(Parcel in) {
             return new DestroyActivityItem(in);

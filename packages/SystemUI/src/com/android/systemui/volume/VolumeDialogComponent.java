@@ -27,6 +27,7 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -44,12 +45,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Implementation of VolumeComponent backed by the new volume dialog.
  */
-@Singleton
+@SysUISingleton
 public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable,
         VolumeDialogControllerImpl.UserActivityListener{
 

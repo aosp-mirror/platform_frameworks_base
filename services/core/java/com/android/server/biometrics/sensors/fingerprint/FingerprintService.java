@@ -25,6 +25,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -97,10 +98,16 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void generateChallenge(IBinder token, IFingerprintServiceReceiver receiver,
-                String opPackageName) {
+        public void generateChallenge(IBinder token, int sensorId,
+                IFingerprintServiceReceiver receiver, String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
-            mFingerprint21.scheduleGenerateChallenge(token, receiver, opPackageName);
+
+            if (sensorId == mFingerprint21.getFingerprintSensorProperties().sensorId) {
+                mFingerprint21.scheduleGenerateChallenge(token, receiver, opPackageName);
+                return;
+            }
+
+            Slog.w(TAG, "No matching sensor for generateChallenge, sensorId: " + sensorId);
         }
 
         @Override // Binder call
@@ -346,9 +353,16 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void resetLockout(int userId, byte [] hardwareAuthToken) {
+        public void resetLockout(IBinder token, int sensorId, int userId,
+                @Nullable byte [] hardwareAuthToken, String opPackageName) {
             Utils.checkPermission(getContext(), RESET_FINGERPRINT_LOCKOUT);
-            mFingerprint21.scheduleResetLockout(userId, hardwareAuthToken);
+
+            if (sensorId == mFingerprint21.getFingerprintSensorProperties().sensorId) {
+                mFingerprint21.scheduleResetLockout(userId);
+                return;
+            }
+
+            Slog.w(TAG, "No matching sensor for resetLockout, sensorId: " + sensorId);
         }
 
         @Override

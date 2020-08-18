@@ -35,6 +35,7 @@ import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.MessagingGroup
 import com.android.settingslib.notification.ConversationIconFactory
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.NotificationPersonExtractorPlugin
@@ -48,7 +49,6 @@ import com.android.systemui.statusbar.policy.ExtensionController
 import java.util.ArrayDeque
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val MAX_STORED_INACTIVE_PEOPLE = 10
 
@@ -58,7 +58,7 @@ interface NotificationPersonExtractor {
     fun isPersonNotification(sbn: StatusBarNotification): Boolean
 }
 
-@Singleton
+@SysUISingleton
 class NotificationPersonExtractorPluginBoundary @Inject constructor(
     extensionController: ExtensionController
 ) : NotificationPersonExtractor {
@@ -87,7 +87,7 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
             plugin?.isPersonNotification(sbn) ?: false
 }
 
-@Singleton
+@SysUISingleton
 class PeopleHubDataSourceImpl @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
     private val extractor: NotificationPersonExtractor,

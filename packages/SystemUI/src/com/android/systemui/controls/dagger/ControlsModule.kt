@@ -33,13 +33,13 @@ import com.android.systemui.controls.ui.ControlActionCoordinator
 import com.android.systemui.controls.ui.ControlActionCoordinatorImpl
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
+import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import javax.inject.Singleton
 
 /**
  * Module for injecting classes in `com.android.systemui.controls`-
@@ -55,7 +55,7 @@ abstract class ControlsModule {
     companion object {
         @JvmStatic
         @Provides
-        @Singleton
+        @SysUISingleton
         @ControlsFeatureEnabled
         fun providesControlsFeatureEnabled(pm: PackageManager): Boolean {
             return pm.hasSystemFeature(PackageManager.FEATURE_CONTROLS)

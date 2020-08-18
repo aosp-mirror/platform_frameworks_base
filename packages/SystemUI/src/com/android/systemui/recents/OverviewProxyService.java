@@ -68,6 +68,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -99,14 +100,13 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
  */
-@Singleton
+@SysUISingleton
 public class OverviewProxyService extends CurrentUserTracker implements
         CallbackController<OverviewProxyListener>, NavigationModeController.ModeChangedListener,
         Dumpable {

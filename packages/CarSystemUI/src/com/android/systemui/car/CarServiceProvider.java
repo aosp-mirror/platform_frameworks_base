@@ -21,14 +21,15 @@ import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /** Provides a common connection to the car service that can be shared. */
-@Singleton
+@SysUISingleton
 public class CarServiceProvider {
 
     private final Context mContext;

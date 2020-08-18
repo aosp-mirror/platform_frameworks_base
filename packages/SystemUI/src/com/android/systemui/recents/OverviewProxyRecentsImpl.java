@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
@@ -43,14 +44,13 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * An implementation of the Recents interface which proxies to the OverviewProxyService.
  */
-@Singleton
+@SysUISingleton
 public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";

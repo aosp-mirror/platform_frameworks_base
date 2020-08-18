@@ -75,6 +75,14 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
      */
     void setDozeAmount(float dozeAmount, boolean animated);
 
+
+    /**
+     * Update the expanded state from {@link StatusBar}'s perspective
+     * @param expanded are we expanded?
+     * @return {@code true} if the state changed, else {@code false}
+     */
+    boolean setPanelExpanded(boolean expanded);
+
     /**
      * Sets whether to leave status bar open when hiding keyguard
      */

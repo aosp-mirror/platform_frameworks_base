@@ -25,6 +25,7 @@ import android.provider.Settings;
 import android.util.MathUtils;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
@@ -34,12 +35,11 @@ import com.android.systemui.tuner.TunerService;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Retrieve doze information
  */
-@Singleton
+@SysUISingleton
 public class DozeParameters implements TunerService.Tunable,
         com.android.systemui.plugins.statusbar.DozeParameters {
     private static final int MAX_DURATION = 60 * 1000;

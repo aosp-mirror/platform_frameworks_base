@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 
 import android.graphics.PointF;
 import android.provider.Settings;
@@ -27,10 +26,12 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -42,11 +43,12 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 
 import java.util.function.BiConsumer;
@@ -64,9 +66,61 @@ public class NotificationStackScrollLayoutController {
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
+    private final DynamicPrivacyController mDynamicPrivacyController;
+    private final ConfigurationController mConfigurationController;
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
     private NotificationStackScrollLayout mView;
+
+    @VisibleForTesting
+    final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
+            new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    mConfigurationController.addCallback(mConfigurationListener);
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    mConfigurationController.removeCallback(mConfigurationListener);
+                }
+            };
+
+    private final DynamicPrivacyController.Listener mDynamicPrivacyControllerListener = () -> {
+        if (mView.isExpanded()) {
+            // The bottom might change because we're using the final actual height of the view
+            mView.setAnimateBottomOnLayout(true);
+        }
+        // Let's update the footer once the notifications have been updated (in the next frame)
+        mView.post(() -> {
+            updateFooter();
+            updateSectionBoundaries("dynamic privacy changed");
+        });
+    };
+
+    @VisibleForTesting
+    final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            mView.reinflateViews();
+        }
+
+        @Override
+        public void onOverlayChanged() {
+            mView.updateCornerRadius();
+            mView.reinflateViews();
+        }
+
+        @Override
+        public void onUiModeChanged() {
+            mView.updateBgColor();
+        }
+
+        @Override
+        public void onThemeChanged() {
+            updateFooter();
+        }
+    };
 
     @Inject
     public NotificationStackScrollLayoutController(
@@ -74,12 +128,16 @@ public class NotificationStackScrollLayoutController {
             NotificationGutsManager notificationGutsManager,
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
-            TunerService tunerService) {
+            TunerService tunerService,
+            DynamicPrivacyController dynamicPrivacyController,
+            ConfigurationController configurationController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
+        mDynamicPrivacyController = dynamicPrivacyController;
+        mConfigurationController = configurationController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -91,15 +149,26 @@ public class NotificationStackScrollLayoutController {
         }
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
+        mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
 
-        mTunerService.addTunable((key, newValue) -> {
-            if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
-                mView.updateDismissRtlSetting("1".equals(newValue));
-            }
-        }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
+        mTunerService.addTunable(
+                (key, newValue) -> {
+                    if (key.equals(Settings.Secure.NOTIFICATION_DISMISS_RTL)) {
+                        mView.updateDismissRtlSetting("1".equals(newValue));
+                    } else if (key.equals(Settings.Secure.NOTIFICATION_HISTORY_ENABLED)) {
+                        updateFooter();
+                    }
+                },
+                Settings.Secure.NOTIFICATION_DISMISS_RTL,
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
+
+        if (mView.isAttachedToWindow()) {
+            mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
+        }
+        mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
@@ -479,10 +548,6 @@ public class NotificationStackScrollLayoutController {
         mView.updateFooter();
     }
 
-    public void updateIconAreaViews() {
-        mView.updateIconAreaViews();
-    }
-
     public void onUpdateRowStates() {
         mView.onUpdateRowStates();
     }
@@ -502,10 +567,6 @@ public class NotificationStackScrollLayoutController {
     public void setNotificationPanelController(
             NotificationPanelViewController notificationPanelViewController) {
         mView.setNotificationPanelController(notificationPanelViewController);
-    }
-
-    public void setIconAreaController(NotificationIconAreaController controller) {
-        mView.setIconAreaController(controller);
     }
 
     public void setStatusBar(StatusBar statusBar) {

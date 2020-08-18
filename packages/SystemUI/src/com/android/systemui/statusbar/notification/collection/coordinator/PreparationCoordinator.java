@@ -28,6 +28,7 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -48,7 +49,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Kicks off core notification inflation and view rebinding when a notification is added or updated.
@@ -57,7 +57,7 @@ import javax.inject.Singleton;
  * If a notification was uninflated, this coordinator will filter the notification out from the
  * {@link ShadeListBuilder} until it is inflated.
  */
-@Singleton
+@SysUISingleton
 public class PreparationCoordinator implements Coordinator {
     private static final String TAG = "PreparationCoordinator";
 

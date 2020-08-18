@@ -125,10 +125,10 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -150,7 +150,6 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -179,8 +178,7 @@ import javax.inject.Named;
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
-public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter,
-        ConfigurationListener, Dumpable, DynamicPrivacyController.Listener {
+public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter, Dumpable {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -500,7 +498,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
-    private NotificationIconAreaController mIconAreaController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final Rect mTmpRect = new Rect();
     private final FeatureFlags mFeatureFlags;
@@ -669,7 +666,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             });
         }
 
-        dynamicPrivacyController.addListener(this);
         mDynamicPrivacyController = dynamicPrivacyController;
         mStatusbarStateController = statusBarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
@@ -732,34 +728,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return 0f;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onDensityOrFontScaleChanged() {
-        reinflateViews();
-    }
-
-    private void reinflateViews() {
+    void reinflateViews() {
         inflateFooterView();
         inflateEmptyShadeView();
         updateFooter();
         mSectionsManager.reinflateViews(LayoutInflater.from(mContext));
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onThemeChanged() {
-        updateFooter();
-    }
-
-    @Override
-    public void onOverlayChanged() {
-        int newRadius = mContext.getResources().getDimensionPixelSize(
-                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
-        if (mCornerRadius != newRadius) {
-            mCornerRadius = newRadius;
-            invalidate();
-        }
-        reinflateViews();
     }
 
     @VisibleForTesting
@@ -827,7 +800,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         super.onAttachedToWindow();
         ((SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class))
                 .addCallback(mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
-        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
@@ -835,7 +807,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
-        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -843,9 +814,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return mSwipeHelper;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onUiModeChanged() {
+    void updateBgColor() {
         mBgColor = mContext.getColor(R.color.notification_shade_background_color);
         updateBackgroundDimming();
         mShelf.onUiModeChanged();
@@ -1076,6 +1045,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+    }
+
+    void updateCornerRadius() {
+        int newRadius = getResources().getDimensionPixelSize(
+                Utils.getThemeAttr(getContext(), android.R.attr.dialogCornerRadius));
+        if (mCornerRadius != newRadius) {
+            mCornerRadius = newRadius;
+            invalidate();
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -3355,8 +3333,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void onViewAddedInternal(ExpandableView child) {
-        child.setOnHeightChangedListener(mOnChildHeightChangedListener);
         updateHideSensitiveForChild(child);
+        child.setOnHeightChangedListener(mOnChildHeightChangedListener);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
@@ -4854,7 +4832,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * @param lightTheme True if light theme should be used.
      */
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
-    private void updateDecorViews(boolean lightTheme) {
+    void updateDecorViews(boolean lightTheme) {
         if (lightTheme == mUsingLightTheme) {
             return;
         }
@@ -5596,11 +5574,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setIconAreaController(NotificationIconAreaController controller) {
-        mIconAreaController = controller;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     @VisibleForTesting
     void clearNotifications(
             @SelectedRows int selection,
@@ -5790,10 +5763,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mNotificationPanelController = notificationPanelViewController;
     }
 
-    public void updateIconAreaViews() {
-        mIconAreaController.updateNotificationIcons();
-    }
-
     /**
      * Set how far the wake up is when waking up from pulsing. This is a height and will adjust the
      * notification positions accordingly.
@@ -5852,17 +5821,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mDimmedNeedsAnimation = true;
     }
 
-    @Override
-    public void onDynamicPrivacyChanged() {
-        if (mIsExpanded) {
-            // The bottom might change because we're using the final actual height of the view
-            mAnimateBottomOnLayout = true;
-        }
-        // Let's update the footer once the notifications have been updated (in the next frame)
-        post(() -> {
-            updateFooter();
-            updateSectionBoundaries("dynamic privacy changed");
-        });
+    void setAnimateBottomOnLayout(boolean animateBottomOnLayout) {
+        mAnimateBottomOnLayout = animateBottomOnLayout;
     }
 
     public void setOnPulseHeightChangedListener(Runnable listener) {

@@ -55,6 +55,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -71,12 +72,11 @@ import java.text.NumberFormat;
 import java.util.IllegalFormatConversionException;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls the indications and error messages shown on the Keyguard
  */
-@Singleton
+@SysUISingleton
 public class KeyguardIndicationController implements StateListener,
         KeyguardStateController.Callback {
 

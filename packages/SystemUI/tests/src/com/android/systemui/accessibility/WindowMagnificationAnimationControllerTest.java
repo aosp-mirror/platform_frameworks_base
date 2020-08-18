@@ -38,6 +38,7 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,6 +93,11 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mSpyController = mController.getSpyController();
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, mController, newValueAnimator());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mInstrumentation.runOnMainSync(() -> mController.deleteWindowMagnification());
     }
 
     @Test

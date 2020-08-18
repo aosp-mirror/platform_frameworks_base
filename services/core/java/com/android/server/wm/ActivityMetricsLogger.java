@@ -542,7 +542,7 @@ class ActivityMetricsLogger {
                     + " processSwitch=" + processSwitch + " info=" + info);
         }
 
-        if (launchedActivity.mDrawn) {
+        if (launchedActivity.isReportedDrawn()) {
             // Launched activity is already visible. We cannot measure windows drawn delay.
             abort(info, "launched activity already visible");
             return;
@@ -681,7 +681,7 @@ class ActivityMetricsLogger {
 
     /** @return {@code true} if the given task has an activity will be drawn. */
     private static boolean hasActivityToBeDrawn(Task t) {
-        return t.forAllActivities((r) -> r.mVisibleRequested && !r.mDrawn && !r.finishing);
+        return t.forAllActivities(r -> r.mVisibleRequested && !r.isReportedDrawn() && !r.finishing);
     }
 
     private void checkVisibility(Task t, ActivityRecord r) {

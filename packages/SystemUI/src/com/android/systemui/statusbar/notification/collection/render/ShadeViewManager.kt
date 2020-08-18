@@ -21,6 +21,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
+import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import java.lang.RuntimeException
 import javax.inject.Inject
 
@@ -31,7 +32,8 @@ import javax.inject.Inject
 class ShadeViewManager constructor(
     listContainer: NotificationListContainer,
     logger: ShadeViewDifferLogger,
-    private val viewBarn: NotifViewBarn
+    private val viewBarn: NotifViewBarn,
+    private val notificationIconAreaController: NotificationIconAreaController
 ) {
     private val rootController = RootNodeController(listContainer)
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
@@ -52,6 +54,7 @@ class ShadeViewManager constructor(
             root.children.add(buildNotifNode(entry, root))
         }
 
+        notificationIconAreaController.updateNotificationIcons(notifList)
         return root
     }
 
@@ -80,9 +83,10 @@ class ShadeViewManager constructor(
 
 class ShadeViewManagerFactory @Inject constructor(
     private val logger: ShadeViewDifferLogger,
-    private val viewBarn: NotifViewBarn
+    private val viewBarn: NotifViewBarn,
+    private val notificationIconAreaController: NotificationIconAreaController
 ) {
     fun create(listContainer: NotificationListContainer): ShadeViewManager {
-        return ShadeViewManager(listContainer, logger, viewBarn)
+        return ShadeViewManager(listContainer, logger, viewBarn, notificationIconAreaController)
     }
 }
