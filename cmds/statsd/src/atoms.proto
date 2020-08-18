@@ -4004,7 +4004,7 @@ message Notification {
     optional bool is_group_summary = 5;
 
     // The section of the shade that the notification is in.
-    // See NotificationSectionsManager.PriorityBucket.
+    // See SystemUI Notifications.proto.
     enum NotificationSection {
         SECTION_UNKNOWN = 0;
         SECTION_HEADS_UP = 1;
@@ -4012,6 +4012,7 @@ message Notification {
         SECTION_PEOPLE = 3;
         SECTION_ALERTING = 4;
         SECTION_SILENT = 5;
+        SECTION_FOREGROUND_SERVICE = 6;
     }
     optional NotificationSection section = 6;
 }
