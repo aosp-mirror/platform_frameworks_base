@@ -4212,14 +4212,19 @@
     </integer-array>
 
     <!-- Messages that should not be shown to the user during face authentication, on
-     BiometricPrompt. This should be used to hide messages that may be too chatty or messages that
-     the user can't do much about. Entries are defined in
-     android.hardware.biometrics.face@1.0 types.hal -->
+         BiometricPrompt. This should be used to hide messages that may be too chatty or messages
+         that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal -->
     <integer-array name="config_face_acquire_biometricprompt_ignorelist" translatable="false" >
     </integer-array>
     <!-- Same as the above, but are defined by vendorCodes -->
     <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
     </integer-array>
+
+    <!-- True if the sensor is able to provide self illumination in dark secnarios, without  support
+         from above the HAL. This configuration is only applicable to IBiometricsFace@1.0 and its
+         minor revisions. -->
+    <bool name="config_faceAuthSupportsSelfIllumination">true</bool>
 
     <!-- If face auth sends the user directly to home/last open app, or stays on keyguard -->
     <bool name="config_faceAuthDismissesKeyguard">true</bool>
