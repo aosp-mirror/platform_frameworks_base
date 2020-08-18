@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import android.content.Context
+import android.view.View
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -30,12 +32,15 @@ import javax.inject.Inject
  * currently populate the notification shade.
  */
 class ShadeViewManager constructor(
+    context: Context,
     listContainer: NotificationListContainer,
     logger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn,
     private val notificationIconAreaController: NotificationIconAreaController
 ) {
-    private val rootController = RootNodeController(listContainer)
+    // We pass a shim view here because the listContainer may not actually have a view associated
+    // with it and the differ never actually cares about the root node's view.
+    private val rootController = RootNodeController(listContainer, View(context))
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
 
     fun attach(listBuilder: ShadeListBuilder) {
@@ -82,11 +87,17 @@ class ShadeViewManager constructor(
 }
 
 class ShadeViewManagerFactory @Inject constructor(
+    private val context: Context,
     private val logger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn,
     private val notificationIconAreaController: NotificationIconAreaController
 ) {
     fun create(listContainer: NotificationListContainer): ShadeViewManager {
-        return ShadeViewManager(listContainer, logger, viewBarn, notificationIconAreaController)
+        return ShadeViewManager(
+                context,
+                listContainer,
+                logger,
+                viewBarn,
+                notificationIconAreaController)
     }
 }

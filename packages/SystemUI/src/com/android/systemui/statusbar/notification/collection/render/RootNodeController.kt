@@ -25,10 +25,10 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
  * we should just modify NLC to implement the NodeController interface.
  */
 class RootNodeController(
-    private val listContainer: NotificationListContainer
+    private val listContainer: NotificationListContainer,
+    override val view: View
 ) : NodeController {
     override val nodeLabel: String = "<root>"
-    override val view: View = listContainer as View
 
     override fun getChildAt(index: Int): View? {
         return listContainer.getContainerChildAt(index)
