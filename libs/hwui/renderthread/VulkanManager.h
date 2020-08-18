@@ -43,10 +43,9 @@ class RenderThread;
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
 // which are re-used by CanvasContext. This class is created once and should be used by all vulkan
 // windowing contexts. The VulkanManager must be initialized before use.
-class VulkanManager {
+class VulkanManager final : public RefBase {
 public:
-    explicit VulkanManager() {}
-    ~VulkanManager() { destroy(); }
+    static sp<VulkanManager> getInstance();
 
     // Sets up the vulkan context that is shared amonst all clients of the VulkanManager. This must
     // be call once before use of the VulkanManager. Multiple calls after the first will simiply
@@ -68,9 +67,6 @@ public:
     Frame dequeueNextBuffer(VulkanSurface* surface);
     void swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect);
 
-    // Cleans up all the global state in the VulkanManger.
-    void destroy();
-
     // Inserts a wait on fence command into the Vulkan command buffer.
     status_t fenceWait(int fence, GrDirectContext* grContext);
 
@@ -83,12 +79,24 @@ public:
     // the internal state of VulkanManager: VulkanManager must be alive to use the returned value.
     VkFunctorInitParams getVkFunctorInitParams() const;
 
-    sk_sp<GrDirectContext> createContext(const GrContextOptions& options);
+
+    enum class ContextType {
+        kRenderThread,
+        kUploadThread
+    };
+
+    // returns a Skia graphic context used to draw content on the specified thread
+    sk_sp<GrDirectContext> createContext(const GrContextOptions& options,
+                                         ContextType contextType = ContextType::kRenderThread);
 
     uint32_t getDriverVersion() const { return mDriverVersion; }
 
 private:
     friend class VulkanSurface;
+
+    explicit VulkanManager() {}
+    ~VulkanManager();
+
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
     // VkPhysicalDeviceFeatures struct.
     void setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
@@ -154,6 +162,7 @@ private:
 
     uint32_t mGraphicsQueueIndex;
     VkQueue mGraphicsQueue = VK_NULL_HANDLE;
+    VkQueue mAHBUploadQueue = VK_NULL_HANDLE;
     uint32_t mPresentQueueIndex;
     VkQueue mPresentQueue = VK_NULL_HANDLE;
     VkCommandPool mCommandPool = VK_NULL_HANDLE;

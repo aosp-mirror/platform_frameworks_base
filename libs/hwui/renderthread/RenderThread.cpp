@@ -131,8 +131,7 @@ RenderThread::RenderThread()
         , mFrameCallbackTaskPending(false)
         , mRenderState(nullptr)
         , mEglManager(nullptr)
-        , mFunctorManager(WebViewFunctorManager::instance())
-        , mVkManager(nullptr) {
+        , mFunctorManager(WebViewFunctorManager::instance()) {
     Properties::load();
     start("RenderThread");
 }
@@ -166,7 +165,7 @@ void RenderThread::initThreadLocals() {
     initializeChoreographer();
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
-    mVkManager = new VulkanManager();
+    mVkManager = VulkanManager::getInstance();
     mCacheManager = new CacheManager();
 }
 
@@ -196,7 +195,8 @@ void RenderThread::requireGlContext() {
 }
 
 void RenderThread::requireVkContext() {
-    if (mVkManager->hasVkContext()) {
+    // the getter creates the context in the event it had been destroyed by destroyRenderingContext
+    if (vulkanManager().hasVkContext()) {
         return;
     }
     mVkManager->initialize();
@@ -222,11 +222,16 @@ void RenderThread::destroyRenderingContext() {
             mEglManager->destroy();
         }
     } else {
-        if (vulkanManager().hasVkContext()) {
-            setGrContext(nullptr);
-            vulkanManager().destroy();
-        }
+        setGrContext(nullptr);
+        mVkManager.clear();
     }
+}
+
+VulkanManager& RenderThread::vulkanManager() {
+    if (!mVkManager.get()) {
+        mVkManager = VulkanManager::getInstance();
+    }
+    return *mVkManager.get();
 }
 
 void RenderThread::dumpGraphicsMemory(int fd) {
