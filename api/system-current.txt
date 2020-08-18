@@ -10249,7 +10249,53 @@ package android.service.trust {
 
 package android.service.voice {
 
+  public class AlwaysOnHotwordDetector {
+    method @Nullable public android.content.Intent createEnrollIntent();
+    method @Nullable public android.content.Intent createReEnrollIntent();
+    method @Nullable public android.content.Intent createUnEnrollIntent();
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int getParameter(int);
+    method public int getSupportedAudioCapabilities();
+    method public int getSupportedRecognitionModes();
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public android.service.voice.AlwaysOnHotwordDetector.ModelParamRange queryParameter(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int setParameter(int, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
+    field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
+    field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
+    field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
+    field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
+    field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
+    field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
+    field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
+    field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
+    field public static final int STATE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
+    field public static final int STATE_KEYPHRASE_ENROLLED = 2; // 0x2
+    field public static final int STATE_KEYPHRASE_UNENROLLED = 1; // 0x1
+    field @Deprecated public static final int STATE_KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
+  }
+
+  public abstract static class AlwaysOnHotwordDetector.Callback {
+    ctor public AlwaysOnHotwordDetector.Callback();
+    method public abstract void onAvailabilityChanged(int);
+    method public abstract void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
+    method public abstract void onError();
+    method public abstract void onRecognitionPaused();
+    method public abstract void onRecognitionResumed();
+  }
+
+  public static class AlwaysOnHotwordDetector.EventPayload {
+    method @Nullable public android.media.AudioFormat getCaptureAudioFormat();
+    method @Nullable public byte[] getTriggerAudio();
+  }
+
+  public static final class AlwaysOnHotwordDetector.ModelParamRange {
+    method public int getEnd();
+    method public int getStart();
+  }
+
   public class VoiceInteractionService extends android.app.Service {
+    method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
   }
 

@@ -16,10 +16,15 @@
 
 package android.service.voice;
 
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.RECORD_AUDIO;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +56,12 @@ import java.util.Locale;
 /**
  * A class that lets a VoiceInteractionService implementation interact with
  * always-on keyphrase detection APIs.
+ *
+ * @hide
+ * TODO(b/168605867): Once Metalava supports expressing a removed public, but current system API,
+ *                    mark and track it as such.
  */
+@SystemApi
 public class AlwaysOnHotwordDetector {
     //---- States of Keyphrase availability. Return codes for onAvailabilityChanged() ----//
     /**
@@ -525,6 +535,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
         synchronized (mLock) {
@@ -555,6 +566,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public boolean stopRecognition() {
         if (DBG) Slog.d(TAG, "stopRecognition()");
         synchronized (mLock) {
@@ -589,6 +601,7 @@ public class AlwaysOnHotwordDetector {
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
      *           if API is not supported by HAL
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public int setParameter(@ModelParams int modelParam, int value) {
         if (DBG) {
             Slog.d(TAG, "setParameter(" + modelParam + ", " + value + ")");
@@ -616,6 +629,7 @@ public class AlwaysOnHotwordDetector {
      * @param modelParam   {@link ModelParams}
      * @return value of parameter
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public int getParameter(@ModelParams int modelParam) {
         if (DBG) {
             Slog.d(TAG, "getParameter(" + modelParam + ")");
@@ -640,6 +654,7 @@ public class AlwaysOnHotwordDetector {
      * @param modelParam {@link ModelParams}
      * @return supported range of parameter, null if not supported
      */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     @Nullable
     public ModelParamRange queryParameter(@ModelParams int modelParam) {
         if (DBG) {
@@ -670,6 +685,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @Nullable
     public Intent createEnrollIntent() {
         if (DBG) Slog.d(TAG, "createEnrollIntent");
         synchronized (mLock) {
@@ -691,6 +707,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @Nullable
     public Intent createUnEnrollIntent() {
         if (DBG) Slog.d(TAG, "createUnEnrollIntent");
         synchronized (mLock) {
@@ -712,6 +729,7 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    @Nullable
     public Intent createReEnrollIntent() {
         if (DBG) Slog.d(TAG, "createReEnrollIntent");
         synchronized (mLock) {

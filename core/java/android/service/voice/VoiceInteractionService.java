@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -237,9 +238,8 @@ public class VoiceInteractionService extends Service {
     /**
      * Called during service initialization to tell you when the system is ready
      * to receive interaction from it. You should generally do initialization here
-     * rather than in {@link #onCreate}. Methods such as {@link #showSession} and
-     * {@link #createAlwaysOnHotwordDetector}
-     * will not be operational until this point.
+     * rather than in {@link #onCreate}. Methods such as {@link #showSession} will
+     * not be operational until this point.
      */
     public void onReady() {
         mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
@@ -309,9 +309,15 @@ public class VoiceInteractionService extends Service {
      * @param locale The locale for which the enrollment needs to be performed.
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
+     *
+     * @hide
      */
+    @SystemApi
+    @NonNull
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
-            String keyphrase, Locale locale, AlwaysOnHotwordDetector.Callback callback) {
+            @SuppressLint("MissingNullability") String keyphrase,  // TODO: annotate nullability properly
+            @SuppressLint({"MissingNullability", "UseIcu"}) Locale locale,
+            @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
