@@ -77,10 +77,10 @@ void RenderProxy::setName(const char* name) {
 }
 
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
-    ANativeWindow_acquire(window);
+    if (window) { ANativeWindow_acquire(window); }
     mRenderThread.queue().post([this, win = window, enableTimeout]() mutable {
         mContext->setSurface(win, enableTimeout);
-        ANativeWindow_release(win);
+        if (win) { ANativeWindow_release(win); }
     });
 }
 
