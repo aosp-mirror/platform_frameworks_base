@@ -1945,7 +1945,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = UserHandle.getUserId(uid);
             final long token = Binder.clearCallingIdentity();
             try {
-                // Don't perform sanity check between controllerPackageName and controllerUid.
+                // Don't perform check between controllerPackageName and controllerUid.
                 // When an (activity|service) runs on the another apps process by specifying
                 // android:process in the AndroidManifest.xml, then PID and UID would have the
                 // running process' information instead of the (activity|service) that has created
