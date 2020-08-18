@@ -15,6 +15,11 @@
  */
 package com.android.networkstack.tethering;
 
+import static android.net.TetheringManager.TETHERING_ETHERNET;
+import static android.net.TetheringManager.TETHERING_USB;
+import static android.net.TetheringManager.TETHERING_WIFI;
+import static android.net.TetheringManager.TETHERING_WIFI_P2P;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.never;
@@ -54,14 +59,24 @@ public final class PrivateAddressCoordinatorTest {
     @Mock private IpServer mHotspotIpServer;
     @Mock private IpServer mUsbIpServer;
     @Mock private IpServer mEthernetIpServer;
+    @Mock private IpServer mWifiP2pIpServer;
     @Mock private Context mContext;
     @Mock private ConnectivityManager mConnectivityMgr;
+    @Mock private TetheringConfiguration mConfig;
 
     private PrivateAddressCoordinator mPrivateAddressCoordinator;
     private final IpPrefix mBluetoothPrefix = new IpPrefix("192.168.44.0/24");
+    private final LinkAddress mLegacyWifiP2pAddress = new LinkAddress("192.168.49.1/24");
     private final Network mWifiNetwork = new Network(1);
     private final Network mMobileNetwork = new Network(2);
     private final Network[] mAllNetworks = {mMobileNetwork, mWifiNetwork};
+
+    private void setUpIpServers() throws Exception {
+        when(mUsbIpServer.interfaceType()).thenReturn(TETHERING_USB);
+        when(mEthernetIpServer.interfaceType()).thenReturn(TETHERING_ETHERNET);
+        when(mHotspotIpServer.interfaceType()).thenReturn(TETHERING_WIFI);
+        when(mWifiP2pIpServer.interfaceType()).thenReturn(TETHERING_WIFI_P2P);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -69,7 +84,9 @@ public final class PrivateAddressCoordinatorTest {
 
         when(mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mConnectivityMgr);
         when(mConnectivityMgr.getAllNetworks()).thenReturn(mAllNetworks);
-        mPrivateAddressCoordinator = spy(new PrivateAddressCoordinator(mContext));
+        when(mConfig.shouldEnableWifiP2pDedicatedIp()).thenReturn(false);
+        setUpIpServers();
+        mPrivateAddressCoordinator = spy(new PrivateAddressCoordinator(mContext, mConfig));
     }
 
     @Test
@@ -127,10 +144,15 @@ public final class PrivateAddressCoordinatorTest {
         mPrivateAddressCoordinator.releaseDownstream(mHotspotIpServer);
     }
 
+    private int getBluetoothSubAddress() {
+        final byte[] rawAddress = mBluetoothPrefix.getRawAddress();
+        int bluetoothSubNet = rawAddress[2] & 0xff;
+        return (bluetoothSubNet << 8) + 0x5;
+    }
+
     @Test
     public void testReserveBluetoothPrefix() throws Exception {
-        final int fakeSubAddr = 0x2c05;
-        when(mPrivateAddressCoordinator.getRandomSubAddr()).thenReturn(fakeSubAddr);
+        when(mPrivateAddressCoordinator.getRandomSubAddr()).thenReturn(getBluetoothSubAddress());
         LinkAddress address = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(address);
@@ -146,7 +168,7 @@ public final class PrivateAddressCoordinatorTest {
         LinkAddress address = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(address);
-        assertEquals("Wrong wifi perfix: ", predefinedPrefix, hotspotPrefix);
+        assertEquals("Wrong wifi prefix: ", predefinedPrefix, hotspotPrefix);
         when(mHotspotIpServer.getAddress()).thenReturn(address);
 
         address = mPrivateAddressCoordinator.requestDownstreamAddress(
@@ -159,7 +181,7 @@ public final class PrivateAddressCoordinatorTest {
         address = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mUsbIpServer);
         final IpPrefix allowUseFreePrefix = PrefixUtils.asIpPrefix(address);
-        assertEquals("Fail to reselect available perfix: ", predefinedPrefix, allowUseFreePrefix);
+        assertEquals("Fail to reselect available prefix: ", predefinedPrefix, allowUseFreePrefix);
     }
 
     private LinkProperties buildUpstreamLinkProperties(boolean withIPv4, boolean withIPv6,
@@ -202,7 +224,7 @@ public final class PrivateAddressCoordinatorTest {
         final LinkAddress hotspotAddr = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(hotspotAddr);
-        assertEquals("Wrong wifi perfix: ", predefinedPrefix, hotspotPrefix);
+        assertEquals("Wrong wifi prefix: ", predefinedPrefix, hotspotPrefix);
         when(mHotspotIpServer.getAddress()).thenReturn(hotspotAddr);
         // 2. Update v6 only mobile network, hotspot prefix should not be removed.
         List<String> testConflicts;
@@ -250,5 +272,39 @@ public final class PrivateAddressCoordinatorTest {
                 mEthernetIpServer);
         final IpPrefix ethPrefix = PrefixUtils.asIpPrefix(ethAddr);
         assertEquals(predefinedPrefix, ethPrefix);
+    }
+
+    private int getSubAddress(final byte... ipv4Address) {
+        assertEquals(4, ipv4Address.length);
+
+        int subnet = Byte.toUnsignedInt(ipv4Address[2]);
+        return (subnet << 8) + ipv4Address[3];
+    }
+
+    private void assertReseveredWifiP2pPrefix() throws Exception {
+        LinkAddress address = mPrivateAddressCoordinator.requestDownstreamAddress(
+                mHotspotIpServer);
+        final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(address);
+        final IpPrefix legacyWifiP2pPrefix = PrefixUtils.asIpPrefix(mLegacyWifiP2pAddress);
+        assertNotEquals(legacyWifiP2pPrefix, hotspotPrefix);
+        mPrivateAddressCoordinator.releaseDownstream(mHotspotIpServer);
+    }
+
+    @Test
+    public void testEnableLegacyWifiP2PAddress() throws Exception {
+        when(mPrivateAddressCoordinator.getRandomSubAddr()).thenReturn(
+                getSubAddress(mLegacyWifiP2pAddress.getAddress().getAddress()));
+        // No matter #shouldEnableWifiP2pDedicatedIp() is enabled or not, legacy wifi p2p prefix
+        // is resevered.
+        assertReseveredWifiP2pPrefix();
+
+        when(mConfig.shouldEnableWifiP2pDedicatedIp()).thenReturn(true);
+        assertReseveredWifiP2pPrefix();
+
+        // If #shouldEnableWifiP2pDedicatedIp() is enabled, wifi P2P gets the configured address.
+        LinkAddress address = mPrivateAddressCoordinator.requestDownstreamAddress(
+                mWifiP2pIpServer);
+        assertEquals(mLegacyWifiP2pAddress, address);
+        mPrivateAddressCoordinator.releaseDownstream(mWifiP2pIpServer);
     }
 }

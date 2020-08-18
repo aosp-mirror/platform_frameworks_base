@@ -15,6 +15,10 @@
  */
 package com.android.networkstack.tethering;
 
+import static android.net.TetheringManager.TETHERING_WIFI_P2P;
+
+import static java.util.Arrays.asList;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IpPrefix;
@@ -34,9 +38,10 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * This class coordinate IP addresses conflict problem.
@@ -55,28 +60,32 @@ public class PrivateAddressCoordinator {
     private static final int BYTE_MASK = 0xff;
     // reserved for bluetooth tethering.
     private static final int BLUETOOTH_RESERVED = 44;
+    private static final int WIFI_P2P_RESERVED = 49;
     private static final byte DEFAULT_ID = (byte) 42;
 
     // Upstream monitor would be stopped when tethering is down. When tethering restart, downstream
     // address may be requested before coordinator get current upstream notification. To ensure
     // coordinator do not select conflict downstream prefix, mUpstreamPrefixMap would not be cleared
-    // when tethering is down. Instead coordinator would remove all depcreted upstreams from
-    // mUpstreamPrefixMap when tethering is starting. See #maybeRemoveDeprectedUpstreams().
+    // when tethering is down. Instead tethering would remove all deprecated upstreams from
+    // mUpstreamPrefixMap when tethering is starting. See #maybeRemoveDeprecatedUpstreams().
     private final ArrayMap<Network, List<IpPrefix>> mUpstreamPrefixMap;
     private final ArraySet<IpServer> mDownstreams;
     // IANA has reserved the following three blocks of the IP address space for private intranets:
     // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
     // Tethering use 192.168.0.0/16 that has 256 contiguous class C network numbers.
     private static final String DEFAULT_TETHERING_PREFIX = "192.168.0.0/16";
+    private static final String LEGACY_WIFI_P2P_IFACE_ADDRESS = "192.168.49.1/24";
     private final IpPrefix mTetheringPrefix;
     private final ConnectivityManager mConnectivityMgr;
+    private final TetheringConfiguration mConfig;
 
-    public PrivateAddressCoordinator(Context context) {
+    public PrivateAddressCoordinator(Context context, TetheringConfiguration config) {
         mDownstreams = new ArraySet<>();
         mUpstreamPrefixMap = new ArrayMap<>();
         mTetheringPrefix = new IpPrefix(DEFAULT_TETHERING_PREFIX);
         mConnectivityMgr = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
+        mConfig = config;
     }
 
     /**
@@ -124,17 +133,22 @@ public class PrivateAddressCoordinator {
         mUpstreamPrefixMap.remove(network);
     }
 
-    private void maybeRemoveDeprectedUpstreams() {
-        if (!mDownstreams.isEmpty() || mUpstreamPrefixMap.isEmpty()) return;
+    /**
+     * Maybe remove deprecated upstream records, this would be called once tethering started without
+     * any exiting tethered downstream.
+     */
+    public void maybeRemoveDeprecatedUpstreams() {
+        if (mUpstreamPrefixMap.isEmpty()) return;
 
-        final ArrayList<Network> toBeRemoved = new ArrayList<>();
-        List<Network> allNetworks = Arrays.asList(mConnectivityMgr.getAllNetworks());
-        for (int i = 0; i < mUpstreamPrefixMap.size(); i++) {
-            final Network network = mUpstreamPrefixMap.keyAt(i);
-            if (!allNetworks.contains(network)) toBeRemoved.add(network);
-        }
+        // Remove all upstreams that are no longer valid networks
+        final Set<Network> toBeRemoved = new HashSet<>(mUpstreamPrefixMap.keySet());
+        toBeRemoved.removeAll(asList(mConnectivityMgr.getAllNetworks()));
 
         mUpstreamPrefixMap.removeAll(toBeRemoved);
+    }
+
+    private boolean isReservedSubnet(final int subnet) {
+        return subnet == BLUETOOTH_RESERVED || subnet == WIFI_P2P_RESERVED;
     }
 
     /**
@@ -143,7 +157,10 @@ public class PrivateAddressCoordinator {
      */
     @Nullable
     public LinkAddress requestDownstreamAddress(final IpServer ipServer) {
-        maybeRemoveDeprectedUpstreams();
+        if (mConfig.shouldEnableWifiP2pDedicatedIp()
+                && ipServer.interfaceType() == TETHERING_WIFI_P2P) {
+            return new LinkAddress(LEGACY_WIFI_P2P_IFACE_ADDRESS);
+        }
 
         // Address would be 192.168.[subAddress]/24.
         final byte[] bytes = mTetheringPrefix.getRawAddress();
@@ -152,7 +169,7 @@ public class PrivateAddressCoordinator {
         bytes[3] = getSanitizedAddressSuffix(subAddress, (byte) 0, (byte) 1, (byte) 0xff);
         for (int i = 0; i < MAX_UBYTE; i++) {
             final int newSubNet = (subNet + i) & BYTE_MASK;
-            if (newSubNet == BLUETOOTH_RESERVED) continue;
+            if (isReservedSubnet(newSubNet)) continue;
 
             bytes[2] = (byte) newSubNet;
             final InetAddress addr;
@@ -237,7 +254,6 @@ public class PrivateAddressCoordinator {
     }
 
     void dump(final IndentingPrintWriter pw) {
-        pw.decreaseIndent();
         pw.println("mUpstreamPrefixMap:");
         pw.increaseIndent();
         for (int i = 0; i < mUpstreamPrefixMap.size(); i++) {

@@ -50,6 +50,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -73,6 +74,7 @@ import android.net.MacAddress;
 import android.net.RouteInfo;
 import android.net.TetherOffloadRuleParcel;
 import android.net.TetherStatsParcel;
+import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpEventCallbacks;
 import android.net.dhcp.IDhcpServer;
@@ -163,17 +165,6 @@ public class IpServerTest {
 
     private void initStateMachine(int interfaceType, boolean usingLegacyDhcp,
             boolean usingBpfOffload) throws Exception {
-        doAnswer(inv -> {
-            final IDhcpServerCallbacks cb = inv.getArgument(2);
-            new Thread(() -> {
-                try {
-                    cb.onDhcpServerCreated(STATUS_SUCCESS, mDhcpServer);
-                } catch (RemoteException e) {
-                    fail(e.getMessage());
-                }
-            }).run();
-            return null;
-        }).when(mDependencies).makeDhcpServer(any(), mDhcpParamsCaptor.capture(), any());
         when(mDependencies.getRouterAdvertisementDaemon(any())).thenReturn(mRaDaemon);
         when(mDependencies.getInterfaceParams(IFACE_NAME)).thenReturn(TEST_IFACE_PARAMS);
 
@@ -225,6 +216,20 @@ public class IpServerTest {
         when(mAddressCoordinator.requestDownstreamAddress(any())).thenReturn(mTestAddress);
     }
 
+    private void setUpDhcpServer() throws Exception {
+        doAnswer(inv -> {
+            final IDhcpServerCallbacks cb = inv.getArgument(2);
+            new Thread(() -> {
+                try {
+                    cb.onDhcpServerCreated(STATUS_SUCCESS, mDhcpServer);
+                } catch (RemoteException e) {
+                    fail(e.getMessage());
+                }
+            }).run();
+            return null;
+        }).when(mDependencies).makeDhcpServer(any(), mDhcpParamsCaptor.capture(), any());
+    }
+
     @Before public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mSharedLog.forSubComponent(anyString())).thenReturn(mSharedLog);
@@ -258,6 +263,8 @@ public class IpServerTest {
                         return mTetherConfig;
                     }
                 }));
+
+        setUpDhcpServer();
     }
 
     @Test
@@ -963,6 +970,31 @@ public class IpServerTest {
         final RaParams cellularParams = raParamsCaptor.getValue();
         assertEquals(63, cellularParams.hopLimit);
         reset(mRaDaemon);
+    }
+
+    @Test
+    public void testStopObsoleteDhcpServer() throws Exception {
+        final ArgumentCaptor<DhcpServerCallbacks> cbCaptor =
+                ArgumentCaptor.forClass(DhcpServerCallbacks.class);
+        doNothing().when(mDependencies).makeDhcpServer(any(), mDhcpParamsCaptor.capture(),
+                cbCaptor.capture());
+        initStateMachine(TETHERING_WIFI);
+        dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_TETHERED);
+        verify(mDhcpServer, never()).startWithCallbacks(any(), any());
+
+        // No stop dhcp server because dhcp server is not created yet.
+        dispatchCommand(IpServer.CMD_TETHER_UNREQUESTED);
+        verify(mDhcpServer, never()).stop(any());
+
+        // Stop obsolete dhcp server.
+        try {
+            final DhcpServerCallbacks cb = cbCaptor.getValue();
+            cb.onDhcpServerCreated(STATUS_SUCCESS, mDhcpServer);
+            mLooper.dispatchAll();
+        } catch (RemoteException e) {
+            fail(e.getMessage());
+        }
+        verify(mDhcpServer).stop(any());
     }
 
     private void assertDhcpServingParams(final DhcpServingParamsParcel params,
