@@ -1693,8 +1693,9 @@ class ActivityStarter {
             // we need to resolve resultTo to a uid as grantImplicitAccess deals explicitly in UIDs
             final PackageManagerInternal pmInternal =
                     mService.getPackageManagerInternalLocked();
-            final int resultToUid = pmInternal.getPackageUidInternal(
-                            mStartActivity.resultTo.info.packageName, 0, mStartActivity.mUserId);
+            final int resultToUid = pmInternal.getPackageUid(
+                    mStartActivity.resultTo.info.packageName, 0 /* flags */,
+                    mStartActivity.mUserId);
             pmInternal.grantImplicitAccess(mStartActivity.mUserId, mIntent,
                     UserHandle.getAppId(mStartActivity.info.applicationInfo.uid) /*recipient*/,
                     resultToUid /*visible*/, true /*direct*/);
