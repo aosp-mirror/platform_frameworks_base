@@ -299,6 +299,7 @@ java_defaults {
     static_libs: [
         // License notices from art module
         "art-notices-for-framework-stubs-jar",
+        "framework-res-package-jar", // Export package of framework-res
     ],
     errorprone: {
         javacflags: [
