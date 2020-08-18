@@ -464,6 +464,7 @@ cc_defaults {
         "RootRenderNode.cpp",
         "shader/Shader.cpp",
         "shader/BitmapShader.cpp",
+        "shader/BlurShader.cpp",
         "shader/ComposeShader.cpp",
         "shader/LinearGradientShader.cpp",
         "shader/RadialGradientShader.cpp",
