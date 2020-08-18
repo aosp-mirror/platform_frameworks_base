@@ -13092,7 +13092,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return true;
             }
             if (sendRemoved) {
-                killApplication(packageName, UserHandle.getUid(userId, pkgSetting.appId),
+                killApplication(packageName, pkgSetting.appId, userId,
                         "hiding pkg");
                 sendApplicationHiddenForUser(packageName, pkgSetting, userId);
                 return true;
