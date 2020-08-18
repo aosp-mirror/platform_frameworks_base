@@ -2371,8 +2371,16 @@ class Task extends WindowContainer<WindowContainer> {
             // For calculating screen layout, we need to use the non-decor inset screen area for the
             // calculation for compatibility reasons, i.e. screen area without system bars that
             // could never go away in Honeycomb.
-            final int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
-            final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
+            int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
+            int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
+            // Use overrides if provided. If both overrides are provided, mTmpNonDecorBounds is
+            // undefined so it can't be used.
+            if (inOutConfig.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+                compatScreenWidthDp = inOutConfig.screenWidthDp;
+            }
+            if (inOutConfig.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+                compatScreenHeightDp = inOutConfig.screenHeightDp;
+            }
             // Reducing the screen layout starting from its parent config.
             inOutConfig.screenLayout = computeScreenLayoutOverride(parentConfig.screenLayout,
                     compatScreenWidthDp, compatScreenHeightDp);
