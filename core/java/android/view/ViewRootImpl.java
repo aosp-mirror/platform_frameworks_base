@@ -8905,6 +8905,9 @@ public final class ViewRootImpl implements ViewParent,
      * @param targets the search queue for targets
      */
     private void collectRootScrollCaptureTargets(Queue<ScrollCaptureTarget> targets) {
+        if (mRootScrollCaptureCallbacks == null) {
+            return;
+        }
         for (ScrollCaptureCallback cb : mRootScrollCaptureCallbacks) {
             // Add to the list for consideration
             Point offset = new Point(mView.getLeft(), mView.getTop());
