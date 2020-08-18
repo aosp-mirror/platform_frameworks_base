@@ -1284,14 +1284,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.increaseIndent();
 
             List<PackageInstallerSession> finalizedSessions = new ArrayList<>();
+            List<PackageInstallerSession> orphanedChildSessions = new ArrayList<>();
             int N = mSessions.size();
             for (int i = 0; i < N; i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
 
-                // Do not print finalized staged session as active install sessions
                 final PackageInstallerSession rootSession = session.hasParentSessionId()
                         ? getSession(session.getParentSessionId())
                         : session;
+                // Do not print orphaned child sessions as active install sessions
+                if (rootSession == null) {
+                    orphanedChildSessions.add(session);
+                    continue;
+                }
+
+                // Do not print finalized staged session as active install sessions
                 if (rootSession.isStagedAndInTerminalState()) {
                     finalizedSessions.add(session);
                     continue;
@@ -1302,6 +1309,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
             pw.println();
             pw.decreaseIndent();
+
+            if (!orphanedChildSessions.isEmpty()) {
+                // Presence of orphaned sessions indicate leak in cleanup for multi-package and
+                // should be cleaned up.
+                pw.println("Orphaned install sessions:");
+                pw.increaseIndent();
+                N = orphanedChildSessions.size();
+                for (int i = 0; i < N; i++) {
+                    final PackageInstallerSession session = orphanedChildSessions.get(i);
+                    session.dump(pw);
+                    pw.println();
+                }
+                pw.println();
+                pw.decreaseIndent();
+            }
 
             pw.println("Finalized install sessions:");
             pw.increaseIndent();
