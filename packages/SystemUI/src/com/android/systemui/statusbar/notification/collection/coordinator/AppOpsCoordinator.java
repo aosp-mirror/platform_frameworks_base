@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -83,8 +83,8 @@ public class AppOpsCoordinator implements Coordinator {
 
     }
 
-    public NotifSection getSection() {
-        return mNotifSection;
+    public NotifSectioner getSectioner() {
+        return mNotifSectioner;
     }
 
     /**
@@ -179,7 +179,7 @@ public class AppOpsCoordinator implements Coordinator {
     /**
      * Puts foreground service notifications into its own section.
      */
-    private final NotifSection mNotifSection = new NotifSection("ForegroundService") {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService") {
         @Override
         public boolean isInSection(ListEntry entry) {
             NotificationEntry notificationEntry = entry.getRepresentativeEntry();

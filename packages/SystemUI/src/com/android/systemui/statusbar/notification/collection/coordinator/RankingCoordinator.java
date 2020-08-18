@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 
 import javax.inject.Inject;
@@ -57,22 +57,22 @@ public class RankingCoordinator implements Coordinator {
         pipeline.addPreGroupFilter(mDozingFilter);
     }
 
-    public NotifSection getAlertingSection() {
-        return mAlertingNotifSection;
+    public NotifSectioner getAlertingSectioner() {
+        return mAlertingNotifSectioner;
     }
 
-    public NotifSection getSilentSection() {
-        return mSilentNotifSection;
+    public NotifSectioner getSilentSectioner() {
+        return mSilentNotifSectioner;
     }
 
-    private final NotifSection mAlertingNotifSection = new NotifSection("Alerting") {
+    private final NotifSectioner mAlertingNotifSectioner = new NotifSectioner("Alerting") {
         @Override
         public boolean isInSection(ListEntry entry) {
             return mHighPriorityProvider.isHighPriority(entry);
         }
     };
 
-    private final NotifSection mSilentNotifSection = new NotifSection("Silent") {
+    private final NotifSectioner mSilentNotifSectioner = new NotifSectioner("Silent") {
         @Override
         public boolean isInSection(ListEntry entry) {
             return !mHighPriorityProvider.isHighPriority(entry);
