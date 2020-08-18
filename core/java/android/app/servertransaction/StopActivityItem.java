@@ -18,6 +18,8 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.annotation.NonNull;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -34,10 +36,10 @@ public class StopActivityItem extends ActivityLifecycleItem {
     private int mConfigChanges;
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-        client.handleStopActivity(token, mConfigChanges, pendingActions,
+        client.handleStopActivity(r, mConfigChanges, pendingActions,
                 true /* finalStateRequest */, "STOP_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -93,7 +95,7 @@ public class StopActivityItem extends ActivityLifecycleItem {
         mConfigChanges = in.readInt();
     }
 
-    public static final @android.annotation.NonNull Creator<StopActivityItem> CREATOR =
+    public static final @NonNull Creator<StopActivityItem> CREATOR =
             new Creator<StopActivityItem>() {
         public StopActivityItem createFromParcel(Parcel in) {
             return new StopActivityItem(in);

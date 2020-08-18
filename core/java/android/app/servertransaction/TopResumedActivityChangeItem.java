@@ -17,7 +17,9 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -28,15 +30,15 @@ import android.os.Trace;
  * Top resumed activity changed callback.
  * @hide
  */
-public class TopResumedActivityChangeItem extends ClientTransactionItem {
+public class TopResumedActivityChangeItem extends ActivityTransactionItem {
 
     private boolean mOnTop;
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "topResumedActivityChangeItem");
-        client.handleTopResumedActivityChanged(token, mOnTop, "topResumedActivityChangeItem");
+        client.handleTopResumedActivityChanged(r, mOnTop, "topResumedActivityChangeItem");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -97,16 +99,16 @@ public class TopResumedActivityChangeItem extends ClientTransactionItem {
         mOnTop = in.readBoolean();
     }
 
-    public static final @android.annotation.NonNull Creator<TopResumedActivityChangeItem> CREATOR =
+    public static final @NonNull Creator<TopResumedActivityChangeItem> CREATOR =
             new Creator<TopResumedActivityChangeItem>() {
-                public TopResumedActivityChangeItem createFromParcel(Parcel in) {
-                    return new TopResumedActivityChangeItem(in);
-                }
+        public TopResumedActivityChangeItem createFromParcel(Parcel in) {
+            return new TopResumedActivityChangeItem(in);
+        }
 
-                public TopResumedActivityChangeItem[] newArray(int size) {
-                    return new TopResumedActivityChangeItem[size];
-                }
-            };
+        public TopResumedActivityChangeItem[] newArray(int size) {
+            return new TopResumedActivityChangeItem[size];
+        }
+    };
 
     @Override
     public boolean equals(Object o) {

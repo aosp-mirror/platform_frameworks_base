@@ -243,27 +243,27 @@ public class ActivityThreadClientTest {
         }
 
         private void startActivity(ActivityClientRecord r) {
-            mThread.handleStartActivity(r.token, null /* pendingActions */);
+            mThread.handleStartActivity(r, null /* pendingActions */);
         }
 
         private void resumeActivity(ActivityClientRecord r) {
-            mThread.handleResumeActivity(r.token, true /* finalStateRequest */,
+            mThread.handleResumeActivity(r, true /* finalStateRequest */,
                     true /* isForward */, "test");
         }
 
         private void pauseActivity(ActivityClientRecord r) {
-            mThread.handlePauseActivity(r.token, false /* finished */,
+            mThread.handlePauseActivity(r, false /* finished */,
                     false /* userLeaving */, 0 /* configChanges */, null /* pendingActions */,
                     "test");
         }
 
         private void stopActivity(ActivityClientRecord r) {
-            mThread.handleStopActivity(r.token, 0 /* configChanges */,
+            mThread.handleStopActivity(r, 0 /* configChanges */,
                     new PendingTransactionActions(), false /* finalStateRequest */, "test");
         }
 
         private void destroyActivity(ActivityClientRecord r) {
-            mThread.handleDestroyActivity(r.token, true /* finishing */, 0 /* configChanges */,
+            mThread.handleDestroyActivity(r, true /* finishing */, 0 /* configChanges */,
                     false /* getNonConfigInstance */, "test");
         }
 
