@@ -24,54 +24,31 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.phone.PipMenuActivity;
 import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
+import com.android.systemui.wm.DisplaySystemBarsController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * Provides dependencies from {@link com.android.wm.shell}.
- */
-@Module
-// TODO(b/161116823) Clean up dependencies after wm shell migration finished.
-public class WindowManagerShellModule {
+/** Provides dependencies from {@link com.android.wm.shell} for CarSystemUI. */
+@Module(includes = WMShellBaseModule.class)
+public class CarWMShellModule {
     @SysUISingleton
     @Provides
-    static TransactionPool provideTransactionPool() {
-        return new TransactionPool();
-    }
-
-    @SysUISingleton
-    @Provides
-    static DisplayController provideDisplayController(Context context, @Main Handler handler,
-            IWindowManager wmService) {
-        return new DisplayController(context, handler, wmService);
-    }
-
-    @SysUISingleton
-    @Provides
-    static SystemWindows provideSystemWindows(DisplayController displayController,
-            IWindowManager wmService) {
-        return new SystemWindows(displayController, wmService);
-    }
-
-    @SysUISingleton
-    @Provides
-    static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @Main Handler mainHandler,
-            TransactionPool transactionPool) {
-        return new DisplayImeController.Builder(wmService, displayController, mainHandler,
-                transactionPool).build();
+    DisplayImeController provideDisplayImeController(Context context,
+            IWindowManager wmService, DisplayController displayController,
+            @Main Handler mainHandler, TransactionPool transactionPool) {
+        return new DisplaySystemBarsController.Builder(context, wmService, displayController,
+                mainHandler, transactionPool).build();
     }
 
     /** TODO(b/150319024): PipMenuActivity will move to a Window */
     @SysUISingleton
     @PipMenuActivityClass
     @Provides
-    static Class<?> providePipMenuActivityClass() {
+    Class<?> providePipMenuActivityClass() {
         return PipMenuActivity.class;
     }
 }

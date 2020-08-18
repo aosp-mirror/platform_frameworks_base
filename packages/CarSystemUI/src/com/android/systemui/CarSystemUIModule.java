@@ -22,7 +22,6 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.view.IWindowManager;
 
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -40,8 +39,6 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
-import com.android.systemui.pip.phone.PipMenuActivity;
-import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -68,11 +65,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.VolumeDialogComponent;
-import com.android.systemui.wm.DisplaySystemBarsController;
-import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.SystemWindows;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.systemui.wmshell.CarWMShellModule;
 
 import javax.inject.Named;
 
@@ -83,7 +76,8 @@ import dagger.Provides;
 @Module(
         includes = {
                 DividerModule.class,
-                QSModule.class
+                QSModule.class,
+                CarWMShellModule.class
         })
 abstract class CarSystemUIModule {
 
@@ -118,42 +112,6 @@ abstract class CarSystemUIModule {
     static Recents provideRecents(Context context, RecentsImplementation recentsImplementation,
             CommandQueue commandQueue) {
         return new Recents(context, recentsImplementation, commandQueue);
-    }
-
-    @SysUISingleton
-    @Provides
-    static TransactionPool provideTransactionPool() {
-        return new TransactionPool();
-    }
-
-    @SysUISingleton
-    @Provides
-    static DisplayController providerDisplayController(Context context, @Main Handler handler,
-            IWindowManager wmService) {
-        return new DisplayController(context, handler, wmService);
-    }
-
-    @SysUISingleton
-    @Provides
-    static SystemWindows provideSystemWindows(DisplayController displayController,
-            IWindowManager wmService) {
-        return new SystemWindows(displayController, wmService);
-    }
-
-    @SysUISingleton
-    @Provides
-    static DisplayImeController provideDisplayImeController(Context context,
-            IWindowManager wmService, DisplayController displayController,
-            @Main Handler mainHandler, TransactionPool transactionPool) {
-        return new DisplaySystemBarsController.Builder(context, wmService, displayController,
-                mainHandler, transactionPool).build();
-    }
-
-    @SysUISingleton
-    @PipMenuActivityClass
-    @Provides
-    static Class<?> providePipMenuActivityClass() {
-        return PipMenuActivity.class;
     }
 
     @Binds
