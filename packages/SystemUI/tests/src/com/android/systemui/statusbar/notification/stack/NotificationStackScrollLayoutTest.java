@@ -54,12 +54,9 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -87,15 +84,13 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.leak.LeakDetector;
 
 import org.junit.After;
@@ -136,14 +131,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
-    @Mock private KeyguardBypassController mKeyguardBypassController;
+    @Mock private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
-    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private FeatureFlags mFeatureFlags;
-    @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
-    private UserChangedListener mUserChangedListener;
     private NotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
@@ -173,8 +165,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectMockDependency(ShadeController.class);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
-        ArgumentCaptor<UserChangedListener> userChangedCaptor = ArgumentCaptor
-                .forClass(UserChangedListener.class);
         mEntryManager = new NotificationEntryManager(
                 mock(NotificationEntryManagerLogger.class),
                 mock(NotificationGroupManager.class),
@@ -219,10 +209,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(DynamicPrivacyController.class),
                 mStatusBarStateController,
                 mHeadsUpManager,
-                mKeyguardBypassController,
-                mKeyguardMediaController,
                 new FalsingManagerFake(),
-                mLockscreenUserManager,
                 mock(NotificationGutsManager.class),
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
@@ -233,8 +220,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(NotifCollection.class),
                 mUiEventLoggerFake
         );
-        verify(mLockscreenUserManager).addUserChangedListener(userChangedCaptor.capture());
-        mUserChangedListener = userChangedCaptor.getValue();
+        mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);
@@ -307,12 +293,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mStackScroller.setExpandedHeight(100f);
         verify(mBlockingHelperManager).setNotificationShadeExpanded(100f);
-    }
-
-    @Test
-    public void testOnStatePostChange_verifyIfProfileIsPublic() {
-        mUserChangedListener.onUserChanged(0);
-        verify(mLockscreenUserManager).isAnyProfilePublicMode();
     }
 
     @Test
