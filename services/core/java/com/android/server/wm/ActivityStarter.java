@@ -1766,8 +1766,8 @@ class ActivityStarter {
         } else if (mInTask != null) {
             return mInTask;
         } else {
-            final Task stack = getLaunchStack(mStartActivity, mLaunchFlags,
-                    null /* task */, mOptions);
+            final Task stack = getLaunchStack(mStartActivity, mLaunchFlags, null /* task */,
+                    mOptions);
             final ActivityRecord top = stack.getTopNonFinishingActivity();
             if (top != null) {
                 return top.getTask();
@@ -1870,13 +1870,7 @@ class ActivityStarter {
             return START_SUCCESS;
         }
 
-        boolean clearTaskForReuse = false;
         if (reusedTask != null) {
-            if (mStartActivity.getTask() == null) {
-                mStartActivity.setTaskForReuse(reusedTask);
-                clearTaskForReuse = true;
-            }
-
             if (targetTask.intent == null) {
                 // This task was started because of movement of the activity based on
                 // affinity...
@@ -1922,13 +1916,6 @@ class ActivityStarter {
 
         complyActivityFlags(targetTask,
                 reusedTask != null ? reusedTask.getTopNonFinishingActivity() : null, intentGrants);
-
-        if (clearTaskForReuse) {
-            // Clear task for re-use so later code to methods
-            // {@link #setTaskFromReuseOrCreateNewTask}, {@link #setTaskFromSourceRecord}, or
-            // {@link #setTaskFromInTask} can parent it to the task.
-            mStartActivity.setTaskForReuse(null);
-        }
 
         if (mAddingToTask) {
             return START_SUCCESS;
@@ -2515,8 +2502,8 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
 
-                final Task launchStack =
-                        getLaunchStack(mStartActivity, mLaunchFlags, intentTask, mOptions);
+                final Task launchStack = getLaunchStack(mStartActivity, mLaunchFlags, intentTask,
+                        mOptions);
                 if (launchStack == null || launchStack == mTargetStack) {
                     // Do not set mMovedToFront to true below for split-screen-top stack, or
                     // START_TASK_TO_FRONT will be returned and trigger unexpected animations when a

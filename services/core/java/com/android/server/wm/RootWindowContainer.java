@@ -2816,7 +2816,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param launchParams The resolved launch params to use.
      * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
      * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
-     *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
     Task getLaunchStack(@Nullable ActivityRecord r,
@@ -2965,10 +2964,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // If {@code r} is already in target display area and its task is the same as the candidate
         // task, the intention should be getting a launch stack for the reusable activity, so we can
         // use the existing stack.
-        if (candidateTask != null && (r.getTask() == null || r.getTask() == candidateTask)) {
-            // TODO(b/153920825): Fix incorrect evaluation of attached state
-            final TaskDisplayArea attachedTaskDisplayArea = r.getTask() != null
-                    ? r.getTask().getDisplayArea() : r.getDisplayArea();
+        if (candidateTask != null) {
+            final TaskDisplayArea attachedTaskDisplayArea = candidateTask.getDisplayArea();
             if (attachedTaskDisplayArea == null || attachedTaskDisplayArea == taskDisplayArea) {
                 return candidateTask.getRootTask();
             }
