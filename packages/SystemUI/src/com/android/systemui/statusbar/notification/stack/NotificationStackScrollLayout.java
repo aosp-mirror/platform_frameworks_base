@@ -154,8 +154,6 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -178,7 +176,7 @@ import javax.inject.Named;
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
-public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter, Dumpable {
+public class NotificationStackScrollLayout extends ViewGroup implements Dumpable {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -555,6 +553,34 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
             };
 
+    private final ScrollAdapter mScrollAdapter = new ScrollAdapter() {
+        @Override
+        public boolean isScrolledToTop() {
+            if (ANCHOR_SCROLLING) {
+                updateScrollAnchor();
+                // TODO: once we're recycling this will need to check the adapter position of the
+                //  child
+                return mScrollAnchorView == getFirstChildNotGone() && mScrollAnchorViewY >= 0;
+            } else {
+                return mOwnScrollY == 0;
+            }
+        }
+
+        @Override
+        public boolean isScrolledToBottom() {
+            if (ANCHOR_SCROLLING) {
+                return getMaxPositiveScrollAmount() <= 0;
+            } else {
+                return mOwnScrollY >= getScrollRange();
+            }
+        }
+
+        @Override
+        public View getHostView() {
+            return NotificationStackScrollLayout.this;
+        }
+    };
+
     @Inject
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
@@ -608,7 +634,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mExpandHelper = new ExpandHelper(getContext(), mExpandHelperCallback,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
-        mExpandHelper.setScrollAdapter(this);
+        mExpandHelper.setScrollAdapter(mScrollAdapter);
         mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, mNotificationCallback,
                 getContext(), mMenuEventListener, mFalsingManager);
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
@@ -1227,7 +1253,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             float end = start + child.getActualHeight();
             boolean clip = clipStart > start && clipStart < end
                     || clipEnd >= start && clipEnd <= end;
-            clip &= !(first && isScrolledToTop());
+            clip &= !(first && mScrollAdapter.isScrolledToTop());
             child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0)
                     : ExpandableView.NO_ROUNDNESS);
             first = false;
@@ -2220,7 +2246,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 springBack();
             } else {
                 float overScrollTop = getCurrentOverScrollAmount(true /* top */);
-                if (isScrolledToTop() && mScrollAnchorViewY > 0) {
+                if (mScrollAdapter.isScrolledToTop() && mScrollAnchorViewY > 0) {
                     notifyOverscrollTopListener(mScrollAnchorViewY,
                             isRubberbanded(true /* onTop */));
                 } else {
@@ -2268,7 +2294,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void springBack() {
         if (ANCHOR_SCROLLING) {
-            boolean overScrolledTop = isScrolledToTop() && mScrollAnchorViewY > 0;
+            boolean overScrolledTop = mScrollAdapter.isScrolledToTop() && mScrollAnchorViewY > 0;
             int maxPositiveScrollAmount = getMaxPositiveScrollAmount();
             boolean overscrolledBottom = maxPositiveScrollAmount < 0;
             if (overScrolledTop || overscrolledBottom) {
@@ -2545,8 +2571,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateForwardAndBackwardScrollability() {
-        boolean forwardScrollable = mScrollable && !isScrolledToBottom();
-        boolean backwardsScrollable = mScrollable && !isScrolledToTop();
+        boolean forwardScrollable = mScrollable && !mScrollAdapter.isScrolledToBottom();
+        boolean backwardsScrollable = mScrollable && !mScrollAdapter.isScrolledToTop();
         boolean changed = forwardScrollable != mForwardScrollable
                 || backwardsScrollable != mBackwardScrollable;
         mForwardScrollable = forwardScrollable;
@@ -2830,7 +2856,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mLastScrollerY = 0;
             // x velocity is set to 1 to avoid overscroller bug
             mScroller.fling(0, 0, 1, velocityY, 0, 0, minY, maxY, 0,
-                    mExpandedInThisMotion && !isScrolledToTop() ? 0 : Integer.MAX_VALUE / 2);
+                    mExpandedInThisMotion
+                            && !mScrollAdapter.isScrolledToTop() ? 0 : Integer.MAX_VALUE / 2);
         }
     }
 
@@ -3343,7 +3370,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         if (ANCHOR_SCROLLING) {
             // TODO: once we're recycling this will need to check the adapter position of the child
-            if (child == getFirstChildNotGone() && (isScrolledToTop() || !mIsExpanded)) {
+            if (child == getFirstChildNotGone()
+                    && (mScrollAdapter.isScrolledToTop() || !mIsExpanded)) {
                 // New child was added at the top while we're scrolled to the top;
                 // make it the new anchor view so that we stay at the top.
                 mScrollAnchorView = child;
@@ -4227,7 +4255,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
             case MotionEvent.ACTION_DOWN: {
                 final int y = (int) ev.getY();
-                mScrolledToTopOnFirstDown = isScrolledToTop();
+                mScrolledToTopOnFirstDown = mScrollAdapter.isScrolledToTop();
                 final ExpandableView childAtTouchPos = getChildAtPosition(
                         ev.getX(), y, false /* requireMinHeight */, false /* ignoreDecors */);
                 if (childAtTouchPos == null) {
@@ -4411,32 +4439,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public boolean isScrolledToTop() {
-        if (ANCHOR_SCROLLING) {
-            updateScrollAnchor();
-            // TODO: once we're recycling this will need to check the adapter position of the child
-            return mScrollAnchorView == getFirstChildNotGone() && mScrollAnchorViewY >= 0;
-        } else {
-            return mOwnScrollY == 0;
-        }
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public boolean isScrolledToBottom() {
-        if (ANCHOR_SCROLLING) {
-            return getMaxPositiveScrollAmount() <= 0;
-        } else {
-            return mOwnScrollY >= getScrollRange();
-        }
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public View getHostView() {
-        return this;
+    boolean isScrolledToBottom() {
+        return mScrollAdapter.isScrolledToBottom();
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
