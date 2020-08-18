@@ -284,11 +284,13 @@ public class AccessibilityWindowManager {
          * Computes partial interactive region of given windowId.
          *
          * @param windowId The windowId
+         * @param forceComputeRegion set outRegion when the windowId matches one on the screen even
+         *                           though the region is not covered by other windows above it.
          * @param outRegion The output to which to write the bounds.
-         * @return true if outRegion is not empty.
+         * @return {@code true} if outRegion is not empty.
          */
         boolean computePartialInteractiveRegionForWindowLocked(int windowId,
-                @NonNull Region outRegion) {
+                boolean forceComputeRegion, @NonNull Region outRegion) {
             if (mWindows == null) {
                 return false;
             }
@@ -309,6 +311,9 @@ public class AccessibilityWindowManager {
                         currentWindow.getRegionInScreen(currentWindowRegions);
                         outRegion.set(currentWindowRegions);
                         windowInteractiveRegion = outRegion;
+                        if (forceComputeRegion) {
+                            windowInteractiveRegionChanged = true;
+                        }
                         continue;
                     }
                 } else if (currentWindow.getType()
@@ -1240,10 +1245,13 @@ public class AccessibilityWindowManager {
      */
     public boolean computePartialInteractiveRegionForWindowLocked(int windowId,
             @NonNull Region outRegion) {
-        windowId = resolveParentWindowIdLocked(windowId);
-        final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(windowId);
+        final int parentWindowId = resolveParentWindowIdLocked(windowId);
+        final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(
+                parentWindowId);
+
         if (observer != null) {
-            return observer.computePartialInteractiveRegionForWindowLocked(windowId, outRegion);
+            return observer.computePartialInteractiveRegionForWindowLocked(parentWindowId,
+                    parentWindowId != windowId, outRegion);
         }
 
         return false;
