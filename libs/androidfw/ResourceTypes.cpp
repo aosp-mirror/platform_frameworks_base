@@ -37,7 +37,6 @@
 #include <androidfw/TypeWrappers.h>
 #include <cutils/atomic.h>
 #include <utils/ByteOrder.h>
-#include <utils/Debug.h>
 #include <utils/Log.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
