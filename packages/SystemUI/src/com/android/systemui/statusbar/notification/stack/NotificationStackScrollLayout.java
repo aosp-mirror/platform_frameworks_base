@@ -156,7 +156,6 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Assert;
 
@@ -366,7 +365,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mForceNoOverlappingRendering;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
     private FalsingManager mFalsingManager;
-    private final ZenModeController mZenController;
     private boolean mAnimationRunning;
     private ViewTreeObserver.OnPreDrawListener mRunningAnimationUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -587,14 +585,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             AttributeSet attrs,
             NotificationRoundnessManager notificationRoundnessManager,
             DynamicPrivacyController dynamicPrivacyController,
-            SysuiStatusBarStateController statusBarStateController,
+            SysuiStatusBarStateController statusbarStateController,
             HeadsUpManagerPhone headsUpManager,
             KeyguardBypassController keyguardBypassController,
             KeyguardMediaController keyguardMediaController,
             FalsingManager falsingManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
-            ZenModeController zenController,
             NotificationSectionsManager notificationSectionsManager,
             ForegroundServiceSectionController fgsSectionController,
             ForegroundServiceDismissalFeatureController fgsFeatureController,
@@ -615,7 +612,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
         mKeyguardBypassController = keyguardBypassController;
         mFalsingManager = falsingManager;
-        mZenController = zenController;
         mFgsSectionController = fgsSectionController;
 
         mSectionsManager = notificationSectionsManager;
@@ -693,7 +689,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         mDynamicPrivacyController = dynamicPrivacyController;
-        mStatusbarStateController = statusBarStateController;
+        mStatusbarStateController = statusbarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
         mUiEventLogger = uiEventLogger;
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
@@ -4996,11 +4992,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void updateEmptyShadeView(boolean visible) {
+    void updateEmptyShadeView(boolean visible, boolean notifVisibleInShade) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         int oldTextRes = mEmptyShadeView.getTextResource();
-        int newTextRes = mZenController.areNotificationsHiddenInShade()
+        int newTextRes = notifVisibleInShade
                 ? R.string.dnd_suppressing_shade_text : R.string.empty_shade_text;
         if (oldTextRes != newTextRes) {
             mEmptyShadeView.setText(newTextRes);

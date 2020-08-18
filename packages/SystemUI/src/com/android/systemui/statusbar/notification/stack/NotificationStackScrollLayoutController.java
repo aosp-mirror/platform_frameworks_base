@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 
 import java.util.function.BiConsumer;
@@ -68,6 +69,7 @@ public class NotificationStackScrollLayoutController {
     private final TunerService mTunerService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final ConfigurationController mConfigurationController;
+    private final ZenModeController mZenModeController;
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
     private NotificationStackScrollLayout mView;
@@ -130,7 +132,8 @@ public class NotificationStackScrollLayoutController {
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
             DynamicPrivacyController dynamicPrivacyController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            ZenModeController zenModeController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -138,6 +141,7 @@ public class NotificationStackScrollLayoutController {
         mTunerService = tunerService;
         mDynamicPrivacyController = dynamicPrivacyController;
         mConfigurationController = configurationController;
+        mZenModeController = zenModeController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -484,7 +488,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void updateEmptyShadeView(boolean visible) {
-        mView.updateEmptyShadeView(visible);
+        mView.updateEmptyShadeView(visible, mZenModeController.areNotificationsHiddenInShade());
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
