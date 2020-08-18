@@ -23,15 +23,7 @@ filegroup {
 java_sdk_library {
     name: "service-permission",
     defaults: ["framework-system-server-module-defaults"],
-    visibility: [
-        "//frameworks/base/services/core",
-        "//frameworks/base/apex/permission",
-        "//frameworks/base/apex/permission/testing",
-        "//frameworks/base/apex/permission/tests",
-        "//frameworks/base/services/tests/mockingservicestests",
-    ],
     impl_library_visibility: [
-        "//visibility:override",
         "//frameworks/base/apex/permission/tests",
         "//frameworks/base/services/tests/mockingservicestests",
         "//frameworks/base/services/tests/servicestests",
