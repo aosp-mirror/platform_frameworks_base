@@ -105,11 +105,10 @@ static bool validateFile(const char* filename) {
     }
 
     case FILETYPE_KEYCHARACTERMAP: {
-        sp<KeyCharacterMap> map;
-        status_t status = KeyCharacterMap::load(filename,
-                KeyCharacterMap::FORMAT_ANY, &map);
-        if (status) {
-            error("Error %d parsing key character map file.\n\n", status);
+        base::Result<std::shared_ptr<KeyCharacterMap>> ret = KeyCharacterMap::load(filename,
+                KeyCharacterMap::FORMAT_ANY);
+        if (!ret) {
+            error("Error %s parsing key character map file.\n\n", ret.error().message().c_str());
             return false;
         }
         break;
