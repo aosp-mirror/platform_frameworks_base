@@ -15,8 +15,8 @@
   ~ limitations under the License.
   -->
 <LinearLayout
+    android:id="@+id/stack_education_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/user_education_view"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
     android:paddingTop="48dp"
@@ -25,26 +25,29 @@
     android:paddingEnd="16dp"
     android:layout_marginEnd="24dp"
     android:orientation="vertical"
-    android:background="@drawable/bubble_stack_user_education_bg">
-
+    android:background="@drawable/bubble_stack_user_education_bg"
+    >
     <TextView
-        android:id="@+id/user_education_title"
+        android:id="@+id/stack_education_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="16dp"
         android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
         android:maxLines="2"
         android:ellipsize="end"
+        android:gravity="start"
+        android:textAlignment="viewStart"
         android:text="@string/bubbles_user_education_title"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
     <TextView
-        android:id="@+id/user_education_description"
+        android:id="@+id/stack_education_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
+        android:gravity="start"
+        android:textAlignment="viewStart"
         android:text="@string/bubbles_user_education_description"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
-
 </LinearLayout>
