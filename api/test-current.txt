@@ -2799,8 +2799,10 @@ package android.os {
 
   public final class PowerManager {
     method @RequiresPermission("android.permission.POWER_SAVER") public int getPowerSaveModeTrigger();
+    method @RequiresPermission("android.permission.DEVICE_POWER") public void setBatteryDischargePrediction(@NonNull java.time.Duration, boolean);
     method @RequiresPermission("android.permission.POWER_SAVER") public boolean setDynamicPowerSaveHint(boolean, int);
     method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveModeEnabled(boolean);
+    field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
   }
