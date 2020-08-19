@@ -55,6 +55,18 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testSkipResume() {
+        final ActivityRecord activity = createTestActivityRecord(mDisplayContent);
+        activity.mLaunchTaskBehind = true;
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
+        mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(activity);
+
+        // Make sure our handler processed the message.
+        waitHandlerIdle(mWm.mH);
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
+    }
+
+    @Test
     public void testMultiple() {
         final ActivityRecord activity1 = createTestActivityRecord(mDisplayContent);
         final ActivityRecord activity2 = createTestActivityRecord(mDisplayContent);
