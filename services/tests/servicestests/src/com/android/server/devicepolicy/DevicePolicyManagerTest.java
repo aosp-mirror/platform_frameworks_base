@@ -4465,6 +4465,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 19436);
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        mServiceContext.permissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
         // Even if the caller is the managed profile, the current user is the user 0
         when(getServices().iactivityManager.getCurrentUser())
@@ -5694,6 +5695,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final long ident = mServiceContext.binder.clearCallingIdentity();
         configureContextForAccess(mServiceContext, true);
+        mServiceContext.permissions.add(permission.MARK_DEVICE_ORGANIZATION_OWNED);
 
         mServiceContext.binder.callingUid =
                 UserHandle.getUid(CALLER_USER_HANDLE,
