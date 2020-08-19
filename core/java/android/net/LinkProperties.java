@@ -20,11 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.LinkPropertiesUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.net.module.util.LinkPropertiesUtils;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
