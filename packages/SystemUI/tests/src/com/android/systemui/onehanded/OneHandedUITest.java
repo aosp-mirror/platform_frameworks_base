@@ -48,7 +48,7 @@ public class OneHandedUITest extends OneHandedTestCase {
     OneHandedUI mOneHandedUI;
     ScreenLifecycle mScreenLifecycle;
     @Mock
-    OneHandedManagerImpl mMockOneHandedManagerImpl;
+    OneHandedController mOneHandedController;
     @Mock
     OneHandedTimeoutHandler mMockTimeoutHandler;
 
@@ -59,7 +59,7 @@ public class OneHandedUITest extends OneHandedTestCase {
         mScreenLifecycle = new ScreenLifecycle();
         mOneHandedUI = new OneHandedUI(mContext,
                 mCommandQueue,
-                mMockOneHandedManagerImpl,
+                mOneHandedController,
                 mScreenLifecycle);
         mOneHandedUI.start();
         mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
@@ -74,14 +74,14 @@ public class OneHandedUITest extends OneHandedTestCase {
     public void testStartOneHanded() {
         mOneHandedUI.startOneHanded();
 
-        verify(mMockOneHandedManagerImpl).startOneHanded();
+        verify(mOneHandedController).startOneHanded();
     }
 
     @Test
     public void testStopOneHanded() {
         mOneHandedUI.stopOneHanded();
 
-        verify(mMockOneHandedManagerImpl).stopOneHanded();
+        verify(mOneHandedController).stopOneHanded();
     }
 
     @Test
@@ -89,7 +89,7 @@ public class OneHandedUITest extends OneHandedTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.TAPS_APP_TO_EXIT, 1);
 
-        verify(mMockOneHandedManagerImpl).setTaskChangeToExit(true);
+        verify(mOneHandedController).setTaskChangeToExit(true);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class OneHandedUITest extends OneHandedTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
 
-        verify(mMockOneHandedManagerImpl).setOneHandedEnabled(true);
+        verify(mOneHandedController).setOneHandedEnabled(true);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class OneHandedUITest extends OneHandedTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
 
-        verify(mMockOneHandedManagerImpl).setSwipeToNotificationEnabled(true);
+        verify(mOneHandedController).setSwipeToNotificationEnabled(true);
     }
 
     @Ignore("Clarifying do not receive callback")
@@ -123,14 +123,14 @@ public class OneHandedUITest extends OneHandedTestCase {
     public void testKeyguardBouncerShowing_shouldStopOneHanded() {
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
 
-        verify(mMockOneHandedManagerImpl).stopOneHanded();
+        verify(mOneHandedController).stopOneHanded();
     }
 
     @Test
     public void testScreenTurningOff_shouldStopOneHanded() {
         mScreenLifecycle.dispatchScreenTurningOff();
 
-        verify(mMockOneHandedManagerImpl).stopOneHanded();
+        verify(mOneHandedController).stopOneHanded();
     }
 
 }
