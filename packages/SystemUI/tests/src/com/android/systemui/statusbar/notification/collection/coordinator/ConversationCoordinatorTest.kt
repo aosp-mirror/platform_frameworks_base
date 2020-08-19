@@ -25,7 +25,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import org.junit.Assert.assertFalse
@@ -45,7 +45,7 @@ import org.mockito.Mockito.`when` as whenever
 class ConversationCoordinatorTest : SysuiTestCase() {
     // captured listeners and pluggables:
     private lateinit var promoter: NotifPromoter
-    private lateinit var peopleSection: NotifSection
+    private lateinit var peopleSectioner: NotifSectioner
 
     @Mock
     private lateinit var pipeline: NotifPipeline
@@ -70,7 +70,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         verify(pipeline).addPromoter(notifPromoterCaptor.capture())
         promoter = notifPromoterCaptor.value
 
-        peopleSection = coordinator.getSection()
+        peopleSectioner = coordinator.sectioner
 
         entry = NotificationEntryBuilder().setChannel(channel).build()
     }
@@ -88,7 +88,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
             entry.sbn, entry.ranking)).thenReturn(TYPE_PERSON)
 
         // only put people notifications in this section
-        assertTrue(peopleSection.isInSection(entry))
-        assertFalse(peopleSection.isInSection(NotificationEntryBuilder().build()))
+        assertTrue(peopleSectioner.isInSection(entry))
+        assertFalse(peopleSectioner.isInSection(NotificationEntryBuilder().build()))
     }
 }

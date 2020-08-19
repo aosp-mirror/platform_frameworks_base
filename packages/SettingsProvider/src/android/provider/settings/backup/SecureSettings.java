@@ -175,5 +175,6 @@ public class SecureSettings {
         Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
         Settings.Secure.PANIC_GESTURE_ENABLED,
         Settings.Secure.PANIC_SOUND_ENABLED,
+        Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED
     };
 }

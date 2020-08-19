@@ -523,7 +523,8 @@ public final class MediaSessionManager {
      * @param keyEvent The KeyEvent to send.
      * @hide
      */
-    public void dispatchMediaKeyEventAsSystemService(KeyEvent keyEvent) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void dispatchMediaKeyEventAsSystemService(@NonNull KeyEvent keyEvent) {
         dispatchMediaKeyEventInternal(true, keyEvent, false);
     }
 
@@ -548,6 +549,7 @@ public final class MediaSessionManager {
      * @return {@code true} if the event was sent to the session, {@code false} otherwise
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean dispatchMediaKeyEventAsSystemService(@NonNull MediaSession.Token sessionToken,
             @NonNull KeyEvent keyEvent) {
         if (sessionToken == null) {
@@ -586,10 +588,15 @@ public final class MediaSessionManager {
      * Should be only called by the {@link com.android.internal.policy.PhoneWindow} or
      * {@link android.view.FallbackEventHandler} when the foreground activity didn't consume the key
      * from the hardware devices.
+     * <p>
+     * Valid stream types include {@link AudioManager.PublicStreamTypes} and
+     * {@link AudioManager#USE_DEFAULT_STREAM_TYPE}.
      *
-     * @param keyEvent The KeyEvent to send.
+     * @param keyEvent volume key event
+     * @param streamType type of stream
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchVolumeKeyEventAsSystemService(@NonNull KeyEvent keyEvent, int streamType) {
         dispatchVolumeKeyEventInternal(true, keyEvent, streamType, false);
     }
@@ -614,6 +621,7 @@ public final class MediaSessionManager {
      * @param keyEvent volume key event
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchVolumeKeyEventAsSystemService(@NonNull MediaSession.Token sessionToken,
             @NonNull KeyEvent keyEvent) {
         if (sessionToken == null) {

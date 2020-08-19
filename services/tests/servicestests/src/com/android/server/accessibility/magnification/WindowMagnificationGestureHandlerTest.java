@@ -16,14 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
-import static android.view.MotionEvent.ACTION_POINTER_DOWN;
-
 import static com.android.server.testutils.TestUtils.strictMock;
 
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -63,11 +58,9 @@ public class WindowMagnificationGestureHandlerTest {
     public static final int LAST_STATE = STATE_SHOW_MAGNIFIER_TRIPLE_TAP;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
-    public static final float DEFAULT_X = 301;
-    public static final float DEFAULT_Y = 299;
-    //Assume first pointer position (DEFAULT_X,DEFAULT_Y) is in the window.
-    public static Rect DEFAULT_WINDOW_FRAME = new Rect(0, 0, 500, 500);
-    private static final int DISPLAY_0 = 0;
+    public static final float DEFAULT_TAP_X = 301;
+    public static final float DEFAULT_TAP_Y = 299;
+    private static final int DISPLAY_0 = MockWindowMagnificationConnection.TEST_DISPLAY;
 
     private Context mContext;
     private WindowMagnificationManager mWindowMagnificationManager;
@@ -83,14 +76,6 @@ public class WindowMagnificationGestureHandlerTest {
                 mContext, mWindowMagnificationManager, mock(ScaleChangedListener.class),
                 /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mMockConnection.getConnectionCallback().onWindowMagnifierBoundsChanged(DISPLAY_0,
-                DEFAULT_WINDOW_FRAME);
-        doAnswer((invocation) -> {
-            mMockConnection.getConnectionCallback().onWindowMagnifierBoundsChanged(DISPLAY_0,
-                    DEFAULT_WINDOW_FRAME);
-            return null;
-        }).when(mMockConnection.getConnection()).enableWindowMagnification(eq(DISPLAY_0),
-                anyFloat(), anyFloat(), anyFloat());
         mWindowMagnificationGestureHandler.setNext(strictMock(EventStreamTransformation.class));
     }
 
@@ -208,10 +193,11 @@ public class WindowMagnificationGestureHandlerTest {
                 break;
                 case STATE_TWO_FINGERS_DOWN: {
                     goFromStateIdleTo(STATE_SHOW_MAGNIFIER);
-                    send(downEvent());
+                    final Rect frame = mMockConnection.getMirrorWindowFrame();
+                    send(downEvent(frame.centerX(), frame.centerY()));
                     //Second finger is outside the window.
-                    send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_WINDOW_FRAME.right + 10,
-                            DEFAULT_WINDOW_FRAME.bottom + 10));
+                    send(twoPointerDownEvent(new float[]{frame.centerX(), frame.centerX() + 10},
+                            new float[]{frame.centerY(), frame.centerY() + 10}));
                 }
                 break;
                 case STATE_SHOW_MAGNIFIER_TRIPLE_TAP: {
@@ -243,7 +229,8 @@ public class WindowMagnificationGestureHandlerTest {
             }
             break;
             case STATE_TWO_FINGERS_DOWN: {
-                send(upEvent());
+                final Rect frame = mMockConnection.getMirrorWindowFrame();
+                send(upEvent(frame.centerX(), frame.centerY()));
                 returnToNormalFrom(STATE_SHOW_MAGNIFIER);
             }
             break;
@@ -286,12 +273,8 @@ public class WindowMagnificationGestureHandlerTest {
         }
     }
 
-    private MotionEvent downEvent() {
-        return TouchEventGenerator.downEvent(DISPLAY_0, DEFAULT_X, DEFAULT_Y);
-    }
-
-    private MotionEvent upEvent() {
-        return upEvent(DEFAULT_X, DEFAULT_Y);
+    private MotionEvent downEvent(float x, float y) {
+        return TouchEventGenerator.downEvent(DISPLAY_0, x, y);
     }
 
     private MotionEvent upEvent(float x, float y) {
@@ -299,18 +282,18 @@ public class WindowMagnificationGestureHandlerTest {
     }
 
     private void tap() {
-        send(downEvent());
-        send(upEvent());
+        send(downEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
+        send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
     }
 
-    private MotionEvent pointerEvent(int action, float x, float y) {
+    private MotionEvent twoPointerDownEvent(float[] x, float[] y) {
         final MotionEvent.PointerCoords defPointerCoords = new MotionEvent.PointerCoords();
-        defPointerCoords.x = DEFAULT_X;
-        defPointerCoords.y = DEFAULT_Y;
+        defPointerCoords.x = x[0];
+        defPointerCoords.y = y[0];
         final MotionEvent.PointerCoords pointerCoords = new MotionEvent.PointerCoords();
-        pointerCoords.x = x;
-        pointerCoords.y = y;
-        return TouchEventGenerator.pointerDownEvent(DISPLAY_0, defPointerCoords, pointerCoords);
+        pointerCoords.x = x[1];
+        pointerCoords.y = y[1];
+        return TouchEventGenerator.twoPointersDownEvent(DISPLAY_0, defPointerCoords, pointerCoords);
     }
 
     private String stateDump() {

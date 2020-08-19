@@ -47,8 +47,8 @@ import java.util.ArrayList;
  *
  * {@hide}
  */
-public class SystemServiceManager {
-    private static final String TAG = "SystemServiceManager";
+public final class SystemServiceManager {
+    private static final String TAG = SystemServiceManager.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final int SERVICE_CALL_WARN_TIME_MS = 50;
 
@@ -250,76 +250,76 @@ public class SystemServiceManager {
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
-    private @NonNull TargetUser getTargetUser(@UserIdInt int userHandle) {
+    private @NonNull TargetUser getTargetUser(@UserIdInt int userId) {
         final TargetUser targetUser;
         synchronized (mTargetUsers) {
-            targetUser = mTargetUsers.get(userHandle);
+            targetUser = mTargetUsers.get(userId);
         }
-        Preconditions.checkState(targetUser != null, "No TargetUser for " + userHandle);
+        Preconditions.checkState(targetUser != null, "No TargetUser for " + userId);
         return targetUser;
     }
 
     /**
      * Starts the given user.
      */
-    public void startUser(final @NonNull TimingsTraceAndSlog t, final @UserIdInt int userHandle) {
+    public void startUser(@NonNull TimingsTraceAndSlog t, @UserIdInt int userId) {
         // Create cached TargetUser
-        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userHandle);
-        Preconditions.checkState(userInfo != null, "No UserInfo for " + userHandle);
+        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
+        Preconditions.checkState(userInfo != null, "No UserInfo for " + userId);
         synchronized (mTargetUsers) {
-            mTargetUsers.put(userHandle, new TargetUser(userInfo));
+            mTargetUsers.put(userId, new TargetUser(userInfo));
         }
 
-        onUser(t, START, userHandle);
+        onUser(t, START, userId);
     }
 
     /**
      * Unlocks the given user.
      */
-    public void unlockUser(final @UserIdInt int userHandle) {
-        onUser(UNLOCKING, userHandle);
+    public void unlockUser(@UserIdInt int userId) {
+        onUser(UNLOCKING, userId);
     }
 
     /**
      * Called after the user was unlocked.
      */
-    public void onUserUnlocked(final @UserIdInt int userHandle) {
-        onUser(UNLOCKED, userHandle);
+    public void onUserUnlocked(@UserIdInt int userId) {
+        onUser(UNLOCKED, userId);
     }
 
     /**
      * Switches to the given user.
      */
-    public void switchUser(final @UserIdInt int from, final @UserIdInt int to) {
+    public void switchUser(@UserIdInt int from, @UserIdInt int to) {
         onUser(TimingsTraceAndSlog.newAsyncLog(), SWITCH, to, from);
     }
 
     /**
      * Stops the given user.
      */
-    public void stopUser(final @UserIdInt int userHandle) {
-        onUser(STOP, userHandle);
+    public void stopUser(@UserIdInt int userId) {
+        onUser(STOP, userId);
     }
 
     /**
      * Cleans up the given user.
      */
-    public void cleanupUser(final @UserIdInt int userHandle) {
-        onUser(CLEANUP, userHandle);
+    public void cleanupUser(@UserIdInt int userId) {
+        onUser(CLEANUP, userId);
 
         // Remove cached TargetUser
         synchronized (mTargetUsers) {
-            mTargetUsers.remove(userHandle);
+            mTargetUsers.remove(userId);
         }
     }
 
-    private void onUser(@NonNull String onWhat, @UserIdInt int userHandle) {
-        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, userHandle);
+    private void onUser(@NonNull String onWhat, @UserIdInt int userId) {
+        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, userId);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
-            @UserIdInt int userHandle) {
-        onUser(t, onWhat, userHandle, UserHandle.USER_NULL);
+            @UserIdInt int userId) {
+        onUser(t, onWhat, userId, UserHandle.USER_NULL);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,

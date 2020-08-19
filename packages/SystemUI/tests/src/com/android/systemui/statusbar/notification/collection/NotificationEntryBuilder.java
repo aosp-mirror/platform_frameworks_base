@@ -53,7 +53,6 @@ public class NotificationEntryBuilder {
 
     /* ListEntry properties */
     private GroupEntry mParent;
-    private int mSection = -1;
 
     /* If set, use this creation time instead of mClock.uptimeMillis */
     private long mCreationTime = -1;
@@ -68,7 +67,6 @@ public class NotificationEntryBuilder {
         mRankingBuilder = new RankingBuilder(source.getRanking());
 
         mParent = source.getParent();
-        mSection = source.getSection();
         mCreationTime = source.getCreationTime();
     }
 
@@ -104,7 +102,6 @@ public class NotificationEntryBuilder {
 
         /* ListEntry properties */
         entry.setParent(mParent);
-        entry.getAttachState().setSectionIndex(mSection);
         return entry;
     }
 
@@ -113,14 +110,6 @@ public class NotificationEntryBuilder {
      */
     public NotificationEntryBuilder setParent(@Nullable GroupEntry parent) {
         mParent = parent;
-        return this;
-    }
-
-    /**
-     * Sets the section.
-     */
-    public NotificationEntryBuilder setSection(int section) {
-        mSection = section;
         return this;
     }
 

@@ -55,7 +55,7 @@ public class WindowManagerPerfTestBase {
      * is in /data because while enabling method profling of system server, it cannot write the
      * trace to external storage.
      */
-    static final File BASE_OUT_PATH = new File("/data/local/WmPerfTests");
+    static final File BASE_OUT_PATH = new File("/data/local/tmp/WmPerfTests");
 
     @BeforeClass
     public static void setUpOnce() {

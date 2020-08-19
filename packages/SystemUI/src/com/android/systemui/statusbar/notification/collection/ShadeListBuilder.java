@@ -28,10 +28,11 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_SORTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_TRANSFORMING;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -39,6 +40,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -48,7 +50,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeL
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
@@ -119,6 +121,8 @@ public class ShadeListBuilder implements Dumpable {
         mLogger = logger;
         mInteractionTracker = interactionTracker;
         dumpManager.registerDumpable(TAG, this);
+
+        setSectioners(Collections.emptyList());
     }
 
     /**
@@ -193,15 +197,17 @@ public class ShadeListBuilder implements Dumpable {
         promoter.setInvalidationListener(this::onPromoterInvalidated);
     }
 
-    void setSections(List<NotifSection> sections) {
+    void setSectioners(List<NotifSectioner> sectioners) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
         mNotifSections.clear();
-        for (NotifSection section : sections) {
-            mNotifSections.add(section);
-            section.setInvalidationListener(this::onNotifSectionInvalidated);
+        for (NotifSectioner sectioner : sectioners) {
+            mNotifSections.add(new NotifSection(sectioner, mNotifSections.size()));
+            sectioner.setInvalidationListener(this::onNotifSectionInvalidated);
         }
+
+        mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
     }
 
     void setNotifStabilityManager(NotifStabilityManager notifStabilityManager) {
@@ -275,7 +281,7 @@ public class ShadeListBuilder implements Dumpable {
         rebuildListIfBefore(STATE_TRANSFORMING);
     }
 
-    private void onNotifSectionInvalidated(NotifSection section) {
+    private void onNotifSectionInvalidated(NotifSectioner section) {
         Assert.isMainThread();
 
         mLogger.logNotifSectionInvalidated(section.getName(), mPipelineState.getState());
@@ -652,7 +658,6 @@ public class ShadeListBuilder implements Dumpable {
      */
     private void annulAddition(ListEntry entry) {
         entry.setParent(null);
-        entry.getAttachState().setSectionIndex(-1);
         entry.getAttachState().setSection(null);
         entry.getAttachState().setPromoter(null);
         if (entry.mFirstAddedIteration == mIterationCount) {
@@ -663,12 +668,12 @@ public class ShadeListBuilder implements Dumpable {
     private void sortList() {
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
-            Pair<NotifSection, Integer> sectionWithIndex = applySections(entry);
+            NotifSection section = applySections(entry);
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
-                    child.getAttachState().setSection(sectionWithIndex.first);
-                    child.getAttachState().setSectionIndex(sectionWithIndex.second);
+                    child.getAttachState().setSection(section);
+                    child.getAttachState().setSection(section);
                 }
                 parent.sortChildren(sChildComparator);
             }
@@ -736,16 +741,13 @@ public class ShadeListBuilder implements Dumpable {
                 mLogger.logSectionChanged(
                         mIterationCount,
                         prev.getSection(),
-                        prev.getSectionIndex(),
-                        curr.getSection(),
-                        curr.getSectionIndex());
+                        curr.getSection());
             }
 
             if (curr.getSuppressedChanges().getSection() != null) {
                 mLogger.logSectionChangeSuppressed(
                         mIterationCount,
                         curr.getSuppressedChanges().getSection(),
-                        curr.getSuppressedChanges().getSectionIndex(),
                         curr.getSection());
             }
         }
@@ -762,7 +764,10 @@ public class ShadeListBuilder implements Dumpable {
         callOnCleanup(mNotifPromoters);
         callOnCleanup(mNotifFinalizeFilters);
         callOnCleanup(mNotifComparators);
-        callOnCleanup(mNotifSections);
+
+        for (int i = 0; i < mNotifSections.size(); i++) {
+            mNotifSections.get(i).getSectioner().onCleanup();
+        }
 
         if (mNotifStabilityManager != null) {
             callOnCleanup(List.of(mNotifStabilityManager));
@@ -777,7 +782,9 @@ public class ShadeListBuilder implements Dumpable {
 
     private final Comparator<ListEntry> mTopLevelComparator = (o1, o2) -> {
 
-        int cmp = Integer.compare(o1.getSection(), o2.getSection());
+        int cmp = Integer.compare(
+                requireNonNull(o1.getSection()).getIndex(),
+                requireNonNull(o2.getSection()).getIndex());
 
         if (cmp == 0) {
             for (int i = 0; i < mNotifComparators.size(); i++) {
@@ -855,45 +862,41 @@ public class ShadeListBuilder implements Dumpable {
         return null;
     }
 
-    private Pair<NotifSection, Integer> applySections(ListEntry entry) {
-        Pair<NotifSection, Integer> sectionWithIndex = findSection(entry);
+    private NotifSection applySections(ListEntry entry) {
+        final NotifSection newSection = findSection(entry);
         final ListAttachState prevAttachState = entry.getPreviousAttachState();
+
+        NotifSection finalSection = newSection;
 
         // are we changing sections of this entry?
         if (mNotifStabilityManager != null
                 && prevAttachState.getParent() != null
-                && (sectionWithIndex.first != prevAttachState.getSection()
-                    || sectionWithIndex.second != prevAttachState.getSectionIndex())) {
+                && newSection != prevAttachState.getSection()) {
 
             // are section changes allowed?
-            if (!mNotifStabilityManager.isSectionChangeAllowed(
-                    entry.getRepresentativeEntry())) {
-                entry.getAttachState().getSuppressedChanges().setSection(
-                        sectionWithIndex.first);
-                entry.getAttachState().getSuppressedChanges().setSectionIndex(
-                        sectionWithIndex.second);
+            if (!mNotifStabilityManager.isSectionChangeAllowed(entry.getRepresentativeEntry())) {
+                // record the section that we wanted to change to
+                entry.getAttachState().getSuppressedChanges().setSection(newSection);
 
                 // keep the previous section
-                sectionWithIndex = new Pair(
-                        prevAttachState.getSection(),
-                        prevAttachState.getSectionIndex());
+                finalSection = prevAttachState.getSection();
             }
         }
 
-        entry.getAttachState().setSection(sectionWithIndex.first);
-        entry.getAttachState().setSectionIndex(sectionWithIndex.second);
+        entry.getAttachState().setSection(finalSection);
 
-        return sectionWithIndex;
+        return finalSection;
     }
 
-    private Pair<NotifSection, Integer> findSection(ListEntry entry) {
+    @NonNull
+    private NotifSection findSection(ListEntry entry) {
         for (int i = 0; i < mNotifSections.size(); i++) {
-            NotifSection sectioner = mNotifSections.get(i);
-            if (sectioner.isInSection(entry)) {
-                return new Pair<>(sectioner, i);
+            NotifSection section = mNotifSections.get(i);
+            if (section.getSectioner().isInSection(entry)) {
+                return section;
             }
         }
-        return new Pair<>(sDefaultSection, mNotifSections.size());
+        throw new RuntimeException("Missing default sectioner!");
     }
 
     private void rebuildListIfBefore(@PipelineState.StateName int state) {
@@ -963,15 +966,15 @@ public class ShadeListBuilder implements Dumpable {
         void onRenderList(@NonNull List<ListEntry> entries);
     }
 
-    private static final NotifSection sDefaultSection =
-            new NotifSection("UnknownSection") {
+    private static final NotifSectioner DEFAULT_SECTIONER =
+            new NotifSectioner("UnknownSection") {
                 @Override
                 public boolean isInSection(ListEntry entry) {
                     return true;
                 }
             };
 
-    private static final String TAG = "ShadeListBuilder";
-
     private static final int MIN_CHILDREN_FOR_GROUP = 2;
+
+    private static final String TAG = "ShadeListBuilder";
 }

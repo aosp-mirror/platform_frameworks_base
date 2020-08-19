@@ -24,7 +24,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
@@ -155,10 +155,10 @@ public class NotifPipeline implements CommonNotifCollection {
      * Sections that are used to sort top-level entries.  If two entries have the same section,
      * NotifComparators are consulted. Sections from this list are called in order for each
      * notification passed through the pipeline. The first NotifSection to return true for
-     * {@link NotifSection#isInSection(ListEntry)} sets the entry as part of its Section.
+     * {@link NotifSectioner#isInSection(ListEntry)} sets the entry as part of its Section.
      */
-    public void setSections(List<NotifSection> sections) {
-        mShadeListBuilder.setSections(sections);
+    public void setSections(List<NotifSectioner> sections) {
+        mShadeListBuilder.setSectioners(sections);
     }
 
     /**

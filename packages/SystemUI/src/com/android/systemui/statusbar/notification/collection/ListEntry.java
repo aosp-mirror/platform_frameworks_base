@@ -21,7 +21,7 @@ import android.annotation.UptimeMillisLong;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 
 /**
  * Abstract superclass for top-level entries, i.e. things that can appear in the final notification
@@ -78,13 +78,12 @@ public abstract class ListEntry {
         return mPreviousAttachState.getParent();
     }
 
-    /** The section this notification was assigned to (0 to N-1, where N is number of sections). */
-    public int getSection() {
-        return mAttachState.getSectionIndex();
+    @Nullable public NotifSection getSection() {
+        return mAttachState.getSection();
     }
 
-    @Nullable public NotifSection getNotifSection() {
-        return mAttachState.getSection();
+    public int getSectionIndex() {
+        return mAttachState.getSection() != null ? mAttachState.getSection().getIndex() : -1;
     }
 
     ListAttachState getAttachState() {

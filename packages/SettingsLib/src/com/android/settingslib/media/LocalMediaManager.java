@@ -465,7 +465,16 @@ public class LocalMediaManager implements BluetoothCallback {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
-                mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
+                // Add disconnected bluetooth devices only when phone output device is available.
+                for (MediaDevice device : devices) {
+                    final int type = device.getDeviceType();
+                    if (type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE
+                            || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
+                            || type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE) {
+                        mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
+                        break;
+                    }
+                }
             }
 
             final MediaDevice infoMediaDevice = mInfoMediaManager.getCurrentConnectedDevice();

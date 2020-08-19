@@ -47,12 +47,15 @@
 #include <minikin/LocaleList.h>
 #include <minikin/Measurement.h>
 #include <minikin/MinikinPaint.h>
+#include <shader/Shader.h>
 #include <unicode/utf16.h>
 
 #include <cassert>
 #include <cstring>
 #include <memory>
 #include <vector>
+
+using namespace android::uirenderer;
 
 namespace android {
 
@@ -782,11 +785,10 @@ namespace PaintGlue {
         return obj->getFillPath(*src, dst) ? JNI_TRUE : JNI_FALSE;
     }
 
-    static jlong setShader(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong shaderHandle) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
-        obj->setShader(sk_ref_sp(shader));
-        return reinterpret_cast<jlong>(obj->getShader());
+    static void setShader(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong shaderHandle) {
+        auto* paint = reinterpret_cast<Paint*>(objHandle);
+        auto* shader = reinterpret_cast<Shader*>(shaderHandle);
+        paint->setShader(sk_ref_sp(shader));
     }
 
     static jlong setColorFilter(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong filterHandle) {
@@ -1097,7 +1099,7 @@ static const JNINativeMethod methods[] = {
     {"nGetStrokeJoin","(J)I", (void*) PaintGlue::getStrokeJoin},
     {"nSetStrokeJoin","(JI)V", (void*) PaintGlue::setStrokeJoin},
     {"nGetFillPath","(JJJ)Z", (void*) PaintGlue::getFillPath},
-    {"nSetShader","(JJ)J", (void*) PaintGlue::setShader},
+    {"nSetShader","(JJ)V", (void*) PaintGlue::setShader},
     {"nSetColorFilter","(JJ)J", (void*) PaintGlue::setColorFilter},
     {"nSetXfermode","(JI)V", (void*) PaintGlue::setXfermode},
     {"nSetPathEffect","(JJ)J", (void*) PaintGlue::setPathEffect},

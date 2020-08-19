@@ -19,6 +19,7 @@ package com.android.systemui.doze.dagger;
 import com.android.systemui.doze.DozeMachine;
 import com.android.systemui.doze.DozeService;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
@@ -30,7 +31,7 @@ public interface DozeComponent {
     /** Simple Builder for {@link DozeComponent}. */
     @Subcomponent.Factory
     interface Builder {
-        DozeComponent build();
+        DozeComponent build(@BindsInstance DozeMachine.Service dozeMachineService);
     }
 
     /** Supply a {@link DozeMachine}. */

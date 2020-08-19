@@ -294,7 +294,7 @@ public final class InputMethodInfo implements Parcelable {
      */
     public InputMethodInfo(String packageName, String className,
             CharSequence label, String settingsActivity) {
-        this(buildDummyResolveInfo(packageName, className, label), false /* isAuxIme */,
+        this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */);
@@ -344,7 +344,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsVrOnly = isVrOnly;
     }
 
-    private static ResolveInfo buildDummyResolveInfo(String packageName, String className,
+    private static ResolveInfo buildFakeResolveInfo(String packageName, String className,
             CharSequence label) {
         ResolveInfo ri = new ResolveInfo();
         ServiceInfo si = new ServiceInfo();
