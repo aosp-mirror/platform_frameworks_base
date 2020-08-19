@@ -103,7 +103,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     }
 
     /**
-     * Notified by {@link OneHandedManager}, when user update settings of Enabled or Disabled
+     * Notified by {@link OneHandedController}, when user update settings of Enabled or Disabled
      *
      * @param isEnabled is one handed settings enabled or not
      */
@@ -264,7 +264,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     }
 
     /**
-     * The touch(gesture) events to notify {@link OneHandedManager} start or stop one handed
+     * The touch(gesture) events to notify {@link OneHandedController} start or stop one handed
      */
     public interface OneHandedGestureEventCallback {
         /**

@@ -59,7 +59,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             "com.android.internal.systemui.onehanded.gestural";
     private static final String SUPPORT_ONE_HANDED_MODE = "ro.support_one_handed_mode";
 
-    private final OneHandedManagerImpl mOneHandedManager;
+    private final OneHandedController mOneHandedController;
     private final CommandQueue mCommandQueue;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final IOverlayManager mOverlayManager;
@@ -74,8 +74,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             OneHandedEvents.writeEvent(enabled
                     ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON
                     : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF);
-            if (mOneHandedManager != null) {
-                mOneHandedManager.setOneHandedEnabled(enabled);
+            if (mOneHandedController != null) {
+                mOneHandedController.setOneHandedEnabled(enabled);
             }
 
             // Also checks swipe to notification settings since they all need gesture overlay.
@@ -125,8 +125,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
                     ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON
                     : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF);
 
-            if (mOneHandedManager != null) {
-                mOneHandedManager.setTaskChangeToExit(enabled);
+            if (mOneHandedController != null) {
+                mOneHandedController.setTaskChangeToExit(enabled);
             }
         }
     };
@@ -138,8 +138,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
                     final boolean enabled =
                             OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                                     mContext.getContentResolver());
-                    if (mOneHandedManager != null) {
-                        mOneHandedManager.setSwipeToNotificationEnabled(enabled);
+                    if (mOneHandedController != null) {
+                        mOneHandedController.setSwipeToNotificationEnabled(enabled);
                     }
 
                     // Also checks one handed mode settings since they all need gesture overlay.
@@ -152,14 +152,14 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     @Inject
     public OneHandedUI(Context context,
             CommandQueue commandQueue,
-            OneHandedManagerImpl oneHandedManager,
+            OneHandedController oneHandedController,
             ScreenLifecycle screenLifecycle) {
         super(context);
 
         if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
             Log.i(TAG, "Device config SUPPORT_ONE_HANDED_MODE off");
             mCommandQueue = null;
-            mOneHandedManager = null;
+            mOneHandedController = null;
             mOverlayManager = null;
             mTimeoutHandler = null;
             mScreenLifecycle = null;
@@ -167,7 +167,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         }
 
         mCommandQueue = commandQueue;
-        mOneHandedManager = oneHandedManager;
+        mOneHandedController = oneHandedController;
         mTimeoutHandler = OneHandedTimeoutHandler.get();
         mScreenLifecycle = screenLifecycle;
         mOverlayManager = IOverlayManager.Stub.asInterface(
@@ -260,13 +260,13 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     }
 
     private void updateSettings() {
-        mOneHandedManager.setOneHandedEnabled(OneHandedSettingsUtil
+        mOneHandedController.setOneHandedEnabled(OneHandedSettingsUtil
                 .getSettingsOneHandedModeEnabled(mContext.getContentResolver()));
         mTimeoutHandler.setTimeout(OneHandedSettingsUtil
                 .getSettingsOneHandedModeTimeout(mContext.getContentResolver()));
-        mOneHandedManager.setTaskChangeToExit(OneHandedSettingsUtil
+        mOneHandedController.setTaskChangeToExit(OneHandedSettingsUtil
                 .getSettingsTapsAppToExit(mContext.getContentResolver()));
-        mOneHandedManager.setSwipeToNotificationEnabled(OneHandedSettingsUtil
+        mOneHandedController.setSwipeToNotificationEnabled(OneHandedSettingsUtil
                 .getSettingsSwipeToNotificationEnabled(mContext.getContentResolver()));
     }
 
@@ -295,7 +295,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
      * Trigger one handed more
      */
     public void startOneHanded() {
-        mOneHandedManager.startOneHanded();
+        mOneHandedController.startOneHanded();
         OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN);
     }
 
@@ -303,7 +303,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
      * Dismiss one handed more
      */
     public void stopOneHanded() {
-        mOneHandedManager.stopOneHanded();
+        mOneHandedController.stopOneHanded();
         OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
     }
 
@@ -314,8 +314,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         final String innerPrefix = "  ";
         pw.println(TAG + "one handed states: ");
 
-        if (mOneHandedManager != null) {
-            ((OneHandedManagerImpl) mOneHandedManager).dump(fd, pw, args);
+        if (mOneHandedController != null) {
+            mOneHandedController.dump(fd, pw, args);
         }
 
         if (mTimeoutHandler != null) {

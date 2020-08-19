@@ -49,7 +49,7 @@ import javax.inject.Inject;
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
 @SysUISingleton
-public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
+public class OneHandedController implements Dumpable {
     private static final String TAG = "OneHandedManager";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
             "persist.debug.one_handed_offset_percentage";
@@ -106,7 +106,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      * Constructor of OneHandedManager
      */
     @Inject
-    public OneHandedManagerImpl(Context context,
+    public OneHandedController(Context context,
             CommandQueue commandQueue,
             DisplayController displayController,
             NavigationModeController navigationModeController,
@@ -137,7 +137,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     // TODO(b/161980408): Should remove extra constructor.
     @VisibleForTesting
-    OneHandedManagerImpl(Context context,
+    OneHandedController(Context context,
             CommandQueue commandQueue,
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
@@ -194,7 +194,6 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     /**
      * Enters one handed mode.
      */
-    @Override
     public void startOneHanded() {
         if (!mDisplayAreaOrganizer.isInOneHanded()) {
             final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
@@ -206,7 +205,6 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     /**
      * Exits one handed mode.
      */
-    @Override
     public void stopOneHanded() {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
             mDisplayAreaOrganizer.scheduleOffset(0, 0);

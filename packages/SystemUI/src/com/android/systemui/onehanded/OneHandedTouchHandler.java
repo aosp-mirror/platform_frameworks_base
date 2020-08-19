@@ -63,7 +63,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
     }
 
     /**
-     * Notified by {@link OneHandedManagerImpl}, when user update settings of Enabled or Disabled
+     * Notified by {@link OneHandedController}, when user update settings of Enabled or Disabled
      *
      * @param isEnabled is one handed settings enabled or not
      */
@@ -166,7 +166,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
     }
 
     /**
-     * The touch(gesture) events to notify {@link OneHandedManager} start or stop one handed
+     * The touch(gesture) events to notify {@link OneHandedController} start or stop one handed
      */
     public interface OneHandedTouchEventCallback {
         /**
