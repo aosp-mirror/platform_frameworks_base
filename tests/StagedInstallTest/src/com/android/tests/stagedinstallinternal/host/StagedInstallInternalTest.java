@@ -93,31 +93,48 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         runPhase("testSystemServerRestartDoesNotAffectStagedSessions_Verify");
     }
 
+    // Test waiting time for staged session to be ready using adb staged install can be altered
     @Test
-    public void testAdbStagedInstallWaitForReadyFlagWorks() throws Exception {
+    public void testAdbStagdReadyTimeoutFlagWorks() throws Exception {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        File apexFile = mTestUtils.getTestFile(SHIM_V2);
-        String output = getDevice().executeAdbCommand("install", "--staged",
-                "--wait-for-staged-ready", "60000", apexFile.getAbsolutePath());
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final String output = getDevice().executeAdbCommand("install", "--staged",
+                "--staged-ready-timeout", "60000", apexFile.getAbsolutePath());
         assertThat(output).contains("Reboot device to apply staged session");
-        String sessionId = getDevice().executeShellCommand(
+        final String sessionId = getDevice().executeShellCommand(
                 "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
         assertThat(sessionId).isNotEmpty();
     }
 
+    // Test adb staged installation wait for session to be ready by default
     @Test
-    public void testAdbStagedInstallNoWaitFlagWorks() throws Exception {
+    public void testAdbStagedInstallWaitsTillReadyByDefault() throws Exception {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        File apexFile = mTestUtils.getTestFile(SHIM_V2);
-        String output = getDevice().executeAdbCommand("install", "--staged",
-                "--no-wait", apexFile.getAbsolutePath());
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final String output = getDevice().executeAdbCommand("install", "--staged",
+                apexFile.getAbsolutePath());
+        assertThat(output).contains("Reboot device to apply staged session");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+    }
+
+    // Test we can skip waiting for staged session to be ready
+    @Test
+    public void testAdbStagedReadyWaitCanBeSkipped() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final String output = getDevice().executeAdbCommand("install", "--staged",
+                "--staged-ready-timeout", "0", apexFile.getAbsolutePath());
         assertThat(output).doesNotContain("Reboot device to apply staged session");
         assertThat(output).contains("Success");
-        String sessionId = getDevice().executeShellCommand(
+        final String sessionId = getDevice().executeShellCommand(
                 "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
         assertThat(sessionId).isEmpty();
     }
@@ -127,9 +144,9 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        File apexFile = mTestUtils.getTestFile(SHIM_V2);
-        File apkFile = mTestUtils.getTestFile(APK_A);
-        String output = getDevice().executeAdbCommand("install-multi-package",
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final File apkFile = mTestUtils.getTestFile(APK_A);
+        final String output = getDevice().executeAdbCommand("install-multi-package",
                 apexFile.getAbsolutePath(), apkFile.getAbsolutePath());
         assertThat(output).contains("Created parent session");
         assertThat(output).contains("Created child session");
@@ -154,10 +171,10 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         getDevice().disableAdbRoot();
 
         // Wait for new system server process to start
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         long newStartTime = oldStartTime;
         while (System.currentTimeMillis() < start + SYSTEM_SERVER_TIMEOUT_MS) {
-            ProcessInfo newPs = getDevice().getProcessByName("system_server");
+            final ProcessInfo newPs = getDevice().getProcessByName("system_server");
             if (newPs != null) {
                 newStartTime = newPs.getStartTime();
                 if (newStartTime != oldStartTime) {
