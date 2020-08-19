@@ -33,9 +33,6 @@ import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
-import dagger.Reusable;
-
-@Reusable  // Don't create multiple DozeServices.
 public class DozeService extends DreamService
         implements DozeMachine.Service, RequestDoze, PluginListener<DozeServicePlugin> {
     private static final String TAG = "DozeService";
@@ -60,7 +57,7 @@ public class DozeService extends DreamService
         setWindowless(true);
 
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
-        DozeComponent dozeComponent = mDozeComponentBuilder.build();
+        DozeComponent dozeComponent = mDozeComponentBuilder.build(this);
         mDozeMachine = dozeComponent.getDozeMachine();
     }
 
