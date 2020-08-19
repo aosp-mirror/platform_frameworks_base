@@ -18,23 +18,32 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -46,6 +55,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -82,8 +92,10 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     private SysuiColorExtractor mColorExtractor;
     @Mock
     private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
+    @Mock
+    private MetricsLogger mMetricsLogger;
 
-    NotificationStackScrollLayoutController mController;
+    private NotificationStackScrollLayoutController mController;
 
     @Before
     public void setUp() {
@@ -102,7 +114,9 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mKeyguardBypassController,
                 mZenModeController,
                 mColorExtractor,
-                mNotificationLockscreenUserManager);
+                mNotificationLockscreenUserManager,
+                mMetricsLogger
+        );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
     }
@@ -204,5 +218,73 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
         stateListener.onStatePostChange();
         verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
+    }
+
+
+    @Test
+    public void testOnMenuShownLogging() { ;
+
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
+        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
+                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
+
+
+        ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
+                ArgumentCaptor.forClass(OnMenuEventListener.class);
+
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout).setMenuEventListener(
+                onMenuEventListenerArgumentCaptor.capture());
+
+        OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
+
+        onMenuEventListener.onMenuShown(row);
+        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
+        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_REVEAL_GEAR,
+                MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    @Test
+    public void testOnMenuClickedLogging() {
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
+        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
+                MetricsProto.MetricsEvent.VIEW_UNKNOWN));
+
+
+        ArgumentCaptor<OnMenuEventListener> onMenuEventListenerArgumentCaptor =
+                ArgumentCaptor.forClass(OnMenuEventListener.class);
+
+        mController.attach(mNotificationStackScrollLayout);
+        verify(mNotificationStackScrollLayout).setMenuEventListener(
+                onMenuEventListenerArgumentCaptor.capture());
+
+        OnMenuEventListener onMenuEventListener = onMenuEventListenerArgumentCaptor.getValue();
+
+        onMenuEventListener.onMenuClicked(row, 0, 0, mock(
+                NotificationMenuRowPlugin.MenuItem.class));
+        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
+        verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
+                MetricsProto.MetricsEvent.TYPE_ACTION));
+    }
+
+    private LogMaker logMatcher(int category, int type) {
+        return argThat(new LogMatcher(category, type));
+    }
+
+    static class LogMatcher implements ArgumentMatcher<LogMaker> {
+        private int mCategory, mType;
+
+        LogMatcher(int category, int type) {
+            mCategory = category;
+            mType = type;
+        }
+        public boolean matches(LogMaker l) {
+            return (l.getCategory() == mCategory)
+                    && (l.getType() == mType);
+        }
+
+        public String toString() {
+            return String.format("LogMaker(%d, %d)", mCategory, mType);
+        }
     }
 }
