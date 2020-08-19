@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
@@ -54,11 +55,14 @@ import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.common.DisplayController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,6 +115,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private Context mContext;
     private PipBoundsHandler mPipBoundsHandler;
     private PipTaskOrganizer mPipTaskOrganizer;
+    private PipSurfaceTransactionHelper mPipSurfaceTransactionHelper;
     private IActivityTaskManager mActivityTaskManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
@@ -229,17 +234,17 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
-            PipBoundsHandler pipBoundsHandler,
-            PipTaskOrganizer pipTaskOrganizer,
-            PipSurfaceTransactionHelper surfaceTransactionHelper,
-            Divider divider) {
+            ConfigurationController configController,
+            DisplayController displayController,
+            Divider divider,
+            @NonNull PipUiEventLogger pipUiEventLogger) {
         if (mInitialized) {
             return;
         }
 
         mInitialized = true;
         mContext = context;
-        mPipBoundsHandler = pipBoundsHandler;
+        mPipBoundsHandler = new PipBoundsHandler(mContext);
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back
         final DisplayInfo displayInfo = new DisplayInfo();
@@ -248,7 +253,9 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         mResizeAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
-        mPipTaskOrganizer = pipTaskOrganizer;
+        mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
+        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
+                mPipSurfaceTransactionHelper, divider, displayController, pipUiEventLogger);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);

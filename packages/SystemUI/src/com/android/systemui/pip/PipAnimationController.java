@@ -31,8 +31,6 @@ import com.android.systemui.Interpolators;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.inject.Inject;
-
 /**
  * Controller class of PiP animations (both from and to PiP mode).
  */
@@ -88,7 +86,6 @@ public class PipAnimationController {
                 return handler;
             });
 
-    @Inject
     PipAnimationController(PipSurfaceTransactionHelper helper) {
         mSurfaceTransactionHelper = helper;
     }
