@@ -3635,6 +3635,8 @@
     -->
     <string name="config_defaultContentSuggestionsService" translatable="false"></string>
 
+    <string name="config_defaultMusicRecognitionService" translatable="false"></string>
+
     <!-- The package name for the default retail demo app.
          This package must be trusted, as it has the permissions to query the usage stats on the
          device.

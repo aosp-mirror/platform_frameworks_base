@@ -38,6 +38,7 @@ package android {
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
     field public static final String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
+    field public static final String BIND_MUSIC_RECOGNITION_SERVICE = "android.permission.BIND_MUSIC_RECOGNITION_SERVICE";
     field public static final String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
@@ -119,6 +120,7 @@ package android {
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
+    field public static final String MANAGE_MUSIC_RECOGNITION = "android.permission.MANAGE_MUSIC_RECOGNITION";
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
     field public static final String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
@@ -4524,6 +4526,58 @@ package android.media.audiopolicy {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioVolumeGroup> CREATOR;
     field public static final int DEFAULT_VOLUME_GROUP = -1; // 0xffffffff
+  }
+
+}
+
+package android.media.musicrecognition {
+
+  public class MusicRecognitionManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_MUSIC_RECOGNITION) public void beginStreamingSearch(@NonNull android.media.musicrecognition.RecognitionRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.musicrecognition.MusicRecognitionManager.RecognitionCallback);
+    field public static final int RECOGNITION_FAILED_AUDIO_UNAVAILABLE = 7; // 0x7
+    field public static final int RECOGNITION_FAILED_NOT_FOUND = 1; // 0x1
+    field public static final int RECOGNITION_FAILED_NO_CONNECTIVITY = 2; // 0x2
+    field public static final int RECOGNITION_FAILED_SERVICE_KILLED = 5; // 0x5
+    field public static final int RECOGNITION_FAILED_SERVICE_UNAVAILABLE = 3; // 0x3
+    field public static final int RECOGNITION_FAILED_TIMEOUT = 6; // 0x6
+    field public static final int RECOGNITION_FAILED_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public static interface MusicRecognitionManager.RecognitionCallback {
+    method public void onAudioStreamClosed();
+    method public void onRecognitionFailed(@NonNull android.media.musicrecognition.RecognitionRequest, int);
+    method public void onRecognitionSucceeded(@NonNull android.media.musicrecognition.RecognitionRequest, @NonNull android.media.MediaMetadata, @Nullable android.os.Bundle);
+  }
+
+  public abstract class MusicRecognitionService extends android.app.Service {
+    ctor public MusicRecognitionService();
+    method public abstract void onRecognize(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.media.musicrecognition.MusicRecognitionService.Callback);
+  }
+
+  public static interface MusicRecognitionService.Callback {
+    method public void onRecognitionFailed(int);
+    method public void onRecognitionSucceeded(@NonNull android.media.MediaMetadata, @Nullable android.os.Bundle);
+  }
+
+  public final class RecognitionRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioAttributes getAudioAttributes();
+    method @NonNull public android.media.AudioFormat getAudioFormat();
+    method public int getCaptureSession();
+    method public int getIgnoreBeginningFrames();
+    method public int getMaxAudioLengthSeconds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.musicrecognition.RecognitionRequest> CREATOR;
+  }
+
+  public static final class RecognitionRequest.Builder {
+    ctor public RecognitionRequest.Builder();
+    method @NonNull public android.media.musicrecognition.RecognitionRequest build();
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setCaptureSession(int);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setIgnoreBeginningFrames(int);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setMaxAudioLengthSeconds(int);
   }
 
 }

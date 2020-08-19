@@ -106,6 +106,8 @@ import android.media.MediaRouter;
 import android.media.MediaTranscodeManager;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
+import android.media.musicrecognition.IMusicRecognitionManager;
+import android.media.musicrecognition.MusicRecognitionManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
@@ -1117,6 +1119,17 @@ public final class SystemServiceRegistry {
                 IAutoFillManager service = IAutoFillManager.Stub.asInterface(b);
                 return new AutofillManager(ctx.getOuterContext(), service);
             }});
+
+        registerService(Context.MUSIC_RECOGNITION_SERVICE, MusicRecognitionManager.class,
+                new CachedServiceFetcher<MusicRecognitionManager>() {
+                    @Override
+                    public MusicRecognitionManager createService(ContextImpl ctx) {
+                        IBinder b = ServiceManager.getService(
+                                Context.MUSIC_RECOGNITION_SERVICE);
+                        return new MusicRecognitionManager(
+                                IMusicRecognitionManager.Stub.asInterface(b));
+                    }
+                });
 
         registerService(Context.CONTENT_CAPTURE_MANAGER_SERVICE, ContentCaptureManager.class,
                 new CachedServiceFetcher<ContentCaptureManager>() {

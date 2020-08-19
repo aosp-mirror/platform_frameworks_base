@@ -278,6 +278,8 @@ public final class SystemServer {
             "com.android.server.autofill.AutofillManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
+    private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
+            "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
             "com.android.server.systemcaptions.SystemCaptionsManagerService";
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
@@ -1401,6 +1403,17 @@ public final class SystemServer {
                 }
                 t.traceEnd();
             }
+
+            if (deviceHasConfigString(context,
+                    R.string.config_defaultMusicRecognitionService)) {
+                t.traceBegin("StartMusicRecognitionManagerService");
+                mSystemServiceManager.startService(MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG,
+                        "MusicRecognitionManagerService not defined by OEM or disabled by flag");
+            }
+
 
             startContentCaptureService(context, t);
             startAttentionService(context, t);

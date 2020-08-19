@@ -2006,6 +2006,57 @@ package android.media.audiopolicy {
 
 }
 
+package android.media.musicrecognition {
+
+  public class MusicRecognitionManager {
+    field public static final int RECOGNITION_FAILED_AUDIO_UNAVAILABLE = 7; // 0x7
+    field public static final int RECOGNITION_FAILED_NOT_FOUND = 1; // 0x1
+    field public static final int RECOGNITION_FAILED_NO_CONNECTIVITY = 2; // 0x2
+    field public static final int RECOGNITION_FAILED_SERVICE_KILLED = 5; // 0x5
+    field public static final int RECOGNITION_FAILED_SERVICE_UNAVAILABLE = 3; // 0x3
+    field public static final int RECOGNITION_FAILED_TIMEOUT = 6; // 0x6
+    field public static final int RECOGNITION_FAILED_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public static interface MusicRecognitionManager.RecognitionCallback {
+    method public void onAudioStreamClosed();
+    method public void onRecognitionFailed(@NonNull android.media.musicrecognition.RecognitionRequest, int);
+    method public void onRecognitionSucceeded(@NonNull android.media.musicrecognition.RecognitionRequest, @NonNull android.media.MediaMetadata, @Nullable android.os.Bundle);
+  }
+
+  public abstract class MusicRecognitionService extends android.app.Service {
+    ctor public MusicRecognitionService();
+    method public abstract void onRecognize(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.media.musicrecognition.MusicRecognitionService.Callback);
+  }
+
+  public static interface MusicRecognitionService.Callback {
+    method public void onRecognitionFailed(int);
+    method public void onRecognitionSucceeded(@NonNull android.media.MediaMetadata, @Nullable android.os.Bundle);
+  }
+
+  public final class RecognitionRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioAttributes getAudioAttributes();
+    method @NonNull public android.media.AudioFormat getAudioFormat();
+    method public int getCaptureSession();
+    method public int getIgnoreBeginningFrames();
+    method public int getMaxAudioLengthSeconds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.musicrecognition.RecognitionRequest> CREATOR;
+  }
+
+  public static final class RecognitionRequest.Builder {
+    ctor public RecognitionRequest.Builder();
+    method @NonNull public android.media.musicrecognition.RecognitionRequest build();
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setCaptureSession(int);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setIgnoreBeginningFrames(int);
+    method @NonNull public android.media.musicrecognition.RecognitionRequest.Builder setMaxAudioLengthSeconds(int);
+  }
+
+}
+
 package android.media.tv {
 
   public final class TvInputManager {
