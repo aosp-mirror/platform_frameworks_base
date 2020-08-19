@@ -60,6 +60,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.phone.PipUpdateThread;
 import com.android.systemui.stackdivider.Divider;
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
@@ -82,7 +83,7 @@ import java.util.function.Consumer;
  * see also {@link com.android.systemui.pip.phone.PipMotionHelper}.
  */
 @SysUISingleton
-public class PipTaskOrganizer extends TaskOrganizer implements
+public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganizer.TaskListener,
         DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -104,6 +105,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Map<IBinder, Configuration> mInitialState = new HashMap<>();
     private final Divider mSplitDivider;
+    protected final ShellTaskOrganizer mTaskOrganizer;
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -207,7 +209,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @Nullable Divider divider,
             @NonNull DisplayController displayController,
-            @NonNull PipUiEventLogger pipUiEventLogger) {
+            @NonNull PipUiEventLogger pipUiEventLogger,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
@@ -218,6 +221,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mPipUiEventLoggerLogger = pipUiEventLogger;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitDivider = divider;
+        mTaskOrganizer = shellTaskOrganizer;
+        mTaskOrganizer.addListener(this, WINDOWING_MODE_PINNED);
         displayController.addDisplayWindowListener(this);
     }
 
@@ -312,7 +317,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                     : WINDOWING_MODE_FULLSCREEN);
             wct.setBounds(mToken, destinationBounds);
             wct.setBoundsChangeTransaction(mToken, tx);
-            applySyncTransaction(wct, new WindowContainerTransactionCallback() {
+            mTaskOrganizer.applySyncTransaction(wct, new WindowContainerTransactionCallback() {
                 @Override
                 public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                     t.apply();
@@ -442,7 +447,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         wct.setBounds(mToken, destinationBounds);
         wct.scheduleFinishEnterPip(mToken, destinationBounds);
-        applySyncTransaction(wct, new WindowContainerTransactionCallback() {
+        mTaskOrganizer.applySyncTransaction(wct, new WindowContainerTransactionCallback() {
             @Override
             public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                 t.apply();
@@ -536,11 +541,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
                 null /* updateBoundsCallback */);
-    }
-
-    @Override
-    public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        // Do nothing
     }
 
     @Override
