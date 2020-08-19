@@ -166,7 +166,7 @@ class JobConcurrencyManager {
                 // Note: we can't directly do postDelayed(this::rampUpForScreenOn), because
                 // we need the exact same instance for removeCallbacks().
                 mHandler.postDelayed(mRampUpForScreenOff,
-                        mConstants.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.getValue());
+                        mConstants.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
             }
         }
     }
@@ -189,7 +189,7 @@ class JobConcurrencyManager {
             }
             final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
             if ((mLastScreenOffRealtime
-                    + mConstants.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.getValue())
+                    + mConstants.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS)
                     > now) {
                 return;
             }
