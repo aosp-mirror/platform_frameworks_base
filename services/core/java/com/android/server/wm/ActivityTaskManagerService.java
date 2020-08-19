@@ -2997,13 +2997,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public void stopLockTaskModeByToken(IBinder token) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r == null) {
-                return;
-            }
-            stopLockTaskModeInternal(r.getTask(), false /* isSystemCaller */);
-        }
+        stopLockTaskModeInternal(token, false /* isSystemCaller */);
     }
 
     /**
@@ -3045,11 +3039,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private void stopLockTaskModeInternal(@Nullable Task task, boolean isSystemCaller) {
+    private void stopLockTaskModeInternal(@Nullable IBinder token, boolean isSystemCaller) {
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                Task task = null;
+                if (token != null) {
+                    final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                    if (r == null) {
+                        return;
+                    }
+                    task = r.getTask();
+                }
                 getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
             }
             // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
