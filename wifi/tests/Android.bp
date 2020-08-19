@@ -34,6 +34,7 @@ android_test {
         "guava",
         "mockito-target-minus-junit4",
         "net-tests-utils",
+        "net-utils-framework-common",
         "frameworks-base-testutils",
         "truth-prebuilt",
     ],
