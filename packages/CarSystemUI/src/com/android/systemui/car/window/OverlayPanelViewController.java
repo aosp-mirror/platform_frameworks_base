@@ -191,6 +191,38 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         }
     }
 
+    /** Checks if a {@link MotionEvent} is an action to open the panel.
+     * @param e {@link MotionEvent} to check.
+     * @return true only if opening action.
+     */
+    protected boolean isOpeningAction(MotionEvent e) {
+        if (mAnimateDirection == POSITIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_DOWN;
+        }
+
+        if (mAnimateDirection == NEGATIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_UP;
+        }
+
+        return false;
+    }
+
+    /** Checks if a {@link MotionEvent} is an action to close the panel.
+     * @param e {@link MotionEvent} to check.
+     * @return true only if closing action.
+     */
+    protected boolean isClosingAction(MotionEvent e) {
+        if (mAnimateDirection == POSITIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_UP;
+        }
+
+        if (mAnimateDirection == NEGATIVE_DIRECTION) {
+            return e.getActionMasked() == MotionEvent.ACTION_DOWN;
+        }
+
+        return false;
+    }
+
     /* ***************************************************************************************** *
      * Panel Animation
      * ***************************************************************************************** */
@@ -243,8 +275,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
      * Depending on certain conditions, determines whether to fully expand or collapse the panel.
      */
     protected void maybeCompleteAnimation(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_UP
-                && isPanelVisible()) {
+        if (isClosingAction(event) && isPanelVisible()) {
             if (mSettleClosePercentage < mPercentageFromEndingEdge) {
                 animatePanel(DEFAULT_FLING_VELOCITY, false);
             } else {
