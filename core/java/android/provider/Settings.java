@@ -65,6 +65,7 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.PowerManager;
 import android.os.PowerManager.AutoPowerSaveModeTriggers;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -12545,18 +12546,23 @@ public final class Settings {
          * millis. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value
          * was updated.
          *
+         * @deprecated Use {@link PowerManager#getBatteryDischargePrediction()} instead.
          * @hide
          */
+        @Deprecated
         public static final String TIME_REMAINING_ESTIMATE_MILLIS =
                 "time_remaining_estimate_millis";
 
         /**
-         * A boolean indicating whether {@link #TIME_REMAINING_ESTIMATE_MILLIS} is based customized
-         * to the devices usage or using global models. See
+         * A boolean indicating whether {@link #TIME_REMAINING_ESTIMATE_MILLIS} is customized
+         * to the device's usage or using global models. See
          * {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value was updated.
+         *
+         * @deprecated Use {@link PowerManager#isBatteryDischargePredictionPersonalized()} instead.
          *
          * @hide
          */
+        @Deprecated
         public static final String TIME_REMAINING_ESTIMATE_BASED_ON_USAGE =
                 "time_remaining_estimate_based_on_usage";
 
@@ -12565,8 +12571,10 @@ public final class Settings {
          * average based on historical drain rates. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME}
          * for the last time this value was updated.
          *
+         * @deprecated Use {@link PowerManager#getHistoricalDischargeTime()} instead.
          * @hide
          */
+        @Deprecated
         public static final String AVERAGE_TIME_TO_DISCHARGE = "average_time_to_discharge";
 
         /**
@@ -12575,7 +12583,9 @@ public final class Settings {
          * and {@link #AVERAGE_TIME_TO_DISCHARGE} were last updated.
          *
          * @hide
+         * @deprecated No longer needed due to {@link PowerManager#getBatteryDischargePrediction}.
          */
+        @Deprecated
         public static final String BATTERY_ESTIMATES_LAST_UPDATE_TIME =
                 "battery_estimates_last_update_time";
 

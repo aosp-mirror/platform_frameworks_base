@@ -56,6 +56,7 @@ import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelDuration;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManager.WakeData;
@@ -89,11 +90,13 @@ import android.view.Display;
 import android.view.KeyEvent;
 
 import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.LockGuard;
 import com.android.server.RescueParty;
@@ -238,6 +241,18 @@ public final class PowerManagerService extends SystemService
     private static final int HALT_MODE_REBOOT = 1;
     private static final int HALT_MODE_REBOOT_SAFE_MODE = 2;
 
+    /**
+     * How stale we'll allow the enhanced discharge prediction values to get before considering them
+     * invalid.
+     */
+    private static final long ENHANCED_DISCHARGE_PREDICTION_TIMEOUT_MS = 30 * 60 * 1000L;
+
+    /**
+     * The minimum amount of time between sending consequent
+     * {@link PowerManager#ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED} broadcasts.
+     */
+    private static final long ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS = 60 * 1000L;
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
@@ -379,6 +394,34 @@ public final class PowerManagerService extends SystemService
 
     // The current battery level percentage.
     private int mBatteryLevel;
+
+    /**
+     * The lock that should be held when interacting with {@link #mEnhancedDischargeTimeElapsed},
+     * {@link #mLastEnhancedDischargeTimeUpdatedElapsed}, and
+     * {@link #mEnhancedDischargePredictionIsPersonalized}.
+     */
+    private final Object mEnhancedDischargeTimeLock = new Object();
+
+    /**
+     * The time (in the elapsed realtime timebase) at which the battery level will reach 0%. This
+     * is provided as an enhanced estimate and only valid if
+     * {@link #mLastEnhancedDischargeTimeUpdatedElapsed} is greater than 0.
+     */
+    @GuardedBy("mEnhancedDischargeTimeLock")
+    private long mEnhancedDischargeTimeElapsed;
+
+    /**
+     * Timestamp (in the elapsed realtime timebase) of last update to enhanced battery estimate
+     * data.
+     */
+    @GuardedBy("mEnhancedDischargeTimeLock")
+    private long mLastEnhancedDischargeTimeUpdatedElapsed;
+
+    /**
+     * Whether or not the current enhanced discharge prediction is personalized to the user.
+     */
+    @GuardedBy("mEnhancedDischargeTimeLock")
+    private boolean mEnhancedDischargePredictionIsPersonalized;
 
     // The battery level percentage at the time the dream started.
     // This is used to terminate a dream and go to sleep if the battery is
@@ -3737,6 +3780,13 @@ public final class PowerManagerService extends SystemService
             pw.println("  mProximityPositive=" + mProximityPositive);
             pw.println("  mBootCompleted=" + mBootCompleted);
             pw.println("  mSystemReady=" + mSystemReady);
+            synchronized (mEnhancedDischargeTimeLock) {
+                pw.println("  mEnhancedDischargeTimeElapsed=" + mEnhancedDischargeTimeElapsed);
+                pw.println("  mLastEnhancedDischargeTimeUpdatedElapsed="
+                        + mLastEnhancedDischargeTimeUpdatedElapsed);
+                pw.println("  mEnhancedDischargePredictionIsPersonalized="
+                        + mEnhancedDischargePredictionIsPersonalized);
+            }
             pw.println("  mHalAutoSuspendModeEnabled=" + mHalAutoSuspendModeEnabled);
             pw.println("  mHalInteractiveModeEnabled=" + mHalInteractiveModeEnabled);
             pw.println("  mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
@@ -3952,6 +4002,16 @@ public final class PowerManagerService extends SystemService
             proto.write(PowerManagerServiceDumpProto.IS_PROXIMITY_POSITIVE, mProximityPositive);
             proto.write(PowerManagerServiceDumpProto.IS_BOOT_COMPLETED, mBootCompleted);
             proto.write(PowerManagerServiceDumpProto.IS_SYSTEM_READY, mSystemReady);
+            synchronized (mEnhancedDischargeTimeLock) {
+                proto.write(PowerManagerServiceDumpProto.ENHANCED_DISCHARGE_TIME_ELAPSED,
+                        mEnhancedDischargeTimeElapsed);
+                proto.write(
+                        PowerManagerServiceDumpProto.LAST_ENHANCED_DISCHARGE_TIME_UPDATED_ELAPSED,
+                        mLastEnhancedDischargeTimeUpdatedElapsed);
+                proto.write(
+                        PowerManagerServiceDumpProto.IS_ENHANCED_DISCHARGE_PREDICTION_PERSONALIZED,
+                        mEnhancedDischargePredictionIsPersonalized);
+            }
             proto.write(
                     PowerManagerServiceDumpProto.IS_HAL_AUTO_SUSPEND_MODE_ENABLED,
                     mHalAutoSuspendModeEnabled);
@@ -3959,7 +4019,8 @@ public final class PowerManagerService extends SystemService
                     PowerManagerServiceDumpProto.IS_HAL_AUTO_INTERACTIVE_MODE_ENABLED,
                     mHalInteractiveModeEnabled);
 
-            final long activeWakeLocksToken = proto.start(PowerManagerServiceDumpProto.ACTIVE_WAKE_LOCKS);
+            final long activeWakeLocksToken = proto.start(
+                    PowerManagerServiceDumpProto.ACTIVE_WAKE_LOCKS);
             proto.write(
                     PowerManagerServiceDumpProto.ActiveWakeLocksProto.IS_CPU,
                     (mWakeLockSummary & WAKE_LOCK_CPU) != 0);
@@ -4262,6 +4323,7 @@ public final class PowerManagerService extends SystemService
         if (wcd != null) {
             wcd.dumpDebug(proto, PowerManagerServiceDumpProto.WIRELESS_CHARGER_DETECTOR);
         }
+
         proto.flush();
     }
 
@@ -5016,6 +5078,96 @@ public final class PowerManagerService extends SystemService
                 return Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
                         PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void setBatteryDischargePrediction(@NonNull ParcelDuration timeRemaining,
+                boolean isPersonalized) {
+            // Get current time before acquiring the lock so that the calculated end time is as
+            // accurate as possible.
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+            final long timeRemainingMs = timeRemaining.getDuration().toMillis();
+                // A non-positive number means the battery should be dead right now...
+            Preconditions.checkArgumentPositive(timeRemainingMs,
+                    "Given time remaining is not positive: " + timeRemainingMs);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (mIsPowered) {
+                        throw new IllegalStateException(
+                                "Discharge prediction can't be set while the device is charging");
+                    }
+                }
+
+                final long broadcastDelayMs;
+                synchronized (mEnhancedDischargeTimeLock) {
+                    if (mLastEnhancedDischargeTimeUpdatedElapsed > nowElapsed) {
+                        // Another later call made it into the block first. Keep the latest info.
+                        return;
+                    }
+                    broadcastDelayMs = Math.max(0,
+                            ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS
+                                    - (nowElapsed - mLastEnhancedDischargeTimeUpdatedElapsed));
+
+                    // No need to persist the discharge prediction values since they'll most likely
+                    // be wrong immediately after a reboot anyway.
+                    mEnhancedDischargeTimeElapsed = nowElapsed + timeRemainingMs;
+                    mEnhancedDischargePredictionIsPersonalized = isPersonalized;
+                    mLastEnhancedDischargeTimeUpdatedElapsed = nowElapsed;
+                }
+                mNotifier.postEnhancedDischargePredictionBroadcast(broadcastDelayMs);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        private boolean isEnhancedDischargePredictionValidLocked(long nowElapsed) {
+            return mLastEnhancedDischargeTimeUpdatedElapsed > 0
+                    && nowElapsed < mEnhancedDischargeTimeElapsed
+                    && nowElapsed - mLastEnhancedDischargeTimeUpdatedElapsed
+                    < ENHANCED_DISCHARGE_PREDICTION_TIMEOUT_MS;
+        }
+
+        @Override // Binder call
+        public ParcelDuration getBatteryDischargePrediction() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (mIsPowered) {
+                        return null;
+                    }
+                }
+                synchronized (mEnhancedDischargeTimeLock) {
+                    // Get current time after acquiring the lock so that the calculated duration
+                    // is as accurate as possible.
+                    final long nowElapsed = SystemClock.elapsedRealtime();
+                    if (isEnhancedDischargePredictionValidLocked(nowElapsed)) {
+                        return new ParcelDuration(mEnhancedDischargeTimeElapsed - nowElapsed);
+                    }
+                }
+                return new ParcelDuration(mBatteryStats.computeBatteryTimeRemaining());
+            } catch (RemoteException e) {
+                // Shouldn't happen in-process.
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            return null;
+        }
+
+        @Override // Binder call
+        public boolean isBatteryDischargePredictionPersonalized() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mEnhancedDischargeTimeLock) {
+                    return isEnhancedDischargePredictionValidLocked(SystemClock.elapsedRealtime())
+                            && mEnhancedDischargePredictionIsPersonalized;
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
