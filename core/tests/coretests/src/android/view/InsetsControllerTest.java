@@ -27,6 +27,7 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 
@@ -40,8 +41,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -124,7 +128,7 @@ public class InsetsControllerTest {
             }
             mTestClock = new OffsettableClock();
             mTestHandler = new TestHandler(null, mTestClock);
-            mTestHost = new TestHost(mViewRoot);
+            mTestHost = spy(new TestHost(mViewRoot));
             mController = new InsetsController(mTestHost, (controller, type) -> {
                 if (type == ITYPE_IME) {
                     return new InsetsSourceConsumer(type, controller.getState(),
@@ -742,6 +746,113 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ITYPE_IME));
             assertEquals(newState.getSource(ITYPE_IME),
                     mTestHost.getModifiedState().peekSource(ITYPE_IME));
+
+            // The modified frames cannot be updated if there is an animation.
+            mController.onControlsChanged(createSingletonControl(ITYPE_NAVIGATION_BAR));
+            mController.hide(navigationBars());
+            newState = new InsetsState(mController.getState(), true /* copySource */);
+            newState.getSource(ITYPE_NAVIGATION_BAR).getFrame().top--;
+            mController.onStateChanged(newState);
+            assertNotEquals(newState.getSource(ITYPE_NAVIGATION_BAR),
+                    mTestHost.getModifiedState().peekSource(ITYPE_NAVIGATION_BAR));
+
+            // The modified frames can be updated while the animation is done.
+            mController.cancelExistingAnimations();
+            assertEquals(newState.getSource(ITYPE_NAVIGATION_BAR),
+                    mTestHost.getModifiedState().peekSource(ITYPE_NAVIGATION_BAR));
+        });
+    }
+
+    @Test
+    public void testInsetsChangedCount_controlSystemBars() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            prepareControls();
+
+            // Hiding visible system bars should only causes insets change once for each bar.
+            clearInvocations(mTestHost);
+            mController.hide(statusBars() | navigationBars());
+            verify(mTestHost, times(2)).notifyInsetsChanged();
+
+            // Sending the same insets state should not cause insets change.
+            // This simulates the callback from server after hiding system bars.
+            clearInvocations(mTestHost);
+            mController.onStateChanged(mController.getState());
+            verify(mTestHost, never()).notifyInsetsChanged();
+
+            // Showing invisible system bars should only causes insets change once for each bar.
+            clearInvocations(mTestHost);
+            mController.show(statusBars() | navigationBars());
+            verify(mTestHost, times(2)).notifyInsetsChanged();
+
+            // Sending the same insets state should not cause insets change.
+            // This simulates the callback from server after showing system bars.
+            clearInvocations(mTestHost);
+            mController.onStateChanged(mController.getState());
+            verify(mTestHost, never()).notifyInsetsChanged();
+        });
+    }
+
+    @Test
+    public void testInsetsChangedCount_controlIme() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            prepareControls();
+
+            // Showing invisible ime should only causes insets change once.
+            clearInvocations(mTestHost);
+            mController.show(ime(), true /* fromIme */);
+            verify(mTestHost, times(1)).notifyInsetsChanged();
+
+            // Sending the same insets state should not cause insets change.
+            // This simulates the callback from server after showing ime.
+            clearInvocations(mTestHost);
+            mController.onStateChanged(mController.getState());
+            verify(mTestHost, never()).notifyInsetsChanged();
+
+            // Hiding visible ime should only causes insets change once.
+            clearInvocations(mTestHost);
+            mController.hide(ime());
+            verify(mTestHost, times(1)).notifyInsetsChanged();
+
+            // Sending the same insets state should not cause insets change.
+            // This simulates the callback from server after hiding ime.
+            clearInvocations(mTestHost);
+            mController.onStateChanged(mController.getState());
+            verify(mTestHost, never()).notifyInsetsChanged();
+        });
+    }
+
+    @Test
+    public void testInsetsChangedCount_onStateChanged() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final InsetsState localState = mController.getState();
+
+            // Changing status bar frame should cause notifyInsetsChanged.
+            clearInvocations(mTestHost);
+            InsetsState newState = new InsetsState(localState, true /* copySources */);
+            newState.getSource(ITYPE_STATUS_BAR).getFrame().bottom++;
+            mController.onStateChanged(newState);
+            verify(mTestHost, times(1)).notifyInsetsChanged();
+
+            // Changing status bar visibility should cause notifyInsetsChanged.
+            clearInvocations(mTestHost);
+            newState = new InsetsState(localState, true /* copySources */);
+            newState.getSource(ITYPE_STATUS_BAR).setVisible(false);
+            mController.onStateChanged(newState);
+            verify(mTestHost, times(1)).notifyInsetsChanged();
+
+            // Changing invisible IME frame should not cause notifyInsetsChanged.
+            clearInvocations(mTestHost);
+            newState = new InsetsState(localState, true /* copySources */);
+            newState.getSource(ITYPE_IME).getFrame().top--;
+            mController.onStateChanged(newState);
+            verify(mTestHost, never()).notifyInsetsChanged();
+
+            // Changing IME visibility should cause notifyInsetsChanged.
+            clearInvocations(mTestHost);
+            newState = new InsetsState(localState, true /* copySources */);
+            newState.getSource(ITYPE_IME).setVisible(true);
+            mController.onStateChanged(newState);
+            verify(mTestHost, times(1)).notifyInsetsChanged();
         });
     }
 
@@ -777,7 +888,7 @@ public class InsetsControllerTest {
         return controls;
     }
 
-    private static class TestHost extends ViewRootInsetsControllerHost {
+    public static class TestHost extends ViewRootInsetsControllerHost {
 
         private InsetsState mModifiedState = new InsetsState();
 
