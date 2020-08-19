@@ -68,7 +68,7 @@ public class GraphicsEnvironment {
     private static final String PROPERTY_GFX_DRIVER_PRERELEASE = "ro.gfx.driver.1";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
     private static final String METADATA_DRIVER_BUILD_TIME =
-            "com.android.graphics.updatabledriver.build_time";
+            "com.android.graphics.driver.build_time";
     private static final String METADATA_DEVELOPER_DRIVER_ENABLE =
             "com.android.graphics.developerdriver.enable";
     private static final String METADATA_INJECT_LAYERS_ENABLE =
@@ -878,9 +878,10 @@ public class GraphicsEnvironment {
             throw new NullPointerException("apk's meta-data cannot be null");
         }
 
-        final String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
-        if (driverBuildTime == null || driverBuildTime.isEmpty()) {
-            Log.v(TAG, "com.android.graphics.updatabledriver.build_time is not set");
+        String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
+        if (driverBuildTime == null || driverBuildTime.length() <= 1) {
+            Log.v(TAG, "com.android.graphics.driver.build_time is not set");
+            driverBuildTime = "L0";
         }
         // driver_build_time in the meta-data is in "L<Unix epoch timestamp>" format. e.g. L123456.
         // Long.parseLong will throw if the meta-data "driver_build_time" is not set properly.
