@@ -422,8 +422,21 @@ public class PipTouchHandler {
         }
     }
 
+    /**
+     * Responds to IPinnedStackListener on resetting aspect ratio for the pinned window.
+     */
+    public void onAspectRatioChanged() {
+        mPipResizeGestureHandler.invalidateUserResizeBounds();
+    }
+
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
+        // Set the user resized bounds equal to the new normal bounds in case they were
+        // invalidated (e.g. by an aspect ratio change).
+        if (mPipResizeGestureHandler.getUserResizeBounds().isEmpty()) {
+            mPipResizeGestureHandler.setUserResizeBounds(normalBounds);
+        }
+
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
         final boolean fromDisplayRotationChanged = (mDisplayRotation != displayRotation);
         if (fromDisplayRotationChanged) {
