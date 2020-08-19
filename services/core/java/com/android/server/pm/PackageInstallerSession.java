@@ -1325,6 +1325,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final int status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
                         PackageInstaller.STATUS_FAILURE);
                 final int sessionIndex = mChildSessionsRemaining.indexOfKey(sessionId);
+                final String message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
                 if (PackageInstaller.STATUS_SUCCESS == status) {
                     mChildSessionsRemaining.removeAt(sessionIndex);
                     if (mChildSessionsRemaining.size() == 0) {
@@ -1341,10 +1342,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     intent.putExtra(PackageInstaller.EXTRA_SESSION_ID,
                             PackageInstallerSession.this.sessionId);
                     mChildSessionsRemaining.clear(); // we're done. Don't send any more.
-                    try {
-                        mStatusReceiver.sendIntent(mContext, 0, intent, null, null);
-                    } catch (IntentSender.SendIntentException ignore) {
-                    }
+                    destroyInternal();
+                    dispatchSessionFinished(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Child session " + sessionId + " failed: " + message, null);
                 }
             });
         }
