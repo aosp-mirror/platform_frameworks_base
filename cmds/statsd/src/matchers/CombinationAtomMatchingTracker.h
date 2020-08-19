@@ -27,13 +27,16 @@ namespace os {
 namespace statsd {
 
 // Represents a AtomMatcher_Combination in the StatsdConfig.
-class CombinationAtomMatchingTracker : public virtual AtomMatchingTracker {
+class CombinationAtomMatchingTracker : public AtomMatchingTracker {
 public:
     CombinationAtomMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash);
 
     bool init(const std::vector<AtomMatcher>& allAtomMatchers,
               const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
               const std::unordered_map<int64_t, int>& matcherMap, std::vector<bool>& stack);
+
+    bool onConfigUpdated(const AtomMatcher& matcher, const int index,
+                         const std::unordered_map<int64_t, int>& atomMatchingTrackerMap) override;
 
     ~CombinationAtomMatchingTracker();
 
@@ -45,6 +48,8 @@ private:
     LogicalOperation mLogicalOperation;
 
     std::vector<int> mChildren;
+
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateMatchers);
 };
 
 }  // namespace statsd

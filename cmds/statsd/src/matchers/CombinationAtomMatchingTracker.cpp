@@ -93,6 +93,23 @@ bool CombinationAtomMatchingTracker::init(
     return true;
 }
 
+bool CombinationAtomMatchingTracker::onConfigUpdated(
+        const AtomMatcher& matcher, const int index,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap) {
+    mIndex = index;
+    mChildren.clear();
+    AtomMatcher_Combination combinationMatcher = matcher.combination();
+    for (const int64_t child : combinationMatcher.matcher()) {
+        const auto& pair = atomMatchingTrackerMap.find(child);
+        if (pair == atomMatchingTrackerMap.end()) {
+            ALOGW("Matcher %lld not found in the config", (long long)child);
+            return false;
+        }
+        mChildren.push_back(pair->second);
+    }
+    return true;
+}
+
 void CombinationAtomMatchingTracker::onLogEvent(
         const LogEvent& event, const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
         vector<MatchingState>& matcherResults) {

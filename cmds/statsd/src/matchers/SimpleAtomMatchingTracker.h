@@ -28,7 +28,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class SimpleAtomMatchingTracker : public virtual AtomMatchingTracker {
+class SimpleAtomMatchingTracker : public AtomMatchingTracker {
 public:
     SimpleAtomMatchingTracker(const int64_t& id, const int index, const uint64_t protoHash,
                               const SimpleAtomMatcher& matcher, const sp<UidMap>& uidMap);
@@ -39,6 +39,9 @@ public:
               const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
               const std::unordered_map<int64_t, int>& matcherMap,
               std::vector<bool>& stack) override;
+
+    bool onConfigUpdated(const AtomMatcher& matcher, const int index,
+                         const std::unordered_map<int64_t, int>& atomMatchingTrackerMap) override;
 
     void onLogEvent(const LogEvent& event,
                     const std::vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
