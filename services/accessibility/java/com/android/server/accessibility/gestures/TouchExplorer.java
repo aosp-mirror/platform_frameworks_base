@@ -590,15 +590,23 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     if (pointerIndex < 0) {
                         return;
                     }
-                    final float deltaX =
-                            mReceivedPointerTracker.getReceivedPointerDownX(pointerId)
-                                    - rawEvent.getX(pointerIndex);
-                    final float deltaY =
-                            mReceivedPointerTracker.getReceivedPointerDownY(pointerId)
-                                    - rawEvent.getY(pointerIndex);
-                    final double moveDelta = Math.hypot(deltaX, deltaY);
-                    if (moveDelta < mTouchSlop) {
-                        return;
+                    // Require both fingers to have moved a certain amount before starting a drag.
+                    for (int index = 0; index < event.getPointerCount(); ++index) {
+                        int id = event.getPointerId(index);
+                        if (!mReceivedPointerTracker.isReceivedPointerDown(id)) {
+                            // Something is wrong with the event stream.
+                            Slog.e(LOG_TAG, "Invalid pointer id: " + id);
+                        }
+                        final float deltaX =
+                                mReceivedPointerTracker.getReceivedPointerDownX(id)
+                                        - rawEvent.getX(index);
+                        final float deltaY =
+                                mReceivedPointerTracker.getReceivedPointerDownY(id)
+                                        - rawEvent.getY(index);
+                        final double moveDelta = Math.hypot(deltaX, deltaY);
+                        if (moveDelta < mTouchSlop) {
+                            return;
+                        }
                     }
                 }
                 // More than one pointer so the user is not touch exploring
