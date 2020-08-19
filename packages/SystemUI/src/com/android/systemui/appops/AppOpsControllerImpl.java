@@ -68,6 +68,12 @@ public class AppOpsControllerImpl implements AppOpsController,
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
     private final LocationManager mLocationManager;
+
+    // mLocationProviderPackages are cached and updated only occasionally
+    private static final long LOCATION_PROVIDER_UPDATE_FREQUENCY_MS = 30000;
+    private long mLastLocationProviderPackageUpdate;
+    private List<String> mLocationProviderPackages;
+
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
@@ -292,6 +298,26 @@ public class AppOpsControllerImpl implements AppOpsController,
         return isUserVisible(item.getCode(), item.getUid(), item.getPackageName());
     }
 
+    /**
+     * Checks if a package is the current location provider.
+     *
+     * <p>Data is cached to avoid too many calls into system server
+     *
+     * @param packageName The package that might be the location provider
+     *
+     * @return {@code true} iff the package is the location provider.
+     */
+    private boolean isLocationProvider(String packageName) {
+        long now = System.currentTimeMillis();
+
+        if (mLastLocationProviderPackageUpdate + LOCATION_PROVIDER_UPDATE_FREQUENCY_MS < now) {
+            mLastLocationProviderPackageUpdate = now;
+            mLocationProviderPackages = mLocationManager.getProviderPackages(
+                    LocationManager.FUSED_PROVIDER);
+        }
+
+        return mLocationProviderPackages.contains(packageName);
+    }
 
     /**
      * Does the app-op, uid and package name, refer to an operation that should be shown to the
@@ -313,8 +339,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             return true;
         }
 
-        if (appOpCode == AppOpsManager.OP_CAMERA && mLocationManager.isProviderPackage(
-                packageName)) {
+        if (appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName)) {
             return true;
         }
 
