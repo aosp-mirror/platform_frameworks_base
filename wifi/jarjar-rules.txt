@@ -112,8 +112,6 @@ rule fi.iki.elonen.** com.android.wifi.x.@0
 ## used by both framework-wifi and service-wifi ##
 rule android.content.pm.BaseParceledListSlice* com.android.wifi.x.@0
 rule android.content.pm.ParceledListSlice* com.android.wifi.x.@0
-rule android.net.util.MacAddressUtils* com.android.wifi.x.@0
-rule android.net.util.nsd.DnsSdTxtRecord* com.android.wifi.x.@0
 rule android.os.HandlerExecutor* com.android.wifi.x.@0
 rule android.telephony.Annotation* com.android.wifi.x.@0
 rule com.android.internal.util.AsyncChannel* com.android.wifi.x.@0

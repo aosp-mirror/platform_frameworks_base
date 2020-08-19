@@ -32,12 +32,13 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
-import android.net.util.MacAddressUtils;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.net.module.util.MacAddressUtils;
 
 import org.junit.Before;
 import org.junit.Test;
