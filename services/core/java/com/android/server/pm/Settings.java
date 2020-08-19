@@ -4551,6 +4551,7 @@ public final class Settings {
                     ? "true" : "false");
             pw.print(prefix); pw.print("  primaryCpuAbi="); pw.println(ps.primaryCpuAbiString);
             pw.print(prefix); pw.print("  secondaryCpuAbi="); pw.println(ps.secondaryCpuAbiString);
+            pw.print(prefix); pw.print("  cpuAbiOverride="); pw.println(ps.cpuAbiOverrideString);
         }
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
         if (pkg != null) {
