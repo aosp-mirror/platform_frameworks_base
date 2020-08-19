@@ -25,13 +25,14 @@ import static android.system.OsConstants.SOCK_NONBLOCK;
 import static android.system.OsConstants.SOCK_RAW;
 
 import android.net.util.InterfaceParams;
-import android.net.util.PacketReader;
 import android.net.util.SocketUtils;
 import android.net.util.TetheringUtils;
 import android.os.Handler;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
+
+import com.android.net.module.util.PacketReader;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
