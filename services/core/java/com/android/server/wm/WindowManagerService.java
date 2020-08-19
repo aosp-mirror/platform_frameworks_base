@@ -8076,8 +8076,7 @@ public class WindowManagerService extends IWindowManager.Stub
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        h.canReceiveKeys = false;
-        h.hasFocus = false;
+        h.focusable = false;
         h.hasWallpaper = false;
         h.paused = false;
 

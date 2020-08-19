@@ -821,7 +821,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 : null;
         if (targetAppMainWindow != null) {
             targetAppMainWindow.getBounds(mTmpRect);
-            inputWindowHandle.hasFocus = hasFocus;
+            inputWindowHandle.focusable = hasFocus;
             inputWindowHandle.touchableRegion.set(mTmpRect);
             return true;
         }
