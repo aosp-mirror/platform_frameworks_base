@@ -285,6 +285,8 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_PLAYBACK_CONFIG_CHANGE = 29;
     private static final int MSG_BROADCAST_MICROPHONE_MUTE = 30;
     private static final int MSG_CHECK_MODE_FOR_UID = 31;
+    private static final int MSG_STREAM_DEVICES_CHANGED = 32;
+    private static final int MSG_UPDATE_VOLUME_STATES_FOR_DEVICE = 33;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -1283,7 +1285,6 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (isPlatformTelevision()) {
-                checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI, caller);
                 synchronized (mHdmiClientLock) {
                     if (mHdmiManager != null && mHdmiPlaybackClient != null) {
                         updateHdmiCecSinkLocked(mHdmiCecSink | false);
@@ -1303,22 +1304,71 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void checkAddAllFixedVolumeDevices(int device, String caller) {
-        final int numStreamTypes = AudioSystem.getNumStreamTypes();
-        for (int streamType = 0; streamType < numStreamTypes; streamType++) {
-            if (!mStreamStates[streamType].hasIndexForDevice(device)) {
-                // set the default value, if device is affected by a full/fix/abs volume rule, it
-                // will taken into account in checkFixedVolumeDevices()
-                mStreamStates[streamType].setIndex(
-                        mStreamStates[mStreamVolumeAlias[streamType]]
-                                .getIndex(AudioSystem.DEVICE_OUT_DEFAULT),
-                        device, caller, true /*hasModifyAudioSettings*/);
-            }
-            mStreamStates[streamType].checkFixedVolumeDevices();
+    /**
+     * Asynchronously update volume states for the given device.
+     *
+     * @param device a single audio device, ensure that this is not a devices bitmask
+     * @param caller caller of this method
+     */
+    private void postUpdateVolumeStatesForAudioDevice(int device, String caller) {
+        sendMsg(mAudioHandler,
+                MSG_UPDATE_VOLUME_STATES_FOR_DEVICE,
+                SENDMSG_QUEUE, device /*arg1*/, 0 /*arg2*/, caller /*obj*/,
+                0 /*delay*/);
+    }
 
-            // Unmute streams if device is full volume
-            if (mFullVolumeDevices.contains(device)) {
-                mStreamStates[streamType].mute(false);
+    /**
+     * Update volume states for the given device.
+     *
+     * This will initialize the volume index if no volume index is available.
+     * If the device is the currently routed device, fixed/full volume policies will be applied.
+     *
+     * @param device a single audio device, ensure that this is not a devices bitmask
+     * @param caller caller of this method
+     */
+    private void onUpdateVolumeStatesForAudioDevice(int device, String caller) {
+        final int numStreamTypes = AudioSystem.getNumStreamTypes();
+        synchronized (mSettingsLock) {
+            synchronized (VolumeStreamState.class) {
+                for (int streamType = 0; streamType < numStreamTypes; streamType++) {
+                    updateVolumeStates(device, streamType, caller);
+                }
+            }
+        }
+    }
+
+    /**
+     * Update volume states for the given device and given stream.
+     *
+     * This will initialize the volume index if no volume index is available.
+     * If the device is the currently routed device, fixed/full volume policies will be applied.
+     *
+     * @param device a single audio device, ensure that this is not a devices bitmask
+     * @param streamType streamType to be updated
+     * @param caller caller of this method
+     */
+    private void updateVolumeStates(int device, int streamType, String caller) {
+        if (!mStreamStates[streamType].hasIndexForDevice(device)) {
+            // set the default value, if device is affected by a full/fix/abs volume rule, it
+            // will taken into account in checkFixedVolumeDevices()
+            mStreamStates[streamType].setIndex(
+                    mStreamStates[mStreamVolumeAlias[streamType]]
+                            .getIndex(AudioSystem.DEVICE_OUT_DEFAULT),
+                    device, caller, true /*hasModifyAudioSettings*/);
+        }
+
+        // Check if device to be updated is routed for the given audio stream
+        List<AudioDeviceAttributes> devicesForAttributes = getDevicesForAttributesInt(
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
+        for (AudioDeviceAttributes deviceAttributes : devicesForAttributes) {
+            if (deviceAttributes.getType() == AudioDeviceInfo.convertInternalDeviceToDeviceType(
+                    device)) {
+                mStreamStates[streamType].checkFixedVolumeDevices();
+
+                // Unmute streams if required and device is full volume
+                if (isStreamMute(streamType) && mFullVolumeDevices.contains(device)) {
+                    mStreamStates[streamType].mute(false);
+                }
             }
         }
     }
@@ -1868,8 +1918,13 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
-        Objects.requireNonNull(attributes);
         enforceModifyAudioRoutingPermission();
+        return getDevicesForAttributesInt(attributes);
+    }
+
+    protected @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesInt(
+            @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
         return AudioSystem.getDevicesForAttributes(attributes);
     }
 
@@ -4912,11 +4967,21 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void observeDevicesForStreams(int skipStream) {
-        synchronized (VolumeStreamState.class) {
-            for (int stream = 0; stream < mStreamStates.length; stream++) {
-                if (stream != skipStream) {
-                    mStreamStates[stream].observeDevicesForStream_syncVSS(false /*checkOthers*/);
+    private void onObserveDevicesForAllStreams(int skipStream) {
+        synchronized (mSettingsLock) {
+            synchronized (VolumeStreamState.class) {
+                for (int stream = 0; stream < mStreamStates.length; stream++) {
+                    if (stream != skipStream) {
+                        int devices = mStreamStates[stream].observeDevicesForStream_syncVSS(
+                                false /*checkOthers*/);
+
+                        Set<Integer> devicesSet = AudioSystem.generateAudioDeviceTypesSet(devices);
+                        for (Integer device : devicesSet) {
+                            // Update volume states for devices routed for the stream
+                            updateVolumeStates(device, stream,
+                                    "AudioService#onObserveDevicesForAllStreams");
+                        }
+                    }
                 }
             }
         }
@@ -4925,14 +4990,16 @@ public class AudioService extends IAudioService.Stub
     /** only public for mocking/spying, do not call outside of AudioService */
     @VisibleForTesting
     public void postObserveDevicesForAllStreams() {
-        sendMsg(mAudioHandler,
-                MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS,
-                SENDMSG_QUEUE, 0 /*arg1*/, 0 /*arg2*/, null /*obj*/,
-                0 /*delay*/);
+        postObserveDevicesForAllStreams(-1);
     }
 
-    private void onObserveDevicesForAllStreams() {
-        observeDevicesForStreams(-1);
+    /** only public for mocking/spying, do not call outside of AudioService */
+    @VisibleForTesting
+    public void postObserveDevicesForAllStreams(int skipStream) {
+        sendMsg(mAudioHandler,
+                MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS,
+                SENDMSG_QUEUE, skipStream /*arg1*/, 0 /*arg2*/, null /*obj*/,
+                0 /*delay*/);
     }
 
     /**
@@ -4985,7 +5052,8 @@ public class AudioService extends IAudioService.Stub
                       + Integer.toHexString(audioSystemDeviceOut) + " from:" + caller));
         // make sure we have a volume entry for this device, and that volume is updated according
         // to volume behavior
-        checkAddAllFixedVolumeDevices(audioSystemDeviceOut, "setDeviceVolumeBehavior:" + caller);
+        postUpdateVolumeStatesForAudioDevice(audioSystemDeviceOut,
+                "setDeviceVolumeBehavior:" + caller);
     }
 
     /**
@@ -5616,6 +5684,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        @GuardedBy("VolumeStreamState.class")
         public int observeDevicesForStream_syncVSS(boolean checkOthers) {
             if (!mSystemServer.isPrivileged()) {
                 return AudioSystem.DEVICE_NONE;
@@ -5628,15 +5697,19 @@ public class AudioService extends IAudioService.Stub
             mObservedDevices = devices;
             if (checkOthers) {
                 // one stream's devices have changed, check the others
-                observeDevicesForStreams(mStreamType);
+                postObserveDevicesForAllStreams(mStreamType);
             }
             // log base stream changes to the event log
             if (mStreamVolumeAlias[mStreamType] == mStreamType) {
                 EventLogTags.writeStreamDevicesChanged(mStreamType, prevDevices, devices);
             }
-            sendBroadcastToAll(mStreamDevicesChanged
-                    .putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_DEVICES, prevDevices)
-                    .putExtra(AudioManager.EXTRA_VOLUME_STREAM_DEVICES, devices));
+            // send STREAM_DEVICES_CHANGED_ACTION on the message handler so it is scheduled after
+            // the postObserveDevicesForStreams is handled
+            sendMsg(mAudioHandler,
+                    MSG_STREAM_DEVICES_CHANGED,
+                    SENDMSG_QUEUE, prevDevices /*arg1*/, devices /*arg2*/,
+                    // ok to send reference to this object, it is final
+                    mStreamDevicesChanged /*obj*/, 0 /*delay*/);
             return devices;
         }
 
@@ -6408,7 +6481,7 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS:
-                    onObserveDevicesForAllStreams();
+                    onObserveDevicesForAllStreams(/*skipStream*/ msg.arg1);
                     break;
 
                 case MSG_HDMI_VOLUME_CHECK:
@@ -6450,6 +6523,16 @@ public class AudioService extends IAudioService.Stub
                         // TODO(b/160260850): remove abusive app from audio mode stack.
                         mModeLogger.log(new PhoneStateEvent(h.getPackage(), h.getPid()));
                     }
+                    break;
+
+                case MSG_STREAM_DEVICES_CHANGED:
+                    sendBroadcastToAll(((Intent) msg.obj)
+                            .putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_DEVICES, msg.arg1)
+                            .putExtra(AudioManager.EXTRA_VOLUME_STREAM_DEVICES, msg.arg2));
+                    break;
+
+                case MSG_UPDATE_VOLUME_STATES_FOR_DEVICE:
+                    onUpdateVolumeStatesForAudioDevice(msg.arg1, (String) msg.obj);
                     break;
             }
         }
@@ -7207,10 +7290,9 @@ public class AudioService extends IAudioService.Stub
                 // HDMI output
                 removeAudioSystemDeviceOutFromFullVolumeDevices(AudioSystem.DEVICE_OUT_HDMI);
             }
+            postUpdateVolumeStatesForAudioDevice(AudioSystem.DEVICE_OUT_HDMI,
+                    "HdmiPlaybackClient.DisplayStatusCallback");
         }
-
-        checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI,
-                "HdmiPlaybackClient.DisplayStatusCallback");
     }
 
     private class MyHdmiControlStatusChangeListenerCallback
