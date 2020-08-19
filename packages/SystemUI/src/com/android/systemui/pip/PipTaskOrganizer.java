@@ -70,8 +70,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
-
 /**
  * Manages PiP tasks such as resize and offset.
  *
@@ -205,12 +203,10 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      */
     private boolean mShouldDeferEnteringPip;
 
-    @Inject
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @Nullable Divider divider,
             @NonNull DisplayController displayController,
-            @NonNull PipAnimationController pipAnimationController,
             @NonNull PipUiEventLogger pipUiEventLogger) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
@@ -218,7 +214,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
-        mPipAnimationController = pipAnimationController;
+        mPipAnimationController = new PipAnimationController(mSurfaceTransactionHelper);
         mPipUiEventLoggerLogger = pipUiEventLogger;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitDivider = divider;

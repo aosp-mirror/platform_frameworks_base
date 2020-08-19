@@ -25,13 +25,11 @@ import android.provider.Settings;
 
 import java.util.concurrent.Executor;
 
-import javax.inject.Inject;
-
 /**
  * Wrapper around DeviceConfig useful for testing.
  */
 public class DeviceConfigProxy {
-    @Inject
+
     public DeviceConfigProxy() {
     }
 

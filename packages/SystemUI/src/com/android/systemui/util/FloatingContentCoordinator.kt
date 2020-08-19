@@ -4,8 +4,7 @@ import android.graphics.Rect
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.FloatingContentCoordinator.FloatingContent
-import java.util.*
-import javax.inject.Inject
+import java.util.HashMap
 
 /** Tag for debug logging. */
 private const val TAG = "FloatingCoordinator"
@@ -20,9 +19,9 @@ private const val TAG = "FloatingCoordinator"
  * other content out of the way. [onContentRemoved] should be called when the content is removed or
  * no longer visible.
  */
-@SysUISingleton
-class FloatingContentCoordinator @Inject constructor() {
 
+@SysUISingleton
+class FloatingContentCoordinator constructor() {
     /**
      * Represents a piece of floating content, such as PIP or the Bubbles stack. Provides methods
      * that allow the [FloatingContentCoordinator] to determine the current location of the content,

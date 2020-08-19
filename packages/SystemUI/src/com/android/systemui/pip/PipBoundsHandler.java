@@ -40,12 +40,9 @@ import android.view.Gravity;
 import android.window.WindowContainerTransaction;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
-
-import javax.inject.Inject;
 
 /**
  * Handles bounds calculation for PIP on Phone and other form factors, it keeps tracking variant
@@ -57,10 +54,8 @@ public class PipBoundsHandler {
     private static final String TAG = PipBoundsHandler.class.getSimpleName();
     private static final float INVALID_SNAP_FRACTION = -1f;
 
-    private final Context mContext;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
-    private final DisplayController mDisplayController;
     private DisplayLayout mDisplayLayout;
 
     private ComponentName mLastPipComponentName;
@@ -82,25 +77,10 @@ public class PipBoundsHandler {
     private boolean mIsShelfShowing;
     private int mShelfHeight;
 
-    private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
-            new DisplayController.OnDisplaysChangedListener() {
-        @Override
-        public void onDisplayAdded(int displayId) {
-            if (displayId == mContext.getDisplayId()) {
-                mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
-            }
-        }
-    };
-
-    @Inject
-    public PipBoundsHandler(Context context, PipSnapAlgorithm pipSnapAlgorithm,
-            DisplayController displayController) {
-        mContext = context;
-        mSnapAlgorithm = pipSnapAlgorithm;
+    public PipBoundsHandler(Context context) {
+        mSnapAlgorithm = new PipSnapAlgorithm(context);
         mDisplayLayout = new DisplayLayout();
-        mDisplayController = displayController;
-        mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
-        reloadResources();
+        reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
         // triggers a configuration change and the resources to be reloaded.
@@ -110,8 +90,8 @@ public class PipBoundsHandler {
     /**
      * TODO: move the resources to SysUI package.
      */
-    private void reloadResources() {
-        final Resources res = mContext.getResources();
+    private void reloadResources(Context context) {
+        final Resources res = context.getResources();
         mDefaultAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
         mDefaultStackGravity = res.getInteger(
@@ -133,6 +113,19 @@ public class PipBoundsHandler {
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
     }
 
+    /**
+     * Sets or update latest {@link DisplayLayout} when new display added or rotation callbacks
+     * from {@link DisplayController.OnDisplaysChangedListener}
+     * @param newDisplayLayout latest {@link DisplayLayout}
+     */
+    public void setDisplayLayout(DisplayLayout newDisplayLayout) {
+        mDisplayLayout.set(newDisplayLayout);
+    }
+
+    /**
+     * Update the Min edge size for {@link PipSnapAlgorithm} to calculate corresponding bounds
+     * @param minEdgeSize
+     */
     public void setMinEdgeSize(int minEdgeSize) {
         mCurrentMinSize = minEdgeSize;
     }
@@ -217,6 +210,14 @@ public class PipBoundsHandler {
         return mReentrySnapFraction != INVALID_SNAP_FRACTION;
     }
 
+    /**
+     * The {@link PipSnapAlgorithm} is couple on display bounds
+     * @return {@link PipSnapAlgorithm}.
+     */
+    public PipSnapAlgorithm getSnapAlgorithm() {
+        return mSnapAlgorithm;
+    }
+
     public Rect getDisplayBounds() {
         return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
     }
@@ -237,8 +238,8 @@ public class PipBoundsHandler {
     /**
      * Responds to IPinnedStackListener on configuration change.
      */
-    public void onConfigurationChanged() {
-        reloadResources();
+    public void onConfigurationChanged(Context context) {
+        reloadResources(context);
     }
 
     /**
@@ -300,10 +301,10 @@ public class PipBoundsHandler {
      * aren't in PIP because the rotation layout is used to calculate the proper insets for the
      * next enter animation into PIP.
      */
-    public void onDisplayRotationChangedNotInPip(int toRotation) {
+    public void onDisplayRotationChangedNotInPip(Context context, int toRotation) {
         // Update the display layout, note that we have to do this on every rotation even if we
         // aren't in PIP since we need to update the display layout to get the right resources
-        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
+        mDisplayLayout.rotateTo(context.getResources(), toRotation);
 
         // Populate the new {@link #mDisplayInfo}.
         // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
@@ -319,7 +320,8 @@ public class PipBoundsHandler {
      *
      * @return {@code true} if internal {@link DisplayInfo} is rotated, {@code false} otherwise.
      */
-    public boolean onDisplayRotationChanged(Rect outBounds, Rect oldBounds, Rect outInsetBounds,
+    public boolean onDisplayRotationChanged(Context context, Rect outBounds, Rect oldBounds,
+            Rect outInsetBounds,
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) {
         // Bail early if the event is not sent to current {@link #mDisplayInfo}
         if ((displayId != mDisplayInfo.displayId) || (fromRotation == toRotation)) {
@@ -342,7 +344,7 @@ public class PipBoundsHandler {
         final float snapFraction = getSnapFraction(postChangeStackBounds);
 
         // Update the display layout
-        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
+        mDisplayLayout.rotateTo(context.getResources(), toRotation);
 
         // Populate the new {@link #mDisplayInfo}.
         // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
@@ -546,5 +548,6 @@ public class PipBoundsHandler {
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
+        pw.println(innerPrefix + "mSnapAlgorithm" + mSnapAlgorithm);
     }
 }
