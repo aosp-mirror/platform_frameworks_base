@@ -6103,7 +6103,8 @@ public class NotificationManagerService extends SystemService {
     protected boolean isBlocked(NotificationRecord r, NotificationUsageStats usageStats) {
         if (isBlocked(r)) {
             if (DBG) {
-                Slog.e(TAG, "Suppressing notification from package by user request.");
+                Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
+                        + " by user request.");
             }
             usageStats.registerBlocked(r);
             return true;
