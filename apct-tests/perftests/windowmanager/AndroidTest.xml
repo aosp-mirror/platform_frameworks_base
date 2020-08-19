@@ -42,7 +42,7 @@
         <option name="hidden-api-checks" value="false"/>
 
         <!-- Listener related args for collecting the traces and waiting for the device to stabilize. -->
-        <option name="device-listeners" value="android.wm.WmPerfRunListener,android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener" />
+        <option name="device-listeners" value="android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener" />
 
         <!-- Guarantee that user defined RunListeners will be running before any of the default listeners defined in this runner. -->
         <option name="instrumentation-arg" key="newRunListenerMode" value="true" />
@@ -57,8 +57,6 @@
         <!-- PerfettoListener related arguments -->
         <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true" />
         <option name="instrumentation-arg" key="perfetto_config_file" value="trace_config.textproto" />
-
-        <option name="instrumentation-arg" key="newRunListenerMode" value="true" />
     </test>
 
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
