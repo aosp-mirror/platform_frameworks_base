@@ -17,9 +17,12 @@
 package com.android.server;
 
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
+
+import java.util.concurrent.Executor;
 
 /**
  * Shared singleton background thread.
@@ -31,6 +34,7 @@ public final class JobSchedulerBackgroundThread extends HandlerThread {
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 30_000;
     private static JobSchedulerBackgroundThread sInstance;
     private static Handler sHandler;
+    private static Executor sHandlerExecutor;
 
     private JobSchedulerBackgroundThread() {
         super("jobscheduler.bg", android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -45,6 +49,7 @@ public final class JobSchedulerBackgroundThread extends HandlerThread {
             looper.setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
             sHandler = new Handler(sInstance.getLooper());
+            sHandlerExecutor = new HandlerExecutor(sHandler);
         }
     }
 
@@ -61,6 +66,14 @@ public final class JobSchedulerBackgroundThread extends HandlerThread {
         synchronized (JobSchedulerBackgroundThread.class) {
             ensureThreadLocked();
             return sHandler;
+        }
+    }
+
+    /** Returns the singleton handler executor for JobSchedulerBackgroundThread */
+    public static Executor getExecutor() {
+        synchronized (JobSchedulerBackgroundThread.class) {
+            ensureThreadLocked();
+            return sHandlerExecutor;
         }
     }
 }
