@@ -187,7 +187,6 @@ public class MediaEvent extends FilterEvent {
 
     /**
      * Releases the MediaEvent object.
-     * @hide
      */
     public void release() {
         synchronized (mLock) {

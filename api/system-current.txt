@@ -5329,6 +5329,7 @@ package android.media.tv.tuner.filter {
     method public boolean isPrivateData();
     method public boolean isPtsPresent();
     method public boolean isSecureMemory();
+    method public void release();
   }
 
   public final class MmtpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
