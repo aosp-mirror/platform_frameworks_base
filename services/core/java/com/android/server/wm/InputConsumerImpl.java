@@ -80,8 +80,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         mWindowHandle.visible = true;
-        mWindowHandle.canReceiveKeys = false;
-        mWindowHandle.hasFocus = false;
+        mWindowHandle.focusable = false;
         mWindowHandle.hasWallpaper = false;
         mWindowHandle.paused = false;
         mWindowHandle.ownerPid = Process.myPid();
