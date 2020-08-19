@@ -4732,6 +4732,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
             }
             setState(STARTED, "makeActiveIfNeeded");
+
+            // Update process info while making an activity from invisible to visible, to make
+            // sure the process state is updated to foreground.
+            if (app != null) {
+                app.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                        true /* activityChange */, true /* updateOomAdj */,
+                        true /* addPendingTopUid */);
+            }
+
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                         StartActivityItem.obtain());
