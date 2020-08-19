@@ -629,7 +629,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
         }
-        if (!mState.equals(state, true /* excludingCaptionInsets */,
+        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */,
                 true /* excludeInvisibleIme */)) {
             if (DEBUG) Log.d(TAG, "onStateChanged, send state to WM: " + mState);
             updateRequestedState();
@@ -1138,21 +1138,24 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (invokeCallback) {
             control.cancel();
         }
+        boolean stateChanged = false;
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             RunningAnimation runningAnimation = mRunningAnimations.get(i);
             if (runningAnimation.runner == control) {
                 mRunningAnimations.remove(i);
                 ArraySet<Integer> types = toInternalType(control.getTypes());
                 for (int j = types.size() - 1; j >= 0; j--) {
-                    if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
-                        mHost.notifyInsetsChanged();
-                    }
+                    stateChanged |= getSourceConsumer(types.valueAt(j)).notifyAnimationFinished();
                 }
                 if (invokeCallback && runningAnimation.startDispatched) {
                     dispatchAnimationEnd(runningAnimation.runner.getAnimation());
                 }
                 break;
             }
+        }
+        if (stateChanged) {
+            mHost.notifyInsetsChanged();
+            updateRequestedState();
         }
     }
 
