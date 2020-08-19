@@ -130,14 +130,15 @@ public class LockPatternUtils {
     public @interface CredentialType {}
 
     /**
-     * Flag provided to {@link #verifyCredential(LockscreenCredential, long, int, int)} . If set,
-     * the method will return the Gatekeeper Password in the {@link VerifyCredentialResponse}.
+     * Flag provided to {@link #verifyCredential(LockscreenCredential, int, int)} . If set, the
+     * method will return a handle to the Gatekeeper Password in the
+     * {@link VerifyCredentialResponse}.
      */
-    public static final int VERIFY_FLAG_RETURN_GK_PW = 1 << 0;
+    public static final int VERIFY_FLAG_REQUEST_GK_PW_HANDLE = 1 << 0;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
-            VERIFY_FLAG_RETURN_GK_PW
+            VERIFY_FLAG_REQUEST_GK_PW_HANDLE
     })
     public @interface VerifyFlag {}
 
@@ -409,16 +410,16 @@ public class LockPatternUtils {
     }
 
     /**
-     * With the Gatekeeper Password returned via {@link #verifyCredential(LockscreenCredential,
-     * int, int)}, request Gatekeeper to create a HardwareAuthToken wrapping the given
-     * challenge.
+     * With the Gatekeeper Password Handle returned via {@link #verifyCredential(
+     * LockscreenCredential, int, int)}, request Gatekeeper to create a HardwareAuthToken wrapping
+     * the given challenge.
      */
     @NonNull
-    public VerifyCredentialResponse verifyGatekeeperPassword(@NonNull byte[] gatekeeperPassword,
+    public VerifyCredentialResponse verifyGatekeeperPasswordHandle(long gatekeeperPasswordHandle,
             long challenge, int userId) {
         try {
-            final VerifyCredentialResponse response = getLockSettings().verifyGatekeeperPassword(
-                    gatekeeperPassword, challenge, userId);
+            final VerifyCredentialResponse response = getLockSettings()
+                    .verifyGatekeeperPasswordHandle(gatekeeperPasswordHandle, challenge, userId);
             if (response == null) {
                 return VerifyCredentialResponse.ERROR;
             }
@@ -426,6 +427,14 @@ public class LockPatternUtils {
         } catch (RemoteException e) {
             Log.e(TAG, "failed to verify gatekeeper password", e);
             return VerifyCredentialResponse.ERROR;
+        }
+    }
+
+    public void removeGatekeeperPasswordHandle(long gatekeeperPasswordHandle) {
+        try {
+            getLockSettings().removeGatekeeperPasswordHandle(gatekeeperPasswordHandle);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to remove gatekeeper password handle", e);
         }
     }
 

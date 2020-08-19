@@ -292,10 +292,12 @@ public abstract class AuthCredentialView extends LinearLayout {
             // The response passed into this method contains the Gatekeeper Password. We still
             // have to request Gatekeeper to create a Hardware Auth Token with the
             // Gatekeeper Password and Challenge (keystore operationId in this case)
-            final VerifyCredentialResponse gkResponse = mLockPatternUtils.verifyGatekeeperPassword(
-                    response.getGatekeeperPw(), mOperationId, mEffectiveUserId);
+            final long pwHandle = response.getGatekeeperPasswordHandle();
+            final VerifyCredentialResponse gkResponse = mLockPatternUtils
+                    .verifyGatekeeperPasswordHandle(pwHandle, mOperationId, mEffectiveUserId);
 
             mCallback.onCredentialMatched(gkResponse.getGatekeeperHAT());
+            mLockPatternUtils.removeGatekeeperPasswordHandle(pwHandle);
         } else {
             if (timeoutMs > 0) {
                 mHandler.removeCallbacks(mClearErrorRunnable);
