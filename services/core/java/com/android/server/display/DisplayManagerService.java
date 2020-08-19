@@ -2174,10 +2174,14 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
-            if (callingUid == Process.SYSTEM_UID
-                    || checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
-                flags |= VIRTUAL_DISPLAY_FLAG_TRUSTED;
-            } else {
+            if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
+                if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+                    throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
+                            + "create a trusted virtual display.");
+                }
+            }
+
+            if ((flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == 0) {
                 flags &= ~VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
             }
 

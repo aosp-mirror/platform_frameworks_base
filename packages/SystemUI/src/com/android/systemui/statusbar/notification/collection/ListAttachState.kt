@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.notification.collection
 
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
 
 /**
  * Stores the state that [ShadeListBuilder] assigns to this [ListEntry]
@@ -35,7 +35,6 @@ data class ListAttachState private constructor(
      * parent's section. Null if not attached to the list.
      */
     var section: NotifSection?,
-    var sectionIndex: Int,
 
     /**
      * If a [NotifFilter] is excluding this entry from the list, then that filter. Always null for
@@ -60,7 +59,6 @@ data class ListAttachState private constructor(
     fun clone(other: ListAttachState) {
         parent = other.parent
         section = other.section
-        sectionIndex = other.sectionIndex
         excludingFilter = other.excludingFilter
         promoter = other.promoter
         suppressedChanges.clone(other.suppressedChanges)
@@ -70,7 +68,6 @@ data class ListAttachState private constructor(
     fun reset() {
         parent = null
         section = null
-        sectionIndex = -1
         excludingFilter = null
         promoter = null
         suppressedChanges.reset()
@@ -82,7 +79,6 @@ data class ListAttachState private constructor(
             return ListAttachState(
                     null,
                     null,
-                    -1,
                     null,
                     null,
                 SuppressedAttachState.create())

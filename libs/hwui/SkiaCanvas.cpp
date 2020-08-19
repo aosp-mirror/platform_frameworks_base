@@ -42,6 +42,8 @@
 #include <SkTextBlob.h>
 #include <SkVertices.h>
 
+#include <shader/BitmapShader.h>
+
 #include <memory>
 #include <optional>
 #include <utility>
@@ -49,6 +51,7 @@
 namespace android {
 
 using uirenderer::PaintUtils;
+using uirenderer::BitmapShader;
 
 Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
     return new SkiaCanvas(bitmap);
@@ -681,7 +684,9 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
     if (paint) {
         pnt = *paint;
     }
-    pnt.setShader(bitmap.makeImage()->makeShader());
+
+    pnt.setShader(sk_ref_sp(new BitmapShader(
+            bitmap.makeImage(), SkTileMode::kClamp, SkTileMode::kClamp, nullptr)));
     auto v = builder.detach();
     apply_looper(&pnt, [&](const SkPaint& p) {
         mCanvas->drawVertices(v, SkBlendMode::kModulate, p);

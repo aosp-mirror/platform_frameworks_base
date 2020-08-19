@@ -159,7 +159,7 @@
 
     <declare-styleable name="UdfpsView">
         <attr name="sensorRadius" format="dimension"/>
-        <attr name="sensorMarginBottom" format="dimension"/>
+        <attr name="sensorCenterY" format="dimension"/>
         <attr name="sensorPressureCoefficient" format="float"/>
         <attr name="sensorTouchAreaCoefficient" format="float"/>
     </declare-styleable>

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection
 
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 
 /**
  * Stores the suppressed state that [ShadeListBuilder] assigned to this [ListEntry] before the
@@ -33,22 +33,19 @@ data class SuppressedAttachState private constructor(
      * The assigned section for this ListEntry. If the child of the group, this will be the
      * parent's section. Null if not attached to the list.
      */
-    var section: NotifSection?,
-    var sectionIndex: Int
+    var section: NotifSection?
 ) {
 
     /** Copies the state of another instance. */
     fun clone(other: SuppressedAttachState) {
         parent = other.parent
         section = other.section
-        sectionIndex = other.sectionIndex
     }
 
     /** Resets back to a "clean" state (the same as created by the factory method) */
     fun reset() {
         parent = null
         section = null
-        sectionIndex = -1
     }
 
     companion object {
@@ -56,8 +53,7 @@ data class SuppressedAttachState private constructor(
         fun create(): SuppressedAttachState {
             return SuppressedAttachState(
                 null,
-                null,
-                -1)
+                null)
         }
     }
 }

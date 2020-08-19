@@ -367,7 +367,6 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.pm.permission.PermissionsState;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.security.VerityUtils;
@@ -1818,7 +1817,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     synchronized (mLock) {
                         removeMessages(WRITE_SETTINGS);
                         removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-                        mSettings.writeLPr();
+                        writeSettingsLPrTEMP();
                         mDirtyUsers.clear();
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -1838,6 +1837,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                     synchronized (mLock) {
                         removeMessages(WRITE_PACKAGE_LIST);
+                        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
                         mSettings.writePackageListLPr(msg.arg1);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -2518,7 +2518,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 mSettings.onVolumeForgotten(fsUuid);
-                mSettings.writeLPr();
+                writeSettingsLPrTEMP();
             }
         }
     };
@@ -3442,6 +3442,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ((SystemClock.uptimeMillis()-startTime)/1000f)
                     + " seconds");
 
+            mPermissionManager.readPermissionsStateFromPackageSettingsTEMP();
             // If the platform SDK has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
@@ -3561,7 +3562,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // can downgrade to reader
             t.traceBegin("write settings");
-            mSettings.writeLPr();
+            writeSettingsLPrTEMP();
             t.traceEnd();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
@@ -3765,7 +3766,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
                     mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
-                    mSettings.writeLPr();
+                    writeSettingsLPrTEMP();
                 }
             } catch (PackageManagerException e) {
                 // Whoops! Something went very wrong; roll back to the stub and disable the package
@@ -3776,9 +3777,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         // If we don't, installing the system package fails during scan
                         enableSystemPackageLPw(stubPkg);
                     }
-                    installPackageFromSystemLIF(stubPkg.getCodePath(),
-                            null /*allUserHandles*/, null /*origUserHandles*/,
-                            null /*origPermissionsState*/, true /*writeSettings*/);
+                    installPackageFromSystemLIF(stubPkg.getCodePath(), null /*allUserHandles*/,
+                            null /*origUserHandles*/, true /*writeSettings*/);
                 } catch (PackageManagerException pme) {
                     // Serious WTF; we have to be able to install the stub
                     Slog.wtf(TAG, "Failed to restore system package:" + stubPkg.getPackageName(),
@@ -3792,7 +3792,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             stubPs.setEnabled(COMPONENT_ENABLED_STATE_DISABLED,
                                     UserHandle.USER_SYSTEM, "android");
                         }
-                        mSettings.writeLPr();
+                        writeSettingsLPrTEMP();
                     }
                 }
                 return false;
@@ -16280,7 +16280,7 @@ public class PackageManagerService extends IPackageManager.Stub
             res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
             //to update install status
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "writeSettings");
-            mSettings.writeLPr();
+            writeSettingsLPrTEMP();
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
@@ -18877,6 +18877,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
                     }
+                    if ((deletedPs.sharedUser == null || deletedPs.sharedUser.packages.size() == 0)
+                            && !isUpdatedSystemApp(deletedPs)) {
+                        mPermissionManager.removePermissionsStateTEMP(removedAppId);
+                    }
                     mPermissionManager.updatePermissions(deletedPs.name, null);
                     if (deletedPs.sharedUser != null) {
                         // Remove permissions associated with package. Since runtime
@@ -18886,10 +18890,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         // package is successful and this causes a change in gids.
                         boolean shouldKill = false;
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            final int userIdToKill = mSettings.updateSharedUserPermsLPw(deletedPs,
-                                    userId);
-                            shouldKill |= userIdToKill == UserHandle.USER_ALL
-                                    || userIdToKill >= UserHandle.USER_SYSTEM;
+                            final int userIdToKill = mPermissionManager
+                                    .revokeSharedUserPermissionsForDeletedPackageTEMP(deletedPs,
+                                            userId);
+                            shouldKill |= userIdToKill != UserHandle.USER_NULL;
                         }
                         // If gids changed, kill all affected packages.
                         if (shouldKill) {
@@ -18933,7 +18937,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // can downgrade to reader
             if (writeSettings) {
                 // Save settings now
-                mSettings.writeLPr();
+                writeSettingsLPrTEMP();
             }
             if (installedStateChanged) {
                 mSettings.writeKernelMappingLPr(deletedPs);
@@ -19020,8 +19024,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
         try {
             installPackageFromSystemLIF(disabledPs.getCodePathString(), allUserHandles,
-                    outInfo == null ? null : outInfo.origUsers, deletedPs.getPermissionsState(),
-                    writeSettings);
+                    outInfo == null ? null : outInfo.origUsers, writeSettings);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPkg.getPackageName() + ": "
                     + e.getMessage());
@@ -19052,9 +19055,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * Installs a package that's already on the system partition.
      */
     private AndroidPackage installPackageFromSystemLIF(@NonNull String codePathString,
-            @Nullable int[] allUserHandles, @Nullable int[] origUserHandles,
-            @Nullable PermissionsState origPermissionState, boolean writeSettings)
-                    throws PackageManagerException {
+            @Nullable int[] allUserHandles, @Nullable int[] origUserHandles, boolean writeSettings)
+            throws PackageManagerException {
         final File codePath = new File(codePathString);
         @ParseFlags int parseFlags =
                 mDefParseFlags
@@ -19091,12 +19093,8 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             PackageSetting ps = mSettings.mPackages.get(pkg.getPackageName());
 
-            // Propagate the permissions state as we do not want to drop on the floor
-            // runtime permissions. The update permissions method below will take
-            // care of removing obsolete permissions and grant install permissions.
-            if (origPermissionState != null) {
-                ps.getPermissionsState().copyFrom(origPermissionState);
-            }
+            // The update permissions method below will take care of removing obsolete permissions
+            // and granting install permissions.
             mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
 
             final boolean applyUserRestrictions
@@ -19130,7 +19128,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             // can downgrade to reader here
             if (writeSettings) {
-                mSettings.writeLPr();
+                writeSettingsLPrTEMP();
             }
         }
         return pkg;
@@ -19204,7 +19202,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 ps.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
             }
-            mSettings.writeLPr();
+            writeSettingsLPrTEMP();
         }
         return true;
     }
@@ -20396,7 +20394,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     (parser1, userId1) -> {
                         synchronized (mLock) {
                             mSettings.readAllDomainVerificationsLPr(parser1, userId1);
-                            mSettings.writeLPr();
+                            writeSettingsLPrTEMP();
                         }
                     });
         } catch (Exception e) {
@@ -21747,6 +21745,8 @@ public class PackageManagerService extends IPackageManager.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
+        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+
         DumpState dumpState = new DumpState();
         boolean fullPreferred = false;
         boolean checkin = false;
@@ -21942,7 +21942,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_SERVICE_PERMISSIONS);
             } else if ("write".equals(cmd)) {
                 synchronized (mLock) {
-                    mSettings.writeLPr();
+                    writeSettingsLPrTEMP();
                     pw.println("Settings written.");
                     return;
                 }
@@ -22660,7 +22660,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Yay, everything is now upgraded
             ver.forceCurrent();
 
-            mSettings.writeLPr();
+            writeSettingsLPrTEMP();
         }
 
         for (PackageFreezer freezer : freezers) {
@@ -22710,7 +22710,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     AttributeCache.instance().removePackage(ps.name);
                 }
 
-                mSettings.writeLPr();
+                writeSettingsLPrTEMP();
             }
         }
 
@@ -23623,6 +23623,8 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             mDirtyUsers.remove(userId);
             mUserNeedsBadging.delete(userId);
+            mPermissionManager.onUserRemoved(userId);
+            mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
             mInstantAppRegistry.onUserRemovedLPw(userId);
@@ -23723,7 +23725,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     boolean readPermissionStateForUser(@UserIdInt int userId) {
         synchronized (mPackages) {
+            mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
             mSettings.readPermissionStateForUserSyncLPr(userId);
+            mPermissionManager.readPermissionsStateFromPackageSettingsTEMP();
             return mPmInternal.isPermissionUpgradeNeeded(userId);
         }
     }
@@ -25179,7 +25183,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (async) {
                     scheduleWriteSettingsLocked();
                 } else {
-                    mSettings.writeLPr();
+                    writeSettingsLPrTEMP();
                 }
             }
         }
@@ -25226,7 +25230,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
                 mSettings.mReadExternalStorageEnforced = enforced ? Boolean.TRUE : Boolean.FALSE;
-                mSettings.writeLPr();
+                writeSettingsLPrTEMP();
             }
         }
 
@@ -25739,6 +25743,17 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
         return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
+    }
+
+    /**
+     * Temporary method that wraps mSettings.writeLPr() and calls
+     * mPermissionManager.writePermissionsStateToPackageSettingsTEMP() beforehand.
+     *
+     * TODO(zhanghai): This should be removed once we finish migration of permission storage.
+     */
+    private void writeSettingsLPrTEMP() {
+        mPermissionManager.writePermissionsStateToPackageSettingsTEMP();
+        mSettings.writeLPr();
     }
 }
 

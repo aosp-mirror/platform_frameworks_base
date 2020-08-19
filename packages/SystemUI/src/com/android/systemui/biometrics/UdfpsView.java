@@ -53,18 +53,20 @@ public class UdfpsView extends View implements DozeReceiver,
     private final Paint mScrimPaint;
     private final Paint mDebugTextPaint;
 
-    private float mSensorX;
-    private float mSensorY;
     private final RectF mSensorRect;
     private final Paint mSensorPaint;
     private final float mSensorRadius;
-    private final float mSensorMarginBottom;
+    private final float mSensorCenterY;
     private final float mSensorTouchAreaCoefficient;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
 
     private final Rect mTouchableRegion;
     private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
+
+    // This is calculated from the screen's dimensions at runtime, as opposed to mSensorCenterY,
+    // which is defined in layout.xml
+    private float mSensorCenterX;
 
     // AOD anti-burn-in offsets
     private float mInterpolatedDarkAmount;
@@ -84,7 +86,7 @@ public class UdfpsView extends View implements DozeReceiver,
             if (!a.hasValue(R.styleable.UdfpsView_sensorRadius)) {
                 throw new IllegalArgumentException("UdfpsView must contain sensorRadius");
             }
-            if (!a.hasValue(R.styleable.UdfpsView_sensorMarginBottom)) {
+            if (!a.hasValue(R.styleable.UdfpsView_sensorCenterY)) {
                 throw new IllegalArgumentException("UdfpsView must contain sensorMarginBottom");
             }
             if (!a.hasValue(R.styleable.UdfpsView_sensorTouchAreaCoefficient)) {
@@ -92,7 +94,7 @@ public class UdfpsView extends View implements DozeReceiver,
                         "UdfpsView must contain sensorTouchAreaCoefficient");
             }
             mSensorRadius = a.getDimension(R.styleable.UdfpsView_sensorRadius, 0f);
-            mSensorMarginBottom = a.getDimension(R.styleable.UdfpsView_sensorMarginBottom, 0f);
+            mSensorCenterY = a.getDimension(R.styleable.UdfpsView_sensorCenterY, 0f);
             mSensorTouchAreaCoefficient = a.getFloat(
                     R.styleable.UdfpsView_sensorTouchAreaCoefficient, 0f);
         } finally {
@@ -163,10 +165,9 @@ public class UdfpsView extends View implements DozeReceiver,
         final int h = getLayoutParams().height;
         final int w = getLayoutParams().width;
         mScrimRect.set(0 /* left */, 0 /* top */, w, h);
-        mSensorX = w / 2f;
-        mSensorY = h - mSensorMarginBottom - mSensorRadius;
-        mSensorRect.set(mSensorX - mSensorRadius, mSensorY - mSensorRadius,
-                mSensorX + mSensorRadius, mSensorY + mSensorRadius);
+        mSensorCenterX = w / 2f;
+        mSensorRect.set(mSensorCenterX - mSensorRadius, mSensorCenterY - mSensorRadius,
+                mSensorCenterX + mSensorRadius, mSensorCenterY + mSensorRadius);
 
         // Sets mTouchableRegion with rounded up values from mSensorRect.
         mSensorRect.roundOut(mTouchableRegion);
@@ -210,10 +211,10 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
-        return x > (mSensorX - mSensorRadius * mSensorTouchAreaCoefficient)
-                && x < (mSensorX + mSensorRadius * mSensorTouchAreaCoefficient)
-                && y > (mSensorY - mSensorRadius * mSensorTouchAreaCoefficient)
-                && y < (mSensorY + mSensorRadius * mSensorTouchAreaCoefficient);
+        return x > (mSensorCenterX - mSensorRadius * mSensorTouchAreaCoefficient)
+                && x < (mSensorCenterX + mSensorRadius * mSensorTouchAreaCoefficient)
+                && y > (mSensorCenterY - mSensorRadius * mSensorTouchAreaCoefficient)
+                && y < (mSensorCenterY + mSensorRadius * mSensorTouchAreaCoefficient);
     }
 
     void setScrimAlpha(int alpha) {

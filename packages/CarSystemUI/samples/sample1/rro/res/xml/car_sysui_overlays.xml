@@ -22,7 +22,8 @@
 
     <item target="attr/icon" value="@attr/icon"/>
     <item target="attr/selectedIcon" value="@attr/selectedIcon"/>
-    <item target="attr/intent" value="@attr/longIntent"/>
+    <item target="attr/intent" value="@attr/intent"/>
+    <item target="attr/longIntent" value="@attr/longIntent"/>
     <item target="attr/componentNames" value="@attr/componentNames"/>
     <item target="attr/highlightWhenSelected" value="@attr/highlightWhenSelected"/>
     <item target="attr/categories" value="@attr/categories"/>

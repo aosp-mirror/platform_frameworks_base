@@ -45,6 +45,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
@@ -275,7 +276,10 @@ class Face10 implements IHwBinder.DeathRecipient {
 
     Face10(@NonNull Context context, int sensorId,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */);
+        final boolean supportsSelfIllumination = context.getResources()
+                .getBoolean(R.bool.config_faceAuthSupportsSelfIllumination);
+        mFaceSensorProperties = new FaceSensorProperties(sensorId, false /* supportsFaceDetect */,
+                supportsSelfIllumination);
         mContext = context;
         mSensorId = sensorId;
         mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
