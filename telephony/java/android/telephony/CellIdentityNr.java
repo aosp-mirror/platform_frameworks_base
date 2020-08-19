@@ -50,6 +50,18 @@ public final class CellIdentityNr extends CellIdentity {
     // a list of additional PLMN-IDs reported for this cell
     private final ArraySet<String> mAdditionalPlmns;
 
+    /** @hide */
+    public CellIdentityNr() {
+        super(TAG, CellInfo.TYPE_NR, null, null, null, null);
+        mNrArfcn = CellInfo.UNAVAILABLE;
+        mPci = CellInfo.UNAVAILABLE;
+        mTac = CellInfo.UNAVAILABLE;
+        mNci = CellInfo.UNAVAILABLE;
+        mBands = new int[] {};
+        mAdditionalPlmns = new ArraySet();
+        mGlobalCellId = null;
+    }
+
     /**
      *
      * @param pci Physical Cell Id in range [0, 1007].
