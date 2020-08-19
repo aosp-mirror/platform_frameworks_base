@@ -36,14 +36,12 @@ import java.util.List;
 public class TaskOrganizer extends WindowOrganizer {
 
     /**
-     * Register a TaskOrganizer to manage tasks as they enter the given windowing mode.
-     * If there was already a TaskOrganizer for this windowing mode it will be evicted
-     * and receive taskVanished callbacks in the process.
+     * Register a TaskOrganizer to manage tasks as they enter a supported windowing mode.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public final void registerOrganizer(int windowingMode) {
+    public final void registerOrganizer() {
         try {
-            getController().registerTaskOrganizer(mInterface, windowingMode);
+            getController().registerTaskOrganizer(mInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

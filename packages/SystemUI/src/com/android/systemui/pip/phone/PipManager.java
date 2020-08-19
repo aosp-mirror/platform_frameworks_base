@@ -60,6 +60,7 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
@@ -272,7 +273,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             Divider divider,
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
-            PipUiEventLogger pipUiEventLogger) {
+            PipUiEventLogger pipUiEventLogger,
+            ShellTaskOrganizer shellTaskOrganizer) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -288,7 +290,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipBoundsHandler = new PipBoundsHandler(mContext);
         mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                mPipSurfaceTransactionHelper, divider, mDisplayController, pipUiEventLogger);
+                mPipSurfaceTransactionHelper, divider, mDisplayController, pipUiEventLogger,
+                shellTaskOrganizer);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
@@ -311,7 +314,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         configController.addCallback(mOverlayChangedListener);
 
         try {
-            mPipTaskOrganizer.registerOrganizer(WINDOWING_MODE_PINNED);
             ActivityManager.StackInfo stackInfo = ActivityTaskManager.getService().getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {

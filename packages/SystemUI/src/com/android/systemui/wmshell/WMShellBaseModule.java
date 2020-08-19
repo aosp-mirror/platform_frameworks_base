@@ -26,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
@@ -77,4 +78,11 @@ public class WMShellBaseModule {
         return new SystemWindows(displayController, wmService);
     }
 
+    @SysUISingleton
+    @Provides
+    public ShellTaskOrganizer provideShellTaskOrganizer() {
+        ShellTaskOrganizer organizer = new ShellTaskOrganizer();
+        organizer.registerOrganizer();
+        return organizer;
+    }
 }

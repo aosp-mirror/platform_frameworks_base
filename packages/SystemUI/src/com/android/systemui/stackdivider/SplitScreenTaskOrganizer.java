@@ -33,9 +33,13 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.TaskOrganizer;
 
-class SplitScreenTaskOrganizer extends TaskOrganizer {
+import com.android.wm.shell.ShellTaskOrganizer;
+
+class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "SplitScreenTaskOrg";
     private static final boolean DEBUG = DividerController.DEBUG;
+
+    private final ShellTaskOrganizer mTaskOrganizer;
 
     RunningTaskInfo mPrimary;
     RunningTaskInfo mSecondary;
@@ -49,13 +53,15 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
 
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
-    SplitScreenTaskOrganizer(DividerController dividerController) {
+    SplitScreenTaskOrganizer(DividerController dividerController,
+                    ShellTaskOrganizer shellTaskOrganizer) {
         mDividerController = dividerController;
+        mTaskOrganizer = shellTaskOrganizer;
+        mTaskOrganizer.addListener(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
     }
 
     void init() throws RemoteException {
-        registerOrganizer(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        registerOrganizer(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         synchronized (this) {
             try {
                 mPrimary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
@@ -64,7 +70,7 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
                         WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
             } catch (Exception e) {
                 // teardown to prevent callbacks
-                unregisterOrganizer();
+                mTaskOrganizer.removeListener(this);
                 throw e;
             }
         }

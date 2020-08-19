@@ -783,7 +783,7 @@ class Task extends WindowContainer<WindowContainer> {
      * taskAppeared callback, and emit a taskRemoved callback when the Task is vanished.
      */
     ITaskOrganizer mTaskOrganizer;
-    private int mLastTaskOrganizerWindowingMode = -1;
+
     /**
      * Prevent duplicate calls to onTaskAppeared.
      */
@@ -798,6 +798,7 @@ class Task extends WindowContainer<WindowContainer> {
      *     organizer for ordering purposes.</li>
      * </ul>
      */
+    @VisibleForTesting
     boolean mCreatedByOrganizer;
 
     /**
@@ -4823,19 +4824,18 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        ITaskOrganizer previousOrganizer = mTaskOrganizer;
+        ITaskOrganizer prevOrganizer = mTaskOrganizer;
         // Update the new task organizer before calling sendTaskVanished since it could result in
         // a new SurfaceControl getting created that would notify the old organizer about it.
         mTaskOrganizer = organizer;
         // Let the old organizer know it has lost control.
-        sendTaskVanished(previousOrganizer);
+        sendTaskVanished(prevOrganizer);
 
         if (mTaskOrganizer != null) {
             sendTaskAppeared();
         } else {
             // No longer managed by any organizer.
             mTaskAppearedSent = false;
-            mLastTaskOrganizerWindowingMode = -1;
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
                 removeImmediately();
@@ -4856,29 +4856,16 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean updateTaskOrganizerState(boolean forceUpdate) {
         if (!isRootTask()) {
-            final boolean result = setTaskOrganizer(null);
-            mLastTaskOrganizerWindowingMode = -1;
-            return result;
+            return setTaskOrganizer(null);
         }
 
         final int windowingMode = getWindowingMode();
-        if (!forceUpdate && windowingMode == mLastTaskOrganizerWindowingMode) {
-            // If our windowing mode hasn't actually changed, then just stick
-            // with our old organizer. This lets us implement the semantic
-            // where SysUI can continue to manage it's old tasks
-            // while CTS temporarily takes over the registration.
+        final TaskOrganizerController controller = mWmService.mAtmService.mTaskOrganizerController;
+        final ITaskOrganizer organizer = controller.getTaskOrganizer(windowingMode);
+        if (!forceUpdate && mTaskOrganizer == organizer) {
             return false;
         }
-        /*
-         * Different windowing modes may be managed by different task organizers. If
-         * getTaskOrganizer returns null, we still call setTaskOrganizer to
-         * make sure we clear it.
-         */
-        final ITaskOrganizer org =
-                mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
-        final boolean result = setTaskOrganizer(org);
-        mLastTaskOrganizerWindowingMode = org != null ? windowingMode : -1;
-        return result;
+        return setTaskOrganizer(organizer);
     }
 
     @Override

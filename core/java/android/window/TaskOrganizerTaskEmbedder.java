@@ -73,7 +73,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         // TODO(wm-shell): This currently prevents other organizers from controlling MULT_WINDOW
         // windowing mode tasks. Plan is to migrate this to a wm-shell front-end when that
         // infrastructure is ready.
-        mTaskOrganizer.registerOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        // mTaskOrganizer.registerOrganizer();
         mTaskOrganizer.setInterceptBackPressedOnTaskRoot(true);
 
         return super.onInitialize();

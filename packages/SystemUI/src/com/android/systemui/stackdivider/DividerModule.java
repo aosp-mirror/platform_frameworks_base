@@ -22,6 +22,7 @@ import android.os.Handler;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
@@ -39,10 +40,11 @@ public class DividerModule {
     @Provides
     static Divider provideDivider(Context context, DisplayController displayController,
             SystemWindows systemWindows, DisplayImeController imeController, @Main Handler handler,
-            KeyguardStateController keyguardStateController, TransactionPool transactionPool) {
+            KeyguardStateController keyguardStateController, TransactionPool transactionPool,
+            ShellTaskOrganizer shellTaskOrganizer) {
         // TODO(b/161116823): fetch DividerProxy from WM shell lib.
         DividerController dividerController = new DividerController(context, displayController,
-                systemWindows, imeController, handler, transactionPool);
+                systemWindows, imeController, handler, transactionPool, shellTaskOrganizer);
         return new Divider(context, dividerController, keyguardStateController);
     }
 }
