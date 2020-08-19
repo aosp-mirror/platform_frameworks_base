@@ -485,6 +485,9 @@ final class UiModeManagerService extends SystemService {
      * @return True if the new value is different from the old value. False otherwise.
      */
     private boolean updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
+        if (mCarModeEnabled || mCar) {
+            return false;
+        }
         int oldNightMode = mNightMode;
         if (mSetupWizardComplete) {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
@@ -1015,7 +1018,7 @@ final class UiModeManagerService extends SystemService {
 
     private void persistNightMode(int user) {
         // Only persist setting if not in car mode
-        if (mCarModeEnabled) return;
+        if (mCarModeEnabled || mCar) return;
         Secure.putIntForUser(getContext().getContentResolver(),
                 Secure.UI_NIGHT_MODE, mNightMode, user);
         Secure.putLongForUser(getContext().getContentResolver(),
@@ -1028,7 +1031,7 @@ final class UiModeManagerService extends SystemService {
 
     private void persistNightModeOverrides(int user) {
         // Only persist setting if not in car mode
-        if (mCarModeEnabled) return;
+        if (mCarModeEnabled || mCar) return;
         Secure.putIntForUser(getContext().getContentResolver(),
                 Secure.UI_NIGHT_MODE_OVERRIDE_ON, mOverrideNightModeOn ? 1 : 0, user);
         Secure.putIntForUser(getContext().getContentResolver(),
@@ -1079,7 +1082,7 @@ final class UiModeManagerService extends SystemService {
         }
 
         // Override night mode in power save mode if not in car mode
-        if (mPowerSave && !mCarModeEnabled) {
+        if (mPowerSave && !mCarModeEnabled && !mCar) {
             uiMode &= ~Configuration.UI_MODE_NIGHT_NO;
             uiMode |= Configuration.UI_MODE_NIGHT_YES;
         } else {
