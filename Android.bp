@@ -330,6 +330,7 @@ filegroup {
         ":gatekeeper_aidl",
         ":gsiservice_aidl",
         ":incidentcompanion_aidl",
+        ":inputconstants_aidl",
         ":installd_aidl",
         ":keystore_aidl",
         ":libaudioclient_aidl",
