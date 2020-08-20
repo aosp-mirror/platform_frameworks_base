@@ -361,20 +361,6 @@ void VulkanManager::initialize() {
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
 
-    // create the command pool for the command buffers
-    if (VK_NULL_HANDLE == mCommandPool) {
-        VkCommandPoolCreateInfo commandPoolInfo;
-        memset(&commandPoolInfo, 0, sizeof(VkCommandPoolCreateInfo));
-        commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        // this needs to be on the render queue
-        commandPoolInfo.queueFamilyIndex = mGraphicsQueueIndex;
-        commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        SkDEBUGCODE(VkResult res =)
-                mCreateCommandPool(mDevice, &commandPoolInfo, nullptr, &mCommandPool);
-        SkASSERT(VK_SUCCESS == res);
-    }
-    LOG_ALWAYS_FATAL_IF(mCommandPool == VK_NULL_HANDLE);
-
     mGetDeviceQueue(mDevice, mPresentQueueIndex, 0, &mPresentQueue);
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
