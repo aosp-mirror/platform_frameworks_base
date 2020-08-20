@@ -171,8 +171,8 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             mAllApps.add(UserHandle.getAppId(uid));
 
             final boolean isNetwork = hasPermission(CHANGE_NETWORK_STATE, uid);
-            final boolean hasRestrictedPermission = hasRestrictedNetworkPermission(uid)
-                    || isCarryoverPackage(app.applicationInfo);
+            final boolean hasRestrictedPermission =
+                    hasRestrictedNetworkPermission(app.applicationInfo);
 
             if (isNetwork || hasRestrictedPermission) {
                 Boolean permission = mApps.get(uid);
@@ -200,7 +200,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         for (int i = 0; i < systemPermission.size(); i++) {
             ArraySet<String> perms = systemPermission.valueAt(i);
             int uid = systemPermission.keyAt(i);
-            int netdPermission = PERMISSION_NONE;
+            int netdPermission = 0;
             // Get the uids of native services that have UPDATE_DEVICE_STATS or INTERNET permission.
             if (perms != null) {
                 netdPermission |= perms.contains(UPDATE_DEVICE_STATS)
@@ -225,21 +225,20 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
     }
 
     @VisibleForTesting
-    // TODO : remove this check in the future(b/162295056). All apps should just request the
-    // appropriate permission for their use case since android Q.
-    boolean isCarryoverPackage(@Nullable final ApplicationInfo appInfo) {
-        if (appInfo == null) return false;
-        return (appInfo.targetSdkVersion < VERSION_Q && isVendorApp(appInfo))
+    boolean hasRestrictedNetworkPermission(@Nullable final ApplicationInfo appInfo) {
+        if (appInfo == null)  return false;
+        // TODO : remove this check in the future(b/162295056). All apps should just
+        // request the appropriate permission for their use case since android Q.
+        if ((appInfo.targetSdkVersion < VERSION_Q && isVendorApp(appInfo))
                 // Backward compatibility for b/114245686, on devices that launched before Q daemons
                 // and apps running as the system UID are exempted from this check.
-                || (appInfo.uid == SYSTEM_UID && mDeps.getDeviceFirstSdkInt() < VERSION_Q);
-    }
+                || (appInfo.uid == SYSTEM_UID && mDeps.getDeviceFirstSdkInt() < VERSION_Q)) {
+            return true;
+        }
 
-    @VisibleForTesting
-    boolean hasRestrictedNetworkPermission(final int uid) {
-        return hasPermission(CONNECTIVITY_USE_RESTRICTED_NETWORKS, uid)
-                || hasPermission(PERMISSION_MAINLINE_NETWORK_STACK, uid)
-                || hasPermission(NETWORK_STACK, uid);
+        return hasPermission(PERMISSION_MAINLINE_NETWORK_STACK, appInfo.uid)
+                || hasPermission(NETWORK_STACK, appInfo.uid)
+                || hasPermission(CONNECTIVITY_USE_RESTRICTED_NETWORKS, appInfo.uid);
     }
 
     /** Returns whether the given uid has using background network permission. */
@@ -329,8 +328,8 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         try {
             final PackageInfo app = mPackageManager.getPackageInfo(name, GET_PERMISSIONS);
             final boolean isNetwork = hasPermission(CHANGE_NETWORK_STATE, uid);
-            final boolean hasRestrictedPermission = hasRestrictedNetworkPermission(uid)
-                    || isCarryoverPackage(app.applicationInfo);
+            final boolean hasRestrictedPermission =
+                    hasRestrictedNetworkPermission(app.applicationInfo);
             if (isNetwork || hasRestrictedPermission) {
                 currentPermission = hasRestrictedPermission;
             }
