@@ -62,6 +62,12 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /** @hide */
+    public CellIdentityNr(android.hardware.radio.V1_4.CellIdentityNr cid) {
+        this(cid.pci, cid.tac, cid.nrarfcn, cid.mcc, cid.mnc, cid.nci, cid.operatorNames.alphaLong,
+                cid.operatorNames.alphaShort);
+    }
+
+    /** @hide */
     public CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort);
