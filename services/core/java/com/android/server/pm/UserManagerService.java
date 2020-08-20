@@ -114,7 +114,6 @@ import com.android.server.SystemService;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -173,6 +172,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
     private static final String ATTR_PRE_CREATED = "preCreated";
+    private static final String ATTR_CONVERTED_FROM_PRE_CREATED = "convertedFromPreCreated";
     private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
@@ -2873,6 +2873,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (userInfo.preCreated) {
             serializer.attribute(null, ATTR_PRE_CREATED, "true");
         }
+        if (userInfo.convertedFromPreCreated) {
+            serializer.attribute(null, ATTR_CONVERTED_FROM_PRE_CREATED, "true");
+        }
         if (userInfo.guestToRemove) {
             serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
         }
@@ -3030,6 +3033,7 @@ public class UserManagerService extends IUserManager.Stub {
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
         boolean preCreated = false;
+        boolean converted = false;
         boolean guestToRemove = false;
         boolean persistSeedData = false;
         String seedAccountName = null;
@@ -3080,6 +3084,10 @@ public class UserManagerService extends IUserManager.Stub {
             valueString = parser.getAttributeValue(null, ATTR_PRE_CREATED);
             if ("true".equals(valueString)) {
                 preCreated = true;
+            }
+            valueString = parser.getAttributeValue(null, ATTR_CONVERTED_FROM_PRE_CREATED);
+            if ("true".equals(valueString)) {
+                converted = true;
             }
             valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
             if ("true".equals(valueString)) {
@@ -3138,6 +3146,7 @@ public class UserManagerService extends IUserManager.Stub {
         userInfo.lastLoggedInFingerprint = lastLoggedInFingerprint;
         userInfo.partial = partial;
         userInfo.preCreated = preCreated;
+        userInfo.convertedFromPreCreated = converted;
         userInfo.guestToRemove = guestToRemove;
         userInfo.profileGroupId = profileGroupId;
         userInfo.profileBadge = profileBadge;
@@ -3584,6 +3593,7 @@ public class UserManagerService extends IUserManager.Stub {
         preCreatedUser.name = name;
         preCreatedUser.flags = newFlags;
         preCreatedUser.preCreated = false;
+        preCreatedUser.convertedFromPreCreated = true;
         preCreatedUser.creationTime = getCreationTime();
 
         synchronized (mPackagesLock) {
@@ -4626,6 +4636,7 @@ public class UserManagerService extends IUserManager.Stub {
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
                             user.preCreated ? " (pre-created)" : "",
+                            user.convertedFromPreCreated ? " (converted)" : "",
                             current ? " (current)" : "");
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and
@@ -4709,6 +4720,9 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                     if (userInfo.preCreated) {
                         pw.print(" <pre-created>");
+                    }
+                    if (userInfo.convertedFromPreCreated) {
+                        pw.print(" <converted>");
                     }
                     pw.println();
                     pw.print("    Type: "); pw.println(userInfo.userType);
