@@ -2674,52 +2674,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Construct an encrypted, RFCOMM server socket.
-     * Call #accept to retrieve connections to this socket.
-     *
-     * @return An RFCOMM BluetoothServerSocket
-     * @throws IOException On error, for example Bluetooth not available, or insufficient
-     * permissions.
-     * @hide
-     */
-    public BluetoothServerSocket listenUsingEncryptedRfcommOn(int port) throws IOException {
-        BluetoothServerSocket socket =
-                new BluetoothServerSocket(BluetoothSocket.TYPE_RFCOMM, false, true, port);
-        int errno = socket.mSocket.bindListen();
-        if (port == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
-            socket.setChannel(socket.mSocket.getPort());
-        }
-        if (errno < 0) {
-            //TODO(BT): Throw the same exception error code
-            // that the previous code was using.
-            //socket.mSocket.throwErrnoNative(errno);
-            throw new IOException("Error: " + errno);
-        }
-        return socket;
-    }
-
-    /**
-     * Construct a SCO server socket.
-     * Call #accept to retrieve connections to this socket.
-     *
-     * @return A SCO BluetoothServerSocket
-     * @throws IOException On error, for example Bluetooth not available, or insufficient
-     * permissions.
-     * @hide
-     */
-    public static BluetoothServerSocket listenUsingScoOn() throws IOException {
-        BluetoothServerSocket socket =
-                new BluetoothServerSocket(BluetoothSocket.TYPE_SCO, false, false, -1);
-        int errno = socket.mSocket.bindListen();
-        if (errno < 0) {
-            //TODO(BT): Throw the same exception error code
-            // that the previous code was using.
-            //socket.mSocket.throwErrnoNative(errno);
-        }
-        return socket;
-    }
-
-    /**
      * Construct an encrypted, authenticated, L2CAP server socket.
      * Call #accept to retrieve connections to this socket.
      * <p>To auto assign a port without creating a SDP record use
