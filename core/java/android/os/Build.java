@@ -1006,16 +1006,10 @@ public class Build {
 
         /**
          * Q.
-         *
-         * <p>Applications targeting this or a later release will get these new changes in behavior.
-         * For more information about this release, see the
-         * <a href="/about/versions/10">Android 10 overview</a>.</p>
-         * <ul>
-         * <li><a href="/about/versions/10/behavior-changes-all">Behavior changes: all apps</a></li>
-         * <li><a href="/about/versions/10/behavior-changes-10">Behavior changes: apps targeting API
-         * 29+</a></li>
-         * </ul>
-         *
+         * <p>
+         * <em>Why? Why, to give you a taste of your future, a preview of things
+         * to come. Con permiso, Capitan. The hall is rented, the orchestra
+         * engaged. It's now time to see if you can dance.</em>
          */
         public static final int Q = 29;
 

@@ -2726,15 +2726,13 @@ class ActivityStack extends Task {
     /**
      * Reset local parameters because an app's activity died.
      * @param app The app of the activity that died.
-     * @return {@code true} if the process has any visible activity.
+     * @return result from removeHistoryRecordsForAppLocked.
      */
     boolean handleAppDied(WindowProcessController app) {
-        boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG_PAUSE,
                     "App died while pausing: " + mPausingActivity);
             mPausingActivity = null;
-            isPausingDied = true;
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
             mLastPausedActivity = null;
@@ -2742,8 +2740,7 @@ class ActivityStack extends Task {
         }
 
         mStackSupervisor.removeHistoryRecords(app);
-        final boolean hadVisibleActivities = mRemoveHistoryRecordsForApp.process(app);
-        return hadVisibleActivities || isPausingDied;
+        return mRemoveHistoryRecordsForApp.process(app);
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
