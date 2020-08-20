@@ -42,7 +42,6 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.ViewRootImpl;
-import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
@@ -133,15 +132,13 @@ class InsetsPolicy {
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
 
-    @InsetsType int showTransient(IntArray types) {
-        @InsetsType int showingTransientTypes = 0;
+    void showTransient(@InternalInsetsType int[] types) {
         boolean changed = false;
-        for (int i = types.size() - 1; i >= 0; i--) {
-            final int type = types.get(i);
+        for (int i = types.length - 1; i >= 0; i--) {
+            final @InternalInsetsType int type = types[i];
             if (!isHidden(type)) {
                 continue;
             }
-            showingTransientTypes |= InsetsState.toPublicType(type);
             if (mShowingTransientTypes.indexOf(type) != -1) {
                 continue;
             }
@@ -169,7 +166,6 @@ class InsetsPolicy {
                 }
             });
         }
-        return showingTransientTypes;
     }
 
     void hideTransient() {
