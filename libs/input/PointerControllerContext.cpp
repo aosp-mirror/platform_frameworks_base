@@ -38,10 +38,10 @@ PointerControllerContext::PointerControllerContext(
         mSpriteController(spriteController),
         mHandler(new MessageHandler()),
         mCallback(new LooperCallback()),
-        mController(controller) {
+        mController(controller),
+        mAnimator(*this) {
     std::scoped_lock lock(mLock);
     mLocked.inactivityTimeout = InactivityTimeout::NORMAL;
-    mLocked.animationPending = false;
 }
 
 PointerControllerContext::~PointerControllerContext() {
@@ -54,15 +54,6 @@ void PointerControllerContext::setInactivityTimeout(InactivityTimeout inactivity
     if (mLocked.inactivityTimeout != inactivityTimeout) {
         mLocked.inactivityTimeout = inactivityTimeout;
         resetInactivityTimeoutLocked();
-    }
-}
-
-void PointerControllerContext::startAnimation() {
-    std::scoped_lock lock(mLock);
-    if (!mLocked.animationPending) {
-        mLocked.animationPending = true;
-        mLocked.animationTime = systemTime(SYSTEM_TIME_MONOTONIC);
-        mDisplayEventReceiver.requestNextVsync();
     }
 }
 
@@ -85,14 +76,8 @@ void PointerControllerContext::removeInactivityTimeout() {
     mLooper->removeMessages(mHandler, MessageHandler::MSG_INACTIVITY_TIMEOUT);
 }
 
-void PointerControllerContext::setAnimationPending(bool animationPending) {
-    std::scoped_lock lock(mLock);
-    mLocked.animationPending = animationPending;
-}
-
-nsecs_t PointerControllerContext::getAnimationTime() {
-    std::scoped_lock lock(mLock);
-    return mLocked.animationTime;
+nsecs_t PointerControllerContext::getAnimationTime() REQUIRES(mAnimator.mLock) {
+    return mAnimator.getAnimationTimeLocked();
 }
 
 void PointerControllerContext::setHandlerController(std::shared_ptr<PointerController> controller) {
@@ -112,31 +97,8 @@ sp<SpriteController> PointerControllerContext::getSpriteController() {
     return mSpriteController;
 }
 
-void PointerControllerContext::initializeDisplayEventReceiver() {
-    if (mDisplayEventReceiver.initCheck() == NO_ERROR) {
-        mLooper->addFd(mDisplayEventReceiver.getFd(), Looper::POLL_CALLBACK, Looper::EVENT_INPUT,
-                       mCallback, nullptr);
-    } else {
-        ALOGE("Failed to initialize DisplayEventReceiver.");
-    }
-}
-
 void PointerControllerContext::handleDisplayEvents() {
-    bool gotVsync = false;
-    ssize_t n;
-    nsecs_t timestamp;
-    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-    while ((n = mDisplayEventReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-        for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
-            if (buf[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
-                timestamp = buf[i].header.timestamp;
-                gotVsync = true;
-            }
-        }
-    }
-    if (gotVsync) {
-        mController.doAnimate(timestamp);
-    }
+    mAnimator.handleVsyncEvents();
 }
 
 void PointerControllerContext::MessageHandler::handleMessage(const Message& message) {
@@ -174,6 +136,93 @@ int PointerControllerContext::LooperCallback::handleEvent(int /* fd */, int even
 
     controller->mContext.handleDisplayEvents();
     return 1; // keep the callback
+}
+
+void PointerControllerContext::addAnimationCallback(int32_t displayId,
+                                                    std::function<bool(nsecs_t)> callback) {
+    mAnimator.addCallback(displayId, callback);
+}
+
+void PointerControllerContext::removeAnimationCallback(int32_t displayId) {
+    mAnimator.removeCallback(displayId);
+}
+
+PointerControllerContext::PointerAnimator::PointerAnimator(PointerControllerContext& context)
+      : mContext(context) {
+    initializeDisplayEventReceiver();
+}
+
+void PointerControllerContext::PointerAnimator::initializeDisplayEventReceiver() {
+    if (mDisplayEventReceiver.initCheck() == NO_ERROR) {
+        mContext.mLooper->addFd(mDisplayEventReceiver.getFd(), Looper::POLL_CALLBACK,
+                                Looper::EVENT_INPUT, mContext.mCallback, nullptr);
+    } else {
+        ALOGE("Failed to initialize DisplayEventReceiver.");
+    }
+}
+
+void PointerControllerContext::PointerAnimator::addCallback(int32_t displayId,
+                                                            std::function<bool(nsecs_t)> callback) {
+    std::scoped_lock lock(mLock);
+    mLocked.callbacks[displayId] = callback;
+    startAnimationLocked();
+}
+
+void PointerControllerContext::PointerAnimator::removeCallback(int32_t displayId) {
+    std::scoped_lock lock(mLock);
+    auto it = mLocked.callbacks.find(displayId);
+    if (it == mLocked.callbacks.end()) {
+        return;
+    }
+    mLocked.callbacks.erase(it);
+}
+
+void PointerControllerContext::PointerAnimator::handleVsyncEvents() {
+    bool gotVsync = false;
+    ssize_t n;
+    nsecs_t timestamp;
+    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
+    while ((n = mDisplayEventReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+        for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
+            if (buf[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
+                timestamp = buf[i].header.timestamp;
+                gotVsync = true;
+            }
+        }
+    }
+    if (gotVsync) {
+        std::scoped_lock lock(mLock);
+        mLocked.animationPending = false;
+        handleCallbacksLocked(timestamp);
+    }
+}
+
+nsecs_t PointerControllerContext::PointerAnimator::getAnimationTimeLocked() REQUIRES(mLock) {
+    return mLocked.animationTime;
+}
+
+void PointerControllerContext::PointerAnimator::startAnimationLocked() REQUIRES(mLock) {
+    if (!mLocked.animationPending) {
+        mLocked.animationPending = true;
+        mLocked.animationTime = systemTime(SYSTEM_TIME_MONOTONIC);
+        mDisplayEventReceiver.requestNextVsync();
+    }
+}
+
+void PointerControllerContext::PointerAnimator::handleCallbacksLocked(nsecs_t timestamp)
+        REQUIRES(mLock) {
+    for (auto it = mLocked.callbacks.begin(); it != mLocked.callbacks.end();) {
+        bool keepCallback = it->second(timestamp);
+        if (!keepCallback) {
+            it = mLocked.callbacks.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    if (!mLocked.callbacks.empty()) {
+        startAnimationLocked();
+    }
 }
 
 } // namespace android
