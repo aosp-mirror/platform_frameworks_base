@@ -544,7 +544,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity = new ActivityBuilder(mAtm)
                 .setTask(mTask)
                 .setLaunchTaskBehind(true)
-                .setConfigChanges(CONFIG_ORIENTATION)
+                .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
                 .build();
         mActivity.setState(Task.ActivityState.STOPPED, "Testing");
 
