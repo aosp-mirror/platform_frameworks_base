@@ -242,8 +242,8 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
         mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         mDragWindowHandle.visible = true;
-        mDragWindowHandle.canReceiveKeys = false;
-        mDragWindowHandle.hasFocus = true;
+        // When dragging the window around, we do not want to steal focus for the window.
+        mDragWindowHandle.focusable = false;
         mDragWindowHandle.hasWallpaper = false;
         mDragWindowHandle.paused = false;
         mDragWindowHandle.ownerPid = Process.myPid();

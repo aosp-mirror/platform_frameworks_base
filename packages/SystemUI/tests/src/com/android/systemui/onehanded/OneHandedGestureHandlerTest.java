@@ -30,8 +30,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -48,7 +48,7 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     OneHandedTouchHandler mTouchHandler;
     OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
-    OneHandedManagerImpl mOneHandedManagerImpl;
+    OneHandedController mOneHandedController;
     @Mock
     CommandQueue mCommandQueue;
     @Mock
@@ -66,7 +66,7 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
         mTutorialHandler = new OneHandedTutorialHandler(mContext);
         mGestureHandler = Mockito.spy(new OneHandedGestureHandler(
                 mContext, mMockDisplayController, mMockNavigationModeController));
-        mOneHandedManagerImpl = new OneHandedManagerImpl(
+        mOneHandedController = new OneHandedController(
                 getContext(),
                 mCommandQueue,
                 mMockDisplayController,
@@ -93,15 +93,15 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     public void testReceiveNewConfig_whenSetOneHandedEnabled() {
         // 1st called at init
         verify(mGestureHandler).onOneHandedEnabled(true);
-        mOneHandedManagerImpl.setOneHandedEnabled(true);
+        mOneHandedController.setOneHandedEnabled(true);
         // 2nd called by setOneHandedEnabled()
         verify(mGestureHandler, times(2)).onOneHandedEnabled(true);
     }
 
     @Test
     public void testOneHandedDisabled_shouldDisposeInputChannel() {
-        mOneHandedManagerImpl.setOneHandedEnabled(false);
-        mOneHandedManagerImpl.setSwipeToNotificationEnabled(false);
+        mOneHandedController.setOneHandedEnabled(false);
+        mOneHandedController.setSwipeToNotificationEnabled(false);
 
         assertThat(mGestureHandler.mInputMonitor).isNull();
         assertThat(mGestureHandler.mInputEventReceiver).isNull();
@@ -111,7 +111,7 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     public void testChangeNavBarTo2Button_shouldDisposeInputChannel() {
         // 1st called at init
         verify(mGestureHandler).onOneHandedEnabled(true);
-        mOneHandedManagerImpl.setOneHandedEnabled(true);
+        mOneHandedController.setOneHandedEnabled(true);
         // 2nd called by setOneHandedEnabled()
         verify(mGestureHandler, times(2)).onOneHandedEnabled(true);
 

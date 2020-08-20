@@ -197,6 +197,13 @@ public final class DeviceConfig {
             "intelligence_content_suggestions";
 
     /**
+     * Namespace for JobScheduler configurations.
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide

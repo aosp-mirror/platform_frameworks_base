@@ -46,17 +46,19 @@ public:
     // Initialize this ConditionTracker. This initialization is done recursively (DFS). It can also
     // be done in the constructor, but we do it separately because (1) easy to return a bool to
     // indicate whether the initialization is successful. (2) makes unit test easier.
+    // This function can also be called on config updates, in which case it does nothing other than
+    // fill the condition cache with the current condition.
     // allConditionConfig: the list of all Predicate config from statsd_config.
     // allConditionTrackers: the list of all ConditionTrackers (this is needed because we may also
     //                       need to call init() on children conditions)
     // conditionIdIndexMap: the mapping from condition id to its index.
     // stack: a bit map to keep track which nodes have been visited on the stack in the recursion.
-    // initialConditionCache: tracks initial conditions of all ConditionTrackers.
+    // conditionCache: tracks initial conditions of all ConditionTrackers. returns the
+    //                        current condition if called on a config update.
     virtual bool init(const std::vector<Predicate>& allConditionConfig,
                       const std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       const std::unordered_map<int64_t, int>& conditionIdIndexMap,
-                      std::vector<bool>& stack,
-                      std::vector<ConditionState>& initialConditionCache) = 0;
+                      std::vector<bool>& stack, std::vector<ConditionState>& conditionCache) = 0;
 
     // evaluate current condition given the new event.
     // event: the new log event

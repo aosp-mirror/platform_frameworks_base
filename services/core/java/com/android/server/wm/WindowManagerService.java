@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -929,7 +930,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void setShadowRenderer() {
         mRenderShadowsInCompositor = Settings.Global.getInt(mContext.getContentResolver(),
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 0) != 0;
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     PowerManager mPowerManager;
@@ -5861,6 +5862,11 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void createInputConsumer(IBinder token, String name, int displayId,
             InputChannel inputChannel) {
+        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+                && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
+            throw new SecurityException("createInputConsumer requires INPUT_CONSUMER permission");
+        }
+
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
@@ -5872,6 +5878,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean destroyInputConsumer(String name, int displayId) {
+        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+                && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
+            throw new SecurityException("destroyInputConsumer requires INPUT_CONSUMER permission");
+        }
+
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
@@ -8065,8 +8076,7 @@ public class WindowManagerService extends IWindowManager.Stub
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        h.canReceiveKeys = false;
-        h.hasFocus = false;
+        h.focusable = false;
         h.hasWallpaper = false;
         h.paused = false;
 

@@ -22,7 +22,6 @@ import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
-import com.android.systemui.onehanded.dagger.OneHandedModule;
 import com.android.systemui.pip.phone.dagger.PipModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
@@ -37,7 +36,6 @@ import dagger.Subcomponent;
         DefaultComponentBinder.class,
         DependencyProvider.class,
         DependencyBinder.class,
-        OneHandedModule.class,
         PipModule.class,
         SystemServicesModule.class,
         SystemUIBinder.class,

@@ -825,8 +825,8 @@ public class ResourcesManager {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                 "ResourcesManager#createApkAssetsSupplierNotLocked");
         try {
-            if (Thread.holdsLock(this)) {
-                Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
+            if (DEBUG && Thread.holdsLock(this)) {
+                Slog.w(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
             }
 

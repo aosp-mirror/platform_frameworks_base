@@ -65,6 +65,7 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.PowerManager;
 import android.os.PowerManager.AutoPowerSaveModeTriggers;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -11844,36 +11845,6 @@ public final class Settings {
         public static final String ALARM_MANAGER_CONSTANTS = "alarm_manager_constants";
 
         /**
-         * Job scheduler specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "min_ready_jobs_count=2,moderate_use_factor=.5"
-         *
-         * The following keys are supported:
-         *
-         * <pre>
-         * min_idle_count                       (int)
-         * min_charging_count                   (int)
-         * min_connectivity_count               (int)
-         * min_content_count                    (int)
-         * min_ready_jobs_count                 (int)
-         * heavy_use_factor                     (float)
-         * moderate_use_factor                  (float)
-         * fg_job_count                         (int)
-         * bg_normal_job_count                  (int)
-         * bg_moderate_job_count                (int)
-         * bg_low_job_count                     (int)
-         * bg_critical_job_count                (int)
-         * </pre>
-         *
-         * <p>
-         * Type: string
-         * @hide
-         * @see com.android.server.job.JobSchedulerService.Constants
-         */
-        public static final String JOB_SCHEDULER_CONSTANTS = "job_scheduler_constants";
-
-        /**
          * Job scheduler QuotaController specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -12545,18 +12516,23 @@ public final class Settings {
          * millis. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value
          * was updated.
          *
+         * @deprecated Use {@link PowerManager#getBatteryDischargePrediction()} instead.
          * @hide
          */
+        @Deprecated
         public static final String TIME_REMAINING_ESTIMATE_MILLIS =
                 "time_remaining_estimate_millis";
 
         /**
-         * A boolean indicating whether {@link #TIME_REMAINING_ESTIMATE_MILLIS} is based customized
-         * to the devices usage or using global models. See
+         * A boolean indicating whether {@link #TIME_REMAINING_ESTIMATE_MILLIS} is customized
+         * to the device's usage or using global models. See
          * {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value was updated.
+         *
+         * @deprecated Use {@link PowerManager#isBatteryDischargePredictionPersonalized()} instead.
          *
          * @hide
          */
+        @Deprecated
         public static final String TIME_REMAINING_ESTIMATE_BASED_ON_USAGE =
                 "time_remaining_estimate_based_on_usage";
 
@@ -12565,8 +12541,10 @@ public final class Settings {
          * average based on historical drain rates. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME}
          * for the last time this value was updated.
          *
+         * @deprecated Use {@link PowerManager#getHistoricalDischargeTime()} instead.
          * @hide
          */
+        @Deprecated
         public static final String AVERAGE_TIME_TO_DISCHARGE = "average_time_to_discharge";
 
         /**
@@ -12575,7 +12553,9 @@ public final class Settings {
          * and {@link #AVERAGE_TIME_TO_DISCHARGE} were last updated.
          *
          * @hide
+         * @deprecated No longer needed due to {@link PowerManager#getBatteryDischargePrediction}.
          */
+        @Deprecated
         public static final String BATTERY_ESTIMATES_LAST_UPDATE_TIME =
                 "battery_estimates_last_update_time";
 

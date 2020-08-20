@@ -11680,8 +11680,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (DEBUG_ABI_SELECTION) {
             Slog.d(TAG, "Resolved nativeLibraryRoot for " + parsedPackage.getPackageName()
-                    + " to root=" + parsedPackage.getNativeLibraryRootDir() + ", isa="
-                    + parsedPackage.isNativeLibraryRootRequiresIsa());
+                    + " to root=" + parsedPackage.getNativeLibraryRootDir()
+                    + ", to dir=" + parsedPackage.getNativeLibraryDir()
+                    + ", isa=" + parsedPackage.isNativeLibraryRootRequiresIsa());
         }
 
         // Push the derived path down into PackageSettings so we know what to
@@ -11689,9 +11690,10 @@ public class PackageManagerService extends IPackageManager.Stub
         pkgSetting.legacyNativeLibraryPathString = parsedPackage.getNativeLibraryRootDir();
 
         if (DEBUG_ABI_SELECTION) {
-            Log.d(TAG, "Abis for package[" + parsedPackage.getPackageName() + "] are" +
-                    " primary=" + AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage) +
-                    " secondary=" + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
+            Log.d(TAG, "Abis for package[" + parsedPackage.getPackageName() + "] are"
+                    + " primary=" + pkgSetting.primaryCpuAbiString
+                    + " secondary=" + pkgSetting.primaryCpuAbiString
+                    + " abiOverride=" + pkgSetting.cpuAbiOverrideString);
         }
 
         if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
@@ -13092,7 +13094,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return true;
             }
             if (sendRemoved) {
-                killApplication(packageName, UserHandle.getUid(userId, pkgSetting.appId),
+                killApplication(packageName, pkgSetting.appId, userId,
                         "hiding pkg");
                 sendApplicationHiddenForUser(packageName, pkgSetting, userId);
                 return true;
@@ -17610,12 +17612,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
                         && pkgSetting.getPkgState().isUpdatedSystemApp();
+                final String abiOverride = deriveAbiOverride(args.abiOverride, pkgSetting);
                 AndroidPackage oldPackage = mPackages.get(pkgName);
                 boolean isUpdatedSystemAppInferred = oldPackage != null && oldPackage.isSystem();
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
                         derivedAbi = mInjector.getAbiHelper().derivePackageAbi(parsedPackage,
                         isUpdatedSystemAppFromExistingSetting || isUpdatedSystemAppInferred,
-                        args.abiOverride);
+                        abiOverride);
                 derivedAbi.first.applyTo(parsedPackage);
                 derivedAbi.second.applyTo(parsedPackage);
             } catch (PackageManagerException pme) {

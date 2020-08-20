@@ -227,6 +227,11 @@ final class InputMonitor {
 
     WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
             InputEventReceiver.Factory inputEventReceiverFactory) {
+        if (!name.contentEquals(INPUT_CONSUMER_NAVIGATION)) {
+            throw new IllegalArgumentException("Illegal input consumer : " + name
+                    + ", display: " + mDisplayId);
+        }
+
         if (mInputConsumers.containsKey(name)) {
             throw new IllegalStateException("Existing input consumer found with name: " + name
                     + ", display: " + mDisplayId);
@@ -256,6 +261,11 @@ final class InputMonitor {
                 // stack, and we need FLAG_NOT_TOUCH_MODAL to ensure other events fall through
                 consumer.mWindowHandle.layoutParamsFlags |= FLAG_NOT_TOUCH_MODAL;
                 break;
+            case INPUT_CONSUMER_RECENTS_ANIMATION:
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal input consumer : " + name
+                        + ", display: " + mDisplayId);
         }
         addInputConsumer(name, consumer);
     }
@@ -271,8 +281,7 @@ final class InputMonitor {
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutMillis = child.getInputDispatchingTimeoutMillis();
         inputWindowHandle.visible = isVisible;
-        inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
-        inputWindowHandle.hasFocus = hasFocus;
+        inputWindowHandle.focusable = hasFocus;
         inputWindowHandle.hasWallpaper = hasWallpaper;
         inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
         inputWindowHandle.ownerPid = child.mSession.mPid;
@@ -463,9 +472,6 @@ final class InputMonitor {
             mDisplayContent.forAllWindows(this,
                     true /* traverseTopToBottom */);
 
-            if (mAddWallpaperInputConsumerHandle) {
-                mWallpaperInputConsumer.show(mInputTransaction, 0);
-            }
             if (!mUpdateInputWindowsImmediately) {
                 mDisplayContent.getPendingTransaction().merge(mInputTransaction);
                 mDisplayContent.scheduleAnimation();
@@ -572,8 +578,7 @@ final class InputMonitor {
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutMillis = 0; // it should never receive input
         inputWindowHandle.visible = isVisible;
-        inputWindowHandle.canReceiveKeys = false;
-        inputWindowHandle.hasFocus = false;
+        inputWindowHandle.focusable = false;
         inputWindowHandle.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL;
         inputWindowHandle.scaleFactor = 1;
         inputWindowHandle.layoutParamsFlags =

@@ -259,18 +259,7 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public int checkPermission(String permission, int pid, int uid) {
-        if (UserHandle.isSameApp(binder.getCallingUid(), SYSTEM_UID)) {
-            return PackageManager.PERMISSION_GRANTED; // Assume system has all permissions.
-        }
-        List<String> permissions = binder.callingPermissions.get(binder.getCallingUid());
-        if (permissions == null) {
-            permissions = callerPermissions;
-        }
-        if (permissions.contains(permission)) {
-            return PackageManager.PERMISSION_GRANTED;
-        } else {
-            return PackageManager.PERMISSION_DENIED;
-        }
+        return checkPermission(permission);
     }
 
     @Override
@@ -480,11 +469,32 @@ public class DpmMockContext extends MockContext {
 
     @Override
     public int checkCallingPermission(String permission) {
-        return spiedContext.checkCallingPermission(permission);
+        return checkPermission(permission);
+    }
+
+    @Override
+    public int checkCallingOrSelfPermission(String permission) {
+        return checkPermission(permission);
     }
 
     @Override
     public void startActivityAsUser(Intent intent, UserHandle userHandle) {
         spiedContext.startActivityAsUser(intent, userHandle);
     }
+
+    private int checkPermission(String permission) {
+        if (UserHandle.isSameApp(binder.getCallingUid(), SYSTEM_UID)) {
+            return PackageManager.PERMISSION_GRANTED; // Assume system has all permissions.
+        }
+        List<String> permissions = binder.callingPermissions.get(binder.getCallingUid());
+        if (permissions == null) {
+            permissions = callerPermissions;
+        }
+        if (permissions.contains(permission)) {
+            return PackageManager.PERMISSION_GRANTED;
+        } else {
+            return PackageManager.PERMISSION_DENIED;
+        }
+    }
+
 }

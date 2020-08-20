@@ -157,7 +157,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mOrganizer.registerOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.registerOrganizer();
 
         mTaskView1 = new ResizingTaskView(this, makeSettingsIntent());
         mTaskView2 = new ResizingTaskView(this, makeContactsIntent());

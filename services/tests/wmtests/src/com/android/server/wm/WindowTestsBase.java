@@ -1031,10 +1031,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         TestSplitOrganizer(ActivityTaskManagerService service, int displayId) {
             mService = service;
             mDisplayId = displayId;
-            mService.mTaskOrganizerController.registerTaskOrganizer(this,
-                    WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-            mService.mTaskOrganizerController.registerTaskOrganizer(this,
-                    WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+            mService.mTaskOrganizerController.registerTaskOrganizer(this);
             WindowContainerToken primary = mService.mTaskOrganizerController.createRootTask(
                     displayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).token;
             mPrimary = WindowContainer.fromBinder(primary.asBinder()).asTask();

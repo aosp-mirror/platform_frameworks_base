@@ -321,5 +321,4 @@ public class DependencyProvider {
     public ModeSwitchesController providesModeSwitchesController(Context context) {
         return new ModeSwitchesController(context);
     }
-
 }

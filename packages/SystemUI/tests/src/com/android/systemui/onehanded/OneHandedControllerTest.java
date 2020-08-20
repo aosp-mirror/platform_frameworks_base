@@ -46,9 +46,9 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class OneHandedManagerImplTest extends OneHandedTestCase {
+public class OneHandedControllerTest extends OneHandedTestCase {
     Display mDisplay;
-    OneHandedManagerImpl mOneHandedManagerImpl;
+    OneHandedController mOneHandedController;
     OneHandedTimeoutHandler mTimeoutHandler;
 
     @Mock
@@ -70,7 +70,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
-        mOneHandedManagerImpl = new OneHandedManagerImpl(
+        mOneHandedController = new OneHandedController(
                 getContext(),
                 mCommandQueue,
                 mMockDisplayController,
@@ -102,7 +102,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
 
     @Test
     public void testStartOneHanded() {
-        mOneHandedManagerImpl.startOneHanded();
+        mOneHandedController.startOneHanded();
 
         verify(mMockDisplayAreaOrganizer).scheduleOffset(anyInt(), anyInt());
     }
@@ -110,7 +110,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Test
     public void testStopOneHanded() {
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
-        mOneHandedManagerImpl.stopOneHanded();
+        mOneHandedController.stopOneHanded();
 
         verify(mMockDisplayAreaOrganizer, never()).scheduleOffset(anyInt(), anyInt());
     }
@@ -122,7 +122,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
 
     @Test
     public void testStopOneHanded_shouldRemoveTimer() {
-        mOneHandedManagerImpl.stopOneHanded();
+        mOneHandedController.stopOneHanded();
 
         verify(mTimeoutHandler).removeTimer();
     }
@@ -130,7 +130,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Test
     public void testUpdateIsEnabled() {
         final boolean enabled = true;
-        mOneHandedManagerImpl.setOneHandedEnabled(enabled);
+        mOneHandedController.setOneHandedEnabled(enabled);
 
         verify(mMockTouchHandler, times(2)).onOneHandedEnabled(enabled);
     }
@@ -138,7 +138,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Test
     public void testUpdateSwipeToNotificationIsEnabled() {
         final boolean enabled = true;
-        mOneHandedManagerImpl.setSwipeToNotificationEnabled(enabled);
+        mOneHandedController.setSwipeToNotificationEnabled(enabled);
 
         verify(mMockTouchHandler, times(2)).onOneHandedEnabled(enabled);
     }

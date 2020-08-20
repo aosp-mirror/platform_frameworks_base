@@ -14,31 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package android.os;
 
-/**
- * The base class of OneHandedManager
- */
-public interface OneHandedManager {
-
-    /**
-     * Set one handed enabled or disabled
-     */
-    default void setOneHandedEnabled(boolean enabled) {}
-
-    /**
-     * Set task stack changed to exit
-     */
-    default void setTaskChangeToExit(boolean enabled) {}
-
-    /**
-     * Exit one handed mode
-     */
-    default void stopOneHanded() {}
-
-    /**
-     * Trigger one handed mode
-     */
-    default void startOneHanded() {}
-
-}
+parcelable ParcelDuration cpp_header "android/ParcelDuration.h";

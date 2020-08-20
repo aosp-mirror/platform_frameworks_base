@@ -18,6 +18,7 @@
 package android.os;
 
 import android.os.BatterySaverPolicyConfig;
+import android.os.ParcelDuration;
 import android.os.PowerSaveState;
 import android.os.WorkSource;
 
@@ -58,6 +59,9 @@ interface IPowerManager
     boolean setAdaptivePowerSavePolicy(in BatterySaverPolicyConfig config);
     boolean setAdaptivePowerSaveEnabled(boolean enabled);
     int getPowerSaveModeTrigger();
+    void setBatteryDischargePrediction(in ParcelDuration timeRemaining, boolean isCustomized);
+    ParcelDuration getBatteryDischargePrediction();
+    boolean isBatteryDischargePredictionPersonalized();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
 

@@ -20,8 +20,13 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.pip.PipUiEventLogger;
+import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
@@ -51,8 +56,33 @@ public class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
+    static DeviceConfigProxy provideDeviceConfigProxy() {
+        return new DeviceConfigProxy();
+    }
+    @SysUISingleton
+    @Provides
+    static FloatingContentCoordinator provideFloatingContentCoordinator() {
+        return new FloatingContentCoordinator();
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger) {
+        return new PipUiEventLogger(uiEventLogger);
+    }
+
+    @SysUISingleton
+    @Provides
     static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
         return new SystemWindows(displayController, wmService);
+    }
+
+    @SysUISingleton
+    @Provides
+    public ShellTaskOrganizer provideShellTaskOrganizer() {
+        ShellTaskOrganizer organizer = new ShellTaskOrganizer();
+        organizer.registerOrganizer();
+        return organizer;
     }
 }

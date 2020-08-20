@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
@@ -188,13 +189,13 @@ public interface WebViewFactoryProvider {
      * Returns PacProcessor instance associated with the {@link Network}.
      * The host resolution is done on this {@link Network}.
      *
-     * @param networkHandle a network handle representing the {@link Network}.
+     * @param network a {@link Network} which needs to be associated
+     * with the returned {@link PacProcessor}.
+     * If {@code null} the method returns default {@link PacProcessor}.
      * @return the {@link PacProcessor} instance associated with {@link Network}.
-     * @see Network#getNetworkHandle
-     * @see Network#fromNetworkHandle
      */
     @NonNull
-    default PacProcessor getPacProcessorForNetwork(long networkHandle) {
+    default PacProcessor getPacProcessorForNetwork(@Nullable Network network) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

@@ -7298,6 +7298,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplaySuppressedForToken(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSaveEnabled(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setBatteryDischargePrediction(@NonNull java.time.Duration, boolean);
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setDynamicPowerSaveHint(boolean, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveModeEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void suppressAmbientDisplay(@NonNull String, boolean);
@@ -11585,8 +11586,8 @@ package android.webkit {
   public interface PacProcessor {
     method @Nullable public String findProxyForUrl(@NonNull String);
     method @NonNull public static android.webkit.PacProcessor getInstance();
-    method @NonNull public static android.webkit.PacProcessor getInstanceForNetwork(long);
-    method public default long getNetworkHandle();
+    method @NonNull public static android.webkit.PacProcessor getInstanceForNetwork(@Nullable android.net.Network);
+    method @Nullable public default android.net.Network getNetwork();
     method public default void releasePacProcessor();
     method public boolean setProxyScript(@NonNull String);
   }
@@ -11727,7 +11728,7 @@ package android.webkit {
     method public android.webkit.CookieManager getCookieManager();
     method public android.webkit.GeolocationPermissions getGeolocationPermissions();
     method @NonNull public default android.webkit.PacProcessor getPacProcessor();
-    method @NonNull public default android.webkit.PacProcessor getPacProcessorForNetwork(long);
+    method @NonNull public default android.webkit.PacProcessor getPacProcessorForNetwork(@Nullable android.net.Network);
     method public android.webkit.ServiceWorkerController getServiceWorkerController();
     method public android.webkit.WebViewFactoryProvider.Statics getStatics();
     method @Deprecated public android.webkit.TokenBindingService getTokenBindingService();

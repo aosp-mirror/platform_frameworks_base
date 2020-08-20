@@ -1,0 +1,18 @@
+// Copyright 2020 The Android Open Source Project
+//
+
+java_binary {
+    name: "uinput",
+    wrapper: "uinput",
+    srcs: ["**/*.java",
+           ":uinputcommand_aidl"
+    ],
+    required: ["libuinputcommand_jni"],
+}
+
+filegroup {
+    name: "uinputcommand_aidl",
+    srcs: [
+        "src/com/android/commands/uinput/InputAbsInfo.aidl",
+    ],
+}

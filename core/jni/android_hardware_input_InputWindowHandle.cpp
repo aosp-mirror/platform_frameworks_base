@@ -56,8 +56,7 @@ static struct {
     jfieldID scaleFactor;
     jfieldID touchableRegion;
     jfieldID visible;
-    jfieldID canReceiveKeys;
-    jfieldID hasFocus;
+    jfieldID focusable;
     jfieldID hasWallpaper;
     jfieldID paused;
     jfieldID trustedOverlay;
@@ -145,10 +144,7 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.visible = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.visible);
-    mInfo.canReceiveKeys = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.canReceiveKeys);
-    mInfo.hasFocus = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.hasFocus);
+    mInfo.focusable = env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable);
     mInfo.hasWallpaper = env->GetBooleanField(obj,
             gInputWindowHandleClassInfo.hasWallpaper);
     mInfo.paused = env->GetBooleanField(obj,
@@ -320,11 +316,7 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.visible, clazz,
             "visible", "Z");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.canReceiveKeys, clazz,
-            "canReceiveKeys", "Z");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.hasFocus, clazz,
-            "hasFocus", "Z");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.focusable, clazz, "focusable", "Z");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.hasWallpaper, clazz,
             "hasWallpaper", "Z");
