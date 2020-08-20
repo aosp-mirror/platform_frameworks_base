@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -59,6 +60,7 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore("Flaky")
     fun switchPlayersPlaying() {
         val playerIsPlaying1 = mock(MediaControlPanel::class.java)
         whenever(playerIsPlaying1.isPlaying).thenReturn(true)

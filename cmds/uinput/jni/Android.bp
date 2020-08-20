@@ -1,0 +1,23 @@
+cc_library_shared {
+    name: "libuinputcommand_jni",
+
+    srcs: [
+        "com_android_commands_uinput_Device.cpp",
+        ":uinputcommand_aidl",
+    ],
+
+    shared_libs: [
+        "libandroid",
+        "libandroid_runtime_lazy",
+        "libbase",
+        "libbinder",
+        "liblog",
+        "libnativehelper",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+}

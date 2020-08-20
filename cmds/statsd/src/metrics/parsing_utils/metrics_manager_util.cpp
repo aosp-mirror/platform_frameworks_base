@@ -303,8 +303,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
     const int conditionTrackerCount = config.predicate_size();
     conditionConfigs.reserve(conditionTrackerCount);
     allConditionTrackers.reserve(conditionTrackerCount);
-    initialConditionCache.reserve(conditionTrackerCount);
-    std::fill(initialConditionCache.begin(), initialConditionCache.end(), ConditionState::kUnknown);
+    initialConditionCache.assign(conditionTrackerCount, ConditionState::kNotEvaluated);
 
     for (int i = 0; i < conditionTrackerCount; i++) {
         const Predicate& condition = config.predicate(i);

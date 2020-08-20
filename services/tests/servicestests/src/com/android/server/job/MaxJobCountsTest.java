@@ -15,13 +15,15 @@
  */
 package com.android.server.job;
 
-import android.util.KeyValueListParser;
+import android.annotation.Nullable;
+import android.provider.DeviceConfig;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.job.JobSchedulerService.MaxJobCounts;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,19 +31,32 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MaxJobCountsTest {
+    @After
+    public void tearDown() throws Exception {
+        resetConfig();
+    }
 
-    private void check(String config,
+    private void resetConfig() {
+        // DeviceConfig.resetToDefaults() doesn't work here. Need to reset constants manually.
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, "total", "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, "maxbg", "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, "minbg", "", false);
+    }
+
+    private void check(@Nullable DeviceConfig.Properties config,
             int defaultTotal, int defaultMaxBg, int defaultMinBg,
-            int expectedTotal, int expectedMaxBg, int expectedMinBg) {
-        final KeyValueListParser parser = new KeyValueListParser(',');
-        parser.setString(config);
+            int expectedTotal, int expectedMaxBg, int expectedMinBg) throws Exception {
+        resetConfig();
+        if (config != null) {
+            DeviceConfig.setProperties(config);
+        }
 
         final MaxJobCounts counts = new JobSchedulerService.MaxJobCounts(
                 defaultTotal, "total",
                 defaultMaxBg, "maxbg",
                 defaultMinBg, "minbg");
 
-        counts.parse(parser);
+        counts.update();
 
         Assert.assertEquals(expectedTotal, counts.getMaxTotal());
         Assert.assertEquals(expectedMaxBg, counts.getMaxBg());
@@ -49,24 +64,35 @@ public class MaxJobCountsTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         // Tests with various combinations.
-        check("", /*default*/ 5, 1, 0, /*expected*/ 5, 1, 0);
-        check("", /*default*/ 5, 0, 0, /*expected*/ 5, 1, 0);
-        check("", /*default*/ 0, 0, 0, /*expected*/ 1, 1, 0);
-        check("", /*default*/ -1, -1, -1, /*expected*/ 1, 1, 0);
-        check("", /*default*/ 5, 5, 5, /*expected*/ 5, 5, 4);
-        check("", /*default*/ 6, 5, 6, /*expected*/ 6, 5, 5);
-        check("", /*default*/ 4, 5, 6, /*expected*/ 4, 4, 3);
-        check("", /*default*/ 5, 1, 1, /*expected*/ 5, 1, 1);
-        check("", /*default*/ 15, 15, 15, /*expected*/ 15, 15, 14);
-        check("", /*default*/ 16, 16, 16, /*expected*/ 16, 16, 15);
-        check("", /*default*/ 20, 20, 20, /*expected*/ 16, 16, 15);
+        check(null, /*default*/ 5, 1, 0, /*expected*/ 5, 1, 0);
+        check(null, /*default*/ 5, 0, 0, /*expected*/ 5, 1, 0);
+        check(null, /*default*/ 0, 0, 0, /*expected*/ 1, 1, 0);
+        check(null, /*default*/ -1, -1, -1, /*expected*/ 1, 1, 0);
+        check(null, /*default*/ 5, 5, 5, /*expected*/ 5, 5, 4);
+        check(null, /*default*/ 6, 5, 6, /*expected*/ 6, 5, 5);
+        check(null, /*default*/ 4, 5, 6, /*expected*/ 4, 4, 3);
+        check(null, /*default*/ 5, 1, 1, /*expected*/ 5, 1, 1);
+        check(null, /*default*/ 15, 15, 15, /*expected*/ 15, 15, 14);
+        check(null, /*default*/ 16, 16, 16, /*expected*/ 16, 16, 15);
+        check(null, /*default*/ 20, 20, 20, /*expected*/ 16, 16, 15);
 
         // Test for overriding with a setting string.
-        check("total=5,maxbg=4,minbg=3", /*default*/ 9, 9, 9, /*expected*/ 5, 4, 3);
-        check("total=5", /*default*/ 9, 9, 9, /*expected*/ 5, 5, 4);
-        check("maxbg=4", /*default*/ 9, 9, 9, /*expected*/ 9, 4, 4);
-        check("minbg=3", /*default*/ 9, 9, 9, /*expected*/ 9, 9, 3);
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt("total", 5)
+                        .setInt("maxbg", 4)
+                        .setInt("minbg", 3)
+                        .build(),
+                /*default*/ 9, 9, 9, /*expected*/ 5, 4, 3);
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt("total", 5).build(),
+                /*default*/ 9, 9, 9, /*expected*/ 5, 5, 4);
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt("maxbg", 4).build(),
+                /*default*/ 9, 9, 9, /*expected*/ 9, 4, 4);
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt("minbg", 3).build(),
+                /*default*/ 9, 9, 9, /*expected*/ 9, 9, 3);
     }
 }

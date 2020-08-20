@@ -22,7 +22,6 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.SystemServicesModule;
 import com.android.systemui.dagger.SystemUIModule;
-import com.android.systemui.onehanded.dagger.OneHandedModule;
 import com.android.systemui.pip.phone.dagger.PipModule;
 
 import dagger.Subcomponent;
@@ -36,7 +35,6 @@ import dagger.Subcomponent;
         DependencyProvider.class,
         DependencyBinder.class,
         PipModule.class,
-        OneHandedModule.class,
         SystemServicesModule.class,
         SystemUIModule.class,
         CarSystemUIModule.class,

@@ -39,7 +39,6 @@ import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -50,7 +49,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
@@ -67,11 +65,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.WorkSource;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -88,6 +85,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
@@ -329,39 +327,70 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     // -- Pre-allocated temporaries only for use in assignJobsToContextsLocked --
 
-    private class ConstantsObserver extends ContentObserver {
-        private ContentResolver mResolver;
-
-        public ConstantsObserver(Handler handler) {
-            super(handler);
-        }
-
-        public void start(ContentResolver resolver) {
-            mResolver = resolver;
-            mResolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.JOB_SCHEDULER_CONSTANTS), false, this);
-            updateConstants();
+    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener {
+        public void start() {
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    JobSchedulerBackgroundThread.getExecutor(), this);
+            // Load all the constants.
+            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updateConstants();
-        }
-
-        private void updateConstants() {
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            boolean apiQuotaScheduleUpdated = false;
+            boolean concurrencyUpdated = false;
             synchronized (mLock) {
-                try {
-                    mConstants.updateConstantsLocked(Settings.Global.getString(mResolver,
-                            Settings.Global.JOB_SCHEDULER_CONSTANTS));
-                    for (int controller = 0; controller < mControllers.size(); controller++) {
-                        final StateController sc = mControllers.get(controller);
-                        sc.onConstantsUpdatedLocked();
+                for (String name : properties.getKeyset()) {
+                    if (name == null) {
+                        continue;
                     }
-                    updateQuotaTracker();
-                } catch (IllegalArgumentException e) {
-                    // Failed to parse the settings string, log this and move on
-                    // with defaults.
-                    Slog.e(TAG, "Bad jobscheduler settings", e);
+                    switch (name) {
+                        case Constants.KEY_ENABLE_API_QUOTAS:
+                        case Constants.KEY_API_QUOTA_SCHEDULE_COUNT:
+                        case Constants.KEY_API_QUOTA_SCHEDULE_WINDOW_MS:
+                        case Constants.KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT:
+                        case Constants.KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION:
+                            if (!apiQuotaScheduleUpdated) {
+                                mConstants.updateApiQuotaConstantsLocked();
+                                updateQuotaTracker();
+                                apiQuotaScheduleUpdated = true;
+                            }
+                            break;
+                        case Constants.KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT:
+                        case Constants.KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS:
+                            mConstants.updateBatchingConstantsLocked();
+                            break;
+                        case Constants.KEY_HEAVY_USE_FACTOR:
+                        case Constants.KEY_MODERATE_USE_FACTOR:
+                            mConstants.updateUseFactorConstantsLocked();
+                            break;
+                        case Constants.KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS:
+                            if (!concurrencyUpdated) {
+                                mConstants.updateConcurrencyConstantsLocked();
+                                concurrencyUpdated = true;
+                            }
+                            break;
+                        case Constants.KEY_MIN_LINEAR_BACKOFF_TIME_MS:
+                        case Constants.KEY_MIN_EXP_BACKOFF_TIME_MS:
+                            mConstants.updateBackoffConstantsLocked();
+                            break;
+                        case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
+                        case Constants.KEY_CONN_PREFETCH_RELAX_FRAC:
+                            mConstants.updateConnectivityConstantsLocked();
+                            break;
+                        default:
+                            // Too many max_job_* strings to list.
+                            if (name.startsWith(Constants.KEY_PREFIX_MAX_JOB)
+                                    && !concurrencyUpdated) {
+                                mConstants.updateConcurrencyConstantsLocked();
+                                concurrencyUpdated = true;
+                            }
+                            break;
+                    }
+                }
+                for (int controller = 0; controller < mControllers.size(); controller++) {
+                    final StateController sc = mControllers.get(controller);
+                    sc.onConstantsUpdatedLocked();
                 }
             }
         }
@@ -376,53 +405,52 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     static class MaxJobCounts {
-        private final KeyValueListParser.IntValue mTotal;
-        private final KeyValueListParser.IntValue mMaxBg;
-        private final KeyValueListParser.IntValue mMinBg;
+        private final int mTotalDefault;
+        private final String mTotalKey;
+        private final int mMaxBgDefault;
+        private final String mMaxBgKey;
+        private final int mMinBgDefault;
+        private final String mMinBgKey;
+        private int mTotal;
+        private int mMaxBg;
+        private int mMinBg;
 
         MaxJobCounts(int totalDefault, String totalKey,
                 int maxBgDefault, String maxBgKey, int minBgDefault, String minBgKey) {
-            mTotal = new KeyValueListParser.IntValue(totalKey, totalDefault);
-            mMaxBg = new KeyValueListParser.IntValue(maxBgKey, maxBgDefault);
-            mMinBg = new KeyValueListParser.IntValue(minBgKey, minBgDefault);
+            mTotalKey = totalKey;
+            mTotal = mTotalDefault = totalDefault;
+            mMaxBgKey = maxBgKey;
+            mMaxBg = mMaxBgDefault = maxBgDefault;
+            mMinBgKey = minBgKey;
+            mMinBg = mMinBgDefault = minBgDefault;
         }
 
-        public void parse(KeyValueListParser parser) {
-            mTotal.parse(parser);
-            mMaxBg.parse(parser);
-            mMinBg.parse(parser);
+        public void update() {
+            mTotal = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    mTotalKey, mTotalDefault);
+            mMaxBg = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    mMaxBgKey, mMaxBgDefault);
+            mMinBg = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    mMinBgKey, mMinBgDefault);
 
-            if (mTotal.getValue() < 1) {
-                mTotal.setValue(1);
-            } else if (mTotal.getValue() > MAX_JOB_CONTEXTS_COUNT) {
-                mTotal.setValue(MAX_JOB_CONTEXTS_COUNT);
-            }
+            // Ensure total in the range [1, MAX_JOB_CONTEXTS_COUNT].
+            mTotal = Math.min(Math.max(1, mTotal), MAX_JOB_CONTEXTS_COUNT);
 
-            if (mMaxBg.getValue() < 1) {
-                mMaxBg.setValue(1);
-            } else if (mMaxBg.getValue() > mTotal.getValue()) {
-                mMaxBg.setValue(mTotal.getValue());
-            }
-            if (mMinBg.getValue() < 0) {
-                mMinBg.setValue(0);
-            } else {
-                if (mMinBg.getValue() > mMaxBg.getValue()) {
-                    mMinBg.setValue(mMaxBg.getValue());
-                }
-                if (mMinBg.getValue() >= mTotal.getValue()) {
-                    mMinBg.setValue(mTotal.getValue() - 1);
-                }
-            }
+            // Ensure maxBg in the range [1, total].
+            mMaxBg = Math.min(Math.max(1, mMaxBg), mTotal);
+
+            // Ensure minBg in the range [0, min(maxBg, total - 1)]
+            mMinBg = Math.min(Math.max(0, mMinBg), Math.min(mMaxBg, mTotal - 1));
         }
 
         /** Total number of jobs to run simultaneously. */
         public int getMaxTotal() {
-            return mTotal.getValue();
+            return mTotal;
         }
 
         /** Max number of BG (== owned by non-TOP apps) jobs to run simultaneously. */
         public int getMaxBg() {
-            return mMaxBg.getValue();
+            return mMaxBg;
         }
 
         /**
@@ -430,20 +458,34 @@ public class JobSchedulerService extends com.android.server.SystemService
          * pending, rather than always running the TOTAL number of FG jobs.
          */
         public int getMinBg() {
-            return mMinBg.getValue();
+            return mMinBg;
         }
 
         public void dump(PrintWriter pw, String prefix) {
-            mTotal.dump(pw, prefix);
-            mMaxBg.dump(pw, prefix);
-            mMinBg.dump(pw, prefix);
+            pw.print(prefix);
+            pw.print(mTotalKey);
+            pw.print("=");
+            pw.print(mTotal);
+            pw.println();
+
+            pw.print(prefix);
+            pw.print(mMaxBgKey);
+            pw.print("=");
+            pw.print(mMaxBg);
+            pw.println();
+
+            pw.print(prefix);
+            pw.print(mMinBgKey);
+            pw.print("=");
+            pw.print(mMinBg);
+            pw.println();
         }
 
         public void dumpProto(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
-            mTotal.dumpProto(proto, MaxJobCountsProto.TOTAL_JOBS);
-            mMaxBg.dumpProto(proto, MaxJobCountsProto.MAX_BG);
-            mMinBg.dumpProto(proto, MaxJobCountsProto.MIN_BG);
+            proto.write(MaxJobCountsProto.TOTAL_JOBS, mTotal);
+            proto.write(MaxJobCountsProto.MAX_BG, mMaxBg);
+            proto.write(MaxJobCountsProto.MIN_BG, mMinBg);
             proto.end(token);
         }
     }
@@ -476,23 +518,11 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * All times are in milliseconds. These constants are kept synchronized with the system
-     * global Settings. Any access to this class or its fields should be done while
+     * All times are in milliseconds. Any access to this class or its fields should be done while
      * holding the JobSchedulerService.mLock lock.
      */
     public static class Constants {
         // Key names stored in the settings value.
-        // TODO(124466289): remove deprecated flags when we migrate to DeviceConfig
-        private static final String DEPRECATED_KEY_MIN_IDLE_COUNT = "min_idle_count";
-        private static final String DEPRECATED_KEY_MIN_CHARGING_COUNT = "min_charging_count";
-        private static final String DEPRECATED_KEY_MIN_BATTERY_NOT_LOW_COUNT =
-                "min_battery_not_low_count";
-        private static final String DEPRECATED_KEY_MIN_STORAGE_NOT_LOW_COUNT =
-                "min_storage_not_low_count";
-        private static final String DEPRECATED_KEY_MIN_CONNECTIVITY_COUNT =
-                "min_connectivity_count";
-        private static final String DEPRECATED_KEY_MIN_CONTENT_COUNT = "min_content_count";
-        private static final String DEPRECATED_KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
         private static final String KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT =
                 "min_ready_non_active_jobs_count";
         private static final String KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS =
@@ -500,28 +530,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_HEAVY_USE_FACTOR = "heavy_use_factor";
         private static final String KEY_MODERATE_USE_FACTOR = "moderate_use_factor";
 
-        // The following values used to be used on P and below. Do not reuse them.
-        private static final String DEPRECATED_KEY_FG_JOB_COUNT = "fg_job_count";
-        private static final String DEPRECATED_KEY_BG_NORMAL_JOB_COUNT = "bg_normal_job_count";
-        private static final String DEPRECATED_KEY_BG_MODERATE_JOB_COUNT = "bg_moderate_job_count";
-        private static final String DEPRECATED_KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
-        private static final String DEPRECATED_KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
-
-        private static final String DEPRECATED_KEY_MAX_STANDARD_RESCHEDULE_COUNT
-                = "max_standard_reschedule_count";
-        private static final String DEPRECATED_KEY_MAX_WORK_RESCHEDULE_COUNT =
-                "max_work_reschedule_count";
-        private static final String KEY_MIN_LINEAR_BACKOFF_TIME = "min_linear_backoff_time";
-        private static final String KEY_MIN_EXP_BACKOFF_TIME = "min_exp_backoff_time";
-        private static final String DEPRECATED_KEY_STANDBY_HEARTBEAT_TIME =
-                "standby_heartbeat_time";
-        private static final String DEPRECATED_KEY_STANDBY_WORKING_BEATS = "standby_working_beats";
-        private static final String DEPRECATED_KEY_STANDBY_FREQUENT_BEATS =
-                "standby_frequent_beats";
-        private static final String DEPRECATED_KEY_STANDBY_RARE_BEATS = "standby_rare_beats";
+        private static final String KEY_MIN_LINEAR_BACKOFF_TIME_MS = "min_linear_backoff_time_ms";
+        private static final String KEY_MIN_EXP_BACKOFF_TIME_MS = "min_exp_backoff_time_ms";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
-        private static final String DEPRECATED_KEY_USE_HEARTBEATS = "use_heartbeats";
         private static final String KEY_ENABLE_API_QUOTAS = "enable_api_quotas";
         private static final String KEY_API_QUOTA_SCHEDULE_COUNT = "aq_schedule_count";
         private static final String KEY_API_QUOTA_SCHEDULE_WINDOW_MS = "aq_schedule_window_ms";
@@ -530,12 +542,15 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 "aq_schedule_return_failure";
 
+        private static final String KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS =
+                "screen_off_job_concurrency_increase_delay_ms";
+
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
-        private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
-        private static final long DEFAULT_MIN_EXP_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
+        private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
+        private static final long DEFAULT_MIN_EXP_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
         private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
@@ -543,6 +558,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        private static final long DEFAULT_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS = 30_000;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -564,59 +580,61 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         float MODERATE_USE_FACTOR = DEFAULT_MODERATE_USE_FACTOR;
 
+        /** Prefix for all of the max_job constants. */
+        private static final String KEY_PREFIX_MAX_JOB = "max_job_";
+
         // Max job counts for screen on / off, for each memory trim level.
         final MaxJobCountsPerMemoryTrimLevel MAX_JOB_COUNTS_SCREEN_ON =
                 new MaxJobCountsPerMemoryTrimLevel(
                         new MaxJobCounts(
-                                8, "max_job_total_on_normal",
-                                6, "max_job_max_bg_on_normal",
-                                2, "max_job_min_bg_on_normal"),
+                                8, KEY_PREFIX_MAX_JOB + "total_on_normal",
+                                6, KEY_PREFIX_MAX_JOB + "max_bg_on_normal",
+                                2, KEY_PREFIX_MAX_JOB + "min_bg_on_normal"),
                         new MaxJobCounts(
-                                8, "max_job_total_on_moderate",
-                                4, "max_job_max_bg_on_moderate",
-                                2, "max_job_min_bg_on_moderate"),
+                                8, KEY_PREFIX_MAX_JOB + "total_on_moderate",
+                                4, KEY_PREFIX_MAX_JOB + "max_bg_on_moderate",
+                                2, KEY_PREFIX_MAX_JOB + "min_bg_on_moderate"),
                         new MaxJobCounts(
-                                5, "max_job_total_on_low",
-                                1, "max_job_max_bg_on_low",
-                                1, "max_job_min_bg_on_low"),
+                                5, KEY_PREFIX_MAX_JOB + "total_on_low",
+                                1, KEY_PREFIX_MAX_JOB + "max_bg_on_low",
+                                1, KEY_PREFIX_MAX_JOB + "min_bg_on_low"),
                         new MaxJobCounts(
-                                5, "max_job_total_on_critical",
-                                1, "max_job_max_bg_on_critical",
-                                1, "max_job_min_bg_on_critical"));
+                                5, KEY_PREFIX_MAX_JOB + "total_on_critical",
+                                1, KEY_PREFIX_MAX_JOB + "max_bg_on_critical",
+                                1, KEY_PREFIX_MAX_JOB + "min_bg_on_critical"));
 
         final MaxJobCountsPerMemoryTrimLevel MAX_JOB_COUNTS_SCREEN_OFF =
                 new MaxJobCountsPerMemoryTrimLevel(
                         new MaxJobCounts(
-                                10, "max_job_total_off_normal",
-                                6, "max_job_max_bg_off_normal",
-                                2, "max_job_min_bg_off_normal"),
+                                10, KEY_PREFIX_MAX_JOB + "total_off_normal",
+                                6, KEY_PREFIX_MAX_JOB + "max_bg_off_normal",
+                                2, KEY_PREFIX_MAX_JOB + "min_bg_off_normal"),
                         new MaxJobCounts(
-                                10, "max_job_total_off_moderate",
-                                4, "max_job_max_bg_off_moderate",
-                                2, "max_job_min_bg_off_moderate"),
+                                10, KEY_PREFIX_MAX_JOB + "total_off_moderate",
+                                4, KEY_PREFIX_MAX_JOB + "max_bg_off_moderate",
+                                2, KEY_PREFIX_MAX_JOB + "min_bg_off_moderate"),
                         new MaxJobCounts(
-                                5, "max_job_total_off_low",
-                                1, "max_job_max_bg_off_low",
-                                1, "max_job_min_bg_off_low"),
+                                5, KEY_PREFIX_MAX_JOB + "total_off_low",
+                                1, KEY_PREFIX_MAX_JOB + "max_bg_off_low",
+                                1, KEY_PREFIX_MAX_JOB + "min_bg_off_low"),
                         new MaxJobCounts(
-                                5, "max_job_total_off_critical",
-                                1, "max_job_max_bg_off_critical",
-                                1, "max_job_min_bg_off_critical"));
+                                5, KEY_PREFIX_MAX_JOB + "total_off_critical",
+                                1, KEY_PREFIX_MAX_JOB + "max_bg_off_critical",
+                                1, KEY_PREFIX_MAX_JOB + "min_bg_off_critical"));
 
 
         /** Wait for this long after screen off before increasing the job concurrency. */
-        final KeyValueListParser.IntValue SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS =
-                new KeyValueListParser.IntValue(
-                        "screen_off_job_concurrency_increase_delay_ms", 30_000);
+        long SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS =
+                DEFAULT_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS;
 
         /**
          * The minimum backoff time to allow for linear backoff.
          */
-        long MIN_LINEAR_BACKOFF_TIME = DEFAULT_MIN_LINEAR_BACKOFF_TIME;
+        long MIN_LINEAR_BACKOFF_TIME_MS = DEFAULT_MIN_LINEAR_BACKOFF_TIME_MS;
         /**
          * The minimum backoff time to allow for exponential backoff.
          */
-        long MIN_EXP_BACKOFF_TIME = DEFAULT_MIN_EXP_BACKOFF_TIME;
+        long MIN_EXP_BACKOFF_TIME_MS = DEFAULT_MIN_EXP_BACKOFF_TIME_MS;
 
         /**
          * The fraction of a job's running window that must pass before we
@@ -652,61 +670,78 @@ public class JobSchedulerService extends com.android.server.SystemService
         public boolean API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT;
 
-        private final KeyValueListParser mParser = new KeyValueListParser(',');
-
-        void updateConstantsLocked(String value) {
-            try {
-                mParser.setString(value);
-            } catch (Exception e) {
-                // Failed to parse the settings string, log this and move on
-                // with defaults.
-                Slog.e(TAG, "Bad jobscheduler settings", e);
-            }
-
-            MIN_READY_NON_ACTIVE_JOBS_COUNT = mParser.getInt(
+        private void updateBatchingConstantsLocked() {
+            MIN_READY_NON_ACTIVE_JOBS_COUNT = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT);
-            MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = mParser.getLong(
+            MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
                     DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS);
-            HEAVY_USE_FACTOR = mParser.getFloat(KEY_HEAVY_USE_FACTOR,
+        }
+
+        private void updateUseFactorConstantsLocked() {
+            HEAVY_USE_FACTOR = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_HEAVY_USE_FACTOR,
                     DEFAULT_HEAVY_USE_FACTOR);
-            MODERATE_USE_FACTOR = mParser.getFloat(KEY_MODERATE_USE_FACTOR,
+            MODERATE_USE_FACTOR = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_MODERATE_USE_FACTOR,
                     DEFAULT_MODERATE_USE_FACTOR);
+        }
 
-            MAX_JOB_COUNTS_SCREEN_ON.normal.parse(mParser);
-            MAX_JOB_COUNTS_SCREEN_ON.moderate.parse(mParser);
-            MAX_JOB_COUNTS_SCREEN_ON.low.parse(mParser);
-            MAX_JOB_COUNTS_SCREEN_ON.critical.parse(mParser);
+        void updateConcurrencyConstantsLocked() {
+            MAX_JOB_COUNTS_SCREEN_ON.normal.update();
+            MAX_JOB_COUNTS_SCREEN_ON.moderate.update();
+            MAX_JOB_COUNTS_SCREEN_ON.low.update();
+            MAX_JOB_COUNTS_SCREEN_ON.critical.update();
 
-            MAX_JOB_COUNTS_SCREEN_OFF.normal.parse(mParser);
-            MAX_JOB_COUNTS_SCREEN_OFF.moderate.parse(mParser);
-            MAX_JOB_COUNTS_SCREEN_OFF.low.parse(mParser);
-            MAX_JOB_COUNTS_SCREEN_OFF.critical.parse(mParser);
+            MAX_JOB_COUNTS_SCREEN_OFF.normal.update();
+            MAX_JOB_COUNTS_SCREEN_OFF.moderate.update();
+            MAX_JOB_COUNTS_SCREEN_OFF.low.update();
+            MAX_JOB_COUNTS_SCREEN_OFF.critical.update();
 
-            SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.parse(mParser);
+            SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS,
+                    DEFAULT_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
+        }
 
-            MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
-                    DEFAULT_MIN_LINEAR_BACKOFF_TIME);
-            MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
-                    DEFAULT_MIN_EXP_BACKOFF_TIME);
-            CONN_CONGESTION_DELAY_FRAC = mParser.getFloat(KEY_CONN_CONGESTION_DELAY_FRAC,
+        private void updateBackoffConstantsLocked() {
+            MIN_LINEAR_BACKOFF_TIME_MS = DeviceConfig.getLong(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_MIN_LINEAR_BACKOFF_TIME_MS,
+                    DEFAULT_MIN_LINEAR_BACKOFF_TIME_MS);
+            MIN_EXP_BACKOFF_TIME_MS = DeviceConfig.getLong(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_MIN_EXP_BACKOFF_TIME_MS,
+                    DEFAULT_MIN_EXP_BACKOFF_TIME_MS);
+        }
+
+        private void updateConnectivityConstantsLocked() {
+            CONN_CONGESTION_DELAY_FRAC = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_CONGESTION_DELAY_FRAC,
                     DEFAULT_CONN_CONGESTION_DELAY_FRAC);
-            CONN_PREFETCH_RELAX_FRAC = mParser.getFloat(KEY_CONN_PREFETCH_RELAX_FRAC,
+            CONN_PREFETCH_RELAX_FRAC = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_PREFETCH_RELAX_FRAC,
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
+        }
 
-            ENABLE_API_QUOTAS = mParser.getBoolean(KEY_ENABLE_API_QUOTAS,
-                DEFAULT_ENABLE_API_QUOTAS);
+        private void updateApiQuotaConstantsLocked() {
+            ENABLE_API_QUOTAS = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_ENABLE_API_QUOTAS, DEFAULT_ENABLE_API_QUOTAS);
             // Set a minimum value on the quota limit so it's not so low that it interferes with
             // legitimate use cases.
             API_QUOTA_SCHEDULE_COUNT = Math.max(250,
-                    mParser.getInt(KEY_API_QUOTA_SCHEDULE_COUNT, DEFAULT_API_QUOTA_SCHEDULE_COUNT));
-            API_QUOTA_SCHEDULE_WINDOW_MS = mParser.getDurationMillis(
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                            KEY_API_QUOTA_SCHEDULE_COUNT, DEFAULT_API_QUOTA_SCHEDULE_COUNT));
+            API_QUOTA_SCHEDULE_WINDOW_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                 KEY_API_QUOTA_SCHEDULE_WINDOW_MS, DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS);
-            API_QUOTA_SCHEDULE_THROW_EXCEPTION = mParser.getBoolean(
+            API_QUOTA_SCHEDULE_THROW_EXCEPTION = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION,
                     DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION);
-            API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = mParser.getBoolean(
+            API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT,
                     DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT);
         }
@@ -731,10 +766,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             MAX_JOB_COUNTS_SCREEN_OFF.low.dump(pw, "");
             MAX_JOB_COUNTS_SCREEN_OFF.critical.dump(pw, "");
 
-            SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.dump(pw, "");
+            pw.print(KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS,
+                    SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS).println();
 
-            pw.print(KEY_MIN_LINEAR_BACKOFF_TIME, MIN_LINEAR_BACKOFF_TIME).println();
-            pw.print(KEY_MIN_EXP_BACKOFF_TIME, MIN_EXP_BACKOFF_TIME).println();
+            pw.print(KEY_MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS).println();
+            pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.print(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
 
@@ -760,11 +796,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             MAX_JOB_COUNTS_SCREEN_ON.dumpProto(proto, ConstantsProto.MAX_JOB_COUNTS_SCREEN_ON);
             MAX_JOB_COUNTS_SCREEN_OFF.dumpProto(proto, ConstantsProto.MAX_JOB_COUNTS_SCREEN_OFF);
 
-            SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.dumpProto(proto,
-                    ConstantsProto.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
+            proto.write(ConstantsProto.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS,
+                    SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
 
-            proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME);
-            proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME);
+            proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS);
+            proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS);
             proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
             proto.write(ConstantsProto.CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC);
 
@@ -1407,7 +1443,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         mHandler = new JobHandler(context.getMainLooper());
         mConstants = new Constants();
-        mConstantsObserver = new ConstantsObserver(mHandler);
+        mConstantsObserver = new ConstantsObserver();
         mJobSchedulerStub = new JobSchedulerStub();
 
         mConcurrencyManager = new JobConcurrencyManager(this);
@@ -1521,7 +1557,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            mConstantsObserver.start(getContext().getContentResolver());
+            mConstantsObserver.start();
             for (StateController controller : mControllers) {
                 controller.onSystemServicesReady();
             }
@@ -1693,8 +1729,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         switch (job.getBackoffPolicy()) {
             case JobInfo.BACKOFF_POLICY_LINEAR: {
                 long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME) {
-                    backoff = mConstants.MIN_LINEAR_BACKOFF_TIME;
+                if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
+                    backoff = mConstants.MIN_LINEAR_BACKOFF_TIME_MS;
                 }
                 delayMillis = backoff * backoffAttempts;
             } break;
@@ -1704,8 +1740,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             case JobInfo.BACKOFF_POLICY_EXPONENTIAL: {
                 long backoff = initialBackoffMillis;
-                if (backoff < mConstants.MIN_EXP_BACKOFF_TIME) {
-                    backoff = mConstants.MIN_EXP_BACKOFF_TIME;
+                if (backoff < mConstants.MIN_EXP_BACKOFF_TIME_MS) {
+                    backoff = mConstants.MIN_EXP_BACKOFF_TIME_MS;
                 }
                 delayMillis = (long) Math.scalb(backoff, backoffAttempts - 1);
             } break;

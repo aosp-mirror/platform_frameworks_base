@@ -283,8 +283,9 @@ class DragState {
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
             mDragWindowHandle.visible = true;
-            mDragWindowHandle.canReceiveKeys = false;
-            mDragWindowHandle.hasFocus = true;
+            // Allows the system to consume keys when dragging is active. This can also be used to
+            // modify the drag state on key press. Example, cancel drag on escape key.
+            mDragWindowHandle.focusable = true;
             mDragWindowHandle.hasWallpaper = false;
             mDragWindowHandle.paused = false;
             mDragWindowHandle.ownerPid = Process.myPid();

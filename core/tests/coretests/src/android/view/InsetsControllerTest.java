@@ -746,6 +746,20 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ITYPE_IME));
             assertEquals(newState.getSource(ITYPE_IME),
                     mTestHost.getModifiedState().peekSource(ITYPE_IME));
+
+            // The modified frames cannot be updated if there is an animation.
+            mController.onControlsChanged(createSingletonControl(ITYPE_NAVIGATION_BAR));
+            mController.hide(navigationBars());
+            newState = new InsetsState(mController.getState(), true /* copySource */);
+            newState.getSource(ITYPE_NAVIGATION_BAR).getFrame().top--;
+            mController.onStateChanged(newState);
+            assertNotEquals(newState.getSource(ITYPE_NAVIGATION_BAR),
+                    mTestHost.getModifiedState().peekSource(ITYPE_NAVIGATION_BAR));
+
+            // The modified frames can be updated while the animation is done.
+            mController.cancelExistingAnimations();
+            assertEquals(newState.getSource(ITYPE_NAVIGATION_BAR),
+                    mTestHost.getModifiedState().peekSource(ITYPE_NAVIGATION_BAR));
         });
     }
 

@@ -111,7 +111,7 @@ public class AuthCredentialPasswordView extends AuthCredentialView
             // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
             // Gatekeeper Password and operationId.
             mPendingLockCheck = LockPatternChecker.verifyCredential(mLockPatternUtils,
-                    password, mEffectiveUserId, LockPatternUtils.VERIFY_FLAG_RETURN_GK_PW,
+                    password, mEffectiveUserId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
                     this::onCredentialVerified);
         }
     }

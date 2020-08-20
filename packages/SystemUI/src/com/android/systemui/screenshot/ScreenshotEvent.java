@@ -22,6 +22,7 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_VENDOR_GESTURE;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -37,6 +38,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     SCREENSHOT_REQUESTED_OVERVIEW(304),
     @UiEvent(doc = "screenshot requested from accessibility actions")
     SCREENSHOT_REQUESTED_ACCESSIBILITY_ACTIONS(382),
+    @UiEvent(doc = "screenshot requested from vendor gesture")
+    SCREENSHOT_REQUESTED_VENDOR_GESTURE(638),
     @UiEvent(doc = "screenshot requested (other)")
     SCREENSHOT_REQUESTED_OTHER(305),
     @UiEvent(doc = "screenshot was saved")
@@ -81,6 +84,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
                 return ScreenshotEvent.SCREENSHOT_REQUESTED_OVERVIEW;
             case SCREENSHOT_ACCESSIBILITY_ACTIONS:
                 return ScreenshotEvent.SCREENSHOT_REQUESTED_ACCESSIBILITY_ACTIONS;
+            case SCREENSHOT_VENDOR_GESTURE:
+                return ScreenshotEvent.SCREENSHOT_REQUESTED_VENDOR_GESTURE;
             case SCREENSHOT_OTHER:
             default:
                 return ScreenshotEvent.SCREENSHOT_REQUESTED_OTHER;

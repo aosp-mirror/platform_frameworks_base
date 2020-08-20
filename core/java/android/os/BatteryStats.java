@@ -2954,7 +2954,7 @@ public abstract class BatteryStats implements Parcelable {
      * enough current data to make a decision, or the battery is currently
      * charging.
      *
-     * @param curTime The current elepsed realtime in microseconds.
+     * @param curTime The current elapsed realtime in microseconds.
      */
     @UnsupportedAppUsage
     public abstract long computeBatteryTimeRemaining(long curTime);

@@ -22,9 +22,6 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 
-import javax.inject.Inject;
-
-
 /**
  * Helper class that ends PiP log to UiEvent, see also go/uievent
  */
@@ -35,7 +32,6 @@ public class PipUiEventLogger {
 
     private TaskInfo mTaskInfo;
 
-    @Inject
     public PipUiEventLogger(UiEventLogger uiEventLogger) {
         mUiEventLogger = uiEventLogger;
     }

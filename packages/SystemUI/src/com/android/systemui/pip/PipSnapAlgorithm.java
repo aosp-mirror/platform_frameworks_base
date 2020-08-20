@@ -22,24 +22,18 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Size;
 
-import javax.inject.Inject;
-
 /**
  * Calculates the snap targets and the snap position for the PIP given a position and a velocity.
  * All bounds are relative to the display top/left.
  */
 public class PipSnapAlgorithm {
 
-    private final Context mContext;
-
     private final float mDefaultSizePercent;
     private final float mMinAspectRatioForMinSize;
     private final float mMaxAspectRatioForMinSize;
 
-    @Inject
     public PipSnapAlgorithm(Context context) {
         Resources res = context.getResources();
-        mContext = context;
         mDefaultSizePercent = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
         mMaxAspectRatioForMinSize = res.getFloat(

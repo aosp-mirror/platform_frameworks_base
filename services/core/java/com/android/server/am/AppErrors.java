@@ -716,7 +716,7 @@ class AppErrors {
             // back in the pending list.
             ServiceRecord sr = app.getRunningServiceAt(i);
             // If the service was restarted a while ago, then reset crash count, else increment it.
-            if (now > sr.restartTime + ProcessList.MIN_CRASH_INTERVAL) {
+            if (now > sr.restartTime + ActivityManagerConstants.MIN_CRASH_INTERVAL) {
                 sr.crashCount = 1;
             } else {
                 sr.crashCount++;
@@ -729,7 +729,7 @@ class AppErrors {
             }
         }
 
-        if (crashTime != null && now < crashTime + ProcessList.MIN_CRASH_INTERVAL) {
+        if (crashTime != null && now < crashTime + ActivityManagerConstants.MIN_CRASH_INTERVAL) {
             // The process crashed again very quickly. If it was a bound foreground service, let's
             // try to restart again in a while, otherwise the process loses!
             Slog.w(TAG, "Process " + app.processName
@@ -771,7 +771,7 @@ class AppErrors {
                 data.taskId = affectedTaskId;
             }
             if (data != null && crashTimePersistent != null
-                    && now < crashTimePersistent + ProcessList.MIN_CRASH_INTERVAL) {
+                    && now < crashTimePersistent + ActivityManagerConstants.MIN_CRASH_INTERVAL) {
                 data.repeating = true;
             }
         }
@@ -853,7 +853,7 @@ class AppErrors {
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
             final long now = SystemClock.uptimeMillis();
             final boolean shouldThottle = crashShowErrorTime != null
-                    && now < crashShowErrorTime + ProcessList.MIN_CRASH_INTERVAL;
+                    && now < crashShowErrorTime + ActivityManagerConstants.MIN_CRASH_INTERVAL;
             if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
                     && !crashSilenced && !shouldThottle
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {

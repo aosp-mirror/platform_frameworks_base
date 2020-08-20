@@ -507,7 +507,7 @@ message GlobalSettingsProto {
     }
     optional IntentFirewall intent_firewall = 65;
 
-    optional SettingProto job_scheduler_constants = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 66; // job_scheduler_constants
     optional SettingProto job_scheduler_quota_controller_constants = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
     reserved 150; // job_scheduler_time_controller_constants
 

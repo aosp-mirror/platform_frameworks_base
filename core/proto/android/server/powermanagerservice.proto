@@ -174,6 +174,16 @@ message PowerManagerServiceDumpProto {
     optional BatterySaverStateMachineProto battery_saver_state_machine = 50;
     // Attentive timeout in ms. The timeout is disabled if it is set to -1.
     optional sint32 attentive_timeout_ms = 51;
+    // The time (in the elapsed realtime timebase) at which the battery level will reach 0%. This
+    // is provided as an enhanced estimate and only valid if
+    // last_enhanced_discharge_time_updated_elapsed is greater than 0.
+    optional int64 enhanced_discharge_time_elapsed = 52;
+    // Timestamp (in the elapsed realtime timebase) of last update to enhanced battery estimate
+    // data.
+    optional int64 last_enhanced_discharge_time_updated_elapsed = 53;
+    // Whether or not the current enhanced discharge prediction is personalized based on device
+    // usage or not.
+    optional bool is_enhanced_discharge_prediction_personalized = 54;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.

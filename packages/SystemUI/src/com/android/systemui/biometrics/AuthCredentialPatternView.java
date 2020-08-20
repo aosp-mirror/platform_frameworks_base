@@ -75,7 +75,7 @@ public class AuthCredentialPatternView extends AuthCredentialView {
                         mLockPatternUtils,
                         credential,
                         mEffectiveUserId,
-                        LockPatternUtils.VERIFY_FLAG_RETURN_GK_PW,
+                        LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
                         this::onPatternVerified);
             }
         }

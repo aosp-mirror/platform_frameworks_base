@@ -102,6 +102,7 @@
     <protected-broadcast android:name="android.os.action.POWER_SAVE_WHITELIST_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED_INTERNAL" />
+    <protected-broadcast android:name="android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED" />
 
     <!-- @deprecated This is rarely used and will be phased out soon. -->
     <protected-broadcast android:name="android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED" />
@@ -5039,6 +5040,10 @@
          <p>CTS tests will use UiAutomation.adoptShellPermissionIdentity() to gain access.  -->
     <permission android:name="android.permission.RESET_APP_ERRORS"
         android:protectionLevel="signature" />
+
+    <!-- @hide Allows an application to create/destroy input consumer. -->
+    <permission android:name="android.permission.INPUT_CONSUMER"
+                android:protectionLevel="signature" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
