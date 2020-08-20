@@ -19,6 +19,7 @@ package com.android.systemui.appops;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.AudioRecordingConfiguration;
 import android.os.Handler;
@@ -66,6 +67,7 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
+    private final LocationManager mLocationManager;
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
@@ -106,6 +108,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
         }
         mAudioManager = audioManager;
+        mLocationManager = context.getSystemService(LocationManager.class);
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -307,6 +310,11 @@ public class AppOpsControllerImpl implements AppOpsController,
                 || appOpCode == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION
                 || appOpCode == AppOpsManager.OP_PHONE_CALL_CAMERA
                 || appOpCode == AppOpsManager.OP_PHONE_CALL_MICROPHONE) {
+            return true;
+        }
+
+        if (appOpCode == AppOpsManager.OP_CAMERA && mLocationManager.isProviderPackage(
+                packageName)) {
             return true;
         }
 
