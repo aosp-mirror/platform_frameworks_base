@@ -50,6 +50,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -68,6 +69,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -103,6 +105,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final ConfigurationController mConfigurationController;
     private final NavigationModeController mNavigationModeController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final Optional<FaceAuthScreenBrightnessController> mFaceAuthScreenBrightnessController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -212,6 +215,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             DockManager dockManager,
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
+            Optional<FaceAuthScreenBrightnessController> faceAuthScreenBrightnessController,
             NotificationMediaManager notificationMediaManager) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -224,6 +228,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardUpdateManager = keyguardUpdateMonitor;
         mStatusBarStateController = sysuiStatusBarStateController;
         mDockManager = dockManager;
+        mFaceAuthScreenBrightnessController = faceAuthScreenBrightnessController;
     }
 
     @Override
@@ -248,6 +253,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         notificationPanelViewController.addExpansionListener(this);
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
+        mFaceAuthScreenBrightnessController.ifPresent((it) -> {
+            View overlay = new View(mContext);
+            container.addView(overlay);
+            it.attach(overlay);
+        });
 
         registerListeners();
     }
