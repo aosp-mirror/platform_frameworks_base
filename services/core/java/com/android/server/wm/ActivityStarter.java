@@ -2009,8 +2009,6 @@ class ActivityStarter {
             // of history or if it is finished immediately), thus disassociating the task. Also note
             // that mReuseTask is reset as a result of {@link Task#performClearTaskLocked}
             // launching another activity.
-            // TODO(b/36119896):  We shouldn't trigger activity launches in this path since we are
-            // already launching one.
             targetTask.performClearTaskLocked();
             targetTask.setIntent(mStartActivity);
             mAddingToTask = true;
