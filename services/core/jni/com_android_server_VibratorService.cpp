@@ -40,14 +40,12 @@ namespace aidl = android::hardware::vibrator;
 namespace android {
 
 static JavaVM* sJvm = nullptr;
-
 static jmethodID sMethodIdOnComplete;
-
 static struct {
     jfieldID id;
     jfieldID scale;
     jfieldID delay;
-} gPrimitiveClassInfo;
+} sPrimitiveClassInfo;
 
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
                 static_cast<uint8_t>(aidl::EffectStrength::LIGHT));
@@ -77,100 +75,117 @@ static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
 static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
                 static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
 
-static inline void callVibrationOnComplete(jobject vibration) {
-    if (vibration == nullptr) {
-        return;
+class NativeVibratorService {
+public:
+    NativeVibratorService(JNIEnv* env, jobject callbackListener)
+          : mController(std::make_unique<vibrator::HalController>()),
+            mCallbackListener(env->NewGlobalRef(callbackListener)) {
+        LOG_ALWAYS_FATAL_IF(mCallbackListener == nullptr,
+                            "Unable to create global reference to vibration callback handler");
     }
-    auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
-    jniEnv->CallVoidMethod(vibration, sMethodIdOnComplete);
-    jniEnv->DeleteGlobalRef(vibration);
-}
+
+    ~NativeVibratorService() {
+        auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+        jniEnv->DeleteGlobalRef(mCallbackListener);
+    }
+
+    vibrator::HalController* controller() const { return mController.get(); }
+
+    std::function<void()> createCallback(jlong vibrationId) {
+        return [vibrationId, this]() {
+            auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+            jniEnv->CallVoidMethod(mCallbackListener, sMethodIdOnComplete, vibrationId);
+        };
+    }
+
+private:
+    const std::unique_ptr<vibrator::HalController> mController;
+    const jobject mCallbackListener;
+};
 
 static aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
     aidl::CompositeEffect effect;
     effect.primitive = static_cast<aidl::CompositePrimitive>(
-            env->GetIntField(primitive, gPrimitiveClassInfo.id));
-    effect.scale = static_cast<float>(env->GetFloatField(primitive, gPrimitiveClassInfo.scale));
-    effect.delayMs = static_cast<int32_t>(env->GetIntField(primitive, gPrimitiveClassInfo.delay));
+            env->GetIntField(primitive, sPrimitiveClassInfo.id));
+    effect.scale = static_cast<float>(env->GetFloatField(primitive, sPrimitiveClassInfo.scale));
+    effect.delayMs = static_cast<int32_t>(env->GetIntField(primitive, sPrimitiveClassInfo.delay));
     return effect;
 }
 
-static void destroyVibratorController(void* rawVibratorController) {
-    vibrator::HalController* vibratorController =
-            reinterpret_cast<vibrator::HalController*>(rawVibratorController);
-    if (vibratorController) {
-        delete vibratorController;
+static void destroyNativeService(void* servicePtr) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service) {
+        delete service;
     }
 }
 
-static jlong vibratorInit(JNIEnv* /* env */, jclass /* clazz */) {
-    std::unique_ptr<vibrator::HalController> controller =
-            std::make_unique<vibrator::HalController>();
-    controller->init();
-    return reinterpret_cast<jlong>(controller.release());
+static jlong vibratorInit(JNIEnv* env, jclass /* clazz */, jobject callbackListener) {
+    std::unique_ptr<NativeVibratorService> service =
+            std::make_unique<NativeVibratorService>(env, callbackListener);
+    service->controller()->init();
+    return reinterpret_cast<jlong>(service.release());
 }
 
 static jlong vibratorGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
-    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyVibratorController));
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyNativeService));
 }
 
-static jboolean vibratorExists(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorExists failed because controller was not initialized");
+static jboolean vibratorExists(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorExists failed because native service was not initialized");
         return JNI_FALSE;
     }
-    return controller->ping().isOk() ? JNI_TRUE : JNI_FALSE;
+    return service->controller()->ping().isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* env, jclass /* clazz */, jlong controllerPtr, jlong timeoutMs,
-                       jobject vibration) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorOn failed because controller was not initialized");
+static void vibratorOn(JNIEnv* env, jclass /* clazz */, jlong servicePtr, jlong timeoutMs,
+                       jlong vibrationId) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorOn failed because native service was not initialized");
         return;
     }
-    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
-    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
-    controller->on(std::chrono::milliseconds(timeoutMs), callback);
+    auto callback = service->createCallback(vibrationId);
+    service->controller()->on(std::chrono::milliseconds(timeoutMs), callback);
 }
 
-static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorOff failed because controller was not initialized");
+static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorOff failed because native service was not initialized");
         return;
     }
-    controller->off();
+    service->controller()->off();
 }
 
-static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
+static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong servicePtr,
                                  jint amplitude) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorSetAmplitude failed because controller was not initialized");
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorSetAmplitude failed because native service was not initialized");
         return;
     }
-    controller->setAmplitude(static_cast<int32_t>(amplitude));
+    service->controller()->setAmplitude(static_cast<int32_t>(amplitude));
 }
 
-static void vibratorSetExternalControl(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
+static void vibratorSetExternalControl(JNIEnv* env, jclass /* clazz */, jlong servicePtr,
                                        jboolean enabled) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorSetExternalControl failed because controller was not initialized");
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorSetExternalControl failed because native service was not initialized");
         return;
     }
-    controller->setExternalControl(enabled);
+    service->controller()->setExternalControl(enabled);
 }
 
-static jintArray vibratorGetSupportedEffects(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorGetSupportedEffects failed because controller was not initialized");
+static jintArray vibratorGetSupportedEffects(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorGetSupportedEffects failed because native service was not initialized");
         return nullptr;
     }
-    auto result = controller->getSupportedEffects();
+    auto result = service->controller()->getSupportedEffects();
     if (!result.isOk()) {
         return nullptr;
     }
@@ -181,14 +196,13 @@ static jintArray vibratorGetSupportedEffects(JNIEnv* env, jclass /* clazz */, jl
     return effects;
 }
 
-static jintArray vibratorGetSupportedPrimitives(JNIEnv* env, jclass /* clazz */,
-                                                jlong controllerPtr) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorGetSupportedPrimitives failed because controller was not initialized");
+static jintArray vibratorGetSupportedPrimitives(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorGetSupportedPrimitives failed because native service was not initialized");
         return nullptr;
     }
-    auto result = controller->getSupportedPrimitives();
+    auto result = service->controller()->getSupportedPrimitives();
     if (!result.isOk()) {
         return nullptr;
     }
@@ -199,26 +213,25 @@ static jintArray vibratorGetSupportedPrimitives(JNIEnv* env, jclass /* clazz */,
     return primitives;
 }
 
-static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
-                                   jlong effect, jlong strength, jobject vibration) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorPerformEffect failed because controller was not initialized");
+static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong servicePtr, jlong effect,
+                                   jlong strength, jlong vibrationId) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorPerformEffect failed because native service was not initialized");
         return -1;
     }
     aidl::Effect effectType = static_cast<aidl::Effect>(effect);
     aidl::EffectStrength effectStrength = static_cast<aidl::EffectStrength>(strength);
-    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
-    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
-    auto result = controller->performEffect(effectType, effectStrength, callback);
+    auto callback = service->createCallback(vibrationId);
+    auto result = service->controller()->performEffect(effectType, effectStrength, callback);
     return result.isOk() ? result.value().count() : -1;
 }
 
-static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
-                                          jobjectArray composition, jobject vibration) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorPerformComposedEffect failed because controller was not initialized");
+static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong servicePtr,
+                                          jobjectArray composition, jlong vibrationId) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorPerformComposedEffect failed because native service was not initialized");
         return;
     }
     size_t size = env->GetArrayLength(composition);
@@ -227,54 +240,52 @@ static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong
         jobject element = env->GetObjectArrayElement(composition, i);
         effects.push_back(effectFromJavaPrimitive(env, element));
     }
-    jobject vibrationRef = vibration == nullptr ? vibration : MakeGlobalRefOrDie(env, vibration);
-    auto callback = [vibrationRef]() { callVibrationOnComplete(vibrationRef); };
-    controller->performComposedEffect(effects, callback);
+    auto callback = service->createCallback(vibrationId);
+    service->controller()->performComposedEffect(effects, callback);
 }
 
-static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong controllerPtr) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorGetCapabilities failed because controller was not initialized");
+static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorGetCapabilities failed because native service was not initialized");
         return 0;
     }
-    auto result = controller->getCapabilities();
+    auto result = service->controller()->getCapabilities();
     return result.isOk() ? static_cast<jlong>(result.value()) : 0;
 }
 
-static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong controllerPtr, jlong id,
+static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong servicePtr, jlong id,
                                    jlong effect, jlong strength) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorAlwaysOnEnable failed because controller was not initialized");
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorAlwaysOnEnable failed because native service was not initialized");
         return;
     }
-    controller->alwaysOnEnable(static_cast<int32_t>(id), static_cast<aidl::Effect>(effect),
-                               static_cast<aidl::EffectStrength>(strength));
+    service->controller()->alwaysOnEnable(static_cast<int32_t>(id),
+                                          static_cast<aidl::Effect>(effect),
+                                          static_cast<aidl::EffectStrength>(strength));
 }
 
-static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong controllerPtr,
-                                    jlong id) {
-    vibrator::HalController* controller = reinterpret_cast<vibrator::HalController*>(controllerPtr);
-    if (controller == nullptr) {
-        ALOGE("vibratorAlwaysOnDisable failed because controller was not initialized");
+static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong servicePtr, jlong id) {
+    NativeVibratorService* service = reinterpret_cast<NativeVibratorService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("vibratorAlwaysOnDisable failed because native service was not initialized");
         return;
     }
-    controller->alwaysOnDisable(static_cast<int32_t>(id));
+    service->controller()->alwaysOnDisable(static_cast<int32_t>(id));
 }
 
 static const JNINativeMethod method_table[] = {
-        {"vibratorInit", "()J", (void*)vibratorInit},
+        {"vibratorInit", "(Lcom/android/server/VibratorService$OnCompleteListener;)J",
+         (void*)vibratorInit},
         {"vibratorGetFinalizer", "()J", (void*)vibratorGetFinalizer},
         {"vibratorExists", "(J)Z", (void*)vibratorExists},
-        {"vibratorOn", "(JJLcom/android/server/VibratorService$Vibration;)V", (void*)vibratorOn},
+        {"vibratorOn", "(JJJ)V", (void*)vibratorOn},
         {"vibratorOff", "(J)V", (void*)vibratorOff},
         {"vibratorSetAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
-        {"vibratorPerformEffect", "(JJJLcom/android/server/VibratorService$Vibration;)J",
-         (void*)vibratorPerformEffect},
+        {"vibratorPerformEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
         {"vibratorPerformComposedEffect",
-         "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/"
-         "VibratorService$Vibration;)V",
+         "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;J)V",
          (void*)vibratorPerformComposedEffect},
         {"vibratorGetSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
         {"vibratorGetSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
@@ -284,18 +295,17 @@ static const JNINativeMethod method_table[] = {
         {"vibratorAlwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
 };
 
-int register_android_server_VibratorService(JavaVM* vm, JNIEnv* env) {
-    sJvm = vm;
-    sMethodIdOnComplete =
-            GetMethodIDOrDie(env,
-                             FindClassOrDie(env, "com/android/server/VibratorService$Vibration"),
-                             "onComplete", "()V");
+int register_android_server_VibratorService(JavaVM* jvm, JNIEnv* env) {
+    sJvm = jvm;
+    jclass listenerClass =
+            FindClassOrDie(env, "com/android/server/VibratorService$OnCompleteListener");
+    sMethodIdOnComplete = GetMethodIDOrDie(env, listenerClass, "onComplete", "(J)V");
 
     jclass primitiveClass =
             FindClassOrDie(env, "android/os/VibrationEffect$Composition$PrimitiveEffect");
-    gPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "id", "I");
-    gPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "scale", "F");
-    gPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "delay", "I");
+    sPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "id", "I");
+    sPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "scale", "F");
+    sPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "delay", "I");
 
     return jniRegisterNativeMethods(env, "com/android/server/VibratorService", method_table,
                                     NELEM(method_table));
