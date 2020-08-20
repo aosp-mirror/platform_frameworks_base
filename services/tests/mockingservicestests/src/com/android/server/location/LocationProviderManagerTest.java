@@ -33,6 +33,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.LocationUtils.createLocation;
+import static com.android.server.location.listeners.RemoteListenerRegistration.IN_PROCESS_EXECUTOR;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -85,7 +86,6 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.location.listeners.ListenerRegistration;
 import com.android.server.location.util.FakeUserInfoHelper;
 import com.android.server.location.util.TestInjector;
 
@@ -484,7 +484,7 @@ public class LocationProviderManagerTest {
                 PERMISSION_FINE, listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
-        ListenerRegistration.IN_PROCESS_EXECUTOR.execute(() -> {
+        IN_PROCESS_EXECUTOR.execute(() -> {
             try {
                 blocker.await();
             } catch (InterruptedException e) {
@@ -622,7 +622,7 @@ public class LocationProviderManagerTest {
                 PERMISSION_FINE, listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
-        ListenerRegistration.IN_PROCESS_EXECUTOR.execute(() -> {
+        IN_PROCESS_EXECUTOR.execute(() -> {
             try {
                 blocker.await();
             } catch (InterruptedException e) {

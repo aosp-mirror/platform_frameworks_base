@@ -30,7 +30,7 @@ import android.util.Log;
  * @param <TListener> listener type
  */
 public abstract class PendingIntentListenerRegistration<TRequest, TListener> extends
-        RemovableListenerRegistration<TRequest, TListener> implements PendingIntent.CancelListener {
+        RemoteListenerRegistration<TRequest, TListener> implements PendingIntent.CancelListener {
 
     /**
      * Interface to allowed pending intent retrieval when keys are not themselves PendingIntents.

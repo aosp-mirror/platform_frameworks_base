@@ -17,55 +17,34 @@
 package com.android.server.location.listeners;
 
 
-import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.location.util.identity.CallerIdentity;
-import android.os.Process;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.listeners.ListenerExecutor;
-import com.android.server.FgThread;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
  * A listener registration object which holds data associated with the listener, such as an optional
- * request, and the identity of the listener owner.
+ * request, and an executor responsible for listener invocations.
  *
  * @param <TRequest>  request type
  * @param <TListener> listener type
  */
 public class ListenerRegistration<TRequest, TListener> implements ListenerExecutor {
 
-    @VisibleForTesting
-    public static final Executor IN_PROCESS_EXECUTOR = FgThread.getExecutor();
-
     private final Executor mExecutor;
     private final @Nullable TRequest mRequest;
-    private final CallerIdentity mIdentity;
 
     private boolean mActive;
 
     private volatile @Nullable TListener mListener;
 
-    protected ListenerRegistration(@Nullable TRequest request, CallerIdentity identity,
+    protected ListenerRegistration(Executor executor, @Nullable TRequest request,
             TListener listener) {
-        // if a client is in the same process as us, binder calls will execute synchronously and
-        // we shouldn't run callbacks directly since they might be run under lock and deadlock
-        if (identity.getPid() == Process.myPid()) {
-            // there's a slight loophole here for pending intents - pending intent callbacks can
-            // always be run on the direct executor since they're always asynchronous, but honestly
-            // you shouldn't be using pending intent callbacks within the same process anyways
-            mExecutor = IN_PROCESS_EXECUTOR;
-        } else {
-            mExecutor = DIRECT_EXECUTOR;
-        }
-
+        mExecutor = Objects.requireNonNull(executor);
         mRequest = request;
-        mIdentity = Objects.requireNonNull(identity);
         mActive = false;
         mListener = Objects.requireNonNull(listener);
     }
@@ -82,34 +61,34 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
     }
 
     /**
-     * Returns the listener identity.
-     */
-    public final CallerIdentity getIdentity() {
-        return mIdentity;
-    }
-
-    /**
-     * May be overridden by subclasses. Invoked when registration occurs.
+     * May be overridden by subclasses. Invoked when registration occurs. Invoked while holding the
+     * owning multiplexer's internal lock.
      */
     protected void onRegister(Object key) {}
 
     /**
-     * May be overridden by subclasses. Invoked when unregistration occurs.
+     * May be overridden by subclasses. Invoked when unregistration occurs. Invoked while holding
+     * the owning multiplexer's internal lock.
      */
     protected void onUnregister() {}
 
     /**
      * May be overridden by subclasses. Invoked when this registration becomes active. If this
-     * returns a non-null operation, that operation will be invoked for the listener.
+     * returns a non-null operation, that operation will be invoked for the listener. Invoked
+     * while holding the owning multiplexer's internal lock.
      */
     protected @Nullable ListenerOperation<TListener> onActive() {
         return null;
     }
 
     /**
-     * May be overridden by subclasses. Invoked when registration becomes inactive.
+     * May be overridden by subclasses. Invoked when registration becomes inactive. If this returns
+     * a non-null operation, that operation will be invoked for the listener. Invoked while holding
+     * the owning multiplexer's internal lock.
      */
-    protected void onInactive() {}
+    protected @Nullable ListenerOperation<TListener> onInactive() {
+        return null;
+    }
 
     public final boolean isActive() {
         return mActive;
@@ -136,8 +115,7 @@ public class ListenerRegistration<TRequest, TListener> implements ListenerExecut
     /**
      * May be overridden by subclasses, however should rarely be needed. Invoked when the listener
      * associated with this registration is unregistered, which may occur before the registration
-     * itself is unregistered. This immediately prevents the listener from being further invoked
-     * even if the various bookkeeping associated with unregistration has not occurred yet.
+     * itself is unregistered. This immediately prevents the listener from being further invoked.
      */
     protected void onListenerUnregister() {};
 
