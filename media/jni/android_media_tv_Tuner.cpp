@@ -2048,7 +2048,7 @@ static FrontendSettings getDvbcFrontendSettings(JNIEnv *env, const jobject& sett
                     env->GetIntField(settings, env->GetFieldID(clazz, "mModulation", "I")));
     FrontendInnerFec innerFec =
             static_cast<FrontendInnerFec>(
-                    env->GetLongField(settings, env->GetFieldID(clazz, "mFec", "J")));
+                    env->GetLongField(settings, env->GetFieldID(clazz, "mInnerFec", "J")));
     uint32_t symbolRate =
             static_cast<uint32_t>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mSymbolRate", "I")));
@@ -2057,7 +2057,7 @@ static FrontendSettings getDvbcFrontendSettings(JNIEnv *env, const jobject& sett
                     env->GetIntField(settings, env->GetFieldID(clazz, "mOuterFec", "I")));
     FrontendDvbcAnnex annex =
             static_cast<FrontendDvbcAnnex>(
-                    env->GetByteField(settings, env->GetFieldID(clazz, "mAnnex", "B")));
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mAnnex", "I")));
     FrontendDvbcSpectralInversion spectralInversion =
             static_cast<FrontendDvbcSpectralInversion>(
                     env->GetIntField(
