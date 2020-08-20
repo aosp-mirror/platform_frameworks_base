@@ -541,7 +541,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity = new ActivityBuilder(mService)
                 .setTask(mTask)
                 .setLaunchTaskBehind(true)
-                .setConfigChanges(CONFIG_ORIENTATION)
+                .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
                 .build();
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
 
