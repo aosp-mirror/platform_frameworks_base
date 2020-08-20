@@ -7,6 +7,7 @@
 #include "include/effects/SkRuntimeEffect.h"
 #include "shader/Shader.h"
 #include "shader/BitmapShader.h"
+#include "shader/BlurShader.h"
 #include "shader/ComposeShader.h"
 #include "shader/LinearGradientShader.h"
 #include "shader/RadialGradientShader.h"
@@ -222,6 +223,22 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+static jlong BlurShader_create(JNIEnv* env , jobject o, jlong matrixPtr, jfloat sigmaX,
+        jfloat sigmaY, jlong shaderHandle) {
+    auto* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
+    auto* inputShader = reinterpret_cast<Shader*>(shaderHandle);
+
+    auto* blurShader = new BlurShader(
+                sigmaX,
+                sigmaY,
+                inputShader,
+                matrix
+            );
+    return reinterpret_cast<jlong>(blurShader);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlong matrixPtr,
         jbyteArray inputs, jlong colorSpaceHandle, jboolean isOpaque) {
     auto* effect = reinterpret_cast<SkRuntimeEffect*>(shaderFactory);
@@ -273,6 +290,10 @@ static const JNINativeMethod gBitmapShaderMethods[] = {
     { "nativeCreate",      "(JJII)J",  (void*)BitmapShader_constructor },
 };
 
+static const JNINativeMethod gBlurShaderMethods[] = {
+    { "nativeCreate",      "(JFFJ)J", (void*)BlurShader_create }
+};
+
 static const JNINativeMethod gLinearGradientMethods[] = {
     { "nativeCreate",     "(JFFFF[J[FIJ)J",  (void*)LinearGradient_create     },
 };
@@ -304,6 +325,8 @@ int register_android_graphics_Shader(JNIEnv* env)
                                   NELEM(gShaderMethods));
     android::RegisterMethodsOrDie(env, "android/graphics/BitmapShader", gBitmapShaderMethods,
                                   NELEM(gBitmapShaderMethods));
+    android::RegisterMethodsOrDie(env, "android/graphics/BlurShader", gBlurShaderMethods,
+                                  NELEM(gBlurShaderMethods));
     android::RegisterMethodsOrDie(env, "android/graphics/LinearGradient", gLinearGradientMethods,
                                   NELEM(gLinearGradientMethods));
     android::RegisterMethodsOrDie(env, "android/graphics/RadialGradient", gRadialGradientMethods,
