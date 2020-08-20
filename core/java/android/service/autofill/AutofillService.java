@@ -136,7 +136,7 @@ import android.view.autofill.AutofillValue;
  * <p>The service can provide an extra degree of security by requiring the user to authenticate
  * before an app can be autofilled. The authentication is typically required in 2 scenarios:
  * <ul>
- *   <li>To unlock the user data (for example, using a master password or fingerprint
+ *   <li>To unlock the user data (for example, using a main password or fingerprint
  *       authentication) - see
  * {@link FillResponse.Builder#setAuthentication(AutofillId[], android.content.IntentSender, android.widget.RemoteViews)}.
  *   <li>To unlock a specific dataset (for example, by providing a CVC for a credit card) - see
@@ -362,9 +362,9 @@ import android.view.autofill.AutofillValue;
  * {@code login.some_bank.com} credentials to the {@code my_financial_app}; if the user agrees,
  * then the service returns an unlocked dataset with the {@code some_bank.com} credentials.
  *
- * <p><b>Note:</b> The autofill service could also whitelist well-known browser apps and skip the
- * verifications above, as long as the service can verify the authenticity of the browser app by
- * checking its signing certificate.
+ * <p><b>Note:</b> The autofill service could also add well-known browser apps into an allowlist and
+ * skip the verifications above, as long as the service can verify the authenticity of the browser
+ * app by checking its signing certificate.
  *
  * <a name="MultipleStepsSave"></a>
  * <h3>Saving when data is split in multiple screens</h3>
@@ -506,9 +506,9 @@ import android.view.autofill.AutofillValue;
  * services and fill data. This mode needs to be explicitly requested for a given package up
  * to a specified max version code allowing clean migration path when the target app begins to
  * support autofill natively. Note that enabling compatibility may degrade performance for the
- * target package and should be used with caution. The platform supports whitelisting which packages
- * can be targeted in compatibility mode to ensure this mode is used only when needed and as long
- * as needed.
+ * target package and should be used with caution. The platform supports creating an allowlist for
+ * including which packages can be targeted in compatibility mode to ensure this mode is used only
+ * when needed and as long as needed.
  *
  * <p>You can request compatibility mode for packages of interest in the meta-data resource
  * associated with your service. Below is a sample service declaration:
