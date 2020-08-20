@@ -19,6 +19,7 @@ package com.android.systemui.appops;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.AudioRecordingConfiguration;
 import android.os.Handler;
@@ -66,6 +67,13 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
+    private final LocationManager mLocationManager;
+
+    // mLocationProviderPackages are cached and updated only occasionally
+    private static final long LOCATION_PROVIDER_UPDATE_FREQUENCY_MS = 30000;
+    private long mLastLocationProviderPackageUpdate;
+    private List<String> mLocationProviderPackages;
+
     private H mBGHandler;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final ArrayMap<Integer, Set<Callback>> mCallbacksByCode = new ArrayMap<>();
@@ -82,8 +90,10 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     protected static final int[] OPS = new int[] {
             AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_PHONE_CALL_CAMERA,
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION
     };
@@ -104,6 +114,7 @@ public class AppOpsControllerImpl implements AppOpsController,
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
         }
         mAudioManager = audioManager;
+        mLocationManager = context.getSystemService(LocationManager.class);
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -287,6 +298,26 @@ public class AppOpsControllerImpl implements AppOpsController,
         return isUserVisible(item.getCode(), item.getUid(), item.getPackageName());
     }
 
+    /**
+     * Checks if a package is the current location provider.
+     *
+     * <p>Data is cached to avoid too many calls into system server
+     *
+     * @param packageName The package that might be the location provider
+     *
+     * @return {@code true} iff the package is the location provider.
+     */
+    private boolean isLocationProvider(String packageName) {
+        long now = System.currentTimeMillis();
+
+        if (mLastLocationProviderPackageUpdate + LOCATION_PROVIDER_UPDATE_FREQUENCY_MS < now) {
+            mLastLocationProviderPackageUpdate = now;
+            mLocationProviderPackages = mLocationManager.getProviderPackages(
+                    LocationManager.FUSED_PROVIDER);
+        }
+
+        return mLocationProviderPackages.contains(packageName);
+    }
 
     /**
      * Does the app-op, uid and package name, refer to an operation that should be shown to the
@@ -302,7 +333,13 @@ public class AppOpsControllerImpl implements AppOpsController,
         // does not correspond to a platform permission
         // which may be user sensitive, so for now always show it to the user.
         if (appOpCode == AppOpsManager.OP_SYSTEM_ALERT_WINDOW
-                || appOpCode == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION) {
+                || appOpCode == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION
+                || appOpCode == AppOpsManager.OP_PHONE_CALL_CAMERA
+                || appOpCode == AppOpsManager.OP_PHONE_CALL_MICROPHONE) {
+            return true;
+        }
+
+        if (appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName)) {
             return true;
         }
 

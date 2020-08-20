@@ -1671,7 +1671,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static int getLockTaskLaunchMode(ActivityInfo aInfo, @Nullable ActivityOptions options) {
         int lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
-        if (aInfo.applicationInfo.isPrivilegedApp()
+        // Non-priv apps are not allowed to use always or never, fall back to default
+        if (!aInfo.applicationInfo.isPrivilegedApp()
                 && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
                 || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
             lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
@@ -2543,7 +2544,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityStack stack = getRootTask();
         final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
-                && stack.isFocusedStackOnDisplay();
+                && stack.isFocusedStackOnDisplay()
+                // Do not adjust focus task because the task will be reused to launch new activity.
+                && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
