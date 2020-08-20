@@ -4221,25 +4221,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyboardShortcuts.dismiss();
     }
 
-    /**
-     * Called when the notification panel layouts
-     */
-    public void onPanelLaidOut() {
-        updateKeyguardMaxNotifications();
-    }
-
-    public void updateKeyguardMaxNotifications() {
-        if (mState == StatusBarState.KEYGUARD) {
-            // Since the number of notifications is determined based on the height of the view, we
-            // need to update them.
-            int maxBefore = mPresenter.getMaxNotificationsWhileLocked(false /* recompute */);
-            int maxNotifications = mPresenter.getMaxNotificationsWhileLocked(true /* recompute */);
-            if (maxBefore != maxNotifications) {
-                mViewHierarchyManager.updateRowStates();
-            }
-        }
-    }
-
     public void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone) {
         if (!mDeviceProvisionedController.isDeviceProvisioned()) return;
 

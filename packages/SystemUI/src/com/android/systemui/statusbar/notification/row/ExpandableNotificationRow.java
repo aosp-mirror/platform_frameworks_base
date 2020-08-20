@@ -141,7 +141,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         void onExpansionChanged(boolean isExpanded);
     }
 
-    private StatusBarStateController mStatusbarStateController;
+    private StatusBarStateController mStatusBarStateController;
     private KeyguardBypassController mBypassController;
     private LayoutListener mLayoutListener;
     private RowContentBindStage mRowContentBindStage;
@@ -460,16 +460,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
             }
         }
-    }
-
-    /**
-     * Set the entry for the row.
-     *
-     * @param entry the entry this row is tied to
-     */
-    public void setEntry(@NonNull NotificationEntry entry) {
-        mEntry = entry;
-        cacheIsSystemNotification();
     }
 
     /**
@@ -1584,6 +1574,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Initialize row.
      */
     public void initialize(
+            NotificationEntry entry,
             String appName,
             String notificationKey,
             ExpansionLogger logger,
@@ -1598,6 +1589,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             OnUserInteractionCallback onUserInteractionCallback) {
+        mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
             mMenuRow = new NotificationMenuRow(mContext, peopleNotificationIdentifier);
@@ -1616,12 +1608,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMediaManager = notificationMediaManager;
         setOnFeedbackClickListener(onFeedbackClickListener);
         mFalsingManager = falsingManager;
-        mStatusbarStateController = statusBarStateController;
+        mStatusBarStateController = statusBarStateController;
+
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         for (NotificationContentView l : mLayouts) {
             l.setPeopleNotificationIdentifier(mPeopleNotificationIdentifier);
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
+
+        cacheIsSystemNotification();
     }
 
     private void initDimens() {
@@ -2134,8 +2129,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     @Override
     public boolean isSoundEffectsEnabled() {
-        final boolean mute = mStatusbarStateController != null
-                && mStatusbarStateController.isDozing()
+        final boolean mute = mStatusBarStateController != null
+                && mStatusBarStateController.isDozing()
                 && mSecureStateProvider != null &&
                 !mSecureStateProvider.getAsBoolean();
         return !mute && super.isSoundEffectsEnabled();
@@ -2259,10 +2254,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    /**
-     * @param onKeyguard whether to prevent notification expansion
-     */
-    public void setOnKeyguard(boolean onKeyguard) {
+    void setOnKeyguard(boolean onKeyguard) {
         if (onKeyguard != mOnKeyguard) {
             boolean wasAboveShelf = isAboveShelf();
             final boolean wasExpanded = isExpanded();
@@ -2331,7 +2323,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private boolean isDozing() {
-        return mStatusbarStateController != null && mStatusbarStateController.isDozing();
+        return mStatusBarStateController != null && mStatusBarStateController.isDozing();
     }
 
     @Override

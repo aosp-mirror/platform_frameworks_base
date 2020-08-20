@@ -681,6 +681,13 @@ public class NotificationStackScrollLayoutController {
         return mView.hasActiveClearableNotifications(selection);
     }
 
+    /**
+     * Set the maximum number of notifications that can currently be displayed
+     */
+    public void setMaxDisplayedNotifications(int maxNotifications) {
+        mNotificationListContainer.setMaxDisplayedNotifications(maxNotifications);
+    }
+
     public RemoteInputController.Delegate createDelegate() {
         return mView.createDelegate();
     }

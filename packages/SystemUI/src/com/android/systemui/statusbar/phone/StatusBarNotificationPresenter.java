@@ -110,7 +110,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
-    private final Context mContext;
     private final KeyguardIndicationController mKeyguardIndicationController;
     private final StatusBar mStatusBar;
     private final ShadeController mShadeController;
@@ -119,7 +118,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final AccessibilityManager mAccessibilityManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    private final int mMaxAllowedKeyguardNotifications;
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private boolean mReinflateNotificationsOnUserSwitched;
@@ -127,7 +125,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private TextView mNotificationPanelDebugText;
 
     protected boolean mVrMode;
-    private int mMaxKeyguardNotifications;
 
     public StatusBarNotificationPresenter(Context context,
             NotificationPanelViewController panel,
@@ -145,7 +142,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             CommandQueue commandQueue,
             InitController initController,
             NotificationInterruptStateProvider notificationInterruptStateProvider) {
-        mContext = context;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
@@ -163,8 +159,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mDozeScrimController = dozeScrimController;
         mScrimController = scrimController;
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
-        mMaxAllowedKeyguardNotifications = context.getResources().getInteger(
-                R.integer.keyguard_max_notification_count);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
@@ -394,17 +388,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         mMediaManager.updateMediaMetaData(metaDataChanged, allowEnterAnimation);
-    }
-
-    @Override
-    public int getMaxNotificationsWhileLocked(boolean recompute) {
-        if (recompute) {
-            mMaxKeyguardNotifications = Math.max(1,
-                    mNotificationPanel.computeMaxKeyguardNotifications(
-                            mMaxAllowedKeyguardNotifications));
-            return mMaxKeyguardNotifications;
-        }
-        return mMaxKeyguardNotifications;
     }
 
     @Override
