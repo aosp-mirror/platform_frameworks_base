@@ -42,7 +42,6 @@ import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
-import com.android.systemui.stackdivider.DividerModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
@@ -76,7 +75,6 @@ import dagger.Provides;
  * overridden by the System UI implementation.
  */
 @Module(includes = {
-            DividerModule.class,
             QSModule.class,
             WMShellModule.class
         },

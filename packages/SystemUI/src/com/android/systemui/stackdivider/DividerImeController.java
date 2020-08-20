@@ -38,7 +38,7 @@ import com.android.wm.shell.common.TransactionPool;
 
 class DividerImeController implements DisplayImeController.ImePositionProcessor {
     private static final String TAG = "DividerImeController";
-    private static final boolean DEBUG = DividerController.DEBUG;
+    private static final boolean DEBUG = SplitScreenController.DEBUG;
 
     private static final float ADJUSTED_NONFOCUS_DIM = 0.3f;
 
@@ -100,15 +100,15 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     }
 
     private DividerView getView() {
-        return mSplits.mDividerController.getDividerView();
+        return mSplits.mSplitScreenController.getDividerView();
     }
 
     private SplitDisplayLayout getLayout() {
-        return mSplits.mDividerController.getSplitLayout();
+        return mSplits.mSplitScreenController.getSplitLayout();
     }
 
     private boolean isDividerVisible() {
-        return mSplits.mDividerController.isDividerVisible();
+        return mSplits.mSplitScreenController.isDividerVisible();
     }
 
     private boolean getSecondaryHasFocus(int displayId) {
@@ -151,7 +151,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         mSecondaryHasFocus = getSecondaryHasFocus(displayId);
         final boolean targetAdjusted = splitIsVisible && imeShouldShow && mSecondaryHasFocus
                 && !imeIsFloating && !getLayout().mDisplayLayout.isLandscape()
-                && !mSplits.mDividerController.isMinimized();
+                && !mSplits.mSplitScreenController.isMinimized();
         if (mLastAdjustTop < 0) {
             mLastAdjustTop = imeShouldShow ? hiddenTop : shownTop;
         } else if (mLastAdjustTop != (imeShouldShow ? mShownTop : mHiddenTop)) {
@@ -236,7 +236,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
                         SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
             }
 
-            if (!mSplits.mDividerController.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
+            if (!mSplits.mSplitScreenController.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
                 WindowOrganizer.applyTransaction(wct);
             }
         }
@@ -250,7 +250,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
                         : DisplayImeController.ANIMATION_DURATION_HIDE_MS);
             }
         }
-        mSplits.mDividerController.setAdjustedForIme(mTargetShown && !mPaused);
+        mSplits.mSplitScreenController.setAdjustedForIme(mTargetShown && !mPaused);
     }
 
     public void updateAdjustForIme() {
@@ -402,7 +402,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             mTargetAdjusted = mPausedTargetAdjusted;
             updateDimTargets();
             final DividerView view = getView();
-            if ((mTargetAdjusted != mAdjusted) && !mSplits.mDividerController.isMinimized()
+            if ((mTargetAdjusted != mAdjusted) && !mSplits.mSplitScreenController.isMinimized()
                     && view != null) {
                 // End unminimize animations since they conflict with adjustment animations.
                 view.finishAnimations();

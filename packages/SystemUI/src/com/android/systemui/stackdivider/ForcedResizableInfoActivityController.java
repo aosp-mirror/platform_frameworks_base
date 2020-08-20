@@ -69,9 +69,9 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
     }
 
     public ForcedResizableInfoActivityController(Context context,
-            DividerController dividerController) {
+            SplitScreenController splitScreenController) {
         mContext = context;
-        dividerController.registerInSplitScreenListener(mDockedStackExistsListener);
+        splitScreenController.registerInSplitScreenListener(mDockedStackExistsListener);
     }
 
     @Override

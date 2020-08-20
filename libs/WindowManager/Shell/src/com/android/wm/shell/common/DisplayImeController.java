@@ -68,7 +68,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
     private final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
-    protected DisplayImeController(IWindowManager wmService, DisplayController displayController,
+    public DisplayImeController(IWindowManager wmService, DisplayController displayController,
             Handler mainHandler, TransactionPool transactionPool) {
         mHandler = mainHandler;
         mWmService = wmService;
@@ -76,7 +76,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         mDisplayController = displayController;
     }
 
-    protected void startMonitorDisplays() {
+    /** Starts monitor displays changes and set insets controller for each displays. */
+    public void startMonitorDisplays() {
         mDisplayController.addDisplayWindowListener(this);
     }
 
@@ -492,30 +493,5 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public IInputMethodManager getImms() {
         return IInputMethodManager.Stub.asInterface(
                 ServiceManager.getService(Context.INPUT_METHOD_SERVICE));
-    }
-
-    /** Builds {@link DisplayImeController} instance. */
-    public static class Builder {
-        private IWindowManager mWmService;
-        private DisplayController mDisplayController;
-        private Handler mHandler;
-        private TransactionPool mTransactionPool;
-
-        public Builder(IWindowManager wmService, DisplayController displayController,
-                Handler handler, TransactionPool transactionPool) {
-            mWmService = wmService;
-            mDisplayController = displayController;
-            mHandler = handler;
-            mTransactionPool = transactionPool;
-        }
-
-        /** Builds and initializes {@link DisplayImeController} instance. */
-        public DisplayImeController build() {
-            DisplayImeController displayImeController = new DisplayImeController(mWmService,
-                    mDisplayController, mHandler, mTransactionPool);
-            // Separates startMonitorDisplays from constructor to prevent circular init issue.
-            displayImeController.startMonitorDisplays();
-            return displayImeController;
-        }
     }
 }

@@ -177,7 +177,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
@@ -388,7 +388,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final Provider<StatusBarComponent.Builder> mStatusBarComponentBuilder;
     private final PluginManager mPluginManager;
-    private final Optional<Divider> mDividerOptional;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
@@ -721,7 +721,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Optional<Recents> recentsOptional,
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
-            Optional<Divider> dividerOptional,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
@@ -803,7 +803,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRecentsOptional = recentsOptional;
         mStatusBarComponentBuilder = statusBarComponentBuilder;
         mPluginManager = pluginManager;
-        mDividerOptional = dividerOptional;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mShadeController = shadeController;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
@@ -1550,31 +1550,32 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mRecentsOptional.isPresent()) {
             return false;
         }
-        Divider divider = null;
-        if (mDividerOptional.isPresent()) {
-            divider = mDividerOptional.get();
-        }
-        if (divider == null || !divider.isDividerVisible()) {
-            final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
-            if (navbarPos == NAV_BAR_POS_INVALID) {
-                return false;
-            }
-            int createMode = navbarPos == NAV_BAR_POS_LEFT
-                    ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
-                    : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-            return mRecentsOptional.get().splitPrimaryTask(createMode, null, metricsDockAction);
-        } else {
-            if (divider.isMinimized() && !divider.isHomeStackResizable()) {
-                // Undocking from the minimized state is not supported
-                return false;
-            } else {
-                divider.onUndockingTask();
-                if (metricsUndockAction != -1) {
-                    mMetricsLogger.action(metricsUndockAction);
+
+        if (mSplitScreenControllerOptional.isPresent()) {
+            SplitScreenController splitScreenController = mSplitScreenControllerOptional.get();
+            if (splitScreenController.isDividerVisible()) {
+                if (splitScreenController.isMinimized()
+                        && !splitScreenController.isHomeStackResizable()) {
+                    // Undocking from the minimized state is not supported
+                    return false;
+                } else {
+                    splitScreenController.onUndockingTask();
+                    if (metricsUndockAction != -1) {
+                        mMetricsLogger.action(metricsUndockAction);
+                    }
                 }
+                return true;
             }
         }
-        return true;
+
+        final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
+        if (navbarPos == NAV_BAR_POS_INVALID) {
+            return false;
+        }
+        int createMode = navbarPos == NAV_BAR_POS_LEFT
+                ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
+                : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+        return mRecentsOptional.get().splitPrimaryTask(createMode, null, metricsDockAction);
     }
 
     /**
@@ -3916,14 +3917,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void appTransitionCancelled(int displayId) {
         if (displayId == mDisplayId) {
-            mDividerOptional.ifPresent(Divider::onAppTransitionFinished);
+            mSplitScreenControllerOptional.ifPresent(
+                    splitScreen -> splitScreen.onAppTransitionFinished());
         }
     }
 
     @Override
     public void appTransitionFinished(int displayId) {
         if (displayId == mDisplayId) {
-            mDividerOptional.ifPresent(Divider::onAppTransitionFinished);
+            mSplitScreenControllerOptional.ifPresent(
+                    splitScreen -> splitScreen.onAppTransitionFinished());
         }
     }
 

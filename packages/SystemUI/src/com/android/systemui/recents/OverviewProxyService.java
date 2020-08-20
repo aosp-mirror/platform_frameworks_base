@@ -86,7 +86,7 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -123,7 +123,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Context mContext;
     private final PipUI mPipUI;
     private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
-    private final Optional<Divider> mDividerOptional;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
@@ -232,7 +232,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
             long token = Binder.clearCallingIdentity();
             try {
-                mDividerOptional.ifPresent(Divider::onDockedFirstAnimationFrame);
+                mSplitScreenControllerOptional.ifPresent(splitScreen -> {
+                    splitScreen.onDockedFirstAnimationFrame();
+                });
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -262,8 +264,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
             long token = Binder.clearCallingIdentity();
             try {
-                return mDividerOptional.map(
-                        divider -> divider.getView().getNonMinimizedSplitScreenSecondaryBounds())
+                return mSplitScreenControllerOptional.map(splitScreen ->
+                        splitScreen.getDividerView().getNonMinimizedSplitScreenSecondaryBounds())
                         .orElse(null);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -399,10 +401,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setSplitScreenMinimized(boolean minimized) {
-            Divider divider = mDividerOptional.get();
-            if (divider != null) {
-                divider.setMinimized(minimized);
-            }
+            mSplitScreenControllerOptional.ifPresent(
+                    splitScreen -> splitScreen.setMinimized(minimized));
         }
 
         @Override
@@ -602,7 +602,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public OverviewProxyService(Context context, CommandQueue commandQueue,
             Lazy<NavigationBarController> navBarControllerLazy, NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
-            PipUI pipUI, Optional<Divider> dividerOptional,
+            PipUI pipUI, Optional<SplitScreenController> splitScreenControllerOptional,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy, OneHandedUI oneHandedUI,
             BroadcastDispatcher broadcastDispatcher) {
         super(broadcastDispatcher);
@@ -613,7 +613,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
         mConnectionBackoffAttempts = 0;
-        mDividerOptional = dividerOptional;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
@@ -755,10 +755,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
         startConnectionToCurrentUser();
 
         // Clean up the minimized state if launcher dies
-        Divider divider = mDividerOptional.get();
-        if (divider != null) {
-            divider.setMinimized(false);
-        }
+        mSplitScreenControllerOptional.ifPresent(
+                splitScreen -> splitScreen.setMinimized(false));
     }
 
     public void startConnectionToCurrentUser() {

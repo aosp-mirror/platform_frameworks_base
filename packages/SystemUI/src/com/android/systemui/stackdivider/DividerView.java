@@ -76,7 +76,7 @@ import java.util.function.Consumer;
 public class DividerView extends FrameLayout implements OnTouchListener,
         OnComputeInternalInsetsListener {
     private static final String TAG = "DividerView";
-    private static final boolean DEBUG = DividerController.DEBUG;
+    private static final boolean DEBUG = SplitScreenController.DEBUG;
 
     public interface DividerCallbacks {
         void onDraggingStart();
