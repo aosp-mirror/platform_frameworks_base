@@ -503,6 +503,10 @@ public class NetworkTemplate implements Parcelable {
         for (final int ratType : ratTypes) {
             collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(ratType));
         }
+        // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
+        // it is not in TelephonyManager#NETWORK_TYPE_* constants.
+        // See {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+        collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(NETWORK_TYPE_5G_NSA));
         // Ensure that unknown type is returned.
         collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         return toIntArray(collapsedRatTypes);
