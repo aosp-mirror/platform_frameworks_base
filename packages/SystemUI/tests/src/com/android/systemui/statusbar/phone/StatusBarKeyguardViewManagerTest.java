@@ -43,6 +43,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.FalsingManager;
@@ -57,6 +58,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -89,6 +92,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private View mNotificationContainer;
     @Mock
     private KeyguardBypassController mBypassController;
+    @Mock
+    private FaceAuthScreenBrightnessController mFaceAuthScreenBrightnessController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Before
@@ -108,6 +113,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(DockManager.class),
                 mock(NotificationShadeWindowController.class),
                 mKeyguardStateController,
+                mFaceAuthScreenBrightnessController,
                 mock(NotificationMediaManager.class));
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
                 mNotificationPanelView, mBiometrucUnlockController, mDismissCallbackRegistry,
@@ -274,11 +280,12 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 DockManager dockManager,
                 NotificationShadeWindowController notificationShadeWindowController,
                 KeyguardStateController keyguardStateController,
+                FaceAuthScreenBrightnessController faceAuthScreenBrightnessController,
                 NotificationMediaManager notificationMediaManager) {
             super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
                     configurationController, keyguardUpdateMonitor, navigationModeController,
                     dockManager, notificationShadeWindowController, keyguardStateController,
-                    notificationMediaManager);
+                    Optional.of(faceAuthScreenBrightnessController), notificationMediaManager);
         }
 
         @Override
