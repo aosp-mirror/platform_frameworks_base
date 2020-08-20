@@ -684,15 +684,13 @@ public final class Bitmap implements Parcelable {
         return b;
     }
 
-    // FIXME: The maxTargetSdk should be R, once R is no longer set to
-    // CUR_DEVELOPMENT.
     /**
      * Creates a new immutable bitmap backed by ashmem which can efficiently
      * be passed between processes.
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
             publicAlternatives = "Use {@link #asShared()} instead")
     public Bitmap createAshmemBitmap() {
         checkRecycled("Can't copy a recycled bitmap");
