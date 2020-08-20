@@ -57,7 +57,8 @@ class PrivacyItemController @Inject constructor(
     @VisibleForTesting
     internal companion object {
         val OPS_MIC_CAMERA = intArrayOf(AppOpsManager.OP_CAMERA,
-                AppOpsManager.OP_RECORD_AUDIO)
+                AppOpsManager.OP_PHONE_CALL_CAMERA, AppOpsManager.OP_RECORD_AUDIO,
+                AppOpsManager.OP_PHONE_CALL_MICROPHONE)
         val OPS_LOCATION = intArrayOf(
                 AppOpsManager.OP_COARSE_LOCATION,
                 AppOpsManager.OP_FINE_LOCATION)
@@ -248,9 +249,11 @@ class PrivacyItemController @Inject constructor(
 
     private fun toPrivacyItem(appOpItem: AppOpItem): PrivacyItem? {
         val type: PrivacyType = when (appOpItem.code) {
+            AppOpsManager.OP_PHONE_CALL_CAMERA,
             AppOpsManager.OP_CAMERA -> PrivacyType.TYPE_CAMERA
-            AppOpsManager.OP_COARSE_LOCATION -> PrivacyType.TYPE_LOCATION
+            AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION -> PrivacyType.TYPE_LOCATION
+            AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }

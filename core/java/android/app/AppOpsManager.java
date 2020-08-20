@@ -1124,9 +1124,24 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_NO_ISOLATED_STORAGE = AppProtoEnums.APP_OP_NO_ISOLATED_STORAGE;
 
+    /**
+     * Phone call is using microphone
+     *
+     * @hide
+     */
+    // TODO: Add as AppProtoEnums
+    public static final int OP_PHONE_CALL_MICROPHONE = 100;
+    /**
+     * Phone call is using camera
+     *
+     * @hide
+     */
+    // TODO: Add as AppProtoEnums
+    public static final int OP_PHONE_CALL_CAMERA = 101;
+
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 100;
+    public static final int _NUM_OP = 102;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1444,6 +1459,19 @@ public class AppOpsManager {
      */
     public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
 
+    /**
+     * Phone call is using microphone
+     *
+     * @hide
+     */
+    public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
+    /**
+     * Phone call is using camera
+     *
+     * @hide
+     */
+    public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1633,6 +1661,8 @@ public class AppOpsManager {
             OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, //AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             OP_AUTO_REVOKE_MANAGED_BY_INSTALLER, //OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             OP_NO_ISOLATED_STORAGE,             // NO_ISOLATED_STORAGE
+            OP_PHONE_CALL_MICROPHONE,           // OP_PHONE_CALL_MICROPHONE
+            OP_PHONE_CALL_CAMERA,               // OP_PHONE_CALL_CAMERA
     };
 
     /**
@@ -1739,6 +1769,8 @@ public class AppOpsManager {
             OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
             OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER,
             OPSTR_NO_ISOLATED_STORAGE,
+            OPSTR_PHONE_CALL_MICROPHONE,
+            OPSTR_PHONE_CALL_CAMERA,
     };
 
     /**
@@ -1846,6 +1878,8 @@ public class AppOpsManager {
             "AUTO_REVOKE_PERMISSIONS_IF_UNUSED",
             "AUTO_REVOKE_MANAGED_BY_INSTALLER",
             "NO_ISOLATED_STORAGE",
+            "PHONE_CALL_MICROPHONE",
+            "PHONE_CALL_CAMERA",
     };
 
     /**
@@ -1954,6 +1988,8 @@ public class AppOpsManager {
             null, // no permission for OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // no permission for OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // no permission for OP_NO_ISOLATED_STORAGE
+            null, // no permission for OP_PHONE_CALL_MICROPHONE
+            null, // no permission for OP_PHONE_CALL_CAMERA
     };
 
     /**
@@ -2062,6 +2098,8 @@ public class AppOpsManager {
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // NO_ISOLATED_STORAGE
+            null, // PHONE_CALL_MICROPHONE
+            null, // PHONE_CALL_MICROPHONE
     };
 
     /**
@@ -2169,6 +2207,8 @@ public class AppOpsManager {
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // NO_ISOLATED_STORAGE
+            null, // PHONE_CALL_MICROPHONE
+            null, // PHONE_CALL_CAMERA
     };
 
     /**
@@ -2275,6 +2315,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             AppOpsManager.MODE_ALLOWED, // OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             AppOpsManager.MODE_ERRORED, // OP_NO_ISOLATED_STORAGE
+            AppOpsManager.MODE_ALLOWED, // PHONE_CALL_MICROPHONE
+            AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
     };
 
     /**
@@ -2385,6 +2427,8 @@ public class AppOpsManager {
             false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             true, // NO_ISOLATED_STORAGE
+            false, // PHONE_CALL_MICROPHONE
+            false, // PHONE_CALL_CAMERA
     };
 
     /**
