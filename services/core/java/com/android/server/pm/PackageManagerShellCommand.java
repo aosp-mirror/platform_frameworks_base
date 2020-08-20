@@ -3199,12 +3199,24 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private long getFileStatSize(File file) {
+        final ParcelFileDescriptor pfd = openFileForSystem(file.getPath(), "r");
+        if (pfd == null) {
+            throw new IllegalArgumentException("Error: Can't open file: " + file.getPath());
+        }
+        try {
+            return pfd.getStatSize();
+        } finally {
+            IoUtils.closeQuietly(pfd);
+        }
+    }
+
     private void processArgForLocalFile(String arg, PackageInstaller.Session session) {
         final String inPath = arg;
 
         final File file = new File(inPath);
         final String name = file.getName();
-        final long size = file.length();
+        final long size = getFileStatSize(file);
         final Metadata metadata = Metadata.forLocalFile(inPath);
 
         byte[] v4signatureBytes = null;
