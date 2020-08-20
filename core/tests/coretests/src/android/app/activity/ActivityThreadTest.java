@@ -408,6 +408,9 @@ public class ActivityThreadTest {
             int originalVirtualDisplayOrientation = virtualDisplayContext.getResources()
                     .getConfiguration().orientation;
 
+
+            // Perform global config change and verify there is no config change in derived display
+            // context.
             Configuration newAppConfig = new Configuration(originalAppConfig);
             newAppConfig.seq++;
             newAppConfig.orientation = newAppConfig.orientation == ORIENTATION_PORTRAIT
@@ -417,7 +420,7 @@ public class ActivityThreadTest {
             activityThread.handleConfigurationChanged(newAppConfig);
 
             try {
-                assertEquals("Virtual display orientation should not change when process"
+                assertEquals("Virtual display orientation must not change when process"
                                 + " configuration orientation changes.",
                         originalVirtualDisplayOrientation,
                         virtualDisplayContext.getResources().getConfiguration().orientation);
@@ -434,6 +437,50 @@ public class ActivityThreadTest {
                 activityThread.updatePendingConfiguration(originalAppConfig);
                 activityThread.handleConfigurationChanged(originalAppConfig);
             }
+        });
+    }
+
+    @Test
+    public void testActivityOrientationChanged_DoesntOverrideVirtualDisplayOrientation() {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Configuration originalActivityConfig =
+                    new Configuration(activity.getResources().getConfiguration());
+            DisplayManager dm = activity.getSystemService(DisplayManager.class);
+
+            int virtualDisplayWidth;
+            int virtualDisplayHeight;
+            if (originalActivityConfig.orientation == ORIENTATION_PORTRAIT) {
+                virtualDisplayWidth = 100;
+                virtualDisplayHeight = 200;
+            } else {
+                virtualDisplayWidth = 200;
+                virtualDisplayHeight = 100;
+            }
+            Display virtualDisplay = dm.createVirtualDisplay("virtual-display",
+                    virtualDisplayWidth, virtualDisplayHeight, 200, null, 0).getDisplay();
+            Context virtualDisplayContext = activity.createDisplayContext(virtualDisplay);
+            int originalVirtualDisplayOrientation = virtualDisplayContext.getResources()
+                    .getConfiguration().orientation;
+
+            // Perform activity config change and verify there is no config change in derived
+            // display context.
+            Configuration newActivityConfig = new Configuration(originalActivityConfig);
+            newActivityConfig.seq++;
+            newActivityConfig.orientation = newActivityConfig.orientation == ORIENTATION_PORTRAIT
+                    ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+
+            activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
+                    newActivityConfig);
+            activityThread.handleActivityConfigurationChanged(activity.getActivityToken(),
+                    newActivityConfig, INVALID_DISPLAY);
+
+            assertEquals("Virtual display orientation must not change when activity"
+                            + " configuration orientation changes.",
+                    originalVirtualDisplayOrientation,
+                    virtualDisplayContext.getResources().getConfiguration().orientation);
         });
     }
 

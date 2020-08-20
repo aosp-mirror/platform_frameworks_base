@@ -96,7 +96,6 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LauncherIcons;
 import android.util.Log;
-import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
@@ -1748,7 +1747,7 @@ public class ApplicationPackageManager extends PackageManager {
         final Resources r = mContext.mMainThread.getTopLevelResources(
                     sameUid ? app.sourceDir : app.publicSourceDir,
                     sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
-                    app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
+                    app.resourceDirs, app.sharedLibraryFiles,
                     mContext.mPackageInfo);
         if (r != null) {
             return r;
