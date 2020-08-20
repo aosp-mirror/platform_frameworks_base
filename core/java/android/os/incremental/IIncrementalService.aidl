@@ -90,9 +90,10 @@ interface IIncrementalService {
     int unlink(int storageId, in @utf8InCpp String path);
 
     /**
-     * Checks if a file's certain range is loaded. File is specified by its path.
+     * Returns overall loading progress of all the files on a storage, progress value between [0,1].
+     * Returns a negative value on error.
      */
-    boolean isFileRangeLoaded(int storageId, in @utf8InCpp String path, long start, long end);
+    float getLoadingProgress(int storageId);
 
     /**
      * Reads the metadata of a file. File is specified by either its path or 16 byte id.

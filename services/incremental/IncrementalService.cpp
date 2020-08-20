@@ -37,7 +37,6 @@
 #include "Metadata.pb.h"
 
 using namespace std::literals;
-namespace fs = std::filesystem;
 
 constexpr const char* kDataUsageStats = "android.permission.LOADER_USAGE_STATS";
 constexpr const char* kOpUsage = "android:loader_usage_stats";
@@ -276,6 +275,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
         mJni(sm.getJni()),
         mLooper(sm.getLooper()),
         mTimedQueue(sm.getTimedQueue()),
+        mFs(sm.getFs()),
         mIncrementalDir(rootDir) {
     CHECK(mVold) << "Vold service is unavailable";
     CHECK(mDataLoaderManager) << "DataLoaderManagerService is unavailable";
@@ -283,6 +283,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
     CHECK(mJni) << "JNI is unavailable";
     CHECK(mLooper) << "Looper is unavailable";
     CHECK(mTimedQueue) << "TimedQueue is unavailable";
+    CHECK(mFs) << "Fs is unavailable";
 
     mJobQueue.reserve(16);
     mJobProcessor = std::thread([this]() {
@@ -344,7 +345,8 @@ void IncrementalService::onDump(int fd) {
             }
             dprintf(fd, "    storages (%d): {\n", int(mnt.storages.size()));
             for (auto&& [storageId, storage] : mnt.storages) {
-                dprintf(fd, "      [%d] -> [%s]\n", storageId, storage.name.c_str());
+                dprintf(fd, "      [%d] -> [%s] (%d %% loaded) \n", storageId, storage.name.c_str(),
+                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()) * 100));
             }
             dprintf(fd, "    }\n");
 
@@ -1671,6 +1673,45 @@ bool IncrementalService::waitForNativeBinariesExtraction(StorageId storage) {
     return mRunning;
 }
 
+float IncrementalService::getLoadingProgress(StorageId storage) const {
+    std::unique_lock l(mLock);
+    const auto ifs = getIfsLocked(storage);
+    if (!ifs) {
+        LOG(ERROR) << "getLoadingProgress failed, invalid storageId: " << storage;
+        return -EINVAL;
+    }
+    const auto storageInfo = ifs->storages.find(storage);
+    if (storageInfo == ifs->storages.end()) {
+        LOG(ERROR) << "getLoadingProgress failed, no storage: " << storage;
+        return -EINVAL;
+    }
+    l.unlock();
+    return getLoadingProgressFromPath(*ifs, storageInfo->second.name);
+}
+
+float IncrementalService::getLoadingProgressFromPath(const IncFsMount& ifs,
+                                                     std::string_view storagePath) const {
+    size_t totalBlocks = 0, filledBlocks = 0;
+    const auto filePaths = mFs->listFilesRecursive(storagePath);
+    for (const auto& filePath : filePaths) {
+        const auto [filledBlocksCount, totalBlocksCount] =
+                mIncFs->countFilledBlocks(ifs.control, filePath);
+        if (filledBlocksCount < 0) {
+            LOG(ERROR) << "getLoadingProgress failed to get filled blocks count for: " << filePath
+                       << " errno: " << filledBlocksCount;
+            return filledBlocksCount;
+        }
+        totalBlocks += totalBlocksCount;
+        filledBlocks += filledBlocksCount;
+    }
+
+    if (totalBlocks == 0) {
+        LOG(ERROR) << "getLoadingProgress failed to get total num of blocks";
+        return -EINVAL;
+    }
+    return (float)filledBlocks / (float)totalBlocks;
+}
+
 bool IncrementalService::perfLoggingEnabled() {
     static const bool enabled = base::GetBoolProperty("incremental.perflogging", false);
     return enabled;
@@ -2029,11 +2070,13 @@ void IncrementalService::DataLoaderStub::updateHealthStatus(bool baseline) {
 
         // Healthcheck depends on timestamp of the oldest pending read.
         // To get it, we need to re-open a pendingReads FD to get a full list of reads.
-        // Additionally we need to re-register for epoll with fresh FDs in case there are no reads.
+        // Additionally we need to re-register for epoll with fresh FDs in case there are no
+        // reads.
         const auto now = Clock::now();
         const auto kernelTsUs = getOldestPendingReadTs();
         if (baseline) {
-            // Updating baseline only on looper/epoll callback, i.e. on new set of pending reads.
+            // Updating baseline only on looper/epoll callback, i.e. on new set of pending
+            // reads.
             mHealthBase = {now, kernelTsUs};
         }
 
