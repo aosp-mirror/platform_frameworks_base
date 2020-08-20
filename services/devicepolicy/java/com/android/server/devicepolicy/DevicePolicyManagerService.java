@@ -302,7 +302,6 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -322,7 +321,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -575,12 +573,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private final CertificateMonitor mCertificateMonitor;
     private final SecurityLogMonitor mSecurityLogMonitor;
+    private final RemoteBugreportManager mBugreportCollectionManager;
 
     @GuardedBy("getLockObject()")
     private NetworkLogger mNetworkLogger;
-
-    private final AtomicBoolean mRemoteBugreportServiceIsActive = new AtomicBoolean();
-    private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
 
     private final SetupContentObserver mSetupContentObserver;
     private final DevicePolicyConstantsObserver mConstantsObserver;
@@ -632,44 +628,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @VisibleForTesting
     final TransferOwnershipMetadataManager mTransferOwnershipMetadataManager;
-
-    private final Runnable mRemoteBugreportTimeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if(mRemoteBugreportServiceIsActive.get()) {
-                onBugreportFailed();
-            }
-        }
-    };
-
-    /** Listens only if mHasFeature == true. */
-    private final BroadcastReceiver mRemoteBugreportFinishedReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH.equals(intent.getAction())
-                    && mRemoteBugreportServiceIsActive.get()) {
-                onBugreportFinished(intent);
-            }
-        }
-    };
-
-    /** Listens only if mHasFeature == true. */
-    private final BroadcastReceiver mRemoteBugreportConsentReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            mInjector.getNotificationManager().cancel(LOG_TAG,
-                    RemoteBugreportUtils.NOTIFICATION_ID);
-            if (DevicePolicyManager.ACTION_BUGREPORT_SHARING_ACCEPTED.equals(action)) {
-                onBugreportSharingAccepted();
-            } else if (DevicePolicyManager.ACTION_BUGREPORT_SHARING_DECLINED.equals(action)) {
-                onBugreportSharingDeclined();
-            }
-            mContext.unregisterReceiver(mRemoteBugreportConsentReceiver);
-        }
-    };
 
     public static final class Lifecycle extends SystemService {
         private BaseIDevicePolicyManager mService;
@@ -748,17 +706,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
-                    && userHandle == mOwners.getDeviceOwnerUserId()
-                    && getDeviceOwnerRemoteBugreportUri() != null) {
-                IntentFilter filterConsent = new IntentFilter();
-                filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_DECLINED);
-                filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_ACCEPTED);
-                mContext.registerReceiver(mRemoteBugreportConsentReceiver, filterConsent);
-                mInjector.getNotificationManager().notifyAsUser(LOG_TAG,
-                        RemoteBugreportUtils.NOTIFICATION_ID,
-                        RemoteBugreportUtils.buildNotification(mContext,
-                                DevicePolicyManager.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED),
-                        UserHandle.ALL);
+                    && userHandle == mOwners.getDeviceOwnerUserId()) {
+                mBugreportCollectionManager.checkForPendingBugreportAfterBoot();
+
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
@@ -1435,10 +1385,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mCertificateMonitor = new CertificateMonitor(this, mInjector, mBackgroundHandler);
 
         mDeviceAdminServiceController = new DeviceAdminServiceController(this, mConstants);
-
         mOverlayPackagesProvider = new OverlayPackagesProvider(mContext);
-
         mTransferOwnershipMetadataManager = mInjector.newTransferOwnershipMetadataManager();
+        mBugreportCollectionManager = new RemoteBugreportManager(this, mInjector);
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -6867,45 +6816,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isDeviceOwner(identity));
         ensureAllUsersAffiliated();
 
-        if (mRemoteBugreportServiceIsActive.get()
-                || (getDeviceOwnerRemoteBugreportUri() != null)) {
-            Slog.d(LOG_TAG, "Remote bugreport wasn't started because there's already one running.");
-            return false;
-        }
-
-        final long currentTime = System.currentTimeMillis();
-        synchronized (getLockObject()) {
-            DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
-            if (currentTime > policyData.mLastBugReportRequestTime) {
-                policyData.mLastBugReportRequestTime = currentTime;
-                saveSettingsLocked(UserHandle.USER_SYSTEM);
-            }
-        }
-
-        final long callingIdentity = mInjector.binderClearCallingIdentity();
-        try {
-            mInjector.getIActivityManager().requestRemoteBugReport();
-
-            mRemoteBugreportServiceIsActive.set(true);
-            mRemoteBugreportSharingAccepted.set(false);
-            registerRemoteBugreportReceivers();
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG,
-                    RemoteBugreportUtils.NOTIFICATION_ID,
-                    RemoteBugreportUtils.buildNotification(mContext,
-                            DevicePolicyManager.NOTIFICATION_BUGREPORT_STARTED), UserHandle.ALL);
-            mHandler.postDelayed(mRemoteBugreportTimeoutRunnable,
-                    RemoteBugreportUtils.REMOTE_BUGREPORT_TIMEOUT_MILLIS);
+        if (mBugreportCollectionManager.requestBugreport()) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.REQUEST_BUGREPORT)
                     .setAdmin(who)
                     .write();
+
+            final long currentTime = System.currentTimeMillis();
+            synchronized (getLockObject()) {
+                DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
+                if (currentTime > policyData.mLastBugReportRequestTime) {
+                    policyData.mLastBugReportRequestTime = currentTime;
+                    saveSettingsLocked(UserHandle.USER_SYSTEM);
+                }
+            }
+
             return true;
-        } catch (RemoteException re) {
-            // should never happen
-            Slog.e(LOG_TAG, "Failed to make remote calls to start bugreportremote service", re);
+        } else {
             return false;
-        } finally {
-            mInjector.binderRestoreCallingIdentity(callingIdentity);
         }
     }
 
@@ -6949,146 +6877,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
-    private String getDeviceOwnerRemoteBugreportUri() {
+    void sendBugreportToDeviceOwner(Uri bugreportUri, String bugreportHash) {
         synchronized (getLockObject()) {
-            return mOwners.getDeviceOwnerRemoteBugreportUri();
+            final Intent intent = new Intent(DeviceAdminReceiver.ACTION_BUGREPORT_SHARE);
+            intent.setComponent(mOwners.getDeviceOwnerComponent());
+            intent.setDataAndType(bugreportUri, RemoteBugreportManager.BUGREPORT_MIMETYPE);
+            intent.putExtra(DeviceAdminReceiver.EXTRA_BUGREPORT_HASH, bugreportHash);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            final UriGrantsManagerInternal ugm = LocalServices
+                    .getService(UriGrantsManagerInternal.class);
+            final NeededUriGrants needed = ugm.checkGrantUriPermissionFromIntent(intent,
+                    Process.SHELL_UID, mOwners.getDeviceOwnerComponent().getPackageName(),
+                    mOwners.getDeviceOwnerUserId());
+            ugm.grantUriPermissionUncheckedFromIntent(needed, null);
+
+            mContext.sendBroadcastAsUser(intent, UserHandle.of(mOwners.getDeviceOwnerUserId()));
         }
     }
 
-    private void setDeviceOwnerRemoteBugreportUriAndHash(String bugreportUri,
-            String bugreportHash) {
+    void setDeviceOwnerRemoteBugreportUriAndHash(String bugreportUri, String bugreportHash) {
         synchronized (getLockObject()) {
             mOwners.setDeviceOwnerRemoteBugreportUriAndHash(bugreportUri, bugreportHash);
         }
     }
 
-    private void registerRemoteBugreportReceivers() {
-        try {
-            IntentFilter filterFinished = new IntentFilter(
-                    DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH,
-                    RemoteBugreportUtils.BUGREPORT_MIMETYPE);
-            mContext.registerReceiver(mRemoteBugreportFinishedReceiver, filterFinished);
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            // should never happen, as setting a constant
-            Slog.w(LOG_TAG, "Failed to set type " + RemoteBugreportUtils.BUGREPORT_MIMETYPE, e);
-        }
-        IntentFilter filterConsent = new IntentFilter();
-        filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_DECLINED);
-        filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_ACCEPTED);
-        mContext.registerReceiver(mRemoteBugreportConsentReceiver, filterConsent);
-    }
-
-    private void onBugreportFinished(Intent intent) {
-        mHandler.removeCallbacks(mRemoteBugreportTimeoutRunnable);
-        mRemoteBugreportServiceIsActive.set(false);
-        Uri bugreportUri = intent.getData();
-        String bugreportUriString = null;
-        if (bugreportUri != null) {
-            bugreportUriString = bugreportUri.toString();
-        }
-        String bugreportHash = intent.getStringExtra(
-                DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH);
-        if (mRemoteBugreportSharingAccepted.get()) {
-            shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
-            mInjector.getNotificationManager().cancel(LOG_TAG,
-                    RemoteBugreportUtils.NOTIFICATION_ID);
-        } else {
-            setDeviceOwnerRemoteBugreportUriAndHash(bugreportUriString, bugreportHash);
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
-                    RemoteBugreportUtils.buildNotification(mContext,
-                            DevicePolicyManager.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED),
-                            UserHandle.ALL);
-        }
-        mContext.unregisterReceiver(mRemoteBugreportFinishedReceiver);
-    }
-
-    private void onBugreportFailed() {
-        mRemoteBugreportServiceIsActive.set(false);
-        mInjector.systemPropertiesSet(RemoteBugreportUtils.CTL_STOP,
-                RemoteBugreportUtils.REMOTE_BUGREPORT_SERVICE);
-        mRemoteBugreportSharingAccepted.set(false);
-        setDeviceOwnerRemoteBugreportUriAndHash(null, null);
-        mInjector.getNotificationManager().cancel(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID);
-        Bundle extras = new Bundle();
-        extras.putInt(DeviceAdminReceiver.EXTRA_BUGREPORT_FAILURE_REASON,
-                DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING);
-        sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_BUGREPORT_FAILED, extras);
-        mContext.unregisterReceiver(mRemoteBugreportConsentReceiver);
-        mContext.unregisterReceiver(mRemoteBugreportFinishedReceiver);
-    }
-
-    private void onBugreportSharingAccepted() {
-        mRemoteBugreportSharingAccepted.set(true);
-        String bugreportUriString = null;
-        String bugreportHash = null;
+    Pair<String, String> getDeviceOwnerRemoteBugreportUriAndHash() {
         synchronized (getLockObject()) {
-            bugreportUriString = getDeviceOwnerRemoteBugreportUri();
-            bugreportHash = mOwners.getDeviceOwnerRemoteBugreportHash();
-        }
-        if (bugreportUriString != null) {
-            shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
-        } else if (mRemoteBugreportServiceIsActive.get()) {
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
-                    RemoteBugreportUtils.buildNotification(mContext,
-                            DevicePolicyManager.NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED),
-                            UserHandle.ALL);
-        }
-    }
-
-    private void onBugreportSharingDeclined() {
-        if (mRemoteBugreportServiceIsActive.get()) {
-            mInjector.systemPropertiesSet(RemoteBugreportUtils.CTL_STOP,
-                    RemoteBugreportUtils.REMOTE_BUGREPORT_SERVICE);
-            mRemoteBugreportServiceIsActive.set(false);
-            mHandler.removeCallbacks(mRemoteBugreportTimeoutRunnable);
-            mContext.unregisterReceiver(mRemoteBugreportFinishedReceiver);
-        }
-        mRemoteBugreportSharingAccepted.set(false);
-        setDeviceOwnerRemoteBugreportUriAndHash(null, null);
-        sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_BUGREPORT_SHARING_DECLINED, null);
-    }
-
-    private void shareBugreportWithDeviceOwnerIfExists(String bugreportUriString,
-            String bugreportHash) {
-        ParcelFileDescriptor pfd = null;
-        try {
-            if (bugreportUriString == null) {
-                throw new FileNotFoundException();
-            }
-            Uri bugreportUri = Uri.parse(bugreportUriString);
-            pfd = mContext.getContentResolver().openFileDescriptor(bugreportUri, "r");
-
-            synchronized (getLockObject()) {
-                Intent intent = new Intent(DeviceAdminReceiver.ACTION_BUGREPORT_SHARE);
-                intent.setComponent(mOwners.getDeviceOwnerComponent());
-                intent.setDataAndType(bugreportUri, RemoteBugreportUtils.BUGREPORT_MIMETYPE);
-                intent.putExtra(DeviceAdminReceiver.EXTRA_BUGREPORT_HASH, bugreportHash);
-                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                final UriGrantsManagerInternal ugm = LocalServices
-                        .getService(UriGrantsManagerInternal.class);
-                final NeededUriGrants needed = ugm.checkGrantUriPermissionFromIntent(intent,
-                        Process.SHELL_UID, mOwners.getDeviceOwnerComponent().getPackageName(),
-                        mOwners.getDeviceOwnerUserId());
-                ugm.grantUriPermissionUncheckedFromIntent(needed, null);
-
-                mContext.sendBroadcastAsUser(intent, UserHandle.of(mOwners.getDeviceOwnerUserId()));
-            }
-        } catch (FileNotFoundException e) {
-            Bundle extras = new Bundle();
-            extras.putInt(DeviceAdminReceiver.EXTRA_BUGREPORT_FAILURE_REASON,
-                    DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE);
-            sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_BUGREPORT_FAILED, extras);
-        } finally {
-            try {
-                if (pfd != null) {
-                    pfd.close();
-                }
-            } catch (IOException ex) {
-                // Ignore
-            }
-            mRemoteBugreportSharingAccepted.set(false);
-            setDeviceOwnerRemoteBugreportUriAndHash(null, null);
+            final String uri = mOwners.getDeviceOwnerRemoteBugreportUri();
+            return uri == null ? null
+                    : new Pair<>(uri, mOwners.getDeviceOwnerRemoteBugreportHash());
         }
     }
 
