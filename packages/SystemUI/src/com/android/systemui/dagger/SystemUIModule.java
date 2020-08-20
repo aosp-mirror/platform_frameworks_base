@@ -25,6 +25,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -58,6 +59,7 @@ import dagger.Provides;
             DemoModeModule.class,
             LogModule.class,
             PeopleHubModule.class,
+            ScreenshotModule.class,
             SensorModule.class,
             SettingsModule.class,
             SettingsUtilModule.class
