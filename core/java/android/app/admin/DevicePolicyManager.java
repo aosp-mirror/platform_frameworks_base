@@ -1830,6 +1830,15 @@ public class DevicePolicyManager {
     public static final int STATE_USER_PROFILE_COMPLETE = 4;
 
     /**
+     * Management setup on a managed profile.
+     * <p>This is used as an intermediate state after {@link #STATE_USER_PROFILE_COMPLETE} once the
+     * work profile has been created.
+     * @hide
+     */
+    @SystemApi
+    public static final int STATE_USER_PROFILE_FINALIZED = 5;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "STATE_USER_" }, value = {
@@ -1837,7 +1846,8 @@ public class DevicePolicyManager {
             STATE_USER_SETUP_INCOMPLETE,
             STATE_USER_SETUP_COMPLETE,
             STATE_USER_SETUP_FINALIZED,
-            STATE_USER_PROFILE_COMPLETE
+            STATE_USER_PROFILE_COMPLETE,
+            STATE_USER_PROFILE_FINALIZED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserProvisioningState {}
