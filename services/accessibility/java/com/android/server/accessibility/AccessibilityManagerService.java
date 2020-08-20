@@ -1488,19 +1488,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-            relevantEventTypes |= isClientInPackageWhitelist(service.getServiceInfo(), client)
+            relevantEventTypes |= isClientInPackageAllowlist(service.getServiceInfo(), client)
                     ? service.getRelevantEventTypes()
                     : 0;
         }
 
-        relevantEventTypes |= isClientInPackageWhitelist(
+        relevantEventTypes |= isClientInPackageAllowlist(
                 mUiAutomationManager.getServiceInfo(), client)
                 ? mUiAutomationManager.getRelevantEventTypes()
                 : 0;
         return relevantEventTypes;
     }
 
-    private static boolean isClientInPackageWhitelist(
+    private static boolean isClientInPackageAllowlist(
             @Nullable AccessibilityServiceInfo serviceInfo, Client client) {
         if (serviceInfo == null) return false;
 
@@ -1519,7 +1519,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Slog.d(LOG_TAG, "Dropping events: "
                         + Arrays.toString(clientPackages) + " -> "
                         + serviceInfo.getComponentName().flattenToShortString()
-                        + " due to not being in package whitelist "
+                        + " due to not being in package allowlist "
                         + Arrays.toString(serviceInfo.packageNames));
             }
         }
@@ -1914,9 +1914,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateLegacyCapabilitiesLocked(UserState userState) {
-        // Up to JB-MR1 we had a white list with services that can enable touch
+        // Up to JB-MR1 we had a allowlist with services that can enable touch
         // exploration. When a service is first started we show a dialog to the
-        // use to get a permission to white list the service.
+        // use to get a permission to allowlist the service.
         final int installedServiceCount = userState.mInstalledServices.size();
         for (int i = 0; i < installedServiceCount; i++) {
             AccessibilityServiceInfo serviceInfo = userState.mInstalledServices.get(i);
@@ -2184,9 +2184,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         if (service.getServiceInfo().getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion
                 <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            // Up to JB-MR1 we had a white list with services that can enable touch
+            // Up to JB-MR1 we had a allowlist with services that can enable touch
             // exploration. When a service is first started we show a dialog to the
-            // use to get a permission to white list the service.
+            // use to get a permission to allowlist the service.
             if (userState.mTouchExplorationGrantedServices.contains(service.mComponentName)) {
                 return true;
             } else if (mEnableTouchExplorationDialog == null
