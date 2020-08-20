@@ -82,8 +82,10 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     protected static final int[] OPS = new int[] {
             AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_PHONE_CALL_CAMERA,
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION
     };
@@ -302,7 +304,9 @@ public class AppOpsControllerImpl implements AppOpsController,
         // does not correspond to a platform permission
         // which may be user sensitive, so for now always show it to the user.
         if (appOpCode == AppOpsManager.OP_SYSTEM_ALERT_WINDOW
-                || appOpCode == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION) {
+                || appOpCode == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION
+                || appOpCode == AppOpsManager.OP_PHONE_CALL_CAMERA
+                || appOpCode == AppOpsManager.OP_PHONE_CALL_MICROPHONE) {
             return true;
         }
 
