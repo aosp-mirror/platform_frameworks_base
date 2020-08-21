@@ -39,6 +39,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -58,6 +59,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private static final String TAG = "BluetoothController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final DumpManager mDumpManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final UserManager mUserManager;
     private final int mCurrentUser;
@@ -77,8 +79,13 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     /**
      */
     @Inject
-    public BluetoothControllerImpl(Context context, @Background Looper bgLooper,
-            @Main Looper mainLooper, @Nullable LocalBluetoothManager localBluetoothManager) {
+    public BluetoothControllerImpl(
+            Context context,
+            DumpManager dumpManager,
+            @Background Looper bgLooper,
+            @Main Looper mainLooper,
+            @Nullable LocalBluetoothManager localBluetoothManager) {
+        mDumpManager = dumpManager;
         mLocalBluetoothManager = localBluetoothManager;
         mBgHandler = new Handler(bgLooper);
         mHandler = new H(mainLooper);
@@ -90,6 +97,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         }
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mCurrentUser = ActivityManager.getCurrentUser();
+        mDumpManager.registerDumpable(TAG, this);
     }
 
     @Override
