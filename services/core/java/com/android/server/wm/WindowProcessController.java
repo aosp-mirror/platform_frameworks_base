@@ -941,7 +941,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 final ActivityRecord r = candidates.remove(0);
                 if (DEBUG_RELEASE) Slog.v(TAG_RELEASE, "Destroying " + r
                         + " in state " + r.getState() + " for reason " + reason);
-                r.destroyImmediately(true /*removeFromApp*/, reason);
+                r.destroyImmediately(reason);
                 --maxRelease;
             } while (maxRelease > 0);
         }

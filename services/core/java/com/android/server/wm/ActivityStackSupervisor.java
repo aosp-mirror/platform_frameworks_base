@@ -41,10 +41,8 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.TYPE_VIRTUAL;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
@@ -1869,7 +1867,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         for (int i = 0; i < numFinishingActivities; i++) {
             final ActivityRecord r = finishingActivities.get(i);
             if (r.isInHistory()) {
-                r.destroyImmediately(true /* removeFromApp */, "finish-" + reason);
+                r.destroyImmediately("finish-" + reason);
             }
         }
     }

@@ -3379,7 +3379,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null || !r.isDestroyable()) {
                     return false;
                 }
-                r.destroyImmediately(true /* removeFromApp */, "app-req");
+                r.destroyImmediately("app-req");
                 return r.isState(DESTROYING, DESTROYED);
             } finally {
                 Binder.restoreCallingIdentity(origId);
