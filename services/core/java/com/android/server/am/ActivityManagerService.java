@@ -17480,8 +17480,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkContentProviderUriPermission(Uri uri, int userId,
                 int callingUid, int modeFlags) {
-            return mCpHelper.checkContentProviderUriPermission(uri,
-                    userId, callingUid, modeFlags);
+            return mCpHelper.checkContentProviderUriPermission(uri, userId, callingUid, modeFlags);
         }
 
         @Override
