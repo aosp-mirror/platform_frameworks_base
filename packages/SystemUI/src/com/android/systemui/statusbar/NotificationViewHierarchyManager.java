@@ -420,11 +420,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
         int visibleNotifications = 0;
         boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
-        int maxNotifications = -1;
-        if (onKeyguard && !mBypassController.getBypassEnabled()) {
-            maxNotifications = mPresenter.getMaxNotificationsWhileLocked(true /* recompute */);
-        }
-        mListContainer.setMaxDisplayedNotifications(maxNotifications);
         Stack<ExpandableNotificationRow> stack = new Stack<>();
         for (int i = N - 1; i >= 0; i--) {
             View child = mListContainer.getContainerChildAt(i);
@@ -438,8 +433,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             NotificationEntry entry = row.getEntry();
             boolean isChildNotification =
                     mGroupManager.isChildInGroupWithSummary(entry.getSbn());
-
-            row.setOnKeyguard(onKeyguard);
 
             if (!onKeyguard) {
                 // If mAlwaysExpandNonGroupedNotification is false, then only expand the

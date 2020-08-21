@@ -140,7 +140,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                                         .build();
                         ExpandableNotificationRowController rowController =
                                 component.getExpandableNotificationRowController();
-                        rowController.init();
+                        rowController.init(entry);
                         entry.setRowController(rowController);
                         bindRow(entry, row);
                         updateRow(entry, row);
@@ -160,7 +160,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mNotificationRemoteInputManager.bindRow(row);
         row.setOnActivatedListener(mPresenter);
         entry.setRow(row);
-        row.setEntry(entry);
         mNotifBindPipeline.manageRow(entry, row);
         mBindRowCallback.onBindRow(row);
     }

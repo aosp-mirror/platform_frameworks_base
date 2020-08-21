@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -219,7 +218,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mViewHierarchyManager.onDynamicPrivacyChanged();
             }
             return null;
-        }).when(mListContainer).setMaxDisplayedNotifications(anyInt());
+        }).when(mListContainer).onNotificationViewUpdateFinished();
 
         // WHEN we call updateNotificationViews()
         mViewHierarchyManager.updateNotificationViews();
@@ -247,7 +246,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mViewHierarchyManager.onDynamicPrivacyChanged();
             }
             return null;
-        }).when(mListContainer).setMaxDisplayedNotifications(anyInt());
+        }).when(mListContainer).onNotificationViewUpdateFinished();
 
         // WHEN we call updateNotificationViews() and drain the looper
         mViewHierarchyManager.updateNotificationViews();
@@ -262,7 +261,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     private class FakeListContainer implements NotificationListContainer {
         final LinearLayout mLayout = new LinearLayout(mContext);
         final List<View> mRows = Lists.newArrayList();
-        private boolean mMakeReentrantCallDuringSetMaxDisplayedNotifications;
 
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {}
@@ -322,9 +320,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
         @Override
         public void setMaxDisplayedNotifications(int maxNotifications) {
-            if (mMakeReentrantCallDuringSetMaxDisplayedNotifications) {
-                mViewHierarchyManager.onDynamicPrivacyChanged();
-            }
         }
 
         @Override
