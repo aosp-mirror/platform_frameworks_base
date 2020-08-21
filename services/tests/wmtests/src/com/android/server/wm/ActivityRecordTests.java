@@ -1190,7 +1190,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertEquals(DESTROYING, mActivity.getState());
         assertTrue(mActivity.finishing);
-        verify(mActivity).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+        verify(mActivity).destroyImmediately(anyString());
     }
 
     /**
@@ -1214,7 +1214,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Verify that the activity was not actually destroyed, but waits for next one to come up
         // instead.
-        verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+        verify(mActivity, never()).destroyImmediately(anyString());
         assertEquals(FINISHING, mActivity.getState());
         assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
     }
@@ -1238,7 +1238,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.completeFinishing("test");
 
         // Verify that the activity is not destroyed immediately, but waits for next one to come up.
-        verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+        verify(mActivity, never()).destroyImmediately(anyString());
         assertEquals(FINISHING, mActivity.getState());
         assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
     }
@@ -1250,26 +1250,26 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testDestroyImmediately_hadApp_finishing() {
         mActivity.finishing = true;
-        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+        mActivity.destroyImmediately("test");
 
         assertEquals(DESTROYING, mActivity.getState());
     }
 
     /**
      * Test that the activity will be moved to destroyed state immediately if it was not marked as
-     * finishing before {@link ActivityRecord#destroyImmediately(boolean, String)}.
+     * finishing before {@link ActivityRecord#destroyImmediately(String)}.
      */
     @Test
     public void testDestroyImmediately_hadApp_notFinishing() {
         mActivity.finishing = false;
-        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+        mActivity.destroyImmediately("test");
 
         assertEquals(DESTROYED, mActivity.getState());
     }
 
     /**
      * Test that an activity with no process attached and that is marked as finishing will be
-     * removed from task when {@link ActivityRecord#destroyImmediately(boolean, String)} is called.
+     * removed from task when {@link ActivityRecord#destroyImmediately(String)} is called.
      */
     @Test
     public void testDestroyImmediately_noApp_finishing() {
@@ -1277,7 +1277,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.finishing = true;
         final Task task = mActivity.getTask();
 
-        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+        mActivity.destroyImmediately("test");
 
         assertEquals(DESTROYED, mActivity.getState());
         assertNull(mActivity.getTask());
@@ -1294,7 +1294,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.finishing = false;
         final Task task = mActivity.getTask();
 
-        mActivity.destroyImmediately(false /* removeFromApp */, "test");
+        mActivity.destroyImmediately("test");
 
         assertEquals(DESTROYED, mActivity.getState());
         assertEquals(task, mActivity.getTask());
@@ -1310,7 +1310,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         mActivity.safelyDestroy("test");
 
-        verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+        verify(mActivity, never()).destroyImmediately(anyString());
     }
 
     /**
@@ -1322,7 +1322,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         mActivity.safelyDestroy("test");
 
-        verify(mActivity).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+        verify(mActivity).destroyImmediately(anyString());
     }
 
     @Test
@@ -1655,13 +1655,13 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
 
-        secondActivity.destroyImmediately(true, "");
+        secondActivity.destroyImmediately("");
 
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
 
-        firstActivity.destroyImmediately(true, "");
+        firstActivity.destroyImmediately("");
 
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
