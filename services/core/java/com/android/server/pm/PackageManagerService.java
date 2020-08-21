@@ -24604,12 +24604,6 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public int getPackageUid(String packageName, int flags, int userId) {
             return PackageManagerService.this
-                    .getPackageUid(packageName, flags, userId);
-        }
-
-        @Override
-        public int getPackageUidInternal(String packageName, int flags, int userId) {
-            return PackageManagerService.this
                     .getPackageUidInternal(packageName, flags, userId, Process.SYSTEM_UID);
         }
 
