@@ -1773,7 +1773,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Обиди се повторно подоцна"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Се прикажува на цел екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"За да излезете, повлечете одозгора надолу."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"Разбрав"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Приказ на часови во кружно движење"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Приказ на минути во кружно движење"</string>
