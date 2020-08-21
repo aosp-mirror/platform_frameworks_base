@@ -1325,15 +1325,14 @@ public class VpnTest {
          * @see UserManagerService#getUsers(boolean)
          */
         doAnswer(invocation -> {
-            final boolean excludeDying = (boolean) invocation.getArguments()[0];
             final ArrayList<UserInfo> result = new ArrayList<>(users.length);
             for (UserInfo ui : users) {
-                if (!excludeDying || (ui.isEnabled() && !ui.partial)) {
+                if (ui.isEnabled() && !ui.partial) {
                     result.add(ui);
                 }
             }
             return result;
-        }).when(mUserManager).getUsers(anyBoolean());
+        }).when(mUserManager).getAliveUsers();
 
         doAnswer(invocation -> {
             final int id = (int) invocation.getArguments()[0];
