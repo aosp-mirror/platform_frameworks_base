@@ -1497,6 +1497,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             synchronized (mLock) {
+                if (mDestroyed) {
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Session destroyed");
+                }
                 // Client staging is fully done at this point
                 mClientProgress = 1f;
                 computeProgressLocked(true);
@@ -1839,21 +1843,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
-        synchronized (mLock) {
-            if (mRelinquished) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session relinquished");
-            }
-            if (mDestroyed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session destroyed");
-            }
-            if (!mSealed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session not sealed");
-            }
-        }
-
         // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
         if (!params.isMultiPackage && needToAskForPermissions()) {
             // User needs to confirm installation;
@@ -1883,6 +1872,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private PackageManagerService.VerificationParams makeVerificationParamsLocked()
             throws PackageManagerException {
+        if (mRelinquished) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session relinquished");
+        }
+        if (mDestroyed) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session destroyed");
+        }
+        if (!mSealed) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session not sealed");
+        }
+
         // TODO(b/136257624): Some logic in this if block probably belongs in
         //  makeInstallParams().
         if (!params.isMultiPackage && !isApexInstallation()) {
