@@ -16,7 +16,12 @@
 
 package android.net.wifi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -39,6 +44,8 @@ public class WifiNetworkSuggestionTest {
     private static final String TEST_FQDN = "fqdn";
     private static final String TEST_WAPI_CERT_SUITE = "suite";
     private static final String TEST_DOMAIN_SUFFIX_MATCH = "domainSuffixMatch";
+    private static final int DEFAULT_PRIORITY_GROUP = 0;
+    private static final int TEST_PRIORITY_GROUP = 1;
 
     /**
      * Validate correctness of WifiNetworkSuggestion object created by
@@ -612,7 +619,7 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion(
-                configuration, null, false, true, true, true);
+                configuration, null, false, true, true, true, TEST_PRIORITY_GROUP);
 
         Parcel parcelW = Parcel.obtain();
         suggestion.writeToParcel(parcelW, 0);
@@ -683,14 +690,16 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, true, false, true, true);
+                new WifiNetworkSuggestion(configuration, null, true, false, true, true,
+                        TEST_PRIORITY_GROUP);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.BSSID = TEST_BSSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, true, true, true);
+                new WifiNetworkSuggestion(configuration1, null, false, true, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         assertEquals(suggestion, suggestion1);
         assertEquals(suggestion.hashCode(), suggestion1.hashCode());
@@ -706,13 +715,15 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, false, false, true, true);
+                new WifiNetworkSuggestion(configuration, null, false, false, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID_1;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, false, true, true);
+                new WifiNetworkSuggestion(configuration1, null, false, false, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         assertNotEquals(suggestion, suggestion1);
     }
@@ -728,13 +739,15 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null,  false, false, true, true);
+                new WifiNetworkSuggestion(configuration, null, false, false, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, false, true, true);
+                new WifiNetworkSuggestion(configuration1, null, false, false, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         assertNotEquals(suggestion, suggestion1);
     }
@@ -749,13 +762,15 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, false, false, true, true);
+                new WifiNetworkSuggestion(configuration, null, false, false, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, false, true, true);
+                new WifiNetworkSuggestion(configuration1, null, false, false, true, true,
+                        DEFAULT_PRIORITY_GROUP);
 
         assertNotEquals(suggestion, suggestion1);
     }

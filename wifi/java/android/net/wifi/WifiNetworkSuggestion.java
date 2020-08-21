@@ -102,10 +102,15 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         private int mMeteredOverride;
         /**
-         * Priority of this network among other network suggestions provided by the app.
+         * Priority of this network among other network suggestions from same priority group
+         * provided by the app.
          * The lower the number, the higher the priority (i.e value of 0 = highest priority).
          */
         private int mPriority;
+        /**
+         * Priority group ID, while suggestion priority will only effect inside the priority group.
+         */
+        private int mPriorityGroup;
 
         /**
          * The carrier ID identifies the operator who provides this network configuration.
@@ -165,6 +170,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mWapiPskPassphrase = null;
             mWapiEnterpriseConfig = null;
             mIsNetworkUntrusted = false;
+            mPriorityGroup = 0;
         }
 
         /**
@@ -329,6 +335,18 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
 
         /**
+         * Set the priority group ID, {@link #setPriority(int)} will only impact the network
+         * suggestions from the same priority group within the same app.
+         *
+         * @param priorityGroup priority group id, if not set default is 0.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setPriorityGroup(int priorityGroup) {
+            mPriorityGroup = priorityGroup;
+            return this;
+        }
+
+        /**
          * Set the ASCII WAPI passphrase for this network. Needed for authenticating to
          * WAPI-PSK networks.
          *
@@ -411,8 +429,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         /**
          * Specify the priority of this network among other network suggestions provided by the same
-         * app (priorities have no impact on suggestions by different apps). The higher the number,
-         * the higher the priority (i.e value of 0 = lowest priority).
+         * app (priorities have no impact on suggestions by different apps) and within the same
+         * priority group, see {@link #setPriorityGroup(int)}.
+         * The higher the number, the higher the priority (i.e value of 0 = lowest priority).
          * <p>
          * <li>If not set, defaults a lower priority than any assigned priority.</li>
          *
@@ -696,7 +715,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
                     mIsSharedWithUser,
-                    mIsInitialAutojoinEnabled);
+                    mIsInitialAutojoinEnabled,
+                    mPriorityGroup);
         }
     }
 
@@ -739,6 +759,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
      */
     public final boolean isInitialAutoJoinEnabled;
 
+    /**
+     * Priority group ID.
+     * @hide
+     */
+    public final int priorityGroup;
+
     /** @hide */
     public WifiNetworkSuggestion() {
         this.wifiConfiguration = new WifiConfiguration();
@@ -747,6 +773,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.isUserInteractionRequired = false;
         this.isUserAllowedToManuallyConnect = true;
         this.isInitialAutoJoinEnabled = true;
+        this.priorityGroup = 0;
     }
 
     /** @hide */
@@ -755,7 +782,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                                  boolean isAppInteractionRequired,
                                  boolean isUserInteractionRequired,
                                  boolean isUserAllowedToManuallyConnect,
-                                 boolean isInitialAutoJoinEnabled) {
+                                 boolean isInitialAutoJoinEnabled, int priorityGroup) {
         checkNotNull(networkConfiguration);
         this.wifiConfiguration = networkConfiguration;
         this.passpointConfiguration = passpointConfiguration;
@@ -764,6 +791,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.isUserInteractionRequired = isUserInteractionRequired;
         this.isUserAllowedToManuallyConnect = isUserAllowedToManuallyConnect;
         this.isInitialAutoJoinEnabled = isInitialAutoJoinEnabled;
+        this.priorityGroup = priorityGroup;
     }
 
     public static final @NonNull Creator<WifiNetworkSuggestion> CREATOR =
@@ -776,7 +804,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
                             in.readBoolean(), // isSharedCredentialWithUser
-                            in.readBoolean()  // isAutojoinEnabled
+                            in.readBoolean(),  // isAutojoinEnabled
+                            in.readInt() // priorityGroup
                     );
                 }
 
@@ -799,6 +828,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         dest.writeBoolean(isUserInteractionRequired);
         dest.writeBoolean(isUserAllowedToManuallyConnect);
         dest.writeBoolean(isInitialAutoJoinEnabled);
+        dest.writeInt(priorityGroup);
     }
 
     @Override
@@ -842,6 +872,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isCredentialSharedWithUser=").append(isUserAllowedToManuallyConnect)
                 .append(", isInitialAutoJoinEnabled=").append(isInitialAutoJoinEnabled)
                 .append(", isUnTrusted=").append(!wifiConfiguration.trusted)
+                .append(", priorityGroup=").append(priorityGroup)
                 .append(" ]");
         return sb.toString();
     }
@@ -961,5 +992,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
             return null;
         }
         return WifiInfo.removeDoubleQuotes(wifiConfiguration.preSharedKey);
+    }
+
+    /**
+     * @see Builder#setPriorityGroup(int)
+     */
+    public int getPriorityGroup() {
+        return priorityGroup;
     }
 }
