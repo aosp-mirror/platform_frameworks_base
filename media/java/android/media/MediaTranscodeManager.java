@@ -36,7 +36,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -94,10 +97,16 @@ import java.util.concurrent.Executors;
  TODO(hkuang): Clarify whether supports framerate conversion.
  @hide
  */
-public final class MediaTranscodeManager {
+public final class MediaTranscodeManager implements AutoCloseable {
     private static final String TAG = "MediaTranscodeManager";
 
     private static final String MEDIA_TRANSCODING_SERVICE = "media.transcoding";
+
+    /** Maximum number of retry to connect to the service. */
+    private static final int CONNECT_SERVICE_RETRY_COUNT = 100;
+
+    /** Interval between trying to reconnect to the service. */
+    private static final int INTERVAL_CONNECT_SERVICE_RETRY_MS = 40;
 
     /**
      * Default transcoding type.
@@ -116,6 +125,25 @@ public final class MediaTranscodeManager {
      * @hide
      */
     public static final int TRANSCODING_TYPE_IMAGE = 2;
+
+    @Override
+    public void close() throws Exception {
+        release();
+    }
+
+    /**
+     * Releases the MediaTranscodeManager.
+     */
+    //TODO(hkuang): add test for it.
+    private void release() throws Exception {
+        synchronized (mLock) {
+            if (mTranscodingClient != null) {
+                mTranscodingClient.unregister();
+            } else {
+                throw new UnsupportedOperationException("Failed to release");
+            }
+        }
+    }
 
     /** @hide */
     @IntDef(prefix = {"TRANSCODING_TYPE_"}, value = {
@@ -181,10 +209,12 @@ public final class MediaTranscodeManager {
     private final String mPackageName;
     private final int mPid;
     private final int mUid;
-    private final ExecutorService mCallbackExecutor = Executors.newSingleThreadExecutor();
-    private static MediaTranscodeManager sMediaTranscodeManager;
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final HashMap<Integer, TranscodingJob> mPendingTranscodingJobs = new HashMap();
-    @NonNull private ITranscodingClient mTranscodingClient;
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    @NonNull private ITranscodingClient mTranscodingClient = null;
+    private static MediaTranscodeManager sMediaTranscodeManager;
 
     private void handleTranscodingFinished(int jobId, TranscodingResultParcel result) {
         synchronized (mPendingTranscodingJobs) {
@@ -209,7 +239,7 @@ public final class MediaTranscodeManager {
         }
     }
 
-    private void handleTranscodingFailed(int jobId, int errorCodec) {
+    private void handleTranscodingFailed(int jobId, int errorCode) {
         synchronized (mPendingTranscodingJobs) {
             // Gets the job associated with the jobId and removes it from
             // mPendingTranscodingJobs.
@@ -252,6 +282,98 @@ public final class MediaTranscodeManager {
                         () -> job.mProgressUpdateListener.onProgressUpdate(newProgress));
             }
         }
+    }
+
+    private static IMediaTranscodingService getService(boolean retry) {
+        int retryCount = !retry ? 1 :  CONNECT_SERVICE_RETRY_COUNT;
+        Log.i(TAG, "get service with rety " + retryCount);
+        for (int count = 1;  count <= retryCount; count++) {
+            Log.d(TAG, "Trying to connect to service. Try count: " + count);
+            IMediaTranscodingService service = IMediaTranscodingService.Stub.asInterface(
+                    ServiceManager.getService(MEDIA_TRANSCODING_SERVICE));
+            if (service != null) {
+                return service;
+            }
+            try {
+                // Sleep a bit before retry.
+                Thread.sleep(INTERVAL_CONNECT_SERVICE_RETRY_MS);
+            } catch (InterruptedException ie) {
+                /* ignore */
+            }
+        }
+
+        throw new UnsupportedOperationException("Failed to connect to MediaTranscoding service");
+    }
+
+    /*
+     * Handle client binder died event.
+     * Upon receiving a binder died event of the client, we will do the following:
+     * 1) For the job that is running, notify the client that the job is failed with error code,
+     *    so client could choose to retry the job or not.
+     *    TODO(hkuang): Add a new error code to signal service died error.
+     * 2) For the jobs that is still pending or paused, we will resubmit the job internally once
+     *    we successfully reconnect to the service and register a new client.
+     * 3) When trying to connect to the service and register a new client. The service may need time
+     *    to reboot or never boot up again. So we will retry for a number of times. If we still
+     *    could not connect, we will notify client job failure for the pending and paused jobs.
+     */
+    private void onClientDied() {
+        synchronized (mLock) {
+            mTranscodingClient = null;
+        }
+
+        // Delegates the job notification and retry to the executor as it may take some time.
+        mExecutor.execute(() -> {
+            // List to track the jobs that we want to retry.
+            List<TranscodingJob> retryJobs = new ArrayList<TranscodingJob>();
+
+            // First notify the client of job failure for all the running jobs.
+            synchronized (mPendingTranscodingJobs) {
+                for (Map.Entry<Integer, TranscodingJob> entry :
+                        mPendingTranscodingJobs.entrySet()) {
+                    TranscodingJob job = entry.getValue();
+
+                    if (job.getStatus() == TranscodingJob.STATUS_RUNNING) {
+                        job.updateStatusAndResult(TranscodingJob.STATUS_FINISHED,
+                                TranscodingJob.RESULT_ERROR);
+
+                        // Remove the job from pending jobs.
+                        mPendingTranscodingJobs.remove(entry.getKey());
+
+                        if (job.mListener != null && job.mListenerExecutor != null) {
+                            Log.i(TAG, "Notify client job failed");
+                            job.mListenerExecutor.execute(
+                                    () -> job.mListener.onTranscodingFinished(job));
+                        }
+                    } else if (job.getStatus() == TranscodingJob.STATUS_PENDING
+                            || job.getStatus() == TranscodingJob.STATUS_PAUSED) {
+                        // Add the job to retryJobs to handle them later.
+                        retryJobs.add(job);
+                    }
+                }
+            }
+
+            // Try to register with the service once it boots up.
+            IMediaTranscodingService service = getService(true /*retry*/);
+            boolean haveTranscodingClient = false;
+            if (service != null) {
+                synchronized (mLock) {
+                    mTranscodingClient = registerClient(service);
+                    if (mTranscodingClient != null) {
+                        haveTranscodingClient = true;
+                    }
+                }
+            }
+
+            for (TranscodingJob job : retryJobs) {
+                // Notify the job failure if we fails to connect to the service or fail
+                // to retry the job.
+                if (!haveTranscodingClient || !job.retry()) {
+                    // TODO(hkuang): Return correct error code to the client.
+                    handleTranscodingFailed(job.getJobId(), 0 /*unused */);
+                }
+            }
+        });
     }
 
     private void updateStatus(int jobId, int status) {
@@ -336,6 +458,30 @@ public final class MediaTranscodeManager {
                 }
             };
 
+    private ITranscodingClient registerClient(IMediaTranscodingService service)
+            throws UnsupportedOperationException {
+        synchronized (mLock) {
+            try {
+                // Registers the client with MediaTranscoding service.
+                mTranscodingClient = service.registerClient(
+                        mTranscodingClientCallback,
+                        mPackageName,
+                        mPackageName,
+                        IMediaTranscodingService.USE_CALLING_UID,
+                        IMediaTranscodingService.USE_CALLING_PID);
+
+                if (mTranscodingClient != null) {
+                    mTranscodingClient.asBinder().linkToDeath(() -> onClientDied(), /* flags */ 0);
+                }
+                return mTranscodingClient;
+            } catch (RemoteException re) {
+                Log.e(TAG, "Failed to register new client due to exception " + re);
+                mTranscodingClient = null;
+            }
+        }
+        throw new UnsupportedOperationException("Failed to register new client");
+    }
+
     /* Private constructor. */
     private MediaTranscodeManager(@NonNull Context context,
             IMediaTranscodingService transcodingService) {
@@ -344,21 +490,17 @@ public final class MediaTranscodeManager {
         mPackageName = mContext.getPackageName();
         mPid = Os.getuid();
         mUid = Os.getpid();
-
-        try {
-            // Registers the client with MediaTranscoding service.
-            mTranscodingClient = transcodingService.registerClient(
-                    mTranscodingClientCallback,
-                    mPackageName,
-                    mPackageName,
-                    IMediaTranscodingService.USE_CALLING_UID,
-                    IMediaTranscodingService.USE_CALLING_PID);
-        } catch (RemoteException re) {
-            Log.e(TAG, "Failed to register new client due to exception " + re);
-            throw new UnsupportedOperationException("Failed to register new client");
-        }
+        mTranscodingClient = registerClient(transcodingService);
     }
 
+    @Override
+    protected void finalize() {
+        try {
+            release();
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to release");
+        }
+    }
 
     public static final class TranscodingRequest {
         /** Uri of the source media file. */
@@ -807,6 +949,16 @@ public final class MediaTranscodeManager {
         }
 
         /**
+         * Resubmit the transcoding job to the service.
+         *
+         * @return true if successfully resubmit the job to the service. False otherwise.
+         */
+        public synchronized boolean retry() {
+            // TODO(hkuang): Implement this.
+            return true;
+        }
+
+        /**
          * Cancels the transcoding job and notify the listener.
          * If the job happened to finish before being canceled this call is effectively a no-op and
          * will not update the result in that case.
@@ -879,9 +1031,15 @@ public final class MediaTranscodeManager {
      */
     public static MediaTranscodeManager getInstance(@NonNull Context context) {
         // Acquires the MediaTranscoding service.
-        IMediaTranscodingService service = IMediaTranscodingService.Stub.asInterface(
-                ServiceManager.getService(MEDIA_TRANSCODING_SERVICE));
+        IMediaTranscodingService service = getService(false /*retry*/);
+        return getInstance(context, service);
+    }
 
+    /** Similar as above, but wait till the service is ready. */
+    @VisibleForTesting
+    public static MediaTranscodeManager getInstance(@NonNull Context context, boolean retry) {
+        // Acquires the MediaTranscoding service.
+        IMediaTranscodingService service = getService(retry);
         return getInstance(context, service);
     }
 
@@ -896,6 +1054,7 @@ public final class MediaTranscodeManager {
                 sMediaTranscodeManager = new MediaTranscodeManager(context.getApplicationContext(),
                         transcodingService);
             }
+
             return sMediaTranscodeManager;
         }
     }
