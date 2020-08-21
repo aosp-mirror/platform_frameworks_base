@@ -25,17 +25,20 @@ import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.tv.dagger.TvPipComponent;
 import com.android.wm.shell.R;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 /**
  * Activity to show the PIP menu to control PIP.
  */
-public class PipMenuActivity extends Activity implements PipManager.Listener {
+
+public class PipMenuActivity extends Activity implements PipController.Listener {
     private static final String TAG = "PipMenuActivity";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -43,7 +46,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     private final TvPipComponent.Builder mPipComponentBuilder;
     private TvPipComponent mTvPipComponent;
-    private final PipManager mPipManager;
+    private final Optional<Pip> mPipOptional;
 
     private Animator mFadeInAnimation;
     private Animator mFadeOutAnimation;
@@ -51,10 +54,11 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private PipControlsViewController mPipControlsViewController;
 
     @Inject
-    public PipMenuActivity(TvPipComponent.Builder pipComponentBuilder, PipManager pipManager) {
+    public PipMenuActivity(TvPipComponent.Builder pipComponentBuilder,
+            Optional<Pip> pipOptional) {
         super();
         mPipComponentBuilder = pipComponentBuilder;
-        mPipManager = pipManager;
+        mPipOptional = pipOptional;
     }
 
     @Override
@@ -62,15 +66,17 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         if (DEBUG) Log.d(TAG, "onCreate()");
 
         super.onCreate(bundle);
-        if (!mPipManager.isPipShown()) {
-            finish();
-        }
+        mPipOptional.ifPresent(pip -> {
+            if (!pip.isPipShown()) {
+                finish();
+            }
+        });
         setContentView(R.layout.tv_pip_menu);
         mTvPipComponent = mPipComponentBuilder.pipControlsView(
                 findViewById(R.id.pip_controls)).build();
         mPipControlsViewController = mTvPipComponent.getPipControlsViewController();
 
-        mPipManager.addListener(this);
+        mPipOptional.ifPresent(pip -> pip.addListener(this));
 
         mRestorePipSizeWhenClose = true;
         mFadeInAnimation = AnimatorInflater.loadAnimator(
@@ -98,7 +104,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
             if (DEBUG) Log.d(TAG, "   > restoring to the default position");
 
             // When PIP menu activity is closed, restore to the default position.
-            mPipManager.resizePinnedStack(PipManager.STATE_PIP);
+            mPipOptional.ifPresent(pip -> pip.resizePinnedStack(PipController.STATE_PIP));
         }
         finish();
     }
@@ -125,9 +131,9 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         if (DEBUG) Log.d(TAG, "onDestroy()");
 
         super.onDestroy();
-        mPipManager.removeListener(this);
-        mPipManager.resumePipResizing(
-                PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
+        mPipOptional.ifPresent(pip -> pip.removeListener(this));
+        mPipOptional.ifPresent(pip -> pip.resumePipResizing(
+                PipController.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH));
     }
 
     @Override
@@ -178,8 +184,8 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         if (DEBUG) Log.d(TAG, "onPipResizeAboutToStart()");
 
         finish();
-        mPipManager.suspendPipResizing(
-                PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
+        mPipOptional.ifPresent(pip -> pip.suspendPipResizing(
+                PipController.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH));
     }
 
     @Override

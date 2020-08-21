@@ -48,14 +48,14 @@ import com.android.wm.shell.R;
 public class PipNotification {
     private static final String TAG = "PipNotification";
     private static final String NOTIFICATION_TAG = PipNotification.class.getSimpleName();
-    private static final boolean DEBUG = PipManager.DEBUG;
+    private static final boolean DEBUG = PipController.DEBUG;
 
     private static final String ACTION_MENU = "PipNotification.menu";
     private static final String ACTION_CLOSE = "PipNotification.close";
 
     private final PackageManager mPackageManager;
 
-    private final PipManager mPipManager;
+    private final PipController mPipController;
 
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
@@ -70,7 +70,7 @@ public class PipNotification {
     private String mMediaTitle;
     private Bitmap mArt;
 
-    private PipManager.Listener mPipListener = new PipManager.Listener() {
+    private PipController.Listener mPipListener = new PipController.Listener() {
         @Override
         public void onPipEntered(String packageName) {
             mPackageName = packageName;
@@ -124,26 +124,27 @@ public class PipNotification {
         }
     };
 
-    private final PipManager.MediaListener mPipMediaListener = new PipManager.MediaListener() {
-        @Override
-        public void onMediaControllerChanged() {
-            MediaController newController = mPipManager.getMediaController();
-            if (mMediaController == newController) {
-                return;
-            }
-            if (mMediaController != null) {
-                mMediaController.unregisterCallback(mMediaControllerCallback);
-            }
-            mMediaController = newController;
-            if (mMediaController != null) {
-                mMediaController.registerCallback(mMediaControllerCallback);
-            }
-            if (updateMediaControllerMetadata() && mNotified) {
-                // update notification
-                notifyPipNotification();
-            }
-        }
-    };
+    private final PipController.MediaListener mPipMediaListener =
+            new PipController.MediaListener() {
+                @Override
+                public void onMediaControllerChanged() {
+                    MediaController newController = mPipController.getMediaController();
+                    if (newController == null || mMediaController == newController) {
+                        return;
+                    }
+                    if (mMediaController != null) {
+                        mMediaController.unregisterCallback(mMediaControllerCallback);
+                    }
+                    mMediaController = newController;
+                    if (mMediaController != null) {
+                        mMediaController.registerCallback(mMediaControllerCallback);
+                    }
+                    if (updateMediaControllerMetadata() && mNotified) {
+                        // update notification
+                        notifyPipNotification();
+                    }
+                }
+            };
 
     private final BroadcastReceiver mEventReceiver = new BroadcastReceiver() {
         @Override
@@ -153,17 +154,17 @@ public class PipNotification {
             }
             switch (intent.getAction()) {
                 case ACTION_MENU:
-                    mPipManager.showPictureInPictureMenu();
+                    mPipController.showPictureInPictureMenu();
                     break;
                 case ACTION_CLOSE:
-                    mPipManager.closePip();
+                    mPipController.closePip();
                     break;
             }
         }
     };
 
     public PipNotification(Context context, BroadcastDispatcher broadcastDispatcher,
-            PipManager pipManager) {
+            PipController pipController) {
         mPackageManager = context.getPackageManager();
 
         mNotificationManager = (NotificationManager) context.getSystemService(
@@ -177,9 +178,9 @@ public class PipNotification {
                         .setContentIntent(createPendingIntent(context, ACTION_MENU))
                         .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE)));
 
-        mPipManager = pipManager;
-        mPipManager.addListener(mPipListener);
-        mPipManager.addMediaListener(mPipMediaListener);
+        mPipController = pipController;
+        pipController.addListener(mPipListener);
+        pipController.addMediaListener(mPipMediaListener);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_MENU);
@@ -190,7 +191,7 @@ public class PipNotification {
     }
 
     /**
-     * Called by {@link PipManager} when the configuration is changed.
+     * Called by {@link PipController} when the configuration is changed.
      */
     void onConfigurationChanged(Context context) {
         Resources res = context.getResources();
@@ -227,8 +228,8 @@ public class PipNotification {
     private boolean updateMediaControllerMetadata() {
         String title = null;
         Bitmap art = null;
-        if (mPipManager.getMediaController() != null) {
-            MediaMetadata metadata = mPipManager.getMediaController().getMetadata();
+        if (mPipController.getMediaController() != null) {
+            MediaMetadata metadata = mPipController.getMediaController().getMetadata();
             if (metadata != null) {
                 title = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
                 if (TextUtils.isEmpty(title)) {
@@ -247,6 +248,7 @@ public class PipNotification {
         }
         return false;
     }
+
 
     private String getNotificationTitle() {
         if (!TextUtils.isEmpty(mMediaTitle)) {

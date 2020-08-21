@@ -306,7 +306,6 @@
         <item>com.android.systemui.power.PowerUI</item>
         <item>com.android.systemui.media.RingtonePlayer</item>
         <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.pip.PipUI</item>
         <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
         <item>@string/config_systemUIVendorServiceComponent</item>
         <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
