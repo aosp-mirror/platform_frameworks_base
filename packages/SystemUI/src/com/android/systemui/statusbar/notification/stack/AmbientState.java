@@ -42,7 +42,7 @@ public class AmbientState {
     private static final float MAX_PULSE_HEIGHT = 100000f;
 
     private final SectionProvider mSectionProvider;
-    private ArrayList<ExpandableView> mDraggedViews = new ArrayList<>();
+    private ArrayList<View> mDraggedViews = new ArrayList<>();
     private int mScrollY;
     private int mAnchorViewIndex;
     private int mAnchorViewY;
@@ -164,7 +164,7 @@ public class AmbientState {
     }
 
     /** Call when dragging begins. */
-    public void onBeginDrag(ExpandableView view) {
+    public void onBeginDrag(View view) {
         mDraggedViews.add(view);
     }
 
@@ -172,7 +172,7 @@ public class AmbientState {
         mDraggedViews.remove(view);
     }
 
-    public ArrayList<ExpandableView> getDraggedViews() {
+    public ArrayList<View> getDraggedViews() {
         return mDraggedViews;
     }
 

@@ -18,11 +18,14 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -31,8 +34,12 @@ import android.widget.FrameLayout;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -89,13 +96,20 @@ public class NotificationStackScrollLayoutController {
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
+    private final FalsingManager mFalsingManager;
+    private final NotificationSectionsManager mNotificationSectionsManager;
+    private final Resources mResources;
+    private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final SysuiColorExtractor mColorExtractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
+    // TODO: StatusBar should be encapsulated behind a Controller
+    private final StatusBar mStatusBar;
 
     private NotificationStackScrollLayout mView;
+    private boolean mFadeNotificationsOnDismiss;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -238,6 +252,194 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
+    private final NotificationSwipeHelper.NotificationCallback mNotificationCallback =
+            new NotificationSwipeHelper.NotificationCallback() {
+
+                @Override
+                public void onDismiss() {
+                    mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                            false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                            false /* resetMenu */);
+                }
+
+                @Override
+                public void onSnooze(StatusBarNotification sbn,
+                        NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
+                    mStatusBar.setNotificationSnoozed(sbn, snoozeOption);
+                }
+
+                @Override
+                public void onSnooze(StatusBarNotification sbn, int hours) {
+                    mStatusBar.setNotificationSnoozed(sbn, hours);
+                }
+
+                @Override
+                public boolean shouldDismissQuickly() {
+                    return mView.isExpanded() && mView.isFullyAwake();
+                }
+
+                @Override
+                public void onDragCancelled(View v) {
+                    mView.setSwipingInProgress(false);
+                    mFalsingManager.onNotificationStopDismissing();
+                }
+
+                /**
+                 * Handles cleanup after the given {@code view} has been fully swiped out (including
+                 * re-invoking dismiss logic in case the notification has not made its way out yet).
+                 */
+                @Override
+                public void onChildDismissed(View view) {
+                    if (!(view instanceof ActivatableNotificationView)) {
+                        return;
+                    }
+                    ActivatableNotificationView row = (ActivatableNotificationView) view;
+                    if (!row.isDismissed()) {
+                        handleChildViewDismissed(view);
+                    }
+                    ViewGroup transientContainer = row.getTransientContainer();
+                    if (transientContainer != null) {
+                        transientContainer.removeTransientView(view);
+                    }
+                }
+
+                /**
+                 * Starts up notification dismiss and tells the notification, if any, to remove
+                 * itself from the layout.
+                 *
+                 * @param view view (e.g. notification) to dismiss from the layout
+                 */
+
+                public void handleChildViewDismissed(View view) {
+                    mView.setSwipingInProgress(false);
+                    if (mView.getDismissAllInProgress()) {
+                        return;
+                    }
+
+                    boolean isBlockingHelperShown = false;
+
+                    mView.removeDraggedView(view);
+                    mView.updateContinuousShadowDrawing();
+
+                    if (view instanceof ExpandableNotificationRow) {
+                        ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                        if (row.isHeadsUp()) {
+                            mHeadsUpManager.addSwipedOutNotification(
+                                    row.getEntry().getSbn().getKey());
+                        }
+                        isBlockingHelperShown =
+                                row.performDismissWithBlockingHelper(false /* fromAccessibility */);
+                    }
+
+                    if (view instanceof PeopleHubView) {
+                        mNotificationSectionsManager.hidePeopleRow();
+                    }
+
+                    if (!isBlockingHelperShown) {
+                        mView.addSwipedOutView(view);
+                    }
+                    mFalsingManager.onNotificationDismissed();
+                    if (mFalsingManager.shouldEnforceBouncer()) {
+                        mStatusBar.executeRunnableDismissingKeyguard(
+                                null,
+                                null /* cancelAction */,
+                                false /* dismissShade */,
+                                true /* afterKeyguardGone */,
+                                false /* deferred */);
+                    }
+                }
+
+                @Override
+                public boolean isAntiFalsingNeeded() {
+                    return mView.onKeyguard();
+                }
+
+                @Override
+                public View getChildAtPosition(MotionEvent ev) {
+                    View child = mView.getChildAtPosition(
+                            ev.getX(),
+                            ev.getY(),
+                            true /* requireMinHeight */,
+                            false /* ignoreDecors */);
+                    if (child instanceof ExpandableNotificationRow) {
+                        ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                        ExpandableNotificationRow parent = row.getNotificationParent();
+                        if (parent != null && parent.areChildrenExpanded()
+                                && (parent.areGutsExposed()
+                                || mSwipeHelper.getExposedMenuView() == parent
+                                || (parent.getAttachedChildren().size() == 1
+                                && parent.getEntry().isClearable()))) {
+                            // In this case the group is expanded and showing the menu for the
+                            // group, further interaction should apply to the group, not any
+                            // child notifications so we use the parent of the child. We also do the
+                            // same if we only have a single child.
+                            child = parent;
+                        }
+                    }
+                    return child;
+                }
+
+                @Override
+                public void onBeginDrag(View v) {
+                    mFalsingManager.onNotificationStartDismissing();
+                    mView.setSwipingInProgress(true);
+                    mView.addDraggedView(v);
+                    mView.updateContinuousShadowDrawing();
+                    mView.updateContinuousBackgroundDrawing();
+                    mView.requestChildrenUpdate();
+                }
+
+                @Override
+                public void onChildSnappedBack(View animView, float targetLeft) {
+                    mView.addDraggedView(animView);
+                    mView.updateContinuousShadowDrawing();
+                    mView.updateContinuousBackgroundDrawing();
+                    if (animView instanceof ExpandableNotificationRow) {
+                        ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
+                        if (row.isPinned() && !canChildBeDismissed(row)
+                                && row.getEntry().getSbn().getNotification().fullScreenIntent
+                                == null) {
+                            mHeadsUpManager.removeNotification(row.getEntry().getSbn().getKey(),
+                                    true /* removeImmediately */);
+                        }
+                    }
+                }
+
+                @Override
+                public boolean updateSwipeProgress(View animView, boolean dismissable,
+                        float swipeProgress) {
+                    // Returning true prevents alpha fading.
+                    return !mFadeNotificationsOnDismiss;
+                }
+
+                @Override
+                public float getFalsingThresholdFactor() {
+                    return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+                }
+
+                @Override
+                public int getConstrainSwipeStartPosition() {
+                    NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
+                    if (menuRow != null) {
+                        return Math.abs(menuRow.getMenuSnapTarget());
+                    }
+                    return 0;
+                }
+
+                @Override
+                public boolean canChildBeDismissed(View v) {
+                    return NotificationStackScrollLayout.canChildBeDismissed(v);
+                }
+
+                @Override
+                public boolean canChildBeDismissedInDirection(View v, boolean isRightOrDown) {
+                    //TODO: b/131242807 for why this doesn't do anything with direction
+                    return canChildBeDismissed(v);
+                }
+            };
+
+    private NotificationSwipeHelper mSwipeHelper;
+
     @Inject
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
@@ -253,7 +455,12 @@ public class NotificationStackScrollLayoutController {
             ZenModeController zenModeController,
             SysuiColorExtractor colorExtractor,
             NotificationLockscreenUserManager lockscreenUserManager,
-            MetricsLogger metricsLogger) {
+            MetricsLogger metricsLogger,
+            FalsingManager falsingManager,
+            NotificationSectionsManager notificationSectionsManager,
+            @Main Resources resources,
+            NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
+            StatusBar statusBar) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -268,12 +475,25 @@ public class NotificationStackScrollLayoutController {
         mColorExtractor = colorExtractor;
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
+        mFalsingManager = falsingManager;
+        mNotificationSectionsManager = notificationSectionsManager;
+        mResources = resources;
+        mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
+        mStatusBar = statusBar;
     }
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
         mView.setController(this);
-        mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled);
+
+        mSwipeHelper = mNotificationSwipeHelperBuilder
+                .setSwipeDirection(SwipeHelper.X)
+                .setNotificationCallback(mNotificationCallback)
+                .setOnMenuEventListener(mMenuEventListener)
+                .build();
+
+        mView.initView(mView.getContext(), mKeyguardBypassController::getBypassEnabled,
+                mSwipeHelper);
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
@@ -281,7 +501,8 @@ public class NotificationStackScrollLayoutController {
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
         mView.setCurrentUserid(mLockscreenUserManager.getCurrentUserId());
 
-        mView.setMenuEventListener(mMenuEventListener);
+        mFadeNotificationsOnDismiss =  // TODO: this should probably be injected directly
+                mResources.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
@@ -861,7 +1082,7 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public NotificationSwipeActionHelper getSwipeActionHelper() {
-            return mView.getSwipeActionHelper();
+            return mSwipeHelper;
         }
 
         @Override

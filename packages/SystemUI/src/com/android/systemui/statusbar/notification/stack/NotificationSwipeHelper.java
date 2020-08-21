@@ -19,15 +19,17 @@ package com.android.systemui.statusbar.notification.stack;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -35,6 +37,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
 import java.lang.ref.WeakReference;
+
+import javax.inject.Inject;
 
 class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeActionHelper {
 
@@ -58,10 +62,10 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     private boolean mPulsing;
 
     NotificationSwipeHelper(
-            int swipeDirection, NotificationCallback callback, Context context,
-            NotificationMenuRowPlugin.OnMenuEventListener menuListener,
-            FalsingManager falsingManager) {
-        super(swipeDirection, callback, context, falsingManager);
+            Resources resources, ViewConfiguration viewConfiguration,
+            FalsingManager falsingManager, int swipeDirection, NotificationCallback callback,
+            NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
+        super(swipeDirection, callback, resources, viewConfiguration, falsingManager);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -74,7 +78,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     public void clearTranslatingParentView() { setTranslatingParentView(null); }
 
     @VisibleForTesting
-    protected void setTranslatingParentView(View view) { mTranslatingParentView = view; };
+    protected void setTranslatingParentView(View view) { mTranslatingParentView = view; }
 
     public void setExposedMenuView(View view) {
         mMenuExposedView = view;
@@ -90,7 +94,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @VisibleForTesting
     void setCurrentMenuRow(NotificationMenuRowPlugin menuRow) {
-        mCurrMenuRowRef = menuRow != null ? new WeakReference(menuRow) : null;
+        mCurrMenuRowRef = menuRow != null ? new WeakReference<>(menuRow) : null;
     }
 
     public NotificationMenuRowPlugin getCurrentMenuRow() {
@@ -469,5 +473,43 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         void onSnooze(StatusBarNotification sbn, int hours);
 
         void onDismiss();
+    }
+
+    static class Builder {
+        private final Resources mResources;
+        private final ViewConfiguration mViewConfiguration;
+        private final FalsingManager mFalsingManager;
+        private int mSwipeDirection;
+        private NotificationCallback mNotificationCallback;
+        private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
+
+        @Inject
+        Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
+                FalsingManager falsingManager) {
+            mResources = resources;
+            mViewConfiguration = viewConfiguration;
+            mFalsingManager = falsingManager;
+        }
+
+        Builder setSwipeDirection(int swipeDirection) {
+            mSwipeDirection = swipeDirection;
+            return this;
+        }
+
+        Builder setNotificationCallback(NotificationCallback notificationCallback) {
+            mNotificationCallback = notificationCallback;
+            return this;
+        }
+
+        Builder setOnMenuEventListener(
+                NotificationMenuRowPlugin.OnMenuEventListener onMenuEventListener) {
+            mOnMenuEventListener = onMenuEventListener;
+            return this;
+        }
+
+        NotificationSwipeHelper build() {
+            return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
+                    mSwipeDirection, mNotificationCallback, mOnMenuEventListener);
+        }
     }
 }
