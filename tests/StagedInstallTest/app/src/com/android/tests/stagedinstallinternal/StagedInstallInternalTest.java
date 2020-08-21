@@ -47,11 +47,7 @@ import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
 public class StagedInstallInternalTest {
-
-    private static final String TAG = StagedInstallInternalTest.class.getSimpleName();
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
-    private static final TestApp TEST_APEX_WITH_APK_V1 = new TestApp("TestApexWithApkV1",
-            APK_IN_APEX_TESTAPEX_NAME, 1, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
     private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
             APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
 
