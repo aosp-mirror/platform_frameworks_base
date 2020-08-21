@@ -103,6 +103,8 @@ public final class MediaSession {
      * System only flag for a session that needs to have priority over all other
      * sessions. This flag ensures this session will receive media button events
      * regardless of the current ordering in the system.
+     * If there are two or more sessions with this flag, the last session that sets this flag
+     * will be the global priority session.
      *
      * @hide
      */
