@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.ArrayMap;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -41,16 +42,20 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class SystemBarConfigsTest extends SysuiTestCase {
+    private static final int SYSTEM_BAR_GIRTH = 100;
 
     private SystemBarConfigs mSystemBarConfigs;
     @Mock
     private Resources mResources;
+    @Mock
+    private CarNavigationBarView mCarNavigationBarView;
 
     @Before
     public void setUp() {
@@ -133,6 +138,41 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         assertEquals(lp.type, WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL);
     }
 
+    @Test
+    public void updateInsetPaddings_overlappingBarWithHigherZOrderDisappeared_removesInset() {
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+        CarNavigationBarView leftBar = new CarNavigationBarView(mContext, /* attrs= */ null);
+        Map<Integer, Boolean> visibilities = new ArrayMap<>();
+        visibilities.put(SystemBarConfigs.TOP, false);
+        visibilities.put(SystemBarConfigs.BOTTOM, true);
+        visibilities.put(SystemBarConfigs.LEFT, true);
+        visibilities.put(SystemBarConfigs.RIGHT, true);
+
+        mSystemBarConfigs.updateInsetPaddings(SystemBarConfigs.LEFT, visibilities);
+        mSystemBarConfigs.insetSystemBar(SystemBarConfigs.LEFT, leftBar);
+
+        assertEquals(0, leftBar.getPaddingTop());
+    }
+
+    @Test
+    public void updateInsetPaddings_overlappingBarWithHigherZOrderReappeared_addsInset() {
+        mSystemBarConfigs = new SystemBarConfigs(mResources);
+        CarNavigationBarView leftBar = new CarNavigationBarView(mContext, /* attrs= */ null);
+        Map<Integer, Boolean> visibilities = new ArrayMap<>();
+        visibilities.put(SystemBarConfigs.TOP, false);
+        visibilities.put(SystemBarConfigs.BOTTOM, true);
+        visibilities.put(SystemBarConfigs.LEFT, true);
+        visibilities.put(SystemBarConfigs.RIGHT, true);
+
+        mSystemBarConfigs.updateInsetPaddings(SystemBarConfigs.LEFT, visibilities);
+        mSystemBarConfigs.insetSystemBar(SystemBarConfigs.LEFT, leftBar);
+        visibilities.put(SystemBarConfigs.TOP, true);
+        mSystemBarConfigs.updateInsetPaddings(SystemBarConfigs.LEFT, visibilities);
+        mSystemBarConfigs.insetSystemBar(SystemBarConfigs.LEFT, leftBar);
+
+        assertEquals(SYSTEM_BAR_GIRTH, leftBar.getPaddingTop());
+    }
+
     // Set valid config where all system bars are enabled.
     private void setDefaultValidConfig() {
         when(mResources.getBoolean(R.bool.config_enableTopNavigationBar)).thenReturn(true);
@@ -141,13 +181,13 @@ public class SystemBarConfigsTest extends SysuiTestCase {
         when(mResources.getBoolean(R.bool.config_enableRightNavigationBar)).thenReturn(true);
 
         when(mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height)).thenReturn(100);
+                com.android.internal.R.dimen.status_bar_height)).thenReturn(SYSTEM_BAR_GIRTH);
         when(mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height)).thenReturn(100);
+                com.android.internal.R.dimen.navigation_bar_height)).thenReturn(SYSTEM_BAR_GIRTH);
         when(mResources.getDimensionPixelSize(R.dimen.car_left_navigation_bar_width)).thenReturn(
-                100);
+                SYSTEM_BAR_GIRTH);
         when(mResources.getDimensionPixelSize(R.dimen.car_right_navigation_bar_width)).thenReturn(
-                100);
+                SYSTEM_BAR_GIRTH);
 
         when(mResources.getInteger(R.integer.config_topSystemBarType)).thenReturn(0);
         when(mResources.getInteger(R.integer.config_bottomSystemBarType)).thenReturn(1);
