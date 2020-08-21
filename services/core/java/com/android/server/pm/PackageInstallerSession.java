@@ -389,6 +389,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private String mStagedSessionErrorMessage;
 
     /**
+     * The callback to run when pre-reboot verification has ended. Used by {@link #abandonStaged()}
+     * to delay session clean-up until it is safe to do so.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private Runnable mPendingAbandonCallback;
+    /**
+     * {@code true} if pre-reboot verification is ongoing which means it is not safe for
+     * {@link #abandon()} to clean up staging directories.
+     */
+    @GuardedBy("mLock")
+    private boolean mInPreRebootVerification;
+
+    /**
      * Path to the validated base APK for this session, which may point at an
      * APK inside the session (when the session defines the base), or it may
      * point at the existing base APK (when adding splits to an existing app).
@@ -1570,7 +1584,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, detailMessage);
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyVerificationComplete(sessionId);
+            mStagingManager.notifyVerificationComplete(this);
         } else {
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, detailMessage, null);
@@ -2786,14 +2800,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void abandonStaged() {
+        final Runnable r;
         synchronized (mLock) {
-            if (mDestroyed) {
-                // If a user abandons staged session in an unsafe state, then system will try to
-                // abandon the destroyed staged session when it is safe on behalf of the user.
-                assertCallerIsOwnerOrRootOrSystemLocked();
-            } else {
-                assertCallerIsOwnerOrRootLocked();
-            }
+            assertCallerIsOwnerOrRootLocked();
             if (isStagedAndInTerminalState()) {
                 // We keep the session in the database if it's in a finalized state. It will be
                 // removed by PackageInstallerService when the last update time is old enough.
@@ -2802,17 +2811,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return;
             }
             mDestroyed = true;
-            if (mCommitted) {
-                if (!mStagingManager.abortCommittedSessionLocked(this)) {
-                    // Do not clean up the staged session from system. It is not safe yet.
-                    mCallback.onStagedSessionChanged(this);
-                    return;
+            boolean isCommitted = mCommitted;
+            List<PackageInstallerSession> childSessions = getChildSessionsLocked();
+            r = () -> {
+                assertNotLocked("abandonStaged");
+                if (isCommitted) {
+                    mStagingManager.abortCommittedSession(this);
                 }
+                cleanStageDir(childSessions);
+                destroyInternal();
+                dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+            };
+            if (mInPreRebootVerification) {
+                // Pre-reboot verification is ongoing. It is not safe to clean up the session yet.
+                mPendingAbandonCallback = r;
+                mCallback.onStagedSessionChanged(this);
+                return;
             }
-            cleanStageDir(getChildSessionsLocked());
-            destroyInternal();
         }
-        dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+        r.run();
     }
 
     @Override
@@ -2827,6 +2844,50 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } else {
             abandonNonStaged();
         }
+    }
+
+    /**
+     * Notified by the staging manager that pre-reboot verification is about to start. The return
+     * value should be checked to decide whether it is OK to start pre-reboot verification. In
+     * the case of a destroyed session, {@code false} is returned and there is no need to start
+     * pre-reboot verification.
+     */
+    boolean notifyStagedStartPreRebootVerification() {
+        synchronized (mLock) {
+            if (mInPreRebootVerification) {
+                throw new IllegalStateException("Pre-reboot verification has started");
+            }
+            if (mDestroyed) {
+                return false;
+            }
+            mInPreRebootVerification = true;
+            return true;
+        }
+    }
+
+    private void dispatchPendingAbandonCallback() {
+        final Runnable callback;
+        synchronized (mLock) {
+            callback = mPendingAbandonCallback;
+            mPendingAbandonCallback = null;
+        }
+        if (callback != null) {
+            callback.run();
+        }
+    }
+
+    /**
+     * Notified by the staging manager that pre-reboot verification has ended. Now it is safe to
+     * clean up the session if {@link #abandon()} has been called previously.
+     */
+    void notifyStagedEndPreRebootVerification() {
+        synchronized (mLock) {
+            if (!mInPreRebootVerification) {
+                throw new IllegalStateException("Pre-reboot verification not started");
+            }
+            mInPreRebootVerification = false;
+        }
+        dispatchPendingAbandonCallback();
     }
 
     @Override

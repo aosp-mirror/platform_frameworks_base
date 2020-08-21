@@ -1028,22 +1028,12 @@ public class StagingManager {
 
     /**
      * <p>Abort committed staged session
-     *
-     * <p>This method must be called while holding {@link PackageInstallerSession#mLock}.
-     *
-     * <p>The method returns {@code false} to indicate it is not safe to clean up the session from
-     * system yet. When it is safe, the method returns {@code true}.
-     *
-     * <p> When it is safe to clean up, {@link StagingManager} will call
-     * {@link PackageInstallerSession#abandon()} on the session again.
-     *
-     * @return {@code true} if it is safe to cleanup the session resources, otherwise {@code false}.
      */
-    boolean abortCommittedSessionLocked(@NonNull PackageInstallerSession session) {
+    void abortCommittedSession(@NonNull PackageInstallerSession session) {
         int sessionId = session.sessionId;
-        if (session.isStagedSessionApplied()) {
-            Slog.w(TAG, "Cannot abort applied session : " + sessionId);
-            return false;
+        if (session.isStagedAndInTerminalState()) {
+            Slog.w(TAG, "Cannot abort session in final state: " + sessionId);
+            return;
         }
         if (!session.isDestroyed()) {
             throw new IllegalStateException("Committed session must be destroyed before aborting it"
@@ -1051,15 +1041,7 @@ public class StagingManager {
         }
         if (getStagedSession(sessionId) == null) {
             Slog.w(TAG, "Session " + sessionId + " has been abandoned already");
-            return false;
-        }
-
-        // If pre-reboot verification is running, then return false. StagingManager will call
-        // abandon again when pre-reboot verification ends.
-        if (mPreRebootVerificationHandler.isVerificationRunning(sessionId)) {
-            Slog.w(TAG, "Session " + sessionId + " aborted before pre-reboot "
-                    + "verification completed.");
-            return false;
+            return;
         }
 
         // A session could be marked ready once its pre-reboot verification ends
@@ -1075,7 +1057,6 @@ public class StagingManager {
         // Session was successfully aborted from apexd (if required) and pre-reboot verification
         // is also complete. It is now safe to clean up the session from system.
         abortSession(session);
-        return true;
     }
 
     /**
@@ -1264,8 +1245,8 @@ public class StagingManager {
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
     //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
-    void notifyVerificationComplete(int sessionId) {
-        mPreRebootVerificationHandler.onPreRebootVerificationComplete(sessionId);
+    void notifyVerificationComplete(PackageInstallerSession session) {
+        mPreRebootVerificationHandler.onPreRebootVerificationComplete(session);
     }
 
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
@@ -1316,7 +1297,7 @@ public class StagingManager {
             }
             if (session.isDestroyed() || session.isStagedSessionFailed()) {
                 // No point in running verification on a destroyed/failed session
-                onPreRebootVerificationComplete(sessionId);
+                onPreRebootVerificationComplete(session);
                 return;
             }
             switch (msg.what) {
@@ -1357,15 +1338,13 @@ public class StagingManager {
             }
 
             PackageInstallerSession session = getStagedSession(sessionId);
-            synchronized (mVerificationRunning) {
-                // Do not start verification on a session that has been abandoned
-                if (session == null || session.isDestroyed()) {
-                    return;
+            if (session != null && session.notifyStagedStartPreRebootVerification()) {
+                synchronized (mVerificationRunning) {
+                    Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
+                    mVerificationRunning.put(sessionId, true);
                 }
-                Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
-                mVerificationRunning.put(sessionId, true);
+                obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, 0).sendToTarget();
             }
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, 0).sendToTarget();
         }
 
         private void onPreRebootVerificationFailure(PackageInstallerSession session,
@@ -1376,22 +1355,18 @@ public class StagingManager {
                 // failed on next step and staging directory for session will be deleted.
             }
             session.setStagedSessionFailed(errorCode, errorMessage);
-            onPreRebootVerificationComplete(session.sessionId);
+            onPreRebootVerificationComplete(session);
         }
 
         // Things to do when pre-reboot verification completes for a particular sessionId
-        private void onPreRebootVerificationComplete(int sessionId) {
+        private void onPreRebootVerificationComplete(PackageInstallerSession session) {
+            int sessionId = session.sessionId;
             // Remove it from mVerificationRunning so that verification is considered complete
             synchronized (mVerificationRunning) {
                 Slog.d(TAG, "Stopping preRebootVerification for session " + sessionId);
                 mVerificationRunning.delete(sessionId);
             }
-            // Check if the session was destroyed while pre-reboot verification was running. If so,
-            // abandon it again.
-            PackageInstallerSession session = getStagedSession(sessionId);
-            if (session != null && session.isDestroyed()) {
-                session.abandon();
-            }
+            session.notifyStagedEndPreRebootVerification();
         }
 
         private boolean isVerificationRunning(int sessionId) {
@@ -1516,7 +1491,7 @@ public class StagingManager {
             // or activate its apex, there won't be any files to work with as they will be cleaned
             // up by the system as part of abandonment. If session is abandoned before this point,
             // then the session is already destroyed and cannot be marked ready anymore.
-            onPreRebootVerificationComplete(session.sessionId);
+            onPreRebootVerificationComplete(session);
 
             // Proactively mark session as ready before calling apexd. Although this call order
             // looks counter-intuitive, this is the easiest way to ensure that session won't end up
