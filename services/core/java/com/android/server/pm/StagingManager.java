@@ -60,7 +60,6 @@ import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.apk.ApkSignatureVerifier;
 
@@ -1260,8 +1259,6 @@ public class StagingManager {
         // Hold session ids before handler gets ready to do the verification.
         private IntArray mPendingSessionIds;
         private boolean mIsReady;
-        @GuardedBy("mVerificationRunning")
-        private final SparseBooleanArray mVerificationRunning = new SparseBooleanArray();
 
         PreRebootVerificationHandler(Looper looper) {
             super(looper);
@@ -1339,10 +1336,7 @@ public class StagingManager {
 
             PackageInstallerSession session = getStagedSession(sessionId);
             if (session != null && session.notifyStagedStartPreRebootVerification()) {
-                synchronized (mVerificationRunning) {
-                    Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
-                    mVerificationRunning.put(sessionId, true);
-                }
+                Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
                 obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, 0).sendToTarget();
             }
         }
@@ -1361,18 +1355,8 @@ public class StagingManager {
         // Things to do when pre-reboot verification completes for a particular sessionId
         private void onPreRebootVerificationComplete(PackageInstallerSession session) {
             int sessionId = session.sessionId;
-            // Remove it from mVerificationRunning so that verification is considered complete
-            synchronized (mVerificationRunning) {
-                Slog.d(TAG, "Stopping preRebootVerification for session " + sessionId);
-                mVerificationRunning.delete(sessionId);
-            }
+            Slog.d(TAG, "Stopping preRebootVerification for session " + sessionId);
             session.notifyStagedEndPreRebootVerification();
-        }
-
-        private boolean isVerificationRunning(int sessionId) {
-            synchronized (mVerificationRunning) {
-                return mVerificationRunning.get(sessionId);
-            }
         }
 
         private void notifyPreRebootVerification_Start_Complete(int sessionId) {
