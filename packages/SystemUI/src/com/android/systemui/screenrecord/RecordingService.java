@@ -21,7 +21,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -69,7 +68,6 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     private static final String ACTION_STOP_NOTIF =
             "com.android.systemui.screenrecord.STOP_FROM_NOTIF";
     private static final String ACTION_SHARE = "com.android.systemui.screenrecord.SHARE";
-    private static final String ACTION_DELETE = "com.android.systemui.screenrecord.DELETE";
 
     private final RecordingController mController;
 
@@ -181,23 +179,6 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 startActivity(Intent.createChooser(shareIntent, shareLabel)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 break;
-            case ACTION_DELETE:
-                // Close quick shade
-                sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-
-                ContentResolver resolver = getContentResolver();
-                Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
-                resolver.delete(uri, null, null);
-
-                Toast.makeText(
-                        this,
-                        R.string.screenrecord_delete_description,
-                        Toast.LENGTH_LONG).show();
-
-                // Remove notification
-                mNotificationManager.cancelAsUser(null, NOTIFICATION_VIEW_ID, currentUser);
-                Log.d(TAG, "Deleted recording " + uri);
-                break;
         }
         return Service.START_STICKY;
     }
@@ -307,16 +288,6 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .build();
 
-        Notification.Action deleteAction = new Notification.Action.Builder(
-                Icon.createWithResource(this, R.drawable.ic_screenrecord),
-                getResources().getString(R.string.screenrecord_delete_label),
-                PendingIntent.getService(
-                        this,
-                        REQUEST_CODE,
-                        getDeleteIntent(this, uri.toString()),
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
-                .build();
-
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 getResources().getString(R.string.screenrecord_name));
@@ -330,7 +301,6 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                         viewIntent,
                         PendingIntent.FLAG_IMMUTABLE))
                 .addAction(shareAction)
-                .addAction(deleteAction)
                 .setAutoCancel(true)
                 .addExtras(extras);
 
@@ -406,11 +376,6 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
     private static Intent getShareIntent(Context context, String path) {
         return new Intent(context, RecordingService.class).setAction(ACTION_SHARE)
-                .putExtra(EXTRA_PATH, path);
-    }
-
-    private static Intent getDeleteIntent(Context context, String path) {
-        return new Intent(context, RecordingService.class).setAction(ACTION_DELETE)
                 .putExtra(EXTRA_PATH, path);
     }
 
