@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.flicker.helpers
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.SmallTest;
+import android.app.Instrumentation
+import android.support.test.launcherhelper.ILauncherStrategy
+import com.android.server.wm.flicker.StandardAppHelper
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-/**
- * Tests for the shell.
- */
-@SmallTest
-@RunWith(AndroidJUnit4.class)
-public class WindowManagerShellTest {
-
-    WindowManagerShell mShell;
-
-    @Test
-    public void testNothing() {
-        // Do nothing
+abstract class FlickerAppHelper(
+    instr: Instrumentation,
+    launcherName: String,
+    launcherStrategy: ILauncherStrategy
+) : StandardAppHelper(instr, sFlickerPackage, launcherName, launcherStrategy) {
+    companion object {
+        var sFlickerPackage = "com.android.wm.shell.flicker.testapp"
     }
 }

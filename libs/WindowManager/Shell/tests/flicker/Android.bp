@@ -1,4 +1,5 @@
-// Copyright (C) 2019 The Android Open Source Project
+//
+// Copyright (C) 2020 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,32 +12,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 android_test {
-    name: "WindowManagerShellTests",
-
-    srcs: ["**/*.java"],
-
+    name: "WMShellFlickerTests",
+    srcs: ["src/**/*.java", "src/**/*.kt"],
+    manifest: "AndroidManifest.xml",
+    test_config: "AndroidTest.xml",
+    platform_apis: true,
+    certificate: "platform",
+    test_suites: ["device-tests"],
+    libs: ["android.test.runner"],
     static_libs: [
-        "WindowManager-Shell",
-        "junit",
-        "androidx.test.runner",
-        "androidx.test.rules",
         "androidx.test.ext.junit",
-        "mockito-target-extended-minus-junit4",
+        "flickerlib",
         "truth-prebuilt",
+        "app-helpers-core",
+        "launcher-helper-lib",
+        "launcher-aosp-tapl"
     ],
-    libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
-    ],
-    jni_libs: [
-        "libdexmakerjvmtiagent",
-        "libstaticjvmtiagent",
-    ],
-
-    optimize: {
-        enabled: false,
-    },
 }
