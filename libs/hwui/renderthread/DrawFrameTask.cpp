@@ -128,7 +128,9 @@ void DrawFrameTask::run() {
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
     int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::Vsync)];
-    mRenderThread->timeLord().vsyncReceived(vsync);
+    int64_t intendedVsync = mFrameInfo[static_cast<int>(FrameInfoIndex::IntendedVsync)];
+    int64_t vsyncId = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameTimelineVsyncId)];
+    mRenderThread->timeLord().vsyncReceived(vsync, intendedVsync, vsyncId);
     bool canDraw = mContext->makeCurrent();
     mContext->unpinImages();
 

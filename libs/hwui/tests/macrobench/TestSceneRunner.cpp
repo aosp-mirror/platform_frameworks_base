@@ -145,7 +145,8 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     for (int i = 0; i < warmupFrameCount; i++) {
         testContext.waitForVsync();
         nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
-        UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
+        UiFrameInfoBuilder(proxy->frameInfo())
+            .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID);
         proxy->syncAndDrawFrame();
     }
 
@@ -165,7 +166,8 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         {
             ATRACE_NAME("UI-Draw Frame");
-            UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
+            UiFrameInfoBuilder(proxy->frameInfo())
+                .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID);
             scene->doFrame(i);
             proxy->syncAndDrawFrame();
         }
