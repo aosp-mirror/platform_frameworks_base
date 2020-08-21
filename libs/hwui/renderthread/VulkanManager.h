@@ -165,7 +165,6 @@ private:
     VkQueue mAHBUploadQueue = VK_NULL_HANDLE;
     uint32_t mPresentQueueIndex;
     VkQueue mPresentQueue = VK_NULL_HANDLE;
-    VkCommandPool mCommandPool = VK_NULL_HANDLE;
 
     // Variables saved to populate VkFunctorInitParams.
     static const uint32_t mAPIVersion = VK_MAKE_VERSION(1, 1, 0);
