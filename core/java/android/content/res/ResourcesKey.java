@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import static android.os.Build.VERSION_CODES.O;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -41,8 +43,17 @@ public final class ResourcesKey {
     @Nullable
     public final String[] mLibDirs;
 
-    public final int mDisplayId;
+    /**
+     * The display ID that overrides the global resources display to produce the Resources display.
+     * If set to something other than {@link android.view.Display#INVALID_DISPLAY} this will
+     * override the global resources display for this key.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = O)
+    public int mDisplayId;
 
+    /**
+     * The configuration applied to the global configuration to produce the Resources configuration.
+     */
     @NonNull
     public final Configuration mOverrideConfiguration;
 
@@ -58,7 +69,7 @@ public final class ResourcesKey {
                         @Nullable String[] splitResDirs,
                         @Nullable String[] overlayDirs,
                         @Nullable String[] libDirs,
-                        int displayId,
+                        int overrideDisplayId,
                         @Nullable Configuration overrideConfig,
                         @Nullable CompatibilityInfo compatInfo,
                         @Nullable ResourcesLoader[] loader) {
@@ -67,7 +78,7 @@ public final class ResourcesKey {
         mOverlayDirs = overlayDirs;
         mLibDirs = libDirs;
         mLoaders = (loader != null && loader.length == 0) ? null : loader;
-        mDisplayId = displayId;
+        mDisplayId = overrideDisplayId;
         mOverrideConfiguration = new Configuration(overrideConfig != null
                 ? overrideConfig : Configuration.EMPTY);
         mCompatInfo = compatInfo != null ? compatInfo : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
@@ -77,7 +88,7 @@ public final class ResourcesKey {
         hash = 31 * hash + Arrays.hashCode(mSplitResDirs);
         hash = 31 * hash + Arrays.hashCode(mOverlayDirs);
         hash = 31 * hash + Arrays.hashCode(mLibDirs);
-        hash = 31 * hash + mDisplayId;
+        hash = 31 * hash + Objects.hashCode(mDisplayId);
         hash = 31 * hash + Objects.hashCode(mOverrideConfiguration);
         hash = 31 * hash + Objects.hashCode(mCompatInfo);
         hash = 31 * hash + Arrays.hashCode(mLoaders);

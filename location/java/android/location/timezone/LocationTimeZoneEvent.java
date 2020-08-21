@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +38,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
     @IntDef({ EVENT_TYPE_UNKNOWN, EVENT_TYPE_SUCCESS, EVENT_TYPE_SUCCESS })
     @interface EventType {}
 
-    /** Uninitialized value for {@link #mEventType} */
+    /** Uninitialized value for {@link #mEventType} - must not be used for real events. */
     private static final int EVENT_TYPE_UNKNOWN = 0;
 
     /**
@@ -60,6 +61,9 @@ public final class LocationTimeZoneEvent implements Parcelable {
 
     private static final int EVENT_TYPE_MAX = EVENT_TYPE_UNCERTAIN;
 
+    @NonNull
+    private final UserHandle mUserHandle;
+
     @EventType
     private final int mEventType;
 
@@ -68,8 +72,9 @@ public final class LocationTimeZoneEvent implements Parcelable {
 
     private final long mElapsedRealtimeNanos;
 
-    private LocationTimeZoneEvent(@EventType int eventType, @NonNull List<String> timeZoneIds,
-            long elapsedRealtimeNanos) {
+    private LocationTimeZoneEvent(@NonNull UserHandle userHandle, @EventType int eventType,
+            @NonNull List<String> timeZoneIds, long elapsedRealtimeNanos) {
+        mUserHandle = Objects.requireNonNull(userHandle);
         mEventType = checkValidEventType(eventType);
         mTimeZoneIds = immutableList(timeZoneIds);
 
@@ -80,6 +85,14 @@ public final class LocationTimeZoneEvent implements Parcelable {
         }
 
         mElapsedRealtimeNanos = elapsedRealtimeNanos;
+    }
+
+    /**
+     * Returns the current user when the event was generated.
+     */
+    @NonNull
+    public UserHandle getUserHandle() {
+        return mUserHandle;
     }
 
     /**
@@ -117,7 +130,8 @@ public final class LocationTimeZoneEvent implements Parcelable {
     @Override
     public String toString() {
         return "LocationTimeZoneEvent{"
-                + "mEventType=" + mEventType
+                + "mUserHandle=" + mUserHandle
+                + ", mEventType=" + mEventType
                 + ", mTimeZoneIds=" + mTimeZoneIds
                 + ", mElapsedRealtimeNanos=" + mElapsedRealtimeNanos
                 + '}';
@@ -127,12 +141,14 @@ public final class LocationTimeZoneEvent implements Parcelable {
             new Parcelable.Creator<LocationTimeZoneEvent>() {
                 @Override
                 public LocationTimeZoneEvent createFromParcel(Parcel in) {
+                    UserHandle userHandle = UserHandle.readFromParcel(in);
                     int eventType = in.readInt();
                     @SuppressWarnings("unchecked")
                     ArrayList<String> timeZoneIds =
                             (ArrayList<String>) in.readArrayList(null /* classLoader */);
                     long elapsedRealtimeNanos = in.readLong();
-                    return new LocationTimeZoneEvent(eventType, timeZoneIds, elapsedRealtimeNanos);
+                    return new LocationTimeZoneEvent(
+                            userHandle, eventType, timeZoneIds, elapsedRealtimeNanos);
                 }
 
                 @Override
@@ -148,6 +164,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        mUserHandle.writeToParcel(parcel, flags);
         parcel.writeInt(mEventType);
         parcel.writeList(mTimeZoneIds);
         parcel.writeLong(mElapsedRealtimeNanos);
@@ -162,19 +179,21 @@ public final class LocationTimeZoneEvent implements Parcelable {
             return false;
         }
         LocationTimeZoneEvent that = (LocationTimeZoneEvent) o;
-        return mEventType == that.mEventType
+        return mUserHandle.equals(that.mUserHandle)
+                && mEventType == that.mEventType
                 && mElapsedRealtimeNanos == that.mElapsedRealtimeNanos
                 && mTimeZoneIds.equals(that.mTimeZoneIds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mEventType, mTimeZoneIds, mElapsedRealtimeNanos);
+        return Objects.hash(mUserHandle, mEventType, mTimeZoneIds, mElapsedRealtimeNanos);
     }
 
     /** @hide */
     public static final class Builder {
 
+        private UserHandle mUserHandle;
         private @EventType int mEventType = EVENT_TYPE_UNKNOWN;
         private @NonNull List<String> mTimeZoneIds = Collections.emptyList();
         private long mElapsedRealtimeNanos;
@@ -186,13 +205,22 @@ public final class LocationTimeZoneEvent implements Parcelable {
          * Sets the contents of this from the supplied instance.
          */
         public Builder(@NonNull LocationTimeZoneEvent ltz) {
+            mUserHandle = ltz.mUserHandle;
             mEventType = ltz.mEventType;
             mTimeZoneIds = ltz.mTimeZoneIds;
             mElapsedRealtimeNanos = ltz.mElapsedRealtimeNanos;
         }
 
         /**
-         * Set the time zone ID of this fix.
+         * Set the current user when this event was generated.
+         */
+        public Builder setUserHandle(@NonNull UserHandle userHandle) {
+            mUserHandle = Objects.requireNonNull(userHandle);
+            return this;
+        }
+
+        /**
+         * Set the time zone ID of this event.
          */
         public Builder setEventType(@EventType int eventType) {
             checkValidEventType(eventType);
@@ -201,7 +229,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
         }
 
         /**
-         * Sets the time zone IDs of this fix.
+         * Sets the time zone IDs of this event.
          */
         public Builder setTimeZoneIds(@NonNull List<String> timeZoneIds) {
             mTimeZoneIds = Objects.requireNonNull(timeZoneIds);
@@ -209,9 +237,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
         }
 
         /**
-         * Sets the time of this fix, in elapsed real-time since system boot.
-         *
-         * @param time elapsed real-time of fix, in nanoseconds since system boot.
+         * Sets the time of this event, in elapsed real-time since system boot.
          */
         public Builder setElapsedRealtimeNanos(long time) {
             mElapsedRealtimeNanos = time;
@@ -222,8 +248,8 @@ public final class LocationTimeZoneEvent implements Parcelable {
          * Builds a {@link LocationTimeZoneEvent} instance.
          */
         public LocationTimeZoneEvent build() {
-            return new LocationTimeZoneEvent(this.mEventType, this.mTimeZoneIds,
-                    this.mElapsedRealtimeNanos);
+            return new LocationTimeZoneEvent(
+                    mUserHandle, mEventType, mTimeZoneIds, mElapsedRealtimeNanos);
         }
     }
 

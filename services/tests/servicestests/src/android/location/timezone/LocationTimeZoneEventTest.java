@@ -23,6 +23,8 @@ import static org.junit.Assert.assertNotEquals;
 
 import static java.util.Collections.singletonList;
 
+import android.os.UserHandle;
+
 import org.junit.Test;
 
 import java.util.List;
@@ -33,6 +35,10 @@ public class LocationTimeZoneEventTest {
 
     private static final List<String> ARBITRARY_TIME_ZONE_IDS = singletonList("Europe/London");
 
+    private static final UserHandle ARBITRARY_USER_HANDLE = UserHandle.SYSTEM;
+    private static final UserHandle ARBITRARY_USER_HANDLE2 =
+            UserHandle.of(ARBITRARY_USER_HANDLE.getIdentifier() + 1);
+
     @Test(expected = RuntimeException.class)
     public void testSetInvalidEventType() {
         new LocationTimeZoneEvent.Builder().setEventType(Integer.MAX_VALUE);
@@ -41,6 +47,7 @@ public class LocationTimeZoneEventTest {
     @Test(expected = RuntimeException.class)
     public void testBuildUnsetEventType() {
         new LocationTimeZoneEvent.Builder()
+                .setUserHandle(ARBITRARY_USER_HANDLE)
                 .setTimeZoneIds(ARBITRARY_TIME_ZONE_IDS)
                 .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS)
                 .build();
@@ -49,6 +56,7 @@ public class LocationTimeZoneEventTest {
     @Test(expected = RuntimeException.class)
     public void testInvalidTimeZoneIds() {
         new LocationTimeZoneEvent.Builder()
+                .setUserHandle(ARBITRARY_USER_HANDLE)
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN)
                 .setTimeZoneIds(ARBITRARY_TIME_ZONE_IDS)
                 .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS)
@@ -58,6 +66,7 @@ public class LocationTimeZoneEventTest {
     @Test
     public void testEquals() {
         LocationTimeZoneEvent.Builder builder1 = new LocationTimeZoneEvent.Builder()
+                .setUserHandle(ARBITRARY_USER_HANDLE)
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN)
                 .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS);
         {
@@ -66,8 +75,25 @@ public class LocationTimeZoneEventTest {
         }
 
         LocationTimeZoneEvent.Builder builder2 = new LocationTimeZoneEvent.Builder()
+                .setUserHandle(ARBITRARY_USER_HANDLE)
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN)
                 .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS);
+        {
+            LocationTimeZoneEvent one = builder1.build();
+            LocationTimeZoneEvent two = builder2.build();
+            assertEquals(one, two);
+            assertEquals(two, one);
+        }
+
+        builder1.setUserHandle(ARBITRARY_USER_HANDLE2);
+        {
+            LocationTimeZoneEvent one = builder1.build();
+            LocationTimeZoneEvent two = builder2.build();
+            assertNotEquals(one, two);
+            assertNotEquals(two, one);
+        }
+
+        builder2.setUserHandle(ARBITRARY_USER_HANDLE2);
         {
             LocationTimeZoneEvent one = builder1.build();
             LocationTimeZoneEvent two = builder2.build();
@@ -127,6 +153,7 @@ public class LocationTimeZoneEventTest {
     @Test
     public void testParcelable() {
         LocationTimeZoneEvent.Builder builder = new LocationTimeZoneEvent.Builder()
+                .setUserHandle(ARBITRARY_USER_HANDLE)
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE)
                 .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS);
         assertRoundTripParcelable(builder.build());

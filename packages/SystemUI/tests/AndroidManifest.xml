@@ -80,6 +80,8 @@
                   android:excludeFromRecents="true"
                   />
 
+        <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
+                  android:exported="false" />
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
             tools:replace="android:authorities"

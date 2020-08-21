@@ -88,7 +88,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.apk.ApkSignatureVerifier;
-import android.view.Display;
 import android.view.Gravity;
 
 import com.android.internal.R;
@@ -8536,7 +8535,7 @@ public class PackageParser {
                 null,
                 androidAppInfo.resourceDirs,
                 androidAppInfo.sharedLibraryFiles,
-                Display.DEFAULT_DISPLAY,
+                null,
                 null,
                 systemResources.getCompatibilityInfo(),
                 systemResources.getClassLoader(),

@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * Base class for location time zone providers implemented as unbundled services.
  *
- * TODO Provide details of the expected service actions.
+ * TODO(b/152744911): Provide details of the expected service actions and threading.
  *
  * <p>IMPORTANT: This class is effectively a public API for unbundled applications, and must remain
  * API stable.

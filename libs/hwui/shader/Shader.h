@@ -32,7 +32,9 @@ namespace android::uirenderer {
 class Shader: public SkRefCnt {
 public:
     /**
-     * Creates a Shader instance with an optional transformation matrix
+     * Creates a Shader instance with an optional transformation matrix. The transformation matrix
+     * is copied internally and ownership is unchanged. It is the responsibility of the caller to
+     * deallocate it appropriately.
      * @param matrix Optional matrix to transform the underlying SkShader or SkImageFilter
      */
     Shader(const SkMatrix* matrix);

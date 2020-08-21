@@ -16,22 +16,16 @@
 
 package com.android.systemui.dagger;
 
-import android.annotation.Nullable;
-import android.content.Context;
-import android.content.pm.PackageManager;
-
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -41,12 +35,10 @@ import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
-import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.ConcurrencyModule;
-import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
@@ -67,6 +59,7 @@ import dagger.Provides;
             DemoModeModule.class,
             LogModule.class,
             PeopleHubModule.class,
+            ScreenshotModule.class,
             SensorModule.class,
             SettingsModule.class,
             SettingsUtilModule.class
@@ -86,22 +79,6 @@ public abstract class SystemUIModule {
     @Binds
     public abstract ContextComponentHelper bindComponentHelper(
             ContextComponentResolver componentHelper);
-
-    @SysUISingleton
-    @Provides
-    @Nullable
-    static KeyguardLiftController provideKeyguardLiftController(
-            Context context,
-            StatusBarStateController statusBarStateController,
-            AsyncSensorManager asyncSensorManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpManager dumpManager) {
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            return null;
-        }
-        return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
-                keyguardUpdateMonitor, dumpManager);
-    }
 
     /** */
     @Binds
