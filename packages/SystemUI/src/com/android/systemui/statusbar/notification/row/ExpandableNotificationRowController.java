@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -118,9 +120,10 @@ public class ExpandableNotificationRowController implements NodeController {
     /**
      * Initialize the controller.
      */
-    public void init() {
+    public void init(NotificationEntry entry) {
         mActivatableNotificationViewController.init();
         mView.initialize(
+                entry,
                 mAppName,
                 mNotificationKey,
                 mExpansionLogger,
@@ -135,7 +138,15 @@ public class ExpandableNotificationRowController implements NodeController {
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback
+
         );
+        mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
+            @Override
+            public void onStateChanged(int newState) {
+                mView.setOnKeyguard(newState == KEYGUARD);
+            }
+        });
+        mView.setOnKeyguard(mStatusBarStateController.getState() == KEYGUARD);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
             mView.setLongPressListener((v, x, y, item) -> {
