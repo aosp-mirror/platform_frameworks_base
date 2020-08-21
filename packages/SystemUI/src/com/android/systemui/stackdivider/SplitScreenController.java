@@ -49,26 +49,34 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 /**
- * Controls the docked stack divider.
+ * Controls split screen.
  */
-public class DividerController implements DisplayController.OnDisplaysChangedListener {
+// TODO(b/161116823): Extract as an interface to expose to SysUISingleton scope.
+public class SplitScreenController implements DisplayController.OnDisplaysChangedListener {
     static final boolean DEBUG = false;
-    private static final String TAG = "Divider";
 
-    static final int DEFAULT_APP_TRANSITION_DURATION = 336;
+    private static final String TAG = "Divider";
+    private static final int DEFAULT_APP_TRANSITION_DURATION = 336;
+
+    private final Context mContext;
+    private final DisplayChangeController.OnDisplayChangingListener mRotationController;
+    private final DisplayController mDisplayController;
+    private final DisplayImeController mImeController;
+    private final DividerImeController mImePositionProcessor;
+    private final DividerState mDividerState = new DividerState();
+    private final ForcedResizableInfoActivityController mForcedResizableController;
+    private final Handler mHandler;
+    private final SplitScreenTaskOrganizer mSplits;
+    private final SystemWindows mSystemWindows;
+    final TransactionPool mTransactionPool;
+    private final WindowManagerProxy mWindowManagerProxy;
+
+    private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
+            new ArrayList<>();
+
 
     private DividerWindowManager mWindowManager;
     private DividerView mView;
-    private final DividerState mDividerState = new DividerState();
-    private boolean mVisible = false;
-    private boolean mMinimized = false;
-    private boolean mAdjustedForIme = false;
-    private boolean mHomeStackResizable = false;
-    private ForcedResizableInfoActivityController mForcedResizableController;
-    private SystemWindows mSystemWindows;
-    private DisplayController mDisplayController;
-    private DisplayImeController mImeController;
-    final TransactionPool mTransactionPool;
 
     // Keeps track of real-time split geometry including snap positions and ime adjustments
     private SplitDisplayLayout mSplitLayout;
@@ -78,19 +86,13 @@ public class DividerController implements DisplayController.OnDisplaysChangedLis
     // layout that we sent back to WM.
     private SplitDisplayLayout mRotateSplitLayout;
 
-    private final Handler mHandler;
-    private final WindowManagerProxy mWindowManagerProxy;
-
-    private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
-            new ArrayList<>();
-
-    private final SplitScreenTaskOrganizer mSplits;
-    private final DisplayChangeController.OnDisplayChangingListener mRotationController;
-    private final DividerImeController mImePositionProcessor;
-    private final Context mContext;
     private boolean mIsKeyguardShowing;
+    private boolean mVisible = false;
+    private boolean mMinimized = false;
+    private boolean mAdjustedForIme = false;
+    private boolean mHomeStackResizable = false;
 
-    public DividerController(Context context,
+    public SplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer) {
@@ -142,10 +144,7 @@ public class DividerController implements DisplayController.OnDisplaysChangedLis
                         wct.merge(t, true /* transfer */);
                     }
                 };
-    }
 
-    /** Inits the divider service. */
-    public void start() {
         mWindowManager = new DividerWindowManager(mSystemWindows);
         mDisplayController.addDisplayWindowListener(this);
         // Don't initialize the divider or anything until we get the default display.
@@ -157,15 +156,15 @@ public class DividerController implements DisplayController.OnDisplaysChangedLis
     }
 
     /** Called when keyguard showing state changed. */
-    public void onKeyguardShowingChanged(boolean isShowing) {
+    public void onKeyguardVisibilityChanged(boolean showing) {
         if (!isSplitActive() || mView == null) {
             return;
         }
-        mView.setHidden(isShowing);
-        if (!isShowing) {
+        mView.setHidden(showing);
+        if (!showing) {
             mImePositionProcessor.updateAdjustForIme();
         }
-        mIsKeyguardShowing = isShowing;
+        mIsKeyguardShowing = showing;
     }
 
     @Override

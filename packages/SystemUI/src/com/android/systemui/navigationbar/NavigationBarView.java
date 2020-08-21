@@ -87,14 +87,13 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
@@ -329,8 +328,9 @@ public class NavigationBarView extends FrameLayout implements
         mContextualButtonGroup.addButton(accessibilityButton);
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
         mFloatingRotationButton = new FloatingRotationButton(context);
+        // TODO(165014649): Temporarily disable onboarding
+        // mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
         mRotationButtonController = new RotationButtonController(mLightContext,
                 mLightIconColor, mDarkIconColor,
                 isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton,
@@ -886,7 +886,9 @@ public class NavigationBarView extends FrameLayout implements
         mNavBarMode = mode;
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
         mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
-        mRecentsOnboarding.onNavigationModeChanged(mNavBarMode);
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.onNavigationModeChanged(mNavBarMode);
+        }
 
         if (isGesturalMode(mNavBarMode)) {
             mRegionSamplingHelper.start(mSamplingBounds);
@@ -902,7 +904,9 @@ public class NavigationBarView extends FrameLayout implements
     }
 
     void hideRecentsOnboarding() {
-        mRecentsOnboarding.hide(true);
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.hide(true);
+        }
     }
 
     @Override
@@ -912,9 +916,6 @@ public class NavigationBarView extends FrameLayout implements
         mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
-
-        Divider divider = Dependency.get(Divider.class);
-        divider.registerInSplitScreenListener(mDockedListener);
         updateOrientationViews();
         reloadNavIcons();
     }
@@ -953,7 +954,9 @@ public class NavigationBarView extends FrameLayout implements
         super.onLayout(changed, left, top, right, bottom);
 
         notifyActiveTouchRegions();
-        mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
+        }
     }
 
     /**
@@ -1115,7 +1118,9 @@ public class NavigationBarView extends FrameLayout implements
         boolean uiCarModeChanged = updateCarMode();
         updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
-        mRecentsOnboarding.onConfigurationChanged(mConfiguration);
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.onConfigurationChanged(mConfiguration);
+        }
         if (uiCarModeChanged || mTmpLastConfiguration.densityDpi != mConfiguration.densityDpi
                 || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
@@ -1205,10 +1210,12 @@ public class NavigationBarView extends FrameLayout implements
     }
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {
-        if (connectedToOverviewProxy) {
-            mRecentsOnboarding.onConnectedToLauncher();
-        } else {
-            mRecentsOnboarding.onDisconnectedFromLauncher();
+        if (mRecentsOnboarding != null) {
+            if (connectedToOverviewProxy) {
+                mRecentsOnboarding.onConnectedToLauncher();
+            } else {
+                mRecentsOnboarding.onDisconnectedFromLauncher();
+            }
         }
     }
 
@@ -1254,7 +1261,9 @@ public class NavigationBarView extends FrameLayout implements
             mNavigationInflaterView.dump(pw);
         }
         mContextualButtonGroup.dump(pw);
-        mRecentsOnboarding.dump(pw);
+        if (mRecentsOnboarding != null) {
+            mRecentsOnboarding.dump(pw);
+        }
         mRegionSamplingHelper.dump(pw);
         mEdgeBackGestureHandler.dump(pw);
     }
@@ -1285,6 +1294,10 @@ public class NavigationBarView extends FrameLayout implements
             controller.setBottomOffset(insets.getSystemWindowInsetBottom());
         }
         return super.onApplyWindowInsets(insets);
+    }
+
+    void registerDockedListener(SplitScreenController splitScreenController) {
+        splitScreenController.registerInSplitScreenListener(mDockedListener);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {

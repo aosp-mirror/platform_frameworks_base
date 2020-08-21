@@ -101,7 +101,6 @@ class ScreenRotationAnimation {
     private final Transformation mRotateExitTransformation = new Transformation();
     private final Transformation mRotateEnterTransformation = new Transformation();
     // Complete transformations being applied.
-    private final Transformation mEnterTransformation = new Transformation();
     private final Matrix mSnapshotInitialMatrix = new Matrix();
     private final WindowManagerService mService;
     /** Only used for custom animations and not screen rotation. */
@@ -309,8 +308,6 @@ class ScreenRotationAnimation {
         pw.print(" "); mRotateExitTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mRotateEnterAnimation="); pw.print(mRotateEnterAnimation);
         pw.print(" "); mRotateEnterTransformation.printShortString(pw); pw.println();
-        pw.print(prefix); pw.print("mEnterTransformation=");
-        mEnterTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mSnapshotInitialMatrix=");
         mSnapshotInitialMatrix.dump(pw); pw.println();
         pw.print(prefix); pw.print("mForceDefaultOrientation="); pw.print(mForceDefaultOrientation);
@@ -506,10 +503,6 @@ class ScreenRotationAnimation {
 
     public boolean isRotating() {
         return mCurRotation != mOriginalRotation;
-    }
-
-    public Transformation getEnterTransformation() {
-        return mEnterTransformation;
     }
 
     /**

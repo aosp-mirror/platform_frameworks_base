@@ -40,8 +40,8 @@ public class CarWMShellModule {
     DisplayImeController provideDisplayImeController(Context context,
             IWindowManager wmService, DisplayController displayController,
             @Main Handler mainHandler, TransactionPool transactionPool) {
-        return new DisplaySystemBarsController.Builder(context, wmService, displayController,
-                mainHandler, transactionPool).build();
+        return new DisplaySystemBarsController(context, wmService, displayController,
+                mainHandler, transactionPool);
     }
 
     /** TODO(b/150319024): PipMenuActivity will move to a Window */

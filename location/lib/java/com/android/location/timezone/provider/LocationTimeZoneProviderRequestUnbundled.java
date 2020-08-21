@@ -44,6 +44,24 @@ public final class LocationTimeZoneProviderRequestUnbundled {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LocationTimeZoneProviderRequestUnbundled that =
+                (LocationTimeZoneProviderRequestUnbundled) o;
+        return mRequest.equals(that.mRequest);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRequest);
+    }
+
+    @Override
     public String toString() {
         return mRequest.toString();
     }

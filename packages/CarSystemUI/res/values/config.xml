@@ -121,7 +121,6 @@
     <string-array name="config_systemUIServiceComponentsExclude" translatable="false">
         <item>com.android.systemui.recents.Recents</item>
         <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.stackdivider.Divider</item>
         <item>com.android.systemui.statusbar.phone.StatusBar</item>
         <item>com.android.systemui.keyboard.KeyboardUI</item>
         <item>com.android.systemui.pip.PipUI</item>

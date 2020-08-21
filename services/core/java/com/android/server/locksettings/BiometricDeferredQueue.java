@@ -123,6 +123,10 @@ public class BiometricDeferredQueue {
                 final VerifyCredentialResponse response = spManager.verifyChallengeInternal(
                         getGatekeeperService(), userAuthInfo.gatekeeperPassword, challenge,
                         userAuthInfo.userId);
+                if (response == null) {
+                    Slog.wtf(TAG, "VerifyChallenge failed, null response");
+                    continue;
+                }
                 if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
                     Slog.wtf(TAG, "VerifyChallenge failed, response: "
                             + response.getResponseCode());

@@ -55,7 +55,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -96,7 +96,7 @@ public class NavigationBarController implements Callbacks,
     private final SysUiState mSysUiFlagsContainer;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Divider mDivider;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
     private final Optional<Recents> mRecentsOptional;
     private final Lazy<StatusBar> mStatusBarLazy;
     private final ShadeController mShadeController;
@@ -130,7 +130,7 @@ public class NavigationBarController implements Callbacks,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
-            Divider divider,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             Optional<Recents> recentsOptional,
             Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
@@ -152,7 +152,7 @@ public class NavigationBarController implements Callbacks,
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mDivider = divider;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mRecentsOptional = recentsOptional;
         mStatusBarLazy = statusBarLazy;
         mShadeController = shadeController;
@@ -278,7 +278,7 @@ public class NavigationBarController implements Callbacks,
                 mSysUiFlagsContainer,
                 mBroadcastDispatcher,
                 mCommandQueue,
-                mDivider,
+                mSplitScreenControllerOptional,
                 mRecentsOptional,
                 mStatusBarLazy,
                 mShadeController,

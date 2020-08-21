@@ -71,8 +71,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
         final boolean configChanged = config.diff(newConfig) != 0;
         if (displayChanged || configChanged) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
-            mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId,
-                    displayChanged);
+            mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
         }
         if (displayChanged) {
             context.updateDisplay(newDisplayId);

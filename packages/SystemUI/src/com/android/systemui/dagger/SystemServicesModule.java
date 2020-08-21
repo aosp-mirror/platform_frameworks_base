@@ -41,6 +41,7 @@ import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.face.FaceManager;
 import android.media.AudioManager;
 import android.media.MediaRouter2Manager;
 import android.media.session.MediaSessionManager;
@@ -164,6 +165,14 @@ public class SystemServicesModule {
     static IDreamManager provideIDreamManager() {
         return IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
+    }
+
+    @Provides
+    @SysUISingleton
+    @Nullable
+    static FaceManager provideFaceManager(Context context) {
+        return context.getSystemService(FaceManager.class);
+
     }
 
     @Provides

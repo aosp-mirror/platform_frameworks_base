@@ -35,7 +35,6 @@ public interface RecentsImplementation {
     default void showRecentApps(boolean triggeredFromAltTab) {}
     default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {}
     default void toggleRecentApps() {}
-    default void growRecents() {}
     default boolean splitPrimaryTask(int stackCreateMode, Rect initialBounds,
             int metricsDockAction) {
         return false;

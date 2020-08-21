@@ -101,6 +101,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mCallbacks = Lists.newArrayList();
 
     private final SysuiColorExtractor mColorExtractor;
+    private float mFaceAuthDisplayBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
 
     @Inject
     public NotificationShadeWindowControllerImpl(Context context, WindowManager windowManager,
@@ -230,6 +231,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     @Override
     public void setDozeScreenBrightness(int value) {
         mScreenBrightnessDoze = value / 255f;
+    }
+
+    @Override
+    public void setFaceAuthDisplayBrightness(float brightness) {
+        mFaceAuthDisplayBrightness = brightness;
+        apply(mCurrentState);
     }
 
     private void setKeyguardDark(boolean dark) {
@@ -436,7 +443,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         if (state.mForceDozeBrightness) {
             mLpChanged.screenBrightness = mScreenBrightnessDoze;
         } else {
-            mLpChanged.screenBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+            mLpChanged.screenBrightness = mFaceAuthDisplayBrightness;
         }
     }
 
@@ -701,6 +708,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         boolean mHeadsUpShowing;
         boolean mForceCollapsed;
         boolean mForceDozeBrightness;
+        int mFaceAuthDisplayBrightness;
         boolean mForceUserActivity;
         boolean mLaunchingActivity;
         boolean mBackdropShowing;

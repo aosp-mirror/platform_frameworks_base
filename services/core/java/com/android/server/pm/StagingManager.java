@@ -1005,7 +1005,7 @@ public class StagingManager {
                             // will be deleted.
                         }
                         root.setStagedSessionFailed(
-                                SessionInfo.STAGED_SESSION_OTHER_ERROR,
+                                SessionInfo.STAGED_SESSION_CONFLICT,
                                 "Session was blocking rollback session: " + session.sessionId);
                         Slog.i(TAG, "Session " + root.sessionId + " is marked failed due to "
                                 + "blocking rollback session: " + session.sessionId);

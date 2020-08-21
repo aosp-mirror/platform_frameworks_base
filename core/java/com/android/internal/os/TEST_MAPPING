@@ -26,5 +26,20 @@
         "KernelSingleUidTimeReader\\.java"
       ]
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.os.BstatsCpuTimesValidationTest"
+        }
+      ],
+      "file_patterns": [
+        "BatteryStatsImpl\\.java",
+        "KernelCpuUidFreqTimeReader\\.java",
+        "KernelSingleUidTimeReader\\.java"
+      ]
+    }
   ]
 }
