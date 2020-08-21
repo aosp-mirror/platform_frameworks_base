@@ -87,14 +87,13 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
@@ -917,9 +916,6 @@ public class NavigationBarView extends FrameLayout implements
         mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
-
-        Divider divider = Dependency.get(Divider.class);
-        divider.registerInSplitScreenListener(mDockedListener);
         updateOrientationViews();
         reloadNavIcons();
     }
@@ -1298,6 +1294,10 @@ public class NavigationBarView extends FrameLayout implements
             controller.setBottomOffset(insets.getSystemWindowInsetBottom());
         }
         return super.onApplyWindowInsets(insets);
+    }
+
+    void registerDockedListener(SplitScreenController splitScreenController) {
+        splitScreenController.registerInSplitScreenListener(mDockedListener);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {

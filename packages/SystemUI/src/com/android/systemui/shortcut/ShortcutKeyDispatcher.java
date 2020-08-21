@@ -30,8 +30,10 @@ import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
+import com.android.systemui.stackdivider.SplitScreenController;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -43,7 +45,7 @@ public class ShortcutKeyDispatcher extends SystemUI
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";
-    private final Divider mDivider;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
     private final Recents mRecents;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
@@ -58,14 +60,16 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     @Inject
-    public ShortcutKeyDispatcher(Context context, Divider divider, Recents recents) {
+    public ShortcutKeyDispatcher(Context context,
+            Optional<SplitScreenController> splitScreenControllerOptional, Recents recents) {
         super(context);
-        mDivider = divider;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mRecents = recents;
     }
 
     /**
      * Registers a shortcut key to window manager.
+     *
      * @param shortcutCode packed representation of shortcut key code and meta information
      */
     public void registerShortcutKey(long shortcutCode) {
@@ -92,24 +96,28 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        if (mDivider == null || !mDivider.isDividerVisible()) {
-            // Split the screen
-            mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
-                    ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                    : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
-        } else {
-            // If there is already a docked window, we respond by resizing the docking pane.
-            DividerView dividerView = mDivider.getView();
-            DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
-            int dividerPosition = dividerView.getCurrentPosition();
-            DividerSnapAlgorithm.SnapTarget currentTarget =
-                    snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
-            DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
-                    ? snapAlgorithm.getPreviousTarget(currentTarget)
-                    : snapAlgorithm.getNextTarget(currentTarget);
-            dividerView.startDragging(true /* animate */, false /* touching */);
-            dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
-                    true /* logMetrics */);
+        if (mSplitScreenControllerOptional.isPresent()) {
+            SplitScreenController splitScreenController = mSplitScreenControllerOptional.get();
+            if (splitScreenController.isDividerVisible()) {
+                // If there is already a docked window, we respond by resizing the docking pane.
+                DividerView dividerView = splitScreenController.getDividerView();
+                DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
+                int dividerPosition = dividerView.getCurrentPosition();
+                DividerSnapAlgorithm.SnapTarget currentTarget =
+                        snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
+                DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
+                        ? snapAlgorithm.getPreviousTarget(currentTarget)
+                        : snapAlgorithm.getNextTarget(currentTarget);
+                dividerView.startDragging(true /* animate */, false /* touching */);
+                dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
+                        true /* logMetrics */);
+                return;
+            }
         }
+
+        // Split the screen
+        mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
+                ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
+                : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
     }
 }

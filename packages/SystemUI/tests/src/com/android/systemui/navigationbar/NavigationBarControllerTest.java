@@ -52,7 +52,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -61,12 +61,12 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
-import java.util.Optional;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Optional;
 
 /** atest NavigationBarControllerTest */
 @RunWith(AndroidTestingRunner.class)
@@ -90,13 +90,13 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(AccessibilityManagerWrapper.class),
                         mock(DeviceProvisionedController.class),
                         mock(MetricsLogger.class),
-                        mock(OverviewProxyService.class), 
+                        mock(OverviewProxyService.class),
                         mock(NavigationModeController.class),
                         mock(StatusBarStateController.class),
                         mock(SysUiState.class),
                         mock(BroadcastDispatcher.class),
                         mock(CommandQueue.class),
-                        mock(Divider.class),
+                        Optional.of(mock(SplitScreenController.class)),
                         Optional.of(mock(Recents.class)),
                         () -> mock(StatusBar.class),
                         mock(ShadeController.class),

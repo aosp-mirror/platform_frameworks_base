@@ -24,6 +24,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.PipUiEventLogger;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -31,6 +32,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 
@@ -40,7 +42,7 @@ import dagger.Provides;
  */
 // TODO(b/162923491): Move most of these dependencies into WMSingleton scope.
 @Module
-public class WMShellBaseModule {
+public abstract class WMShellBaseModule {
     @SysUISingleton
     @Provides
     static TransactionPool provideTransactionPool() {
@@ -59,6 +61,7 @@ public class WMShellBaseModule {
     static DeviceConfigProxy provideDeviceConfigProxy() {
         return new DeviceConfigProxy();
     }
+
     @SysUISingleton
     @Provides
     static FloatingContentCoordinator provideFloatingContentCoordinator() {
@@ -80,9 +83,12 @@ public class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    public ShellTaskOrganizer provideShellTaskOrganizer() {
+    static ShellTaskOrganizer provideShellTaskOrganizer() {
         ShellTaskOrganizer organizer = new ShellTaskOrganizer();
         organizer.registerOrganizer();
         return organizer;
     }
+
+    @BindsOptionalOf
+    abstract SplitScreenController optionalSplitScreenController();
 }

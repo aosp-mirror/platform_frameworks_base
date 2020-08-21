@@ -28,7 +28,6 @@
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.stackdivider.Divider</item>
         <item>com.android.systemui.statusbar.tv.TvStatusBar</item>
         <item>com.android.systemui.usb.StorageNotification</item>
         <item>com.android.systemui.power.PowerUI</item>
@@ -42,6 +41,7 @@
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.onehanded.OneHandedUI</item>
+        <item>com.android.systemui.wmshell.WMShell</item>
     </string-array>
 
     <!-- Show a separate icon for low and high volume on the volume dialog -->

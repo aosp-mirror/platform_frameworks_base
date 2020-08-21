@@ -37,7 +37,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 
 class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "SplitScreenTaskOrg";
-    private static final boolean DEBUG = DividerController.DEBUG;
+    private static final boolean DEBUG = SplitScreenController.DEBUG;
 
     private final ShellTaskOrganizer mTaskOrganizer;
 
@@ -48,14 +48,14 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     SurfaceControl mPrimaryDim;
     SurfaceControl mSecondaryDim;
     Rect mHomeBounds = new Rect();
-    final DividerController mDividerController;
+    final SplitScreenController mSplitScreenController;
     private boolean mSplitScreenSupported = false;
 
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
-    SplitScreenTaskOrganizer(DividerController dividerController,
+    SplitScreenTaskOrganizer(SplitScreenController splitScreenController,
                     ShellTaskOrganizer shellTaskOrganizer) {
-        mDividerController = dividerController;
+        mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
         mTaskOrganizer.addListener(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
@@ -81,11 +81,11 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     }
 
     SurfaceControl.Transaction getTransaction() {
-        return mDividerController.mTransactionPool.acquire();
+        return mSplitScreenController.mTransactionPool.acquire();
     }
 
     void releaseTransaction(SurfaceControl.Transaction t) {
-        mDividerController.mTransactionPool.release(t);
+        mSplitScreenController.mTransactionPool.release(t);
     }
 
     @Override
@@ -146,7 +146,7 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
                 t.apply();
                 releaseTransaction(t);
 
-                mDividerController.onTaskVanished();
+                mSplitScreenController.onTaskVanished();
             }
         }
     }
@@ -156,7 +156,7 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
         if (taskInfo.displayId != DEFAULT_DISPLAY) {
             return;
         }
-        mDividerController.post(() -> handleTaskInfoChanged(taskInfo));
+        mSplitScreenController.post(() -> handleTaskInfoChanged(taskInfo));
     }
 
     /**
@@ -175,7 +175,7 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
         }
         final boolean secondaryImpliedMinimize = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
                 || (mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS
-                        && mDividerController.isHomeStackResizable());
+                        && mSplitScreenController.isHomeStackResizable());
         final boolean primaryWasEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryWasEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         if (info.token.asBinder() == mPrimary.token.asBinder()) {
@@ -187,7 +187,7 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
         final boolean secondaryIsEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryImpliesMinimize = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
                 || (mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS
-                        && mDividerController.isHomeStackResizable());
+                        && mSplitScreenController.isHomeStackResizable());
         if (DEBUG) {
             Log.d(TAG, "onTaskInfoChanged " + mPrimary + "  " + mSecondary);
         }
@@ -203,14 +203,14 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
                 Log.d(TAG, " at-least one split empty " + mPrimary.topActivityType
                         + "  " + mSecondary.topActivityType);
             }
-            if (mDividerController.isDividerVisible()) {
+            if (mSplitScreenController.isDividerVisible()) {
                 // Was in split-mode, which means we are leaving split, so continue that.
                 // This happens when the stack in the primary-split is dismissed.
                 if (DEBUG) {
                     Log.d(TAG, "    was in split, so this means leave it "
                             + mPrimary.topActivityType + "  " + mSecondary.topActivityType);
                 }
-                mDividerController.startDismissSplit();
+                mSplitScreenController.startDismissSplit();
             } else if (!primaryIsEmpty && primaryWasEmpty && secondaryWasEmpty) {
                 // Wasn't in split-mode (both were empty), but now that the primary split is
                 // populated, we should fully enter split by moving everything else into secondary.
@@ -219,15 +219,15 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
                 if (DEBUG) {
                     Log.d(TAG, "   was not in split, but primary is populated, so enter it");
                 }
-                mDividerController.startEnterSplit();
+                mSplitScreenController.startEnterSplit();
             }
         } else if (secondaryImpliesMinimize) {
             // Both splits are populated but the secondary split has a home/recents stack on top,
             // so enter minimized mode.
-            mDividerController.ensureMinimizedSplit();
+            mSplitScreenController.ensureMinimizedSplit();
         } else {
             // Both splits are populated by normal activities, so make sure we aren't minimized.
-            mDividerController.ensureNormalSplit();
+            mSplitScreenController.ensureNormalSplit();
         }
     }
 }
