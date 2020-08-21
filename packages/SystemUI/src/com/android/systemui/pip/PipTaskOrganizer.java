@@ -945,13 +945,18 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
      */
     private boolean syncWithSplitScreenBounds(Rect destinationBoundsOut) {
         if (!mSplitScreenControllerOptional.isPresent()) {
+            return false;
+        }
+
+        SplitScreenController splitScreenController = mSplitScreenControllerOptional.get();
+        if (!splitScreenController.isDividerVisible()) {
             // fail early if system is not in split screen mode
             return false;
         }
 
         // PiP window will go to split-secondary mode instead of fullscreen, populates the
         // split screen bounds here.
-        destinationBoundsOut.set(mSplitScreenControllerOptional.get().getDividerView()
+        destinationBoundsOut.set(splitScreenController.getDividerView()
                 .getNonMinimizedSplitScreenSecondaryBounds());
         return true;
     }
