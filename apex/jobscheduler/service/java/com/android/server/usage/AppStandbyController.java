@@ -2131,7 +2131,7 @@ public class AppStandbyController implements AppStandbyInternal {
         }
 
         public List<UserHandle> getValidCrossProfileTargets(String pkg, int userId) {
-            final int uid = mPackageManagerInternal.getPackageUidInternal(pkg, 0, userId);
+            final int uid = mPackageManagerInternal.getPackageUid(pkg, /* flags= */ 0, userId);
             final AndroidPackage aPkg = mPackageManagerInternal.getPackage(uid);
             if (uid < 0
                     || aPkg == null

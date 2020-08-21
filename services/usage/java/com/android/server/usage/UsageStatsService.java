@@ -1653,8 +1653,8 @@ public class UsageStatsService extends SystemService implements
 
             // If the calling app is asking about itself, continue, else check for permission.
             if (packageName.equals(callingPackage)) {
-                final int actualCallingUid = mPackageManagerInternal.getPackageUidInternal(
-                        callingPackage, 0, userId);
+                final int actualCallingUid = mPackageManagerInternal.getPackageUid(
+                        callingPackage, /* flags= */ 0, userId);
                 if (actualCallingUid != callingUid) {
                     return false;
                 }
