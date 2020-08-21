@@ -37,6 +37,11 @@
     <color name="status_bar_background_color">#33000000</color>
     <drawable name="system_bar_background">@color/status_bar_background_color</drawable>
 
+    <!-- colors for hvac temperature view -->
+    <color name="hvac_temperature_adjust_button_color">#3C4043</color>
+    <color name="hvac_temperature_decrease_arrow_color">#8AB4F8</color>
+    <color name="hvac_temperature_increase_arrow_color">#F28B82</color>
+
     <!-- The background color of the notification shade -->
     <color name="notification_shade_background_color">#D6000000</color>
 

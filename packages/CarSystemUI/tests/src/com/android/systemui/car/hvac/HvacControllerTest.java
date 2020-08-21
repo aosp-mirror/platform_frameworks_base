@@ -40,6 +40,8 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.CarSystemUiTest;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +72,8 @@ public class HvacControllerTest extends SysuiTestCase {
         when(mCar.getCarManager(Car.PROPERTY_SERVICE)).thenReturn(mCarPropertyManager);
 
         CarServiceProvider carServiceProvider = new CarServiceProvider(mContext, mCar);
-        mHvacController = new HvacController(carServiceProvider);
+        mHvacController = new HvacController(carServiceProvider,
+                new FakeExecutor(new FakeSystemClock()));
         mHvacController.connectToCarService();
     }
 
@@ -86,31 +89,31 @@ public class HvacControllerTest extends SysuiTestCase {
         TemperatureTextView v = setupMockTemperatureTextView(AREA_ID, TEMP);
         mHvacController.addTemperatureViewToController(v);
 
-        verify(v).setTemperatureView(TEMP);
+        verify(v).setTemp(TEMP);
     }
 
     @Test
     public void addTemperatureViewToController_usingSameTemperatureView_registersFirstView() {
         TemperatureTextView v = setupMockTemperatureTextView(AREA_ID, TEMP);
         mHvacController.addTemperatureViewToController(v);
-        verify(v).setTemperatureView(TEMP);
+        verify(v).setTemp(TEMP);
         resetTemperatureView(v, AREA_ID);
 
         mHvacController.addTemperatureViewToController(v);
-        verify(v, never()).setTemperatureView(TEMP);
+        verify(v, never()).setTemp(TEMP);
     }
 
     @Test
     public void addTemperatureViewToController_usingDifferentTemperatureView_registersBothViews() {
         TemperatureTextView v1 = setupMockTemperatureTextView(AREA_ID, TEMP);
         mHvacController.addTemperatureViewToController(v1);
-        verify(v1).setTemperatureView(TEMP);
+        verify(v1).setTemp(TEMP);
 
         TemperatureTextView v2 = setupMockTemperatureTextView(
                 AREA_ID + 1,
                 TEMP + 1);
         mHvacController.addTemperatureViewToController(v2);
-        verify(v2).setTemperatureView(TEMP + 1);
+        verify(v2).setTemp(TEMP + 1);
     }
 
     @Test
@@ -124,7 +127,7 @@ public class HvacControllerTest extends SysuiTestCase {
         mHvacController.addTemperatureViewToController(v);
 
         verify(v).setDisplayInFahrenheit(true);
-        verify(v).setTemperatureView(TEMP);
+        verify(v).setTemp(TEMP);
     }
 
     private TemperatureTextView setupMockTemperatureTextView(int areaId, float value) {
