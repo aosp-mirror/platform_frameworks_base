@@ -1090,7 +1090,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void setSeparateProfileChallengeEnabled(int userId, boolean enabled,
             LockscreenCredential managedUserPassword) {
         checkWritePermission(userId);
-        if (!mHasSecureLockScreen) {
+        if (!mHasSecureLockScreen
+                && managedUserPassword != null
+                && managedUserPassword.getType() != CREDENTIAL_TYPE_NONE) {
             throw new UnsupportedOperationException(
                     "This operation requires secure lock screen feature.");
         }
@@ -1560,7 +1562,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     public boolean setLockCredential(LockscreenCredential credential,
             LockscreenCredential savedCredential, int userId) {
 
-        if (!mHasSecureLockScreen) {
+        if (!mHasSecureLockScreen
+                && credential != null && credential.getType() != CREDENTIAL_TYPE_NONE) {
             throw new UnsupportedOperationException(
                     "This operation requires secure lock screen feature");
         }
@@ -3423,7 +3426,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
                 byte[] token, int userId) {
-            if (!mHasSecureLockScreen) {
+        if (!mHasSecureLockScreen
+                && credential != null && credential.getType() != CREDENTIAL_TYPE_NONE) {
                 throw new UnsupportedOperationException(
                         "This operation requires secure lock screen feature.");
             }

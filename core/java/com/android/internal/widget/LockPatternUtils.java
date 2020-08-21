@@ -680,7 +680,7 @@ public class LockPatternUtils {
      */
     public boolean setLockCredential(@NonNull LockscreenCredential newCredential,
             @NonNull LockscreenCredential savedCredential, int userHandle) {
-        if (!hasSecureLockScreen()) {
+        if (!hasSecureLockScreen() && newCredential.getType() != CREDENTIAL_TYPE_NONE) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
@@ -775,7 +775,7 @@ public class LockPatternUtils {
 
     /** Update the encryption password if it is enabled **/
     private void updateEncryptionPassword(final int type, final byte[] password) {
-        if (!hasSecureLockScreen()) {
+        if (!hasSecureLockScreen() && password != null && password.length != 0) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
@@ -1575,7 +1575,7 @@ public class LockPatternUtils {
      */
     public boolean setLockCredentialWithToken(@NonNull LockscreenCredential credential,
             long tokenHandle, byte[] token, int userHandle) {
-        if (!hasSecureLockScreen()) {
+        if (!hasSecureLockScreen() && credential.getType() != CREDENTIAL_TYPE_NONE) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
