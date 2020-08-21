@@ -25,9 +25,6 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dumpable;
-
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Timeout handler for stop one handed mode operations.
  */
-public class OneHandedTimeoutHandler implements Dumpable {
+public class OneHandedTimeoutHandler {
     private static final String TAG = "OneHandedTimeoutHandler";
     private static boolean sIsDragging = false;
     // Default timeout is ONE_HANDED_TIMEOUT_MEDIUM
@@ -150,8 +147,7 @@ public class OneHandedTimeoutHandler implements Dumpable {
         }
     }
 
-    @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "sTimeout=");

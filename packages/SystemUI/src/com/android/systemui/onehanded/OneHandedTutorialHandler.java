@@ -33,10 +33,8 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -45,7 +43,7 @@ import java.io.PrintWriter;
  * Refer {@link OneHandedGestureHandler} and {@link OneHandedTouchHandler} to see start and stop
  * one handed gesture
  */
-public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Dumpable {
+public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private static final String TAG = "OneHandedTutorialHandler";
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
             "persist.debug.one_handed_offset_percentage";
@@ -170,8 +168,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback, Du
         return lp;
     }
 
-    @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mLastUpdatedBounds=");

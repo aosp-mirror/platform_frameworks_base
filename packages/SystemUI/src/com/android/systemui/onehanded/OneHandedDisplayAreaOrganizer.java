@@ -38,10 +38,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.os.SomeArgs;
-import com.android.systemui.Dumpable;
 import com.android.wm.shell.common.DisplayController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +56,7 @@ import java.util.Objects;
  *
  * This class is also responsible for translating one handed operations within SysUI component
  */
-public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implements Dumpable {
+public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private static final String TAG = "OneHandedDisplayAreaOrganizer";
     private static final String ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION =
             "persist.debug.one_handed_translate_animation_duration";
@@ -353,8 +351,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         return args;
     }
 
-    @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mIsInOneHanded=");
