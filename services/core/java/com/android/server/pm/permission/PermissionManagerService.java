@@ -137,6 +137,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
@@ -901,6 +902,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private int checkPermissionImpl(String permName, String pkgName, int userId) {
+        try {
+            enforceCrossUserOrProfilePermission(Binder.getCallingUid(), userId,
+                    false, false, "checkPermissionImpl");
+        } catch (Exception e) {
+            Slog.e(TAG, "Invalid cross user access", e);
+            EventLog.writeEvent(0x534e4554, "153996875", "checkPermissionImpl", pkgName);
+
+            throw e;
+        }
+
         final AndroidPackage pkg = mPackageManagerInt.getPackage(pkgName);
         if (pkg == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -978,6 +989,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private int checkUidPermissionImpl(String permName, int uid) {
+        try {
+            enforceCrossUserOrProfilePermission(Binder.getCallingUid(), UserHandle.getUserId(uid),
+                    false, false, "checkUidPermissionImpl");
+        } catch (Exception e) {
+            Slog.e(TAG, "Invalid cross user access", e);
+            EventLog.writeEvent(0x534e4554, "153996875", "checkUidPermissionImpl", uid);
+
+            throw e;
+        }
+
         final AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
         return checkUidPermissionInternal(pkg, uid, permName);
     }
@@ -4507,7 +4528,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (hasCrossUserPermission(
-                callingUid, callingUserId, userId, requireFullPermission,
+                Binder.getCallingPid(), callingUid, callingUserId, userId, requireFullPermission,
                 requirePermissionWhenSameUser)) {
             return;
         }
@@ -4534,53 +4555,79 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell,
             String message) {
+        int callingPid = Binder.getCallingPid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
-        if (checkShell) {
-            PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
-                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
-        }
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        if (hasCrossUserPermission(callingUid, callingUserId, userId, requireFullPermission,
-                /*requirePermissionWhenSameUser= */ false)) {
+
+        if (callingUserId == userId) {
             return;
         }
-        final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
-        if (isSameProfileGroup && PermissionChecker.checkPermissionForPreflight(
-                mContext,
-                android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-                PermissionChecker.PID_UNKNOWN,
-                callingUid,
-                mPackageManagerInt.getPackage(callingUid).getPackageName())
-                == PermissionChecker.PERMISSION_GRANTED) {
+
+        // Prevent endless loop between when checking permission while checking a permission
+        if (callingPid == ActivityManagerService.MY_PID) {
             return;
         }
+
+        long token = Binder.clearCallingIdentity();
+        try {
+            if (checkShell) {
+                PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
+                        UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
+            }
+            if (hasCrossUserPermission(callingPid, callingUid, callingUserId, userId,
+                    requireFullPermission, /*requirePermissionWhenSameUser= */ false)) {
+                return;
+            }
+            final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
+
+            if (isSameProfileGroup) {
+                AndroidPackage callingPkg = mPackageManagerInt.getPackage(callingUid);
+                String callingPkgName = null;
+                if (callingPkg != null) {
+                    callingPkgName = callingPkg.getPackageName();
+                }
+
+                if (PermissionChecker.checkPermissionForPreflight(
+                        mContext,
+                        android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+                        PermissionChecker.PID_UNKNOWN,
+                        callingUid,
+                        callingPkgName)
+                        == PermissionChecker.PERMISSION_GRANTED) {
+                    return;
+                }
+            }
+
         String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
                 callingUid, userId, message, requireFullPermission, isSameProfileGroup);
         Slog.w(TAG, errorMessage);
         throw new SecurityException(errorMessage);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
-    private boolean hasCrossUserPermission(
-            int callingUid, int callingUserId, int userId, boolean requireFullPermission,
-            boolean requirePermissionWhenSameUser) {
+    private boolean hasCrossUserPermission(int callingPid, int callingUid, int callingUserId,
+            int userId, boolean requireFullPermission, boolean requirePermissionWhenSameUser) {
         if (!requirePermissionWhenSameUser && userId == callingUserId) {
             return true;
         }
         if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
             return true;
         }
-        if (requireFullPermission) {
-            return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
-        }
-        return hasPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS);
-    }
 
-    private boolean hasPermission(String permission) {
-        return mContext.checkCallingOrSelfPermission(permission)
-                == PackageManager.PERMISSION_GRANTED;
+        if (!requireFullPermission) {
+            if (mContext.checkPermission(android.Manifest.permission.INTERACT_ACROSS_USERS,
+                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+
+        return mContext.checkPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {

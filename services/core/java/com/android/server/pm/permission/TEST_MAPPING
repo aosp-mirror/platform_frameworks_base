@@ -18,14 +18,6 @@
             ]
         },
         {
-            "name": "CtsAppSecurityHostTestCases",
-            "options": [
-                {
-                    "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
-                }
-            ]
-        },
-        {
             "name": "CtsPermission2TestCases",
             "options": [
                 {
@@ -33,6 +25,17 @@
                 },
                 {
                     "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"
+                }
+            ]
+        },
+        {
+            "name": "CtsPermissionHostTestCases"
+        },
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
                 }
             ]
         },

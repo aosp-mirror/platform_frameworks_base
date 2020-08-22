@@ -6741,10 +6741,14 @@ public class AppOpsManager {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(int code, int uid, @Mode int mode) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -6762,11 +6766,7 @@ public class AppOpsManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
-        try {
-            mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
     }
 
     /** @hide */
@@ -6795,10 +6795,14 @@ public class AppOpsManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -6818,11 +6822,7 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
             @Mode int mode) {
-        try {
-            mService.setMode(strOpToOp(op), uid, packageName, mode);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setMode(strOpToOp(op), uid, packageName, mode);
     }
 
     /**
@@ -7298,10 +7298,14 @@ public class AppOpsManager {
      * @hide
      */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             return mService.checkOperationRaw(op, uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -7473,8 +7477,20 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.noteOperation(op, uid, packageName, attributionTag,
-                    collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
+            int mode;
+            // Making the binder call "noteOperation" usually sets Binder.callingUid to the calling
+            // processes UID. Hence clearing the calling UID is superfluous.
+            // If the call is inside the system server though "noteOperation" is not a binder all,
+            // it is only a method call. Hence Binder.callingUid might still be set to the app that
+            // called the system server. This can lead to problems as not every app can see the
+            // same appops the system server can see.
+            long token = Binder.clearCallingIdentity();
+            try {
+                mode = mService.noteOperation(op, uid, packageName, attributionTag,
+                        collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -7637,10 +7653,17 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.noteProxyOperation(op, proxiedUid, proxiedPackageName,
-                    proxiedAttributionTag, myUid, mContext.getOpPackageName(),
-                    mContext.getAttributionTag(), collectionMode == COLLECT_ASYNC, message,
-                    shouldCollectMessage);
+            int mode;
+            // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+            long token = Binder.clearCallingIdentity();
+            try {
+                mode = mService.noteProxyOperation(op, proxiedUid, proxiedPackageName,
+                        proxiedAttributionTag, myUid, mContext.getOpPackageName(),
+                        mContext.getAttributionTag(), collectionMode == COLLECT_ASYNC, message,
+                        shouldCollectMessage);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -7690,6 +7713,8 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             int mode = mService.checkOperation(op, uid, packageName);
             if (mode == MODE_ERRORED) {
@@ -7698,6 +7723,8 @@ public class AppOpsManager {
             return mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -7708,11 +7735,15 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOpNoThrow(int op, int uid, String packageName) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             int mode = mService.checkOperation(op, uid, packageName);
             return mode == AppOpsManager.MODE_FOREGROUND ? AppOpsManager.MODE_ALLOWED : mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -7964,9 +7995,16 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.startOperation(getClientId(), op, uid, packageName,
-                    attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message,
-                    shouldCollectMessage);
+            int mode;
+            // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+            long token = Binder.clearCallingIdentity();
+            try {
+                mode = mService.startOperation(getClientId(), op, uid, packageName,
+                        attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC,
+                        message, shouldCollectMessage);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -8029,10 +8067,14 @@ public class AppOpsManager {
      */
     public void finishOp(int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             mService.finishOperation(getClientId(), op, uid, packageName, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -8624,10 +8666,14 @@ public class AppOpsManager {
     // TODO: Uncomment below annotation once b/73559440 is fixed
     // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
     public boolean isOperationActive(int code, int uid, String packageName) {
+        // Clear calling UID to handle calls from inside the system server. See #noteOpNoThrow
+        long token = Binder.clearCallingIdentity();
         try {
             return mService.isOperationActive(code, uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
