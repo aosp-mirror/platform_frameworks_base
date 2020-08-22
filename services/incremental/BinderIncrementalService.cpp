@@ -237,11 +237,9 @@ binder::Status BinderIncrementalService::unlink(int32_t storageId, const std::st
     return ok();
 }
 
-binder::Status BinderIncrementalService::isFileRangeLoaded(int32_t storageId,
-                                                           const std::string& path, int64_t start,
-                                                           int64_t end, bool* _aidl_return) {
-    // TODO: implement
-    *_aidl_return = false;
+binder::Status BinderIncrementalService::getLoadingProgress(int32_t storageId,
+                                                            float* _aidl_return) {
+    *_aidl_return = mImpl.getLoadingProgress(storageId);
     return ok();
 }
 

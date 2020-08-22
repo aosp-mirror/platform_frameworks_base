@@ -25,6 +25,7 @@
 #include <binder/AppOpsManager.h>
 #include <utils/String16.h>
 
+#include <filesystem>
 #include <thread>
 
 #include "IncrementalServiceValidation.h"
@@ -165,6 +166,29 @@ public:
     FileId getFileId(const Control& control, std::string_view path) const final {
         return incfs::getFileId(control, path);
     }
+    std::pair<IncFsBlockIndex, IncFsBlockIndex> countFilledBlocks(
+            const Control& control, std::string_view path) const final {
+        const auto fileId = incfs::getFileId(control, path);
+        const auto fd = incfs::openForSpecialOps(control, fileId);
+        int res = fd.get();
+        if (!fd.ok()) {
+            return {res, res};
+        }
+        const auto ranges = incfs::getFilledRanges(res);
+        res = ranges.first;
+        if (res) {
+            return {res, res};
+        }
+        const auto totalBlocksCount = ranges.second.internalRawRanges().endIndex;
+        int filledBlockCount = 0;
+        for (const auto& dataRange : ranges.second.dataRanges()) {
+            filledBlockCount += dataRange.size();
+        }
+        for (const auto& hashRange : ranges.second.hashRanges()) {
+            filledBlockCount += hashRange.size();
+        }
+        return {filledBlockCount, totalBlocksCount};
+    }
     ErrorCode link(const Control& control, std::string_view from, std::string_view to) const final {
         return incfs::link(control, from, to);
     }
@@ -265,6 +289,23 @@ private:
     std::thread mThread;
 };
 
+class RealFsWrapper : public FsWrapper {
+public:
+    RealFsWrapper() = default;
+    ~RealFsWrapper() = default;
+
+    std::vector<std::string> listFilesRecursive(std::string_view directoryPath) const final {
+        std::vector<std::string> files;
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
+            if (!entry.is_regular_file()) {
+                continue;
+            }
+            files.push_back(entry.path().c_str());
+        }
+        return files;
+    }
+};
+
 RealServiceManager::RealServiceManager(sp<IServiceManager> serviceManager, JNIEnv* env)
       : mServiceManager(std::move(serviceManager)), mJvm(RealJniWrapper::getJvm(env)) {}
 
@@ -314,6 +355,10 @@ std::unique_ptr<LooperWrapper> RealServiceManager::getLooper() {
 
 std::unique_ptr<TimedQueueWrapper> RealServiceManager::getTimedQueue() {
     return std::make_unique<RealTimedQueueWrapper>(mJvm);
+}
+
+std::unique_ptr<FsWrapper> RealServiceManager::getFs() {
+    return std::make_unique<RealFsWrapper>();
 }
 
 static JavaVM* getJavaVm(JNIEnv* env) {
