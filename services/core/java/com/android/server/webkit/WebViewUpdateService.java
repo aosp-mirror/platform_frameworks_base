@@ -209,8 +209,8 @@ public class WebViewUpdateService extends SystemService {
         private void grantVisibilityToCaller(String webViewPackageName, int callingUid) {
             final PackageManagerInternal pmInternal = LocalServices.getService(
                     PackageManagerInternal.class);
-            final int webviewUid = pmInternal.getPackageUidInternal(
-                    webViewPackageName, 0, UserHandle.getUserId(callingUid));
+            final int webviewUid = pmInternal.getPackageUid(
+                    webViewPackageName, 0 /* flags */, UserHandle.getUserId(callingUid));
             pmInternal.grantImplicitAccess(UserHandle.getUserId(callingUid), null,
                     UserHandle.getAppId(callingUid), webviewUid,
                     true /*direct*/);

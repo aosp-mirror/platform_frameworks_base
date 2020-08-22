@@ -22,7 +22,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.RectF;
 import android.os.Handler;
@@ -115,24 +114,24 @@ public class SwipeHelper implements Gefingerpoken {
     private final ArrayMap<View, Animator> mDismissPendingMap = new ArrayMap<>();
 
     public SwipeHelper(
-            int swipeDirection, Callback callback, Context context, FalsingManager falsingManager) {
+            int swipeDirection, Callback callback, Resources resources,
+            ViewConfiguration viewConfiguration, FalsingManager falsingManager) {
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
         mVelocityTracker = VelocityTracker.obtain();
-        final ViewConfiguration configuration = ViewConfiguration.get(context);
-        mPagingTouchSlop = configuration.getScaledPagingTouchSlop();
-        mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
+        mPagingTouchSlop = viewConfiguration.getScaledPagingTouchSlop();
+        mSlopMultiplier = viewConfiguration.getScaledAmbiguousGestureMultiplier();
 
         // Extra long-press!
         mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f);
 
-        Resources res = context.getResources();
-        mDensityScale =  res.getDisplayMetrics().density;
-        mFalsingThreshold = res.getDimensionPixelSize(R.dimen.swipe_helper_falsing_threshold);
-        mFadeDependingOnAmountSwiped = res.getBoolean(R.bool.config_fadeDependingOnAmountSwiped);
+        mDensityScale =  resources.getDisplayMetrics().density;
+        mFalsingThreshold = resources.getDimensionPixelSize(R.dimen.swipe_helper_falsing_threshold);
+        mFadeDependingOnAmountSwiped = resources.getBoolean(
+                R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = falsingManager;
-        mFlingAnimationUtils = new FlingAnimationUtils(res.getDisplayMetrics(),
+        mFlingAnimationUtils = new FlingAnimationUtils(resources.getDisplayMetrics(),
                 getMaxEscapeAnimDuration() / 1000f);
     }
 

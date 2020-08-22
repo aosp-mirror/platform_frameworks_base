@@ -111,7 +111,6 @@ import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
@@ -123,7 +122,7 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -180,7 +179,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NavigationModeController mNavigationModeController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Divider mDivider;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
     private final Optional<Recents> mRecentsOptional;
     private final SystemActions mSystemActions;
     private final Handler mHandler;
@@ -377,22 +376,22 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
-        @Override
-        public void onPropertiesChanged(DeviceConfig.Properties properties) {
-            if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
-                mForceNavBarHandleOpaque = properties.getBoolean(
-                        NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
-            }
-        }
-    };
+                @Override
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
+                        mForceNavBarHandleOpaque = properties.getBoolean(
+                                NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
+                    }
+                }
+            };
 
     private final DeviceProvisionedController.DeviceProvisionedListener mUserSetupListener =
             new DeviceProvisionedController.DeviceProvisionedListener() {
-        @Override
-        public void onUserSetupChanged() {
-            mIsCurrentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
-        }
-    };
+                @Override
+                public void onUserSetupChanged() {
+                    mIsCurrentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
+                }
+            };
 
     public NavigationBar(Context context,
             WindowManager windowManager,
@@ -406,7 +405,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Divider divider,
+            CommandQueue commandQueue,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
@@ -430,7 +430,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mDivider = divider;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mRecentsOptional = recentsOptional;
         mSystemActions = systemActions;
         mHandler = mainHandler;
@@ -458,10 +458,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         lp.windowAnimations = 0;
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 
-        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        NavigationBarFrame frame = (NavigationBarFrame) layoutInflater.inflate(
+        NavigationBarFrame frame = (NavigationBarFrame) LayoutInflater.from(mContext).inflate(
                 R.layout.navigation_bar_window, null);
-        View barView = layoutInflater.inflate(R.layout.navigation_bar, frame);
+        View barView = LayoutInflater.from(frame.getContext()).inflate(
+                R.layout.navigation_bar, frame);
         barView.addOnAttachStateChangeListener(this);
 
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + barView);
@@ -528,6 +528,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
+        mSplitScreenControllerOptional.ifPresent(mNavigationBarView::registerDockedListener);
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -559,7 +560,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         setDisabled2Flags(mDisabledFlags2);
         if (mIsOnDefaultDisplay) {
             mAssistHandlerViewController =
-                new AssistHandleViewController(mHandler, mNavigationBarView);
+                    new AssistHandleViewController(mHandler, mNavigationBarView);
             getBarTransitions().addDarkIntensityListener(mAssistHandlerViewController);
         }
 
@@ -690,7 +691,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             return;
         }
 
-        if (mStartingQuickSwitchRotation == -1 || mDivider.isDividerVisible()) {
+        if (mStartingQuickSwitchRotation == -1 || mSplitScreenControllerOptional
+                .map(SplitScreenController::isDividerVisible).orElse(false)) {
             // Hide the secondary home handle if we are in multiwindow since apps in multiwindow
             // aren't allowed to set the display orientation
             resetSecondaryHandle();
@@ -1121,7 +1123,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         mUiEventLogger.log(NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS);
-        Bundle args  = new Bundle();
+        Bundle args = new Bundle();
         args.putInt(
                 AssistManager.INVOCATION_TYPE_KEY, AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS);
         mAssistManagerLazy.get().startAssist(args);
@@ -1246,10 +1248,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private boolean onLongPressRecents() {
         if (mRecentsOptional.isPresent() || !ActivityTaskManager.supportsMultiWindow(mContext)
-                || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()
                 || ActivityManager.isLowRamDeviceStatic()
                 // If we are connected to the overview service, then disable the recents button
-                || mOverviewProxyService.getProxy() != null) {
+                || mOverviewProxyService.getProxy() != null
+                || !mSplitScreenControllerOptional.map(splitScreen ->
+                splitScreen.getDividerView().getSnapAlgorithm().isSplitScreenFeasible())
+                .orElse(false)) {
             return false;
         }
 
@@ -1311,6 +1315,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     /**
      * Returns the system UI flags corresponding the the current accessibility button state
+     *
      * @param outFeedbackEnabled if non-null, sets it to true if accessibility feedback is enabled.
      */
     public int getA11yButtonState(@Nullable boolean[] outFeedbackEnabled) {

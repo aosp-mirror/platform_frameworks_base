@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * Helper for serializing sync-transactions and corresponding callbacks.
  */
 class SyncTransactionQueue {
-    private static final boolean DEBUG = DividerController.DEBUG;
+    private static final boolean DEBUG = SplitScreenController.DEBUG;
     private static final String TAG = "SyncTransactionQueue";
 
     // Just a little longer than the sync-engine timeout of 5s

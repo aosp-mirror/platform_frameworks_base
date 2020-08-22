@@ -58,7 +58,7 @@ import android.window.WindowOrganizer;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.phone.PipUpdateThread;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -104,7 +105,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Map<IBinder, Configuration> mInitialState = new HashMap<>();
-    private final Divider mSplitDivider;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
 
     // These callbacks are called on the update thread
@@ -207,7 +208,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
 
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
-            @Nullable Divider divider,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer) {
@@ -220,7 +221,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         mPipAnimationController = new PipAnimationController(mSurfaceTransactionHelper);
         mPipUiEventLoggerLogger = pipUiEventLogger;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
-        mSplitDivider = divider;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mTaskOrganizer = shellTaskOrganizer;
         mTaskOrganizer.addListener(this, WINDOWING_MODE_PINNED);
         displayController.addDisplayWindowListener(this);
@@ -336,9 +337,11 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         wct.setWindowingMode(mToken, getOutPipWindowingMode());
         // Simply reset the activity mode set prior to the animation running.
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-        if (mSplitDivider != null && direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
-            wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
-        }
+        mSplitScreenControllerOptional.ifPresent(splitScreen -> {
+            if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
+                wct.reparent(mToken, splitScreen.getSecondaryRoot(), true /* onTop */);
+            }
+        });
     }
 
     /**
@@ -934,20 +937,27 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
     }
 
     /**
-     * Sync with {@link #mSplitDivider} on destination bounds if PiP is going to split screen.
+     * Sync with {@link SplitScreenController} on destination bounds if PiP is going to split
+     * screen.
      *
      * @param destinationBoundsOut contain the updated destination bounds if applicable
      * @return {@code true} if destinationBounds is altered for split screen
      */
     private boolean syncWithSplitScreenBounds(Rect destinationBoundsOut) {
-        if (mSplitDivider == null || !mSplitDivider.isDividerVisible()) {
-            // bail early if system is not in split screen mode
+        if (!mSplitScreenControllerOptional.isPresent()) {
             return false;
         }
+
+        SplitScreenController splitScreenController = mSplitScreenControllerOptional.get();
+        if (!splitScreenController.isDividerVisible()) {
+            // fail early if system is not in split screen mode
+            return false;
+        }
+
         // PiP window will go to split-secondary mode instead of fullscreen, populates the
         // split screen bounds here.
-        destinationBoundsOut.set(
-                mSplitDivider.getView().getNonMinimizedSplitScreenSecondaryBounds());
+        destinationBoundsOut.set(splitScreenController.getDividerView()
+                .getNonMinimizedSplitScreenSecondaryBounds());
         return true;
     }
 

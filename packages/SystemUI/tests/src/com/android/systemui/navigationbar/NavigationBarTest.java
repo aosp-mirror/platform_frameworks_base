@@ -68,7 +68,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -121,7 +121,6 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectMockDependency(Divider.class);
         mOverviewProxyService = mDependency.injectMockDependency(OverviewProxyService.class);
         TestableLooper.get(this).runWithLooper(() -> {
             mHandler = new Handler();
@@ -224,7 +223,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mMockSysUiState,
                 mBroadcastDispatcher,
                 mCommandQueue,
-                mock(Divider.class),
+                Optional.of(mock(SplitScreenController.class)),
                 Optional.of(mock(Recents.class)),
                 () -> mock(StatusBar.class),
                 mock(ShadeController.class),

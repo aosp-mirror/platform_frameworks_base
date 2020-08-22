@@ -5806,10 +5806,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private void updateSequenceNumberLP(PackageSetting pkgSetting, int[] userList) {
         for (int i = userList.length - 1; i >= 0; --i) {
             final int userId = userList[i];
-            // don't add instant app to the list of updates
-            if (pkgSetting.getInstantApp(userId)) {
-                continue;
-            }
             SparseArray<String> changedPackages = mChangedPackages.get(userId);
             if (changedPackages == null) {
                 changedPackages = new SparseArray<>();
@@ -5854,6 +5850,11 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = sequenceNumber; i < mChangedPackagesSequenceNumber; i++) {
                 final String packageName = changedPackages.get(i);
                 if (packageName != null) {
+                    // Filter out the changes if the calling package should not be able to see it.
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                        continue;
+                    }
                     packageNames.add(packageName);
                 }
             }
@@ -24602,12 +24603,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public int getPackageUid(String packageName, int flags, int userId) {
-            return PackageManagerService.this
-                    .getPackageUid(packageName, flags, userId);
-        }
-
-        @Override
-        public int getPackageUidInternal(String packageName, int flags, int userId) {
             return PackageManagerService.this
                     .getPackageUidInternal(packageName, flags, userId, Process.SYSTEM_UID);
         }

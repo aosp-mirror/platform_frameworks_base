@@ -2160,7 +2160,7 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.i(TAG, "Remounting storage for pid: " + pid);
             final String[] sharedPackages =
                     mPmInternal.getSharedUserPackagesForPackage(packageName, userId);
-            final int uid = mPmInternal.getPackageUidInternal(packageName, 0, userId);
+            final int uid = mPmInternal.getPackageUid(packageName, 0 /* flags */, userId);
             final String[] packages =
                     sharedPackages.length != 0 ? sharedPackages : new String[]{packageName};
             try {

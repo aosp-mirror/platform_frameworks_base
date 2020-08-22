@@ -55,12 +55,13 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -80,13 +81,14 @@ public class InstantAppNotifier extends SystemUI
     private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
-    private final Divider mDivider;
+    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
 
     @Inject
     public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor, Divider divider) {
+            @UiBackground Executor uiBgExecutor,
+            Optional<SplitScreenController> splitScreenControllerOptional) {
         super(context);
-        mDivider = divider;
+        mSplitScreenControllerOptional = splitScreenControllerOptional;
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
     }
@@ -105,11 +107,11 @@ public class InstantAppNotifier extends SystemUI
         mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
 
-        mDivider.registerInSplitScreenListener(
-                exists -> {
+        mSplitScreenControllerOptional.ifPresent(splitScreen ->
+                splitScreen.registerInSplitScreenListener(exists -> {
                     mDockedStackExists = exists;
                     updateForegroundInstantApps();
-                });
+                }));
 
         // Clear out all old notifications on startup (only present in the case where sysui dies)
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);

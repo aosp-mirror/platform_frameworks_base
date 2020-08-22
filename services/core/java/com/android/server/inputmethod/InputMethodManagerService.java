@@ -2591,7 +2591,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 final String curMethodPackage = mCurIntent.getComponent().getPackageName();
-                final int curMethodUid = mPackageManagerInternal.getPackageUidInternal(
+                final int curMethodUid = mPackageManagerInternal.getPackageUid(
                         curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
                 if (curMethodUid < 0) {
                     Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);

@@ -16,6 +16,7 @@
 
 package com.android.systemui.wmshell;
 
+import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
@@ -23,8 +24,11 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.phone.PipMenuActivity;
 import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
+import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
 
 import dagger.Module;
@@ -42,8 +46,7 @@ public class WMShellModule {
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
             DisplayController displayController, @Main Handler mainHandler,
             TransactionPool transactionPool) {
-        return new DisplayImeController.Builder(wmService, displayController, mainHandler,
-                transactionPool).build();
+        return new DisplayImeController(wmService, displayController, mainHandler, transactionPool);
     }
 
     /** TODO(b/150319024): PipMenuActivity will move to a Window */
@@ -52,5 +55,15 @@ public class WMShellModule {
     @Provides
     static Class<?> providePipMenuActivityClass() {
         return PipMenuActivity.class;
+    }
+
+    @SysUISingleton
+    @Provides
+    static SplitScreenController provideSplitScreenController(Context context,
+            DisplayController displayController, SystemWindows systemWindows,
+            DisplayImeController displayImeController, @Main Handler handler,
+            TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer) {
+        return new SplitScreenController(context, displayController, systemWindows,
+                displayImeController, handler, transactionPool, shellTaskOrganizer);
     }
 }

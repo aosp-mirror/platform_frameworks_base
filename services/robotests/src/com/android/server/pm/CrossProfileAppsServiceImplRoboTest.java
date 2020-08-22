@@ -204,10 +204,10 @@ public class CrossProfileAppsServiceImplRoboTest {
                 CROSS_PROFILE_APP_PACKAGE_NAME, PERSONAL_PROFILE_UID, PERSONAL_PROFILE_USER_ID);
         ShadowApplicationPackageManager.setPackageUidAsUser(
                 CROSS_PROFILE_APP_PACKAGE_NAME, WORK_PROFILE_UID, WORK_PROFILE_USER_ID);
-        when(mPackageManagerInternal.getPackageUidInternal(
+        when(mPackageManagerInternal.getPackageUid(
                 CROSS_PROFILE_APP_PACKAGE_NAME, /* flags= */ 0, PERSONAL_PROFILE_USER_ID))
                 .thenReturn(PERSONAL_PROFILE_UID);
-        when(mPackageManagerInternal.getPackageUidInternal(
+        when(mPackageManagerInternal.getPackageUid(
                 CROSS_PROFILE_APP_PACKAGE_NAME, /* flags= */ 0, WORK_PROFILE_USER_ID))
                 .thenReturn(WORK_PROFILE_UID);
     }

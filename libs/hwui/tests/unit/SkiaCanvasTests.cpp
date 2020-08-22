@@ -73,7 +73,7 @@ TEST(SkiaCanvas, colorSpaceXform) {
 
     // Test picture recording.
     SkPictureRecorder recorder;
-    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
+    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1);
     SkiaCanvas picCanvas(skPicCanvas);
     picCanvas.drawBitmap(*adobeBitmap, 0, 0, nullptr);
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
@@ -104,7 +104,7 @@ TEST(SkiaCanvas, captureCanvasState) {
 
     // Create a picture canvas.
     SkPictureRecorder recorder;
-    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1, NULL, 0);
+    SkCanvas* skPicCanvas = recorder.beginRecording(1, 1);
     SkiaCanvas picCanvas(skPicCanvas);
     state = picCanvas.captureCanvasState();
 

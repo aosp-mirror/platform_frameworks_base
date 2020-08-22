@@ -35,6 +35,7 @@ java_test_host {
         "cts-install-lib-host",
     ],
     data: [
+        ":com.android.apex.apkrollback.test_v1",
         ":com.android.apex.cts.shim.v2_prebuilt",
         ":TestAppAv1",
     ],

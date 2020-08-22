@@ -56,7 +56,7 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -65,6 +65,7 @@ import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -270,7 +271,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             ConfigurationController configController,
             DeviceConfigProxy deviceConfig,
             DisplayController displayController,
-            Divider divider,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
             PipUiEventLogger pipUiEventLogger,
@@ -290,8 +291,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipBoundsHandler = new PipBoundsHandler(mContext);
         mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                mPipSurfaceTransactionHelper, divider, mDisplayController, pipUiEventLogger,
-                shellTaskOrganizer);
+                mPipSurfaceTransactionHelper, splitScreenControllerOptional, mDisplayController,
+                pipUiEventLogger, shellTaskOrganizer);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);

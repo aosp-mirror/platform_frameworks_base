@@ -23,15 +23,23 @@ import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
+
 import org.junit.Test;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -127,8 +135,9 @@ public class MediaTranscodeManagerTest
         super.setUp();
 
         mContext = getInstrumentation().getContext();
-        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext);
+        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext, true /*retry*/);
         assertNotNull(mMediaTranscodeManager);
+        androidx.test.InstrumentationRegistry.registerInstance(getInstrumentation(), new Bundle());
 
         // Setup source HEVC file uri.
         mSourceHEVCVideoUri = resourceToUri(mContext, R.raw.VideoOnlyHEVC, "VideoOnlyHEVC.mp4");
@@ -148,8 +157,6 @@ public class MediaTranscodeManagerTest
 
     @Test
     public void testTranscodingFromHevcToAvc() throws Exception {
-        Log.d(TAG, "Starting: testMediaTranscodeManager");
-
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
 
         // Create a file Uri: file:///data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
@@ -193,6 +200,7 @@ public class MediaTranscodeManagerTest
         assertTrue("PSNR: " + stats.mAveragePSNR + " is too low",
                 stats.mAveragePSNR >= PSNR_THRESHOLD);
     }
+
 
     @Test
     public void testCancelTranscoding() throws Exception {
@@ -299,6 +307,95 @@ public class MediaTranscodeManagerTest
         assertTrue("Transcode failed to complete in time.", finishedOnTime);
         assertTrue("Failed to receive at least 10 progress updates",
                 progressUpdateCount.get() > 10);
+    }
+
+    // [[ $(adb shell whoami) == "root" ]]
+    private boolean checkIfRoot() throws IOException {
+        try (ParcelFileDescriptor result = getInstrumentation().getUiAutomation()
+                .executeShellCommand("whoami");
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                     new FileInputStream(result.getFileDescriptor())))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains("root")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private String executeShellCommand(String cmd) throws Exception {
+        return UiDevice.getInstance(
+                InstrumentationRegistry.getInstrumentation()).executeShellCommand(cmd);
+    }
+
+    @Test
+    public void testHandleTranscoderServiceDied() throws Exception {
+        try {
+            if (!checkIfRoot()) {
+                throw new AssertionError("must be root to run this test; try adb root?");
+            } else {
+                Log.i(TAG, "Device is root");
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+
+        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
+        Semaphore jobStartedSemaphore = new Semaphore(0);
+
+        // Transcode a 15 seconds video, so that the transcoding is not finished when we kill the
+        // service.
+        Uri srcUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/longtest_15s.mp4");
+        Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/HevcTranscode.mp4");
+
+        TranscodingRequest request =
+                new TranscodingRequest.Builder()
+                        .setSourceUri(mSourceHEVCVideoUri)
+                        .setDestinationUri(destinationUri)
+                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
+                        .setVideoTrackFormat(createMediaFormat())
+                        .build();
+        Executor listenerExecutor = Executors.newSingleThreadExecutor();
+
+        Log.i(TAG, "transcoding to " + createMediaFormat());
+
+        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
+                transcodingJob -> {
+                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
+                    assertEquals(transcodingJob.getResult(), TranscodingJob.RESULT_ERROR);
+                    transcodeCompleteSemaphore.release();
+                });
+        assertNotNull(job);
+
+        AtomicInteger progressUpdateCount = new AtomicInteger(0);
+
+        // Set progress update executor and use the same executor as result listener.
+        job.setOnProgressUpdateListener(listenerExecutor,
+                new TranscodingJob.OnProgressUpdateListener() {
+                    @Override
+                    public void onProgressUpdate(int newProgress) {
+                        if (newProgress > 0) {
+                            jobStartedSemaphore.release();
+                        }
+                    }
+                });
+
+        // Wait for progress update so the job is in running state.
+        jobStartedSemaphore.tryAcquire(TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertTrue("Job is not running", job.getStatus() == TranscodingJob.STATUS_RUNNING);
+
+        // Kills the service and expects receiving failure of the job.
+        executeShellCommand("pkill -f media.transcoding");
+
+        Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode result.");
+        boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
+                TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertTrue("Invalid job status", job.getStatus() == TranscodingJob.STATUS_FINISHED);
     }
 }
 

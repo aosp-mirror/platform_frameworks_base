@@ -2716,7 +2716,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 + " resumed=" + r.getStack().mResumedActivity + " pausing="
                 + r.getStack().mPausingActivity + " for reason " + mDestroyAllActivitiesReason);
 
-        r.destroyImmediately(true /* removeFromTask */, mDestroyAllActivitiesReason);
+        r.destroyImmediately(mDestroyAllActivitiesReason);
     }
 
     // Tries to put all activity stacks to sleep. Returns true if all stacks were
