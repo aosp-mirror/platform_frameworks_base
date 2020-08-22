@@ -85,6 +85,10 @@ public class NotificationShelfController {
         return mView.getShelfIcons();
     }
 
+    public @View.Visibility int getVisibility() {
+        return mView.getVisibility();
+    };
+
     public void setCollapsedIcons(NotificationIconContainer notificationIcons) {
         mView.setCollapsedIcons(notificationIcons);
     }

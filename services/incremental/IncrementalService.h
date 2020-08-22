@@ -132,9 +132,7 @@ public:
              std::string_view newPath);
     int unlink(StorageId storage, std::string_view path);
 
-    bool isRangeLoaded(StorageId storage, FileId file, std::pair<BlockIndex, BlockIndex> range) {
-        return false;
-    }
+    float getLoadingProgress(StorageId storage) const;
 
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
@@ -341,6 +339,8 @@ private:
     int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
+    float getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
+
     void registerAppOpsCallback(const std::string& packageName);
     bool unregisterAppOpsCallback(const std::string& packageName);
     void onAppOpChanged(const std::string& packageName);
@@ -363,6 +363,7 @@ private:
     const std::unique_ptr<JniWrapper> mJni;
     const std::unique_ptr<LooperWrapper> mLooper;
     const std::unique_ptr<TimedQueueWrapper> mTimedQueue;
+    const std::unique_ptr<FsWrapper> mFs;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;

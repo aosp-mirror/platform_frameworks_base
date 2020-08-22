@@ -7532,36 +7532,36 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         String innerPrefix = prefix + "  ";
-        writer.print(prefix); writer.println("ViewRoot:");
-        writer.print(innerPrefix); writer.print("mAdded="); writer.print(mAdded);
-                writer.print(" mRemoved="); writer.println(mRemoved);
-        writer.print(innerPrefix); writer.print("mConsumeBatchedInputScheduled=");
-                writer.println(mConsumeBatchedInputScheduled);
-        writer.print(innerPrefix); writer.print("mConsumeBatchedInputImmediatelyScheduled=");
-                writer.println(mConsumeBatchedInputImmediatelyScheduled);
-        writer.print(innerPrefix); writer.print("mPendingInputEventCount=");
-                writer.println(mPendingInputEventCount);
-        writer.print(innerPrefix); writer.print("mProcessInputEventsScheduled=");
-                writer.println(mProcessInputEventsScheduled);
-        writer.print(innerPrefix); writer.print("mTraversalScheduled=");
-                writer.print(mTraversalScheduled);
-        writer.print(innerPrefix); writer.print("mIsAmbientMode=");
-                writer.print(mIsAmbientMode);
-        writer.print(innerPrefix); writer.print("mUnbufferedInputSource=");
-        writer.print(Integer.toHexString(mUnbufferedInputSource));
-
+        writer.println(prefix + "ViewRoot:");
+        writer.println(innerPrefix + "mAdded=" + mAdded);
+        writer.println(innerPrefix + "mRemoved=" + mRemoved);
+        writer.println(innerPrefix + "mStopped=" + mStopped);
+        writer.println(innerPrefix + "mConsumeBatchedInputScheduled="
+                + mConsumeBatchedInputScheduled);
+        writer.println(innerPrefix + "mConsumeBatchedInputImmediatelyScheduled="
+                + mConsumeBatchedInputImmediatelyScheduled);
+        writer.println(innerPrefix + "mPendingInputEventCount=" + mPendingInputEventCount);
+        writer.println(innerPrefix + "mProcessInputEventsScheduled="
+                + mProcessInputEventsScheduled);
+        writer.println(innerPrefix + "mTraversalScheduled=" + mTraversalScheduled);
         if (mTraversalScheduled) {
-            writer.print(" (barrier="); writer.print(mTraversalBarrier); writer.println(")");
-        } else {
-            writer.println();
+            writer.println(innerPrefix + " (barrier=" + mTraversalBarrier + ")");
         }
+        writer.println(innerPrefix + "mIsAmbientMode="  + mIsAmbientMode);
+        writer.println(innerPrefix + "mUnbufferedInputSource="
+                + Integer.toHexString(mUnbufferedInputSource));
+
         mFirstInputStage.dump(innerPrefix, writer);
+
+        if (mInputEventReceiver != null) {
+            mInputEventReceiver.dump(innerPrefix, writer);
+        }
 
         mChoreographer.dump(prefix, writer);
 
         mInsetsController.dump(prefix, writer);
 
-        writer.print(prefix); writer.println("View Hierarchy:");
+        writer.println(prefix + "View Hierarchy:");
         dumpViewHierarchy(innerPrefix, writer, mView);
     }
 

@@ -91,6 +91,8 @@ public:
     virtual incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;
     virtual incfs::RawMetadata getMetadata(const Control& control, std::string_view path) const = 0;
     virtual FileId getFileId(const Control& control, std::string_view path) const = 0;
+    virtual std::pair<IncFsBlockIndex, IncFsBlockIndex> countFilledBlocks(
+            const Control& control, std::string_view path) const = 0;
     virtual ErrorCode link(const Control& control, std::string_view from,
                            std::string_view to) const = 0;
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
@@ -106,7 +108,8 @@ public:
     virtual ~AppOpsManagerWrapper() = default;
     virtual binder::Status checkPermission(const char* permission, const char* operation,
                                            const char* package) const = 0;
-    virtual void startWatchingMode(int32_t op, const String16& packageName, const sp<IAppOpsCallback>& callback) = 0;
+    virtual void startWatchingMode(int32_t op, const String16& packageName,
+                                   const sp<IAppOpsCallback>& callback) = 0;
     virtual void stopWatchingMode(const sp<IAppOpsCallback>& callback) = 0;
 };
 
@@ -134,6 +137,12 @@ public:
     virtual void stop() = 0;
 };
 
+class FsWrapper {
+public:
+    virtual ~FsWrapper() = default;
+    virtual std::vector<std::string> listFilesRecursive(std::string_view directoryPath) const = 0;
+};
+
 class ServiceManagerWrapper {
 public:
     virtual ~ServiceManagerWrapper() = default;
@@ -144,6 +153,7 @@ public:
     virtual std::unique_ptr<JniWrapper> getJni() = 0;
     virtual std::unique_ptr<LooperWrapper> getLooper() = 0;
     virtual std::unique_ptr<TimedQueueWrapper> getTimedQueue() = 0;
+    virtual std::unique_ptr<FsWrapper> getFs() = 0;
 };
 
 // --- Real stuff ---
@@ -159,6 +169,7 @@ public:
     std::unique_ptr<JniWrapper> getJni() final;
     std::unique_ptr<LooperWrapper> getLooper() final;
     std::unique_ptr<TimedQueueWrapper> getTimedQueue() final;
+    std::unique_ptr<FsWrapper> getFs() final;
 
 private:
     template <class INTERFACE>

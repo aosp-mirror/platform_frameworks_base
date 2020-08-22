@@ -22,11 +22,12 @@
 
 #include <nativehelper/JNIHelp.h>
 
+#include <android-base/stringprintf.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <input/InputTransport.h>
 #include <log/log.h>
 #include <utils/Looper.h>
-#include <utils/Vector.h>
-#include <input/InputTransport.h>
+#include <vector>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
@@ -52,6 +53,21 @@ static struct {
     jmethodID onBatchedInputEventPending;
 } gInputEventReceiverClassInfo;
 
+// Add prefix to the beginning of each line in 'str'
+static std::string addPrefix(std::string str, std::string_view prefix) {
+    str.insert(0, prefix); // insert at the beginning of the first line
+    const size_t prefixLength = prefix.length();
+    size_t pos = prefixLength; // just inserted prefix. start at the end of it
+    while (true) {             // process all newline characters in 'str'
+        pos = str.find('\n', pos);
+        if (pos == std::string::npos) {
+            break;
+        }
+        str.insert(pos + 1, prefix); // insert prefix just after the '\n' character
+        pos += prefixLength + 1;     // advance the position past the newly inserted prefix
+    }
+    return str;
+}
 
 class NativeInputEventReceiver : public LooperCallback {
 public:
@@ -64,6 +80,7 @@ public:
     status_t finishInputEvent(uint32_t seq, bool handled);
     status_t consumeEvents(JNIEnv* env, bool consumeBatches, nsecs_t frameTime,
             bool* outConsumedBatch);
+    std::string dump(const char* prefix);
 
 protected:
     virtual ~NativeInputEventReceiver();
@@ -80,7 +97,7 @@ private:
     PreallocatedInputEventFactory mInputEventFactory;
     bool mBatchedInputEventPending;
     int mFdEvents;
-    Vector<Finish> mFinishQueue;
+    std::vector<Finish> mFinishQueue;
 
     void setFdEvents(int events);
 
@@ -128,7 +145,7 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
     }
 
     status_t status = mInputConsumer.sendFinishedSignal(seq, handled);
-    if (status) {
+    if (status != OK) {
         if (status == WOULD_BLOCK) {
             if (kDebugDispatchCycle) {
                 ALOGD("channel '%s' ~ Could not send finished signal immediately.  "
@@ -137,7 +154,7 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
             Finish finish;
             finish.seq = seq;
             finish.handled = handled;
-            mFinishQueue.add(finish);
+            mFinishQueue.push_back(finish);
             if (mFinishQueue.size() == 1) {
                 setFdEvents(ALOOPER_EVENT_INPUT | ALOOPER_EVENT_OUTPUT);
             }
@@ -162,6 +179,9 @@ void NativeInputEventReceiver::setFdEvents(int events) {
 }
 
 int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data) {
+    // Allowed return values of this function as documented in LooperCallback::handleEvent
+    constexpr int REMOVE_CALLBACK = 0;
+    constexpr int KEEP_CALLBACK = 1;
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
         // This error typically occurs when the publisher has closed the input channel
         // as part of removing a window or finishing an IME session, in which case
@@ -170,41 +190,42 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
             ALOGD("channel '%s' ~ Publisher closed input channel or an error occurred.  "
                     "events=0x%x", getInputChannelName().c_str(), events);
         }
-        return 0; // remove the callback
+        return REMOVE_CALLBACK;
     }
 
     if (events & ALOOPER_EVENT_INPUT) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         status_t status = consumeEvents(env, false /*consumeBatches*/, -1, nullptr);
         mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
-        return status == OK || status == NO_MEMORY ? 1 : 0;
+        return status == OK || status == NO_MEMORY ? KEEP_CALLBACK : REMOVE_CALLBACK;
     }
 
     if (events & ALOOPER_EVENT_OUTPUT) {
         for (size_t i = 0; i < mFinishQueue.size(); i++) {
-            const Finish& finish = mFinishQueue.itemAt(i);
+            const Finish& finish = mFinishQueue[i];
             status_t status = mInputConsumer.sendFinishedSignal(finish.seq, finish.handled);
-            if (status) {
-                mFinishQueue.removeItemsAt(0, i);
+            if (status != OK) {
+                mFinishQueue.erase(mFinishQueue.begin(), mFinishQueue.begin() + i);
 
                 if (status == WOULD_BLOCK) {
                     if (kDebugDispatchCycle) {
                         ALOGD("channel '%s' ~ Sent %zu queued finish events; %zu left.",
-                                getInputChannelName().c_str(), i, mFinishQueue.size());
+                              getInputChannelName().c_str(), i, mFinishQueue.size());
                     }
-                    return 1; // keep the callback, try again later
+                    return KEEP_CALLBACK; // try again later
                 }
 
                 ALOGW("Failed to send finished signal on channel '%s'.  status=%d",
                         getInputChannelName().c_str(), status);
                 if (status != DEAD_OBJECT) {
                     JNIEnv* env = AndroidRuntime::getJNIEnv();
-                    String8 message;
-                    message.appendFormat("Failed to finish input event.  status=%d", status);
-                    jniThrowRuntimeException(env, message.string());
+                    std::string message =
+                            android::base::StringPrintf("Failed to finish input event.  status=%d",
+                                                        status);
+                    jniThrowRuntimeException(env, message.c_str());
                     mMessageQueue->raiseAndClearException(env, "finishInputEvent");
                 }
-                return 0; // remove the callback
+                return REMOVE_CALLBACK;
             }
         }
         if (kDebugDispatchCycle) {
@@ -213,12 +234,12 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
         }
         mFinishQueue.clear();
         setFdEvents(ALOOPER_EVENT_INPUT);
-        return 1;
+        return KEEP_CALLBACK;
     }
 
     ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
             "events=0x%x", getInputChannelName().c_str(), events);
-    return 1;
+    return KEEP_CALLBACK;
 }
 
 status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
@@ -354,6 +375,23 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
     }
 }
 
+std::string NativeInputEventReceiver::dump(const char* prefix) {
+    std::string out;
+    std::string consumerDump = addPrefix(mInputConsumer.dump(), "  ");
+    out = out + "mInputConsumer:\n" + consumerDump + "\n";
+
+    out += android::base::StringPrintf("mBatchedInputEventPending: %s\n",
+                                       toString(mBatchedInputEventPending));
+    out = out + "mFinishQueue:\n";
+    for (const Finish& finish : mFinishQueue) {
+        out += android::base::StringPrintf("  seq=%" PRIu32 " handled=%s\n", finish.seq,
+                                           toString(finish.handled));
+    }
+    if (mFinishQueue.empty()) {
+        out = out + "  <empty>\n";
+    }
+    return addPrefix(out, prefix);
+}
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
@@ -374,9 +412,10 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
             receiverWeak, inputChannel, messageQueue);
     status_t status = receiver->initialize();
     if (status) {
-        String8 message;
-        message.appendFormat("Failed to initialize input event receiver.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        std::string message =
+                android::base::StringPrintf("Failed to initialize input event receiver.  status=%d",
+                                            status);
+        jniThrowRuntimeException(env, message.c_str());
         return 0;
     }
 
@@ -397,9 +436,9 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jlong receiverPtr,
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     status_t status = receiver->finishInputEvent(seq, handled);
     if (status && status != DEAD_OBJECT) {
-        String8 message;
-        message.appendFormat("Failed to finish input event.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        std::string message =
+                android::base::StringPrintf("Failed to finish input event.  status=%d", status);
+        jniThrowRuntimeException(env, message.c_str());
     }
 }
 
@@ -411,26 +450,31 @@ static jboolean nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jlong
     status_t status = receiver->consumeEvents(env, true /*consumeBatches*/, frameTimeNanos,
             &consumedBatch);
     if (status && status != DEAD_OBJECT && !env->ExceptionCheck()) {
-        String8 message;
-        message.appendFormat("Failed to consume batched input event.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        std::string message =
+                android::base::StringPrintf("Failed to consume batched input event.  status=%d",
+                                            status);
+        jniThrowRuntimeException(env, message.c_str());
         return JNI_FALSE;
     }
     return consumedBatch ? JNI_TRUE : JNI_FALSE;
 }
 
+static jstring nativeDump(JNIEnv* env, jclass clazz, jlong receiverPtr, jstring prefix) {
+    sp<NativeInputEventReceiver> receiver =
+            reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
+    ScopedUtfChars prefixChars(env, prefix);
+    return env->NewStringUTF(receiver->dump(prefixChars.c_str()).c_str());
+}
 
 static const JNINativeMethod gMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeInit",
-            "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)J",
-            (void*)nativeInit },
-    { "nativeDispose", "(J)V",
-            (void*)nativeDispose },
-    { "nativeFinishInputEvent", "(JIZ)V",
-            (void*)nativeFinishInputEvent },
-    { "nativeConsumeBatchedInputEvents", "(JJ)Z",
-            (void*)nativeConsumeBatchedInputEvents },
+        /* name, signature, funcPtr */
+        {"nativeInit",
+         "(Ljava/lang/ref/WeakReference;Landroid/view/InputChannel;Landroid/os/MessageQueue;)J",
+         (void*)nativeInit},
+        {"nativeDispose", "(J)V", (void*)nativeDispose},
+        {"nativeFinishInputEvent", "(JIZ)V", (void*)nativeFinishInputEvent},
+        {"nativeConsumeBatchedInputEvents", "(JJ)Z", (void*)nativeConsumeBatchedInputEvents},
+        {"nativeDump", "(JLjava/lang/String;)Ljava/lang/String;", (void*)nativeDump},
 };
 
 int register_android_view_InputEventReceiver(JNIEnv* env) {

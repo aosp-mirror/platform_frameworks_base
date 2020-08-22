@@ -304,29 +304,21 @@ public final class IncrementalStorage {
     }
 
     /**
-     * Checks whether a file under the current storage directory is fully loaded.
+     * Returns the loading progress of a storage
      *
-     * @param path The relative path of the file.
-     * @return True if the file is fully loaded.
+     * @return progress value between [0, 1].
      */
-    public boolean isFileFullyLoaded(@NonNull String path) {
-        return isFileRangeLoaded(path, 0, -1);
-    }
-
-    /**
-     * Checks whether a range in a file if loaded.
-     *
-     * @param path The relative path of the file.
-     * @param start            The starting offset of the range.
-     * @param end              The ending offset of the range.
-     * @return True if the file is fully loaded.
-     */
-    public boolean isFileRangeLoaded(@NonNull String path, long start, long end) {
+    public float getLoadingProgress() throws IOException {
         try {
-            return mService.isFileRangeLoaded(mId, path, start, end);
+            final float res = mService.getLoadingProgress(mId);
+            if (res < 0) {
+                throw new IOException(
+                        "getLoadingProgress() failed at querying loading progress, errno " + -res);
+            }
+            return res;
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
-            return false;
+            return 0;
         }
     }
 
