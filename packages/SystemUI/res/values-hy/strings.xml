@@ -337,7 +337,7 @@
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Էկրանը կողպված է ուղղաձիգ դիրքավորմամբ:"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="5772498370935088261">"Էկրանն այժմ ավտոմատ կպտտվի:"</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"Էկրանն այժմ կողպված է հորիզոնական դիրքում:"</string>
-    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"Էկրանն այժմ կողպված է ուղղահայաց դիրքում:"</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"Էկրանն այժմ կողպված է ուղղաձիգ դիրքում:"</string>
     <string name="dessert_case" msgid="9104973640704357717">"Dessert Case"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Էկրանապահ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>

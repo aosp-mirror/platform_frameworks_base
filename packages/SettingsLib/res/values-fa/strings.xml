@@ -139,7 +139,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"‏قدرت سیگنال Wi‑Fi کامل است."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"شبکه باز"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"شبکه ایمن"</string>
-    <string name="process_kernel_label" msgid="950292573930336765">"‏سیستم عامل Android"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"‏سیستم‌عامل Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"برنامه‌های حذف شده"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"برنامه‌ها و کاربران حذف شده"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"به‌روزرسانی‌های سیستم"</string>

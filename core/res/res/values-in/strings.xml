@@ -942,7 +942,7 @@
     <string name="autofill_postal_code" msgid="7034789388968295591">"Kode pos"</string>
     <string name="autofill_state" msgid="3341725337190434069">"Negara Bagian"</string>
     <string name="autofill_zip_code" msgid="1315503730274962450">"Kode pos"</string>
-    <string name="autofill_county" msgid="7781382735643492173">"Wilayah"</string>
+    <string name="autofill_county" msgid="7781382735643492173">"County"</string>
     <string name="autofill_island" msgid="5367139008536593734">"Pulau"</string>
     <string name="autofill_district" msgid="6428712062213557327">"Distrik"</string>
     <string name="autofill_department" msgid="9047276226873531529">"Departemen"</string>
