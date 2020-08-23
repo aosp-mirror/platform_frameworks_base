@@ -96,7 +96,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -238,7 +238,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarComponent.Builder mStatusBarComponentBuilder;
     @Mock private StatusBarComponent mStatusBarComponent;
     @Mock private PluginManager mPluginManager;
-    @Mock private SplitScreenController mSplitScreenController;
+    @Mock private SplitScreen mSplitScreen;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
@@ -397,7 +397,7 @@ public class StatusBarTest extends SysuiTestCase {
                 Optional.of(mRecents),
                 mStatusBarComponentBuilderProvider,
                 mPluginManager,
-                Optional.of(mSplitScreenController),
+                Optional.of(mSplitScreen),
                 mLightsOutNotifController,
                 mStatusBarNotificationActivityStarterBuilder,
                 mShadeController,

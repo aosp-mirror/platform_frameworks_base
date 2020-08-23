@@ -31,7 +31,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.DividerView;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class ShortcutKeyDispatcher extends SystemUI
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";
-    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Recents mRecents;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
@@ -61,9 +61,9 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     @Inject
     public ShortcutKeyDispatcher(Context context,
-            Optional<SplitScreenController> splitScreenControllerOptional, Recents recents) {
+            Optional<SplitScreen> splitScreenOptional, Recents recents) {
         super(context);
-        mSplitScreenControllerOptional = splitScreenControllerOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mRecents = recents;
     }
 
@@ -96,11 +96,11 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        if (mSplitScreenControllerOptional.isPresent()) {
-            SplitScreenController splitScreenController = mSplitScreenControllerOptional.get();
-            if (splitScreenController.isDividerVisible()) {
+        if (mSplitScreenOptional.isPresent()) {
+            SplitScreen splitScreen = mSplitScreenOptional.get();
+            if (splitScreen.isDividerVisible()) {
                 // If there is already a docked window, we respond by resizing the docking pane.
-                DividerView dividerView = splitScreenController.getDividerView();
+                DividerView dividerView = splitScreen.getDividerView();
                 DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
                 int dividerPosition = dividerView.getCurrentPosition();
                 DividerSnapAlgorithm.SnapTarget currentTarget =

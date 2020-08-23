@@ -87,7 +87,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -1283,8 +1283,8 @@ public class NavigationBarView extends FrameLayout implements
         return super.onApplyWindowInsets(insets);
     }
 
-    void registerDockedListener(SplitScreenController splitScreenController) {
-        splitScreenController.registerInSplitScreenListener(mDockedListener);
+    void registerDockedListener(SplitScreen splitScreen) {
+        splitScreen.registerInSplitScreenListener(mDockedListener);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {

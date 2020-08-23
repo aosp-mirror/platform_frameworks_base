@@ -60,7 +60,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -238,7 +238,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             ConfigurationController configController,
             DisplayController displayController,
-            Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<SplitScreen> splitScreenOptional,
             @NonNull PipUiEventLogger pipUiEventLogger,
             ShellTaskOrganizer shellTaskOrganizer) {
         if (mInitialized) {
@@ -258,7 +258,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                mPipSurfaceTransactionHelper, splitScreenControllerOptional, displayController,
+                mPipSurfaceTransactionHelper, splitScreenOptional, displayController,
                 pipUiEventLogger, shellTaskOrganizer);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
