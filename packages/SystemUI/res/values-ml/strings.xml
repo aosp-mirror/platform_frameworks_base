@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"പുനരാരംഭിക്കുക"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"റദ്ദാക്കുക"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"പങ്കിടുക"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ഇല്ലാതാക്കുക"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"സ്ക്രീൻ റെക്കോർഡിംഗ് റദ്ദാക്കി"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"സ്ക്രീൻ റെക്കോർഡിംഗ് സംരക്ഷിച്ചു, കാണാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"സ്ക്രീൻ റെക്കോർഡിംഗ് ഇല്ലാതാക്കി"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"സ്ക്രീൻ റെക്കോർഡിംഗ് ഇല്ലാതാക്കുന്നതിൽ പിശക്"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"അനുമതികൾ ലഭിച്ചില്ല"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"സ്ക്രീൻ റെക്കോർഡിംഗ് ആരംഭിക്കുന്നതിൽ പിശക്"</string>
