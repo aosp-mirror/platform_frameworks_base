@@ -329,7 +329,7 @@ public final class ProcessList {
     /**
      * How long between a process kill and we actually receive its death recipient
      */
-    private static final int PROC_KILL_TIMEOUT = 2000; // 2 seconds;
+    static final int PROC_KILL_TIMEOUT = 2000; // 2 seconds;
 
     /**
      * Native heap allocations will now have a non-zero tag in the most significant byte.
