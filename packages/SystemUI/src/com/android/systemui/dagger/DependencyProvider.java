@@ -61,7 +61,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -193,7 +193,7 @@ public class DependencyProvider {
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
-            Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
             Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
@@ -215,7 +215,7 @@ public class DependencyProvider {
                 sysUiFlagsContainer,
                 broadcastDispatcher,
                 commandQueue,
-                splitScreenControllerOptional,
+                splitScreenOptional,
                 recentsOptional,
                 statusBarLazy,
                 shadeController,

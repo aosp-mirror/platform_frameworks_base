@@ -55,7 +55,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
@@ -81,14 +81,13 @@ public class InstantAppNotifier extends SystemUI
     private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
-    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
 
     @Inject
     public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor,
-            Optional<SplitScreenController> splitScreenControllerOptional) {
+            @UiBackground Executor uiBgExecutor, Optional<SplitScreen> splitScreenOptional) {
         super(context);
-        mSplitScreenControllerOptional = splitScreenControllerOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
     }
@@ -107,7 +106,7 @@ public class InstantAppNotifier extends SystemUI
         mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
 
-        mSplitScreenControllerOptional.ifPresent(splitScreen ->
+        mSplitScreenOptional.ifPresent(splitScreen ->
                 splitScreen.registerInSplitScreenListener(exists -> {
                     mDockedStackExists = exists;
                     updateForegroundInstantApps();

@@ -24,7 +24,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -90,5 +90,5 @@ public abstract class WMShellBaseModule {
     }
 
     @BindsOptionalOf
-    abstract SplitScreenController optionalSplitScreenController();
+    abstract SplitScreen optionalSplitScreen();
 }

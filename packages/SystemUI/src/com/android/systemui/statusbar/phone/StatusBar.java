@@ -177,7 +177,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
@@ -388,7 +388,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final Provider<StatusBarComponent.Builder> mStatusBarComponentBuilder;
     private final PluginManager mPluginManager;
-    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
@@ -721,7 +721,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Optional<Recents> recentsOptional,
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
-            Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<SplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
@@ -803,7 +803,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRecentsOptional = recentsOptional;
         mStatusBarComponentBuilder = statusBarComponentBuilder;
         mPluginManager = pluginManager;
-        mSplitScreenControllerOptional = splitScreenControllerOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mShadeController = shadeController;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
@@ -1551,15 +1551,15 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        if (mSplitScreenControllerOptional.isPresent()) {
-            SplitScreenController splitScreenController = mSplitScreenControllerOptional.get();
-            if (splitScreenController.isDividerVisible()) {
-                if (splitScreenController.isMinimized()
-                        && !splitScreenController.isHomeStackResizable()) {
+        if (mSplitScreenOptional.isPresent()) {
+            SplitScreen splitScreen = mSplitScreenOptional.get();
+            if (splitScreen.isDividerVisible()) {
+                if (splitScreen.isMinimized()
+                        && !splitScreen.isHomeStackResizable()) {
                     // Undocking from the minimized state is not supported
                     return false;
                 } else {
-                    splitScreenController.onUndockingTask();
+                    splitScreen.onUndockingTask();
                     if (metricsUndockAction != -1) {
                         mMetricsLogger.action(metricsUndockAction);
                     }
@@ -3917,16 +3917,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void appTransitionCancelled(int displayId) {
         if (displayId == mDisplayId) {
-            mSplitScreenControllerOptional.ifPresent(
-                    splitScreen -> splitScreen.onAppTransitionFinished());
+            mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.onAppTransitionFinished());
         }
     }
 
     @Override
     public void appTransitionFinished(int displayId) {
         if (displayId == mDisplayId) {
-            mSplitScreenControllerOptional.ifPresent(
-                    splitScreen -> splitScreen.onAppTransitionFinished());
+            mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.onAppTransitionFinished());
         }
     }
 
