@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Davom etish"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Bekor qilish"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ulashish"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"O‘chirish"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Ekrandan yozib olish bekor qilindi"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Ekrandan yozib olingan video saqlandi. Uni ochish uchun bildirishnomani bosing."</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Ekrandan yozib olingan video o‘chirib tashlandi"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ekrandan yozib olingan vi olib tashlanmadi"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Zarur ruxsatlar olinmadi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ekranni yozib olish boshlanmadi"</string>
@@ -362,7 +360,7 @@
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Aylanmaydigan qilingan"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Tik holat"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Eniga"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Yotiq"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Joylashuv"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Joylashuvni aniqlash xizmati yoqilmagan"</string>
