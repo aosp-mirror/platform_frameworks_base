@@ -8,6 +8,7 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "androidx.test.uiautomator_uiautomator",
         "android-support-test",
         "testng"
     ],

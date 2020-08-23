@@ -524,6 +524,7 @@ void* DisplayListData::push(size_t pod, Args&&... args) {
         // Next greater multiple of SKLITEDL_PAGE.
         fReserved = (fUsed + skip + SKLITEDL_PAGE) & ~(SKLITEDL_PAGE - 1);
         fBytes.realloc(fReserved);
+        LOG_ALWAYS_FATAL_IF(fBytes.get() == nullptr, "realloc(%zd) failed", fReserved);
     }
     SkASSERT(fUsed + skip <= fReserved);
     auto op = (T*)(fBytes.get() + fUsed);

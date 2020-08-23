@@ -302,24 +302,11 @@ public abstract class PackageManagerInternal {
             String packageName, int userId);
 
     /**
-     * Do a straight uid lookup for the given package/application in the given user. This enforces
-     * app visibility rules and permissions. Call {@link #getPackageUidInternal} for the internal
-     * implementation.
-     * @deprecated Use {@link PackageManager#getPackageUid(String, int)}
-     * @return The app's uid, or < 0 if the package was not found in that user
-     */
-    @Deprecated
-    public abstract int getPackageUid(String packageName,
-            @PackageInfoFlags int flags, int userId);
-
-    /**
      * Do a straight uid lookup for the given package/application in the given user.
      * @see PackageManager#getPackageUidAsUser(String, int, int)
      * @return The app's uid, or < 0 if the package was not found in that user
-     * TODO(b/148235092): rename this to getPackageUid
      */
-    public abstract int getPackageUidInternal(String packageName,
-            @PackageInfoFlags int flags, int userId);
+    public abstract int getPackageUid(String packageName, @PackageInfoFlags int flags, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.

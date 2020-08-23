@@ -52,6 +52,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
+import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -217,6 +218,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mView.findViewById(R.id.big_clock_container)).thenReturn(mBigClockContainer);
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
+        when(mView.findViewById(R.id.keyguard_status_view))
+                .thenReturn(mock(KeyguardStatusView.class));
         FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
                 mDisplayMetrics);
 
@@ -239,6 +242,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mStatusBarStateController,
                 new FalsingManagerFake());
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
+                mResources,
                 mInjectionInflationController,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, mShadeController,

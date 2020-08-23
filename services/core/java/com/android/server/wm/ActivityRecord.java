@@ -2786,8 +2786,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         makeFinishingLocked();
 
-        final boolean activityRemoved = destroyImmediately(true /* removeFromApp */,
-                "finish-imm:" + reason);
+        final boolean activityRemoved = destroyImmediately("finish-imm:" + reason);
 
         // If the display does not have running activity, the configuration may need to be
         // updated for restoring original orientation of the display.
@@ -2835,7 +2834,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @return {@code true} if activity was immediately removed from history, {@code false}
      * otherwise.
      */
-    boolean destroyImmediately(boolean removeFromApp, String reason) {
+    boolean destroyImmediately(String reason) {
         if (DEBUG_SWITCH || DEBUG_CLEANUP) {
             Slog.v(TAG_SWITCH, "Removing activity from " + reason + ": token=" + this
                     + ", app=" + (hasProcess() ? app.mName : "(null)"));
@@ -2857,17 +2856,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         cleanUp(false /* cleanServices */, false /* setState */);
 
         if (hasProcess()) {
-            if (removeFromApp) {
-                app.removeActivity(this, true /* keepAssociation */);
-                if (!app.hasActivities()) {
-                    mAtmService.clearHeavyWeightProcessIfEquals(app);
-                    // Update any services we are bound to that might care about whether
-                    // their client may have activities.
-                    // No longer have activities, so update LRU list and oom adj.
-                    app.updateProcessInfo(true /* updateServiceConnectionActivities */,
-                            false /* activityChange */, true /* updateOomAdj */,
-                            false /* addPendingTopUid */);
-                }
+            app.removeActivity(this, true /* keepAssociation */);
+            if (!app.hasActivities()) {
+                mAtmService.clearHeavyWeightProcessIfEquals(app);
+                // Update any services we are bound to that might care about whether
+                // their client may have activities.
+                // No longer have activities, so update LRU list and oom adj.
+                app.updateProcessInfo(true /* updateServiceConnectionActivities */,
+                        false /* activityChange */, true /* updateOomAdj */,
+                        false /* addPendingTopUid */);
             }
 
             boolean skipDestroy = false;
@@ -2934,7 +2931,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + " pausing=" + stack.mPausingActivity
                         + " for reason " + reason);
             }
-            return destroyImmediately(true /* removeFromApp */, reason);
+            return destroyImmediately(reason);
         }
         return false;
     }
@@ -5122,7 +5119,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Stop failed; moving to STOPPED: " + this);
             setState(STOPPED, "stopIfPossible");
             if (deferRelaunchUntilPaused) {
-                destroyImmediately(true /* removeFromApp */, "stop-except");
+                destroyImmediately("stop-except");
             }
         }
     }
@@ -5163,7 +5160,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 clearOptionsLocked();
             } else {
                 if (deferRelaunchUntilPaused) {
-                    destroyImmediately(true /* removeFromApp */, "stop-config");
+                    destroyImmediately("stop-config");
                     mRootWindowContainer.resumeFocusedStacksTopActivities();
                 } else {
                     mRootWindowContainer.updatePreviousProcess(this);
@@ -7113,7 +7110,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!attachedToProcess()) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is destroying non-running " + this);
-                destroyImmediately(true /* removeFromApp */, "config");
+                destroyImmediately("config");
             } else if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
                 // do anything now, but just flag that it needs to be restarted when done pausing.

@@ -406,12 +406,12 @@ public class NotificationTestHelper {
 
         entry.setRow(row);
         mIconManager.createIcons(entry);
-        row.setEntry(entry);
 
         mBindPipelineEntryListener.onEntryInit(entry);
         mBindPipeline.manageRow(entry, row);
 
         row.initialize(
+                entry,
                 APP_NAME,
                 entry.getKey(),
                 mock(ExpansionLogger.class),
@@ -426,6 +426,7 @@ public class NotificationTestHelper {
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mock(OnUserInteractionCallback.class));
+
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
         inflateAndWait(entry);

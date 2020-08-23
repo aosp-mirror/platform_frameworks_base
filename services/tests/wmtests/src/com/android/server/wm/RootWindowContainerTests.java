@@ -184,7 +184,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         };
         activities[0].detachFromProcess();
         activities[1].finishing = true;
-        activities[1].destroyImmediately(true /* removeFromApp */, "test");
+        activities[1].destroyImmediately("test");
         spyOn(wpc);
         doReturn(true).when(wpc).isRemoved();
 

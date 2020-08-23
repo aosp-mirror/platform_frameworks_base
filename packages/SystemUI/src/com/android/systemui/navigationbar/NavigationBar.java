@@ -458,10 +458,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         lp.windowAnimations = 0;
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 
-        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        NavigationBarFrame frame = (NavigationBarFrame) layoutInflater.inflate(
+        NavigationBarFrame frame = (NavigationBarFrame) LayoutInflater.from(mContext).inflate(
                 R.layout.navigation_bar_window, null);
-        View barView = layoutInflater.inflate(R.layout.navigation_bar, frame);
+        View barView = LayoutInflater.from(frame.getContext()).inflate(
+                R.layout.navigation_bar, frame);
         barView.addOnAttachStateChangeListener(this);
 
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + barView);

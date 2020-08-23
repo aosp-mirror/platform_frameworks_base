@@ -36,8 +36,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 /**
@@ -337,9 +335,6 @@ public abstract class DialogPreference extends Preference implements
         if (state != null) {
             dialog.onRestoreInstanceState(state);
         }
-        if (needInputMethod()) {
-            requestInputMethod(dialog);
-        }
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
@@ -377,24 +372,6 @@ public abstract class DialogPreference extends Preference implements
         if (decorView != null) {
             decorView.removeCallbacks(mDismissRunnable);
         }
-    }
-
-    /**
-     * Returns whether the preference needs to display a soft input method when the dialog
-     * is displayed. Default is false. Subclasses should override this method if they need
-     * the soft input method brought up automatically.
-     * @hide
-     */
-    protected boolean needInputMethod() {
-        return false;
-    }
-
-    /**
-     * Sets the required flags on the dialog window to enable input method window to show up.
-     */
-    private void requestInputMethod(Dialog dialog) {
-        Window window = dialog.getWindow();
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     /**
