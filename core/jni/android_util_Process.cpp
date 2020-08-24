@@ -613,7 +613,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
     }
 
     // Do not change sched policy cgroup after boot complete.
-    rc = androidSetThreadPriority(pid, pri, !boot_completed);
+    rc = androidSetThreadPriorityAndPolicy(pid, pri, !boot_completed);
     if (rc != 0) {
         if (rc == INVALID_OPERATION) {
             signalExceptionForPriorityError(env, errno, pid);
