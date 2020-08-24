@@ -34,10 +34,11 @@ import javax.inject.Inject;
 public class KeyguardClockSwitchController {
     private static final boolean CUSTOM_CLOCKS_ENABLED = true;
 
+    private final KeyguardClockSwitch mView;
     private final StatusBarStateController mStatusBarStateController;
     private final SysuiColorExtractor mColorExtractor;
     private final ClockManager mClockManager;
-    private KeyguardClockSwitch mView;
+    private final KeyguardSliceViewController mKeyguardSliceViewController;
 
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
@@ -52,9 +53,13 @@ public class KeyguardClockSwitchController {
      *
      * The color palette changes when the wallpaper is changed.
      */
-    private final ColorExtractor.OnColorsChangedListener mColorsListener = (extractor, which) -> {
-        if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-            mView.updateColors(getGradientColors());
+    private final ColorExtractor.OnColorsChangedListener mColorsListener =
+            new ColorExtractor.OnColorsChangedListener() {
+        @Override
+        public void onColorsChanged(ColorExtractor extractor, int which) {
+            if ((which & WallpaperManager.FLAG_LOCK) != 0) {
+                mView.updateColors(getGradientColors());
+            }
         }
     };
 
@@ -84,22 +89,27 @@ public class KeyguardClockSwitchController {
     };
 
     @Inject
-    public KeyguardClockSwitchController(StatusBarStateController statusBarStateController,
-            SysuiColorExtractor colorExtractor, ClockManager clockManager) {
+    public KeyguardClockSwitchController(KeyguardClockSwitch keyguardClockSwitch,
+            StatusBarStateController statusBarStateController,
+            SysuiColorExtractor colorExtractor, ClockManager clockManager,
+            KeyguardSliceViewController keyguardSliceViewController) {
+        mView = keyguardClockSwitch;
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
         mClockManager = clockManager;
+        mKeyguardSliceViewController = keyguardSliceViewController;
     }
 
     /**
      * Attach the controller to the view it relates to.
      */
-    public void attach(KeyguardClockSwitch view) {
-        mView = view;
+    public void init() {
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
+
+        mKeyguardSliceViewController.init();
     }
 
     /**

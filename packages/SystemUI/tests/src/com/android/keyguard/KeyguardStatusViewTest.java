@@ -40,7 +40,8 @@ import org.mockito.Mock;
 public class KeyguardStatusViewTest extends SysuiTestCase {
 
     @Mock
-    KeyguardSliceView mKeyguardSlice;
+    KeyguardSliceViewController mKeyguardSliceViewController;
+
     @Mock
     KeyguardClockSwitch mClockView;
     @InjectMocks
@@ -64,7 +65,7 @@ public class KeyguardStatusViewTest extends SysuiTestCase {
     @Test
     public void dozeTimeTick_updatesSlice() {
         mKeyguardStatusView.dozeTimeTick();
-        verify(mKeyguardSlice).refresh();
+        verify(mKeyguardSliceViewController).refresh();
     }
 
     @Test

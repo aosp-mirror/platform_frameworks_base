@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextClock;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ClockPlugin;
@@ -36,6 +37,7 @@ import java.util.TimeZone;
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
+@KeyguardStatusViewScope
 public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final String TAG = "KeyguardClockSwitch";

@@ -62,6 +62,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private ClockPlugin mClockPlugin;
     @Mock
     ColorExtractor.GradientColors mGradientColors;
+    @Mock
+    KeyguardSliceViewController mKeyguardSliceViewController;
 
     private KeyguardClockSwitchController mController;
 
@@ -69,28 +71,30 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mController = new KeyguardClockSwitchController(
-                mStatusBarStateController, mColorExtractor, mClockManager);
-
         when(mView.isAttachedToWindow()).thenReturn(true);
+
+        mController = new KeyguardClockSwitchController(
+                mView, mStatusBarStateController, mColorExtractor, mClockManager,
+                mKeyguardSliceViewController);
+
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
     }
 
     @Test
-    public void testAttach_viewAlreadyAttached() {
-        mController.attach(mView);
+    public void testInit_viewAlreadyAttached() {
+        mController.init();
 
         verifyAttachment(times(1));
     }
 
     @Test
-    public void testAttach_viewNotYetAttached() {
+    public void testInit_viewNotYetAttached() {
         ArgumentCaptor<View.OnAttachStateChangeListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
 
         when(mView.isAttachedToWindow()).thenReturn(false);
-        mController.attach(mView);
+        mController.init();
         verify(mView).addOnAttachStateChangeListener(listenerArgumentCaptor.capture());
 
         verifyAttachment(never());
@@ -100,12 +104,17 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verifyAttachment(times(1));
     }
 
+    @Test
+    public void testInitSubControllers() {
+        mController.init();
+        verify(mKeyguardSliceViewController).init();
+    }
 
     @Test
-    public void testAttach_viewDetached() {
+    public void testInit_viewDetached() {
         ArgumentCaptor<View.OnAttachStateChangeListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
-        mController.attach(mView);
+        mController.init();
         verify(mView).addOnAttachStateChangeListener(listenerArgumentCaptor.capture());
 
         verifyAttachment(times(1));
@@ -122,7 +131,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     public void testBigClockPassesStatusBarState() {
         ViewGroup testView = new FrameLayout(mContext);
 
-        mController.attach(mView);
+        mController.init();
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         mController.setBigClockContainer(testView);
         verify(mView).setBigClockContainer(testView, StatusBarState.SHADE);
@@ -143,7 +152,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         ArgumentCaptor<ClockManager.ClockChangedListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(ClockManager.ClockChangedListener.class);
 
-        mController.attach(mView);
+        mController.init();
         verify(mClockManager).addOnClockChangedListener(listenerArgumentCaptor.capture());
 
         listenerArgumentCaptor.getValue().onClockChanged(mClockPlugin);
