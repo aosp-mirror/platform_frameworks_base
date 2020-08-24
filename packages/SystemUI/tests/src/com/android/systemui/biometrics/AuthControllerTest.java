@@ -46,6 +46,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -69,6 +70,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.inject.Provider;
+
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
@@ -82,6 +85,14 @@ public class AuthControllerTest extends SysuiTestCase {
     private AuthDialog mDialog1;
     @Mock
     private AuthDialog mDialog2;
+    @Mock
+    private CommandQueue mCommandQueue;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private FingerprintManager mFingerprintManager;
+    @Mock
+    private UdfpsController mUdfpsController;
 
     private TestableAuthController mAuthController;
 
@@ -104,8 +115,16 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
         when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
 
-        mAuthController = new TestableAuthController(context, mock(CommandQueue.class),
-                mock(StatusBarStateController.class), new MockInjector());
+        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+        FingerprintSensorProperties prop = new FingerprintSensorProperties(
+                1, FingerprintSensorProperties.TYPE_UDFPS, true, 1);
+        List<FingerprintSensorProperties> props = new ArrayList<>();
+        props.add(prop);
+        when(mFingerprintManager.getSensorProperties()).thenReturn(props);
+
+        mAuthController = new TestableAuthController(context, mCommandQueue,
+                mStatusBarStateController, new MockInjector(),
+                () -> mUdfpsController);
 
         mAuthController.start();
     }
@@ -463,6 +482,27 @@ public class AuthControllerTest extends SysuiTestCase {
                 eq(null) /* credentialAttestation */);
     }
 
+    @Test
+    public void testOnAodInterrupt() {
+        final int pos = 10;
+        mAuthController.onAodInterrupt(pos, pos);
+        verify(mUdfpsController).onAodInterrupt(eq(pos), eq(pos));
+    }
+
+    @Test
+    public void testOnBiometricAuthenticated_OnCancelAodInterrupt() {
+        showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FINGERPRINT);
+        mAuthController.onBiometricAuthenticated();
+        verify(mUdfpsController).onCancelAodInterrupt();
+    }
+
+    @Test
+    public void testOnBiometricError_OnCancelAodInterrupt() {
+        showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FINGERPRINT);
+        mAuthController.onBiometricError(0, 0, 0);
+        verify(mUdfpsController).onCancelAodInterrupt();
+    }
+
     // Helpers
 
     private void showDialog(int authenticators, int biometricModality) {
@@ -504,8 +544,10 @@ public class AuthControllerTest extends SysuiTestCase {
         private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context, CommandQueue commandQueue,
-                StatusBarStateController statusBarStateController, Injector injector) {
-            super(context, commandQueue, statusBarStateController, injector);
+                StatusBarStateController statusBarStateController, Injector injector,
+                Provider<UdfpsController> udfpsControllerFactory) {
+            super(context, commandQueue, statusBarStateController, injector,
+                    udfpsControllerFactory);
         }
 
         @Override
@@ -536,7 +578,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         @Override
         FingerprintManager getFingerprintManager(Context context) {
-            return mock(FingerprintManager.class);
+            return mFingerprintManager;
         }
     }
 }
