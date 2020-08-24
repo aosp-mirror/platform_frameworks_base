@@ -57,7 +57,6 @@ std::shared_ptr<PointerController> PointerController::create(
 
     controller->mContext.setHandlerController(controller);
     controller->mContext.setCallbackController(controller);
-    controller->mContext.initializeDisplayEventReceiver();
     return controller;
 }
 
@@ -189,24 +188,6 @@ void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
     mCursorController.setCustomPointerIcon(icon);
 }
 
-void PointerController::doAnimate(nsecs_t timestamp) {
-    std::scoped_lock lock(mLock);
-
-    mContext.setAnimationPending(false);
-
-    bool keepFading = false;
-    keepFading = mCursorController.doFadingAnimation(timestamp, keepFading);
-
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
-        keepFading = spotController.doFadingAnimation(timestamp, keepFading);
-    }
-
-    bool keepBitmapFlipping = mCursorController.doBitmapAnimation(timestamp);
-    if (keepFading || keepBitmapFlipping) {
-        mContext.startAnimation();
-    }
-}
-
 void PointerController::doInactivityTimeout() {
     fade(Transition::GRADUAL);
 }
@@ -221,6 +202,11 @@ void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& 
     for (auto it = mLocked.spotControllers.begin(); it != mLocked.spotControllers.end();) {
         int32_t displayID = it->first;
         if (!displayIdSet.count(displayID)) {
+            /*
+             * Ensures that an in-progress animation won't dereference
+             * a null pointer to TouchSpotController.
+             */
+            mContext.removeAnimationCallback(displayID);
             it = mLocked.spotControllers.erase(it);
         } else {
             ++it;
