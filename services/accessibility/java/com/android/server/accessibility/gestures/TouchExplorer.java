@@ -612,12 +612,20 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 if (isDraggingGesture(event)) {
                     // Two pointers moving in the same direction within
                     // a given distance perform a drag.
-                    mState.startDragging();
                     computeDraggingPointerIdIfNeeded(event);
                     pointerIdBits = 1 << mDraggingPointerId;
                     event.setEdgeFlags(mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
-                    mDispatcher.sendMotionEvent(
-                            event, ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
+                    MotionEvent downEvent = computeDownEventForDrag(event);
+                    if (downEvent != null) {
+                        mDispatcher.sendMotionEvent(
+                                downEvent, ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
+                        mDispatcher.sendMotionEvent(
+                                event, ACTION_MOVE, rawEvent, pointerIdBits, policyFlags);
+                    } else {
+                        mDispatcher.sendMotionEvent(
+                                event, ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
+                    }
+                    mState.startDragging();
                 } else {
                     // Two pointers moving arbitrary are delegated to the view hierarchy.
                     mState.startDelegating();
@@ -1002,6 +1010,49 @@ public class TouchExplorer extends BaseEventStreamTransformation
             distance = (height - y);
         }
         return distance;
+    }
+
+    /**
+     * Creates a down event using the down coordinates of the dragging pointer and other information
+     * from the supplied event. The supplied event's down time is adjusted to reflect the time when
+     * the dragging pointer initially went down.
+     */
+    private MotionEvent computeDownEventForDrag(MotionEvent event) {
+        // Creating a down event only  makes sense if we haven't started touch exploring yet.
+        if (mState.isTouchExploring()
+                || mDraggingPointerId == INVALID_POINTER_ID
+                || event == null) {
+            return null;
+        }
+        final float x = mReceivedPointerTracker.getReceivedPointerDownX(mDraggingPointerId);
+        final float y = mReceivedPointerTracker.getReceivedPointerDownY(mDraggingPointerId);
+        final long time = mReceivedPointerTracker.getReceivedPointerDownTime(mDraggingPointerId);
+        MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[1];
+        coords[0] = new MotionEvent.PointerCoords();
+        coords[0].x = x;
+        coords[0].y = y;
+        MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[1];
+        properties[0] = new MotionEvent.PointerProperties();
+        properties[0].id = mDraggingPointerId;
+        properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent downEvent =
+                MotionEvent.obtain(
+                        time,
+                        time,
+                        ACTION_DOWN,
+                        1,
+                        properties,
+                        coords,
+                        event.getMetaState(),
+                        event.getButtonState(),
+                        event.getXPrecision(),
+                        event.getYPrecision(),
+                        event.getDeviceId(),
+                        event.getEdgeFlags(),
+                        event.getSource(),
+                        event.getFlags());
+        event.setDownTime(time);
+        return downEvent;
     }
 
     public TouchState getState() {
