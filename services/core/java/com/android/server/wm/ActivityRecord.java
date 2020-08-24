@@ -2859,12 +2859,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             app.removeActivity(this, true /* keepAssociation */);
             if (!app.hasActivities()) {
                 mAtmService.clearHeavyWeightProcessIfEquals(app);
-                // Update any services we are bound to that might care about whether
-                // their client may have activities.
-                // No longer have activities, so update LRU list and oom adj.
-                app.updateProcessInfo(true /* updateServiceConnectionActivities */,
-                        false /* activityChange */, true /* updateOomAdj */,
-                        false /* addPendingTopUid */);
             }
 
             boolean skipDestroy = false;
@@ -4484,16 +4478,40 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             detachChildren();
         }
 
-        if (state == RESUMED) {
-            mAtmService.updateBatteryStats(this, true);
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_RESUMED);
-        } else if (state == PAUSED) {
-            mAtmService.updateBatteryStats(this, false);
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
-        } else if (state == STOPPED) {
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
-        } else if (state == DESTROYED) {
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+        switch (state) {
+            case RESUMED:
+                mAtmService.updateBatteryStats(this, true);
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_RESUMED);
+                // Fall through.
+            case STARTED:
+                // Update process info while making an activity from invisible to visible, to make
+                // sure the process state is updated to foreground.
+                if (app != null) {
+                    app.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                            true /* activityChange */, true /* updateOomAdj */,
+                            true /* addPendingTopUid */);
+                }
+                break;
+            case PAUSED:
+                mAtmService.updateBatteryStats(this, false);
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+                break;
+            case STOPPED:
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
+                break;
+            case DESTROYED:
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+                // Fall through.
+            case DESTROYING:
+                if (app != null && !app.hasActivities()) {
+                    // Update any services we are bound to that might care about whether
+                    // their client may have activities.
+                    // No longer have activities, so update LRU list and oom adj.
+                    app.updateProcessInfo(true /* updateServiceConnectionActivities */,
+                            false /* activityChange */, true /* updateOomAdj */,
+                            false /* addPendingTopUid */);
+                }
+                break;
         }
     }
 
@@ -4803,14 +4821,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
             }
             setState(STARTED, "makeActiveIfNeeded");
-
-            // Update process info while making an activity from invisible to visible, to make
-            // sure the process state is updated to foreground.
-            if (app != null) {
-                app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* activityChange */, true /* updateOomAdj */,
-                        true /* addPendingTopUid */);
-            }
 
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,

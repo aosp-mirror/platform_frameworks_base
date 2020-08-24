@@ -6190,10 +6190,6 @@ class Task extends WindowContainer<WindowContainer> {
 
             next.setState(RESUMED, "resumeTopActivityInnerLocked");
 
-            next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                    true /* activityChange */, true /* updateOomAdj */,
-                    true /* addPendingTopUid */);
-
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
             boolean notUpdated = true;
