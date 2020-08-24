@@ -2389,7 +2389,6 @@ class ContextImpl extends Context {
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
                 mResources.getLoaders()));
-        context.mIsUiContext = isSelfOrOuterUiContext();
         return context;
     }
 
@@ -2409,6 +2408,11 @@ class ContextImpl extends Context {
                 mResources.getLoaders()));
         context.mDisplay = display;
         context.mIsAssociatedWithDisplay = true;
+        // Note that even if a display context is derived from an UI context, it should not be
+        // treated as UI context because it does not handle configuration changes from the server
+        // side. If the context does need to handle configuration changes, please use
+        // Context#createWindowContext(int, Bundle).
+        context.mIsUiContext = false;
         return context;
     }
 
@@ -2770,6 +2774,7 @@ class ContextImpl extends Context {
             mDisplay = container.mDisplay;
             mIsAssociatedWithDisplay = container.mIsAssociatedWithDisplay;
             mIsSystemOrSystemUiContext = container.mIsSystemOrSystemUiContext;
+            mIsUiContext = container.isSelfOrOuterUiContext();
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
