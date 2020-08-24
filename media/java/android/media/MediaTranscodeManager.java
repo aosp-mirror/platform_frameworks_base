@@ -18,8 +18,11 @@ package android.media;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -97,6 +100,8 @@ import java.util.concurrent.Executors;
  TODO(hkuang): Clarify whether supports framerate conversion.
  @hide
  */
+@TestApi
+@SystemApi
 public final class MediaTranscodeManager implements AutoCloseable {
     private static final String TAG = "MediaTranscodeManager";
 
@@ -127,20 +132,23 @@ public final class MediaTranscodeManager implements AutoCloseable {
     public static final int TRANSCODING_TYPE_IMAGE = 2;
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         release();
     }
 
     /**
      * Releases the MediaTranscodeManager.
      */
-    //TODO(hkuang): add test for it.
-    private void release() throws Exception {
+    private void release() {
         synchronized (mLock) {
-            if (mTranscodingClient != null) {
-                mTranscodingClient.unregister();
-            } else {
-                throw new UnsupportedOperationException("Failed to release");
+            try {
+                if (mTranscodingClient != null) {
+                    mTranscodingClient.unregister();
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to unregister the client");
+            } finally {
+                mTranscodingClient = null;
             }
         }
     }
@@ -482,24 +490,22 @@ public final class MediaTranscodeManager implements AutoCloseable {
         throw new UnsupportedOperationException("Failed to register new client");
     }
 
-    /* Private constructor. */
-    private MediaTranscodeManager(@NonNull Context context,
-            IMediaTranscodingService transcodingService) {
+    /**
+     * @hide
+     */
+    public MediaTranscodeManager(@NonNull Context context) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mPackageName = mContext.getPackageName();
         mPid = Os.getuid();
         mUid = Os.getpid();
-        mTranscodingClient = registerClient(transcodingService);
+        IMediaTranscodingService service = getService(false /*retry*/);
+        mTranscodingClient = registerClient(service);
     }
 
     @Override
     protected void finalize() {
-        try {
-            release();
-        } catch (Exception ex) {
-            Log.e(TAG, "Failed to release");
-        }
+        release();
     }
 
     public static final class TranscodingRequest {
@@ -555,25 +561,25 @@ public final class MediaTranscodeManager implements AutoCloseable {
 
         /** Return the type of the transcoding. */
         @TranscodingType
-        int getType() {
+        public int getType() {
             return mType;
         }
 
         /** Return source uri of the transcoding. */
         @NonNull
-        Uri getSourceUri() {
+        public Uri getSourceUri() {
             return mSourceUri;
         }
 
         /** Return destination uri of the transcoding. */
         @NonNull
-        Uri getDestinationUri() {
+        public Uri getDestinationUri() {
             return mDestinationUri;
         }
 
         /** Return priority of the transcoding. */
         @TranscodingPriority
-        int getPriority() {
+        public int getPriority() {
             return mPriority;
         }
 
@@ -581,8 +587,18 @@ public final class MediaTranscodeManager implements AutoCloseable {
          * Return the video track format of the transcoding.
          * This will be null is the transcoding is not for video transcoding.
          */
-        MediaFormat getVideoTrackFormat() {
+        @Nullable
+        public MediaFormat getVideoTrackFormat() {
             return mVideoTrackFormat;
+        }
+
+        /**
+         * Return TestConfig of the transcoding.
+         * @hide
+         */
+        @Nullable
+        public TranscodingTestConfig getTestConfig() {
+            return mTestConfig;
         }
 
         /* Writes the TranscodingRequest to a parcel. */
@@ -665,7 +681,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
          * Builder class for {@link TranscodingRequest} objects.
          * Use this class to configure and create a <code>TranscodingRequest</code> instance.
          */
-        public static class Builder {
+        public static final class Builder {
             private @NonNull Uri mSourceUri;
             private @NonNull Uri mDestinationUri;
             private @TranscodingType int mType = TRANSCODING_TYPE_UNKNOWN;
@@ -684,7 +700,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
              */
             // TODO(hkuang): Add documentation on how the app could generate the correct Uri.
             @NonNull
-            public Builder setSourceUri(@NonNull Uri sourceUri) throws IllegalArgumentException {
+            public Builder setSourceUri(@NonNull Uri sourceUri) {
                 if (sourceUri == null || Uri.EMPTY.equals(sourceUri)) {
                     throw new IllegalArgumentException(
                             "You must specify a non-empty source Uri.");
@@ -701,8 +717,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
              * @throws IllegalArgumentException if Uri is null or empty.
              */
             @NonNull
-            public Builder setDestinationUri(@NonNull Uri destinationUri)
-                    throws IllegalArgumentException {
+            public Builder setDestinationUri(@NonNull Uri destinationUri) {
                 if (destinationUri == null || Uri.EMPTY.equals(destinationUri)) {
                     throw new IllegalArgumentException(
                             "You must specify a non-empty destination Uri.");
@@ -719,8 +734,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
              * @throws IllegalArgumentException if flags is invalid.
              */
             @NonNull
-            public Builder setPriority(@TranscodingPriority int priority)
-                    throws IllegalArgumentException {
+            public Builder setPriority(@TranscodingPriority int priority) {
                 if (priority != PRIORITY_OFFLINE && priority != PRIORITY_REALTIME) {
                     throw new IllegalArgumentException("Invalid priority: " + priority);
                 }
@@ -738,8 +752,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
              * @throws IllegalArgumentException if flags is invalid.
              */
             @NonNull
-            public Builder setType(@TranscodingType int type)
-                    throws IllegalArgumentException {
+            public Builder setType(@TranscodingType int type) {
                 if (type != TRANSCODING_TYPE_VIDEO && type != TRANSCODING_TYPE_IMAGE) {
                     throw new IllegalArgumentException("Invalid transcoding type");
                 }
@@ -763,8 +776,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
              * @throws IllegalArgumentException if videoFormat is invalid.
              */
             @NonNull
-            public Builder setVideoTrackFormat(@NonNull MediaFormat videoFormat)
-                    throws IllegalArgumentException {
+            public Builder setVideoTrackFormat(@NonNull MediaFormat videoFormat) {
                 if (videoFormat == null) {
                     throw new IllegalArgumentException("videoFormat must not be null");
                 }
@@ -784,9 +796,11 @@ public final class MediaTranscodeManager implements AutoCloseable {
              * Sets the delay in processing this request.
              * @param config test config.
              * @return The same builder instance.
+             * @hide
              */
             @VisibleForTesting
-            public Builder setTestConfig(TranscodingTestConfig config) {
+            @NonNull
+            public Builder setTestConfig(@NonNull TranscodingTestConfig config) {
                 mTestConfig = config;
                 return this;
             }
@@ -799,7 +813,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
              *         device.
              */
             @NonNull
-            public TranscodingRequest build() throws UnsupportedOperationException {
+            public TranscodingRequest build() {
                 if (mSourceUri == null) {
                     throw new UnsupportedOperationException("Source URI must not be null");
                 }
@@ -843,6 +857,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
         /** The job is paused. */
         public static final int STATUS_PAUSED = 4;
 
+        /** @hide */
         @IntDef(prefix = { "STATUS_" }, value = {
                 STATUS_PENDING,
                 STATUS_RUNNING,
@@ -861,6 +876,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
         /** The job was canceled by the caller. */
         public static final int RESULT_CANCELED = 4;
 
+        /** @hide */
         @IntDef(prefix = { "RESULT_" }, value = {
                 RESULT_NONE,
                 RESULT_SUCCESS,
@@ -878,24 +894,26 @@ public final class MediaTranscodeManager implements AutoCloseable {
              * where 0 means that the job has not yet started and 100 means that it has finished.
              * @param progress The new progress ranging from 0 ~ 100 inclusive.
              */
-            void onProgressUpdate(int progress);
+            void onProgressUpdate(@IntRange(from = 0, to = 100) int progress);
         }
 
         private final ITranscodingClient mJobOwner;
         private final Executor mListenerExecutor;
         private final OnTranscodingFinishedListener mListener;
         private int mJobId = -1;
-        @GuardedBy("this")
+        // Lock for internal state.
+        private final Object mLock = new Object();
+        @GuardedBy("mLock")
         private Executor mProgressUpdateExecutor = null;
-        @GuardedBy("this")
+        @GuardedBy("mLock")
         private OnProgressUpdateListener mProgressUpdateListener = null;
-        @GuardedBy("this")
+        @GuardedBy("mLock")
         private int mProgress = 0;
-        @GuardedBy("this")
+        @GuardedBy("mLock")
         private int mProgressUpdateInterval = 0;
-        @GuardedBy("this")
+        @GuardedBy("mLock")
         private @Status int mStatus = STATUS_PENDING;
-        @GuardedBy("this")
+        @GuardedBy("mLock")
         private @Result int mResult = RESULT_NONE;
 
         private TranscodingJob(
@@ -932,20 +950,24 @@ public final class MediaTranscodeManager implements AutoCloseable {
          * @param executor The executor on which listener will be invoked.
          * @param listener The progress listener.
          */
-        public synchronized void setOnProgressUpdateListener(
+        public void setOnProgressUpdateListener(
                 int minProgressUpdateInterval,
                 @NonNull @CallbackExecutor Executor executor,
                 @Nullable OnProgressUpdateListener listener) {
-            Objects.requireNonNull(executor, "listenerExecutor must not be null");
-            Objects.requireNonNull(listener, "listener must not be null");
-            mProgressUpdateExecutor = executor;
-            mProgressUpdateListener = listener;
+            synchronized (mLock) {
+                Objects.requireNonNull(executor, "listenerExecutor must not be null");
+                Objects.requireNonNull(listener, "listener must not be null");
+                mProgressUpdateExecutor = executor;
+                mProgressUpdateListener = listener;
+            }
         }
 
-        private synchronized void updateStatusAndResult(@Status int jobStatus,
+        private void updateStatusAndResult(@Status int jobStatus,
                 @Result int jobResult) {
-            mStatus = jobStatus;
-            mResult = jobResult;
+            synchronized (mLock) {
+                mStatus = jobStatus;
+                mResult = jobResult;
+            }
         }
 
         /**
@@ -953,8 +975,10 @@ public final class MediaTranscodeManager implements AutoCloseable {
          *
          * @return true if successfully resubmit the job to the service. False otherwise.
          */
-        public synchronized boolean retry() {
-            // TODO(hkuang): Implement this.
+        public boolean retry() {
+            synchronized (mLock) {
+                // TODO(hkuang): Implement this.
+            }
             return true;
         }
 
@@ -963,38 +987,46 @@ public final class MediaTranscodeManager implements AutoCloseable {
          * If the job happened to finish before being canceled this call is effectively a no-op and
          * will not update the result in that case.
          */
-        public synchronized void cancel() {
-            // Check if the job is finished already.
-            if (mStatus != STATUS_FINISHED) {
-                try {
-                    mJobOwner.cancelJob(mJobId);
-                } catch (RemoteException re) {
-                    //TODO(hkuang): Find out what to do if failing to cancel the job.
-                    Log.e(TAG, "Failed to cancel the job due to exception:  " + re);
-                }
-                mStatus = STATUS_FINISHED;
-                mResult = RESULT_CANCELED;
+        public void cancel() {
+            synchronized (mLock) {
+                // Check if the job is finished already.
+                if (mStatus != STATUS_FINISHED) {
+                    try {
+                        mJobOwner.cancelJob(mJobId);
+                    } catch (RemoteException re) {
+                        //TODO(hkuang): Find out what to do if failing to cancel the job.
+                        Log.e(TAG, "Failed to cancel the job due to exception:  " + re);
+                    }
+                    mStatus = STATUS_FINISHED;
+                    mResult = RESULT_CANCELED;
 
-                // Notifies client the job is canceled.
-                mListenerExecutor.execute(() -> mListener.onTranscodingFinished(this));
+                    // Notifies client the job is canceled.
+                    mListenerExecutor.execute(() -> mListener.onTranscodingFinished(this));
+                }
             }
         }
 
         /**
-         * Gets the progress of the transcoding job. The progress is between 0 and 1, where 0 means
-         * that the job has not yet started and 1 means that it is finished.
+         * Gets the progress of the transcoding job. The progress is between 0 and 100, where 0
+         * means that the job has not yet started and 100 means that it is finished. For the
+         * cancelled job, the progress will be the last updated progress before it is cancelled.
          * @return The progress.
          */
-        public synchronized int getProgress() {
-            return mProgress;
+        @IntRange(from = 0, to = 100)
+        public int getProgress() {
+            synchronized (mLock) {
+                return mProgress;
+            }
         }
 
         /**
          * Gets the status of the transcoding job.
          * @return The status.
          */
-        public synchronized @Status int getStatus() {
-            return mStatus;
+        public @Status int getStatus() {
+            synchronized (mLock) {
+                return mStatus;
+            }
         }
 
         /**
@@ -1009,53 +1041,22 @@ public final class MediaTranscodeManager implements AutoCloseable {
          * Gets the result of the transcoding job.
          * @return The result.
          */
-        public synchronized @Result int getResult() {
-            return mResult;
-        }
-
-        private synchronized void updateProgress(int newProgress) {
-            mProgress = newProgress;
-        }
-
-        private synchronized void updateStatus(int newStatus) {
-            mStatus = newStatus;
-        }
-    }
-
-    /**
-     * Gets the MediaTranscodeManager singleton instance.
-     *
-     * @param context The application context.
-     * @return the {@link MediaTranscodeManager} singleton instance.
-     * @throws UnsupportedOperationException if failing to acquire the MediaTranscodeManager.
-     */
-    public static MediaTranscodeManager getInstance(@NonNull Context context) {
-        // Acquires the MediaTranscoding service.
-        IMediaTranscodingService service = getService(false /*retry*/);
-        return getInstance(context, service);
-    }
-
-    /** Similar as above, but wait till the service is ready. */
-    @VisibleForTesting
-    public static MediaTranscodeManager getInstance(@NonNull Context context, boolean retry) {
-        // Acquires the MediaTranscoding service.
-        IMediaTranscodingService service = getService(retry);
-        return getInstance(context, service);
-    }
-
-    /** Similar as above, but allow injecting transcodingService for testing. */
-    @VisibleForTesting
-    public static MediaTranscodeManager getInstance(@NonNull Context context,
-            IMediaTranscodingService transcodingService) {
-        Objects.requireNonNull(context, "context must not be null");
-
-        synchronized (MediaTranscodeManager.class) {
-            if (sMediaTranscodeManager == null) {
-                sMediaTranscodeManager = new MediaTranscodeManager(context.getApplicationContext(),
-                        transcodingService);
+        public @Result int getResult() {
+            synchronized (mLock) {
+                return mResult;
             }
+        }
 
-            return sMediaTranscodeManager;
+        private void updateProgress(int newProgress) {
+            synchronized (mLock) {
+                mProgress = newProgress;
+            }
+        }
+
+        private void updateStatus(int newStatus) {
+            synchronized (mLock) {
+                mStatus = newStatus;
+            }
         }
     }
 
@@ -1077,7 +1078,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
             @NonNull TranscodingRequest transcodingRequest,
             @NonNull @CallbackExecutor Executor listenerExecutor,
             @NonNull OnTranscodingFinishedListener listener)
-            throws UnsupportedOperationException, FileNotFoundException {
+            throws FileNotFoundException {
         Log.i(TAG, "enqueueRequest called.");
         Objects.requireNonNull(transcodingRequest, "transcodingRequest must not be null");
         Objects.requireNonNull(listenerExecutor, "listenerExecutor must not be null");
@@ -1092,8 +1093,14 @@ public final class MediaTranscodeManager implements AutoCloseable {
             // Synchronizes the access to mPendingTranscodingJobs to make sure the job Id is
             // inserted in the mPendingTranscodingJobs in the callback handler.
             synchronized (mPendingTranscodingJobs) {
-                if (!mTranscodingClient.submitRequest(requestParcel, jobParcel)) {
-                    throw new UnsupportedOperationException("Failed to enqueue request");
+                synchronized (mLock) {
+                    if (mTranscodingClient == null) {
+                        // TODO(hkuang): Handle the case if client is temporarily unavailable.
+                    }
+
+                    if (!mTranscodingClient.submitRequest(requestParcel, jobParcel)) {
+                        throw new UnsupportedOperationException("Failed to enqueue request");
+                    }
                 }
 
                 // Wraps the TranscodingJobParcel into a TranscodingJob and returns it to client for

@@ -69,6 +69,13 @@ public class MediaTranscodeManagerTest
     private static final String TAG = "MediaTranscodeManagerTest";
     /** The time to wait for the transcode operation to complete before failing the test. */
     private static final int TRANSCODE_TIMEOUT_SECONDS = 10;
+
+    /** Maximum number of retry to connect to the service. */
+    private static final int CONNECT_SERVICE_RETRY_COUNT = 100;
+
+    /** Interval between trying to reconnect to the service. */
+    private static final int INTERVAL_CONNECT_SERVICE_RETRY_MS = 40;
+
     private Context mContext;
     private MediaTranscodeManager mMediaTranscodeManager = null;
     private Uri mSourceHEVCVideoUri = null;
@@ -129,13 +136,31 @@ public class MediaTranscodeManagerTest
         return format;
     }
 
+    private MediaTranscodeManager getManager() {
+        for (int count = 1;  count <= CONNECT_SERVICE_RETRY_COUNT; count++) {
+            Log.d(TAG, "Trying to connect to service. Try count: " + count);
+            MediaTranscodeManager manager = mContext.getSystemService(MediaTranscodeManager.class);
+            if (manager != null) {
+                return manager;
+            }
+            try {
+                // Sleep a bit before retry.
+                Thread.sleep(INTERVAL_CONNECT_SERVICE_RETRY_MS);
+            } catch (InterruptedException ie) {
+                /* ignore */
+            }
+        }
+
+        throw new UnsupportedOperationException("Failed to acquire MediaTranscodeManager");
+    }
+
     @Override
     public void setUp() throws Exception {
         Log.d(TAG, "setUp");
         super.setUp();
 
         mContext = getInstrumentation().getContext();
-        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext, true /*retry*/);
+        mMediaTranscodeManager = getManager();
         assertNotNull(mMediaTranscodeManager);
         androidx.test.InstrumentationRegistry.registerInstance(getInstrumentation(), new Bundle());
 
