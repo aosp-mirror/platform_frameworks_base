@@ -25,7 +25,7 @@ import java.util.Arrays;
  * A helper class to build {@link HdmiCecMessage} from various cec commands.
  */
 public class HdmiCecMessageBuilder {
-    private static final int OSD_NAME_MAX_LENGTH = 13;
+    private static final int OSD_NAME_MAX_LENGTH = 14;
 
     private HdmiCecMessageBuilder() {}
 

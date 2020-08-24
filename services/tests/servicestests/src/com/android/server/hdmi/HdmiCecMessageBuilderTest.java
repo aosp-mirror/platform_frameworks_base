@@ -62,6 +62,32 @@ public class HdmiCecMessageBuilderTest {
         assertThat(message).isEqualTo(buildMessage("5F:81:21:00"));
     }
 
+    @Test
+    public void buildSetOsdName_short() {
+        String deviceName = "abc";
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildSetOsdNameCommand(ADDR_PLAYBACK_1,
+                ADDR_TV, deviceName);
+        assertThat(message).isEqualTo(buildMessage("40:47:61:62:63"));
+    }
+
+    @Test
+    public void buildSetOsdName_maximumLength() {
+        String deviceName = "abcdefghijklmn";
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildSetOsdNameCommand(ADDR_PLAYBACK_1,
+                ADDR_TV, deviceName);
+        assertThat(message).isEqualTo(
+                buildMessage("40:47:61:62:63:64:65:66:67:68:69:6A:6B:6C:6D:6E"));
+    }
+
+    @Test
+    public void buildSetOsdName_tooLong() {
+        String deviceName = "abcdefghijklmnop";
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildSetOsdNameCommand(ADDR_PLAYBACK_1,
+                ADDR_TV, deviceName);
+        assertThat(message).isEqualTo(
+                buildMessage("40:47:61:62:63:64:65:66:67:68:69:6A:6B:6C:6D:6E"));
+    }
+
     /**
      * Build a CEC message from a hex byte string with bytes separated by {@code :}.
      *
