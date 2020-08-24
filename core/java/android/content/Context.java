@@ -5809,10 +5809,19 @@ public abstract class Context {
      * {@link #createWindowContext(int, Bundle)} on the returned display Context or use an
      * {@link android.app.Activity}.
      *
+     * <p>
+     * Note that invoking #createDisplayContext(Display) from an UI context is not regarded
+     * as an UI context. In other words, it is not suggested to access UI components (such as
+     * obtain a {@link WindowManager} by {@link #getSystemService(String)})
+     * from the context created from #createDisplayContext(Display).
+     * </p>
+     *
      * @param display A {@link Display} object specifying the display for whose metrics the
      * Context's resources should be tailored.
      *
      * @return A {@link Context} for the display.
+     *
+     * @see #getSystemService(String)
      */
     @DisplayContext
     public abstract Context createDisplayContext(@NonNull Display display);
