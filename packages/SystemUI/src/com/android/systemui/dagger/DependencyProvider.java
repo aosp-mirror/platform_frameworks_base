@@ -18,6 +18,8 @@ package com.android.systemui.dagger;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.INotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -26,6 +28,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.view.Choreographer;
 import android.view.IWindowManager;
@@ -39,6 +42,7 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Prefs;
 import com.android.systemui.accessibility.ModeSwitchesController;
 import com.android.systemui.accessibility.SystemActions;
@@ -88,7 +92,7 @@ import dagger.Provides;
  * Provides dependencies for the root component of sysui injection.
  *
  * Only SystemUI owned classes and instances should go in here. Other, framework-owned classes
- * should go in {@link SystemServicesModule}.
+ * should go in {@link FrameworkServicesModule}.
  *
  * See SystemUI/docs/dagger.md
  */
@@ -161,6 +165,15 @@ public class DependencyProvider {
     public LeakDetector provideLeakDetector() {
         return LeakDetector.create();
 
+    }
+
+    @SuppressLint("MissingPermission")
+    @SysUISingleton
+    @Provides
+    @Nullable
+    static LocalBluetoothManager provideLocalBluetoothController(Context context,
+            @Background Handler bgHandler) {
+        return LocalBluetoothManager.create(context, bgHandler, UserHandle.ALL);
     }
 
     /** */
