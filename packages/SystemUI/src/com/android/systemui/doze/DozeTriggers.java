@@ -262,11 +262,11 @@ public class DozeTriggers implements DozeMachine.Part {
             onWakeScreen(wakeEvent, mMachine.isExecutingTransition() ? null : mMachine.getState());
         } else if (isLongPress) {
             requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
-                    null /* onPulseSupressedListener */);
+                    null /* onPulseSuppressedListener */);
         } else if (isWakeLockScreen) {
             if (wakeEvent) {
                 requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
-                        null /* onPulseSupressedListener */);
+                        null /* onPulseSuppressedListener */);
             }
         } else {
             proximityCheckThenCall((result) -> {
@@ -536,7 +536,7 @@ public class DozeTriggers implements DozeMachine.Part {
             if (PULSE_ACTION.equals(intent.getAction())) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "Received pulse intent");
                 requestPulse(DozeLog.PULSE_REASON_INTENT, false, /* performedProxCheck */
-                        null /* onPulseSupressedListener */);
+                        null /* onPulseSuppressedListener */);
             }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
                 mMachine.requestState(DozeMachine.State.FINISH);
