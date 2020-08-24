@@ -24,7 +24,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -762,13 +761,14 @@ public class DisplayContentTests extends WindowTestsBase {
                 window.mAttrs.screenOrientation, dc.getOrientation());
 
         // ----------------------------
-        // Test close-to-square display
+        // Test close-to-square display - should be handled in the same way
         // ----------------------------
         dc.mBaseDisplayHeight = dc.mBaseDisplayWidth;
         dc.configureDisplayPolicy();
 
-        assertEquals("Screen orientation must be SCREEN_ORIENTATION_USER.",
-                SCREEN_ORIENTATION_USER, dc.getOrientation());
+        assertEquals(
+                "Screen orientation must be defined by the window even on close-to-square display.",
+                window.mAttrs.screenOrientation, dc.getOrientation());
     }
 
     @Test

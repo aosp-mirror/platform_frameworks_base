@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -365,13 +364,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     final float mCloseToSquareMaxAspectRatio;
-
-    /**
-     * If this is true, we would not rotate the display for apps. The rotation would be either the
-     * sensor rotation or the user rotation, controlled by
-     * {@link WindowManagerPolicy.UserRotationMode}.
-     */
-    private boolean mIgnoreRotationForApps;
 
     /**
      * Keep track of wallpaper visibility to notify changes.
@@ -1751,26 +1743,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
-
-        // Not much of use to rotate the display for apps since it's close to square.
-        mIgnoreRotationForApps = isNonDecorDisplayCloseToSquare(Surface.ROTATION_0, width, height);
-    }
-
-    /** @return {@code true} if the orientation requested from application will be ignored. */
-    boolean ignoreRotationForApps() {
-        return mIgnoreRotationForApps;
-    }
-
-    private boolean isNonDecorDisplayCloseToSquare(int rotation, int width, int height) {
-        final DisplayCutout displayCutout =
-                calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
-        final int uiMode = mWmService.mPolicy.getUiMode();
-        final int w = mDisplayPolicy.getNonDecorDisplayWidth(
-                width, height, rotation, uiMode, displayCutout);
-        final int h = mDisplayPolicy.getNonDecorDisplayHeight(
-                width, height, rotation, uiMode, displayCutout);
-        final float aspectRatio = Math.max(w, h) / (float) Math.min(w, h);
-        return aspectRatio <= mCloseToSquareMaxAspectRatio;
     }
 
     /**
@@ -2335,10 +2307,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     int getOrientation() {
         mLastOrientationSource = null;
-
-        if (mIgnoreRotationForApps) {
-            return SCREEN_ORIENTATION_USER;
-        }
 
         if (mWmService.mDisplayFrozen) {
             if (mWmService.mPolicy.isKeyguardLocked()) {
