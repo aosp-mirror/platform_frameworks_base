@@ -1697,8 +1697,9 @@ class ActivityStarter {
         mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        mTargetStack.startActivityLocked(mStartActivity, topStack.getTopNonFinishingActivity(),
-                newTask, mKeepCurTransition, mOptions);
+        mTargetStack.startActivityLocked(mStartActivity,
+                topStack != null ? topStack.getTopNonFinishingActivity() : null, newTask,
+                mKeepCurTransition, mOptions);
         if (mDoResume) {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();
