@@ -249,6 +249,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final PackageManagerService mPm;
     private final Handler mHandler;
     private final PackageSessionProvider mSessionProvider;
+    /**
+     * Note all calls must be done outside {@link #mLock} to prevent lock inversion.
+     */
     private final StagingManager mStagingManager;
 
     final int sessionId;
@@ -1468,26 +1471,50 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // TODO(patb): since the work done here for a parent session in a multi-package install is
         //             mostly superficial, consider splitting this method for the parent and
         //             single / child sessions.
-        synchronized (mLock) {
-            if (mCommitted) {
-                return true;
+        try {
+            synchronized (mLock) {
+                if (mCommitted) {
+                    return true;
+                }
+                // Read transfers from the original owner stay open, but as the session's data
+                // cannot be modified anymore, there is no leak of information. For staged sessions,
+                // further validation is performed by the staging manager.
+                if (!params.isMultiPackage) {
+                    if (!prepareDataLoaderLocked()) {
+                        return false;
+                    }
+
+                    if (isApexInstallation()) {
+                        validateApexInstallLocked();
+                    } else {
+                        validateApkInstallLocked();
+                    }
+                }
             }
 
-            if (!streamAndValidateLocked()) {
-                return false;
+            if (params.isStaged) {
+                mStagingManager.checkNonOverlappingWithStagedSessions(this);
             }
 
-            // Client staging is fully done at this point
-            mClientProgress = 1f;
-            computeProgressLocked(true);
+            synchronized (mLock) {
+                // Client staging is fully done at this point
+                mClientProgress = 1f;
+                computeProgressLocked(true);
 
-            // This ongoing commit should keep session active, even though client
-            // will probably close their end.
-            mActiveCount.incrementAndGet();
+                // This ongoing commit should keep session active, even though client
+                // will probably close their end.
+                mActiveCount.incrementAndGet();
 
-            mCommitted = true;
+                mCommitted = true;
+            }
+            return true;
+        } catch (PackageManagerException e) {
+            throw onSessionValidationFailure(e);
+        } catch (Throwable e) {
+            // Convert all exceptions into package manager exceptions as only those are handled
+            // in the code above.
+            throw onSessionValidationFailure(new PackageManagerException(e));
         }
-        return true;
     }
 
     @GuardedBy("mLock")
@@ -1518,44 +1545,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertNoWriteFileTransfersOpenLocked();
             assertPreparedAndNotDestroyedLocked("sealing of session");
             mSealed = true;
-        } catch (Throwable e) {
-            // Convert all exceptions into package manager exceptions as only those are handled
-            // in the code above.
-            throw onSessionValidationFailure(new PackageManagerException(e));
-        }
-    }
-
-    /**
-     * Prepare DataLoader and stream content for DataLoader sessions.
-     * Validate the contents of all session.
-     *
-     * @return false if the data loader could not be prepared.
-     * @throws PackageManagerException when an unrecoverable exception is encountered
-     */
-    @GuardedBy("mLock")
-    private boolean streamAndValidateLocked() throws PackageManagerException {
-        try {
-            // Read transfers from the original owner stay open, but as the session's data cannot
-            // be modified anymore, there is no leak of information. For staged sessions, further
-            // validation is performed by the staging manager.
-            if (!params.isMultiPackage) {
-                if (!prepareDataLoaderLocked()) {
-                    return false;
-                }
-
-                if (isApexInstallation()) {
-                    validateApexInstallLocked();
-                } else {
-                    validateApkInstallLocked();
-                }
-            }
-
-            if (params.isStaged) {
-                mStagingManager.checkNonOverlappingWithStagedSessions(this);
-            }
-            return true;
-        } catch (PackageManagerException e) {
-            throw onSessionValidationFailure(e);
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above.
