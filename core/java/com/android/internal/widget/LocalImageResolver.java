@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ import java.io.InputStream;
  * A class to extract Bitmaps from a MessagingStyle message.
  */
 public class LocalImageResolver {
+    private static final String TAG = LocalImageResolver.class.getSimpleName();
 
     private static final int MAX_SAFE_ICON_SIZE_PX = 480;
 
@@ -60,11 +62,18 @@ public class LocalImageResolver {
 
     private static BitmapFactory.Options getBoundsOptionsForImage(Uri uri, Context context)
             throws IOException {
-        InputStream input = context.getContentResolver().openInputStream(uri);
         BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
-        onlyBoundsOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
-        input.close();
+        try (InputStream input = context.getContentResolver().openInputStream(uri)) {
+            if (input == null) {
+                throw new IllegalArgumentException();
+            }
+            onlyBoundsOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
+        } catch (IllegalArgumentException iae) {
+            onlyBoundsOptions.outWidth = -1;
+            onlyBoundsOptions.outHeight = -1;
+            Log.e(TAG, "error loading image", iae);
+        }
         return onlyBoundsOptions;
     }
 
