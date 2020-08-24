@@ -314,6 +314,14 @@ class LocationProviderManager extends
         }
 
         @Override
+        public final <Listener> void onOperationFailure(ListenerOperation<Listener> operation,
+                Exception e) {
+            synchronized (mLock) {
+                super.onOperationFailure(operation, e);
+            }
+        }
+
+        @Override
         public final LocationRequest getRequest() {
             return mProviderLocationRequest;
         }
