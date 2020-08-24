@@ -32,6 +32,7 @@ import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import androidx.test.runner.lifecycle.Stage;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -52,18 +53,17 @@ public class WindowManagerPerfTestBase {
 
     /**
      * The out directory matching the directory-keys of collector in AndroidTest.xml. The directory
-     * is in /data because while enabling method profling of system server, it cannot write the
+     * is in /data because while enabling method profiling of system server, it cannot write the
      * trace to external storage.
      */
     static final File BASE_OUT_PATH = new File("/data/local/tmp/WmPerfTests");
+
+    static boolean sIsProfilingMethod;
 
     @BeforeClass
     public static void setUpOnce() {
         final Context context = getInstrumentation().getContext();
 
-        if (!BASE_OUT_PATH.exists()) {
-            executeShellCommand("mkdir -p " + BASE_OUT_PATH);
-        }
         if (!context.getSystemService(PowerManager.class).isInteractive()
                 || context.getSystemService(KeyguardManager.class).isKeyguardLocked()) {
             executeShellCommand("input keyevent KEYCODE_WAKEUP");
@@ -71,6 +71,14 @@ public class WindowManagerPerfTestBase {
         }
         context.startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    @After
+    public void tearDown() {
+        // Make sure that profiling is stopped if test fails.
+        if (sIsProfilingMethod) {
+            stopProfiling();
+        }
     }
 
     /**
@@ -93,12 +101,26 @@ public class WindowManagerPerfTestBase {
     }
 
     /** Starts method tracing on system server. */
-    void startProfiling(String subPath) {
-        executeShellCommand("am profile start system " + new File(BASE_OUT_PATH, subPath));
+    static void startProfiling(String subPath) {
+        if (!BASE_OUT_PATH.exists()) {
+            executeShellCommand("mkdir -p " + BASE_OUT_PATH);
+        }
+        final String samplingArg = WmPerfRunListener.sSamplingIntervalUs > 0
+                ? ("--sampling " + WmPerfRunListener.sSamplingIntervalUs)
+                : "";
+        executeShellCommand("am profile start " + samplingArg + " system "
+                + new File(BASE_OUT_PATH, subPath));
+        sIsProfilingMethod = true;
     }
 
-    void stopProfiling() {
+    static void stopProfiling() {
         executeShellCommand("am profile stop system");
+        sIsProfilingMethod = false;
+    }
+
+    /** Returns how many iterations should run with method tracing. */
+    static int getProfilingIterations() {
+        return WmPerfRunListener.sProfilingIterations;
     }
 
     static void runWithShellPermissionIdentity(Runnable runnable) {
