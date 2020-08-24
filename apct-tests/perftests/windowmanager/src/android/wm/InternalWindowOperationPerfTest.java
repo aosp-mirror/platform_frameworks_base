@@ -41,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 
 /** Measure the performance of internal methods in window manager service by trace tag. */
 @LargeTest
-public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
+public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
+        implements ManualBenchmarkState.CustomizedIterationListener {
     private static final String TAG = InternalWindowOperationPerfTest.class.getSimpleName();
 
     @Rule
@@ -68,6 +69,9 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
             "finishActivity",
             "startActivityInner");
 
+    private boolean mIsProfiling;
+    private boolean mIsTraceStarted;
+
     @Test
     @ManualBenchmarkTest(
             targetTestDurationNs = 20 * TIME_1_S_IN_NS,
@@ -76,13 +80,13 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
                             | StatsReport.FLAG_MAX | StatsReport.FLAG_COEFFICIENT_VAR))
     public void testLaunchAndFinishActivity() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        state.setCustomizedIterations(getProfilingIterations(), this);
         long measuredTimeNs = 0;
-        boolean isTraceStarted = false;
 
         while (state.keepRunning(measuredTimeNs)) {
-            if (!isTraceStarted && !state.isWarmingUp()) {
+            if (!mIsTraceStarted && !mIsProfiling && !state.isWarmingUp()) {
                 startAsyncAtrace();
-                isTraceStarted = true;
+                mIsTraceStarted = true;
             }
             final long startTime = SystemClock.elapsedRealtimeNanos();
             mActivityRule.launchActivity();
@@ -91,7 +95,9 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
             measuredTimeNs = SystemClock.elapsedRealtimeNanos() - startTime;
         }
 
-        stopAsyncAtrace();
+        if (mIsTraceStarted) {
+            stopAsyncAtrace();
+        }
 
         mTraceMarkParser.forAllSlices((key, slices) -> {
             for (TraceMarkSlice slice : slices) {
@@ -108,7 +114,7 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
         SystemClock.sleep(TimeUnit.NANOSECONDS.toMillis(TIME_1_S_IN_NS));
     }
 
-    private void stopAsyncAtrace() throws IOException {
+    private void stopAsyncAtrace() {
         final ParcelFileDescriptor pfd = sUiAutomation.executeShellCommand("atrace --async_stop");
         final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -116,6 +122,28 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase {
             while ((line = reader.readLine()) != null) {
                 mTraceMarkParser.visit(line);
             }
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to read the result of stopped atrace", e);
+        }
+    }
+
+    @Override
+    public void onStart(int iteration) {
+        if (mIsTraceStarted) {
+            // Do not capture trace when profiling because the result will be much slower.
+            stopAsyncAtrace();
+            mIsTraceStarted = false;
+        }
+        mIsProfiling = true;
+        startProfiling(InternalWindowOperationPerfTest.class.getSimpleName()
+                + "_MethodTracing_" + iteration + ".trace");
+    }
+
+    @Override
+    public void onFinished(int iteration) {
+        stopProfiling();
+        if (iteration >= getProfilingIterations() - 1) {
+            mIsProfiling = false;
         }
     }
 }

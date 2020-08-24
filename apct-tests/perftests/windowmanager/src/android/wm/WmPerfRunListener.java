@@ -31,6 +31,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.WindowManagerPolicyConstants;
 import android.wm.WindowManagerPerfTestBase.SettingsSession;
 
@@ -46,9 +47,21 @@ import java.util.List;
 
 /** Prepare the preconditions before running performance test. */
 public class WmPerfRunListener extends RunListener {
+    private static final String TAG = WmPerfRunListener.class.getSimpleName();
 
-    private static final String OPTION_KILL_BACKGROUND = "kill-bg";
+    private static final String ARGUMENT_LOG_ONLY = "log";
+    private static final String ARGUMENT_KILL_BACKGROUND = "kill-bg";
+    private static final String ARGUMENT_PROFILING_ITERATIONS = "profiling-iterations";
+    private static final String ARGUMENT_PROFILING_SAMPLING = "profiling-sampling";
+    private static final String DEFAULT_PROFILING_ITERATIONS = "0";
+    private static final String DEFAULT_PROFILING_SAMPLING_US = "10";
     private static final long KILL_BACKGROUND_WAIT_MS = 3000;
+
+    /** The requested iterations to run with method profiling. */
+    static int sProfilingIterations;
+
+    /** The interval of sample profiling in microseconds. */
+    static int sSamplingIntervalUs;
 
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     private long mWaitPreconditionDoneMs = 500;
@@ -83,6 +96,16 @@ public class WmPerfRunListener extends RunListener {
     @Override
     public void testRunStarted(Description description) {
         final Bundle arguments = InstrumentationRegistry.getArguments();
+        // If true, it only logs the method names without running.
+        final boolean skip = Boolean.parseBoolean(arguments.getString(ARGUMENT_LOG_ONLY, "false"));
+        Log.i(TAG, "arguments=" + arguments);
+        if (skip) {
+            return;
+        }
+        sProfilingIterations = Integer.parseInt(
+                arguments.getString(ARGUMENT_PROFILING_ITERATIONS, DEFAULT_PROFILING_ITERATIONS));
+        sSamplingIntervalUs = Integer.parseInt(
+                arguments.getString(ARGUMENT_PROFILING_SAMPLING, DEFAULT_PROFILING_SAMPLING_US));
 
         // Use gesture navigation for consistency.
         mNavigationModeSetting.set(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL);
@@ -97,7 +120,7 @@ public class WmPerfRunListener extends RunListener {
         });
         PhoneWindow.sendCloseSystemWindows(mContext, "WmPerfTests");
 
-        if (Boolean.parseBoolean(arguments.getString(OPTION_KILL_BACKGROUND))) {
+        if (Boolean.parseBoolean(arguments.getString(ARGUMENT_KILL_BACKGROUND))) {
             runWithShellPermissionIdentity(this::killBackgroundProcesses);
             mWaitPreconditionDoneMs = KILL_BACKGROUND_WAIT_MS;
         }

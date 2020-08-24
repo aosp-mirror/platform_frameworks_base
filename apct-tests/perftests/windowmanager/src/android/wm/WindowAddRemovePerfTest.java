@@ -48,8 +48,6 @@ import org.junit.Test;
 public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
         implements ManualBenchmarkState.CustomizedIterationListener {
 
-    private static final int PROFILED_ITERATIONS = 2;
-
     @Rule
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
 
@@ -64,7 +62,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
         sUiAutomation.dropShellPermissionIdentity();
     }
 
-    /** The last {@link #PROFILED_ITERATIONS} will provide the information of method profiling. */
+    /** The last customized iterations will provide the information of method profiling. */
     @Override
     public void onStart(int iteration) {
         startProfiling(WindowAddRemovePerfTest.class.getSimpleName()
@@ -80,7 +78,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
     @ManualBenchmarkTest(warmupDurationNs = TIME_1_S_IN_NS, targetTestDurationNs = TIME_5_S_IN_NS)
     public void testAddRemoveWindow() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        state.setCustomizedIterations(PROFILED_ITERATIONS, this);
+        state.setCustomizedIterations(getProfilingIterations(), this);
         new TestWindow().runBenchmark(state);
     }
 
