@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.view.Surface
-import androidx.test.filters.LargeTest
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.ImeAppHelper
@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
  * Test IME window closing back to app window transitions.
  * To run this test: `atest FlickerTests:CloseImeWindowToAppTest`
  */
-@LargeTest
+@RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CloseImeAutoOpenWindowToAppTest(
