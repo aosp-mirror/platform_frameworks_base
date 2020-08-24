@@ -32,16 +32,14 @@ import android.app.timezonedetector.TimeZoneConfiguration;
  * this Binder interface directly. See {@link android.app.timezonedetector.TimeZoneDetectorService}
  * for more complete documentation.
  *
- *
  * {@hide}
  */
 interface ITimeZoneDetectorService {
   TimeZoneCapabilities getCapabilities();
-
-  TimeZoneConfiguration getConfiguration();
-  boolean updateConfiguration(in TimeZoneConfiguration configuration);
   void addConfigurationListener(ITimeZoneConfigurationListener listener);
   void removeConfigurationListener(ITimeZoneConfigurationListener listener);
+
+  boolean updateConfiguration(in TimeZoneConfiguration configuration);
 
   boolean suggestManualTimeZone(in ManualTimeZoneSuggestion timeZoneSuggestion);
   void suggestTelephonyTimeZone(in TelephonyTimeZoneSuggestion timeZoneSuggestion);
