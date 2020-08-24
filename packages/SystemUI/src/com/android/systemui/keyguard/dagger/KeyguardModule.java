@@ -26,8 +26,10 @@ import android.os.Handler;
 import android.os.PowerManager;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
+import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -43,7 +45,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SystemSettings;
@@ -58,7 +59,7 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module
+@Module(subcomponents = {KeyguardStatusViewComponent.class})
 public class KeyguardModule {
     /**
      * Provides our instance of KeyguardViewMediator which is considered optional.
@@ -79,7 +80,7 @@ public class KeyguardModule {
             @UiBackground Executor uiBgExecutor,
             DeviceConfigProxy deviceConfig,
             NavigationModeController navigationModeController,
-            InjectionInflationController injectionInflationController) {
+            KeyguardDisplayManager keyguardDisplayManager) {
         return new KeyguardViewMediator(
                 context,
                 falsingManager,
@@ -94,7 +95,8 @@ public class KeyguardModule {
                 trustManager,
                 deviceConfig,
                 navigationModeController,
-                injectionInflationController);
+                keyguardDisplayManager
+        );
     }
 
     @SysUISingleton
