@@ -36,8 +36,8 @@ import javax.inject.Inject;
  * Activity to show the PIP menu to control PIP.
  */
 public class PipMenuActivity extends Activity implements PipManager.Listener {
-    private static final boolean DEBUG = false;
     private static final String TAG = "PipMenuActivity";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     static final String EXTRA_CUSTOM_ACTIONS = "custom_actions";
 
