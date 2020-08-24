@@ -9195,6 +9195,7 @@ public class NotificationManagerService extends SystemService {
             final NotificationRankingUpdate update;
             synchronized (mNotificationLock) {
                 update = makeRankingUpdateLocked(info);
+                grantUriPermissionsForActiveNotificationsLocked(info);
             }
             try {
                 listener.onListenerConnected(update);
@@ -9297,13 +9298,8 @@ public class NotificationManagerService extends SystemService {
                     // This notification became invisible -> remove the old one.
                     if (oldSbnVisible && !sbnVisible) {
                         final StatusBarNotification oldSbnLightClone = oldSbn.cloneLight();
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyRemoved(
-                                        info, oldSbnLightClone, update, null, REASON_USER_STOPPED);
-                            }
-                        });
+                        mHandler.post(() -> notifyRemoved(
+                                info, oldSbnLightClone, update, null, REASON_USER_STOPPED));
                         continue;
                     }
 
@@ -9313,15 +9309,36 @@ public class NotificationManagerService extends SystemService {
                     updateUriPermissions(r, old, info.component.getPackageName(), targetUserId);
 
                     final StatusBarNotification sbnToPost = trimCache.ForListener(info);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyPosted(info, sbnToPost, update);
-                        }
-                    });
+                    mHandler.post(() -> notifyPosted(info, sbnToPost, update));
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Could not notify listeners for " + r.getKey(), e);
+            }
+        }
+
+        /**
+         * Synchronously grant permissions to Uris for all active and visible notifications to the
+         * NotificationListenerService provided.
+         */
+        @GuardedBy("mNotificationLock")
+        private void grantUriPermissionsForActiveNotificationsLocked(ManagedServiceInfo info) {
+            try {
+                for (final NotificationRecord r : mNotificationList) {
+                    // This notification isn't visible -> ignore.
+                    if (!isVisibleToListener(r.getSbn(), info)) {
+                        continue;
+                    }
+                    // If the notification is hidden, permissions are not required by the listener.
+                    if (r.isHidden() && info.targetSdkVersion < Build.VERSION_CODES.P) {
+                        continue;
+                    }
+                    // Grant access before listener is initialized
+                    final int targetUserId = (info.userid == UserHandle.USER_ALL)
+                            ? UserHandle.USER_SYSTEM : info.userid;
+                    updateUriPermissions(r, null, info.component.getPackageName(), targetUserId);
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not grant Uri permissions to " + info.component, e);
             }
         }
 
