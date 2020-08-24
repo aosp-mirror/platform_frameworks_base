@@ -6404,6 +6404,17 @@ public final class Settings {
         public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
 
         /**
+         * The current location time zone detection enabled state for the user.
+         *
+         * See {@link
+         * android.app.timezonedetector.TimeZoneDetector#getCapabilities} for access. See {@link
+         * android.app.timezonedetector.TimeZoneDetector#updateConfiguration} to update.
+         * @hide
+         */
+        public static final String LOCATION_TIME_ZONE_DETECTION_ENABLED =
+                "location_time_zone_detection_enabled";
+
+        /**
          * The accuracy in meters used for coarsening location for clients with only the coarse
          * location permission.
          *
