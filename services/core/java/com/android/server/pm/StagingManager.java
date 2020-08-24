@@ -1299,6 +1299,20 @@ public class StagingManager {
         return session;
     }
 
+    // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
+    //  verification logic is extraced out of StagingManager into PMS, we can remove
+    //  this.
+    void notifyVerificationComplete(int sessionId) {
+        mPreRebootVerificationHandler.onPreRebootVerificationComplete(sessionId);
+    }
+
+    // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
+    //  verification logic is extraced out of StagingManager into PMS, we can remove
+    //  this.
+    void notifyPreRebootVerification_Apk_Complete(int sessionId) {
+        mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(sessionId);
+    }
+
     private final class PreRebootVerificationHandler extends Handler {
         // Hold session ids before handler gets ready to do the verification.
         private IntArray mPendingSessionIds;
@@ -1500,25 +1514,16 @@ public class StagingManager {
         }
 
         /**
-         * Pre-reboot verification state for apk files:
-         *   <p><ul>
-         *       <li>performs a dry-run install of apk</li>
-         *   </ul></p>
+         * Pre-reboot verification state for apk files. Session is sent to
+         * {@link PackageManagerService} for verification and it notifies back the result via
+         * {@link #notifyPreRebootVerification_Apk_Complete(int)}
          */
         private void handlePreRebootVerification_Apk(@NonNull PackageInstallerSession session) {
             if (!sessionContainsApk(session)) {
                 notifyPreRebootVerification_Apk_Complete(session.sessionId);
                 return;
             }
-
-            try {
-                Slog.d(TAG, "Running a pre-reboot verification for APKs in session "
-                        + session.sessionId + " by performing a dry-run install");
-                // verifyApksInSession will notify the handler when APK verification is complete
-                verifyApksInSession(session);
-            } catch (PackageManagerException e) {
-                onPreRebootVerificationFailure(session, e.error, e.getMessage());
-            }
+            session.verifyStagedSession();
         }
 
         private void verifyApksInSession(PackageInstallerSession session)

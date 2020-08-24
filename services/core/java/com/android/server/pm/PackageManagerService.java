@@ -15201,6 +15201,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         public void handleStartCopy() {
+            if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
+                // Apex packages get verified in StagingManager currently.
+                // TODO(b/136257624): Move apex verification logic out of StagingManager
+                mRet = INSTALL_SUCCEEDED;
+                return;
+            }
+
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     origin.resolvedPath, installFlags, packageAbiOverride);
 
