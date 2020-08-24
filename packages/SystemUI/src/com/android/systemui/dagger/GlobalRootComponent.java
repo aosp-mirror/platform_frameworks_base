@@ -28,6 +28,7 @@ import dagger.Component;
  */
 @Singleton
 @Component(modules = {
+        GlobalModule.class,
         SysUISubcomponentModule.class,
         WMModule.class})
 public interface GlobalRootComponent {

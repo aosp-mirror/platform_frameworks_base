@@ -16,7 +16,9 @@
 
 package com.android.systemui.tv;
 
+import com.android.systemui.dagger.GlobalModule;
 import com.android.systemui.dagger.GlobalRootComponent;
+import com.android.systemui.dagger.WMModule;
 
 import javax.inject.Singleton;
 
@@ -26,7 +28,11 @@ import dagger.Component;
  * Root component for Dagger injection.
  */
 @Singleton
-@Component(modules = {TvSysUIComponentModule.class})
+@Component(modules = {
+        GlobalModule.class,
+        TvSysUIComponentModule.class,
+        WMModule.class
+})
 public interface TvGlobalRootComponent extends GlobalRootComponent {
     /**
      * Component Builder interface. This allows to bind Context instance in the component
