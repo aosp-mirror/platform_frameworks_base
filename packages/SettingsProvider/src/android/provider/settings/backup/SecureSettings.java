@@ -167,6 +167,7 @@ public class SecureSettings {
         Settings.Secure.MEDIA_CONTROLS_RESUME,
         Settings.Secure.MEDIA_CONTROLS_RESUME_BLOCKED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
-        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS
+        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+        Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED
     };
 }
