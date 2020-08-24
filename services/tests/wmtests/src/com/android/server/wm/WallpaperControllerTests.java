@@ -133,8 +133,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         int expectedWidth = (int) (wallpaperWidth * (displayHeight / (double) wallpaperHeight));
 
         // Check that the wallpaper is correctly scaled
-        assertEquals(new Rect(0, 0, expectedWidth, displayHeight), wallpaperWindow.getFrameLw());
-        Rect portraitFrame = wallpaperWindow.getFrameLw();
+        assertEquals(new Rect(0, 0, expectedWidth, displayHeight), wallpaperWindow.getFrame());
+        Rect portraitFrame = wallpaperWindow.getFrame();
 
         // Rotate the display
         dc.getDisplayRotation().updateOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, true);
@@ -149,7 +149,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         // Check that the wallpaper has the same frame in landscape than in portrait
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getConfiguration().orientation);
-        assertEquals(portraitFrame, wallpaperWindow.getFrameLw());
+        assertEquals(portraitFrame, wallpaperWindow.getFrame());
     }
 
     @Test
