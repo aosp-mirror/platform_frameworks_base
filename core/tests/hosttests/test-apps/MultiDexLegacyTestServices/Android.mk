@@ -33,6 +33,8 @@ LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
 
 LOCAL_DEX_PREOPT := false
 
+LOCAL_EMMA_INSTRUMENT := false
+
 include $(BUILD_PACKAGE)
 
 $(mainDexList): $(full_classes_pre_proguard_jar) $(MAINDEXCLASSES) $(PROGUARD_DEPS)
