@@ -2738,4 +2738,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: S
     SETTINGS_COLUMBUS = 1848;
+
+    // OPEN: Settings > Accessibility > Magnification > Settings > Magnification area > Magnification switch shortcut dialog
+    // CATEGORY: SETTINGS
+    // OS: S
+    DIALOG_MAGNIFICATION_SWITCH_SHORTCUT = 1849;
 }
