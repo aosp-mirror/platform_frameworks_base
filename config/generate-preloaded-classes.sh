@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 if [ "$#" -lt 2 ]; then
-  echo "Usage $0 <input classes file> <blacklist file> [extra classes files]"
+  echo "Usage $0 <input classes file> <denylist file> [extra classes files]"
   exit 1
 fi
 
@@ -31,9 +31,9 @@ echo "# Preloaded-classes filter file for phones.
 #"
 
 input=$1
-blacklist=$2
+denylist=$2
 shift 2
 extra_classes_files=("$@")
 
 # Disable locale to enable lexicographical sorting
-LC_ALL=C sort "$input" "${extra_classes_files[@]}" | uniq | grep -f "$blacklist" -v -F -x | grep -v "\$NoPreloadHolder"
+LC_ALL=C sort "$input" "${extra_classes_files[@]}" | uniq | grep -f "$denylist" -v -F -x | grep -v "\$NoPreloadHolder"
