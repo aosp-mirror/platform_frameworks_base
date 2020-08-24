@@ -5656,6 +5656,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw new IllegalArgumentException("Activity token not set. Is the activity attached?");
         }
 
+        // WindowConfiguration differences aren't considered as public, check it separately.
+        // multi-window / pip mode changes, if any, should be sent before the configuration
+        // change callback, see also PinnedStackTests#testConfigurationChangeOrderDuringTransition
+        handleWindowingModeChangeIfNeeded(activity, newConfig);
+
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity, displayId);
         boolean shouldReportChange = false;
         if (activity.mCurrentConfig == null) {
@@ -5708,11 +5713,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         if (shouldReportChange) {
-            // multi-window / pip mode changes, if any, should be sent before the configuration
-            // change callback, see also
-            // PinnedStackTests#testConfigurationChangeOrderDuringTransition
-            handleWindowingModeChangeIfNeeded(activity, newConfig);
-
             activity.mCalled = false;
             activity.onConfigurationChanged(configToReport);
             if (!activity.mCalled) {
