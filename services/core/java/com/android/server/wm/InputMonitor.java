@@ -61,7 +61,6 @@ import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.util.Set;
@@ -95,8 +94,11 @@ final class InputMonitor {
      */
     private final ArrayMap<String, InputConsumerImpl> mInputConsumers = new ArrayMap();
 
-    private static final class EventReceiverInputConsumer extends InputConsumerImpl
-            implements WindowManagerPolicy.InputConsumer {
+    /**
+     * Representation of a input consumer that the policy has added to the window manager to consume
+     * input events going to windows below it.
+     */
+    static final class EventReceiverInputConsumer extends InputConsumerImpl {
         private InputMonitor mInputMonitor;
         private final InputEventReceiver mInputEventReceiver;
 
@@ -111,8 +113,8 @@ final class InputMonitor {
                     mClientChannel, looper);
         }
 
-        @Override
-        public void dismiss() {
+        /** Removes the input consumer from the window manager. */
+        void dismiss() {
             synchronized (mService.mGlobalLock) {
                 mInputMonitor.mInputConsumers.remove(mName);
                 hide(mInputMonitor.mInputTransaction);
@@ -120,8 +122,8 @@ final class InputMonitor {
             }
         }
 
-        @Override
-        public void dispose() {
+        /** Disposes the input consumer and input receiver from the associated thread. */
+        void dispose() {
             synchronized (mService.mGlobalLock) {
                 disposeChannelsLw(mInputMonitor.mInputTransaction);
                 mInputEventReceiver.dispose();
@@ -225,7 +227,7 @@ final class InputMonitor {
         }
     }
 
-    WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
+    EventReceiverInputConsumer createInputConsumer(Looper looper, String name,
             InputEventReceiver.Factory inputEventReceiverFactory) {
         if (!name.contentEquals(INPUT_CONSUMER_NAVIGATION)) {
             throw new IllegalArgumentException("Illegal input consumer : " + name
@@ -289,7 +291,7 @@ final class InputMonitor {
         inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
         inputWindowHandle.displayId = child.getDisplayId();
 
-        final Rect frame = child.getFrameLw();
+        final Rect frame = child.getFrame();
         inputWindowHandle.frameLeft = frame.left;
         inputWindowHandle.frameTop = frame.top;
         inputWindowHandle.frameRight = frame.right;

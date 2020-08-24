@@ -700,8 +700,8 @@ final class AccessibilityController {
                     touchableRegion.getBounds(touchableFrame);
                     RectF windowFrame = mTempRectF;
                     windowFrame.set(touchableFrame);
-                    windowFrame.offset(-windowState.getFrameLw().left,
-                            -windowState.getFrameLw().top);
+                    windowFrame.offset(-windowState.getFrame().left,
+                            -windowState.getFrame().top);
                     matrix.mapRect(windowFrame);
                     Region windowBounds = mTempRegion2;
                     windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
@@ -730,7 +730,7 @@ final class AccessibilityController {
                     }
 
                     // Count letterbox into nonMagnifiedBounds
-                    if (windowState.isLetterboxedForDisplayCutoutLw()) {
+                    if (windowState.isLetterboxedForDisplayCutout()) {
                         Region letterboxBounds = getLetterboxBounds(windowState);
                         nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
                         availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
@@ -1429,11 +1429,11 @@ final class AccessibilityController {
                         // Account for all space in the task, whether the windows in it are
                         // touchable or not. The modal window blocks all touches from the task's
                         // area.
-                        unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
+                        unaccountedSpace.op(windowState.getDisplayFrame(), unaccountedSpace,
                                 Region.Op.REVERSE_DIFFERENCE);
                     } else {
                         // If a window has tap exclude region, we need to account it.
-                        final Region displayRegion = new Region(windowState.getDisplayFrameLw());
+                        final Region displayRegion = new Region(windowState.getDisplayFrame());
                         final Region tapExcludeRegion = new Region();
                         windowState.getTapExcludeRegion(tapExcludeRegion);
                         displayRegion.op(tapExcludeRegion, displayRegion,
@@ -1470,7 +1470,7 @@ final class AccessibilityController {
                 // Move to origin as all transforms are captured by the matrix.
                 RectF windowFrame = mTempRectF;
                 windowFrame.set(rect);
-                windowFrame.offset(-windowState.getFrameLw().left, -windowState.getFrameLw().top);
+                windowFrame.offset(-windowState.getFrame().left, -windowState.getFrame().top);
 
                 matrix.mapRect(windowFrame);
 

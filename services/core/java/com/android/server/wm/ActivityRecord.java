@@ -1334,7 +1334,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean surfaceReady = w.isDrawnLw()  // Regular case
+        final boolean surfaceReady = w.isDrawn()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
         final boolean needsLetterbox = surfaceReady && w.isLetterboxedAppWindow() && fillsParent();
@@ -1355,7 +1355,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     : inMultiWindowMode()
                             ? task.getBounds()
                             : getRootTask().getParent().getBounds();
-            mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
+            mLetterbox.layout(spaceToFill, w.getFrame(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
@@ -4296,7 +4296,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // If we are being set visible, and the starting window is not yet displayed,
             // then make sure it doesn't get displayed.
-            if (startingWindow != null && !startingWindow.isDrawnLw()) {
+            if (startingWindow != null && !startingWindow.isDrawn()) {
                 startingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
                 startingWindow.mLegacyPolicyVisibilityAfterAnim = false;
             }
@@ -5596,9 +5596,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
                 final boolean isAnimationSet = isAnimating(TRANSITION | PARENTS,
                         ANIMATION_TYPE_APP_TRANSITION);
-                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
+                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawn()
                         + ", isAnimationSet=" + isAnimationSet);
-                if (!w.isDrawnLw()) {
+                if (!w.isDrawn()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
@@ -5613,7 +5613,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     if (findMainWindow(false /* includeStartingApp */) != w) {
                         mNumInterestingWindows++;
                     }
-                    if (w.isDrawnLw()) {
+                    if (w.isDrawn()) {
                         mNumDrawnWindows++;
 
                         if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
@@ -5626,7 +5626,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         isInterestingAndDrawn = true;
                     }
                 }
-            } else if (w.isDrawnLw()) {
+            } else if (w.isDrawn()) {
                 // The starting window for this container is drawn.
                 mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(this);
                 startingDisplayed = true;
@@ -6155,7 +6155,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (win == null) {
             return;
         }
-        final Rect frame = win.getRelativeFrameLw();
+        final Rect frame = win.getRelativeFrame();
         final int thumbnailDrawableRes = task.mUserId == mWmService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
@@ -6181,7 +6181,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // destination of the thumbnail header animation. If this is a full screen
         // window scenario, we use the whole display as the target.
         WindowState win = findMainWindow();
-        Rect appRect = win != null ? win.getContentFrameLw() :
+        final Rect appRect = win != null ? win.getContentFrame() :
                 new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
         final Rect insets = win != null ? win.getContentInsets() : null;
         final Configuration displayConfig = mDisplayContent.getConfiguration();
