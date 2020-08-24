@@ -2219,11 +2219,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int getMaxWallpaperLayer() {
-        return getWindowLayerFromTypeLw(TYPE_NOTIFICATION_SHADE);
-    }
-
-    @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
         return attrs.type == TYPE_NOTIFICATION_SHADE;
     }
@@ -5321,15 +5316,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setSwitchingUser(boolean switching) {
         mKeyguardDelegate.setSwitchingUser(switching);
-    }
-
-    @Override
-    public boolean isTopLevelWindow(int windowType) {
-        if (windowType >= WindowManager.LayoutParams.FIRST_SUB_WINDOW
-                && windowType <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
-            return (windowType == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
-        }
-        return true;
     }
 
     @Override

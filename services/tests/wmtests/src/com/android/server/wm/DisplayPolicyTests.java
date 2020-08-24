@@ -297,7 +297,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         final WindowState navigationBar = createNavigationBarWindow();
 
-        navigationBar.getFrameLw().set(new Rect(100, 200, 200, 300));
+        navigationBar.getFrame().set(new Rect(100, 200, 200, 300));
 
         assertFalse("Freeform is overlapping with navigation bar",
                 DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
@@ -377,7 +377,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
-        mImeWindow.getGivenContentInsetsLw().set(0, displayInfo.logicalHeight, 0, 0);
+        mImeWindow.mGivenContentInsets.set(0, displayInfo.logicalHeight, 0, 0);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
         displayPolicy.beginLayoutLw(mDisplayContent.mDisplayFrames, 0 /* UI mode */);

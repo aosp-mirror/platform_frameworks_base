@@ -1106,14 +1106,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean onScreen = w.isOnScreen();
-        final boolean canBeSeen = w.isDisplayedLw();
+        final boolean canBeSeen = w.isDisplayed();
         final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
         ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
                 "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w"
                         + ".isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",
-                w, w.mHasSurface, onScreen, w.isDisplayedLw(), w.mAttrs.userActivityTimeout);
+                w, w.mHasSurface, onScreen, w.isDisplayed(), w.mAttrs.userActivityTimeout);
         if (w.mHasSurface && onScreen) {
             if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
                 mUserActivityTimeout = w.mAttrs.userActivityTimeout;

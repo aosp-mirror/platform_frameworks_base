@@ -483,7 +483,7 @@ class TaskSnapshotController {
         final InsetsState insetsState =
                 new InsetsState(insetsPolicy.getInsetsForDispatch(mainWindow));
         mergeInsetsSources(insetsState, mainWindow.getRequestedInsetsState());
-        final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrameLw(), insetsState);
+        final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrame(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription(),
                 mHighResTaskSnapshotScale, insetsState);

@@ -526,13 +526,13 @@ class WindowStateAnimator {
 
         if (DEBUG) {
             Slog.v(TAG, "Got surface: " + mSurfaceController
-                    + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top);
+                    + ", set left=" + w.getFrame().left + " top=" + w.getFrame().top);
         }
 
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
-                    + w.getFrameLw().left + "," + w.getFrameLw().top + ") ("
+                    + w.getFrame().left + "," + w.getFrame().top + ") ("
                     + width + "x" + height + ")" + " HIDE", false);
         }
 
@@ -896,7 +896,7 @@ class WindowStateAnimator {
 
             // There is no need to wait for an animation change if our window is gone for layout
             // already as we'll never be visible.
-            if (w.getOrientationChanging() && w.isGoneForLayoutLw()) {
+            if (w.getOrientationChanging() && w.isGoneForLayout()) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change skips hidden %s", w);
                 w.setOrientationChanging(false);
             }
@@ -920,7 +920,7 @@ class WindowStateAnimator {
             // really hidden (gone for layout), there is no point in still waiting for it.
             // Note that this does introduce a potential glitch if the window becomes unhidden
             // before it has drawn for the new orientation.
-            if (w.getOrientationChanging() && w.isGoneForLayoutLw()) {
+            if (w.getOrientationChanging() && w.isGoneForLayout()) {
                 w.setOrientationChanging(false);
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Orientation change skips hidden %s", w);
@@ -998,7 +998,7 @@ class WindowStateAnimator {
         }
 
         if (w.getOrientationChanging()) {
-            if (!w.isDrawnLw()) {
+            if (!w.isDrawn()) {
                 mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
                 mAnimator.mLastWindowFreezeSource = w;
                 ProtoLog.v(WM_DEBUG_ORIENTATION,

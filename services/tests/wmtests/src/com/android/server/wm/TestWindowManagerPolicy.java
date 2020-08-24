@@ -86,11 +86,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int getMaxWallpaperLayer() {
-        return 0;
-    }
-
-    @Override
     public boolean isKeyguardHostWindow(WindowManager.LayoutParams attrs) {
         return attrs.type == TYPE_NOTIFICATION_SHADE;
     }
@@ -374,11 +369,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void dump(String prefix, PrintWriter writer, String[] args) {
-    }
-
-    @Override
-    public boolean isTopLevelWindow(int windowType) {
-        return false;
     }
 
     @Override
