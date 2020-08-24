@@ -84,7 +84,6 @@ import android.os.storage.StorageManager;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
 import android.stats.devicepolicy.DevicePolicyEnums;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -142,6 +141,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Service for {@link UserManager}.
@@ -159,10 +159,6 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String LOG_TAG = "UserManagerService";
     static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
     private static final boolean DBG_WITH_STACKTRACE = false; // DO NOT SUBMIT WITH TRUE
-
-    // TODO(b/164159026): remove once owner_name issue on automotive is fixed
-    // Can be used to track getUsers() / userWithNameLU() behavior
-    public static final boolean DBG_CACHED_USERINFOS = false; // DO NOT SUBMIT WITH TRUE
     // Can be used for manual testing of id recycling
     private static final boolean RELEASE_DELETED_USER_ID = false; // DO NOT SUBMIT WITH TRUE
 
@@ -274,25 +270,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     private PackageManagerInternal mPmInternal;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
-
-    /**
-     * Reference to the {@link UserHandle#SYSTEM} user's UserInfo; it's {@code name} was either
-     * manually set, or it's {@code null}.
-     *
-     * <p>The reference is set just once, but it's {@code name} is updated when it's manually set.
-     */
-    @GuardedBy("mUsersLock")
-    private UserInfo mSystemUserInfo;
-
-    /**
-     * Reference to the {@link UserHandle#SYSTEM} user's UserInfo, with its {@code name} set to
-     * the localized value of {@code owner_name}.
-     *
-     * <p>The reference is set just once, but it's {@code name} is updated everytime the reference
-     * is used and the locale changed.
-     */
-    @GuardedBy("mUsersLock")
-    private UserInfo mSystemUserInfoWithName;
 
     /**
      * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
@@ -466,6 +443,11 @@ public class UserManagerService extends IUserManager.Stub {
                     setQuietModeEnabled(userId, false, target, /* callingPackage */ null));
         }
     };
+
+    // TODO(b/161915546): remove once userWithName() is fixed / removed
+    // Use to debug / dump when user 0 is allocated at userWithName()
+    public static final boolean DBG_ALLOCATION = false; // DO NOT SUBMIT WITH TRUE
+    public final AtomicInteger mUser0Allocations;
 
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
@@ -656,6 +638,7 @@ public class UserManagerService extends IUserManager.Stub {
         LocalServices.addService(UserManagerInternal.class, mLocalService);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mUserStates.put(UserHandle.USER_SYSTEM, UserState.STATE_BOOTING);
+        mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
     }
 
     void systemReady() {
@@ -801,7 +784,7 @@ public class UserManagerService extends IUserManager.Stub {
                         || (excludePreCreated && ui.preCreated)) {
                     continue;
                 }
-                users.add(userWithNameLU(ui));
+                users.add(userWithName(ui));
             }
             return users;
         }
@@ -870,7 +853,7 @@ public class UserManagerService extends IUserManager.Stub {
                 userInfo.name = null;
                 userInfo.iconPath = null;
             } else {
-                userInfo = userWithNameLU(userInfo);
+                userInfo = userWithName(userInfo);
             }
             users.add(userInfo);
         }
@@ -1327,57 +1310,26 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo getUserInfo(@UserIdInt int userId) {
         checkManageOrCreateUsersPermission("query user");
         synchronized (mUsersLock) {
-            return userWithNameLU(getUserInfoLU(userId));
+            return userWithName(getUserInfoLU(userId));
         }
     }
 
     /**
      * Returns a UserInfo object with the name filled in, for Owner, or the original
      * if the name is already set.
-     *
-     * <p>Note:</p> the Owner name is localized, so the current value must be checked every time
-     * this method is called.
      */
-    private UserInfo userWithNameLU(UserInfo orig) {
-        // Only the system user uses the owner_name string.
-        if (orig == null || orig.id != UserHandle.USER_SYSTEM) return orig;
-
-        if (mSystemUserInfo == null) {
-            mSystemUserInfo = orig;
-            if (DBG_CACHED_USERINFOS) {
-                Slog.d(LOG_TAG, "Set mSystemUserInfo:" + mSystemUserInfo.toFullString());
+    private UserInfo userWithName(UserInfo orig) {
+        if (orig != null && orig.name == null && orig.id == UserHandle.USER_SYSTEM) {
+            if (DBG_ALLOCATION) {
+                final int number = mUser0Allocations.incrementAndGet();
+                Slog.w(LOG_TAG, "System user instantiated at least " + number + " times");
             }
+            UserInfo withName = new UserInfo(orig);
+            withName.name = getOwnerName();
+            return withName;
+        } else {
+            return orig;
         }
-
-        if (mSystemUserInfo.name != null) {
-            if (DBG_CACHED_USERINFOS) {
-                Slog.v(LOG_TAG, "Returning mSystemUserInfo: " + mSystemUserInfo.toFullString());
-            }
-            return mSystemUserInfo;
-        }
-
-        final String ownerName = getOwnerName();
-
-        if (mSystemUserInfoWithName == null) {
-            mSystemUserInfoWithName = new UserInfo(orig);
-            mSystemUserInfoWithName.name = ownerName;
-            if (DBG_CACHED_USERINFOS) {
-                Slog.d(LOG_TAG, "Set mSystemUserInfoWithName: "
-                        + mSystemUserInfoWithName.toFullString());
-            }
-        } else if (!TextUtils.equals(ownerName, mSystemUserInfoWithName.name)) {
-            if (DBG_CACHED_USERINFOS) {
-                Slog.d(LOG_TAG, "Updating mSystemUserInfoWithName.name from  "
-                        + mSystemUserInfoWithName.name + " to " + ownerName);
-            }
-            mSystemUserInfoWithName.name = ownerName;
-        }
-
-        if (DBG_CACHED_USERINFOS) {
-            Slog.v(LOG_TAG, "Returning mSystemUserInfoWithName:"
-                    + mSystemUserInfoWithName.toFullString());
-        }
-        return mSystemUserInfoWithName;
     }
 
     /** Returns whether the given user type is one of the FULL user types. */
@@ -1530,7 +1482,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         synchronized (mUsersLock) {
-            UserInfo userInfo = userWithNameLU(getUserInfoLU(userId));
+            UserInfo userInfo = userWithName(getUserInfoLU(userId));
             return userInfo == null ? "" : userInfo.name;
         }
     }
@@ -1645,13 +1597,6 @@ public class UserManagerService extends IUserManager.Stub {
             Slog.w(LOG_TAG, "getUserInfo: unknown user #" + userId);
             return null;
         }
-
-        if (DBG_CACHED_USERINFOS && userId == UserHandle.USER_SYSTEM && userData != null
-                && userData.info != mSystemUserInfo) {
-            Slog.wtf(LOG_TAG, "getUserInfoLU(): system user on userData (" + userData.info
-                    + ") is not the same as mSystemUserInfo (" + mSystemUserInfo + ")");
-        }
-
         return userData != null ? userData.info : null;
     }
 
@@ -4910,15 +4855,8 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  Is headless-system mode: " + UserManager.isHeadlessSystemUserMode());
         pw.println("  User version: " + mUserVersion);
         pw.println("  Owner name: " + getOwnerName());
-        if (mSystemUserInfo == null) {
-            pw.println("  (mSystemUserInfo not set)");
-        } else {
-            pw.println("  System user: " +  mSystemUserInfo.toFullString());
-        }
-        if (mSystemUserInfoWithName == null) {
-            pw.println("  (mSystemUserInfoWithName not set)");
-        } else {
-            pw.println("  System user (with name): " +  mSystemUserInfoWithName.toFullString());
+        if (DBG_ALLOCATION) {
+            pw.println("  System user allocations: " + mUser0Allocations.get());
         }
 
         // Dump UserTypes
