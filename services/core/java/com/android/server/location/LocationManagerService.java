@@ -1586,6 +1586,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
 
                 record.mRequest = locationRequest;
+                record.mReceiver.updateMonitoring(true);
                 requests.add(locationRequest);
                 if (!locationRequest.isLowPowerMode()) {
                     providerRequest.setLowPowerMode(false);
