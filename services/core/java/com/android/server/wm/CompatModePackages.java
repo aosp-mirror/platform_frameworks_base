@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -37,6 +37,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -333,8 +334,8 @@ public final class CompatModePackages {
                 }
                 try {
                     if (app.hasThread()) {
-                        if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
-                                + app.mName + " new compat " + ci);
+                        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s "
+                                + "new compat %s", app.mName, ci);
                         app.getThread().updatePackageCompatibilityInfo(packageName, ci);
                     }
                 } catch (Exception e) {

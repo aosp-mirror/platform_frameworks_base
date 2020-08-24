@@ -13,6 +13,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-2121056984": {
+      "message": "%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
     "-2109936758": {
       "message": "removeAppToken make exiting: %s",
       "level": "VERBOSE",
@@ -42,6 +48,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-2029985709": {
+      "message": "setFocusedTask: taskId=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-2024464438": {
       "message": "app-onAnimationFinished(): mOuter=%s",
@@ -139,6 +151,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "-1868048288": {
+      "message": "Updating to new configuration after starting activity.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityStarter.java"
+    },
     "-1862269827": {
       "message": "applyAnimation: anim=%s transit=%s isEntrance=%b Callers=%s",
       "level": "VERBOSE",
@@ -162,6 +180,18 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-1810446914": {
+      "message": "Trying to update display configuration for system\/invalid process.",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-1791031393": {
+      "message": "Ensuring correct configuration: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1782453012": {
       "message": "Checking theme of starting window: 0x%x",
@@ -211,6 +241,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "-1699018375": {
+      "message": "Adding activity %s to task %s callers: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
     "-1698815688": {
       "message": "Resetting app token %s of replacing window marks.",
       "level": "DEBUG",
@@ -229,11 +265,29 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1638958146": {
+      "message": "Removing activity %s from task=%s adding to task=%s Callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/ResetTargetTaskHelper.java"
+    },
     "-1632122349": {
       "message": "Changing surface while display frozen: %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1630752478": {
+      "message": "removeLockedTask: removed %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
+    "-1598452494": {
+      "message": "activityDestroyedLocked: r=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_CONTAINERS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1596995693": {
       "message": "startAnimation",
@@ -307,6 +361,18 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-1495062622": {
+      "message": "Can't report activity moved to display - client not running, activityRecord=%s, displayId=%d",
+      "level": "WARN",
+      "group": "WM_DEBUG_SWITCH",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-1492881555": {
+      "message": "Starting activity when config will change = %b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityStarter.java"
+    },
     "-1471946192": {
       "message": "Marking app token %s with replacing child windows.",
       "level": "DEBUG",
@@ -379,6 +445,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-1305755880": {
+      "message": "Initial config: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "-1292329638": {
       "message": "Added starting %s: startingWindow=%s startingView=%s",
       "level": "VERBOSE",
@@ -445,6 +517,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "-1155279885": {
+      "message": "Frontmost changed immersion: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IMMERSIVE",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "-1144293044": {
       "message": "SURFACE SET FREEZE LAYER: %s",
       "level": "INFO",
@@ -474,6 +552,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "-1115019498": {
+      "message": "Configuration & display unchanged in %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1113134997": {
       "message": "Attempted to add application window with unknown token %s.  Aborting.",
@@ -559,11 +643,23 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-929676529": {
+      "message": "Configuration changes for %s, allChanges=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-928291778": {
       "message": "applyAnimation: anim=%s nextAppTransition=%d transit=%s Callers=%s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "-927199900": {
+      "message": "Updating global configuration to: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-916108501": {
       "message": "Adding %s to %s",
@@ -619,11 +715,23 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-846078709": {
+      "message": "Configuration doesn't matter in finishing %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-809771899": {
       "message": "findFocusedWindow: Reached focused app=%s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "-804217032": {
+      "message": "Skipping config check (will change): %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-793346159": {
       "message": "New transit into wallpaper: %s",
@@ -672,6 +780,18 @@
       "level": "INFO",
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-743431900": {
+      "message": "Configuration no differences in %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-716565534": {
+      "message": "moveActivityStackToFront: unfocusable activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-714291355": {
       "message": "Losing delayed focus: %s",
@@ -739,6 +859,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "-593535526": {
+      "message": "Binding proc %s with config %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/am\/ActivityManagerService.java"
+    },
     "-583031528": {
       "message": "%s",
       "level": "INFO",
@@ -756,6 +882,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-548282316": {
+      "message": "setLockTaskMode: Locking to %s Callers=%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
     "-547111355": {
       "message": "hideIme Control target: %s ",
@@ -781,6 +913,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-503656156": {
+      "message": "Update process config of %s to new config %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "-496681057": {
       "message": "Attempted to get remove mode of a display that does not exist: %d",
       "level": "WARN",
@@ -798,6 +936,12 @@
       "level": "INFO",
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
+    "-449118559": {
+      "message": "Trying to update display configuration for invalid process, pid=%d",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-445944810": {
       "message": "finish(%b): mCanceled=%b",
@@ -834,6 +978,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
+    },
+    "-401282500": {
+      "message": "destroyIfPossible: r=%s destroy returned removed=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_CONTAINERS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-395922585": {
       "message": "InsetsSource setWin %s",
@@ -907,16 +1057,40 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-317194205": {
+      "message": "clearLockedTasks: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
     "-303497363": {
       "message": "reparent: moving activity=%s to task=%d at %d",
       "level": "INFO",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-272719931": {
+      "message": "startLockTaskModeLocked: %s",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-260960989": {
+      "message": "Removing and adding activity %s to stack at top callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
     "-251259736": {
       "message": "No longer freezing: %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-235225312": {
+      "message": "Skipping config check for initializing activity: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-198463978": {
@@ -942,6 +1116,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
+    },
+    "-168799453": {
+      "message": "Allowing features %d:0x%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-167822951": {
       "message": "Attempted to add starting window to token with already existing starting window",
@@ -978,6 +1158,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-90559682": {
+      "message": "Config is skipping already pausing %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-87705714": {
       "message": "findFocusedWindow: focusedApp=null using new focus @ %s",
@@ -1303,6 +1489,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "355940361": {
+      "message": "Config is destroying non-running %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "371641947": {
       "message": "Window Manager Crash %s",
       "level": "WTF",
@@ -1314,6 +1506,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "374506950": {
+      "message": "Reporting activity moved to display, activityRecord=%s, displayId=%d, config=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SWITCH",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "374972436": {
       "message": "performEnableScreen: Waiting for anim complete",
@@ -1410,6 +1608,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "556758086": {
+      "message": "Applying new update lock state '%s' for %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IMMERSIVE",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "557227556": {
       "message": "onAnimationFinished(): Notify animation finished:",
@@ -1531,12 +1735,6 @@
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "676824470": {
-      "message": "Test completed successfully: %b %d %o %x %e %g %f %% %s.",
-      "level": "ERROR",
-      "group": "TEST_GROUP",
-      "at": "com\/android\/server\/wm\/ProtoLogGroup.java"
-    },
     "685047360": {
       "message": "Resizing window %s",
       "level": "VERBOSE",
@@ -1560,6 +1758,18 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "715749922": {
+      "message": "Allowlisting %d:%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "736692676": {
+      "message": "Config is relaunching %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "745391677": {
       "message": "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x \/ %s",
@@ -1615,6 +1825,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "869266572": {
+      "message": "Removing activity %s from stack, reason= %s callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "873914452": {
       "message": "goodToGo()",
       "level": "DEBUG",
@@ -1645,11 +1861,29 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
+    "950074526": {
+      "message": "setLockTaskMode: Can't lock due to auth",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
     "954470154": {
       "message": "FORCED DISPLAY SCALING DISABLED",
       "level": "INFO",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "956374481": {
+      "message": "removeLockedTask: task=%s last task, reverting locktask mode. Callers=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
+    "969323241": {
+      "message": "Sending new config to %s, config: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "972354148": {
       "message": "\tcontainer=%s",
@@ -1663,11 +1897,23 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1040675582": {
+      "message": "Can't report activity configuration update - client not running, activityRecord=%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1046922686": {
       "message": "requestScrollCapture: caught exception dispatching callback: %s",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1049367566": {
+      "message": "Sending to proc %s new config %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/WindowProcessController.java"
     },
     "1051545910": {
       "message": "Exit animation finished in %s: remove=%b",
@@ -1680,6 +1926,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
+    },
+    "1088929964": {
+      "message": "onLockTaskPackagesUpdated: starting new locktask task=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
     "1089714158": {
       "message": "  FREEZE %s: DESTROY",
@@ -1789,6 +2041,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1337596507": {
+      "message": "Sending to proc %s new compat %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/CompatModePackages.java"
+    },
     "1346895820": {
       "message": "ScreenRotation still animating: type: %d\nmDisplayAnimator: %s\nmEnterBlackFrameAnimator: %s\nmRotateScreenAnimator: %s\nmScreenshotRotationAnimator: %s",
       "level": "VERBOSE",
@@ -1800,6 +2058,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "1360551978": {
+      "message": "Trying to update display configuration for non-existing displayId=%d",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "1364498663": {
       "message": "notifyAppResumed: wasStopped=%b %s",
@@ -1818,6 +2082,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
+    },
+    "1401295262": {
+      "message": "Mode default, asking user",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
     "1401700824": {
       "message": "Window drawn win=%s",
@@ -1927,6 +2197,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1522489371": {
+      "message": "moveActivityStackToFront: activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1525976603": {
       "message": "cancelAnimation(): reason=%s",
       "level": "DEBUG",
@@ -1950,6 +2226,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1576607724": {
+      "message": "Report configuration: %s %s %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "1577579529": {
       "message": "win=%s destroySurfaces: appStopped=%b win.mWindowRemovalAllowed=%b win.mRemoveOnExit=%b",
@@ -1980,6 +2262,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1635062046": {
+      "message": "Skipping config check invisible: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1635462459": {
       "message": "onMovedByResize: Moving %s",
@@ -2021,6 +2309,12 @@
       "message": "Finish starting %s: first real window is shown, no animation",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1679569477": {
+      "message": "Configuration doesn't matter not running %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1720229827": {
@@ -2077,11 +2371,29 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1789603530": {
+      "message": "Removing activity %s hasSavedState=%b stateNotNeeded=%s finishing=%b state=%s callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1822843721": {
       "message": "Aborted starting %s: startingData=%s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1824105730": {
+      "message": "setLockTaskAuth: task=%s mLockTaskAuth=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
+    "1829094918": {
+      "message": "onLockTaskPackagesUpdated: removing %s mLockTaskAuth()=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
     "1831008694": {
       "message": "Loading animation for app transition. transit=%s enter=%b frame=%s insets=%s surfaceInsets=%s",
@@ -2161,6 +2473,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "1975793405": {
+      "message": "setFocusedStack: stackId=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "1984470582": {
       "message": "Creating TaskScreenshotAnimatable: task: %s width: %d height: %d",
       "level": "DEBUG",
@@ -2172,6 +2490,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowAnimator.java"
+    },
+    "1995093920": {
+      "message": "Checking to restart %s: changed=0x%s, handles=0x%s, mLastReportedConfiguration=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "2016061474": {
       "message": "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d Callers=%s",
@@ -2190,6 +2514,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "2022322588": {
+      "message": "Adding activity %s to stack to task %s callers: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/Task.java"
     },
     "2022422429": {
       "message": "createAnimationAdapter(): container=%s",
@@ -2269,6 +2599,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "2134999275": {
+      "message": "moveActivityStackToFront: already on top, activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "2137411379": {
       "message": "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b Callers=%s",
       "level": "VERBOSE",
@@ -2277,9 +2613,6 @@
     }
   },
   "groups": {
-    "TEST_GROUP": {
-      "tag": "WindowManagetProtoLogTest"
-    },
     "WM_DEBUG_ADD_REMOVE": {
       "tag": "WindowManager"
     },
@@ -2290,6 +2623,12 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_BOOT": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_CONFIGURATION": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_CONTAINERS": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_DRAW": {
@@ -2304,7 +2643,13 @@
     "WM_DEBUG_IME": {
       "tag": "WindowManager"
     },
+    "WM_DEBUG_IMMERSIVE": {
+      "tag": "WindowManager"
+    },
     "WM_DEBUG_KEEP_SCREEN_ON": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_LOCKTASK": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_ORIENTATION": {
@@ -2323,6 +2668,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_STARTING_WINDOW": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_SWITCH": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_WINDOW_MOVEMENT": {

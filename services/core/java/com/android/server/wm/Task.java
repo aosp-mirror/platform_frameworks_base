@@ -79,6 +79,7 @@ import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
@@ -87,9 +88,7 @@ import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -1651,8 +1650,8 @@ class Task extends WindowContainer<WindowContainer> {
      * Reorder the history stack so that the passed activity is brought to the front.
      */
     final void moveActivityToFrontLocked(ActivityRecord newTop) {
-        if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE, "Removing and adding activity "
-                + newTop + " to stack at top callers=" + Debug.getCallers(4));
+        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Removing and adding activity %s to stack at top "
+                + "callers=%s", newTop, Debug.getCallers(4));
 
         positionChildAtTop(newTop);
         updateEffectiveIntent();
@@ -1951,8 +1950,8 @@ class Task extends WindowContainer<WindowContainer> {
                         ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }
-        if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this
-                + " mLockTaskAuth=" + lockTaskAuthToString());
+        ProtoLog.d(WM_DEBUG_LOCKTASK, "setLockTaskAuth: task=%s mLockTaskAuth=%s", this,
+                lockTaskAuthToString());
     }
 
     @Override
@@ -6370,7 +6369,8 @@ class Task extends WindowContainer<WindowContainer> {
                 // Here it is!  Now, if this is not yet visible (occluded by another task) to the
                 // user, then just add it without starting; it will get started when the user
                 // navigates back to it.
-                if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to task " + task,
+                ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s "
+                                + "callers: %s", r, task,
                         new RuntimeException("here").fillInStackTrace());
                 rTask.positionChildAtTop(r);
                 ActivityOptions.abort(options);
@@ -6392,8 +6392,8 @@ class Task extends WindowContainer<WindowContainer> {
         task = activityTask;
 
         // Slot the activity into the history stack and proceed
-        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack to task " + task,
-                new RuntimeException("here").fillInStackTrace());
+        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to stack to task %s "
+                        + "callers: %s", r, task, new RuntimeException("here").fillInStackTrace());
         task.positionChildAtTop(r);
 
         // The transition animation and starting window are not needed if {@code allowMoveToFront}

@@ -16,9 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.wm.Task.TAG_ADD_REMOVE;
 import static com.android.server.wm.Task.TAG_TASKS;
 
 import android.app.ActivityOptions;
@@ -27,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Debug;
 import android.util.Slog;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -218,8 +218,8 @@ class ResetTargetTaskHelper {
             if (takeOptions) {
                 noOptions = takeOption(p, noOptions);
             }
-            if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE, "Removing activity " + p + " from task="
-                    + mTask + " adding to task=" + targetTask + " Callers=" + Debug.getCallers(4));
+            ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Removing activity %s from task=%s "
+                    + "adding to task=%s Callers=%s", p, mTask,  targetTask, Debug.getCallers(4));
             if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                     "Pushing next activity " + p + " out to target's task " + target);
             p.reparent(targetTask, position, "resetTargetTaskIfNeeded");
