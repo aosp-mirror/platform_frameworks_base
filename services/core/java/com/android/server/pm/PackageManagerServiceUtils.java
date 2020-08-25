@@ -421,18 +421,13 @@ public class PackageManagerServiceUtils {
 
     /**
      * Derive the value of the {@code cpuAbiOverride} based on the provided
-     * value and an optional stored value from the package settings.
+     * value.
      */
-    public static String deriveAbiOverride(String abiOverride, PackageSetting settings) {
-        String cpuAbiOverride = null;
+    public static String deriveAbiOverride(String abiOverride) {
         if (NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
-            cpuAbiOverride = null;
-        } else if (abiOverride != null) {
-            cpuAbiOverride = abiOverride;
-        } else if (settings != null) {
-            cpuAbiOverride = settings.cpuAbiOverrideString;
+            return null;
         }
-        return cpuAbiOverride;
+        return abiOverride;
     }
 
     /**
