@@ -629,7 +629,13 @@ public class TouchExplorer extends BaseEventStreamTransformation
                                     Slog.d(LOG_TAG, "Three-finger edge swipe detected.");
                                 }
                                 mState.startDelegating();
-                                mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
+                                if (mState.isTouchExploring()) {
+                                    mDispatcher.sendDownForAllNotInjectedPointers(event,
+                                            policyFlags);
+                                } else {
+                                    mDispatcher.sendDownForAllNotInjectedPointersWithOriginalDown(
+                                            event, policyFlags);
+                                }
                             }
                         }
                     }
