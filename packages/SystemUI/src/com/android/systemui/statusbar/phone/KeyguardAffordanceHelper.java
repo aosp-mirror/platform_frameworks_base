@@ -27,6 +27,7 @@ import android.view.ViewConfiguration;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.classifier.Classifier;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -317,7 +318,9 @@ public class KeyguardAffordanceHelper {
         // We snap back if the current translation is not far enough
         boolean snapBack = false;
         if (mCallback.needsAntiFalsing()) {
-            snapBack = snapBack || mFalsingManager.isFalseTouch();
+            snapBack = snapBack || mFalsingManager.isFalseTouch(
+                    mTargetedView == mRightIcon
+                            ? Classifier.RIGHT_AFFORDANCE : Classifier.LEFT_AFFORDANCE);
         }
         snapBack = snapBack || isBelowFalsingThreshold();
 
