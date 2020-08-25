@@ -1133,9 +1133,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             return;
         }
 
-        String dumpFilter = args.length == 0 ? null : args[0];
-
-        ipw.println("Location Manager State:");
+        ipw.print("Location Manager State:");
         ipw.increaseIndent();
         ipw.println("Elapsed Realtime: " + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
 
@@ -1166,34 +1164,28 @@ public class LocationManagerService extends ILocationManager.Stub {
                 ipw.println(
                         "Location Controller Extra Package: " + mExtraLocationControllerPackage
                                 + (mExtraLocationControllerPackageEnabled ? " [enabled]"
-                                : "[disabled]"));
+                                : " [disabled]"));
             }
         }
 
         ipw.println("Location Providers:");
         ipw.increaseIndent();
         for (LocationProviderManager manager : mProviderManagers) {
-            if (dumpFilter == null || manager.getName().equals(dumpFilter)) {
-                manager.dump(fd, ipw, args);
-            }
+            manager.dump(fd, ipw, args);
         }
         ipw.decreaseIndent();
 
-        if (dumpFilter == null || GPS_PROVIDER.equals(dumpFilter)) {
-            if (mGnssManagerService != null) {
-                ipw.println("GNSS Manager:");
-                ipw.increaseIndent();
-                mGnssManagerService.dump(fd, ipw, args);
-                ipw.decreaseIndent();
-            }
-        }
-
-        if (dumpFilter == null || "geofence".equals(dumpFilter)) {
-            ipw.println("Geofence Manager:");
+        if (mGnssManagerService != null) {
+            ipw.println("GNSS Manager:");
             ipw.increaseIndent();
-            mGeofenceManager.dump(fd, ipw, args);
+            mGnssManagerService.dump(fd, ipw, args);
             ipw.decreaseIndent();
         }
+
+        ipw.println("Geofence Manager:");
+        ipw.increaseIndent();
+        mGeofenceManager.dump(fd, ipw, args);
+        ipw.decreaseIndent();
     }
 
     private class LocalService extends LocationManagerInternal {

@@ -17,10 +17,10 @@
 package com.android.server.location.listeners;
 
 import android.annotation.Nullable;
-import android.location.util.identity.CallerIdentity;
 import android.util.Log;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * A listener registration that stores its own key, and thus can remove itself. By default it will
@@ -36,9 +36,9 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
 
     private volatile @Nullable Object mKey;
 
-    protected RemovableListenerRegistration(String tag, @Nullable TRequest request,
-            CallerIdentity callerIdentity, TListener listener) {
-        super(request, callerIdentity, listener);
+    protected RemovableListenerRegistration(String tag, Executor executor,
+            @Nullable TRequest request, TListener listener) {
+        super(executor, request, listener);
         mTag = Objects.requireNonNull(tag);
     }
 
@@ -70,7 +70,7 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
 
     @Override
     public <Listener> void onOperationFailure(ListenerOperation<Listener> operation, Exception e) {
-        Log.w(mTag, "registration " + getIdentity() + " removed due to unexpected exception", e);
+        Log.w(mTag, "registration " + this + " removed due to unexpected exception", e);
         remove();
     }
 

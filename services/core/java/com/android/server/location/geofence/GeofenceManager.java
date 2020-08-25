@@ -32,6 +32,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.util.identity.CallerIdentity;
+import android.os.Binder;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
@@ -291,17 +292,28 @@ public class GeofenceManager extends
             @Nullable String attributionTag) {
         LocationPermissions.enforceCallingOrSelfLocationPermission(mContext, PERMISSION_FINE);
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
-                AppOpsManager.toReceiverId(pendingIntent));
-        addRegistration(new GeofenceKey(pendingIntent, geofence),
-                new GeofenceRegistration(geofence, identity, pendingIntent));
+        CallerIdentity callerIdentity = CallerIdentity.fromBinder(mContext, packageName,
+                attributionTag, AppOpsManager.toReceiverId(pendingIntent));
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            addRegistration(new GeofenceKey(pendingIntent, geofence),
+                    new GeofenceRegistration(geofence, callerIdentity, pendingIntent));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
      * Removes the geofence associated with the PendingIntent.
      */
     public void removeGeofence(PendingIntent pendingIntent) {
-        removeRegistrationIf(key -> key.getPendingIntent().equals(pendingIntent));
+        long identity = Binder.clearCallingIdentity();
+        try {
+            removeRegistrationIf(key -> key.getPendingIntent().equals(pendingIntent));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
