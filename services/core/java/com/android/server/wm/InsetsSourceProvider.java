@@ -173,7 +173,7 @@ class InsetsSourceProvider {
         // frame may not yet determined that server side doesn't think the window is ready to
         // visible. (i.e. No surface, pending insets that were given during layout, etc..)
         if (mServerVisible) {
-            mTmpRect.set(mWin.getFrameLw());
+            mTmpRect.set(mWin.getFrame());
             if (mFrameProvider != null) {
                 mFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin, mTmpRect);
             } else {
@@ -185,14 +185,14 @@ class InsetsSourceProvider {
         mSource.setFrame(mTmpRect);
 
         if (mImeFrameProvider != null) {
-            mImeOverrideFrame.set(mWin.getFrameLw());
+            mImeOverrideFrame.set(mWin.getFrame());
             mImeFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin,
                     mImeOverrideFrame);
         }
 
         if (mWin.mGivenVisibleInsets.left != 0 || mWin.mGivenVisibleInsets.top != 0
                 || mWin.mGivenVisibleInsets.right != 0 || mWin.mGivenVisibleInsets.bottom != 0) {
-            mTmpRect.set(mWin.getFrameLw());
+            mTmpRect.set(mWin.getFrame());
             mTmpRect.inset(mWin.mGivenVisibleInsets);
             mSource.setVisibleFrame(mTmpRect);
         } else {

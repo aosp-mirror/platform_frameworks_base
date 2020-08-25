@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ສືບຕໍ່"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ຍົກເລີກ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ແບ່ງປັນ"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ລຶບ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ຍົກເລີກການບັນທຶກໜ້າຈໍແລ້ວ"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ຈັດເກັບການບັນທຶກໜ້າຈໍ, ແຕະເພື່ອເບິ່ງ"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ລຶບການບັນທຶກໜ້າຈໍອອກແລ້ວ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ເກີດຄວາມຜິດພາດໃນການລຶບການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ໂຫຼດສິດອະນຸຍາດບໍ່ສຳເລັດ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ເກີດຄວາມຜິດພາດໃນການບັນທຶກໜ້າຈໍ"</string>

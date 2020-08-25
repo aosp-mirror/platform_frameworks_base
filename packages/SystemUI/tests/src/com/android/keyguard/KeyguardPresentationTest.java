@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardDisplayManager.KeyguardPresentation;
+import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
@@ -51,6 +53,12 @@ public class KeyguardPresentationTest extends SysuiTestCase {
     KeyguardSliceView mMockKeyguardSliceView;
     @Mock
     KeyguardStatusView mMockKeyguardStatusView;
+    @Mock
+    private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    @Mock
+    private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
+    @Mock
+    private KeyguardClockSwitchController mKeyguardClockSwitchController;
 
     LayoutInflater mLayoutInflater;
 
@@ -62,6 +70,11 @@ public class KeyguardPresentationTest extends SysuiTestCase {
         when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
         when(mMockKeyguardStatusView.getContext()).thenReturn(mContext);
         when(mMockKeyguardStatusView.findViewById(R.id.clock)).thenReturn(mMockKeyguardStatusView);
+        when(mKeyguardStatusViewComponentFactory.build(any(KeyguardStatusView.class)))
+                .thenReturn(mKeyguardStatusViewComponent);
+        when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
+                .thenReturn(mKeyguardClockSwitchController);
+
         allowTestableLooperAsMainThread();
 
         InjectionInflationController inflationController = new InjectionInflationController(
@@ -99,7 +112,8 @@ public class KeyguardPresentationTest extends SysuiTestCase {
     @Test
     public void testInflation_doesntCrash() {
         KeyguardPresentation keyguardPresentation = new KeyguardPresentation(mContext,
-                mContext.getDisplayNoVerify(), mLayoutInflater);
+                mContext.getDisplayNoVerify(), mKeyguardStatusViewComponentFactory,
+                mLayoutInflater);
         keyguardPresentation.onCreate(null /*savedInstanceState */);
     }
 }

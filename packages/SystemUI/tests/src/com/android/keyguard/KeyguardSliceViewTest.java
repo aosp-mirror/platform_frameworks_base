@@ -15,37 +15,27 @@
  */
 package com.android.keyguard;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
 
+import androidx.slice.Slice;
 import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
+import androidx.slice.widget.RowContent;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.tuner.TunerService;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
@@ -53,46 +43,18 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardSliceViewTest extends SysuiTestCase {
     private KeyguardSliceView mKeyguardSliceView;
     private Uri mSliceUri;
 
-    @Mock
-    private TunerService mTunerService;
-    @Mock
-    private ConfigurationController mConfigurationController;
-    @Mock
-    private ActivityStarter mActivityStarter;
-    @Mock
-    private Resources mResources;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        allowTestableLooperAsMainThread();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        layoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
-
-            @Override
-            public View onCreateView(View parent, String name, Context context,
-                    AttributeSet attrs) {
-                return onCreateView(name, context, attrs);
-            }
-
-            @Override
-            public View onCreateView(String name, Context context, AttributeSet attrs) {
-                if ("com.android.keyguard.KeyguardSliceView".equals(name)) {
-                    return new KeyguardSliceView(getContext(), attrs, mActivityStarter,
-                            mConfigurationController, mTunerService, mResources);
-                }
-                return null;
-            }
-        });
         mKeyguardSliceView = (KeyguardSliceView) layoutInflater
                 .inflate(R.layout.keyguard_status_area, null);
-        mKeyguardSliceView.setupUri(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
         mSliceUri = Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
         SliceProvider.setSpecs(new HashSet<>(Collections.singletonList(SliceSpecs.LIST)));
     }
@@ -100,9 +62,13 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void showSlice_notifiesListener() {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
+        builder.setHeader(new ListBuilder.HeaderBuilder().setTitle("header title!"));
+        Slice slice = builder.build();
+        RowContent rowContent = new RowContent(slice.getItemArray()[0], 0);
+
         AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
-        mKeyguardSliceView.onChanged(builder.build());
+        mKeyguardSliceView.showSlice(rowContent, Collections.EMPTY_LIST);
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());
     }
@@ -111,7 +77,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     public void showSlice_emptySliceNotifiesListener() {
         AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
-        mKeyguardSliceView.onChanged(null);
+        mKeyguardSliceView.showSlice(null, Collections.EMPTY_LIST);
         Assert.assertTrue("Listener should be notified about slice changes.",
                 notified.get());
     }
@@ -119,21 +85,14 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
     @Test
     public void hasHeader_readsSliceData() {
         ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
-        mKeyguardSliceView.onChanged(builder.build());
+        mKeyguardSliceView.showSlice(null, Collections.EMPTY_LIST);
         Assert.assertFalse("View should not have a header", mKeyguardSliceView.hasHeader());
 
         builder.setHeader(new ListBuilder.HeaderBuilder().setTitle("header title!"));
-        mKeyguardSliceView.onChanged(builder.build());
+        Slice slice = builder.build();
+        RowContent rowContent = new RowContent(slice.getItemArray()[0], 0);
+        mKeyguardSliceView.showSlice(rowContent, Collections.EMPTY_LIST);
         Assert.assertTrue("View should have a header", mKeyguardSliceView.hasHeader());
-    }
-
-    @Test
-    public void refresh_replacesSliceContentAndNotifiesListener() {
-        AtomicBoolean notified = new AtomicBoolean();
-        mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
-        mKeyguardSliceView.refresh();
-        Assert.assertTrue("Listener should be notified about slice changes.",
-                notified.get());
     }
 
     @Test
@@ -146,19 +105,5 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
         mKeyguardSliceView.setDarkAmount(1);
         Assert.assertEquals("Should be using AOD text color", Color.WHITE,
                 mKeyguardSliceView.getTextColor());
-    }
-
-    @Test
-    public void onAttachedToWindow_registersListeners() {
-        mKeyguardSliceView.onAttachedToWindow();
-        verify(mTunerService).addTunable(eq(mKeyguardSliceView), anyString());
-        verify(mConfigurationController).addCallback(eq(mKeyguardSliceView));
-    }
-
-    @Test
-    public void onDetachedFromWindow_unregistersListeners() {
-        mKeyguardSliceView.onDetachedFromWindow();
-        verify(mTunerService).removeTunable(eq(mKeyguardSliceView));
-        verify(mConfigurationController).removeCallback(eq(mKeyguardSliceView));
     }
 }

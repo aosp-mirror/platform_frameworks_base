@@ -89,15 +89,14 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -228,7 +227,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
     /** TrustManager for letting it know when we change visibility */
     private final TrustManager mTrustManager;
-    private final InjectionInflationController mInjectionInflationController;
 
     /**
      * Used to keep the device awake while to ensure the keyguard finishes opening before
@@ -345,7 +343,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
     /**
      * For managing external displays
      */
-    private KeyguardDisplayManager mKeyguardDisplayManager;
+    private final KeyguardDisplayManager mKeyguardDisplayManager;
 
     private final ArrayList<IKeyguardStateCallback> mKeyguardStateCallbacks = new ArrayList<>();
 
@@ -724,7 +722,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             TrustManager trustManager,
             DeviceConfigProxy deviceConfig,
             NavigationModeController navigationModeController,
-            InjectionInflationController injectionInflationController) {
+            KeyguardDisplayManager keyguardDisplayManager) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
@@ -735,7 +733,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         mUpdateMonitor = keyguardUpdateMonitor;
         mPM = powerManager;
         mTrustManager = trustManager;
-        mInjectionInflationController = injectionInflationController;
+        mKeyguardDisplayManager = keyguardDisplayManager;
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
@@ -774,9 +772,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         delayedActionFilter.addAction(DELAYED_LOCK_PROFILE_ACTION);
         mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
                 SYSTEMUI_PERMISSION, null /* scheduler */);
-
-        mKeyguardDisplayManager = new KeyguardDisplayManager(mContext,
-                mInjectionInflationController);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 

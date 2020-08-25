@@ -110,9 +110,13 @@ import static android.view.WindowManager.TRANSIT_UNSET;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTAINERS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SWITCH;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecordProto.ALL_DRAWN;
@@ -145,9 +149,6 @@ import static com.android.server.wm.ActivityRecordProto.WINDOW_TOKEN;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -1096,15 +1097,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void scheduleActivityMovedToDisplay(int displayId, Configuration config) {
         if (!attachedToProcess()) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.w(TAG,
-                    "Can't report activity moved to display - client not running, activityRecord="
-                            + this + ", displayId=" + displayId);
+            ProtoLog.w(WM_DEBUG_SWITCH, "Can't report activity moved "
+                    + "to display - client not running, activityRecord=%s, displayId=%d",
+                    this, displayId);
             return;
         }
         try {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                    "Reporting activity moved to display" + ", activityRecord=" + this
-                            + ", displayId=" + displayId + ", config=" + config);
+            ProtoLog.v(WM_DEBUG_SWITCH, "Reporting activity moved to "
+                    + "display, activityRecord=%s, displayId=%d, config=%s", this, displayId,
+                    config);
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     MoveToDisplayItem.obtain(displayId, config));
@@ -1115,14 +1116,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void scheduleConfigurationChanged(Configuration config) {
         if (!attachedToProcess()) {
-            if (DEBUG_CONFIGURATION) Slog.w(TAG,
-                    "Can't report activity configuration update - client not running"
-                            + ", activityRecord=" + this);
+            ProtoLog.w(WM_DEBUG_CONFIGURATION, "Can't report activity configuration "
+                    + "update - client not running, activityRecord=%s", this);
             return;
         }
         try {
-            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + ", config: "
-                    + config);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending new config to %s, "
+                    + "config: %s", this, config);
 
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     ActivityConfigurationChangeItem.obtain(config));
@@ -1334,7 +1334,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean surfaceReady = w.isDrawnLw()  // Regular case
+        final boolean surfaceReady = w.isDrawn()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
         final boolean needsLetterbox = surfaceReady && w.isLetterboxedAppWindow() && fillsParent();
@@ -1355,7 +1355,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     : inMultiWindowMode()
                             ? task.getBounds()
                             : getRootTask().getParent().getBounds();
-            mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
+            mLetterbox.layout(spaceToFill, w.getFrame(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
@@ -1949,10 +1949,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             startingWindow = null;
             startingDisplayed = false;
             if (surface == null) {
-                ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
-                        "startingWindow was set but startingSurface==null, couldn't "
-                                + "remove");
-
+                ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "startingWindow was set but "
+                        + "startingSurface==null, couldn't remove");
                 return;
             }
         } else {
@@ -1962,9 +1960,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
-                        + " startingView=%s Callers=%s",
-                this, startingWindow, startingSurface, Debug.getCallers(5));
+                + " startingView=%s Callers=%s", this, startingWindow, startingSurface,
+                Debug.getCallers(5));
 
 
         // Use the same thread to remove the window as we used to add it, as otherwise we end up
@@ -2399,9 +2398,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean moveFocusableActivityToTop(String reason) {
         if (!isFocusable()) {
-            if (DEBUG_FOCUS) {
-                Slog.d(TAG_FOCUS, "moveActivityStackToFront: unfocusable activity=" + this);
-            }
+            ProtoLog.d(WM_DEBUG_FOCUS, "moveActivityStackToFront: unfocusable "
+                    + "activity=%s", this);
             return false;
         }
 
@@ -2414,15 +2412,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (mRootWindowContainer.getTopResumedActivity() == this
                 && getDisplayContent().mFocusedApp == this) {
-            if (DEBUG_FOCUS) {
-                Slog.d(TAG_FOCUS, "moveActivityStackToFront: already on top, activity=" + this);
-            }
+            ProtoLog.d(WM_DEBUG_FOCUS, "moveActivityStackToFront: already on top, "
+                    + "activity=%s", this);
             return !isState(RESUMED);
         }
-
-        if (DEBUG_FOCUS) {
-            Slog.d(TAG_FOCUS, "moveActivityStackToFront: activity=" + this);
-        }
+        ProtoLog.d(WM_DEBUG_FOCUS, "moveActivityStackToFront: activity=%s", this);
 
         stack.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
@@ -2798,10 +2792,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
 
-        if (DEBUG_CONTAINERS) {
-            Slog.d(TAG_CONTAINERS, "destroyIfPossible: r=" + this + " destroy returned removed="
-                    + activityRemoved);
-        }
+        ProtoLog.d(WM_DEBUG_CONTAINERS, "destroyIfPossible: r=%s destroy returned "
+                + "removed=%s", this, activityRemoved);
 
         return activityRemoved;
     }
@@ -2859,12 +2851,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             app.removeActivity(this, true /* keepAssociation */);
             if (!app.hasActivities()) {
                 mAtmService.clearHeavyWeightProcessIfEquals(app);
-                // Update any services we are bound to that might care about whether
-                // their client may have activities.
-                // No longer have activities, so update LRU list and oom adj.
-                app.updateProcessInfo(true /* updateServiceConnectionActivities */,
-                        false /* activityChange */, true /* updateOomAdj */,
-                        false /* addPendingTopUid */);
             }
 
             boolean skipDestroy = false;
@@ -2941,10 +2927,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         finishActivityResults(Activity.RESULT_CANCELED,
                 null /* resultData */, null /* resultGrants */);
         makeFinishingLocked();
-        if (ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE) {
-            Slog.i(TAG_ADD_REMOVE, "Removing activity " + this + " from stack, reason="
-                    + reason + ", callers=" + Debug.getCallers(5));
-        }
+
+        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Removing activity %s from stack, reason= %s "
+                        + "callers=%s", this, reason, Debug.getCallers(5));
 
         takeFromHistory();
         removeTimeouts();
@@ -2984,7 +2969,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void destroyed(String reason) {
         removeDestroyTimeout();
 
-        if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS, "activityDestroyedLocked: r=" + this);
+        ProtoLog.d(WM_DEBUG_CONTAINERS, "activityDestroyedLocked: r=%s", this);
 
         if (!isState(DESTROYING, DESTROYED)) {
             throw new IllegalStateException(
@@ -3185,12 +3170,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             remove = false;
         }
         if (remove) {
-            if (ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE || DEBUG_CLEANUP) {
-                Slog.i(TAG_ADD_REMOVE, "Removing activity " + this
-                        + " hasSavedState=" + mHaveState + " stateNotNeeded=" + stateNotNeeded
-                        + " finishing=" + finishing + " state=" + mState
-                        + " callers=" + Debug.getCallers(5));
-            }
+            ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Removing activity %s hasSavedState=%b "
+                    + "stateNotNeeded=%s finishing=%b state=%s callers=%s", this,
+                    mHaveState, stateNotNeeded, finishing, mState, Debug.getCallers(5));
             if (!finishing || (app != null && app.isRemoved())) {
                 Slog.w(TAG, "Force removing " + this + ": app died, no saved state");
                 EventLogTags.writeWmFinishActivity(mUserId, System.identityHashCode(this),
@@ -4302,7 +4284,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // If we are being set visible, and the starting window is not yet displayed,
             // then make sure it doesn't get displayed.
-            if (startingWindow != null && !startingWindow.isDrawnLw()) {
+            if (startingWindow != null && !startingWindow.isDrawn()) {
                 startingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
                 startingWindow.mLegacyPolicyVisibilityAfterAnim = false;
             }
@@ -4484,16 +4466,40 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             detachChildren();
         }
 
-        if (state == RESUMED) {
-            mAtmService.updateBatteryStats(this, true);
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_RESUMED);
-        } else if (state == PAUSED) {
-            mAtmService.updateBatteryStats(this, false);
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
-        } else if (state == STOPPED) {
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
-        } else if (state == DESTROYED) {
-            mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+        switch (state) {
+            case RESUMED:
+                mAtmService.updateBatteryStats(this, true);
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_RESUMED);
+                // Fall through.
+            case STARTED:
+                // Update process info while making an activity from invisible to visible, to make
+                // sure the process state is updated to foreground.
+                if (app != null) {
+                    app.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                            true /* activityChange */, true /* updateOomAdj */,
+                            true /* addPendingTopUid */);
+                }
+                break;
+            case PAUSED:
+                mAtmService.updateBatteryStats(this, false);
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+                break;
+            case STOPPED:
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
+                break;
+            case DESTROYED:
+                mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+                // Fall through.
+            case DESTROYING:
+                if (app != null && !app.hasActivities()) {
+                    // Update any services we are bound to that might care about whether
+                    // their client may have activities.
+                    // No longer have activities, so update LRU list and oom adj.
+                    app.updateProcessInfo(true /* updateServiceConnectionActivities */,
+                            false /* activityChange */, true /* updateOomAdj */,
+                            false /* addPendingTopUid */);
+                }
+                break;
         }
     }
 
@@ -4803,14 +4809,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
             }
             setState(STARTED, "makeActiveIfNeeded");
-
-            // Update process info while making an activity from invisible to visible, to make
-            // sure the process state is updated to foreground.
-            if (app != null) {
-                app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* activityChange */, true /* updateOomAdj */,
-                        true /* addPendingTopUid */);
-            }
 
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
@@ -5586,9 +5584,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
                 final boolean isAnimationSet = isAnimating(TRANSITION | PARENTS,
                         ANIMATION_TYPE_APP_TRANSITION);
-                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
+                Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawn()
                         + ", isAnimationSet=" + isAnimationSet);
-                if (!w.isDrawnLw()) {
+                if (!w.isDrawn()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
@@ -5603,7 +5601,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     if (findMainWindow(false /* includeStartingApp */) != w) {
                         mNumInterestingWindows++;
                     }
-                    if (w.isDrawnLw()) {
+                    if (w.isDrawn()) {
                         mNumDrawnWindows++;
 
                         if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
@@ -5616,7 +5614,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         isInterestingAndDrawn = true;
                     }
                 }
-            } else if (w.isDrawnLw()) {
+            } else if (w.isDrawn()) {
                 // The starting window for this container is drawn.
                 mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(this);
                 startingDisplayed = true;
@@ -6145,7 +6143,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (win == null) {
             return;
         }
-        final Rect frame = win.getRelativeFrameLw();
+        final Rect frame = win.getRelativeFrame();
         final int thumbnailDrawableRes = task.mUserId == mWmService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
@@ -6171,7 +6169,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // destination of the thumbnail header animation. If this is a full screen
         // window scenario, we use the whole display as the target.
         WindowState win = findMainWindow();
-        Rect appRect = win != null ? win.getContentFrameLw() :
+        final Rect appRect = win != null ? win.getContentFrame() :
                 new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
         final Rect insets = win != null ? win.getContentInsets() : null;
         final Configuration displayConfig = mDisplayContent.getConfiguration();
@@ -6997,27 +6995,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             boolean ignoreVisibility) {
         final Task stack = getRootTask();
         if (stack.mConfigWillChange) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Skipping config check (will change): " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
+                    + "(will change): %s", this);
             return true;
         }
 
         // We don't worry about activities that are finishing.
         if (finishing) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration doesn't matter in finishing " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration doesn't matter "
+                    + "in finishing %s", this);
             stopFreezingScreenLocked(false);
             return true;
         }
 
         if (!ignoreVisibility && (mState == STOPPING || mState == STOPPED || !shouldBeVisible())) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Skipping config check invisible: " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
+                    + "invisible: %s", this);
             return true;
         }
 
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Ensuring correct configuration: " + this);
+        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Ensuring correct "
+                + "configuration: %s", this);
 
         final int newDisplayId = getDisplayId();
         final boolean displayChanged = mLastReportedDisplayId != newDisplayId;
@@ -7033,8 +7031,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
         if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration & display unchanged in " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
+                    + "unchanged in %s", this);
             return true;
         }
 
@@ -7054,14 +7052,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // No need to relaunch or schedule new config for activity that hasn't been launched
             // yet. We do, however, return after applying the config to activity record, so that
             // it will use it for launch transaction.
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Skipping config check for initializing activity: " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check for "
+                    + "initializing activity: %s", this);
             return true;
         }
 
         if (changes == 0 && !forceNewConfig) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration no differences in " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration no differences in %s",
+                    this);
             // There are no significant differences, so we won't relaunch but should still deliver
             // the new configuration to the client process.
             if (displayChanged) {
@@ -7072,26 +7070,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Configuration changes for " + this + ", allChanges="
-                        + Configuration.configurationDiffToString(changes));
+        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration changes for %s, "
+                + "allChanges=%s", this, Configuration.configurationDiffToString(changes));
 
         // If the activity isn't currently running, just leave the new configuration and it will
         // pick that up next time it starts.
         if (!attachedToProcess()) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration doesn't matter not running " + this);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration doesn't matter not running %s", this);
             stopFreezingScreenLocked(false);
             forceNewConfig = false;
             return true;
         }
 
         // Figure out how to handle the changes between the configurations.
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                "Checking to restart " + info.name + ": changed=0x"
-                        + Integer.toHexString(changes) + ", handles=0x"
-                        + Integer.toHexString(info.getRealConfigChanged())
-                        + ", mLastReportedConfiguration=" + mLastReportedConfiguration);
+        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Checking to restart %s: changed=0x%s, "
+                + "handles=0x%s, mLastReportedConfiguration=%s", info.name,
+                Integer.toHexString(changes), Integer.toHexString(info.getRealConfigChanged()),
+                mLastReportedConfiguration);
 
         if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
@@ -7108,20 +7103,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mRelaunchReason = RELAUNCH_REASON_NONE;
             }
             if (!attachedToProcess()) {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is destroying non-running " + this);
+                ProtoLog.v(WM_DEBUG_CONFIGURATION,
+                        "Config is destroying non-running %s", this);
                 destroyImmediately("config");
             } else if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
                 // do anything now, but just flag that it needs to be restarted when done pausing.
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is skipping already pausing " + this);
+                ProtoLog.v(WM_DEBUG_CONFIGURATION,
+                        "Config is skipping already pausing %s", this);
                 deferRelaunchUntilPaused = true;
                 preserveWindowOnDeferredRelaunch = preserveWindow;
                 return true;
             } else {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is relaunching " + this);
+                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Config is relaunching %s",
+                        this);
                 if (DEBUG_STATES && !mVisibleRequested) {
                     Slog.v(TAG_STATES, "Config is relaunching invisible activity " + this
                             + " called by " + Debug.getCallers(4));

@@ -122,7 +122,7 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -179,7 +179,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final NavigationModeController mNavigationModeController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Optional<SplitScreenController> mSplitScreenControllerOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
     private final SystemActions mSystemActions;
     private final Handler mHandler;
@@ -406,7 +406,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
-            Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
@@ -430,7 +430,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mSplitScreenControllerOptional = splitScreenControllerOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
         mSystemActions = systemActions;
         mHandler = mainHandler;
@@ -528,7 +528,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
-        mSplitScreenControllerOptional.ifPresent(mNavigationBarView::registerDockedListener);
+        mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -691,8 +691,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             return;
         }
 
-        if (mStartingQuickSwitchRotation == -1 || mSplitScreenControllerOptional
-                .map(SplitScreenController::isDividerVisible).orElse(false)) {
+        if (mStartingQuickSwitchRotation == -1 || mSplitScreenOptional
+                .map(SplitScreen::isDividerVisible).orElse(false)) {
             // Hide the secondary home handle if we are in multiwindow since apps in multiwindow
             // aren't allowed to set the display orientation
             resetSecondaryHandle();
@@ -1251,7 +1251,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 || ActivityManager.isLowRamDeviceStatic()
                 // If we are connected to the overview service, then disable the recents button
                 || mOverviewProxyService.getProxy() != null
-                || !mSplitScreenControllerOptional.map(splitScreen ->
+                || !mSplitScreenOptional.map(splitScreen ->
                 splitScreen.getDividerView().getSnapAlgorithm().isSplitScreenFeasible())
                 .orElse(false)) {
             return false;

@@ -54,6 +54,7 @@ import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -187,9 +188,15 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
+    private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    @Mock
+    private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
+    @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
+
+    private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
@@ -241,6 +248,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mock(NotificationRoundnessManager.class),
                 mStatusBarStateController,
                 new FalsingManagerFake());
+        when(mKeyguardStatusViewComponentFactory.build(any()))
+                .thenReturn(mKeyguardStatusViewComponent);
+        when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
+                .thenReturn(mKeyguardClockSwitchController);
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
                 mInjectionInflationController,
@@ -254,9 +265,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
-                () -> mKeyguardClockSwitchController,
                 mNotificationStackScrollLayoutController,
-                mNotificationAreaController);
+                mNotificationAreaController,
+                mKeyguardStatusViewComponentFactory);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mGroupManager,

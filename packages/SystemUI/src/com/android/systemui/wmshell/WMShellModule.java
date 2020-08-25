@@ -24,6 +24,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.phone.PipMenuActivity;
 import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
+import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -59,7 +60,7 @@ public class WMShellModule {
 
     @SysUISingleton
     @Provides
-    static SplitScreenController provideSplitScreenController(Context context,
+    static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer) {

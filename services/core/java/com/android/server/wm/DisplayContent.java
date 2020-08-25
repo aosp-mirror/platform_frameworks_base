@@ -694,7 +694,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Don't do layout of a window if it is not visible, or soon won't be visible, to avoid
         // wasting time and funky changes while a window is animating away.
         final boolean gone = (mTmpWindow != null && mWmService.mPolicy.canBeHiddenByKeyguardLw(w))
-                || w.isGoneForLayoutLw();
+                || w.isGoneForLayout();
 
         if (DEBUG_LAYOUT && !w.mLayoutAttached) {
             Slog.v(TAG, "1ST PASS " + w + ": gone=" + gone + " mHaveFrame=" + w.mHaveFrame
@@ -742,7 +742,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (firstLayout) {
                 // The client may compute its actual requested size according to the first layout,
                 // so we still request the window to resize if the current frame is empty.
-                if (!w.getFrameLw().isEmpty()) {
+                if (!w.getFrame().isEmpty()) {
                     w.updateLastFrames();
                 }
                 w.updateLastInsetValues();
@@ -753,9 +753,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 w.mActivityRecord.layoutLetterbox(w);
             }
 
-            if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
+            if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrame()
                     + " mContainingFrame=" + w.getContainingFrame()
-                    + " mDisplayFrame=" + w.getDisplayFrameLw());
+                    + " mDisplayFrame=" + w.getDisplayFrame());
         }
     };
 
@@ -780,9 +780,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 w.prelayout();
                 getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
                 w.mLayoutSeq = mLayoutSeq;
-                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrameLw()
+                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrame()
                         + " mContainingFrame=" + w.getContainingFrame()
-                        + " mDisplayFrame=" + w.getDisplayFrameLw());
+                        + " mDisplayFrame=" + w.getDisplayFrame());
             }
         }
     };
@@ -807,7 +807,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         w.mObscured = mTmpApplySurfaceChangesTransactionState.obscured;
 
         if (!mTmpApplySurfaceChangesTransactionState.obscured) {
-            final boolean isDisplayed = w.isDisplayedLw();
+            final boolean isDisplayed = w.isDisplayed();
 
             if (isDisplayed && w.isObscuringDisplay()) {
                 // This window completely covers everything behind it, so we want to leave all
@@ -2549,7 +2549,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return;
             }
 
-            if (w.isOnScreen() && w.isVisibleLw() && w.getFrameLw().contains(x, y)) {
+            if (w.isOnScreen() && w.isVisibleLw() && w.getFrame().contains(x, y)) {
                 targetWindowType[0] = w.mAttrs.type;
                 return;
             }
@@ -2747,7 +2747,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void adjustForImeIfNeeded() {
         final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw()
-                && imeWin.isDisplayedLw();
+                && imeWin.isDisplayed();
         final int imeHeight = mDisplayFrames.getInputMethodWindowVisibleHeight();
         mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
     }
@@ -3364,7 +3364,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Now, a special case -- if the last target's window is in the process of exiting, but
         // not removed, keep on the last target to avoid IME flicker. The exception is if the
         // current target is home since we want opening apps to become the IME target right away.
-        if (curTarget != null && !curTarget.mRemoved && curTarget.isDisplayedLw()
+        if (curTarget != null && !curTarget.mRemoved && curTarget.isDisplayed()
                 && curTarget.isClosing() && !curTarget.isActivityTypeHome()) {
             if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Not changing target till current window is"
                     + " closing and not removed");
@@ -3647,7 +3647,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         final WindowState visibleNotDrawnWindow = getWindow(w -> {
             final boolean isVisible = w.isVisible() && !w.mObscured;
-            final boolean isDrawn = w.isDrawnLw();
+            final boolean isDrawn = w.isDrawn();
             if (isVisible && !isDrawn) {
                 ProtoLog.d(WM_DEBUG_BOOT,
                         "DisplayContent: boot is waiting for window of type %d to be drawn",
@@ -4599,9 +4599,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             DisplayContent dc = this;
             do {
                 final WindowState displayParent = dc.getParentWindow();
-                location.x += displayParent.getFrameLw().left
+                location.x += displayParent.getFrame().left
                         + (dc.getLocationInParentWindow().x * displayParent.mGlobalScale + 0.5f);
-                location.y += displayParent.getFrameLw().top
+                location.y += displayParent.getFrame().top
                         + (dc.getLocationInParentWindow().y * displayParent.mGlobalScale + 0.5f);
                 dc = displayParent.getDisplayContent();
             } while (dc != null && dc.getParentWindow() != null);

@@ -1131,7 +1131,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         @Override
-        public boolean isGoneForLayoutLw() {
+        public boolean isGoneForLayout() {
             return false;
         }
 

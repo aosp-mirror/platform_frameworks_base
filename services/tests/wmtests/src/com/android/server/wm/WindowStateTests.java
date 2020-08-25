@@ -479,7 +479,7 @@ public class WindowStateTests extends WindowTestsBase {
         app.mHasSurface = true;
         app.mSurfaceControl = mock(SurfaceControl.class);
         try {
-            app.getFrameLw().set(10, 20, 60, 80);
+            app.getFrame().set(10, 20, 60, 80);
             app.updateSurfacePosition(t);
 
             app.seamlesslyRotateIfAllowed(t, ROTATION_0, ROTATION_90, true);
@@ -519,7 +519,7 @@ public class WindowStateTests extends WindowTestsBase {
                 new Rect(95, 378, 105, 400));
         wf.setDisplayCutout(new WmDisplayCutout(cutout, new Size(200, 400)));
 
-        app.computeFrameLw();
+        app.computeFrame();
         assertThat(app.getWmDisplayCutout().getDisplayCutout(), is(cutout.inset(7, 10, 5, 20)));
     }
 
@@ -633,7 +633,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
 
         final DisplayContent dc = createNewDisplay();
-        win0.getFrameLw().offsetTo(PARENT_WINDOW_OFFSET, 0);
+        win0.getFrame().offsetTo(PARENT_WINDOW_OFFSET, 0);
         dc.reparentDisplayContent(win0, win0.getSurfaceControl());
         dc.updateLocation(win0, DISPLAY_IN_PARENT_WINDOW_OFFSET, 0);
 
@@ -644,7 +644,7 @@ public class WindowStateTests extends WindowTestsBase {
         win1.mHasSurface = true;
         win1.mSurfaceControl = mock(SurfaceControl.class);
         win1.mAttrs.surfaceInsets.set(1, 2, 3, 4);
-        win1.getFrameLw().offsetTo(WINDOW_OFFSET, 0);
+        win1.getFrame().offsetTo(WINDOW_OFFSET, 0);
         win1.updateSurfacePosition(t);
         win1.getTransformationMatrix(values, matrix);
 

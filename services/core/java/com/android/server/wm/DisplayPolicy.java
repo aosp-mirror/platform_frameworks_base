@@ -195,13 +195,13 @@ import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.policy.WindowManagerPolicy.InputConsumer;
 import com.android.server.policy.WindowManagerPolicy.NavigationBarPosition;
 import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.policy.WindowOrientationListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
+import com.android.server.wm.InputMonitor.EventReceiverInputConsumer;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -416,7 +416,7 @@ public class DisplayPolicy {
     private boolean mAllowLockscreenWhenOn;
 
     @VisibleForTesting
-    InputConsumer mInputConsumer = null;
+    EventReceiverInputConsumer mInputConsumer;
 
     private PointerLocationView mPointerLocationView;
 
@@ -462,7 +462,7 @@ public class DisplayPolicy {
                     }
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
-                    disposeInputConsumer((InputConsumer) msg.obj);
+                    disposeInputConsumer((EventReceiverInputConsumer) msg.obj);
                     break;
                 case MSG_ENABLE_POINTER_LOCATION:
                     enablePointerLocation();
@@ -1126,7 +1126,7 @@ public class DisplayPolicy {
 
                         // For IME we use regular frame.
                         (displayFrames, windowState, inOutFrame) ->
-                                inOutFrame.set(windowState.getFrameLw()));
+                                inOutFrame.set(windowState.getFrame()));
 
                 mDisplayContent.setInsetProvider(ITYPE_BOTTOM_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
@@ -1203,11 +1203,11 @@ public class DisplayPolicy {
                 // IME should not provide frame which is smaller than the nav bar frame. Otherwise,
                 // nav bar might be overlapped with the content of the client when IME is shown.
                 sTmpRect.set(inOutFrame);
-                sTmpRect.intersectUnchecked(mNavigationBar.getFrameLw());
-                inOutFrame.inset(windowState.getGivenContentInsetsLw());
+                sTmpRect.intersectUnchecked(mNavigationBar.getFrame());
+                inOutFrame.inset(windowState.mGivenContentInsets);
                 inOutFrame.union(sTmpRect);
             } else {
-                inOutFrame.inset(windowState.getGivenContentInsetsLw());
+                inOutFrame.inset(windowState.mGivenContentInsets);
             }
         };
     }
@@ -2075,7 +2075,7 @@ public class DisplayPolicy {
 
             // In case we forced the window to draw behind the navigation bar, restrict df to
             // DF.Restricted to simulate old compat behavior.
-            Rect parentDisplayFrame = attached.getDisplayFrameLw();
+            Rect parentDisplayFrame = attached.getDisplayFrame();
             final WindowManager.LayoutParams attachedAttrs = attached.mAttrs;
             if ((attachedAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
                     && (attachedAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
@@ -2096,14 +2096,14 @@ public class DisplayPolicy {
                 // setting {@link WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR} flag.
                 // Otherwise, use the overscan frame.
                 cf.set((fl & FLAG_LAYOUT_ATTACHED_IN_DECOR) != 0
-                        ? attached.getContentFrameLw() : parentDisplayFrame);
+                        ? attached.getContentFrame() : parentDisplayFrame);
             } else {
                 // If the window is resizing, then we want to base the content frame on our attached
                 // content frame to resize...however, things can be tricky if the attached window is
                 // NOT in resize mode, in which case its content frame will be larger.
                 // Ungh. So to deal with that, make sure the content frame we end up using is not
                 // covering the IM dock.
-                cf.set(attached.getContentFrameLw());
+                cf.set(attached.getContentFrame());
                 if (attached.isVoiceInteraction()) {
                     cf.intersectUnchecked(displayFrames.mVoiceContent);
                 } else if (win.isInputMethodTarget() || attached.isInputMethodTarget()) {
@@ -2111,11 +2111,11 @@ public class DisplayPolicy {
                 }
             }
             df.set(insetDecors ? parentDisplayFrame : cf);
-            vf.set(attached.getVisibleFrameLw());
+            vf.set(attached.getVisibleFrame());
         }
         // The LAYOUT_IN_SCREEN flag is used to determine whether the attached window should be
         // positioned relative to its parent or the entire screen.
-        pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrameLw() : df);
+        pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrame() : df);
     }
 
     private void applyStableConstraints(int sysui, int fl, Rect r, DisplayFrames displayFrames) {
@@ -2217,8 +2217,8 @@ public class DisplayPolicy {
                 vf.set(adjust != SOFT_INPUT_ADJUST_NOTHING
                         ? displayFrames.mCurrent : displayFrames.mDock);
             } else {
-                pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrameLw() : df);
-                vf.set(attached.getVisibleFrameLw());
+                pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrame() : df);
+                vf.set(attached.getVisibleFrame());
             }
             cf.set(adjust != SOFT_INPUT_ADJUST_RESIZE
                     ? displayFrames.mDock : displayFrames.mContent);
@@ -2623,12 +2623,10 @@ public class DisplayPolicy {
         win.computeFrame(displayFrames);
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
-        if (type == TYPE_INPUT_METHOD && win.isVisibleLw()
-                && !win.getGivenInsetsPendingLw()) {
+        if (type == TYPE_INPUT_METHOD && win.isVisibleLw() && !win.mGivenInsetsPending) {
             offsetInputMethodWindowLw(win, displayFrames);
         }
-        if (type == TYPE_VOICE_INTERACTION && win.isVisibleLw()
-                && !win.getGivenInsetsPendingLw()) {
+        if (type == TYPE_VOICE_INTERACTION && win.isVisibleLw() && !win.mGivenInsetsPending) {
             offsetVoiceInputWindowLw(win, displayFrames);
         }
     }
@@ -2645,8 +2643,8 @@ public class DisplayPolicy {
         final int navBarPosition = navigationBarPosition(displayFrames.mDisplayWidth,
                 displayFrames.mDisplayHeight, rotation);
 
-        int top = Math.max(win.getDisplayFrameLw().top, win.getContentFrameLw().top);
-        top += win.getGivenContentInsetsLw().top;
+        int top = Math.max(win.getDisplayFrame().top, win.getContentFrame().top);
+        top += win.mGivenContentInsets.top;
         displayFrames.mContent.bottom = Math.min(displayFrames.mContent.bottom, top);
         if (navBarPosition == NAV_BAR_BOTTOM) {
             // Always account for the nav bar frame height on the bottom since in all navigation
@@ -2658,8 +2656,8 @@ public class DisplayPolicy {
                     displayFrames.mUnrestricted.bottom - navFrameHeight);
         }
         displayFrames.mVoiceContent.bottom = Math.min(displayFrames.mVoiceContent.bottom, top);
-        top = win.getVisibleFrameLw().top;
-        top += win.getGivenVisibleInsetsLw().top;
+        top = win.getVisibleFrame().top;
+        top += win.mGivenVisibleInsets.top;
         displayFrames.mCurrent.bottom = Math.min(displayFrames.mCurrent.bottom, top);
         if (DEBUG_LAYOUT) Slog.v(TAG, "Input method: mDockBottom="
                 + displayFrames.mDock.bottom + " mContentBottom="
@@ -2667,8 +2665,8 @@ public class DisplayPolicy {
     }
 
     private void offsetVoiceInputWindowLw(WindowState win, DisplayFrames displayFrames) {
-        int top = Math.max(win.getDisplayFrameLw().top, win.getContentFrameLw().top);
-        top += win.getGivenContentInsetsLw().top;
+        int top = Math.max(win.getDisplayFrame().top, win.getContentFrame().top);
+        top += win.mGivenContentInsets.top;
         displayFrames.mVoiceContent.bottom = Math.min(displayFrames.mVoiceContent.bottom, top);
     }
 
@@ -2729,8 +2727,7 @@ public class DisplayPolicy {
             if (win.isDreamWindow()) {
                 // If the lockscreen was showing when the dream started then wait
                 // for the dream to draw before hiding the lockscreen.
-                if (!mDreamingLockscreen
-                        || (win.isVisibleLw() && win.hasDrawnLw())) {
+                if (!mDreamingLockscreen || (win.isVisibleLw() && win.hasDrawn())) {
                     mShowingDream = true;
                     appWindow = true;
                 }
@@ -2916,7 +2913,7 @@ public class DisplayPolicy {
         final InsetsSource request = mTopFullscreenOpaqueWindowState.getRequestedInsetsState()
                 .peekSource(ITYPE_STATUS_BAR);
         if (WindowManagerDebugConfig.DEBUG) {
-            Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw());
+            Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrame());
             Slog.d(TAG, "attr: " + attrs + " request: " + request);
         }
         return (fl & LayoutParams.FLAG_FULLSCREEN) != 0
@@ -3398,7 +3395,7 @@ public class DisplayPolicy {
         mImmersiveModeConfirmation.confirmCurrentPrompt();
     }
 
-    private void disposeInputConsumer(InputConsumer inputConsumer) {
+    private void disposeInputConsumer(EventReceiverInputConsumer inputConsumer) {
         if (inputConsumer != null) {
             inputConsumer.dispose();
         }
@@ -4171,6 +4168,6 @@ public class DisplayPolicy {
             return false;
         }
 
-        return Rect.intersects(targetWindow.getFrameLw(), navBarWindow.getFrameLw());
+        return Rect.intersects(targetWindow.getFrame(), navBarWindow.getFrame());
     }
 }

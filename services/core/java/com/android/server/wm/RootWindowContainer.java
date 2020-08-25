@@ -1106,14 +1106,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean onScreen = w.isOnScreen();
-        final boolean canBeSeen = w.isDisplayedLw();
+        final boolean canBeSeen = w.isDisplayed();
         final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
         ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
                 "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w"
                         + ".isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",
-                w, w.mHasSurface, onScreen, w.isDisplayedLw(), w.mAttrs.userActivityTimeout);
+                w, w.mHasSurface, onScreen, w.isDisplayed(), w.mAttrs.userActivityTimeout);
         if (w.mHasSurface && onScreen) {
             if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
                 mUserActivityTimeout = w.mAttrs.userActivityTimeout;
@@ -3124,7 +3124,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     FinishDisabledPackageActivitiesHelper mFinishDisabledPackageActivitiesHelper =
             new FinishDisabledPackageActivitiesHelper();
     class FinishDisabledPackageActivitiesHelper {
-        private boolean mDidSomething;
         private String mPackageName;
         private Set<String> mFilterByClasses;
         private boolean mDoit;
@@ -3132,11 +3131,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         private int mUserId;
         private boolean mOnlyRemoveNoProcess;
         private Task mLastTask;
-        private ComponentName mHomeActivity;
+        private final ArrayList<ActivityRecord> mCollectedActivities = new ArrayList<>();
 
         private void reset(String packageName, Set<String> filterByClasses,
                 boolean doit, boolean evenPersistent, int userId, boolean onlyRemoveNoProcess) {
-            mDidSomething = false;
             mPackageName = packageName;
             mFilterByClasses = filterByClasses;
             mDoit = doit;
@@ -3144,7 +3142,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mUserId = userId;
             mOnlyRemoveNoProcess = onlyRemoveNoProcess;
             mLastTask = null;
-            mHomeActivity = null;
         }
 
         boolean process(String packageName, Set<String> filterByClasses,
@@ -3152,14 +3149,35 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             reset(packageName, filterByClasses, doit, evenPersistent, userId, onlyRemoveNoProcess);
 
             final PooledFunction f = PooledLambda.obtainFunction(
-                    FinishDisabledPackageActivitiesHelper::processActivity, this,
+                    FinishDisabledPackageActivitiesHelper::collectActivity, this,
                     PooledLambda.__(ActivityRecord.class));
             forAllActivities(f);
             f.recycle();
-            return mDidSomething;
+
+            boolean didSomething = false;
+            final int size = mCollectedActivities.size();
+            // Keep the finishing order from top to bottom.
+            for (int i = 0; i < size; i++) {
+                final ActivityRecord r = mCollectedActivities.get(i);
+                if (mOnlyRemoveNoProcess) {
+                    if (!r.hasProcess()) {
+                        didSomething = true;
+                        Slog.i(TAG, "  Force removing " + r);
+                        r.cleanUp(false /* cleanServices */, false /* setState */);
+                        r.removeFromHistory("force-stop");
+                    }
+                } else {
+                    didSomething = true;
+                    Slog.i(TAG, "  Force finishing " + r);
+                    r.finishIfPossible("force-stop", true /* oomAdj */);
+                }
+            }
+            mCollectedActivities.clear();
+
+            return didSomething;
         }
 
-        private boolean processActivity(ActivityRecord r) {
+        private boolean collectActivity(ActivityRecord r) {
             final boolean sameComponent =
                     (r.packageName.equals(mPackageName) && (mFilterByClasses == null
                             || mFilterByClasses.contains(r.mActivityComponent.getClassName())))
@@ -3176,26 +3194,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     }
                     return true;
                 }
-                if (r.isActivityTypeHome()) {
-                    if (mHomeActivity != null && mHomeActivity.equals(r.mActivityComponent)) {
-                        Slog.i(TAG, "Skip force-stop again " + r);
-                        return false;
-                    } else {
-                        mHomeActivity = r.mActivityComponent;
-                    }
-                }
-                if (mOnlyRemoveNoProcess) {
-                    if (noProcess) {
-                        mDidSomething = true;
-                        Slog.i(TAG, "  Force removing " + r);
-                        r.cleanUp(false /* cleanServices */, false /* setState */);
-                        r.removeFromHistory("force-stop");
-                    }
-                } else {
-                    mDidSomething = true;
-                    Slog.i(TAG, "  Force finishing " + r);
-                    r.finishIfPossible("force-stop", true /* oomAdj */);
-                }
+                mCollectedActivities.add(r);
                 mLastTask = r.getTask();
             }
 

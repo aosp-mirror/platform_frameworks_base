@@ -22,9 +22,9 @@ import static android.os.Build.VERSION_CODES.Q;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
@@ -72,6 +72,7 @@ import android.view.IRemoteAnimationRunner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
@@ -1348,9 +1349,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             return;
         }
-        if (DEBUG_CONFIGURATION) {
-            Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName + " new config " + config);
-        }
+        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
+                config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
             // TODO (b/135719017): Temporary log for debugging IME service.
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);

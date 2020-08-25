@@ -56,12 +56,12 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
@@ -116,6 +116,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
@@ -669,10 +670,8 @@ class ActivityStarter {
                 if (stack != null) {
                     stack.mConfigWillChange = globalConfigWillChange;
                 }
-                if (DEBUG_CONFIGURATION) {
-                    Slog.v(TAG_CONFIGURATION, "Starting activity when config will change = "
-                            + globalConfigWillChange);
-                }
+                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Starting activity when config "
+                        + "will change = %b", globalConfigWillChange);
 
                 final long origId = Binder.clearCallingIdentity();
 
@@ -695,10 +694,9 @@ class ActivityStarter {
                     if (stack != null) {
                         stack.mConfigWillChange = false;
                     }
-                    if (DEBUG_CONFIGURATION) {
-                        Slog.v(TAG_CONFIGURATION,
+                    ProtoLog.v(WM_DEBUG_CONFIGURATION,
                                 "Updating to new configuration after starting activity.");
-                    }
+
                     mService.updateConfigurationLocked(mRequest.globalConfig, null, false);
                 }
 

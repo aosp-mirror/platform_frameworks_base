@@ -62,7 +62,8 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
 @LargeTest
-public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
+public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase
+        implements ManualBenchmarkState.CustomizedIterationListener {
     private static Intent sRecentsIntent;
 
     @Rule
@@ -162,6 +163,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
                     | StatsReport.FLAG_COEFFICIENT_VAR))
     public void testRecentsAnimation() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        state.setCustomizedIterations(getProfilingIterations(), this);
         final IActivityTaskManager atm = ActivityTaskManager.getService();
 
         final ArrayList<Pair<String, Boolean>> finishCases = new ArrayList<>();
@@ -230,7 +232,21 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
             state.addExtraResult("start", elapsedTimeNsOfStart);
 
             // Ensure the animation callback is done.
-            Assume.assumeTrue(recentsSemaphore.tryAcquire(TIME_5_S_IN_NS, TimeUnit.NANOSECONDS));
+            Assume.assumeTrue(recentsSemaphore.tryAcquire(
+                    sIsProfilingMethod ? 10 * TIME_5_S_IN_NS : TIME_5_S_IN_NS,
+                    TimeUnit.NANOSECONDS));
         }
+    }
+
+    @Override
+    public void onStart(int iteration) {
+        startProfiling(RecentsAnimationPerfTest.class.getSimpleName()
+                + "_interval_" + intervalBetweenOperations
+                + "_MethodTracing_" + iteration + ".trace");
+    }
+
+    @Override
+    public void onFinished(int iteration) {
+        stopProfiling();
     }
 }

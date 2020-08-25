@@ -49,10 +49,10 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 /**
- * Controls split screen.
+ * Controls split screen feature.
  */
-// TODO(b/161116823): Extract as an interface to expose to SysUISingleton scope.
-public class SplitScreenController implements DisplayController.OnDisplaysChangedListener {
+public class SplitScreenController implements SplitScreen,
+        DisplayController.OnDisplaysChangedListener {
     static final boolean DEBUG = false;
 
     private static final String TAG = "Divider";

@@ -21,7 +21,6 @@ import com.android.systemui.dagger.DependencyBinder;
 import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.SystemServicesModule;
 import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.dagger.SystemUIModule;
 
@@ -35,7 +34,6 @@ import dagger.Subcomponent;
         DefaultComponentBinder.class,
         DependencyProvider.class,
         DependencyBinder.class,
-        SystemServicesModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
         TvSystemUIModule.class,

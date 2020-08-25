@@ -222,12 +222,12 @@ public class BarController {
     }
 
     protected boolean skipAnimation() {
-        return !mWin.isDrawnLw();
+        return !mWin.isDrawn();
     }
 
     private @StatusBarManager.WindowVisibleState int computeStateLw(
             boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
-        if (win.isDrawnLw()) {
+        if (win.isDrawn()) {
             final boolean vis = win.isVisibleLw();
             final boolean anim = win.isAnimatingLw();
             if (mState == StatusBarManager.WINDOW_STATE_HIDING && !change && !vis) {
@@ -264,7 +264,7 @@ public class BarController {
     }
 
     boolean checkHiddenLw() {
-        if (mWin != null && mWin.isDrawnLw()) {
+        if (mWin != null && mWin.isDrawn()) {
             if (!mWin.isVisibleLw() && !mWin.isAnimatingLw()) {
                 updateStateLw(StatusBarManager.WINDOW_STATE_HIDDEN);
             }
@@ -291,7 +291,7 @@ public class BarController {
         } else if (mWin == null) {
             if (DEBUG) Slog.d(mTag, "Not showing transient bar, bar doesn't exist");
             return false;
-        } else if (mWin.isDisplayedLw()) {
+        } else if (mWin.isDisplayed()) {
             if (DEBUG) Slog.d(mTag, "Not showing transient bar, bar already visible");
             return false;
         } else {

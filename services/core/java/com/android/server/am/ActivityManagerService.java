@@ -83,6 +83,7 @@ import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -117,7 +118,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
@@ -319,6 +319,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -4946,9 +4947,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 notifyPackageUse(instr.mClass.getPackageName(),
                                  PackageManager.NOTIFY_PACKAGE_USE_INSTRUMENTATION);
             }
-            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
-                    + processName + " with config "
-                    + app.getWindowProcessController().getConfiguration());
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Binding proc %s with config %s",
+                    processName, app.getWindowProcessController().getConfiguration());
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackage(appInfo);
 

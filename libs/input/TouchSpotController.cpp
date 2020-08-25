@@ -142,7 +142,8 @@ TouchSpotController::Spot* TouchSpotController::getSpot(uint32_t id,
 }
 
 TouchSpotController::Spot* TouchSpotController::createAndAddSpotLocked(uint32_t id,
-                                                                       std::vector<Spot*>& spots) {
+                                                                       std::vector<Spot*>& spots)
+        REQUIRES(mLock) {
     // Remove spots until we have fewer than MAX_SPOTS remaining.
     while (spots.size() >= MAX_SPOTS) {
         Spot* spot = removeFirstFadingSpotLocked(spots);
@@ -186,14 +187,13 @@ void TouchSpotController::releaseSpotLocked(Spot* spot) REQUIRES(mLock) {
     if (mLocked.recycledSprites.size() < MAX_RECYCLED_SPRITES) {
         mLocked.recycledSprites.push_back(spot->sprite);
     }
-
     delete spot;
 }
 
 void TouchSpotController::fadeOutAndReleaseSpotLocked(Spot* spot) REQUIRES(mLock) {
     if (spot->id != Spot::INVALID_ID) {
         spot->id = Spot::INVALID_ID;
-        mContext.startAnimation();
+        startAnimationLocked();
     }
 }
 
@@ -209,8 +209,24 @@ void TouchSpotController::reloadSpotResources() {
     mContext.getPolicy()->loadPointerResources(&mResources, mDisplayId);
 }
 
-bool TouchSpotController::doFadingAnimation(nsecs_t timestamp, bool keepAnimating) {
+bool TouchSpotController::doAnimations(nsecs_t timestamp) {
     std::scoped_lock lock(mLock);
+    bool keepAnimating = doFadingAnimationLocked(timestamp);
+    if (!keepAnimating) {
+        /*
+         * We know that this callback will be removed before another
+         * is added. mLock in PointerAnimator will not be released
+         * until after this is removed, and adding another callback
+         * requires that lock. Thus it's safe to set mLocked.animating
+         * here.
+         */
+        mLocked.animating = false;
+    }
+    return keepAnimating;
+}
+
+bool TouchSpotController::doFadingAnimationLocked(nsecs_t timestamp) REQUIRES(mLock) {
+    bool keepAnimating = false;
     nsecs_t animationTime = mContext.getAnimationTime();
     nsecs_t frameDelay = timestamp - animationTime;
     size_t numSpots = mLocked.displaySpots.size();
@@ -231,6 +247,18 @@ bool TouchSpotController::doFadingAnimation(nsecs_t timestamp, bool keepAnimatin
         ++i;
     }
     return keepAnimating;
+}
+
+void TouchSpotController::startAnimationLocked() REQUIRES(mLock) {
+    using namespace std::placeholders;
+
+    if (mLocked.animating) {
+        return;
+    }
+    mLocked.animating = true;
+
+    std::function<bool(nsecs_t)> func = std::bind(&TouchSpotController::doAnimations, this, _1);
+    mContext.addAnimationCallback(mDisplayId, func);
 }
 
 } // namespace android
