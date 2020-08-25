@@ -3072,9 +3072,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardStatusBar != null) {
             mKeyguardStatusBar.dump(fd, pw, args);
         }
-        if (mKeyguardStatusView != null) {
-            mKeyguardStatusView.dump(fd, pw, args);
-        }
     }
 
     public boolean hasActiveClearableNotifications() {
