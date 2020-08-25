@@ -16,9 +16,11 @@
 
 package com.android.systemui.settings
 
-import android.content.ContentResolver
+import android.content.Context
 
-interface CurrentUserContentResolverProvider {
-
-    val currentUserContentResolver: ContentResolver
+/**
+ * Implemented by [UserTrackerImpl].
+ */
+interface UserContextProvider {
+    val userContext: Context
 }

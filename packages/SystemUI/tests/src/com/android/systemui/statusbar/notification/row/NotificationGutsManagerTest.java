@@ -69,7 +69,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
@@ -128,7 +128,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private ShortcutManager mShortcutManager;
     @Mock private ChannelEditorDialogController mChannelEditorDialogController;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    @Mock private CurrentUserContextTracker mContextTracker;
+    @Mock private UserContextProvider mContextTracker;
     @Mock private BubbleController mBubbleController;
     @Mock(answer = Answers.RETURNS_SELF)
     private PriorityOnboardingDialogController.Builder mBuilder;
