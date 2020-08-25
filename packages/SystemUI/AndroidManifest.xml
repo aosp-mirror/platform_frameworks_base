@@ -530,20 +530,6 @@
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
 
-        <activity
-            android:name=".pip.phone.PipMenuActivity"
-            android:permission="com.android.systemui.permission.SELF"
-            android:theme="@style/PipPhoneOverlayControlTheme"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            android:stateNotNeeded="true"
-            android:taskAffinity=""
-            android:launchMode="singleTop"
-            androidprv:alwaysFocusable="true" />
-
         <!-- started from SliceProvider -->
         <activity android:name=".SlicePermissionActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
