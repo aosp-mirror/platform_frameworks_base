@@ -185,6 +185,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         mAlertEntries.put(entry.getKey(), alertEntry);
         onAlertEntryAdded(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        entry.setIsAlerting(true);
     }
 
     /**

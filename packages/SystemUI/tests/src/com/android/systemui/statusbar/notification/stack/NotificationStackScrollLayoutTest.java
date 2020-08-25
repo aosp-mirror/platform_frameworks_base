@@ -122,7 +122,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private EmptyShadeView mEmptyShadeView;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
-    @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
@@ -203,8 +202,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mNotificationRoundnessManager,
                 mock(DynamicPrivacyController.class),
                 mStatusBarStateController,
-                mHeadsUpManager,
-                new FalsingManagerFake(),
                 mock(NotificationGutsManager.class),
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
