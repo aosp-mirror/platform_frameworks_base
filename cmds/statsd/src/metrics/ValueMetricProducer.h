@@ -193,8 +193,14 @@ private:
 
     // Internal state of an ongoing aggregation bucket.
     typedef struct CurrentValueBucket {
+        // If the `MetricDimensionKey` state key is the current state key, then
+        // the condition timer will be updated later (e.g. condition/state/active
+        // state change) with the correct condition and time.
+        CurrentValueBucket() : intervals(), conditionTimer(ConditionTimer(false, 0)) {}
         // Value information for each value field of the metric.
         std::vector<Interval> intervals;
+        // Tracks how long the condition is true.
+        ConditionTimer conditionTimer;
     } CurrentValueBucket;
 
     // Holds base information for diffing values from one value field.
@@ -206,7 +212,10 @@ private:
     } BaseInfo;
 
     // State key and base information for a specific DimensionsInWhat key.
-    typedef struct {
+    typedef struct DimensionsInWhatInfo {
+        DimensionsInWhatInfo(const HashableDimensionKey& stateKey)
+            : baseInfos(), currentState(stateKey), hasCurrentState(false) {
+        }
         std::vector<BaseInfo> baseInfos;
         // Last seen state value(s).
         HashableDimensionKey currentState;
@@ -251,6 +260,10 @@ private:
 
     // Reset diff base and mHasGlobalBase
     void resetBase();
+
+    // Updates the condition timers in the current sliced bucket when there is a
+    // condition change or an active state change.
+    void updateCurrentSlicedBucketConditionTimers(bool newCondition, int64_t eventTimeNs);
 
     static const size_t kBucketSize = sizeof(PastValueBucket{});
 
@@ -337,6 +350,11 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithMultipleDimensions);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithMissingDataInStateChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithDataMissingInConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithMissingDataThenFlushBucket);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithNoPullOnBucketBoundary);
 
     FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenOneConditionFailed);
     FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenInitialPullFailed);

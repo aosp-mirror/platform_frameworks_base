@@ -93,6 +93,13 @@ static void assertPastBucketValuesSingleKey(
     }
 }
 
+static void assertConditionTimer(const ConditionTimer& conditionTimer, bool condition,
+                                 int64_t timerNs, int64_t lastConditionTrueTimestampNs) {
+    EXPECT_EQ(condition, conditionTimer.mCondition);
+    EXPECT_EQ(timerNs, conditionTimer.mTimerNs);
+    EXPECT_EQ(lastConditionTrueTimestampNs, conditionTimer.mLastConditionChangeTimestampNs);
+}
+
 }  // anonymous namespace
 
 class ValueMetricProducerTestHelper {
@@ -3967,33 +3974,37 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
             // Screen state change to ON.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 5);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 5 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5, 5));
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5 * NS_PER_SEC, 5));
                 return true;
             }))
             // Screen state change to OFF.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 9));
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC, 9));
                 return true;
             }))
             // Screen state change to ON.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 15);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 15 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 15, 21));
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 15 * NS_PER_SEC, 21));
                 return true;
             }))
             // Dump report requested.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 50, 30));
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 50 * NS_PER_SEC, 30));
                 return true;
             }));
 
@@ -4025,12 +4036,13 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
 
     // Bucket status after screen state change kStateUnknown->ON.
     auto screenEvent = CreateScreenStateChangedEvent(
-            bucketStartTimeNs + 5, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+            bucketStartTimeNs + 5 * NS_PER_SEC, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4040,34 +4052,13 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
               itBase->second.currentState.getValues()[0].mValue.int_value);
-    // Value for dimension, state key {{}, kStateUnknown}
-    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
-    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
-    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
-              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_TRUE(it->second.intervals[0].hasValue);
-    EXPECT_EQ(2, it->second.intervals[0].value.long_value);
-
-    // Bucket status after screen state change ON->OFF.
-    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10,
-                                                android::view::DisplayStateEnum::DISPLAY_STATE_OFF);
-    StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    // Base for dimension key {}
-    it = valueProducer->mCurrentSlicedBucket.begin();
-    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_TRUE(itBase->second.baseInfos[0].hasBase);
-    EXPECT_EQ(9, itBase->second.baseInfos[0].base.long_value);
-    EXPECT_TRUE(itBase->second.hasCurrentState);
-    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
-              itBase->second.currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, ON}
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_TRUE(it->second.intervals[0].hasValue);
-    EXPECT_EQ(4, it->second.intervals[0].value.long_value);
+    EXPECT_EQ(0, it->second.intervals.size());
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 5 * NS_PER_SEC);
     // Value for dimension, state key {{}, kStateUnknown}
     it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
@@ -4076,9 +4067,52 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
+
+    // Bucket status after screen state change ON->OFF.
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10 * NS_PER_SEC,
+                                                android::view::DisplayStateEnum::DISPLAY_STATE_OFF);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.baseInfos[0].hasBase);
+    EXPECT_EQ(9, itBase->second.baseInfos[0].base.long_value);
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, OFF}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(0, it->second.intervals.size());
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+    // Value for dimension, state key {{}, ON}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second.intervals[0].hasValue);
+    EXPECT_EQ(4, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 10 * NS_PER_SEC);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second.intervals[0].hasValue);
+    EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
 
     // Bucket status after screen state change OFF->ON.
-    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 15,
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 15 * NS_PER_SEC,
                                                 android::view::DisplayStateEnum::DISPLAY_STATE_ON);
     StateManager::getInstance().onLogEvent(*screenEvent);
     ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
@@ -4098,6 +4132,8 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(12, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 15 * NS_PER_SEC);
     // Value for dimension, state key {{}, ON}
     it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
@@ -4106,6 +4142,8 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(4, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, true, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 15 * NS_PER_SEC);
     // Value for dimension, state key {{}, kStateUnknown}
     it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
@@ -4114,37 +4152,46 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
 
     // Start dump report and check output.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
-                                NO_TIME_CONSTRAINTS, &strSet, &output);
+    valueProducer->onDumpReport(bucketStartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
     ASSERT_EQ(3, report.value_metrics().data_size());
 
+    // {{}, kStateUnknown}
     auto data = report.value_metrics().data(0);
     ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */, data.slice_by_state(0).value());
+    EXPECT_EQ(5 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {{}, ON}
     data = report.value_metrics().data(1);
     ASSERT_EQ(1, report.value_metrics().data(1).bucket_info_size());
     EXPECT_EQ(13, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {{}, OFF}
     data = report.value_metrics().data(2);
     ASSERT_EQ(1, report.value_metrics().data(2).bucket_info_size());
     EXPECT_EQ(12, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
+    EXPECT_EQ(5 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 }
 
 /*
@@ -4169,9 +4216,10 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
             // Screen state change to ON.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 5);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 5 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5, 5));
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5 * NS_PER_SEC, 5));
                 return true;
             }))
             // Screen state change to VR has no pull because it is in the same
@@ -4183,17 +4231,19 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
             // Screen state change to OFF.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 15);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 15 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 15, 21));
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 15 * NS_PER_SEC, 21));
                 return true;
             }))
             // Dump report requested.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50 * NS_PER_SEC);
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 50, 30));
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 50 * NS_PER_SEC, 30));
                 return true;
             }));
 
@@ -4236,12 +4286,13 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
 
     // Bucket status after screen state change kStateUnknown->ON.
     auto screenEvent = CreateScreenStateChangedEvent(
-            bucketStartTimeNs + 5, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+            bucketStartTimeNs + 5 * NS_PER_SEC, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4251,20 +4302,29 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(screenOnGroup.group_id(),
               itBase->second.currentState.getValues()[0].mValue.long_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 5 * NS_PER_SEC);
     // Value for dimension, state key {{}, kStateUnknown}
+    it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
 
     // Bucket status after screen state change ON->VR.
     // Both ON and VR are in the same state group, so the base should not change.
-    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10,
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10 * NS_PER_SEC,
                                                 android::view::DisplayStateEnum::DISPLAY_STATE_VR);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4274,20 +4334,29 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(screenOnGroup.group_id(),
               itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 5 * NS_PER_SEC);
     // Value for dimension, state key {{}, kStateUnknown}
+    it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
 
     // Bucket status after screen state change VR->ON.
     // Both ON and VR are in the same state group, so the base should not change.
-    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 12,
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 12 * NS_PER_SEC,
                                                 android::view::DisplayStateEnum::DISPLAY_STATE_ON);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4297,19 +4366,28 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(screenOnGroup.group_id(),
               itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 5 * NS_PER_SEC);
     // Value for dimension, state key {{}, kStateUnknown}
+    it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
 
     // Bucket status after screen state change VR->OFF.
-    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 15,
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 15 * NS_PER_SEC,
                                                 android::view::DisplayStateEnum::DISPLAY_STATE_OFF);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4319,13 +4397,22 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(screenOffGroup.group_id(),
               itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, OFF GROUP}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(screenOffGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 15 * NS_PER_SEC);
     // Value for dimension, state key {{}, ON GROUP}
+    it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(screenOnGroup.group_id(),
               it->first.getStateValuesKey().getValues()[0].mValue.long_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(16, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 15 * NS_PER_SEC);
     // Value for dimension, state key {{}, kStateUnknown}
     it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
@@ -4334,37 +4421,46 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 5 * NS_PER_SEC,
+                         bucketStartTimeNs + 5 * NS_PER_SEC);
 
     // Start dump report and check output.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
-                                NO_TIME_CONSTRAINTS, &strSet, &output);
+    valueProducer->onDumpReport(bucketStartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
     ASSERT_EQ(3, report.value_metrics().data_size());
 
+    // {{}, kStateUnknown}
     auto data = report.value_metrics().data(0);
     ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /*StateTracker::kStateUnknown*/, data.slice_by_state(0).value());
+    EXPECT_EQ(5 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {{}, ON GROUP}
     data = report.value_metrics().data(1);
     ASSERT_EQ(1, report.value_metrics().data(1).bucket_info_size());
     EXPECT_EQ(16, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOnGroup.group_id(), data.slice_by_state(0).group_id());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {{}, OFF GROUP}
     data = report.value_metrics().data(2);
     ASSERT_EQ(1, report.value_metrics().data(2).bucket_info_size());
     EXPECT_EQ(9, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOffGroup.group_id(), data.slice_by_state(0).group_id());
+    EXPECT_EQ(35 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 }
 
 /*
@@ -4386,6 +4482,35 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     auto fieldsInState = stateLink->mutable_fields_in_state();
     *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
 
+    /*
+    NOTE: "1" denotes uid 1 and "2" denotes uid 2.
+                    bucket # 1                            bucket # 2
+    10     20     30     40     50     60     70     80     90    100    110    120 (seconds)
+    |------------------------------------------|---------------------------------|--
+
+                                                                                    (kStateUnknown)
+    1
+    |-------------|
+          20
+
+    2
+    |----------------------------|
+                 40
+
+                                                                                    (FOREGROUND)
+                  1                                                       1
+                  |----------------------------|-------------|            |------|
+                               40                     20                     10
+
+
+                                                                                    (BACKGROUND)
+                                                             1
+                                                             |------------|
+                                                                   20
+                                 2
+                                 |-------------|---------------------------------|
+                                       20                      50
+    */
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             // ValueMetricProducer initialized.
@@ -4400,64 +4525,64 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
             // Uid 1 process state change from kStateUnknown -> Foreground
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20 * NS_PER_SEC);
                 data->clear();
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 20, 1 /*uid*/, 6));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC,
+                                                       1 /*uid*/, 6));
 
                 // This event should be skipped.
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 20, 2 /*uid*/, 8));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC,
+                                                       2 /*uid*/, 8));
                 return true;
             }))
             // Uid 2 process state change from kStateUnknown -> Background
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 40);
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 40 * NS_PER_SEC);
                 data->clear();
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 40, 2 /*uid*/, 9));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 40 * NS_PER_SEC,
+                                                       2 /*uid*/, 9));
 
                 // This event should be skipped.
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 40, 1 /*uid*/, 12));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 40 * NS_PER_SEC,
+                                                       1 /*uid*/, 12));
                 return true;
             }))
             // Uid 1 process state change from Foreground -> Background
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 20);
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 20 * NS_PER_SEC);
                 data->clear();
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 20, 1 /*uid*/, 13));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 20 * NS_PER_SEC,
+                                                       1 /*uid*/, 13));
 
                 // This event should be skipped.
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 20, 2 /*uid*/, 11));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 20 * NS_PER_SEC,
+                                                       2 /*uid*/, 11));
                 return true;
             }))
             // Uid 1 process state change from Background -> Foreground
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 40);
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 40 * NS_PER_SEC);
                 data->clear();
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 40, 1 /*uid*/, 17));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 40 * NS_PER_SEC,
+                                                       1 /*uid*/, 17));
 
                 // This event should be skipped.
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 40, 2 /*uid */, 15));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 40 * NS_PER_SEC,
+                                                       2 /*uid */, 15));
                 return true;
             }))
             // Dump report pull.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
-                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 50);
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 50 * NS_PER_SEC);
                 data->clear();
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 50, 2 /*uid*/, 20));
-                data->push_back(
-                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 50, 1 /*uid*/, 21));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 50 * NS_PER_SEC,
+                                                       2 /*uid*/, 20));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 50 * NS_PER_SEC,
+                                                       1 /*uid*/, 21));
                 return true;
             }));
 
@@ -4489,6 +4614,7 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
     // Base for dimension key {uid 2}
     it++;
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4505,12 +4631,14 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
 
     // Bucket status after uid 1 process state change kStateUnknown -> Foreground.
-    auto uidProcessEvent = CreateUidProcessStateChangedEvent(
-            bucketStartTimeNs + 20, 1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
+    auto uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucketStartTimeNs + 20 * NS_PER_SEC, 1 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
     StateManager::getInstance().onLogEvent(*uidProcessEvent);
-    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {uid 1}.
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4528,8 +4656,18 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(3, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+    // Value for key {uid 1, FOREGROUND}.
+    it++;
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
 
-    // Base for dimension key {uid 2}
+    // Base for dimension key {uid 2}.
     it++;
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
     EXPECT_TRUE(itBase->second.baseInfos[0].hasBase);
@@ -4538,20 +4676,40 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               itBase->second.currentState.getValues()[0].mValue.int_value);
-    // Value for key {uid 2, kStateUnknown}
+    // Value for key {uid 2, kStateUnknown}.
     ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
-    EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
 
     // Bucket status after uid 2 process state change kStateUnknown -> Background.
-    uidProcessEvent = CreateUidProcessStateChangedEvent(
-            bucketStartTimeNs + 40, 2 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
+    uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucketStartTimeNs + 40 * NS_PER_SEC, 2 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
     StateManager::getInstance().onLogEvent(*uidProcessEvent);
-    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    // Base for dimension key {uid 1}.
+    ASSERT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 2}.
     it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.baseInfos[0].hasBase);
+    EXPECT_EQ(9, itBase->second.baseInfos[0].base.long_value);
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {uid 2, BACKGROUND}.
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 40 * NS_PER_SEC);
+
+    // Base for dimension key {uid 1}.
+    it++;
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
     EXPECT_TRUE(itBase->second.baseInfos[0].hasBase);
     EXPECT_EQ(6, itBase->second.baseInfos[0].base.long_value);
@@ -4563,26 +4721,33 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
     EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
-    EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(3, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
 
-    // Base for dimension key {uid 2}
+    // Value for key {uid 1, FOREGROUND}.
     it++;
-    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_TRUE(itBase->second.baseInfos[0].hasBase);
-    EXPECT_EQ(9, itBase->second.baseInfos[0].base.long_value);
-    EXPECT_TRUE(itBase->second.hasCurrentState);
-    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
-    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
-              itBase->second.currentState.getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
     // Value for key {uid 2, kStateUnknown}
+    it++;
     ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
-    EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 40 * NS_PER_SEC,
+                         bucketStartTimeNs + 40 * NS_PER_SEC);
 
     // Pull at end of first bucket.
     vector<shared_ptr<LogEvent>> allData;
@@ -4612,6 +4777,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+    EXPECT_EQ(20 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
 
     // Base for dimension key {uid 1}
     it++;
@@ -4629,6 +4796,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* kStateTracker::kUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+    EXPECT_EQ(20 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
 
     // Value for key {uid 1, FOREGROUND}
     it++;
@@ -4638,6 +4807,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+    EXPECT_EQ(40 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
 
     // Value for key {uid 2, kStateUnknown}
     it++;
@@ -4647,13 +4818,16 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* kStateTracker::kUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 40 * NS_PER_SEC);
+    EXPECT_EQ(40 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
 
     // Bucket status after uid 1 process state change from Foreground -> Background.
-    uidProcessEvent = CreateUidProcessStateChangedEvent(
-            bucket2StartTimeNs + 20, 1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
+    uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucket2StartTimeNs + 20 * NS_PER_SEC, 1 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
     StateManager::getInstance().onLogEvent(*uidProcessEvent);
 
-    ASSERT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(5UL, valueProducer->mCurrentSlicedBucket.size());
     ASSERT_EQ(4UL, valueProducer->mPastBuckets.size());
     ASSERT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
     // Base for dimension key {uid 2}.
@@ -4672,6 +4846,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+
     // Base for dimension key {uid 1}
     it++;
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
@@ -4688,6 +4864,17 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {uid 1, BACKGROUND}
+    it++;
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs + 20 * NS_PER_SEC);
+
     // Value for key {uid 1, FOREGROUND}
     it++;
     ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
@@ -4697,6 +4884,9 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(3, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucket2StartTimeNs + 20 * NS_PER_SEC);
+
     // Value for key {uid 2, kStateUnknown}
     it++;
     ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
@@ -4705,10 +4895,12 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 40 * NS_PER_SEC);
 
     // Bucket status after uid 1 process state change Background->Foreground.
-    uidProcessEvent = CreateUidProcessStateChangedEvent(
-            bucket2StartTimeNs + 40, 1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
+    uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucket2StartTimeNs + 40 * NS_PER_SEC, 1 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
     StateManager::getInstance().onLogEvent(*uidProcessEvent);
 
     ASSERT_EQ(5UL, valueProducer->mCurrentSlicedBucket.size());
@@ -4729,6 +4921,7 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
 
     // Base for dimension key {uid 1}
     it++;
@@ -4746,6 +4939,7 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
 
     // Value for key {uid 1, BACKGROUND}
     it++;
@@ -4756,6 +4950,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(4, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucket2StartTimeNs + 40 * NS_PER_SEC);
 
     // Value for key {uid 1, FOREGROUND}
     it++;
@@ -4766,6 +4962,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(3, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, true, 20 * NS_PER_SEC,
+                         bucket2StartTimeNs + 40 * NS_PER_SEC);
 
     // Value for key {uid 2, kStateUnknown}
     it++;
@@ -4774,17 +4972,20 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 40 * NS_PER_SEC);
 
     // Start dump report and check output.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucket2StartTimeNs + 50, true /* include recent buckets */, true,
-                                NO_TIME_CONSTRAINTS, &strSet, &output);
+    valueProducer->onDumpReport(bucket2StartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
     ASSERT_EQ(5, report.value_metrics().data_size());
 
+    // {uid 1, BACKGROUND}
     auto data = report.value_metrics().data(0);
     ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(4, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
@@ -4792,14 +4993,18 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
               data.slice_by_state(0).value());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {uid 2, kStateUnknown}
     data = report.value_metrics().data(1);
     ASSERT_EQ(1, report.value_metrics().data(1).bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /*StateTracker::kStateUnknown*/, data.slice_by_state(0).value());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {uid 1, FOREGROUND}
     data = report.value_metrics().data(2);
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -4808,14 +5013,19 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2, report.value_metrics().data(2).bucket_info_size());
     EXPECT_EQ(4, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
     EXPECT_EQ(7, report.value_metrics().data(2).bucket_info(1).values(0).value_long());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
 
+    // {uid 1, kStateUnknown}
     data = report.value_metrics().data(3);
     ASSERT_EQ(1, report.value_metrics().data(3).bucket_info_size());
     EXPECT_EQ(3, report.value_metrics().data(3).bucket_info(0).values(0).value_long());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /*StateTracker::kStateUnknown*/, data.slice_by_state(0).value());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
+    // {uid 2, BACKGROUND}
     data = report.value_metrics().data(4);
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -4824,6 +5034,1630 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2, report.value_metrics().data(4).bucket_info_size());
     EXPECT_EQ(6, report.value_metrics().data(4).bucket_info(0).values(0).value_long());
     EXPECT_EQ(5, report.value_metrics().data(4).bucket_info(1).values(0).value_long());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
+}
+
+/*
+ * Test slicing condition_true_nanos by state for metric that slices by state when data is not
+ * present in pulled data during a state change.
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithMissingDataInStateChange) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric =
+            ValueMetricProducerTestHelper::createMetricWithState("BATTERY_SAVER_MODE_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    /*
+    NOTE: "-" means that the data was not present in the pulled data.
+
+                             bucket # 1
+    10         20         30         40         50         60   (seconds)
+    |-------------------------------------------------------|--
+    x                                                           (kStateUnknown)
+    |-----------|
+         10
+
+                x                               x               (ON)
+                |---------------------|         |-----------|
+                           20                        10
+
+                                      -                         (OFF)
+    */
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs, 3));
+                return true;
+            }))
+            // Battery saver mode state changed to ON.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC, 5));
+                return true;
+            }))
+            // Battery saver mode state changed to OFF but data for dimension key {} is not present
+            // in the pulled data.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 30 * NS_PER_SEC);
+                data->clear();
+                return true;
+            }))
+            // Battery saver mode state changed to ON.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 40 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 40 * NS_PER_SEC, 7));
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 50 * NS_PER_SEC, 15));
+                return true;
+            }));
+
+    StateManager::getInstance().clear();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {util::BATTERY_SAVER_MODE_STATE_CHANGED}, {});
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().registerListener(util::BATTERY_SAVER_MODE_STATE_CHANGED,
+                                                 valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(
+                         util::BATTERY_SAVER_MODE_STATE_CHANGED));
+
+    // Bucket status after metric initialized.
+    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
+
+    // Bucket status after battery saver mode ON event.
+    unique_ptr<LogEvent> batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucketStartTimeNs + 10 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+
+    // Base for dimension key {}
+
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Bucket status after battery saver mode OFF event which is not present
+    // in the pulled data.
+    unique_ptr<LogEvent> batterySaverOffEvent =
+            CreateBatterySaverOffEvent(/*timestamp=*/bucketStartTimeNs + 30 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOffEvent);
+
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_FALSE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Bucket status after battery saver mode ON event.
+    batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucketStartTimeNs + 40 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 40 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(2, report.value_metrics().data_size());
+
+    // {{}, kStateUnknown}
+    ValueMetricData data = report.value_metrics().data(0);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+
+    // {{}, ON}
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+}
+
+/*
+ * Test for metric that slices by state when data is not present in pulled data
+ * during an event and then a flush occurs for the current bucket. With the new
+ * condition timer behavior, a "new" MetricDimensionKey is inserted into
+ * `mCurrentSlicedBucket` before intervals are closed/added to that new
+ * MetricDimensionKey.
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithMissingDataThenFlushBucket) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric =
+            ValueMetricProducerTestHelper::createMetricWithState("BATTERY_SAVER_MODE_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    /*
+    NOTE: "-" means that the data was not present in the pulled data.
+
+                             bucket # 1
+    10         20         30         40         50         60   (seconds)
+    |-------------------------------------------------------|--
+    -                                                           (kStateUnknown)
+
+                -                                               (ON)
+    */
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
+            // ValueMetricProducer initialized  but data for dimension key {} is not present
+            // in the pulled data..
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs);
+                data->clear();
+                return true;
+            }))
+            // Battery saver mode state changed to ON but data for dimension key {} is not present
+            // in the pulled data.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 50 * NS_PER_SEC, 15));
+                return true;
+            }));
+
+    StateManager::getInstance().clear();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {util::BATTERY_SAVER_MODE_STATE_CHANGED}, {});
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().registerListener(util::BATTERY_SAVER_MODE_STATE_CHANGED,
+                                                 valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(
+                         util::BATTERY_SAVER_MODE_STATE_CHANGED));
+
+    // Bucket status after metric initialized.
+    ASSERT_EQ(0UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(0UL, valueProducer->mCurrentBaseInfo.size());
+
+    // Bucket status after battery saver mode ON event which is not present
+    // in the pulled data.
+    unique_ptr<LogEvent> batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucketStartTimeNs + 10 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+
+    ASSERT_EQ(0UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(0UL, valueProducer->mCurrentSlicedBucket.size());
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(0, report.value_metrics().data_size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+}
+
+TEST(ValueMetricProducerTest, TestSlicedStateWithNoPullOnBucketBoundary) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric =
+            ValueMetricProducerTestHelper::createMetricWithState("BATTERY_SAVER_MODE_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    /*
+                 bucket # 1                         bucket # 2
+    10    20    30    40    50    60    70    80   90   100   110   120  (seconds)
+    |------------------------------------|---------------------------|--
+    x                                                                    (kStateUnknown)
+    |-----|
+      10
+          x                                              x               (ON)
+          |-----|                                        |-----------|
+             10                                               20
+                x                                                        (OFF)
+                |------------------------|
+                          40
+    */
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs, 3));
+                return true;
+            }))
+            // Battery saver mode state changed to ON.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC, 5));
+                return true;
+            }))
+            // Battery saver mode state changed to OFF.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC, 7));
+                return true;
+            }))
+            // Battery saver mode state changed to ON.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 30 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucket2StartTimeNs + 30 * NS_PER_SEC, 10));
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 50 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucket2StartTimeNs + 50 * NS_PER_SEC, 15));
+                return true;
+            }));
+
+    StateManager::getInstance().clear();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {util::BATTERY_SAVER_MODE_STATE_CHANGED}, {});
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().registerListener(util::BATTERY_SAVER_MODE_STATE_CHANGED,
+                                                 valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(
+                         util::BATTERY_SAVER_MODE_STATE_CHANGED));
+
+    // Bucket status after metric initialized.
+    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs);
+
+    // Bucket status after battery saver mode ON event.
+    unique_ptr<LogEvent> batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucketStartTimeNs + 10 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Bucket status after battery saver mode OFF event.
+    unique_ptr<LogEvent> batterySaverOffEvent =
+            CreateBatterySaverOffEvent(/*timestamp=*/bucketStartTimeNs + 20 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOffEvent);
+
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, OFF}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{}, ON}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Bucket status after battery saver mode ON event.
+    batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucket2StartTimeNs + 30 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, OFF}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 30 * NS_PER_SEC,
+                         bucket2StartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{}, ON}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(3, report.value_metrics().data_size());
+
+    // {{}, kStateUnknown}
+    ValueMetricData data = report.value_metrics().data(0);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+
+    // {{}, ON}
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON, data.slice_by_state(0).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
+
+    // {{}, OFF}
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+}
+
+/*
+ * Test slicing condition_true_nanos by state for metric that slices by state when data is not
+ * present in pulled data during a condition change.
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithDataMissingInConditionChange) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithConditionAndState(
+            "BATTERY_SAVER_MODE_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    /*
+    NOTE: "-" means that the data was not present in the pulled data.
+
+                             bucket # 1
+    10         20         30         40         50         60   (seconds)
+    |-------------------------------------------------------|--
+
+    T                                 F         T               (Condition)
+               x                                                (ON)
+               |----------------------|         -
+                         20
+    */
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
+            // Battery saver mode state changed to ON.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC, 3));
+                return true;
+            }))
+            // Condition changed to false.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 30 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 30 * NS_PER_SEC, 5));
+                return true;
+            }))
+            // Condition changed to true but data for dimension key {} is not present in the
+            // pulled data.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 40 * NS_PER_SEC);
+                data->clear();
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 50 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucketStartTimeNs + 50 * NS_PER_SEC, 20));
+                return true;
+            }));
+
+    StateManager::getInstance().clear();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithConditionAndState(
+                    pullerManager, metric, {util::BATTERY_SAVER_MODE_STATE_CHANGED}, {},
+                    ConditionState::kTrue);
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().registerListener(util::BATTERY_SAVER_MODE_STATE_CHANGED,
+                                                 valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(
+                         util::BATTERY_SAVER_MODE_STATE_CHANGED));
+
+    // Bucket status after battery saver mode ON event.
+    unique_ptr<LogEvent> batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucketStartTimeNs + 10 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket status after condition change to false.
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 30 * NS_PER_SEC);
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket status after condition change to true.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 40 * NS_PER_SEC);
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_FALSE(itBase->second.hasCurrentState);
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{}, -1}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(1, report.value_metrics().data_size());
+
+    // {{}, ON}
+    ValueMetricData data = report.value_metrics().data(0);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+}
+
+/*
+ * Test slicing condition_true_nanos by state for metric that slices by state with a primary field,
+ * condition, and has multiple dimensions.
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithMultipleDimensions) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric =
+            ValueMetricProducerTestHelper::createMetricWithConditionAndState("UID_PROCESS_STATE");
+    metric.mutable_dimensions_in_what()->set_field(tagId);
+    metric.mutable_dimensions_in_what()->add_child()->set_field(1);
+    metric.mutable_dimensions_in_what()->add_child()->set_field(3);
+
+    MetricStateLink* stateLink = metric.add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateDimensions(tagId, {1 /* uid */});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+
+    /*
+                    bucket # 1                            bucket # 2
+    10     20     30     40     50     60     70     80     90    100    110    120 (seconds)
+    |------------------------------------------|---------------------------------|--
+
+    T                           F   T                                               (Condition)
+                                                                                    (FOREGROUND)
+           x                                                                        {1, 14}
+           |------|
+              10
+
+           x                                                                        {1, 16}
+           |------|
+              10
+                                                                   x                {2, 8}
+                                                                   |-------------|
+                                                                         20
+
+                                                                                    (BACKGROUND)
+                  x                                                                 {1, 14}
+                  |-------------|   |----------|---------------------------------|
+                        20              15                     50
+
+                  x                                                                 {1, 16}
+                  |-------------|   |----------|---------------------------------|
+                        20              15                     50
+
+                     x                                                              {2, 8}
+                     |----------|   |----------|-------------------|
+                         15             15              30
+    */
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
+            // Uid 1 process state change from kStateUnknown -> Foreground
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC,
+                                                         1 /*uid*/, 3, 14 /*tag*/));
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC,
+                                                         1 /*uid*/, 3, 16 /*tag*/));
+
+                // This event should be skipped.
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 10 * NS_PER_SEC,
+                                                         2 /*uid*/, 5, 8 /*tag*/));
+                return true;
+            }))
+            // Uid 1 process state change from Foreground -> Background
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC,
+                                                         1 /*uid*/, 5, 14 /*tag*/));
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC,
+                                                         1 /*uid*/, 5, 16 /*tag*/));
+
+                // This event should be skipped.
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC,
+                                                         2 /*uid*/, 7, 8 /*tag*/));
+
+                return true;
+            }))
+            // Uid 2 process state change from kStateUnknown -> Background
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 25 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 25 * NS_PER_SEC,
+                                                         2 /*uid*/, 9, 8 /*tag*/));
+
+                // This event should be skipped.
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 25 * NS_PER_SEC,
+                                                         1 /*uid*/, 9, 14 /* tag */));
+
+                // This event should be skipped.
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 25 * NS_PER_SEC,
+                                                         1 /*uid*/, 9, 16 /* tag */));
+
+                return true;
+            }))
+            // Condition changed to false.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 40 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 40 * NS_PER_SEC,
+                                                         1 /*uid*/, 11, 14 /* tag */));
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 40 * NS_PER_SEC,
+                                                         1 /*uid*/, 11, 16 /* tag */));
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 40 * NS_PER_SEC,
+                                                         2 /*uid*/, 11, 8 /*tag*/));
+
+                return true;
+            }))
+            // Condition changed to true.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 45 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 45 * NS_PER_SEC,
+                                                         1 /*uid*/, 13, 14 /* tag */));
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 45 * NS_PER_SEC,
+                                                         1 /*uid*/, 13, 16 /* tag */));
+                data->push_back(CreateThreeValueLogEvent(tagId, bucketStartTimeNs + 45 * NS_PER_SEC,
+                                                         2 /*uid*/, 13, 8 /*tag*/));
+                return true;
+            }))
+            // Uid 2 process state change from Background -> Foreground
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 30 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(
+                        tagId, bucket2StartTimeNs + 30 * NS_PER_SEC, 2 /*uid*/, 18, 8 /*tag*/));
+
+                // This event should be skipped.
+                data->push_back(CreateThreeValueLogEvent(
+                        tagId, bucket2StartTimeNs + 30 * NS_PER_SEC, 1 /*uid*/, 18, 14 /* tag */));
+                // This event should be skipped.
+                data->push_back(CreateThreeValueLogEvent(
+                        tagId, bucket2StartTimeNs + 30 * NS_PER_SEC, 1 /*uid*/, 18, 16 /* tag */));
+
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 50 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateThreeValueLogEvent(
+                        tagId, bucket2StartTimeNs + 50 * NS_PER_SEC, 1 /*uid*/, 21, 14 /* tag */));
+                data->push_back(CreateThreeValueLogEvent(
+                        tagId, bucket2StartTimeNs + 50 * NS_PER_SEC, 1 /*uid*/, 21, 16 /* tag */));
+                data->push_back(CreateThreeValueLogEvent(
+                        tagId, bucket2StartTimeNs + 50 * NS_PER_SEC, 2 /*uid*/, 21, 8 /*tag*/));
+                return true;
+            }));
+
+    StateManager::getInstance().clear();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithConditionAndState(
+                    pullerManager, metric, {UID_PROCESS_STATE_ATOM_ID}, {}, ConditionState::kTrue);
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().registerListener(UID_PROCESS_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
+
+    // Condition is true.
+    // Bucket status after uid 1 process state change kStateUnknown -> Foreground.
+    auto uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucketStartTimeNs + 10 * NS_PER_SEC, 1 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    ASSERT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension {uid 1, tag 16}.
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 10 * NS_PER_SEC);
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket status after uid 1 process state change Foreground -> Background.
+    uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucketStartTimeNs + 20 * NS_PER_SEC, 1 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    ASSERT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(6UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension {uid 1, tag 16}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket status after uid 2 process state change kStateUnknown -> Background.
+    uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucketStartTimeNs + 25 * NS_PER_SEC, 2 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    ASSERT_EQ(3UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(8UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension {uid 2, tag 8}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 2, uid 8}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 25 * NS_PER_SEC);
+
+    // Value for key {{uid 2, uid 8}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Base for dimension {uid 1, tag 16}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket 1 status after condition change to false.
+    // All condition timers should be turned off.
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 40 * NS_PER_SEC);
+    ASSERT_EQ(3UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(8UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension {uid 2, tag 8}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 2, uid 8}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 15 * NS_PER_SEC,
+                         bucketStartTimeNs + 40 * NS_PER_SEC);
+
+    // Value for key {{uid 2, uid 8}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Base for dimension {uid 1, tag 16}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 40 * NS_PER_SEC);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 40 * NS_PER_SEC);
+
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket 1 status after condition change to true.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 45 * NS_PER_SEC);
+    ASSERT_EQ(3UL, valueProducer->mCurrentBaseInfo.size());
+    ASSERT_EQ(8UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension {uid 2, tag 8}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 2, uid 8}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 15 * NS_PER_SEC,
+                         bucketStartTimeNs + 45 * NS_PER_SEC);
+
+    // Value for key {{uid 2, uid 8}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Base for dimension {uid 1, tag 16}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 45 * NS_PER_SEC);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 20 * NS_PER_SEC,
+                         bucketStartTimeNs + 45 * NS_PER_SEC);
+
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Pull at end of first bucket.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(
+            CreateThreeValueLogEvent(tagId, bucket2StartTimeNs, 1 /*uid*/, 13, 14 /* tag */));
+    allData.push_back(
+            CreateThreeValueLogEvent(tagId, bucket2StartTimeNs, 1 /*uid*/, 13, 16 /* tag */));
+    allData.push_back(
+            CreateThreeValueLogEvent(tagId, bucket2StartTimeNs, 2 /*uid*/, 13, 8 /*tag*/));
+    valueProducer->onDataPulled(allData, /** succeeds */ true, bucket2StartTimeNs + 1);
+
+    // Buckets flushed after end of first bucket.
+    // All condition timers' behavior should rollover to bucket 2.
+    ASSERT_EQ(8UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(5UL, valueProducer->mPastBuckets.size());
+    ASSERT_EQ(3UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension {uid 2, tag 8}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 2, uid 8}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+    ASSERT_EQ(1, valueProducer->mPastBuckets[it->first].size());
+    EXPECT_EQ(30 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
+
+    // Value for key {{uid 2, uid 8}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Base for dimension {uid 1, tag 16}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+    ASSERT_EQ(1, valueProducer->mPastBuckets[it->first].size());
+    EXPECT_EQ(35 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+    ASSERT_EQ(1, valueProducer->mPastBuckets[it->first].size());
+    EXPECT_EQ(35 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
+
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+    ASSERT_EQ(1, valueProducer->mPastBuckets[it->first].size());
+    EXPECT_EQ(10 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
+
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+    ASSERT_EQ(1, valueProducer->mPastBuckets[it->first].size());
+    EXPECT_EQ(10 * NS_PER_SEC, valueProducer->mPastBuckets[it->first][0].mConditionTrueNs);
+
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Bucket 2 status after uid 2 process state change Background->Foreground.
+    uidProcessEvent =
+            CreateUidProcessStateChangedEvent(bucket2StartTimeNs + 30 * NS_PER_SEC, 2 /* uid */,
+                                              android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+
+    ASSERT_EQ(9UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(3UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension {uid 2, tag 8}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 2, uid 8}, FOREGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{uid 2, uid 8}, BACKGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 30 * NS_PER_SEC,
+                         bucket2StartTimeNs + 30 * NS_PER_SEC);
+
+    // Value for key {{uid 2, uid 8}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(8, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Base for dimension {uid 1, tag 16}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, uid 16}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+
+    // Base for dimension key {uid 1, tag 14}.
+    it++;
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    ASSERT_EQ(1, itBase->second.currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{uid 1, tag 14}, BACKGROUND}.
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+
+    // Value for key {{uid 1, uid 16}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 16}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(16, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Value for key {{uid 1, tag 14}, FOREGROUND}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+
+    // Value for key {{uid 1, tag 14}, kStateUnknown}.
+    it++;
+    ASSERT_EQ(2, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(14, it->first.getDimensionKeyInWhat().getValues()[1].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(6, report.value_metrics().data_size());
+
+    // {{uid 1, tag 14}, FOREGROUND}.
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+
+    // {{uid 1, tag 16}, BACKGROUND}.
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(35 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
+
+    // {{uid 1, tag 14}, BACKGROUND}.
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(35 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
+
+    // {{uid 1, tag 16}, FOREGROUND}.
+    data = report.value_metrics().data(3);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+
+    // {{uid 2, tag 8}, FOREGROUND}.
+    data = report.value_metrics().data(4);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(20 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+
+    // {{uid 2, tag 8}, BACKGROUND}.
+    data = report.value_metrics().data(5);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
 }
 
 TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
@@ -4894,15 +6728,23 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(BatterySaverModeStateChanged::ON,
               itBase->second.currentState.getValues()[0].mValue.int_value);
-    // Value for key {{}, -1}
-    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Value for key {{}, ON}
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     std::unordered_map<MetricDimensionKey, ValueMetricProducer::CurrentValueBucket>::iterator it =
             valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 20 * NS_PER_SEC);
+    // Value for key {{}, -1}
+    it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
 
     // Bucket status after battery saver mode OFF event.
     unique_ptr<LogEvent> batterySaverOffEvent =
@@ -4917,15 +6759,27 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(BatterySaverModeStateChanged::OFF,
               itBase->second.currentState.getValues()[0].mValue.int_value);
-    // Value for key {{}, ON}
-    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Value for key {{}, OFF}
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
     it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucketStartTimeNs + 30 * NS_PER_SEC);
+    // Value for key {{}, ON}
+    it++;
     EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(BatterySaverModeStateChanged::ON,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(2, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucketStartTimeNs + 30 * NS_PER_SEC);
+    // Value for key {{}, -1}
+    it++;
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
 
     // Pull at end of first bucket.
     vector<shared_ptr<LogEvent>> allData;
@@ -4944,6 +6798,15 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
     ASSERT_EQ(1, itBase->second.currentState.getValues().size());
     EXPECT_EQ(BatterySaverModeStateChanged::OFF,
               itBase->second.currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, OFF}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    assertConditionTimer(it->second.conditionTimer, true, 0, bucket2StartTimeNs);
+    // Value for key {{}, ON}
+    it++;
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 30 * NS_PER_SEC);
+    // Value for key {{}, -1}
+    it++;
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
 
     // Bucket 2 status after condition change to false.
     valueProducer->onConditionChanged(false, bucket2StartTimeNs + 10 * NS_PER_SEC);
@@ -4964,6 +6827,19 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
     EXPECT_TRUE(it->second.intervals[0].hasValue);
     EXPECT_EQ(4, it->second.intervals[0].value.long_value);
+    assertConditionTimer(it->second.conditionTimer, false, 10 * NS_PER_SEC,
+                         bucket2StartTimeNs + 10 * NS_PER_SEC);
+    // Value for key {{}, ON}
+    it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second.intervals[0].hasValue);
+    assertConditionTimer(it->second.conditionTimer, false, 0, bucketStartTimeNs + 30 * NS_PER_SEC);
+    // Value for key {{}, -1}
+    it++;
+    assertConditionTimer(it->second.conditionTimer, false, 0, 0);
 
     // Start dump report and check output.
     ProtoOutputStream output;
@@ -4982,6 +6858,7 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
     EXPECT_EQ(BatterySaverModeStateChanged::ON, data.slice_by_state(0).value());
     ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, data.bucket_info(0).values(0).value_long());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
 
     data = report.value_metrics().data(1);
     EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
@@ -4990,6 +6867,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
     ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(6, data.bucket_info(0).values(0).value_long());
     EXPECT_EQ(4, data.bucket_info(1).values(0).value_long());
+    EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(0).condition_true_nanos());
+    EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(1).condition_true_nanos());
 }
 
 /*
