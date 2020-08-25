@@ -41,7 +41,12 @@
     public <init>(android.content.Context);
 }
 
+# Keep the wm shell lib
 -keep class com.android.wm.shell.*
+# Keep the protolog group methods that are called by the generated code
+-keepclassmembers class com.android.wm.shell.protolog.ShellProtoLogGroup {
+    *;
+}
 
 -keep class com.android.systemui.dagger.GlobalRootComponent { *; }
 -keep class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { *; }

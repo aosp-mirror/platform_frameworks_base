@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "messages": {
+    "-1340279385": {
+      "message": "Remove listener=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "-880817403": {
+      "message": "Task vanished taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "-460572385": {
+      "message": "Task appeared taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "-242812822": {
+      "message": "Add listener for modes=%s listener=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "157713005": {
+      "message": "Task info changed taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "980952660": {
+      "message": "Task root back pressed taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    }
+  },
+  "groups": {
+    "WM_SHELL_TASK_ORG": {
+      "tag": "WindowManagerShell"
+    }
+  }
+}
