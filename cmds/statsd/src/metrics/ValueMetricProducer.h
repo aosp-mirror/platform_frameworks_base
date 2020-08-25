@@ -193,22 +193,29 @@ private:
         std::vector<Interval> intervals;
     } CurrentValueBucket;
 
+    // Holds base information for diffing values from one value field.
     typedef struct {
         // Holds current base value of the dimension. Take diff and update if necessary.
         Value base;
         // Whether there is a base to diff to.
         bool hasBase;
+    } BaseInfo;
+
+    // State key and base information for a specific DimensionsInWhat key.
+    typedef struct {
+        std::vector<BaseInfo> baseInfos;
         // Last seen state value(s).
         HashableDimensionKey currentState;
         // Whether this dimensions in what key has a current state key.
         bool hasCurrentState;
-    } BaseInfo;
+    } DimensionsInWhatInfo;
 
     // Tracks the internal state in the ongoing aggregation bucket for each DimensionsInWhat
     // key and StateValuesKey pair.
     std::unordered_map<MetricDimensionKey, CurrentValueBucket> mCurrentSlicedBucket;
 
-    std::unordered_map<HashableDimensionKey, std::vector<BaseInfo>> mCurrentBaseInfo;
+    // Tracks current state key and base information for each DimensionsInWhat key.
+    std::unordered_map<HashableDimensionKey, DimensionsInWhatInfo> mCurrentBaseInfo;
 
     std::unordered_map<MetricDimensionKey, int64_t> mCurrentFullBucket;
 
