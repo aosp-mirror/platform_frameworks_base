@@ -22,8 +22,6 @@ import android.view.IWindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.pip.phone.PipMenuActivity;
-import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.wm.DisplaySystemBarsController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -42,13 +40,5 @@ public class CarWMShellModule {
             @Main Handler mainHandler, TransactionPool transactionPool) {
         return new DisplaySystemBarsController(context, wmService, displayController,
                 mainHandler, transactionPool);
-    }
-
-    /** TODO(b/150319024): PipMenuActivity will move to a Window */
-    @SysUISingleton
-    @PipMenuActivityClass
-    @Provides
-    Class<?> providePipMenuActivityClass() {
-        return PipMenuActivity.class;
     }
 }
