@@ -114,6 +114,14 @@ public class PipNotification {
                 notifyPipNotification();
             }
         }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            if (updateMediaControllerMetadata() && mNotified) {
+                // update notification
+                notifyPipNotification();
+            }
+        }
     };
 
     private final PipManager.MediaListener mPipMediaListener = new PipManager.MediaListener() {
