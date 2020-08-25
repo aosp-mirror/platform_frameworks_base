@@ -11671,7 +11671,7 @@ public class PackageManagerService extends IPackageManager.Stub
             configurePackageComponents(parsedPackage);
         }
 
-        final String cpuAbiOverride = deriveAbiOverride(request.cpuAbiOverride, pkgSetting);
+        final String cpuAbiOverride = deriveAbiOverride(request.cpuAbiOverride);
         final boolean isUpdatedSystemApp = pkgSetting.getPkgState().isUpdatedSystemApp();
 
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
@@ -17704,7 +17704,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
                         && pkgSetting.getPkgState().isUpdatedSystemApp();
-                final String abiOverride = deriveAbiOverride(args.abiOverride, pkgSetting);
+                final String abiOverride = deriveAbiOverride(args.abiOverride);
                 AndroidPackage oldPackage = mPackages.get(pkgName);
                 boolean isUpdatedSystemAppInferred = oldPackage != null && oldPackage.isSystem();
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
