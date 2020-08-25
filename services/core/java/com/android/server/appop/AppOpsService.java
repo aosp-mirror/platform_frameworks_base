@@ -37,6 +37,7 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
+import static android.app.AppOpsManager.OP_INTERACT_ACROSS_PROFILES;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
@@ -2251,6 +2252,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 scheduleWriteLocked();
             }
             uidState.evalForegroundOps(mOpModeWatchers);
+
+            if (code == OP_INTERACT_ACROSS_PROFILES) {
+                // Invalidate package info cache as the visibility of packages might have changed
+                PackageManager.invalidatePackageInfoCache();
+            }
         }
 
         notifyOpChangedForAllPkgsInUid(code, uid, false, permissionPolicyCallback);
@@ -2723,6 +2729,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             if (changed) {
                 scheduleFastWriteLocked();
+
+                // Invalidate package info cache as the visibility of packages might have changed
+                PackageManager.invalidatePackageInfoCache();
             }
         }
         if (callbacks != null) {
