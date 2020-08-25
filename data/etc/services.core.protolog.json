@@ -43,6 +43,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-2049725903": {
+      "message": "Task back pressed on root taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "-2039580386": {
       "message": "Attempted to add input method window with unknown token %s.  Aborting.",
       "level": "WARN",
@@ -85,6 +91,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
     },
+    "-1980468143": {
+      "message": "DisplayArea appeared name=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
     "-1976930686": {
       "message": "Attempted to add Accessibility overlay window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -102,6 +114,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1939861963": {
+      "message": "Create root task displayId=%d winMode=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
     "-1939358269": {
       "message": "mRecentScreenshotAnimator finish",
@@ -126,6 +144,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1895337367": {
+      "message": "Delete root task display=%d winMode=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
     "-1884933373": {
       "message": "enableScreenAfterBoot: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b. %s",
@@ -186,6 +210,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-1792633344": {
+      "message": "Register task organizer=%s uid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
     "-1791031393": {
       "message": "Ensuring correct configuration: %s",
@@ -421,6 +451,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1364754753": {
+      "message": "Task vanished taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "-1352076759": {
       "message": "Removing app token: %s",
       "level": "VERBOSE",
@@ -643,6 +679,18 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-951939129": {
+      "message": "Unregister task organizer=%s uid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
+    "-930893991": {
+      "message": "Set sync ready, syncId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
+    },
     "-929676529": {
       "message": "Configuration changes for %s, allChanges=%s",
       "level": "VERBOSE",
@@ -793,12 +841,6 @@
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-714291355": {
-      "message": "Losing delayed focus: %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-694710814": {
       "message": "Pausing rotation during drag",
       "level": "DEBUG",
@@ -918,6 +960,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-497620140": {
+      "message": "Transaction ready, syncId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
     },
     "-496681057": {
       "message": "Attempted to get remove mode of a display that does not exist: %d",
@@ -1345,6 +1393,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/BlackFrame.java"
     },
+    "174572959": {
+      "message": "DisplayArea info changed name=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
     "184362060": {
       "message": "screenshotTask(%d): mCanceled=%b",
       "level": "DEBUG",
@@ -1387,6 +1441,12 @@
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "232317536": {
+      "message": "Set intercept back pressed on root=%b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "241961619": {
       "message": "Adding %s to %s",
       "level": "VERBOSE",
@@ -1404,6 +1464,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "251812577": {
+      "message": "Register display organizer=%s uid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
     "254883724": {
       "message": "addWindowToken: Attempted to add binder token: %s for already created window token: %s displayId=%d",
@@ -1452,6 +1518,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "302969511": {
+      "message": "Task info changed taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
     "302992539": {
       "message": "addAnimation(%s)",
@@ -1519,12 +1591,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "385096046": {
-      "message": "Delaying loss of focus...",
-      "level": "INFO",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "399841913": {
       "message": "SURFACE RECOVER DESTROY: %s",
       "level": "INFO",
@@ -1572,6 +1638,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
+    "487621047": {
+      "message": "DisplayArea vanished name=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
     "490877640": {
       "message": "onStackOrderChanged(): stack=%s",
@@ -1849,6 +1921,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "906215061": {
+      "message": "Apply window transaction, syncId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
+    },
     "913494177": {
       "message": "removeAllWindowsIfPossible: removing win=%s",
       "level": "WARN",
@@ -1956,6 +2034,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/DisplayPolicy.java"
+    },
+    "1149424314": {
+      "message": "Unregister display organizer=%s uid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
     "1160771501": {
       "message": "Resize reasons for w=%s:  %s surfaceResized=%b configChanged=%b dragResizingChanged=%b reportOrientationChanged=%b",
@@ -2443,6 +2527,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1918448345": {
+      "message": "Task appeared taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
     "1921821199": {
       "message": "Preserving %s until the new one is added",
       "level": "VERBOSE",
@@ -2674,6 +2764,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_WINDOW_MOVEMENT": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_WINDOW_ORGANIZER": {
       "tag": "WindowManager"
     },
     "WM_ERROR": {

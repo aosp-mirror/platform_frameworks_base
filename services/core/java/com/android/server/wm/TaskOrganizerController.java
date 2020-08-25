@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_CONFIGS;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDOW_CONFIGS;
 
@@ -43,13 +44,12 @@ import android.window.ITaskOrganizerController;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -126,6 +126,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void onTaskAppeared(Task task) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task appeared taskId=%d", task.mTaskId);
             final boolean visible = task.isVisible();
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
@@ -147,6 +148,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
 
         void onTaskVanished(Task task) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task vanished taskId=%d", task.mTaskId);
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
@@ -163,6 +165,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 // by the organizer that don't receive that signal
                 return;
             }
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task info changed taskId=%d", task.mTaskId);
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 if (!task.isOrganized()) {
                     // This is safe to ignore if the task is no longer organized
@@ -177,6 +180,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void onBackPressedOnTaskRoot(Task task) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task back pressed on root taskId=%d",
+                    task.mTaskId);
             if (!task.mCreatedByOrganizer && !task.mTaskAppearedSent) {
                 // Skip if the task has not yet received taskAppeared(), except for tasks created
                 // by the organizer that don't receive that signal
@@ -306,6 +311,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register task organizer=%s uid=%d",
+                        organizer.asBinder(), uid);
                 for (int winMode : SUPPORTED_WINDOWING_MODES) {
                     if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
                         mTaskOrganizers.add(organizer);
@@ -327,6 +334,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     @Override
     public void unregisterTaskOrganizer(ITaskOrganizer organizer) {
         enforceStackPermission("unregisterTaskOrganizer()");
+        final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -334,6 +342,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (state == null) {
                     return;
                 }
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Unregister task organizer=%s uid=%d",
+                        organizer.asBinder(), uid);
                 state.unlinkDeath();
                 state.dispose();
             }
@@ -383,6 +393,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     return null;
                 }
 
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Create root task displayId=%d winMode=%d",
+                        displayId, windowingMode);
                 final Task task = display.getDefaultTaskDisplayArea().createStack(windowingMode,
                         ACTIVITY_TYPE_UNDEFINED, false /* onTop */, null /* info */, new Intent(),
                         true /* createdByOrganizer */);
@@ -407,6 +419,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     throw new IllegalArgumentException(
                             "Attempt to delete task not created by organizer task=" + task);
                 }
+
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Delete root task display=%d winMode=%d",
+                        task.getDisplayId(), task.getWindowingMode());
                 task.removeImmediately();
                 return true;
             }
@@ -614,6 +629,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Set intercept back pressed on root=%b",
+                        interceptBackPressed);
                 final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 if (state != null) {
                     state.setInterceptBackPressedOnTaskRoot(interceptBackPressed);
