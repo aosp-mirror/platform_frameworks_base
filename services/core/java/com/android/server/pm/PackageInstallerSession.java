@@ -134,6 +134,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -1554,10 +1555,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onSessionValidationFailure(int error, String detailMessage) {
-        // Session is sealed but could not be verified, we need to destroy it.
+        // Session is sealed but could not be validated, we need to destroy it.
         destroyInternal();
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, detailMessage, null);
+    }
+
+    private void onSessionVerificationFailure(int error, String detailMessage) {
+        Slog.e(TAG, "Failed to verify session " + sessionId + " [" + detailMessage + "]");
+        // Session is sealed and committed but could not be verified, we need to destroy it.
+        destroyInternal();
+        if (isStaged()) {
+            setStagedSessionFailed(
+                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, detailMessage);
+            // TODO(b/136257624): Remove this once all verification logic has been transferred out
+            //  of StagingManager.
+            mStagingManager.notifyVerificationComplete(sessionId);
+        } else {
+            // Dispatch message to remove session from PackageInstallerService.
+            dispatchSessionFinished(error, detailMessage, null);
+        }
     }
 
     private void onStorageUnhealthy() {
@@ -1680,7 +1697,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         if (params.isStaged) {
             mStagingManager.commitSession(this);
-            destroyInternal();
+            // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
+            //  though ideally, we just need to send session committed broadcast.
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
@@ -1691,14 +1709,30 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "APEX packages can only be installed using staged sessions.", null);
             return;
         }
+        verify();
+    }
 
+    /**
+     * Resumes verification process for non-final committed staged session.
+     *
+     * Useful if a device gets rebooted before verification is complete and we need to restart the
+     * verification.
+     */
+    void verifyStagedSession() {
+        assertCallerIsOwnerOrRootOrSystemLocked();
+        Preconditions.checkArgument(isCommitted());
+        Preconditions.checkArgument(isStaged());
+        Preconditions.checkArgument(!mStagedSessionApplied && !mStagedSessionFailed);
+
+        verify();
+    }
+
+    private void verify() {
         try {
             verifyNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-            Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
-            destroyInternal();
-            dispatchSessionFinished(e.error, completeMsg, null);
+            onSessionVerificationFailure(e.error, completeMsg);
         }
     }
 
@@ -1846,7 +1880,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private PackageManagerService.VerificationParams makeVerificationParamsLocked()
             throws PackageManagerException {
-        if (!params.isMultiPackage) {
+        // TODO(b/136257624): Some logic in this if block probably belongs in
+        //  makeInstallParams().
+        if (!params.isMultiPackage && !isApexInstallation()) {
             Objects.requireNonNull(mPackageName);
             Objects.requireNonNull(mSigningDetails);
             Objects.requireNonNull(mResolvedBaseFile);
@@ -1923,8 +1959,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
                         onVerificationComplete();
                     } else {
-                        destroyInternal();
-                        dispatchSessionFinished(returnCode, msg, extras);
+                        onSessionVerificationFailure(returnCode, msg);
                     }
                 }
             };
@@ -1946,9 +1981,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onVerificationComplete() {
-        if ((params.installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
-            destroyInternal();
-            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Dry run", new Bundle());
+        // Staged sessions will be installed later during boot
+        if (isStaged()) {
+            // TODO(b/136257624): Remove this once all verification logic has been transferred out
+            //  of StagingManager.
+            mStagingManager.notifyPreRebootVerification_Apk_Complete(sessionId);
+            // TODO(b/136257624): We also need to destroy internals for verified staged session,
+            //  otherwise file descriptors are never closed for verified staged session until reboot
             return;
         }
 

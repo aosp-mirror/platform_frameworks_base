@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.View.GONE;
 
+import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
@@ -68,9 +69,11 @@ import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -129,7 +132,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 @StatusBarComponent.StatusBarScope
 public class NotificationPanelViewController extends PanelViewController {
@@ -260,7 +262,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ConversationNotificationManager mConversationNotificationManager;
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private final Provider<KeyguardClockSwitchController> mKeyguardClockSwitchControllerProvider;
+    private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
     private final int mMaxKeyguardNotifications;
@@ -511,9 +513,9 @@ public class NotificationPanelViewController extends PanelViewController {
             MediaHierarchyManager mediaHierarchyManager,
             BiometricUnlockController biometricUnlockController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            Provider<KeyguardClockSwitchController> keyguardClockSwitchControllerProvider,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -525,9 +527,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mMediaHierarchyManager = mediaHierarchyManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-        mKeyguardClockSwitchControllerProvider = keyguardClockSwitchControllerProvider;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mView.setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
@@ -602,8 +604,10 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusView = mView.findViewById(R.id.keyguard_status_view);
 
         KeyguardClockSwitchController keyguardClockSwitchController =
-                mKeyguardClockSwitchControllerProvider.get();
-        keyguardClockSwitchController.attach(mView.findViewById(R.id.keyguard_clock_container));
+                mKeyguardStatusViewComponentFactory
+                        .build(mKeyguardStatusView)
+                        .getKeyguardClockSwitchController();
+        keyguardClockSwitchController.init();
         mBigClockContainer = mView.findViewById(R.id.big_clock_container);
         keyguardClockSwitchController.setBigClockContainer(mBigClockContainer);
 
@@ -733,8 +737,10 @@ public class NotificationPanelViewController extends PanelViewController {
         // Re-associate the clock container with the keyguard clock switch.
         mBigClockContainer.removeAllViews();
         KeyguardClockSwitchController keyguardClockSwitchController =
-                mKeyguardClockSwitchControllerProvider.get();
-        keyguardClockSwitchController.attach(mView.findViewById(R.id.keyguard_clock_container));
+                mKeyguardStatusViewComponentFactory
+                        .build(mKeyguardStatusView)
+                        .getKeyguardClockSwitchController();
+        keyguardClockSwitchController.init();
         keyguardClockSwitchController.setBigClockContainer(mBigClockContainer);
 
         // Update keyguard bottom area
@@ -1264,7 +1270,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private boolean flingExpandsQs(float vel) {
-        if (mFalsingManager.isUnlockingDisabled() || isFalseTouch()) {
+        if (mFalsingManager.isUnlockingDisabled() || isFalseTouch(QUICK_SETTINGS)) {
             return false;
         }
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
@@ -1274,12 +1280,12 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private boolean isFalseTouch() {
+    private boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         if (!mKeyguardAffordanceHelperCallback.needsAntiFalsing()) {
             return false;
         }
         if (mFalsingManager.isClassifierEnabled()) {
-            return mFalsingManager.isFalseTouch();
+            return mFalsingManager.isFalseTouch(interactionType);
         }
         return !mQsTouchAboveFalsingThreshold;
     }

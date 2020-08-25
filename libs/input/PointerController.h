@@ -70,7 +70,6 @@ public:
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
-    void doAnimate(nsecs_t timestamp);
     void reloadPointerResources();
     void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
 

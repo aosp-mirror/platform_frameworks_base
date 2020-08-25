@@ -27,6 +27,12 @@ import android.annotation.NonNull;
  */
 public interface TimeZoneDetectorInternal extends Dumpable.Container {
 
+    /** Adds a listener that will be invoked when time zone detection configuration is changed. */
+    void addConfigurationListener(ConfigurationChangeListener listener);
+
+    /** Returns the {@link ConfigurationInternal} for the current user. */
+    ConfigurationInternal getCurrentUserConfigurationInternal();
+
     /**
      * Suggests the current time zone, determined using geolocation, to the detector. The
      * detector may ignore the signal based on system settings, whether better information is

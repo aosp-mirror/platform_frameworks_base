@@ -20,5 +20,5 @@ import android.app.timezonedetector.TimeZoneConfiguration;
 
 /** {@hide} */
 oneway interface ITimeZoneConfigurationListener {
-    void onChange(in TimeZoneConfiguration configuration);
+    void onChange();
 }

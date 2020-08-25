@@ -1714,6 +1714,27 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     }
 
+    @Test
+    public void testProcessInfoUpdateWhenSetState() {
+        spyOn(mActivity.app);
+        verifyProcessInfoUpdate(RESUMED, true /* shouldUpdate */, true /* activityChange */);
+        verifyProcessInfoUpdate(PAUSED, false /* shouldUpdate */, false /* activityChange */);
+        verifyProcessInfoUpdate(STOPPED, false /* shouldUpdate */, false /* activityChange */);
+        verifyProcessInfoUpdate(STARTED, true /* shouldUpdate */, true /* activityChange */);
+
+        mActivity.app.removeActivity(mActivity, true /* keepAssociation */);
+        verifyProcessInfoUpdate(DESTROYING, true /* shouldUpdate */, false /* activityChange */);
+        verifyProcessInfoUpdate(DESTROYED, true /* shouldUpdate */, false /* activityChange */);
+    }
+
+    private void verifyProcessInfoUpdate(ActivityState state, boolean shouldUpdate,
+            boolean activityChange) {
+        reset(mActivity.app);
+        mActivity.setState(state, "test");
+        verify(mActivity.app, times(shouldUpdate ? 1 : 0)).updateProcessInfo(anyBoolean(),
+                eq(activityChange), anyBoolean(), anyBoolean());
+    }
+
     /**
      * Creates an activity on display. For non-default display request it will also create a new
      * display with custom DisplayInfo.

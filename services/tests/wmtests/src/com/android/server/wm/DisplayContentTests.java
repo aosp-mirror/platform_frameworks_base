@@ -1110,7 +1110,7 @@ public class DisplayContentTests extends WindowTestsBase {
         performLayout(mDisplayContent);
 
         // The frame is empty because the requested height is zero.
-        assertTrue(win.getFrameLw().isEmpty());
+        assertTrue(win.getFrame().isEmpty());
         // The window should be scheduled to resize then the client may report a new non-empty size.
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).contains(win);

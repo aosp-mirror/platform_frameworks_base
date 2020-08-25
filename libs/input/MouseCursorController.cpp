@@ -168,7 +168,7 @@ void MouseCursorController::fade(PointerControllerInterface::Transition transiti
         updatePointerLocked();
     } else {
         mLocked.pointerFadeDirection = -1;
-        mContext.startAnimation();
+        startAnimationLocked();
     }
 }
 
@@ -185,7 +185,7 @@ void MouseCursorController::unfade(PointerControllerInterface::Transition transi
         updatePointerLocked();
     } else {
         mLocked.pointerFadeDirection = 1;
-        mContext.startAnimation();
+        startAnimationLocked();
     }
 }
 
@@ -312,10 +312,9 @@ void MouseCursorController::setCustomPointerIcon(const SpriteIcon& icon) {
     updatePointerLocked();
 }
 
-bool MouseCursorController::doFadingAnimation(nsecs_t timestamp, bool keepAnimating) {
+bool MouseCursorController::doFadingAnimationLocked(nsecs_t timestamp) REQUIRES(mLock) {
     nsecs_t frameDelay = timestamp - mContext.getAnimationTime();
-
-    std::scoped_lock lock(mLock);
+    bool keepAnimating = false;
 
     // Animate pointer fade.
     if (mLocked.pointerFadeDirection < 0) {
@@ -337,13 +336,10 @@ bool MouseCursorController::doFadingAnimation(nsecs_t timestamp, bool keepAnimat
         }
         updatePointerLocked();
     }
-
     return keepAnimating;
 }
 
-bool MouseCursorController::doBitmapAnimation(nsecs_t timestamp) {
-    std::scoped_lock lock(mLock);
-
+bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(mLock) {
     std::map<int32_t, PointerAnimation>::const_iterator iter =
             mLocked.animationResources.find(mLocked.requestedPointerType);
     if (iter == mLocked.animationResources.end()) {
@@ -364,7 +360,6 @@ bool MouseCursorController::doBitmapAnimation(nsecs_t timestamp) {
 
         spriteController->closeTransaction();
     }
-
     // Keep animating.
     return true;
 }
@@ -399,7 +394,7 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
                 if (anim_iter != mLocked.animationResources.end()) {
                     mLocked.animationFrameIndex = 0;
                     mLocked.lastFrameUpdatedTime = systemTime(SYSTEM_TIME_MONOTONIC);
-                    mContext.startAnimation();
+                    startAnimationLocked();
                 }
                 mLocked.pointerSprite->setIcon(iter->second);
             } else {
@@ -455,6 +450,40 @@ void MouseCursorController::getAdditionalMouseResources() {
 bool MouseCursorController::resourcesLoaded() {
     std::scoped_lock lock(mLock);
     return mLocked.resourcesLoaded;
+}
+
+bool MouseCursorController::doAnimations(nsecs_t timestamp) {
+    std::scoped_lock lock(mLock);
+    bool keepFading = doFadingAnimationLocked(timestamp);
+    bool keepBitmap = doBitmapAnimationLocked(timestamp);
+    bool keepAnimating = keepFading || keepBitmap;
+    if (!keepAnimating) {
+        /*
+         * We know that this callback will be removed before another
+         * is added. mLock in PointerAnimator will not be released
+         * until after this is removed, and adding another callback
+         * requires that lock. Thus it's safe to set mLocked.animating
+         * here.
+         */
+        mLocked.animating = false;
+    }
+    return keepAnimating;
+}
+
+void MouseCursorController::startAnimationLocked() REQUIRES(mLock) {
+    using namespace std::placeholders;
+
+    if (mLocked.animating) {
+        return;
+    }
+    mLocked.animating = true;
+
+    std::function<bool(nsecs_t)> func = std::bind(&MouseCursorController::doAnimations, this, _1);
+    /*
+     * Using -1 for displayId here to avoid removing the callback
+     * if a TouchSpotController with the same display is removed.
+     */
+    mContext.addAnimationCallback(-1, func);
 }
 
 } // namespace android

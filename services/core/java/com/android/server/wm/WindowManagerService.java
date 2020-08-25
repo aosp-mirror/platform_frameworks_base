@@ -1848,7 +1848,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
-        Rect frame = replacedWindow.getVisibleFrameLw();
+        Rect frame = replacedWindow.getVisibleFrame();
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
@@ -2069,7 +2069,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 outDisplayFrame.setEmpty();
                 return;
             }
-            outDisplayFrame.set(win.getDisplayFrameLw());
+            outDisplayFrame.set(win.getDisplayFrame());
             if (win.inSizeCompatMode()) {
                 outDisplayFrame.scale(win.mInvGlobalScale);
             }
@@ -2389,7 +2389,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayPolicy.areSystemBarsForcedShownLw(win)) {
                 result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
             }
-            if (!win.isGoneForLayoutLw()) {
+            if (!win.isGoneForLayout()) {
                 win.mResizedWhileGone = false;
             }
 
@@ -2419,7 +2419,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.getInsetsForRelayout(outContentInsets, outVisibleInsets,
                     outStableInsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
-            outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
+            outBackdropFrame.set(win.getBackdropFrame(win.getFrame()));
             outInsetsState.set(win.getInsetsState(), win.isClientLocal());
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
@@ -2880,11 +2880,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public void notifyShowingDreamChanged() {
         // TODO(multi-display): support show dream in multi-display.
         notifyKeyguardFlagsChanged(null /* callback */, DEFAULT_DISPLAY);
-    }
-
-    @Override
-    public WindowManagerPolicy.WindowState getInputMethodWindowLw() {
-        return mRoot.getCurrentInputMethodWindow();
     }
 
     @Override
@@ -5481,7 +5476,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Window has been removed or hidden; no draw will now happen, so stop waiting.
                     ProtoLog.w(WM_DEBUG_SCREEN_ON, "Aborted waiting for drawn: %s", win);
                     container.mWaitingForDrawn.remove(win);
-                } else if (win.hasDrawnLw()) {
+                } else if (win.hasDrawn()) {
                     // Window is now drawn (and shown).
                     ProtoLog.d(WM_DEBUG_SCREEN_ON, "Window drawn win=%s", win);
                     container.mWaitingForDrawn.remove(win);
@@ -7356,7 +7351,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 WindowState windowState = mWindowMap.get(token);
                 if (windowState != null) {
-                    outBounds.set(windowState.getFrameLw());
+                    outBounds.set(windowState.getFrame());
                 } else {
                     outBounds.setEmpty();
                 }

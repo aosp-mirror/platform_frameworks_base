@@ -187,7 +187,7 @@ public class TouchExplorerTest {
         moveEachPointers(mLastEvent, p(10, 10), p(10, 10));
         send(mLastEvent);
         goToStateClearFrom(STATE_DRAGGING_2FINGERS);
-        assertCapturedEvents(ACTION_DOWN, ACTION_MOVE, ACTION_MOVE, ACTION_UP);
+        assertCapturedEvents(ACTION_DOWN, ACTION_MOVE, ACTION_MOVE, ACTION_MOVE, ACTION_UP);
     }
 
     @Test
@@ -288,7 +288,7 @@ public class TouchExplorerTest {
         assertState(STATE_DRAGGING);
         goToStateClearFrom(STATE_DRAGGING_2FINGERS);
         assertState(STATE_CLEAR);
-        assertCapturedEvents(ACTION_DOWN, ACTION_UP);
+        assertCapturedEvents(ACTION_DOWN, ACTION_MOVE, ACTION_UP);
         assertCapturedEventsNoHistory();
     }
 
@@ -301,6 +301,7 @@ public class TouchExplorerTest {
         assertState(STATE_CLEAR);
         assertCapturedEvents(
                 /* goto dragging state */ ACTION_DOWN,
+                ACTION_MOVE,
                 /* leave dragging state */ ACTION_UP,
                 ACTION_DOWN,
                 ACTION_POINTER_DOWN,

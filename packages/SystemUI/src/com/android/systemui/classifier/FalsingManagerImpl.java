@@ -262,7 +262,7 @@ public class FalsingManagerImpl implements FalsingManager {
     /**
      * @return true if the classifier determined that this is not a human interacting with the phone
      */
-    public boolean isFalseTouch() {
+    public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         if (FalsingLog.ENABLED) {
             // We're getting some false wtfs from touches that happen after the device went
             // to sleep. Only report missing sessions that happen when the device is interactive.

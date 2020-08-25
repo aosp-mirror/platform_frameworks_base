@@ -54,7 +54,8 @@ import java.util.function.IntSupplier;
 @RunWith(Parameterized.class)
 @LargeTest
 @Presubmit
-public class RelayoutPerfTest extends WindowManagerPerfTestBase {
+public class RelayoutPerfTest extends WindowManagerPerfTestBase
+        implements BenchmarkState.CustomizedIterationListener {
     private int mIteration;
 
     @Rule
@@ -93,9 +94,22 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
         mActivityRule.runOnUiThread(() -> activity.setContentView(contentView));
         getInstrumentation().waitForIdleSync();
 
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        state.setCustomizedIterations(getProfilingIterations(), this);
         final RelayoutRunner relayoutRunner = new RelayoutRunner(activity, contentView.getWindow(),
                 () -> visibilities[mIteration++ % visibilities.length]);
-        relayoutRunner.runBenchmark(mPerfStatusReporter.getBenchmarkState());
+        relayoutRunner.runBenchmark(state);
+    }
+
+    @Override
+    public void onStart(int iteration) {
+        startProfiling(RelayoutPerfTest.class.getSimpleName() + "_" + testName
+                + "_MethodTracing_" + iteration + ".trace");
+    }
+
+    @Override
+    public void onFinished(int iteration) {
+        stopProfiling();
     }
 
     /** A dummy view to get IWindow. */

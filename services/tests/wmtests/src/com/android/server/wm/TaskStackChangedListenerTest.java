@@ -53,7 +53,6 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.compatibility.common.util.SystemUtil;
-import com.android.internal.annotations.GuardedBy;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,14 +75,10 @@ public class TaskStackChangedListenerTest {
 
     private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
-    @GuardedBy("sLock")
-    private static boolean sTaskStackChangedCalled;
-    private static boolean sActivityBResumed;
 
     @Before
     public void setUp() throws Exception {
         mService = ActivityManager.getService();
-        sTaskStackChangedCalled = false;
     }
 
     @After
@@ -94,47 +89,33 @@ public class TaskStackChangedListenerTest {
 
     @Test
     @Presubmit
-    @FlakyTest(bugId = 130388819)
     public void testTaskStackChanged_afterFinish() throws Exception {
+        final TestActivity activity = startTestActivity(ActivityA.class);
+        final CountDownLatch latch = new CountDownLatch(1);
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
             public void onTaskStackChanged() throws RemoteException {
-                synchronized (sLock) {
-                    sTaskStackChangedCalled = true;
-                }
+                latch.countDown();
             }
         });
 
-        Context context = getInstrumentation().getContext();
-        context.startActivity(
-                new Intent(context, ActivityA.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        UiDevice.getInstance(getInstrumentation()).waitForIdle();
-        synchronized (sLock) {
-            assertTrue(sTaskStackChangedCalled);
-        }
-        assertTrue(sActivityBResumed);
+        activity.finish();
+        waitForCallback(latch);
     }
 
     @Test
     @Presubmit
     public void testTaskStackChanged_resumeWhilePausing() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
             public void onTaskStackChanged() throws RemoteException {
-                synchronized (sLock) {
-                    sTaskStackChangedCalled = true;
-                }
+                latch.countDown();
             }
         });
 
-        final Context context = getInstrumentation().getContext();
-        context.startActivity(new Intent(context, ResumeWhilePausingActivity.class).addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK));
-        UiDevice.getInstance(getInstrumentation()).waitForIdle();
-
-        synchronized (sLock) {
-            assertTrue(sTaskStackChangedCalled);
-        }
+        startTestActivity(ResumeWhilePausingActivity.class);
+        waitForCallback(latch);
     }
 
     @Test
@@ -512,7 +493,7 @@ public class TaskStackChangedListenerTest {
         try {
             final boolean result = latch.await(WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             if (!result) {
-                throw new RuntimeException("Timed out waiting for task stack change notification");
+                throw new AssertionError("Timed out waiting for task stack change notification");
             }
         } catch (InterruptedException e) {
         }
@@ -569,19 +550,6 @@ public class TaskStackChangedListenerTest {
     }
 
     public static class ActivityA extends TestActivity {
-
-        private boolean mActivityBLaunched = false;
-
-        @Override
-        protected void onPostResume() {
-            super.onPostResume();
-            if (mActivityBLaunched) {
-                return;
-            }
-            mActivityBLaunched = true;
-            finish();
-            startActivity(new Intent(this, ActivityB.class));
-        }
     }
 
     public static class ActivityB extends TestActivity {
@@ -589,10 +557,6 @@ public class TaskStackChangedListenerTest {
         @Override
         protected void onPostResume() {
             super.onPostResume();
-            synchronized (sLock) {
-                sTaskStackChangedCalled = false;
-            }
-            sActivityBResumed = true;
             finish();
         }
     }

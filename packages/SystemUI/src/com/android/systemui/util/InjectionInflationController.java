@@ -24,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.keyguard.KeyguardMessageArea;
-import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
@@ -107,11 +106,6 @@ public class InjectionInflationController {
          * Creates the NotificationStackScrollLayout.
          */
         NotificationStackScrollLayout createNotificationStackScrollLayout();
-
-        /**
-         * Creates the KeyguardSliceView.
-         */
-        KeyguardSliceView createKeyguardSliceView();
 
         /**
          * Creates the KeyguardMessageArea.

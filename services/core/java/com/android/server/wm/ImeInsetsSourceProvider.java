@@ -93,7 +93,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 || (mImeTargetFromIme != null
                 && isImeTargetFromDisplayContentAndImeSame()
                 && mWin != null
-                && mWin.isDrawnLw()
+                && mWin.isDrawn()
                 && !mWin.mGivenInsetsPending)) {
             mIsImeLayoutDrawn = true;
             // show IME if InputMethodService requested it to be shown.

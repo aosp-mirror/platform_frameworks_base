@@ -16,24 +16,30 @@
 
 package com.android.server.timezonedetector;
 
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_NOT_ALLOWED;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_NOT_APPLICABLE;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_NOT_SUPPORTED;
-import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_POSSESSED;
+import static android.content.Intent.ACTION_USER_SWITCHED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
-import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.ContentObserver;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.Slog;
+
+import com.android.server.LocalServices;
 
 import java.util.Objects;
 
@@ -42,103 +48,87 @@ import java.util.Objects;
  */
 public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrategyImpl.Callback {
 
+    private static final String LOG_TAG = "TimeZoneDetectorCallbackImpl";
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
-    private final Context mContext;
-    private final ContentResolver mCr;
-    private final UserManager mUserManager;
+    @NonNull private final Context mContext;
+    @NonNull private final Handler mHandler;
+    @NonNull private final ContentResolver mCr;
+    @NonNull private final UserManager mUserManager;
+    @NonNull private final boolean mGeoDetectionFeatureEnabled;
+    @NonNull private final LocationManager mLocationManager;
+    // @NonNull after setConfigChangeListener() is called.
+    private ConfigurationChangeListener mConfigChangeListener;
 
-    TimeZoneDetectorCallbackImpl(Context context) {
-        mContext = context;
+    TimeZoneDetectorCallbackImpl(@NonNull Context context, @NonNull Handler handler,
+            boolean geoDetectionFeatureEnabled) {
+        mContext = Objects.requireNonNull(context);
+        mHandler = Objects.requireNonNull(handler);
         mCr = context.getContentResolver();
         mUserManager = context.getSystemService(UserManager.class);
+        mLocationManager = context.getSystemService(LocationManager.class);
+        mGeoDetectionFeatureEnabled = geoDetectionFeatureEnabled;
+
+        // Wire up the change listener. All invocations are performed on the mHandler thread.
+
+        // Listen for the user changing / the user's location mode changing.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_USER_SWITCHED);
+        filter.addAction(LocationManager.MODE_CHANGED_ACTION);
+        mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                handleConfigChangeOnHandlerThread();
+            }
+        }, filter, null, mHandler);
+
+        // Add async callbacks for global settings being changed.
+        ContentResolver contentResolver = mContext.getContentResolver();
+        contentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
+                new ContentObserver(mHandler) {
+                    public void onChange(boolean selfChange) {
+                        handleConfigChangeOnHandlerThread();
+                    }
+                });
+
+        // Add async callbacks for user scoped location settings being changed.
+        contentResolver.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED),
+                true,
+                new ContentObserver(mHandler) {
+                    public void onChange(boolean selfChange) {
+                        handleConfigChangeOnHandlerThread();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void handleConfigChangeOnHandlerThread() {
+        if (mConfigChangeListener == null) {
+            Slog.wtf(LOG_TAG, "mConfigChangeListener is unexpectedly null");
+        }
+        mConfigChangeListener.onChange();
     }
 
     @Override
-    public TimeZoneCapabilities getCapabilities(@UserIdInt int userId) {
-        UserHandle userHandle = UserHandle.of(userId);
-        boolean disallowConfigDateTime =
-                mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
-
-        TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder(userId);
-
-        // Automatic time zone detection is only supported (currently) on devices if there is a
-        // telephony network available.
-        if (!deviceHasTelephonyNetwork()) {
-            builder.setConfigureAutoDetectionEnabled(CAPABILITY_NOT_SUPPORTED);
-        } else if (disallowConfigDateTime) {
-            builder.setConfigureAutoDetectionEnabled(CAPABILITY_NOT_ALLOWED);
-        } else {
-            builder.setConfigureAutoDetectionEnabled(CAPABILITY_POSSESSED);
-        }
-
-        // TODO(b/149014708) Replace this with real logic when the settings storage is fully
-        // implemented.
-        builder.setConfigureGeoDetectionEnabled(CAPABILITY_NOT_SUPPORTED);
-
-        // The ability to make manual time zone suggestions can also be restricted by policy. With
-        // the current logic above, this could lead to a situation where a device hardware does not
-        // support auto detection, the device has been forced into "auto" mode by an admin and the
-        // user is unable to disable auto detection.
-        if (disallowConfigDateTime) {
-            builder.setSuggestManualTimeZone(CAPABILITY_NOT_ALLOWED);
-        } else if (isAutoDetectionEnabled()) {
-            builder.setSuggestManualTimeZone(CAPABILITY_NOT_APPLICABLE);
-        } else {
-            builder.setSuggestManualTimeZone(CAPABILITY_POSSESSED);
-        }
-        return builder.build();
+    public void setConfigChangeListener(@NonNull ConfigurationChangeListener listener) {
+        mConfigChangeListener = Objects.requireNonNull(listener);
     }
 
     @Override
-    public TimeZoneConfiguration getConfiguration(@UserIdInt int userId) {
-        return new TimeZoneConfiguration.Builder()
+    public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
+        return new ConfigurationInternal.Builder(userId)
+                .setUserConfigAllowed(isUserConfigAllowed(userId))
+                .setAutoDetectionSupported(isAutoDetectionSupported())
                 .setAutoDetectionEnabled(isAutoDetectionEnabled())
-                .setGeoDetectionEnabled(isGeoDetectionEnabled())
+                .setLocationEnabled(isLocationEnabled(userId))
+                .setGeoDetectionEnabled(isGeoDetectionEnabled(userId))
                 .build();
     }
 
     @Override
-    public void setConfiguration(
-            @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration) {
-        Objects.requireNonNull(configuration);
-        if (!configuration.isComplete()) {
-            throw new IllegalArgumentException("configuration=" + configuration + " not complete");
-        }
-
-        // Avoid writing auto detection config for devices that do not support auto time zone
-        // detection: if we wrote it down then we'd set the default explicitly. That might influence
-        // what happens on later releases that do support auto detection on the same hardware.
-        if (isAutoDetectionSupported()) {
-            final int autoEnabledValue = configuration.isAutoDetectionEnabled() ? 1 : 0;
-            Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, autoEnabledValue);
-
-            final boolean geoTzDetectionEnabledValue = configuration.isGeoDetectionEnabled();
-            // TODO(b/149014708) Write this down to user-scoped settings once implemented.
-        }
-    }
-
-    @Override
-    public boolean isAutoDetectionEnabled() {
-        // To ensure that TimeZoneConfiguration is "complete" for simplicity, devices that do not
-        // support auto detection have safe, hard coded configuration values that make it look like
-        // auto detection is turned off. It is therefore important that false is returned from this
-        // method for devices that do not support auto time zone detection. Such devices will not
-        // have a UI to turn the auto detection on/off. Returning true could prevent the user
-        // entering information manually. On devices that do support auto time detection the default
-        // is to turn auto detection on.
-        if (isAutoDetectionSupported()) {
-            return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isGeoDetectionEnabled() {
-        // TODO(b/149014708) Read this from user-scoped settings once implemented. The user's
-        //  location toggle will act as an override for this setting, i.e. so that the setting will
-        //  return false if the location toggle is disabled.
-        return false;
+    public @UserIdInt int getCurrentUserId() {
+        return LocalServices.getService(ActivityManagerInternal.class).getCurrentUserId();
     }
 
     @Override
@@ -165,8 +155,55 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
         alarmManager.setTimeZone(zoneId);
     }
 
+    @Override
+    public void storeConfiguration(TimeZoneConfiguration configuration) {
+        Objects.requireNonNull(configuration);
+
+        // Avoid writing the auto detection enabled setting for devices that do not support auto
+        // time zone detection: if we wrote it down then we'd set the value explicitly, which would
+        // prevent detecting "default" later. That might influence what happens on later releases
+        // that support new types of auto detection on the same hardware.
+        if (isAutoDetectionSupported()) {
+            final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
+            setAutoDetectionEnabled(autoDetectionEnabled);
+
+            final int userId = configuration.getUserId();
+            final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
+            setGeoDetectionEnabled(userId, geoTzDetectionEnabled);
+        }
+    }
+
+    private boolean isUserConfigAllowed(@UserIdInt int userId) {
+        UserHandle userHandle = UserHandle.of(userId);
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
+    }
+
     private boolean isAutoDetectionSupported() {
-        return deviceHasTelephonyNetwork();
+        return deviceHasTelephonyNetwork() || mGeoDetectionFeatureEnabled;
+    }
+
+    private boolean isAutoDetectionEnabled() {
+        return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
+    }
+
+    private void setAutoDetectionEnabled(boolean enabled) {
+        Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME_ZONE, enabled ? 1 : 0);
+    }
+
+    private boolean isLocationEnabled(@UserIdInt int userId) {
+        return mLocationManager.isLocationEnabledForUser(UserHandle.of(userId));
+    }
+
+    private boolean isGeoDetectionEnabled(@UserIdInt int userId) {
+        final boolean locationEnabled = isLocationEnabled(userId);
+        return Settings.Secure.getIntForUser(mCr,
+                Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
+                locationEnabled ? 1 : 0 /* defaultValue */, userId) != 0;
+    }
+
+    private void setGeoDetectionEnabled(@UserIdInt int userId, boolean enabled) {
+        Settings.Secure.putIntForUser(mCr, Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
+                enabled ? 1 : 0, userId);
     }
 
     private boolean deviceHasTelephonyNetwork() {
