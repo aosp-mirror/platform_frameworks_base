@@ -33,7 +33,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class RecordingServiceTest extends SysuiTestCase {
     @Mock
     private Executor mExecutor;
     @Mock
-    private CurrentUserContextTracker mUserContextTracker;
+    private UserContextProvider mUserContextTracker;
     private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil() {
         public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
                 boolean requiresShadeOpen) {
@@ -92,7 +92,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         doNothing().when(mRecordingService).startForeground(anyInt(), any());
         doReturn(mScreenMediaRecorder).when(mRecordingService).getRecorder();
 
-        doReturn(mContext).when(mUserContextTracker).getCurrentUserContext();
+        doReturn(mContext).when(mUserContextTracker).getUserContext();
     }
 
     @Test
