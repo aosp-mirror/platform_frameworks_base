@@ -40,7 +40,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
@@ -169,7 +168,6 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
-import android.content.pm.FileChecksum;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageDataObserver;
@@ -933,6 +931,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Object mLock;
         private final Installer mInstaller;
         private final Object mInstallLock;
+        private final Handler mBackgroundHandler;
         private final Executor mBackgroundExecutor;
 
         // ----- producers -----
@@ -955,7 +954,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Injector(Context context, Object lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
-                Executor backgroundExecutor,
+                Handler backgroundHandler,
                 Producer<ComponentResolver> componentResolverProducer,
                 Producer<PermissionManagerServiceInternal> permissionManagerProducer,
                 Producer<UserManagerService> userManagerProducer,
@@ -977,7 +976,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mInstaller = installer;
             mAbiHelper = abiHelper;
             mInstallLock = installLock;
-            mBackgroundExecutor = backgroundExecutor;
+            mBackgroundHandler = backgroundHandler;
+            mBackgroundExecutor = new HandlerExecutor(backgroundHandler);
             mComponentResolverProducer = new Singleton<>(componentResolverProducer);
             mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
             mUserManagerProducer = new Singleton<>(userManagerProducer);
@@ -1090,6 +1090,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public PlatformCompat getCompatibility() {
             return mPlatformCompatProducer.get(this, mPackageManager);
+        }
+
+        public Handler getBackgroundHandler() {
+            return mBackgroundHandler;
         }
 
         public Executor getBackgroundExecutor() {
@@ -2489,29 +2493,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final Certificate[] trustedCerts = (trustedInstallers != null) ? decodeCertificates(
                 trustedInstallers) : null;
-        final Context context = mContext;
 
         mInjector.getBackgroundExecutor().execute(() -> {
-            final Intent intent = new Intent();
-            List<FileChecksum> result = new ArrayList<>();
-            for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
-                final String split = filesToChecksum.get(i).first;
-                final File file = filesToChecksum.get(i).second;
-                try {
-                    result.addAll(ApkChecksums.getFileChecksums(split, file, optional, required,
-                            trustedCerts));
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Checksum calculation error", e);
-                }
-            }
-            intent.putExtra(EXTRA_CHECKSUMS,
-                    result.toArray(new FileChecksum[result.size()]));
-
-            try {
-                statusReceiver.sendIntent(context, 1, intent, null, null);
-            } catch (SendIntentException e) {
-                Slog.w(TAG, e);
-            }
+            ApkChecksums.Injector injector = new ApkChecksums.Injector(
+                    () -> mContext,
+                    () -> mInjector.getBackgroundHandler(),
+                    () -> mContext.getSystemService(IncrementalManager.class));
+            ApkChecksums.getChecksums(filesToChecksum, optional, required, trustedCerts,
+                    statusReceiver, injector);
         });
     }
 
@@ -2684,7 +2673,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Injector injector = new Injector(
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
-                new HandlerExecutor(backgroundHandler),
+                backgroundHandler,
                 (i, pm) ->
                         new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
                 (i, pm) ->

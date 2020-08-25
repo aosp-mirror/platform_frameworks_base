@@ -289,7 +289,7 @@ public:
                        ErrorCode(const Control& control, std::string_view from,
                                  std::string_view to));
     MOCK_CONST_METHOD2(unlink, ErrorCode(const Control& control, std::string_view path));
-    MOCK_CONST_METHOD2(openForSpecialOps, base::unique_fd(const Control& control, FileId id));
+    MOCK_CONST_METHOD2(openForSpecialOps, UniqueFd(const Control& control, FileId id));
     MOCK_CONST_METHOD1(writeBlocks, ErrorCode(std::span<const DataBlock> blocks));
     MOCK_CONST_METHOD3(waitForPendingReads,
                        WaitResult(const Control& control, std::chrono::milliseconds timeout,
@@ -302,6 +302,10 @@ public:
 
     void countFilledBlocksSuccess() {
         ON_CALL(*this, countFilledBlocks(_, _)).WillByDefault(Return(std::make_pair(1, 2)));
+    }
+
+    void countFilledBlocksFullyLoaded() {
+        ON_CALL(*this, countFilledBlocks(_, _)).WillByDefault(Return(std::make_pair(10000, 10000)));
     }
 
     void countFilledBlocksFails() {
@@ -1067,6 +1071,53 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
                          _));
     auto res = mIncrementalService->makeDirs(storageId, dir_path, 0555);
     ASSERT_EQ(res, 0);
+}
+
+TEST_F(IncrementalServiceTest, testIsFileFullyLoadedFailsWithNoFile) {
+    mIncFs->countFilledBlocksFails();
+    mFs->hasNoFile();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    ASSERT_EQ(-1, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
+}
+
+TEST_F(IncrementalServiceTest, testIsFileFullyLoadedFailsWithFailedRanges) {
+    mIncFs->countFilledBlocksFails();
+    mFs->hasFiles();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
+    ASSERT_EQ(-1, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
+}
+
+TEST_F(IncrementalServiceTest, testIsFileFullyLoadedSuccessWithEmptyRanges) {
+    mIncFs->countFilledBlocksEmpty();
+    mFs->hasFiles();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
+    ASSERT_EQ(0, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
+}
+
+TEST_F(IncrementalServiceTest, testIsFileFullyLoadedSuccess) {
+    mIncFs->countFilledBlocksFullyLoaded();
+    mFs->hasFiles();
+
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
+    ASSERT_EQ(0, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithNoFile) {

@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
 import static android.content.pm.PackageManager.PARTIAL_MERKLE_ROOT_1M_SHA256;
 import static android.content.pm.PackageManager.PARTIAL_MERKLE_ROOT_1M_SHA512;
 import static android.content.pm.PackageManager.WHOLE_MD5;
@@ -27,11 +28,20 @@ import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA25
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.FileChecksum;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalStorage;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.apk.ApkSignatureSchemeV2Verifier;
 import android.util.apk.ApkSignatureSchemeV3Verifier;
@@ -43,6 +53,7 @@ import android.util.apk.SignatureInfo;
 import android.util.apk.SignatureNotFoundException;
 import android.util.apk.VerityBuilder;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.security.VerityUtils;
 
 import java.io.BufferedInputStream;
@@ -72,32 +83,163 @@ public class ApkChecksums {
     static final String ALGO_SHA512 = "SHA512";
 
     /**
-     * Fetch or calculate checksums for the specific file.
+     * Check back in 1 second after we detected we needed to wait for the APK to be fully available.
+     */
+    private static final long PROCESS_REQUIRED_CHECKSUMS_DELAY_MILLIS = 1000;
+
+    /**
+     * 24 hours timeout to wait till all files are loaded.
+     */
+    private static final long PROCESS_REQUIRED_CHECKSUMS_TIMEOUT_MILLIS = 1000 * 3600 * 24;
+
+    /**
+     * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
      *
-     * @param split             split name, null for base
-     * @param file              to fetch checksums for
+     * NOTE: All getters should return the same instance for every call.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    static class Injector {
+
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+        interface Producer<T> {
+            /** Produce an instance of type {@link T} */
+            T produce();
+        }
+
+        private final Producer<Context> mContext;
+        private final Producer<Handler> mHandlerProducer;
+        private final Producer<IncrementalManager> mIncrementalManagerProducer;
+
+        Injector(Producer<Context> context, Producer<Handler> handlerProducer,
+                Producer<IncrementalManager> incrementalManagerProducer) {
+            mContext = context;
+            mHandlerProducer = handlerProducer;
+            mIncrementalManagerProducer = incrementalManagerProducer;
+        }
+
+        public Context getContext() {
+            return mContext.produce();
+        }
+
+        public Handler getHandler() {
+            return mHandlerProducer.produce();
+        }
+
+        public IncrementalManager getIncrementalManager() {
+            return mIncrementalManagerProducer.produce();
+        }
+    }
+
+    /**
+     * Fetch or calculate checksums for the collection of files.
+     *
+     * @param filesToChecksum   split name, null for base and File to fetch checksums for
      * @param optional          mask to fetch readily available checksums
      * @param required          mask to forcefully calculate if not available
      * @param trustedInstallers array of certificate to trust, two specific cases:
      *                          null - trust anybody,
      *                          [] - trust nobody.
+     * @param statusReceiver    to receive the resulting checksums
      */
-    public static List<FileChecksum> getFileChecksums(String split, File file,
+    public static void getChecksums(List<Pair<String, File>> filesToChecksum,
             @PackageManager.FileChecksumKind int optional,
             @PackageManager.FileChecksumKind int required,
-            @Nullable Certificate[] trustedInstallers) {
+            @Nullable Certificate[] trustedInstallers,
+            @NonNull IntentSender statusReceiver,
+            @NonNull Injector injector) {
+        List<Map<Integer, FileChecksum>> result = new ArrayList<>(filesToChecksum.size());
+        for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
+            final String split = filesToChecksum.get(i).first;
+            final File file = filesToChecksum.get(i).second;
+            Map<Integer, FileChecksum> checksums = new ArrayMap<>();
+            result.add(checksums);
+
+            try {
+                getAvailableFileChecksums(split, file, optional | required, trustedInstallers,
+                        checksums);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Preferred checksum calculation error", e);
+            }
+        }
+
+        long startTime = SystemClock.uptimeMillis();
+        processRequiredChecksums(filesToChecksum, result, required, statusReceiver, injector,
+                startTime);
+    }
+
+    private static void processRequiredChecksums(List<Pair<String, File>> filesToChecksum,
+            List<Map<Integer, FileChecksum>> result,
+            @PackageManager.FileChecksumKind int required,
+            @NonNull IntentSender statusReceiver,
+            @NonNull Injector injector,
+            long startTime) {
+        final boolean timeout =
+                SystemClock.uptimeMillis() - startTime >= PROCESS_REQUIRED_CHECKSUMS_TIMEOUT_MILLIS;
+        List<FileChecksum> allChecksums = new ArrayList<>();
+        for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
+            final String split = filesToChecksum.get(i).first;
+            final File file = filesToChecksum.get(i).second;
+            Map<Integer, FileChecksum> checksums = result.get(i);
+
+            try {
+                if (!timeout || required != 0) {
+                    if (needToWait(file, required, checksums, injector)) {
+                        // Not ready, come back later.
+                        injector.getHandler().postDelayed(() -> {
+                            processRequiredChecksums(filesToChecksum, result, required,
+                                    statusReceiver, injector, startTime);
+                        }, PROCESS_REQUIRED_CHECKSUMS_DELAY_MILLIS);
+                        return;
+                    }
+
+                    getRequiredFileChecksums(split, file, required, checksums);
+                }
+                allChecksums.addAll(checksums.values());
+            } catch (Throwable e) {
+                Slog.e(TAG, "Required checksum calculation error", e);
+            }
+        }
+
+        final Intent intent = new Intent();
+        intent.putExtra(EXTRA_CHECKSUMS,
+                allChecksums.toArray(new FileChecksum[allChecksums.size()]));
+
+        try {
+            statusReceiver.sendIntent(injector.getContext(), 1, intent, null, null);
+        } catch (IntentSender.SendIntentException e) {
+            Slog.w(TAG, e);
+        }
+    }
+
+    /**
+     * Fetch readily available checksums - enforced by kernel or provided by Installer.
+     *
+     * @param split             split name, null for base
+     * @param file              to fetch checksums for
+     * @param kinds             mask to fetch checksums
+     * @param trustedInstallers array of certificate to trust, two specific cases:
+     *                          null - trust anybody,
+     *                          [] - trust nobody.
+     * @param checksums         resulting checksums
+     */
+    private static void getAvailableFileChecksums(String split, File file,
+            @PackageManager.FileChecksumKind int kinds,
+            @Nullable Certificate[] trustedInstallers,
+            Map<Integer, FileChecksum> checksums) {
         final String filePath = file.getAbsolutePath();
-        Map<Integer, FileChecksum> checksums = new ArrayMap<>();
-        final int kinds = (optional | required);
-        // System enforced: FSI or v2/v3/v4 signatures.
-        if ((kinds & WHOLE_MERKLE_ROOT_4K_SHA256) != 0) {
+
+        // Always available: FSI or IncFs.
+        if (isRequired(WHOLE_MERKLE_ROOT_4K_SHA256, kinds, checksums)) {
             // Hashes in fs-verity and IncFS are always verified.
             FileChecksum checksum = extractHashFromFS(split, filePath);
             if (checksum != null) {
                 checksums.put(checksum.getKind(), checksum);
             }
         }
-        if ((kinds & (PARTIAL_MERKLE_ROOT_1M_SHA256 | PARTIAL_MERKLE_ROOT_1M_SHA512)) != 0) {
+
+        // System enforced: v2/v3.
+        if (isRequired(PARTIAL_MERKLE_ROOT_1M_SHA256, kinds, checksums) || isRequired(
+                PARTIAL_MERKLE_ROOT_1M_SHA512, kinds, checksums)) {
             Map<Integer, FileChecksum> v2v3checksums = extractHashFromV2V3Signature(
                     split, filePath, kinds);
             if (v2v3checksums != null) {
@@ -106,11 +248,58 @@ public class ApkChecksums {
         }
 
         // TODO(b/160605420): Installer provided.
-        // TODO(b/160605420): Wait for Incremental to be fully loaded.
+    }
+
+    /**
+     * Whether the file is available for checksumming or we need to wait.
+     */
+    private static boolean needToWait(File file,
+            @PackageManager.FileChecksumKind int kinds,
+            Map<Integer, FileChecksum> checksums,
+            @NonNull Injector injector) throws IOException {
+        if (!isRequired(WHOLE_MERKLE_ROOT_4K_SHA256, kinds, checksums)
+                && !isRequired(WHOLE_MD5, kinds, checksums)
+                && !isRequired(WHOLE_SHA1, kinds, checksums)
+                && !isRequired(WHOLE_SHA256, kinds, checksums)
+                && !isRequired(WHOLE_SHA512, kinds, checksums)
+                && !isRequired(PARTIAL_MERKLE_ROOT_1M_SHA256, kinds, checksums)
+                && !isRequired(PARTIAL_MERKLE_ROOT_1M_SHA512, kinds, checksums)) {
+            return false;
+        }
+
+        final String filePath = file.getAbsolutePath();
+        if (!IncrementalManager.isIncrementalPath(filePath)) {
+            return false;
+        }
+
+        IncrementalManager manager = injector.getIncrementalManager();
+        if (manager == null) {
+            throw new IllegalStateException("IncrementalManager is missing.");
+        }
+        IncrementalStorage storage = manager.openStorage(filePath);
+        if (storage == null) {
+            throw new IllegalStateException(
+                    "IncrementalStorage is missing for a path on IncFs: " + filePath);
+        }
+
+        return !storage.isFileFullyLoaded(filePath);
+    }
+
+    /**
+     * Fetch or calculate checksums for the specific file.
+     *
+     * @param split     split name, null for base
+     * @param file      to fetch checksums for
+     * @param kinds     mask to forcefully calculate if not available
+     * @param checksums resulting checksums
+     */
+    private static void getRequiredFileChecksums(String split, File file,
+            @PackageManager.FileChecksumKind int kinds,
+            Map<Integer, FileChecksum> checksums) {
+        final String filePath = file.getAbsolutePath();
 
         // Manually calculating required checksums if not readily available.
-        if ((required & WHOLE_MERKLE_ROOT_4K_SHA256) != 0 && !checksums.containsKey(
-                WHOLE_MERKLE_ROOT_4K_SHA256)) {
+        if (isRequired(WHOLE_MERKLE_ROOT_4K_SHA256, kinds, checksums)) {
             try {
                 byte[] generatedRootHash = VerityBuilder.generateFsVerityRootHash(
                         filePath, /*salt=*/null,
@@ -127,14 +316,23 @@ public class ApkChecksums {
             }
         }
 
-        calculateChecksumIfRequested(checksums, split, file, required, WHOLE_MD5);
-        calculateChecksumIfRequested(checksums, split, file, required, WHOLE_SHA1);
-        calculateChecksumIfRequested(checksums, split, file, required, WHOLE_SHA256);
-        calculateChecksumIfRequested(checksums, split, file, required, WHOLE_SHA512);
+        calculateChecksumIfRequested(checksums, split, file, kinds, WHOLE_MD5);
+        calculateChecksumIfRequested(checksums, split, file, kinds, WHOLE_SHA1);
+        calculateChecksumIfRequested(checksums, split, file, kinds, WHOLE_SHA256);
+        calculateChecksumIfRequested(checksums, split, file, kinds, WHOLE_SHA512);
 
-        calculatePartialChecksumsIfRequested(checksums, split, file, required);
+        calculatePartialChecksumsIfRequested(checksums, split, file, kinds);
+    }
 
-        return new ArrayList<>(checksums.values());
+    private static boolean isRequired(@PackageManager.FileChecksumKind int kind,
+            @PackageManager.FileChecksumKind int kinds, Map<Integer, FileChecksum> checksums) {
+        if ((kinds & kind) == 0) {
+            return false;
+        }
+        if (checksums.containsKey(kind)) {
+            return false;
+        }
+        return true;
     }
 
     private static FileChecksum extractHashFromFS(String split, String filePath) {
@@ -170,7 +368,9 @@ public class ApkChecksums {
                     PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2,
                     false).contentDigests;
         } catch (PackageParser.PackageParserException e) {
-            Slog.e(TAG, "Signature verification error", e);
+            if (!(e.getCause() instanceof SignatureNotFoundException)) {
+                Slog.e(TAG, "Signature verification error", e);
+            }
         }
 
         if (contentDigests == null) {

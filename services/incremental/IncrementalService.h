@@ -132,6 +132,7 @@ public:
              std::string_view newPath);
     int unlink(StorageId storage, std::string_view path);
 
+    int isFileFullyLoaded(StorageId storage, const std::string& path) const;
     float getLoadingProgress(StorageId storage) const;
 
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
@@ -339,6 +340,7 @@ private:
     int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
+    int isFileFullyLoadedFromPath(const IncFsMount& ifs, std::string_view filePath) const;
     float getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
 
     void registerAppOpsCallback(const std::string& packageName);

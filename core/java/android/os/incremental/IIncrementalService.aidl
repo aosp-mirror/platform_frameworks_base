@@ -90,6 +90,14 @@ interface IIncrementalService {
     int unlink(int storageId, in @utf8InCpp String path);
 
     /**
+     * Checks if a file is fully loaded. File is specified by its path.
+     * 0 - fully loaded
+     * >0 - certain pages missing
+     * <0 - -errcode
+     */
+    int isFileFullyLoaded(int storageId, in @utf8InCpp String path);
+
+    /**
      * Returns overall loading progress of all the files on a storage, progress value between [0,1].
      * Returns a negative value on error.
      */
