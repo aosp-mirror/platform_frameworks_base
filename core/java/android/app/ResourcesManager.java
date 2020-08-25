@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -245,7 +246,7 @@ public class ResourcesManager {
     /**
      * A cache of DisplayId, DisplayAdjustments to Display.
      */
-    private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>>
+    private final ArrayMap<Pair<Integer, DisplayAdjustments>, SoftReference<Display>>
             mAdjustedDisplays = new ArrayMap<>();
 
     /**
@@ -373,25 +374,28 @@ public class ResourcesManager {
                 ? new DisplayAdjustments(displayAdjustments) : new DisplayAdjustments();
         final Pair<Integer, DisplayAdjustments> key =
                 Pair.create(displayId, displayAdjustmentsCopy);
+        SoftReference<Display> sd;
         synchronized (this) {
-            WeakReference<Display> wd = mAdjustedDisplays.get(key);
-            if (wd != null) {
-                final Display display = wd.get();
-                if (display != null) {
-                    return display;
-                }
-            }
-            final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
-            if (dm == null) {
-                // may be null early in system startup
-                return null;
-            }
-            final Display display = dm.getCompatibleDisplay(displayId, key.second);
-            if (display != null) {
-                mAdjustedDisplays.put(key, new WeakReference<>(display));
-            }
-            return display;
+            sd = mAdjustedDisplays.get(key);
         }
+        if (sd != null) {
+            final Display display = sd.get();
+            if (display != null) {
+                return display;
+            }
+        }
+        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+        if (dm == null) {
+            // may be null early in system startup
+            return null;
+        }
+        final Display display = dm.getCompatibleDisplay(displayId, key.second);
+        if (display != null) {
+            synchronized (this) {
+                mAdjustedDisplays.put(key, new SoftReference<>(display));
+            }
+        }
+        return display;
     }
 
     /**

@@ -17,7 +17,6 @@ package android.app;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.view.Display;
@@ -134,6 +133,24 @@ public class ResourcesManagerPerfTest {
             } else {
                 c.uiMode = Configuration.UI_MODE_TYPE_WATCH;
             }
+        }
+    }
+
+    @Test
+    public void getDisplayMetrics() {
+        ResourcesManager resourcesManager = ResourcesManager.getInstance();
+
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            // Invalidate cache.
+            resourcesManager.applyConfigurationToResourcesLocked(
+                    resourcesManager.getConfiguration(), null);
+            state.resumeTiming();
+
+            // Invoke twice for testing cache.
+            resourcesManager.getDisplayMetrics();
+            resourcesManager.getDisplayMetrics();
         }
     }
 }
