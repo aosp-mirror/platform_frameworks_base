@@ -29,6 +29,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -215,6 +217,7 @@ public class LocationManager {
      * @see #EXTRA_PROVIDER_ENABLED
      * @see #isProviderEnabled(String)
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
 
     /**
@@ -243,6 +246,7 @@ public class LocationManager {
      * @see #EXTRA_LOCATION_ENABLED
      * @see #isLocationEnabled()
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
 
     /**
