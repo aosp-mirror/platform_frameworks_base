@@ -31,7 +31,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-struct ValueBucket {
+struct PastValueBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     std::vector<int> valueIndex;
@@ -40,7 +40,6 @@ struct ValueBucket {
     // When we tune statsd memory usage in the future, this is a candidate to optimize.
     int64_t mConditionTrueNs;
 };
-
 
 // Aggregates values within buckets.
 //
@@ -173,7 +172,7 @@ private:
     // if this is pulled metric
     const bool mIsPulled;
 
-    // internal state of an ongoing aggregation bucket.
+    // Tracks the value information of one value field.
     typedef struct {
         // Index in multi value aggregation.
         int valueIndex;
@@ -188,6 +187,12 @@ private:
         bool seenNewData = false;
     } Interval;
 
+    // Internal state of an ongoing aggregation bucket.
+    typedef struct CurrentValueBucket {
+        // Value information for each value field of the metric.
+        std::vector<Interval> intervals;
+    } CurrentValueBucket;
+
     typedef struct {
         // Holds current base value of the dimension. Take diff and update if necessary.
         Value base;
@@ -199,14 +204,16 @@ private:
         bool hasCurrentState;
     } BaseInfo;
 
-    std::unordered_map<MetricDimensionKey, std::vector<Interval>> mCurrentSlicedBucket;
+    // Tracks the internal state in the ongoing aggregation bucket for each DimensionsInWhat
+    // key and StateValuesKey pair.
+    std::unordered_map<MetricDimensionKey, CurrentValueBucket> mCurrentSlicedBucket;
 
     std::unordered_map<HashableDimensionKey, std::vector<BaseInfo>> mCurrentBaseInfo;
 
     std::unordered_map<MetricDimensionKey, int64_t> mCurrentFullBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
+    std::unordered_map<MetricDimensionKey, std::vector<PastValueBucket>> mPastBuckets;
 
     const int64_t mMinBucketSizeNs;
 
@@ -224,8 +231,8 @@ private:
     void accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs);
 
-    ValueBucket buildPartialBucket(int64_t bucketEndTime,
-                                   const std::vector<Interval>& intervals);
+    PastValueBucket buildPartialBucket(int64_t bucketEndTime,
+                                       const std::vector<Interval>& intervals);
 
     void initCurrentSlicedBucket(int64_t nextBucketStartTimeNs);
 
@@ -234,7 +241,7 @@ private:
     // Reset diff base and mHasGlobalBase
     void resetBase();
 
-    static const size_t kBucketSize = sizeof(ValueBucket{});
+    static const size_t kBucketSize = sizeof(PastValueBucket{});
 
     const size_t mDimensionSoftLimit;
 
