@@ -1069,7 +1069,7 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
     ASSERT_EQ(res, 0);
 }
 
-TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithNoFile) {
+TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithNoFile) {
     mIncFs->countFilledBlocksSuccess();
     mFs->hasNoFile();
 
@@ -1077,7 +1077,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithNoFile) {
     int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
                                                        IncrementalService::CreateOptions::CreateNew,
                                                        {}, {}, {});
-    ASSERT_EQ(-EINVAL, mIncrementalService->getLoadingProgress(storageId));
+    ASSERT_EQ(1, mIncrementalService->getLoadingProgress(storageId));
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithFailedRanges) {
@@ -1092,7 +1092,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithFailedRanges) {
     ASSERT_EQ(-1, mIncrementalService->getLoadingProgress(storageId));
 }
 
-TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithEmptyRanges) {
+TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithEmptyRanges) {
     mIncFs->countFilledBlocksEmpty();
     mFs->hasFiles();
 
@@ -1101,7 +1101,7 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithEmptyRanges) {
                                                        IncrementalService::CreateOptions::CreateNew,
                                                        {}, {}, {});
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(3);
-    ASSERT_EQ(-EINVAL, mIncrementalService->getLoadingProgress(storageId));
+    ASSERT_EQ(1, mIncrementalService->getLoadingProgress(storageId));
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccess) {

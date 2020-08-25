@@ -1706,8 +1706,8 @@ float IncrementalService::getLoadingProgressFromPath(const IncFsMount& ifs,
     }
 
     if (totalBlocks == 0) {
-        LOG(ERROR) << "getLoadingProgress failed to get total num of blocks";
-        return -EINVAL;
+        // No file in the storage or files are empty; regarded as fully loaded
+        return 1;
     }
     return (float)filledBlocks / (float)totalBlocks;
 }
