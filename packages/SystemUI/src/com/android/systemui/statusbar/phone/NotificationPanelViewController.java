@@ -3140,15 +3140,13 @@ public class NotificationPanelViewController extends PanelViewController {
     public void initDependencies(
             StatusBar statusBar,
             NotificationGroupManager groupManager,
-            NotificationShelfController notificationShelfController,
-            ScrimController scrimController) {
+            NotificationShelfController notificationShelfController) {
         setStatusBar(statusBar);
         setGroupManager(mGroupManager);
         mNotificationStackScrollLayoutController.setNotificationPanelController(this);
         mNotificationStackScrollLayoutController.setStatusBar(statusBar);
         mNotificationStackScrollLayoutController.setGroupManager(groupManager);
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
-        mNotificationStackScrollLayoutController.setScrimController(scrimController);
         updateShowEmptyShadeView();
         mNotificationShelfController = notificationShelfController;
         updateMaxDisplayedNotifications(true);
