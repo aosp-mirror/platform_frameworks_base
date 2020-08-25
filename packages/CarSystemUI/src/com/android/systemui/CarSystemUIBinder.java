@@ -21,6 +21,8 @@ import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.car.navigationbar.CarNavigationBar;
 import com.android.systemui.car.notification.CarNotificationModule;
 import com.android.systemui.car.sideloaded.SideLoadedAppController;
+import com.android.systemui.car.statusbar.UnusedStatusBar;
+import com.android.systemui.car.statusbar.UnusedStatusBarModule;
 import com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier;
 import com.android.systemui.car.volume.VolumeUI;
 import com.android.systemui.car.window.OverlayWindowModule;
@@ -34,7 +36,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -48,9 +49,9 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /** Binder for car specific {@link SystemUI} modules. */
-@Module(includes = {RecentsModule.class, StatusBarModule.class, NotificationsModule.class,
+@Module(includes = {RecentsModule.class, NotificationsModule.class,
         BubbleModule.class, KeyguardModule.class, OverlayWindowModule.class,
-        CarNotificationModule.class})
+        CarNotificationModule.class, UnusedStatusBarModule.class})
 public abstract class CarSystemUIBinder {
     /** Inject into AuthController. */
     @Binds
@@ -153,7 +154,7 @@ public abstract class CarSystemUIBinder {
     @Binds
     @IntoMap
     @ClassKey(StatusBar.class)
-    public abstract SystemUI bindsStatusBar(StatusBar sysui);
+    public abstract SystemUI bindsStatusBar(UnusedStatusBar sysui);
 
     /** Inject into VolumeUI. */
     @Binds
