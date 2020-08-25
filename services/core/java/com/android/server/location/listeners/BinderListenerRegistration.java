@@ -32,10 +32,10 @@ import android.util.Log;
  * @param <TListener> listener type
  */
 public abstract class BinderListenerRegistration<TRequest, TListener> extends
-        RemovableListenerRegistration<TRequest, TListener> implements Binder.DeathRecipient {
+        RemoteListenerRegistration<TRequest, TListener> implements Binder.DeathRecipient {
 
     /**
-     * Interface to allowed binder retrieval when keys are not themselves IBinder.
+     * Interface to allow binder retrieval when keys are not themselves IBinders.
      */
     public interface BinderKey {
         /**

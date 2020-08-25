@@ -2022,6 +2022,21 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        boolean dumpAll = false;
+
+        int opti = 0;
+        while (opti < args.length) {
+            String opt = args[opti];
+            if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                break;
+            }
+            opti++;
+            if ("-a".equals(opt)) {
+                dumpAll = true;
+                break;
+            }
+        }
+
         StringBuilder s = new StringBuilder();
         s.append("mStarted=").append(mStarted).append("   (changed ");
         TimeUtils.formatDuration(SystemClock.elapsedRealtime()
@@ -2053,9 +2068,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             s.append("]\n");
         }
         s.append(mGnssMetrics.dumpGnssMetricsAsText());
-        s.append("native internal state: \n");
-        s.append("  ").append(native_get_internal_state());
-        s.append("\n");
+        if (dumpAll) {
+            s.append("native internal state: \n");
+            s.append("  ").append(native_get_internal_state());
+            s.append("\n");
+        }
         pw.append(s);
     }
 

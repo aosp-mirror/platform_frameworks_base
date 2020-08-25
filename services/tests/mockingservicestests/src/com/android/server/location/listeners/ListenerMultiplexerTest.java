@@ -16,6 +16,8 @@
 
 package com.android.server.location.listeners;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -27,8 +29,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertThrows;
 
-import android.location.util.identity.CallerIdentity;
-import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -324,10 +324,8 @@ public class ListenerMultiplexerTest {
         boolean mActive = true;
 
         protected TestListenerRegistration(Integer integer,
-                Consumer<TestListenerRegistration> consumer,
-                boolean outOfProcess) {
-            super(integer, CallerIdentity.forTest(Process.myUid(),
-                    Process.myPid() + (outOfProcess ? 1 : 0), "test", "test"), consumer);
+                Consumer<TestListenerRegistration> consumer) {
+            super(DIRECT_EXECUTOR, integer, consumer);
         }
     }
 
@@ -345,7 +343,7 @@ public class ListenerMultiplexerTest {
         }
 
         public void addListener(Integer request, Consumer<TestListenerRegistration> consumer) {
-            addRegistration(consumer, new TestListenerRegistration(request, consumer, true));
+            addRegistration(consumer, new TestListenerRegistration(request, consumer));
         }
 
         public void removeListener(Consumer<TestListenerRegistration> consumer) {
