@@ -743,6 +743,8 @@ interface IPackageManager {
 
     void notifyPackagesReplacedReceived(in String[] packages);
 
+    void getChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IntentSender statusReceiver, int userId);
+
     //------------------------------------------------------------------------
     //
     // The following binder interfaces have been moved to IPermissionManager

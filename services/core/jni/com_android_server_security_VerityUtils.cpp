@@ -33,6 +33,8 @@
 
 #include <android-base/unique_fd.h>
 
+#include <type_traits>
+
 namespace android {
 
 namespace {
@@ -53,7 +55,7 @@ int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath, jbyteArra
 
     fsverity_enable_arg arg = {};
     arg.version = 1;
-    arg.hash_algorithm = FS_VERITY_HASH_ALG_SHA256;
+    arg.hash_algorithm = FS_VERITY_HASH_ALG_SHA256; // hardcoded in measureFsverity below
     arg.block_size = 4096;
     arg.salt_size = 0;
     arg.salt_ptr = reinterpret_cast<uintptr_t>(nullptr);
@@ -85,9 +87,41 @@ int statxForFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
     return (out.stx_attributes & STATX_ATTR_VERITY) != 0;
 }
 
+int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArray digest) {
+    static constexpr auto kDigestSha256 = 32;
+    using Storage = std::aligned_storage_t<sizeof(fsverity_digest) + kDigestSha256>;
+
+    Storage bytes;
+    fsverity_digest *data = reinterpret_cast<fsverity_digest *>(&bytes);
+    data->digest_size = kDigestSha256; // the only input/output parameter
+
+    ScopedUtfChars path(env, filePath);
+    ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
+    if (rfd.get() < 0) {
+        return rfd.get();
+    }
+    if (auto err = ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data); err < 0) {
+        return err;
+    }
+
+    if (data->digest_algorithm != FS_VERITY_HASH_ALG_SHA256) {
+        return -EINVAL;
+    }
+
+    if (digest != nullptr && data->digest_size > 0) {
+        auto digestSize = env->GetArrayLength(digest);
+        if (data->digest_size > digestSize) {
+            return -E2BIG;
+        }
+        env->SetByteArrayRegion(digest, 0, data->digest_size, (const jbyte *)data->digest);
+    }
+
+    return 0;
+}
 const JNINativeMethod sMethods[] = {
         {"enableFsverityNative", "(Ljava/lang/String;[B)I", (void *)enableFsverity},
         {"statxForFsverityNative", "(Ljava/lang/String;)I", (void *)statxForFsverity},
+        {"measureFsverityNative", "(Ljava/lang/String;[B)I", (void *)measureFsverity},
 };
 
 }  // namespace

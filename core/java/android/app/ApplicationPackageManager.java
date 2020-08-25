@@ -73,6 +73,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -107,7 +108,11 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,6 +139,12 @@ public class ApplicationPackageManager extends PackageManager {
 
     // Default flags to use with PackageManager when no flags are given.
     private static final int sDefaultFlags = GET_SHARED_LIBRARY_FILES;
+
+    /** Default set of checksums - includes all available checksums.
+     * @see PackageManager#getChecksums  */
+    private static final int DEFAULT_CHECKSUMS =
+            WHOLE_MERKLE_ROOT_4K_SHA256 | WHOLE_MD5 | WHOLE_SHA1 | WHOLE_SHA256 | WHOLE_SHA512
+                    | PARTIAL_MERKLE_ROOT_1M_SHA256 | PARTIAL_MERKLE_ROOT_1M_SHA512;
 
     // Name of the resource which provides background permission button string
     public static final String APP_PERMISSION_BUTTON_ALLOW_ALWAYS =
@@ -940,6 +951,39 @@ public class ApplicationPackageManager extends PackageManager {
             int uid, byte[] certificate, @CertificateInputType int type) {
         try {
             return mPM.hasUidSigningCertificate(uid, certificate, type);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static List<byte[]> encodeCertificates(List<Certificate> certs) throws
+            CertificateEncodingException {
+        if (certs == null) {
+            return null;
+        }
+        List<byte[]> result = new ArrayList<>(certs.size());
+        for (Certificate cert : certs) {
+            if (!(cert instanceof X509Certificate)) {
+                throw new CertificateEncodingException("Only X509 certificates supported.");
+            }
+            result.add(cert.getEncoded());
+        }
+        return result;
+    }
+
+    @Override
+    public void getChecksums(@NonNull String packageName, boolean includeSplits,
+            @FileChecksumKind int required, @Nullable List<Certificate> trustedInstallers,
+            @NonNull IntentSender statusReceiver)
+            throws CertificateEncodingException, IOException, NameNotFoundException {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(statusReceiver);
+        try {
+            mPM.getChecksums(packageName, includeSplits, DEFAULT_CHECKSUMS, required,
+                    encodeCertificates(trustedInstallers), statusReceiver, getUserId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
