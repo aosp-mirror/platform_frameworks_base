@@ -48,3 +48,65 @@ enum WifiModeEnum {
      */
     WIFI_MODE_FULL_LOW_LATENCY = 4;
 }
+
+/**
+ * Wifi authentication type.
+ */
+enum WifiAuthType {
+    AUTH_TYPE_NONE = 0;
+
+    // WPA pre-shared key.
+    AUTH_TYPE_WPA_PSK = 1;
+    // WPA using EAP authentication. Generally used with an external authentication server.
+    AUTH_TYPE_WPA_EAP = 2;
+    // IEEE 802.1X using EAP authentication and (optionally) dynamically generated WEP keys.
+    AUTH_TYPE_IEEE8021X = 3;
+    // WPA2 pre-shared key for use with soft access point.
+    AUTH_TYPE_WPA2_PSK = 4;
+    // Hotspot 2.0 r2 OSEN.
+    AUTH_TYPE_OSEN = 5;
+    // IEEE 802.11r Fast BSS Transition with PSK authentication.
+    AUTH_TYPE_FT_PSK = 6;
+    // IEEE 802.11r Fast BSS Transition with EAP authentication.
+    AUTH_TYPE_FT_EAP = 7;
+    // Simultaneous Authentication of Equals.
+    AUTH_TYPE_SAE = 8;
+    // Opportunistic Wireless Encryption.
+    AUTH_TYPE_OWE = 9;
+    // SUITE_B_192 192 bit level
+    AUTH_TYPE_SUITE_B_192 = 10;
+    // WPA pre-shared key with stronger SHA256-based algorithms.
+    AUTH_TYPE_WPA_PSK_SHA256 = 11;
+    // WPA using EAP authentication with stronger SHA256-based algorithms.
+    AUTH_TYPE_WPA_EAP_SHA256 = 12;
+    // WAPI pre-shared key.
+    AUTH_TYPE_WAPI_PSK = 13;
+    // WAPI certificate to be specified.
+    AUTH_TYPE_WAPI_CERT = 14;
+    // IEEE 802.11ai FILS SK with SHA256.
+    AUTH_TYPE_FILS_SHA256 = 15;
+    // IEEE 802.11ai FILS SK with SHA384.
+    AUTH_TYPE_FILS_SHA384 = 16;
+}
+
+/**
+ * Bucketed wifi band.
+ */
+enum WifiBandBucket {
+    BAND_UNKNOWN = 0;
+
+    // All of 2.4GHz band
+    BAND_2G = 1;
+    // Frequencies in the range of [5150, 5250) GHz
+    BAND_5G_LOW = 2;
+    // Frequencies in the range of [5250, 5725) GHz
+    BAND_5G_MIDDLE = 3;
+    // Frequencies in the range of [5725, 5850) GHz
+    BAND_5G_HIGH = 4;
+    // Frequencies in the range of [5925, 6425) GHz
+    BAND_6G_LOW = 5;
+    // Frequencies in the range of [6425, 6875) GHz
+    BAND_6G_MIDDLE = 6;
+    // Frequencies in the range of [6875, 7125) GHz
+    BAND_6G_HIGH = 7;
+}
