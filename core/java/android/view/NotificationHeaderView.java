@@ -456,8 +456,8 @@ public class NotificationHeaderView extends ViewGroup {
                 case MotionEvent.ACTION_UP:
                     if (mTrackGesture) {
                         if (mFeedbackIcon.isVisibleToUser()
-                                && (mFeedbackRect.contains((int) x, (int) y))
-                                || mFeedbackRect.contains((int) mDownX, (int) mDownY)) {
+                                && (mFeedbackRect.contains((int) x, (int) y)
+                                || mFeedbackRect.contains((int) mDownX, (int) mDownY))) {
                             mFeedbackIcon.performClick();
                             return true;
                         }
