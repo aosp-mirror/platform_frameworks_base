@@ -81,17 +81,17 @@ public class AmbientState {
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
-    private HeadsUpManager mHeadUpManager;
     private Runnable mOnPulseHeightChangedListener;
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
 
+    /** Tracks the state from AlertingNotificationManager#hasNotifications() */
+    private boolean mHasAlertEntries;
+
     public AmbientState(
             Context context,
-            @NonNull SectionProvider sectionProvider,
-            HeadsUpManager headsUpManager) {
+            @NonNull SectionProvider sectionProvider) {
         mSectionProvider = sectionProvider;
-        mHeadUpManager = headsUpManager;
         reload(context);
     }
 
@@ -393,7 +393,7 @@ public class AmbientState {
     }
 
     public boolean hasPulsingNotifications() {
-        return mPulsing && mHeadUpManager != null && mHeadUpManager.hasNotifications();
+        return mPulsing && mHasAlertEntries;
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -408,10 +408,7 @@ public class AmbientState {
     }
 
     public boolean isPulsing(NotificationEntry entry) {
-        if (!mPulsing || mHeadUpManager == null) {
-            return false;
-        }
-        return mHeadUpManager.isAlerting(entry.getKey());
+        return mPulsing && entry.isAlerting();
     }
 
     public boolean isPanelTracking() {
@@ -567,5 +564,9 @@ public class AmbientState {
 
     public float getAppearFraction() {
         return mAppearFraction;
+    }
+
+    public void setHasAlertEntries(boolean hasAlertEntries) {
+        mHasAlertEntries = hasAlertEntries;
     }
 }
