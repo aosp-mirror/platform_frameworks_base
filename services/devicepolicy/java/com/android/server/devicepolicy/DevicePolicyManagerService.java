@@ -1536,9 +1536,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Creates a new {@link CallerIdentity} object to represent the caller's identity.
+     */
+    @VisibleForTesting
+    protected CallerIdentity getCallerIdentity(@Nullable ComponentName adminComponent,
+            @NonNull String callerPackage) {
+        return adminComponent == null
+                ? getCallerIdentity(callerPackage)
+                : getCallerIdentity(adminComponent);
+    }
+
+    /**
+     * Creates a new {@link CallerIdentity} object to represent the caller's identity.
      * The component name should be an active admin for the calling user.
      */
-    private CallerIdentity getCallerIdentity(@NonNull ComponentName adminComponent) {
+    @VisibleForTesting
+    protected CallerIdentity getCallerIdentity(@NonNull ComponentName adminComponent) {
         final int callerUid = mInjector.binderGetCallingUid();
         final DevicePolicyData policy = getUserData(UserHandle.getUserId(callerUid));
         ActiveAdmin admin = policy.mAdminMap.get(adminComponent);
@@ -2097,12 +2109,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 String.format("Device owner %s for user %d not found", doComponent,
                         caller.getUid()));
 
-        Preconditions.checkSecurity(doAdmin.getUid() == caller.getUid(),
+        Preconditions.checkCallAuthorization(doAdmin.getUid() == caller.getUid(),
                     String.format("Admin %s is not owned by uid %d, but uid %d", doComponent,
                             caller.getUid(), doAdmin.getUid()));
 
-        Preconditions.checkSecurity(doAdmin.info.getComponent().equals(caller.getComponentName()),
-                    String.format("Caller component %s is not device owner",
+        Preconditions.checkCallAuthorization(
+                doAdmin.info.getComponent().equals(caller.getComponentName()),
+                String.format("Caller component %s is not device owner",
                         caller.getComponentName()));
 
         return doAdmin;
@@ -2119,12 +2132,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkState(poAdmin != null,
                     String.format("No device profile owner for caller %d", caller.getUid()));
 
-        Preconditions.checkSecurity(poAdmin.getUid() == caller.getUid(),
+        Preconditions.checkCallAuthorization(poAdmin.getUid() == caller.getUid(),
                     String.format("Admin %s is not owned by uid %d", poAdminComponent,
                             caller.getUid()));
 
-        Preconditions.checkSecurity(poAdmin.info.getComponent().equals(caller.getComponentName()),
-                    String.format("Caller component %s is not profile owner",
+        Preconditions.checkCallAuthorization(
+                poAdmin.info.getComponent().equals(caller.getComponentName()),
+                String.format("Caller component %s is not profile owner",
                         caller.getComponentName()));
 
         return poAdmin;
@@ -2133,7 +2147,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @NonNull ActiveAdmin getOrganizationOwnedProfileOwnerLocked(final CallerIdentity caller) {
         final ActiveAdmin profileOwner = getProfileOwnerOfCallerLocked(caller);
 
-        Preconditions.checkSecurity(
+        Preconditions.checkCallAuthorization(
                 mOwners.isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId()),
                 String.format("Admin %s is not of an org-owned device",
                         profileOwner.info.getComponent()));
@@ -2881,10 +2895,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Bundle onEnableData) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         DevicePolicyData policy = getUserData(userHandle);
         DeviceAdminInfo info = findAdmin(adminReceiver, userHandle,
@@ -3026,8 +3040,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             return getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null;
@@ -3041,8 +3055,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             DevicePolicyData policyData = getUserData(userHandle);
@@ -3057,8 +3071,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity(adminReceiver);
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity(adminReceiver);
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             ActiveAdmin administrator = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
@@ -3077,8 +3091,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -3101,8 +3115,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             DevicePolicyData policy = getUserData(userHandle);
@@ -3215,8 +3229,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         enforceUserUnlocked(userHandle);
 
         synchronized (getLockObject()) {
@@ -3372,8 +3386,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             int mode = PASSWORD_QUALITY_UNSPECIFIED;
@@ -3588,8 +3602,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             long timeout = 0L;
@@ -3616,12 +3630,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean addCrossProfileWidgetProvider(ComponentName admin, String packageName) {
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
         List<String> changedProviders = null;
 
         synchronized (getLockObject()) {
-            ActiveAdmin activeAdmin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin activeAdmin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (activeAdmin.crossProfileWidgetProviders == null) {
                 activeAdmin.crossProfileWidgetProviders = new ArrayList<>();
             }
@@ -3629,7 +3643,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!providers.contains(packageName)) {
                 providers.add(packageName);
                 changedProviders = new ArrayList<>(providers);
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
             }
         }
 
@@ -3639,7 +3653,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
 
         if (changedProviders != null) {
-            mLocalService.notifyCrossProfileProvidersChanged(identity.getUserId(),
+            mLocalService.notifyCrossProfileProvidersChanged(caller.getUserId(),
                     changedProviders);
             return true;
         }
@@ -3649,12 +3663,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean removeCrossProfileWidgetProvider(ComponentName admin, String packageName) {
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
         List<String> changedProviders = null;
 
         synchronized (getLockObject()) {
-            ActiveAdmin activeAdmin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin activeAdmin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (activeAdmin.crossProfileWidgetProviders == null
                     || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
                 return false;
@@ -3662,7 +3676,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             List<String> providers = activeAdmin.crossProfileWidgetProviders;
             if (providers.remove(packageName)) {
                 changedProviders = new ArrayList<>(providers);
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
             }
         }
 
@@ -3672,7 +3686,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
 
         if (changedProviders != null) {
-            mLocalService.notifyCrossProfileProvidersChanged(identity.getUserId(),
+            mLocalService.notifyCrossProfileProvidersChanged(caller.getUserId(),
                     changedProviders);
             return true;
         }
@@ -3682,11 +3696,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public List<String> getCrossProfileWidgetProviders(ComponentName admin) {
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin activeAdmin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin activeAdmin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (activeAdmin.crossProfileWidgetProviders == null
                     || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
                 return null;
@@ -3731,8 +3745,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             return getPasswordExpirationLocked(who, userHandle, parent);
@@ -3941,8 +3955,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             if (who != null) {
@@ -3985,8 +3999,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
         synchronized (getLockObject()) {
@@ -4006,8 +4020,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         enforceUserUnlocked(userHandle, parent);
 
         synchronized (getLockObject()) {
@@ -4041,8 +4055,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         enforceManagedProfile(userHandle, "call APIs refering to the parent profile");
 
         synchronized (getLockObject()) {
@@ -4063,8 +4077,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         enforceNotManagedProfile(userHandle, "check password sufficiency");
         enforceUserUnlocked(userHandle);
 
@@ -4154,11 +4168,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
-            if (!isSystemUid(identity)) {
+            if (!isSystemUid(caller)) {
                 // This API can be called by an active device admin or by keyguard code.
                 if (!hasCallingPermission(permission.ACCESS_KEYGUARD_SECURE_STORAGE)) {
                     getActiveAdminForCallerLocked(
@@ -4205,8 +4219,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = (who != null)
@@ -4223,8 +4237,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getAdminWithMinimumFailedPasswordsForWipeLocked(
@@ -4498,8 +4512,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             if (who != null) {
@@ -4577,8 +4591,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userId));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
 
         if (!mLockPatternUtils.hasSecureLockScreen()) {
             // No strong auth timeout on devices not supporting the
@@ -4716,20 +4730,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceProfileOrDeviceOwner(who);
     }
 
-    private void enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(ComponentName who) {
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(
-                    who, DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
-        }
-    }
-
-    private void enforceProfileOwnerOfOrganizationOwnedDevice(ActiveAdmin admin) {
-        if (!isProfileOwnerOfOrganizationOwnedDevice(admin)) {
-            throw new SecurityException(String.format("Provided admin %s is either not a profile "
-                    + "owner or not on a corporate-owned device.", admin));
-        }
-    }
-
     @Override
     public boolean approveCaCert(String alias, int userId, boolean approval) {
         enforceManageUsers();
@@ -4832,29 +4832,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean installKeyPair(ComponentName who, String callerPackage, byte[] privKey,
             byte[] cert, byte[] chain, String alias, boolean requestAccess,
             boolean isUserSelectable) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_CERT_INSTALL);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwner(caller) || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
-
-        final int callingUid = mInjector.binderGetCallingUid();
         final long id = mInjector.binderClearCallingIdentity();
         try {
             final KeyChainConnection keyChainConnection =
-                    KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid));
+                    KeyChain.bindAsUser(mContext, caller.getUserHandle());
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyStore.UID_SELF)) {
                     return false;
                 }
                 if (requestAccess) {
-                    keyChain.setGrant(callingUid, alias, true);
+                    keyChain.setGrant(caller.getUid(), alias, true);
                 }
                 keyChain.setUserSelectable(alias, isUserSelectable);
-                final boolean isDelegate = (who == null);
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.INSTALL_KEY_PAIR)
-                        .setAdmin(callerPackage)
-                        .setBoolean(isDelegate)
+                        .setAdmin(caller.getPackageName())
+                        .setBoolean(/* isDelegate */ who == null)
                         .write();
                 return true;
             } catch (RemoteException e) {
@@ -4873,23 +4871,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean removeKeyPair(ComponentName who, String callerPackage, String alias) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_CERT_INSTALL);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwner(caller) || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
         final long id = Binder.clearCallingIdentity();
         try {
-            final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
+            final KeyChainConnection keyChainConnection =
+                    KeyChain.bindAsUser(mContext, caller.getUserHandle());
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                final boolean result = keyChain.removeKeyPair(alias);
-                final boolean isDelegate = (who == null);
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.REMOVE_KEY_PAIR)
-                        .setAdmin(callerPackage)
-                        .setBoolean(isDelegate)
+                        .setAdmin(caller.getPackageName())
+                        .setBoolean(/* isDelegate */ who == null)
                         .write();
-                return result;
+                return keyChain.removeKeyPair(alias);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Removing keypair", e);
             } finally {
@@ -4905,39 +4902,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean setKeyGrantForApp(
-            ComponentName who, String callerPackage, String alias, String packageName,
-            boolean hasGrant) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_CERT_SELECTION);
+    public boolean setKeyGrantForApp(ComponentName who, String callerPackage, String alias,
+            String packageName, boolean hasGrant) {
+        Preconditions.checkStringNotEmpty(alias, "Alias to grant cannot be empty");
+        Preconditions.checkStringNotEmpty(packageName, "Package to grant to cannot be empty");
 
-        if (TextUtils.isEmpty(alias)) {
-            throw new IllegalArgumentException("Alias to grant cannot be empty.");
-        }
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwner(caller) || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
-        if (TextUtils.isEmpty(packageName)) {
-            throw new IllegalArgumentException("Package to grant to cannot be empty.");
-        }
-
-        final int userId = mInjector.userHandleGetCallingUserId();
         final int granteeUid;
         try {
             ApplicationInfo ai = mInjector.getIPackageManager().getApplicationInfo(
-                    packageName, 0, userId);
-            if (ai == null) {
-                throw new IllegalArgumentException(
-                        String.format("Provided package %s is not installed", packageName));
-            }
+                    packageName, 0, caller.getUserId());
+            Preconditions.checkArgument(ai != null,
+                    String.format("Provided package %s is not installed", packageName));
             granteeUid = ai.uid;
         } catch (RemoteException e) {
             throw new IllegalStateException("Failure getting grantee uid", e);
         }
 
-        final int callingUid = mInjector.binderGetCallingUid();
         final long id = mInjector.binderClearCallingIdentity();
         try {
             final KeyChainConnection keyChainConnection =
-                    KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid));
+                    KeyChain.bindAsUser(mContext, caller.getUserHandle());
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 keyChain.setGrant(granteeUid, alias, hasGrant);
@@ -4980,23 +4968,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      *  access to device identifiers in this case as part of the delegation.
      */
     @VisibleForTesting
-    public void enforceCallerCanRequestDeviceIdAttestation(
-            ComponentName who, String callerPackage, int callerUid) throws SecurityException {
-        final int userId = UserHandle.getUserId(callerUid);
-
+    public void enforceCallerCanRequestDeviceIdAttestation(CallerIdentity caller)
+            throws SecurityException {
         /**
          *  First check if there's a profile owner because the device could be in COMP mode (where
          *  there's a device owner and profile owner on the same device).
          *  If the caller is from the work profile, then it must be the PO or the delegate, and
          *  it must have the right permission to access device identifiers.
          */
-        if (hasProfileOwner(userId)) {
+        if (hasProfileOwner(caller.getUserId())) {
             // Make sure that the caller is the profile owner or delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_CERT_INSTALL);
+            Preconditions.checkCallAuthorization(
+                    isDeviceOwner(caller) || isProfileOwner(caller) || isCallerDelegate(
+                            caller, DELEGATION_CERT_INSTALL));
             // Verify that the managed profile is on an organization-owned device and as such
             // the profile owner can access Device IDs.
-            if (isProfileOwnerOfOrganizationOwnedDevice(userId)) {
+            if (isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId())) {
                 return;
             }
             throw new SecurityException(
@@ -5004,8 +4991,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         // If not, fall back to the device owner check.
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
-                DELEGATION_CERT_INSTALL);
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
     }
 
     @VisibleForTesting
@@ -5046,26 +5033,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
-            ParcelableKeyGenParameterSpec parcelableKeySpec,
-            int idAttestationFlags,
+            ParcelableKeyGenParameterSpec parcelableKeySpec, int idAttestationFlags,
             KeymasterCertificateChain attestationChain) {
         // Get attestation flags, if any.
         final int[] attestationUtilsFlags = translateIdAttestationFlags(idAttestationFlags);
         final boolean deviceIdAttestationRequired = attestationUtilsFlags != null;
-        final int callingUid = mInjector.binderGetCallingUid();
-
-        if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
-            enforceCallerCanRequestDeviceIdAttestation(who, callerPackage, callingUid);
-            enforceIndividualAttestationSupportedIfRequested(attestationUtilsFlags);
-        } else {
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_CERT_INSTALL);
-        }
         final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
         final String alias = keySpec.getKeystoreAlias();
-        if (TextUtils.isEmpty(alias)) {
-            throw new IllegalArgumentException("Empty alias provided.");
+
+        Preconditions.checkStringNotEmpty(alias, "Empty alias provided");
+        Preconditions.checkArgument(
+                !deviceIdAttestationRequired || keySpec.getAttestationChallenge() != null,
+                "Requested Device ID attestation but challenge is empty");
+
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
+            // TODO: replace enforce methods
+            enforceCallerCanRequestDeviceIdAttestation(caller);
+            enforceIndividualAttestationSupportedIfRequested(attestationUtilsFlags);
+        } else {
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                    || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
         }
+
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
         if (keySpec.getUid() != KeyStore.UID_SELF) {
@@ -5073,24 +5063,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        if (deviceIdAttestationRequired && (keySpec.getAttestationChallenge() == null)) {
-            throw new IllegalArgumentException(
-                    "Requested Device ID attestation but challenge is empty.");
-        }
-
-        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         final long id = mInjector.binderClearCallingIdentity();
         try {
             try (KeyChainConnection keyChainConnection =
-                    KeyChain.bindAsUser(mContext, userHandle)) {
+                    KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
                 IKeyChainService keyChain = keyChainConnection.getService();
 
                 // Copy the provided keySpec, excluding the attestation challenge, which will be
                 // used later for requesting key attestation record.
-                final KeyGenParameterSpec noAttestationSpec =
-                    new KeyGenParameterSpec.Builder(keySpec)
-                        .setAttestationChallenge(null)
-                        .build();
+                final KeyGenParameterSpec noAttestationSpec = new KeyGenParameterSpec.Builder(
+                        keySpec).setAttestationChallenge(null).build();
 
                 final int generationResult = keyChain.generateKeyPair(algorithm,
                     new ParcelableKeyGenParameterSpec(noAttestationSpec));
@@ -5112,7 +5094,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Note the use of the calling  UID, since the request for the private
                 // key will come from the client's process, so the grant has to be for
                 // that UID.
-                keyChain.setGrant(callingUid, alias, true);
+                keyChain.setGrant(caller.getUid(), alias, true);
 
                 final byte[] attestationChallenge = keySpec.getAttestationChallenge();
                 if (attestationChallenge != null) {
@@ -5130,11 +5112,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         return false;
                     }
                 }
-                final boolean isDelegate = (who == null);
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.GENERATE_KEY_PAIR)
-                        .setAdmin(callerPackage)
-                        .setBoolean(isDelegate)
+                        .setAdmin(caller.getPackageName())
+                        .setBoolean(/* isDelegate */ who == null)
                         .setInt(idAttestationFlags)
                         .setStrings(algorithm)
                         .write();
@@ -5165,23 +5146,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
             byte[] cert, byte[] chain, boolean isUserSelectable) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_CERT_INSTALL);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwner(caller) || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
-        final int callingUid = mInjector.binderGetCallingUid();
         final long id = mInjector.binderClearCallingIdentity();
         try (final KeyChainConnection keyChainConnection =
-                KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid))) {
+                KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
             IKeyChainService keyChain = keyChainConnection.getService();
             if (!keyChain.setKeyPairCertificate(alias, cert, chain)) {
                 return false;
             }
             keyChain.setUserSelectable(alias, isUserSelectable);
-            final boolean isDelegate = (who == null);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_KEY_PAIR_CERTIFICATE)
-                    .setAdmin(callerPackage)
-                    .setBoolean(isDelegate)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(/* isDelegate */ who == null)
                     .write();
             return true;
         } catch (InterruptedException e) {
@@ -5301,7 +5281,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkStringNotEmpty(delegatePackage, "Delegate package is null or empty");
         Preconditions.checkCollectionElementsNotNull(scopeList, "Scopes");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         // Remove possible duplicates.
         final ArrayList<String> scopes = new ArrayList(new ArraySet(scopeList));
@@ -5310,12 +5290,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalArgumentException("Unexpected delegation scopes");
         }
         // Retrieve the user ID of the calling process.
-        final int userId = identity.getUserId();
+        final int userId = caller.getUserId();
         final boolean hasDoDelegation = !Collections.disjoint(scopes, DEVICE_OWNER_DELEGATIONS);
         synchronized (getLockObject()) {
             // Ensure calling process is device/profile owner.
             if (hasDoDelegation) {
-                Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+                Preconditions.checkCallAuthorization(isDeviceOwner(caller));
             } else {
                 // TODO move whole condition out of synchronized block
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -5538,49 +5518,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Throw a security exception if a ComponentName is given and it is not a device/profile owner
-     * or if the calling process is not a delegate of the given scope.
+     * Check whether a caller application has been delegated a given scope via
+     * {@link #setDelegatedScopes} to access privileged APIs on the behalf of a profile owner or
+     * device owner.
+     * <p>
+     * This is done by checking that the calling package was granted {@code scope} delegation and
+     * then comparing the calling UID with the UID of the calling package as reported by
+     * {@link PackageManager#getPackageUidAsUser}.
      *
-     * @param who the device owner of profile owner, or null if {@code callerPackage} is a
-     *            {@code scope} delegate.
-     * @param callerPackage the name of the calling package. Required if {@code who} is
-     *            {@code null}.
-     * @param reqPolicy the policy used in the API whose access permission is being checked.
-     * @param scope the delegation scope corresponding to the API being checked.
-     * @throws SecurityException if {@code who} is given and is not an owner for {@code reqPolicy};
-     *            or when {@code who} is {@code null} and {@code callerPackage} is not a delegate
-     *            of {@code scope}.
+     * @param caller the calling identity
+     * @param scope the delegation scope to be checked.
+     * @return {@code true} if the calling process is a delegate of {@code scope}.
      */
-    private void enforceCanManageScope(ComponentName who, String callerPackage, int reqPolicy,
-            String scope) {
-        enforceCanManageScopeOrCheckPermission(who, callerPackage, reqPolicy, scope, null);
-    }
+    private boolean isCallerDelegate(CallerIdentity caller, String scope) {
+        Objects.requireNonNull(caller.getPackageName(), "callerPackage is null");
+        Preconditions.checkArgument(Arrays.asList(DELEGATIONS).contains(scope),
+                String.format("Unexpected delegation scope: %s", scope));
 
-    /**
-     * Throw a security exception if a ComponentName is given and it is not a device/profile owner
-     * OR if the calling process is not a delegate of the given scope and does not hold the
-     * required permission.
-     */
-    private void enforceCanManageScopeOrCheckPermission(@Nullable ComponentName who,
-            @NonNull String callerPackage, int reqPolicy, @NonNull String scope,
-            @Nullable String permission) {
-        // If a ComponentName is given ensure it is a device or profile owner according to policy.
-        if (who != null) {
-            synchronized (getLockObject()) {
-                getActiveAdminForCallerLocked(who, reqPolicy);
-            }
-        } else {
-            // If no ComponentName is given ensure calling process has scope delegation or required
-            // permission
-            if (isCallerDelegate(callerPackage, mInjector.binderGetCallingUid(), scope)) {
-                return;
-            }
-            if (permission == null) {
-                throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid()
-                        + " is not a delegate of scope " + scope + ".");
-            } else {
-                mContext.enforceCallingOrSelfPermission(permission, null);
-            }
+        synchronized (getLockObject()) {
+            // Retrieve user policy data.
+            final DevicePolicyData policy = getUserData(caller.getUserId());
+            // Retrieve the list of delegation scopes granted to callerPackage.
+            final List<String> scopes = policy.mDelegationMap.get(caller.getPackageName());
+            // Check callingUid only if callerPackage has the required scope delegation.
+            return scopes != null && scopes.contains(scope);
         }
     }
 
@@ -5784,40 +5745,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void wipeDataWithReason(int flags, String wipeReasonForUser,
-            boolean calledOnParentInstance) {
+    public void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent) {
         if (!mHasFeature) {
             return;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        boolean calledByProfileOwnerOnOrgOwnedDevice =
+                isProfileOwnerOfOrganizationOwnedDevice(caller);
+        if (parent) {
+            Preconditions.checkCallAuthorization(calledByProfileOwnerOnOrgOwnedDevice,
+                    "Wiping the entire device can only be done by a profile owner on "
+                            + "organization-owned device.");
+        }
+        if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
+            Preconditions.checkCallAuthorization(
+                    isDeviceOwner(caller) || calledByProfileOwnerOnOrgOwnedDevice,
+                    "Only device owners or proflie owners of organization-owned device can set "
+                            + "WIPE_RESET_PROTECTION_DATA");
         }
 
         final ActiveAdmin admin;
         synchronized (getLockObject()) {
             admin = getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_WIPE_DATA);
         }
-
-        if (admin == null) {
-            throw new SecurityException(String.format("No active admin for user %d",
-                    mInjector.userHandleGetCallingUserId()));
-        }
-
-        boolean calledByProfileOwnerOnOrgOwnedDevice =
-                isProfileOwnerOfOrganizationOwnedDevice(admin);
-
-        if (calledOnParentInstance && !calledByProfileOwnerOnOrgOwnedDevice) {
-            throw new SecurityException("Wiping the entire device can only be done by a profile"
-                    + "owner on organization-owned device.");
-        }
-
-        if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
-            if (!isDeviceOwner(admin) && !calledByProfileOwnerOnOrgOwnedDevice) {
-                throw new SecurityException(
-                        "Only device owners or proflie owners of organization-owned device"
-                        + " can set WIPE_RESET_PROTECTION_DATA");
-            }
-        }
+        Preconditions.checkCallAuthorization(admin != null,
+                String.format("No active admin for user %d", caller.getUserId()));
 
         if (TextUtils.isEmpty(wipeReasonForUser)) {
-            if (calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance) {
+            if (calledByProfileOwnerOnOrgOwnedDevice && !parent) {
                 wipeReasonForUser = mContext.getString(R.string.device_ownership_relinquished);
             } else {
                 wipeReasonForUser = mContext.getString(
@@ -5828,7 +5783,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         int userId = admin.getUserHandle().getIdentifier();
         if (calledByProfileOwnerOnOrgOwnedDevice) {
             // When wipeData is called on the parent instance, it implies wiping the entire device.
-            if (calledOnParentInstance) {
+            if (parent) {
                 userId = UserHandle.USER_SYSTEM;
             } else {
                 // when wipeData is _not_ called on the parent instance, it implies relinquishing
@@ -5853,7 +5808,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
                 .setAdmin(admin.info.getComponent())
                 .setInt(flags)
-                .setStrings(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
+                .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         String internalReason = String.format(
                 "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
@@ -6004,10 +5959,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = comp != null
+        final CallerIdentity caller = comp != null
                 ? getCallerIdentity(comp)
                 : getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
         synchronized (getLockObject()) {
@@ -6087,8 +6042,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reportFailedPasswordAttempt(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
         if (!isSeparateProfileChallengeEnabled(userHandle)) {
             enforceNotManagedProfile(userHandle,
@@ -6168,8 +6123,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reportSuccessfulPasswordAttempt(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
         synchronized (getLockObject()) {
@@ -6198,8 +6153,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reportFailedBiometricAttempt(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
         if (mInjector.securityLogIsLoggingEnabled()) {
@@ -6212,8 +6167,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reportSuccessfulBiometricAttempt(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
         if (mInjector.securityLogIsLoggingEnabled()) {
@@ -6226,8 +6181,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reportKeyguardDismissed(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
         if (mInjector.securityLogIsLoggingEnabled()) {
@@ -6239,8 +6194,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reportKeyguardSecured(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
         if (mInjector.securityLogIsLoggingEnabled()) {
@@ -6305,8 +6260,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
@@ -6329,8 +6284,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setRecommendedGlobalProxy(ComponentName who, ProxyInfo proxyInfo) {
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getConnectivityManager().setGlobalProxy(proxyInfo));
     }
@@ -6443,10 +6398,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = who != null
+        final CallerIdentity caller = who != null
                 ? getCallerIdentity(who)
                 : getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             // Check for permissions if a particular caller is specified
@@ -6479,10 +6434,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = callerPackage != null
+        final CallerIdentity caller = callerPackage != null
                 ? getCallerIdentity(callerPackage)
                 : getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         // It's not critical here, but let's make sure the package name is correct, in case
         // we start using it for different purposes.
@@ -6555,23 +6510,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final int userHandle = UserHandle.getCallingUserId();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        if (parent) {
+            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
+
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
-            if (parent) {
-                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
-            }
             if (ap.disableScreenCapture != disabled) {
                 ap.disableScreenCapture = disabled;
-                saveSettingsLocked(userHandle);
-                final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
+                saveSettingsLocked(caller.getUserId());
+                final int affectedUserId = parent
+                        ? getProfileParentId(caller.getUserId())
+                        : caller.getUserId();
                 updateScreenCaptureDisabled(affectedUserId, disabled);
             }
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_SCREEN_CAPTURE_DISABLED)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(disabled)
                 .write();
     }
@@ -6585,12 +6544,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
+        if (parent) {
+            Objects.requireNonNull(who, "ComponentName is null");
+            Preconditions.checkCallAuthorization(
+                    isProfileOwnerOfOrganizationOwnedDevice(getCallerIdentity(who)));
+        }
+
         synchronized (getLockObject()) {
-            if (parent) {
-                final ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                        DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
-                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
-            }
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
                 return (admin != null) && admin.disableScreenCapture;
@@ -6627,23 +6587,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         boolean requireAutoTimeChanged = false;
         synchronized (getLockObject()) {
-            Preconditions.checkSecurity(!isManagedProfile(identity.getUserId()),
+            Preconditions.checkCallAuthorization(!isManagedProfile(caller.getUserId()),
                     "Managed profile cannot set auto time required");
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (admin.requireAutoTime != required) {
                 admin.requireAutoTime = required;
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
                 requireAutoTimeChanged = true;
             }
         }
         // requireAutoTime is now backed by DISALLOW_CONFIG_DATE_TIME restriction, so propagate
         // updated restrictions to the framework.
         if (requireAutoTimeChanged) {
-            pushUserRestrictions(identity.getUserId());
+            pushUserRestrictions(caller.getUserId());
         }
         // Turn AUTO_TIME on in settings if it is required
         if (required) {
@@ -6694,14 +6654,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDeviceOwner(caller));
 
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Settings.Global.AUTO_TIME, enabled ? 1 : 0));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_AUTO_TIME)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(enabled)
                 .write();
     }
@@ -6715,7 +6678,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDeviceOwner(caller));
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
     }
@@ -6729,14 +6695,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDeviceOwner(caller));
 
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_AUTO_TIME_ZONE)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(enabled)
                 .write();
     }
@@ -6750,7 +6719,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDeviceOwner(caller));
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
@@ -6761,8 +6733,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         // Allow setting this policy to true only if there is a split system user.
         if (forceEphemeralUsers && !mInjector.userManagerIsSplitSystemUser()) {
@@ -6774,7 +6746,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
             if (deviceOwner.forceEphemeralUsers != forceEphemeralUsers) {
                 deviceOwner.forceEphemeralUsers = forceEphemeralUsers;
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
                 mUserManagerInternal.setForceEphemeralUsers(forceEphemeralUsers);
                 removeAllUsers = forceEphemeralUsers;
             }
@@ -6790,20 +6762,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
             final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
             return deviceOwner.forceEphemeralUsers;
-        }
-    }
-
-    private void ensureAllUsersAffiliated() throws SecurityException {
-        synchronized (getLockObject()) {
-            if (!areAllUsersAffiliatedWithDeviceLocked()) {
-                throw new SecurityException("Not all users are affiliated.");
-            }
         }
     }
 
@@ -6816,9 +6780,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // TODO: If an unaffiliated user is removed, the admin will be able to request a bugreport
         // which could still contain data related to that user. Should we disallow that, e.g. until
         // next boot? Might not be needed given that this still requires user consent.
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
-        ensureAllUsersAffiliated();
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked());
 
         if (mBugreportCollectionManager.requestBugreport()) {
             DevicePolicyEventLogger
@@ -6923,13 +6887,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        int userHandle = mInjector.userHandleGetCallingUserId();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        if (parent) {
+            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
+
+        final int userHandle = caller.getUserId();
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
-            if (parent) {
-                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
-            }
             if (ap.disableCamera != disabled) {
                 ap.disableCamera = disabled;
                 saveSettingsLocked(userHandle);
@@ -6945,7 +6912,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_CAMERA_DISABLED)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(disabled)
                 .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
@@ -6965,15 +6932,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
+        if (parent) {
+            Objects.requireNonNull(who, "ComponentName is null");
+            Preconditions.checkCallAuthorization(
+                    isProfileOwnerOfOrganizationOwnedDevice(getCallerIdentity(who)));
+        }
+
         synchronized (getLockObject()) {
-            if (parent) {
-                final ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                        DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
-                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
-            }
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return (admin != null) ? admin.disableCamera : false;
+                return (admin != null) && admin.disableCamera;
             }
             // First, see if DO has set it.  If so, it's device-wide.
             if (mergeDeviceOwnerRestriction) {
@@ -7001,13 +6969,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final int userHandle = mInjector.userHandleGetCallingUserId();
+
+        final CallerIdentity caller = getCallerIdentity(who);
+
+        final int userHandle = caller.getUserId();
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES, parent);
             if (isManagedProfile(userHandle)) {
                 if (parent) {
-                    if (isProfileOwnerOfOrganizationOwnedDevice(ap)) {
+                    if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
                         which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
                     } else {
                         which = which & NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
@@ -7028,7 +6999,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_KEYGUARD_DISABLED_FEATURES)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setInt(which)
                 .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
@@ -7045,8 +7016,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -7097,25 +7068,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(packageList, "packageList is null");
-        final int userHandle = UserHandle.getCallingUserId();
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_KEEP_UNINSTALLED_PACKAGES));
+
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO or a keep uninstalled packages delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
-                    DELEGATION_KEEP_UNINSTALLED_PACKAGES);
             // Get the device owner
             ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
             // Set list of packages to be kept even if uninstalled.
             deviceOwner.keepUninstalledPackages = packageList;
             // Save settings.
-            saveSettingsLocked(userHandle);
+            saveSettingsLocked(caller.getUserId());
             // Notify package manager.
             mInjector.getPackageManagerInternal().setKeepUninstalledPackages(packageList);
         }
-        final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_KEEP_UNINSTALLED_PACKAGES)
-                .setAdmin(callerPackage)
-                .setBoolean(isDelegate)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageList.toArray(new String[0]))
                 .write();
     }
@@ -7125,11 +7095,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_KEEP_UNINSTALLED_PACKAGES));
+
         // TODO In split system user mode, allow apps on user 0 to query the list
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO or a keep uninstalled packages delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
-                    DELEGATION_KEEP_UNINSTALLED_PACKAGES);
             return getKeepUninstalledPackagesLocked();
         }
     }
@@ -7228,11 +7199,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isDeviceOwner(CallerIdentity identity) {
+    private boolean isDeviceOwner(CallerIdentity caller) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerUserId() == identity.getUserId()
-                    && mOwners.getDeviceOwnerComponent().equals(identity.getComponentName());
+                    && mOwners.getDeviceOwnerUserId() == caller.getUserId()
+                    && mOwners.getDeviceOwnerComponent().equals(caller.getComponentName());
         }
     }
 
@@ -7258,12 +7229,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Returns {@code true} if the provided caller identity is of a profile owner.
-     * @param identity identity of caller.
+     * @param caller identity of caller.
      * @return true if {@code identity} is a profile owner, false otherwise.
      */
-    public boolean isProfileOwner(CallerIdentity identity) {
-        final ComponentName profileOwner = getProfileOwner(identity.getUserId());
-        return profileOwner != null && profileOwner.equals(identity.getComponentName());
+    public boolean isProfileOwner(CallerIdentity caller) {
+        final ComponentName profileOwner = getProfileOwner(caller.getUserId());
+        return profileOwner != null && profileOwner.equals(caller.getComponentName());
     }
 
     private boolean hasProfileOwner(int userId) {
@@ -7272,30 +7243,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * Returns {@code true} if the provided caller identity is of a profile owner of an organization
+     * owned device.
+     *
+     * @param caller identity of caller
+     * @return true if {@code identity} is a profile owner of an organization owned device, false
+     * otherwise.
+     */
+    private boolean isProfileOwnerOfOrganizationOwnedDevice(CallerIdentity caller) {
+        return isProfileOwner(caller) && isProfileOwnerOfOrganizationOwnedDevice(
+                caller.getUserId());
+    }
+
     private boolean isProfileOwnerOfOrganizationOwnedDevice(int userId) {
         synchronized (getLockObject()) {
             return mOwners.isProfileOwnerOfOrganizationOwnedDevice(userId);
         }
     }
 
-    /**
-     * Returns true if the provided {@code admin} is a profile owner and the profile is marked
-     * as organization-owned.
-     * The {@code admin} parameter must be obtained by the service by calling
-     * {@code getActiveAdminForCallerLocked} or one of the similar variants, not caller-supplied
-     * input.
-     */
-    private boolean isProfileOwnerOfOrganizationOwnedDevice(@Nullable ActiveAdmin admin) {
-        if (admin == null) {
-            return false;
-        }
-
-        return isProfileOwnerOfOrganizationOwnedDevice(
-                admin.info.getComponent(), admin.getUserHandle().getIdentifier());
-    }
-
     private boolean isProfileOwnerOfOrganizationOwnedDevice(ComponentName who, int userId) {
         return isProfileOwner(who, userId) && isProfileOwnerOfOrganizationOwnedDevice(userId);
+    }
+
+    private boolean isProfileOwnerOnUser0(CallerIdentity caller) {
+        return isProfileOwner(caller) && caller.getUserHandle().isSystem();
     }
 
     @Override
@@ -7604,26 +7576,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setDeviceOwnerLockScreenInfo(ComponentName who, CharSequence info) {
-        Objects.requireNonNull(who, "ComponentName is null");
         if (!mHasFeature) {
             return;
         }
+        Objects.requireNonNull(who, "ComponentName is null");
 
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isProfileOwnerOfOrganizationOwnedDevice(admin) && !isDeviceOwner(admin)) {
-                throw new SecurityException("Only Device Owner or Profile Owner of"
-                        + " organization-owned device can set screen lock info.");
-            }
-        }
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
 
         mInjector.binderWithCleanCallingIdentity(() ->
                 mLockPatternUtils.setDeviceOwnerInfo(info != null ? info.toString() : null));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_DEVICE_OWNER_LOCK_SCREEN_INFO)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .write();
     }
 
@@ -7828,8 +7795,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public ComponentName getProfileOwnerAsUser(int userHandle) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
 
         return getProfileOwner(userHandle);
     }
@@ -8195,21 +8162,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean hasPermissionForPreflight(CallerIdentity identity, String permission) {
+    private boolean hasPermissionForPreflight(CallerIdentity caller, String permission) {
         final int callingPid = mInjector.binderGetCallingPid();
         final String packageName = mContext.getPackageName();
 
         return PermissionChecker.checkPermissionForPreflight(mContext, permission, callingPid,
-                identity.getUid(), packageName) == PermissionChecker.PERMISSION_GRANTED;
+                caller.getUid(), packageName) == PermissionChecker.PERMISSION_GRANTED;
     }
 
-    private boolean hasFullCrossUsersPermission(CallerIdentity identity, int userHandle) {
-        return (userHandle == identity.getUserId()) || isSystemUid(identity) || isRootUid(identity)
+    private boolean hasFullCrossUsersPermission(CallerIdentity caller, int userHandle) {
+        return (userHandle == caller.getUserId()) || isSystemUid(caller) || isRootUid(caller)
                 || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL);
     }
 
-    private boolean hasCrossUsersPermission(CallerIdentity identity, int userHandle) {
-        return (userHandle == identity.getUserId()) || isSystemUid(identity) || isRootUid(identity)
+    private boolean hasCrossUsersPermission(CallerIdentity caller, int userHandle) {
+        return (userHandle == caller.getUserId()) || isSystemUid(caller) || isRootUid(caller)
                 || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS);
     }
 
@@ -8249,39 +8216,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Only profile owner, device owner and system may call this method.");
     }
 
-    private void enforceProfileOwnerOnUser0OrProfileOwnerOrganizationOwned() {
-        synchronized (getLockObject()) {
-            // Check if there is a device owner or profile owner of an organization-owned device
-            ActiveAdmin owner = getActiveAdminWithPolicyForUidLocked(null,
-                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
-                    mInjector.binderGetCallingUid());
-            if (owner != null) {
-                return;
-            }
-
-            // Checks whether the caller is a profile owner on user 0 rather than
-            // checking whether the active admin is on user 0
-            owner = getActiveAdminWithPolicyForUidLocked(null,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid());
-            if (owner != null && owner.getUserHandle().isSystem()) {
-                return;
-            }
-        }
-        throw new SecurityException("No active admin found");
-    }
-
-    private void enforceProfileOwnerOrFullCrossUsersPermission(CallerIdentity identity,
+    private void enforceProfileOwnerOrFullCrossUsersPermission(CallerIdentity caller,
             int userId) {
-        if (userId == identity.getUserId()) {
+        if (userId == caller.getUserId()) {
             synchronized (getLockObject()) {
                 if (getActiveAdminWithPolicyForUidLocked(null,
-                        DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, identity.getUid()) != null) {
+                        DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, caller.getUid()) != null) {
                     // Device Owner/Profile Owner may access the user it runs on.
                     return;
                 }
             }
         }
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userId));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
     }
 
     private boolean canUserUseLockTaskLocked(int userId) {
@@ -8335,16 +8281,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID);
     }
 
-    private boolean isSystemUid(CallerIdentity identity) {
-        return UserHandle.isSameApp(identity.getUid(), Process.SYSTEM_UID);
+    private boolean isSystemUid(CallerIdentity caller) {
+        return UserHandle.isSameApp(caller.getUid(), Process.SYSTEM_UID);
     }
 
-    private boolean isRootUid(CallerIdentity identity) {
-        return UserHandle.isSameApp(identity.getUid(), Process.ROOT_UID);
+    private boolean isRootUid(CallerIdentity caller) {
+        return UserHandle.isSameApp(caller.getUid(), Process.ROOT_UID);
     }
 
-    private boolean isShellUid(CallerIdentity identity) {
-        return UserHandle.isSameApp(identity.getUid(), Process.SHELL_UID);
+    private boolean isShellUid(CallerIdentity caller) {
+        return UserHandle.isSameApp(caller.getUid(), Process.SHELL_UID);
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -8518,16 +8464,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setDefaultSmsApplication(ComponentName admin, String packageName, boolean parent) {
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
 
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
         if (parent) {
-            ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
-                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
-            enforceProfileOwnerOfOrganizationOwnedDevice(ap);
             mInjector.binderWithCleanCallingIdentity(() -> enforcePackageIsSystemPackage(
                     packageName, getProfileParentId(mInjector.userHandleGetCallingUserId())));
-        } else {
-            Preconditions.checkCallAuthorization(isDeviceOwner(identity));
         }
 
         mInjector.binderWithCleanCallingIdentity(() ->
@@ -8561,17 +8504,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setApplicationRestrictions(ComponentName who, String callerPackage,
             String packageName, Bundle settings) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_APP_RESTRICTIONS);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS));
 
-        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         mInjector.binderWithCleanCallingIdentity(() -> {
-            mUserManager.setApplicationRestrictions(packageName, settings, userHandle);
-            final boolean isDelegate = (who == null);
+            mUserManager.setApplicationRestrictions(packageName, settings,
+                    caller.getUserHandle());
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_APPLICATION_RESTRICTIONS)
-                    .setAdmin(callerPackage)
-                    .setBoolean(isDelegate)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(/* isDelegate */ who == null)
                     .setStrings(packageName)
                     .write();
         });
@@ -8603,10 +8546,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(agent, "agent null");
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = admin != null
+        final CallerIdentity caller = admin != null
                 ? getCallerIdentity(admin)
                 : getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             final String componentName = agent.flattenToString();
@@ -8806,10 +8749,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         if (packageList != null) {
-            int userId = identity.getUserId();
+            int userId = caller.getUserId();
             List<AccessibilityServiceInfo> enabledServices = null;
             long id = mInjector.binderClearCallingIdentity();
             try {
@@ -8839,7 +8782,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             admin.permittedAccessiblityServices = packageList;
             saveSettingsLocked(UserHandle.getCallingUserId());
         }
@@ -8859,11 +8802,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity) || isProfileOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.permittedAccessiblityServices;
         }
     }
@@ -8958,19 +8901,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity) || isProfileOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
         if (packageList != null) {
             List<InputMethodInfo> enabledImes = InputMethodManagerInternal.get()
-                    .getEnabledInputMethodListAsUser(identity.getUserId());
+                    .getEnabledInputMethodListAsUser(caller.getUserId());
             if (enabledImes != null) {
                 List<String> enabledPackages = new ArrayList<String>();
                 for (InputMethodInfo ime : enabledImes) {
                     enabledPackages.add(ime.getPackageName());
                 }
                 if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList,
-                        identity.getUserId())) {
+                        caller.getUserId())) {
                     Slog.e(LOG_TAG, "Cannot set permitted input methods, "
                             + "because it contains already enabled input method.");
                     return false;
@@ -8979,9 +8922,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             admin.permittedInputMethods = packageList;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
         final String[] packageArray =
                 packageList != null ? ((List<String>) packageList).toArray(new String[0]) : null;
@@ -8999,11 +8942,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity) || isProfileOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.permittedInputMethods;
         }
     }
@@ -9077,16 +9020,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
-        if (!isManagedProfile(identity.getUserId())) {
+        if (!isManagedProfile(caller.getUserId())) {
             return false;
         }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             admin.permittedNotificationListeners = packageList;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
         return true;
     }
@@ -9097,12 +9040,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         synchronized (getLockObject()) {
             // API contract is to return null if there are no permitted cross-profile notification
             // listeners, including in Device Owner mode.
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.permittedNotificationListeners;
         }
     }
@@ -9298,14 +9241,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean removeUser(ComponentName who, UserHandle userHandle) {
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(userHandle, "UserHandle is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             String restriction = isManagedProfile(userHandle.getIdentifier())
                     ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE
                     : UserManager.DISALLOW_REMOVE_USER;
-            if (isAdminAffectedByRestriction(who, restriction, identity.getUserId())) {
+            if (isAdminAffectedByRestriction(who, restriction, caller.getUserId())) {
                 Log.w(LOG_TAG, "The device owner cannot remove a user because "
                         + restriction + " is enabled, and was not set by the device owner");
                 return false;
@@ -9331,8 +9274,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean switchUser(ComponentName who, UserHandle userHandle) {
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
@@ -9355,8 +9298,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public int startUserInBackground(ComponentName who, UserHandle userHandle) {
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(userHandle, "UserHandle is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
@@ -9388,8 +9331,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public int stopUser(ComponentName who, UserHandle userHandle) {
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(userHandle, "UserHandle is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
@@ -9457,8 +9400,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public List<UserHandle> getSecondaryUsers(ComponentName who) {
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             final List<UserInfo> userInfos = mInjector.getUserManager().getAliveUsers();
@@ -9486,12 +9429,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public Bundle getApplicationRestrictions(ComponentName who, String callerPackage,
             String packageName) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_APP_RESTRICTIONS);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS));
 
-        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            Bundle bundle = mUserManager.getApplicationRestrictions(packageName, userHandle);
+            Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
+                    caller.getUserHandle());
            // if no restrictions were saved, mUserManager.getApplicationRestrictions
            // returns null, but DPM method should return an empty Bundle as per JavaDoc
            return bundle != null ? bundle : Bundle.EMPTY;
@@ -9501,18 +9445,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public String[] setPackagesSuspended(ComponentName who, String callerPackage,
             String[] packageNames, boolean suspended) {
-        int callingUserId = UserHandle.getCallingUserId();
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS));
+
         String[] result = null;
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a package access delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PACKAGE_ACCESS);
-
             long id = mInjector.binderClearCallingIdentity();
             try {
-                result = mIPackageManager
-                        .setPackagesSuspendedAsUser(packageNames, suspended,
-                        null, null, null, PLATFORM_PACKAGE_NAME, callingUserId);
+                result = mIPackageManager.setPackagesSuspendedAsUser(packageNames, suspended, null,
+                        null, null, PLATFORM_PACKAGE_NAME, caller.getUserId());
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
@@ -9520,11 +9462,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
-        final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PACKAGES_SUSPENDED)
-                .setAdmin(callerPackage)
-                .setBoolean(isDelegate)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageNames)
                 .write();
         if (result != null) {
@@ -9535,15 +9476,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isPackageSuspended(ComponentName who, String callerPackage, String packageName) {
-        int callingUserId = UserHandle.getCallingUserId();
-        synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a package access delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PACKAGE_ACCESS);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS));
 
+        synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
             try {
-                return mIPackageManager.isPackageSuspendedForUser(packageName, callingUserId);
+                return mIPackageManager.isPackageSuspendedForUser(packageName, caller.getUserId());
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
@@ -9558,32 +9498,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner,
             boolean parent) {
         Objects.requireNonNull(who, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
             return;
         }
 
-        int userHandle = mInjector.userHandleGetCallingUserId();
+        int userHandle = caller.getUserId();
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who,
                             DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
-            final boolean isDeviceOwner = isDeviceOwner(who, userHandle);
 
-            if (isDeviceOwner) {
+            if (isDeviceOwner(caller)) {
                 if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
                     throw new SecurityException("Device owner cannot set user restriction " + key);
                 }
-                if (parent) {
-                    throw new IllegalArgumentException(
-                            "Cannot use the parent instance in Device Owner mode");
-                }
+                Preconditions.checkArgument(!parent,
+                        "Cannot use the parent instance in Device Owner mode");
             } else {
                 boolean profileOwnerCanChangeOnItself = !parent
                         && UserRestrictionsUtils.canProfileOwnerChange(key, userHandle);
                 boolean orgOwnedProfileOwnerCanChangesGlobally = parent
-                        && isProfileOwnerOfOrganizationOwnedDevice(activeAdmin)
+                        && isProfileOwnerOfOrganizationOwnedDevice(caller)
                         && UserRestrictionsUtils
-                                .canProfileOwnerOfOrganizationOwnedDeviceChange(key);
+                        .canProfileOwnerOfOrganizationOwnedDeviceChange(key);
 
                 if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangesGlobally) {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
@@ -9604,7 +9544,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 : DevicePolicyEnums.REMOVE_USER_RESTRICTION;
         DevicePolicyEventLogger
                 .createEvent(eventId)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setStrings(key, parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         if (SecurityLog.isLoggingEnabled()) {
@@ -9682,14 +9622,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
+
         final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
 
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
                     getProfileOwnerOrDeviceOwnerLocked(caller), parent);
-            if (parent) {
-                enforceProfileOwnerOfOrganizationOwnedDevice(activeAdmin);
-            }
             return activeAdmin.userRestrictions;
         }
     }
@@ -9697,15 +9637,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setApplicationHidden(ComponentName who, String callerPackage, String packageName,
             boolean hidden, boolean parent) {
-        final int userId = parent ? getProfileParentId(UserHandle.getCallingUserId())
-                : UserHandle.getCallingUserId();
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS));
+
+        final int userId = parent ? getProfileParentId(caller.getUserId()) : caller.getUserId();
         boolean result;
-
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a package access delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PACKAGE_ACCESS);
-
             if (parent) {
                 getActiveAdminForCallerLocked(who,
                         DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
@@ -9715,15 +9653,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderWithCleanCallingIdentity(() ->
                         enforcePackageIsSystemPackage(packageName, userId));
             }
-
             result = mInjector.binderWithCleanCallingIdentity(() -> mIPackageManager
                     .setApplicationHiddenSettingAsUser(packageName, hidden, userId));
         }
-        final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_APPLICATION_HIDDEN)
-                .setAdmin(callerPackage)
-                .setBoolean(isDelegate)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageName, hidden ? "hidden" : "not_hidden",
                         parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
@@ -9733,14 +9669,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean isApplicationHidden(ComponentName who, String callerPackage,
             String packageName, boolean parent) {
-        final int userId = parent ? getProfileParentId(UserHandle.getCallingUserId())
-                : UserHandle.getCallingUserId();
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS));
 
+        final int userId = parent ? getProfileParentId(caller.getUserId()) : caller.getUserId();
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a package access delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PACKAGE_ACCESS);
-
             if (parent) {
                 getActiveAdminForCallerLocked(who,
                         DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
@@ -9769,26 +9703,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void enableSystemApp(ComponentName who, String callerPackage, String packageName) {
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_ENABLE_SYSTEM_APP));
+
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or an enable system app delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_ENABLE_SYSTEM_APP);
-
             final boolean isDemo = isCurrentUserDemo();
-
-            int userId = UserHandle.getCallingUserId();
+            int userId = caller.getUserId();
             long id = mInjector.binderClearCallingIdentity();
-
             try {
                 if (VERBOSE_LOG) {
-                    Slog.v(LOG_TAG, "installing " + packageName + " for "
-                            + userId);
+                    Slog.v(LOG_TAG, "installing " + packageName + " for " + userId);
                 }
 
-                int parentUserId = getProfileParentId(userId);
-                if (!isDemo && !isSystemApp(mIPackageManager, packageName, parentUserId)) {
-                    throw new IllegalArgumentException("Only system apps can be enabled this way.");
-                }
+                Preconditions.checkArgument(isDemo || isSystemApp(mIPackageManager, packageName,
+                        getProfileParentId(userId)), "Only system apps can be enabled this way");
 
                 // Install the app.
                 mIPackageManager.installExistingPackageAsUser(packageName, userId,
@@ -9807,28 +9736,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
-        final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.ENABLE_SYSTEM_APP)
-                .setAdmin(callerPackage)
-                .setBoolean(isDelegate)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageName)
                 .write();
     }
 
     @Override
     public int enableSystemAppWithIntent(ComponentName who, String callerPackage, Intent intent) {
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_ENABLE_SYSTEM_APP));
+
         int numberOfAppsInstalled = 0;
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or an enable system app delegate.
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_ENABLE_SYSTEM_APP);
-
-            int userId = UserHandle.getCallingUserId();
             long id = mInjector.binderClearCallingIdentity();
-
             try {
-                int parentUserId = getProfileParentId(userId);
+                final int parentUserId = getProfileParentId(caller.getUserId());
                 List<ResolveInfo> activitiesToEnable = mIPackageManager
                         .queryIntentActivities(intent,
                                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -9846,7 +9772,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             String packageName = info.activityInfo.packageName;
                             if (isSystemApp(mIPackageManager, packageName, parentUserId)) {
                                 numberOfAppsInstalled++;
-                                mIPackageManager.installExistingPackageAsUser(packageName, userId,
+                                mIPackageManager.installExistingPackageAsUser(packageName,
+                                        caller.getUserId(),
                                         PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
                                         PackageManager.INSTALL_REASON_POLICY, null);
                             } else {
@@ -9864,11 +9791,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
-        final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.ENABLE_SYSTEM_APP_WITH_INTENT)
-                .setAdmin(callerPackage)
-                .setBoolean(isDelegate)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
                 .setStrings(intent.getAction())
                 .write();
         return numberOfAppsInstalled;
@@ -9888,26 +9814,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean installExistingPackage(ComponentName who, String callerPackage,
             String packageName) {
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_INSTALL_EXISTING_PACKAGE));
+
         boolean result;
         synchronized (getLockObject()) {
-            // Ensure the caller is a PO or an install existing package delegate
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_INSTALL_EXISTING_PACKAGE);
-            final int callingUserId = mInjector.userHandleGetCallingUserId();
-            if (!isUserAffiliatedWithDeviceLocked(callingUserId)) {
-                throw new SecurityException("Admin " + who +
-                        " is neither the device owner or affiliated user's profile owner.");
-            }
-
+            Preconditions.checkCallAuthorization(
+                    isUserAffiliatedWithDeviceLocked(caller.getUserId()), String.format(
+                            "Admin %s is neither the device owner or "
+                                    + "affiliated user's profile owner.", who));
             final long id = mInjector.binderClearCallingIdentity();
             try {
                 if (VERBOSE_LOG) {
-                    Slog.v(LOG_TAG, "installing " + packageName + " for "
-                            + callingUserId);
+                    Slog.v(LOG_TAG, "installing " + packageName + " for " + caller.getUserId());
                 }
 
                 // Install the package.
-                result = mIPackageManager.installExistingPackageAsUser(packageName, callingUserId,
+                result = mIPackageManager.installExistingPackageAsUser(packageName,
+                        caller.getUserId(),
                         PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
                         PackageManager.INSTALL_REASON_POLICY, null)
                         == PackageManager.INSTALL_SUCCEEDED;
@@ -9919,11 +9844,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         if (result) {
-            final boolean isDelegate = (who == null);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_EXISTING_PACKAGE)
-                    .setAdmin(callerPackage)
-                    .setBoolean(isDelegate)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(/* isDelegate */ who == null)
                     .setStrings(packageName)
                     .write();
         }
@@ -9974,8 +9898,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userId));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             final ArraySet<String> resultSet = new ArraySet<>();
@@ -10004,12 +9928,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setUninstallBlocked(ComponentName who, String callerPackage, String packageName,
             boolean uninstallBlocked) {
-        final int userId = UserHandle.getCallingUserId();
-        synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a block uninstall delegate
-            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_BLOCK_UNINSTALL);
+        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_BLOCK_UNINSTALL));
 
+        final int userId = caller.getUserId();
+        synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
             try {
                 mIPackageManager.setBlockUninstallForUser(packageName, uninstallBlocked, userId);
@@ -10026,11 +9950,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pmi.removeDistractingPackageRestrictions(packageName, userId);
             pmi.flushPackageRestrictions(userId);
         }
-        final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_UNINSTALL_BLOCKED)
-                .setAdmin(callerPackage)
-                .setBoolean(isDelegate)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageName)
                 .write();
     }
@@ -10068,14 +9991,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (admin.disableCallerId != disabled) {
                 admin.disableCallerId = disabled;
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
             }
         }
         DevicePolicyEventLogger
@@ -10091,11 +10014,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.disableCallerId;
         }
     }
@@ -10104,8 +10027,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean getCrossProfileCallerIdDisabledForUser(int userId) {
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(identity, userId));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
@@ -10119,14 +10042,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (admin.disableContactsSearch != disabled) {
                 admin.disableContactsSearch = disabled;
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
             }
         }
         DevicePolicyEventLogger
@@ -10142,11 +10065,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwner(identity) || isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.disableContactsSearch;
         }
     }
@@ -10155,8 +10078,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean getCrossProfileContactsSearchDisabledForUser(int userId) {
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(identity, userId));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
@@ -10228,14 +10151,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity) || isProfileOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (admin.disableBluetoothContactSharing != disabled) {
                 admin.disableBluetoothContactSharing = disabled;
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
             }
         }
         DevicePolicyEventLogger
@@ -10251,11 +10174,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity) || isProfileOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.disableBluetoothContactSharing;
         }
     }
@@ -10452,8 +10375,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setGlobalSetting(ComponentName who, String setting, String value) {
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_GLOBAL_SETTING)
@@ -10515,7 +10438,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
 
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
@@ -10523,7 +10449,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.ALLOW_MODIFICATION_OF_ADMIN_CONFIGURED_NETWORKS)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(lockdown)
                 .write();
     }
@@ -10534,7 +10460,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
 
         return mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalGetInt(Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0) > 0);
@@ -10542,20 +10471,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setLocationEnabled(ComponentName who, boolean locationEnabled) {
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         mInjector.binderWithCleanCallingIdentity(() -> {
             boolean wasLocationEnabled = mInjector.getLocationManager().isLocationEnabledForUser(
-                    identity.getUserHandle());
+                    caller.getUserHandle());
             mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
-                    identity.getUserHandle());
+                    caller.getUserHandle());
 
             // make a best effort to only show the notification if the admin is actually enabling
             // location. this is subject to race conditions with settings changes, but those are
             // unlikely to realistically interfere
             if (locationEnabled && !wasLocationEnabled) {
-                showLocationSettingsEnabledNotification(identity.getUserHandle());
+                showLocationSettingsEnabledNotification(caller.getUserHandle());
             }
         });
 
@@ -10600,15 +10529,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean setTime(ComponentName who, long millis) {
-        Objects.requireNonNull(who, "ComponentName is null in setTime");
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+        Objects.requireNonNull(who, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+
         // Don't allow set time when auto time is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
             return false;
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_TIME)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .write();
         mInjector.binderWithCleanCallingIdentity(() -> mInjector.getAlarmManager().setTime(millis));
         return true;
@@ -10616,8 +10549,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean setTimeZone(ComponentName who, String timeZone) {
-        Objects.requireNonNull(who, "ComponentName is null in setTimeZone");
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(who);
+        Objects.requireNonNull(who, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+
         // Don't allow set timezone when auto timezone is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
@@ -10627,7 +10564,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_TIME_ZONE)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .write();
         return true;
     }
@@ -11639,25 +11576,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setPermissionPolicy(ComponentName admin, String callerPackage, int policy)
-            throws RemoteException {
-        int userId = UserHandle.getCallingUserId();
+    public void setPermissionPolicy(ComponentName admin, String callerPackage, int policy) {
+        final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_PERMISSION_GRANT));
+
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a permission grant state delegate.
-            enforceCanManageScope(admin, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PERMISSION_GRANT);
-            DevicePolicyData userPolicy = getUserData(userId);
+            DevicePolicyData userPolicy = getUserData(caller.getUserId());
             if (userPolicy.mPermissionPolicy != policy) {
                 userPolicy.mPermissionPolicy = policy;
-                saveSettingsLocked(userId);
+                saveSettingsLocked(caller.getUserId());
             }
         }
-        final boolean isDelegate = (admin == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERMISSION_POLICY)
-                .setAdmin(callerPackage)
+                .setAdmin(caller.getPackageName())
                 .setInt(policy)
-                .setBoolean(isDelegate)
+                .setBoolean(/* isDelegate */ admin == null)
                 .write();
     }
 
@@ -11676,18 +11611,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throws RemoteException {
         Objects.requireNonNull(callback);
 
-        UserHandle user = mInjector.binderGetCallingUserHandle();
+        final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_PERMISSION_GRANT));
+
         synchronized (getLockObject()) {
-            // Ensure the caller is a DO/PO or a permission grant state delegate.
-            enforceCanManageScope(admin, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PERMISSION_GRANT);
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                boolean isPostQAdmin = getTargetSdk(callerPackage, user.getIdentifier())
+                boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
                         >= android.os.Build.VERSION_CODES.Q;
                 if (!isPostQAdmin) {
                     // Legacy admins assume that they cannot control pre-M apps
-                    if (getTargetSdk(packageName, user.getIdentifier())
+                    if (getTargetSdk(packageName, caller.getUserId())
                             < android.os.Build.VERSION_CODES.M) {
                         callback.sendResult(null);
                         return;
@@ -11699,16 +11634,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         return;
                     }
                 } catch (NameNotFoundException e) {
-                    throw new RemoteException(
-                            "Cannot check if " + permission + "is a runtime permission", e, false,
-                            true);
+                    throw new RemoteException("Cannot check if " + permission
+                            + "is a runtime permission", e, false, true);
                 }
 
                 if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
-                    mInjector.getPermissionControllerManager(user)
-                            .setRuntimePermissionGrantStateByDeviceAdmin(callerPackage,
+                    mInjector.getPermissionControllerManager(caller.getUserHandle())
+                            .setRuntimePermissionGrantStateByDeviceAdmin(caller.getPackageName(),
                                     packageName, permission, grantState, mContext.getMainExecutor(),
                                     (permissionWasSet) -> {
                                         if (isPostQAdmin && !permissionWasSet) {
@@ -11716,14 +11650,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                             return;
                                         }
 
-                                        final boolean isDelegate = (admin == null);
                                         DevicePolicyEventLogger
                                                 .createEvent(DevicePolicyEnums
                                                         .SET_PERMISSION_GRANT_STATE)
-                                                .setAdmin(callerPackage)
+                                                .setAdmin(caller.getPackageName())
                                                 .setStrings(permission)
                                                 .setInt(grantState)
-                                                .setBoolean(isDelegate)
+                                                .setBoolean(/* isDelegate */ admin == null)
                                                 .write();
 
                                         callback.sendResult(Bundle.EMPTY);
@@ -11742,26 +11675,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPermissionGrantState(ComponentName admin, String callerPackage,
             String packageName, String permission) throws RemoteException {
-        PackageManager packageManager = mInjector.getPackageManager();
+        final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
+        Preconditions.checkCallAuthorization(
+                isSystemUid(caller) || isDeviceOwner(caller) || isProfileOwner(caller)
+                        || isCallerDelegate(caller, DELEGATION_PERMISSION_GRANT));
 
-        UserHandle user = mInjector.binderGetCallingUserHandle();
-        if (!isCallerWithSystemUid()) {
-            // Ensure the caller is a DO/PO or a permission grant state delegate.
-            enforceCanManageScope(admin, callerPackage,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, DELEGATION_PERMISSION_GRANT);
-        }
         synchronized (getLockObject()) {
             return mInjector.binderWithCleanCallingIdentity(() -> {
                 int granted;
-                if (getTargetSdk(callerPackage, user.getIdentifier())
+                if (getTargetSdk(caller.getPackageName(), caller.getUserId())
                         < android.os.Build.VERSION_CODES.Q) {
                     // The per-Q behavior was to not check the app-ops state.
                     granted = mIPackageManager.checkPermission(permission, packageName,
-                            user.getIdentifier());
+                            caller.getUserId());
                 } else {
                     try {
-                        int uid = packageManager.getPackageUidAsUser(packageName,
-                                user.getIdentifier());
+                        int uid = mInjector.getPackageManager().getPackageUidAsUser(packageName,
+                                caller.getUserId());
                         if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
                                 PermissionChecker.PID_UNKNOWN, uid, packageName)
                                         != PermissionChecker.PERMISSION_GRANTED) {
@@ -11770,12 +11700,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             granted = PackageManager.PERMISSION_GRANTED;
                         }
                     } catch (NameNotFoundException e) {
-                        throw new RemoteException(
-                                "Cannot check if " + permission + "is a runtime permission", e,
-                                false, true);
+                        throw new RemoteException("Cannot check if " + permission
+                                + "is a runtime permission", e, false, true);
                     }
                 }
-                int permFlags = packageManager.getPermissionFlags(permission, packageName, user);
+                int permFlags = mInjector.getPackageManager().getPermissionFlags(
+                        permission, packageName, caller.getUserHandle());
                 if ((permFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED)
                         != PackageManager.FLAG_PERMISSION_POLICY_FIXED) {
                     // Not controlled by policy
@@ -12043,8 +11973,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public String getWifiMacAddress(ComponentName admin) {
-        // Make sure caller has DO.
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
+        Objects.requireNonNull(admin, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             String[] macAddresses = mInjector.getWifiManager().getFactoryMacAddresses();
@@ -12053,7 +11986,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.GET_WIFI_MAC_ADDRESS)
-                    .setAdmin(admin)
+                    .setAdmin(caller.getComponentName())
                     .write();
             return macAddresses.length > 0 ? macAddresses[0] : null;
         });
@@ -12083,8 +12016,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void reboot(ComponentName admin) {
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         mInjector.binderWithCleanCallingIdentity(() -> {
             // Make sure there are no ongoing calls on the device.
@@ -12203,12 +12136,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        enforceManagedProfile(identity.getUserId(), "set organization color");
+        final CallerIdentity caller = getCallerIdentity(who);
+        enforceManagedProfile(caller.getUserId(), "set organization color");
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             admin.organizationColor = color;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_ORGANIZATION_COLOR)
@@ -12223,8 +12156,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userId));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
 
         enforceManageUsers();
         enforceManagedProfile(userId, "set organization color");
@@ -12241,10 +12174,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return ActiveAdmin.DEF_ORGANIZATION_COLOR;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        enforceManagedProfile(identity.getUserId(), "get organization color");
+        final CallerIdentity caller = getCallerIdentity(who);
+        enforceManagedProfile(caller.getUserId(), "get organization color");
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.organizationColor;
         }
     }
@@ -12256,8 +12189,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         enforceManagedProfile(userHandle, "get organization color");
         synchronized (getLockObject()) {
@@ -12274,14 +12207,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (!TextUtils.equals(admin.organizationName, text)) {
                 admin.organizationName = (text == null || text.length() == 0)
                         ? null : text.toString();
-                saveSettingsLocked(identity.getUserId());
+                saveSettingsLocked(caller.getUserId());
             }
         }
     }
@@ -12292,10 +12225,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        enforceManagedProfile(identity.getUserId(), "get organization name");
+        final CallerIdentity caller = getCallerIdentity(who);
+        enforceManagedProfile(caller.getUserId(), "get organization name");
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.organizationName;
         }
     }
@@ -12319,8 +12252,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
         enforceManagedProfile(userHandle, "get organization name");
         synchronized (getLockObject()) {
@@ -12335,21 +12268,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public List<String> setMeteredDataDisabledPackages(ComponentName who, List<String> packageNames) {
         Objects.requireNonNull(who);
         Objects.requireNonNull(packageNames);
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkSecurity(isDeviceOwner(identity) || isProfileOwner(identity),
-                String.format("Admin %s does not own the profile", identity.getComponentName()));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller),
+                String.format("Admin %s does not own the profile", caller.getComponentName()));
 
         if (!mHasFeature) {
             return packageNames;
         }
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return mInjector.binderWithCleanCallingIdentity(() -> {
                 final List<String> excludedPkgs = removeInvalidPkgsForMeteredDataRestriction(
-                        identity.getUserId(), packageNames);
+                        caller.getUserId(), packageNames);
                 admin.meteredDisabledPackages = packageNames;
-                pushMeteredDisabledPackagesLocked(identity.getUserId());
-                saveSettingsLocked(identity.getUserId());
+                pushMeteredDisabledPackagesLocked(caller.getUserId());
+                saveSettingsLocked(caller.getUserId());
                 return excludedPkgs;
             });
         }
@@ -12386,12 +12319,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return new ArrayList<>();
         }
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkSecurity(isDeviceOwner(identity) || isProfileOwner(identity),
-                String.format("Admin %s does not own the profile", identity.getComponentName()));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller),
+                String.format("Admin %s does not own the profile", caller.getComponentName()));
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.meteredDisabledPackages == null
                     ? new ArrayList<>() : admin.meteredDisabledPackages;
         }
@@ -12688,16 +12621,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
+        Objects.requireNonNull(admin, "ComponentName is null");
 
-        Objects.requireNonNull(admin);
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
-        if (!isOrganizationOwnedDeviceWithManagedProfile()) {
-            ensureAllUsersAffiliated();
-        }
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
+                || areAllUsersAffiliatedWithDeviceLocked());
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.RETRIEVE_PRE_REBOOT_SECURITY_LOGS)
-                .setAdmin(admin)
+                .setAdmin(caller.getComponentName())
                 .write();
 
         if (!mContext.getResources().getBoolean(R.bool.config_supportPreRebootSecurityLogs)
@@ -12725,12 +12659,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
+        Objects.requireNonNull(admin, "ComponentName is null");
 
-        Objects.requireNonNull(admin);
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
-        if (!isOrganizationOwnedDeviceWithManagedProfile()) {
-            ensureAllUsersAffiliated();
-        }
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
+                || areAllUsersAffiliatedWithDeviceLocked());
 
         if (!mInjector.securityLogGetLoggingEnabledProperty()) {
             return null;
@@ -12741,7 +12676,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         List<SecurityEvent> logs = mSecurityLogMonitor.retrieveLogs();
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.RETRIEVE_SECURITY_LOGS)
-                .setAdmin(admin)
+                .setAdmin(caller.getComponentName())
                 .write();
         return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
     }
@@ -13181,10 +13116,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
-        synchronized (getLockObject()) {
-            enforceCanManageScope(admin, packageName, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
-                    DELEGATION_NETWORK_LOGGING);
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING));
 
+        synchronized (getLockObject()) {
             if (enabled == isNetworkLoggingEnabledInternalLocked()) {
                 // already in the requested state
                 return;
@@ -13195,15 +13131,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 deviceOwner.numNetworkLoggingNotifications = 0;
                 deviceOwner.lastNetworkLoggingNotificationTimeMs = 0;
             }
-            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
-
+            saveSettingsLocked(caller.getUserId());
             setNetworkLoggingActiveInternal(enabled);
 
-            final boolean isDelegate = (admin == null);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_NETWORK_LOGGING_ENABLED)
-                    .setAdmin(packageName)
-                    .setBoolean(isDelegate)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(/* isDelegate */ admin == null)
                     .setInt(enabled ? 1 : 0)
                     .write();
         }
@@ -13300,10 +13234,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return false;
         }
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)
+                        || hasCallingOrSelfPermission(permission.MANAGE_USERS));
+
         synchronized (getLockObject()) {
-            enforceCanManageScopeOrCheckPermission(admin, packageName,
-                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, DELEGATION_NETWORK_LOGGING,
-                    android.Manifest.permission.MANAGE_USERS);
             return isNetworkLoggingEnabledInternalLocked();
         }
     }
@@ -13326,20 +13262,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
-        enforceCanManageScope(admin, packageName, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
-                DELEGATION_NETWORK_LOGGING);
-        ensureAllUsersAffiliated();
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING));
+        Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked());
 
         synchronized (getLockObject()) {
-            if (mNetworkLogger == null
-                    || !isNetworkLoggingEnabledInternalLocked()) {
+            if (mNetworkLogger == null || !isNetworkLoggingEnabledInternalLocked()) {
                 return null;
             }
-            final boolean isDelegate = (admin == null);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.RETRIEVE_NETWORK_LOGS)
-                    .setAdmin(packageName)
-                    .setBoolean(isDelegate)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(/* isDelegate */ admin == null)
                     .write();
 
             final long currentTime = System.currentTimeMillis();
@@ -13556,8 +13491,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public StringParceledListSlice getOwnerInstalledCaCerts(@NonNull UserHandle user) {
         final int userId = user.getIdentifier();
-        final CallerIdentity identity = getCallerIdentity();
-        enforceProfileOwnerOrFullCrossUsersPermission(identity, userId);
+        final CallerIdentity caller = getCallerIdentity();
+        enforceProfileOwnerOrFullCrossUsersPermission(caller, userId);
         synchronized (getLockObject()) {
             return new StringParceledListSlice(
                     new ArrayList<>(getUserData(userId).mOwnerInstalledCaCerts));
@@ -13601,8 +13536,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
             ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
@@ -13611,7 +13546,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return;
             }
             deviceOwner.isLogoutEnabled = enabled;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
     }
 
@@ -13778,8 +13713,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         final String startUserSessionMessageString =
                 startUserSessionMessage != null ? startUserSessionMessage.toString() : null;
@@ -13790,7 +13725,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return;
             }
             deviceOwner.startUserSessionMessage = startUserSessionMessageString;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
 
         mInjector.getActivityManagerInternal()
@@ -13803,8 +13738,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         final String endUserSessionMessageString =
                 endUserSessionMessage != null ? endUserSessionMessage.toString() : null;
@@ -13815,7 +13750,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return;
             }
             deviceOwner.endUserSessionMessage = endUserSessionMessageString;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
 
         mInjector.getActivityManagerInternal()
@@ -13828,8 +13763,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
             final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
@@ -13843,8 +13778,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
             final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
@@ -13888,8 +13823,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(apnSetting, "ApnSetting is null in addOverrideApn");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
         if (tm != null) {
@@ -13909,8 +13844,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(apnSetting, "ApnSetting is null in updateOverrideApn");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         if (apnId < 0) {
             return false;
@@ -13931,8 +13866,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         return removeOverrideApnUnchecked(apnId);
     }
 
@@ -13952,8 +13887,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return Collections.emptyList();
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         return getOverrideApnsUnchecked();
     }
 
@@ -13973,8 +13908,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         setOverrideApnsEnabledUnchecked(enabled);
     }
 
@@ -13991,8 +13926,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         Cursor enforceCursor = mInjector.binderWithCleanCallingIdentity(
                 () -> mContext.getContentResolver().query(
@@ -14075,8 +14010,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         switch (mode) {
             case PRIVATE_DNS_MODE_OPPORTUNISTIC:
@@ -14111,8 +14046,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return PRIVATE_DNS_MODE_UNKNOWN;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         String currentMode = mInjector.settingsGlobalGetString(PRIVATE_DNS_MODE);
         if (currentMode == null) {
@@ -14136,20 +14071,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         return mInjector.settingsGlobalGetString(PRIVATE_DNS_SPECIFIER);
     }
 
     @Override
     public void installUpdateFromFile(ComponentName admin,
             ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback callback) {
+        Objects.requireNonNull(admin, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(admin);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.INSTALL_SYSTEM_UPDATE)
-                .setAdmin(admin)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(isDeviceAB())
                 .write();
-        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
+
         mInjector.binderWithCleanCallingIdentity(() -> {
             UpdateInstaller updateInstaller;
             if (isDeviceAB()) {
@@ -14174,12 +14115,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             admin.mCrossProfileCalendarPackages = packageNames;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_CROSS_PROFILE_CALENDAR_PACKAGES)
@@ -14195,10 +14136,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return Collections.emptyList();
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.mCrossProfileCalendarPackages;
         }
     }
@@ -14212,8 +14153,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             if (mInjector.settingsSecureGetIntForUser(
@@ -14238,8 +14179,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(identity, userHandle));
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
 
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
@@ -14257,17 +14198,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(packageNames, "Package names is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         final List<String> previousCrossProfilePackages;
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             previousCrossProfilePackages = admin.mCrossProfilePackages;
             if (packageNames.equals(previousCrossProfilePackages)) {
                 return;
             }
             admin.mCrossProfilePackages = packageNames;
-            saveSettingsLocked(identity.getUserId());
+            saveSettingsLocked(caller.getUserId());
         }
         logSetCrossProfilePackages(who, packageNames);
         final CrossProfileApps crossProfileApps = mContext.getSystemService(CrossProfileApps.class);
@@ -14290,10 +14231,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return Collections.emptyList();
         }
         Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
         synchronized (getLockObject()) {
-            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(identity);
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             return admin.mCrossProfilePackages;
         }
     }
@@ -14303,12 +14244,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return Collections.emptyList();
         }
-        final CallerIdentity identity = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
-                isSystemUid(identity) || isRootUid(identity) || hasCallingPermission(
+                isSystemUid(caller) || isRootUid(caller) || hasCallingPermission(
                         permission.INTERACT_ACROSS_USERS) || hasCallingPermission(
                         permission.INTERACT_ACROSS_USERS_FULL) || hasPermissionForPreflight(
-                        identity, permission.INTERACT_ACROSS_PROFILES));
+                        caller, permission.INTERACT_ACROSS_PROFILES));
 
         synchronized (getLockObject()) {
             final List<ActiveAdmin> admins = getProfileOwnerAdminsForCurrentProfileGroup();
@@ -14497,11 +14438,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void setUserControlDisabledPackages(ComponentName who, List<String> packages) {
         Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkNotNull(packages, "packages is null");
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            setUserControlDisabledPackagesLocked(identity.getUserId(), packages);
+            setUserControlDisabledPackagesLocked(caller.getUserId(), packages);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_USER_CONTROL_DISABLED_PACKAGES)
                     .setAdmin(who)
@@ -14521,12 +14462,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public List<String> getUserControlDisabledPackages(ComponentName who) {
-        final CallerIdentity identity = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
             final List<String> packages =
-                    getUserData(identity.getUserId()).mUserControlDisabledPackages;
+                    getUserData(caller.getUserId()).mUserControlDisabledPackages;
             return packages == null ? Collections.EMPTY_LIST : packages;
         }
     }
@@ -14574,12 +14515,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public @PersonalAppsSuspensionReason int getPersonalAppsSuspendedReasons(ComponentName who) {
+        Objects.requireNonNull(who, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        // DO shouldn't be able to use this method.
+        Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
                     false /* parent */);
-            // DO shouldn't be able to use this method.
-            enforceProfileOwnerOfOrganizationOwnedDevice(admin);
             final long deadline = admin.mProfileOffDeadline;
             final int result = makeSuspensionReasons(admin.mSuspendPersonalApps,
                     deadline != 0 && mInjector.systemCurrentTimeMillis() > deadline);
@@ -14603,14 +14548,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setPersonalAppsSuspended(ComponentName who, boolean suspended) {
-        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        Objects.requireNonNull(who, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        // DO shouldn't be able to use this method.
+        Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+        Preconditions.checkState(canHandleCheckPolicyComplianceIntent(caller));
+
+        final int callingUserId = caller.getUserId();
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
                     false /* parent */);
-            // DO shouldn't be able to use this method.
-            enforceProfileOwnerOfOrganizationOwnedDevice(admin);
-            enforceHandlesCheckPolicyComplianceIntent(callingUserId, admin.info.getPackageName());
             boolean shouldSaveSettings = false;
             if (admin.mSuspendPersonalApps != suspended) {
                 admin.mSuspendPersonalApps = suspended;
@@ -14630,7 +14579,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setBoolean(suspended)
                 .write();
     }
@@ -14861,15 +14810,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setManagedProfileMaximumTimeOff(ComponentName who, long timeoutMillis) {
-        final int userId = mInjector.userHandleGetCallingUserId();
+        Objects.requireNonNull(who, "ComponentName is null");
+        Preconditions.checkArgumentNonnegative(timeoutMillis, "Timeout must be non-negative.");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        // DO shouldn't be able to use this method.
+        Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+        Preconditions.checkState(canHandleCheckPolicyComplianceIntent(caller));
+
+        final int userId = caller.getUserId();
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
                     false /* parent */);
-            // DO shouldn't be able to use this method.
-            enforceProfileOwnerOfOrganizationOwnedDevice(admin);
-            enforceHandlesCheckPolicyComplianceIntent(userId, admin.info.getPackageName());
-            Preconditions.checkArgument(timeoutMillis >= 0, "Timeout must be non-negative.");
+
             // Ensure the timeout is long enough to avoid having bad user experience.
             if (timeoutMillis > 0 && timeoutMillis < MANAGED_PROFILE_MAXIMUM_TIME_OFF_THRESHOLD
                     && !isAdminTestOnlyLocked(who, userId)) {
@@ -14887,31 +14841,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_MANAGED_PROFILE_MAXIMUM_TIME_OFF)
-                .setAdmin(who)
+                .setAdmin(caller.getComponentName())
                 .setTimePeriod(timeoutMillis)
                 .write();
     }
 
-    private void enforceHandlesCheckPolicyComplianceIntent(
-            @UserIdInt int userId, String packageName) {
+    private boolean canHandleCheckPolicyComplianceIntent(CallerIdentity caller) {
         mInjector.binderWithCleanCallingIdentity(() -> {
             final Intent intent = new Intent(DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
-            intent.setPackage(packageName);
-            final List<ResolveInfo> handlers = mInjector.getPackageManager()
-                    .queryIntentActivitiesAsUser(intent, /* flags= */ 0, userId);
-            Preconditions.checkState(!handlers.isEmpty(),
-                    "Admin doesn't handle " + DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
+            intent.setPackage(caller.getPackageName());
+            final List<ResolveInfo> handlers =
+                    mInjector.getPackageManager().queryIntentActivitiesAsUser(intent, /* flags= */
+                            0, caller.getUserId());
+            return !handlers.isEmpty();
         });
+        return true;
     }
 
     @Override
     public long getManagedProfileMaximumTimeOff(ComponentName who) {
+        Objects.requireNonNull(who, "ComponentName is null");
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        // DO shouldn't be able to use this method.
+        Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
                     false /* parent */);
-            // DO shouldn't be able to use this method.
-            enforceProfileOwnerOfOrganizationOwnedDevice(admin);
             return admin.mProfileMaximumTimeOffMillis;
         }
     }
