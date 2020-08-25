@@ -142,7 +142,7 @@ public class ApkSignatureSchemeV3Verifier {
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v3.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    private static SignatureInfo findSignature(RandomAccessFile apk)
+    public static SignatureInfo findSignature(RandomAccessFile apk)
             throws IOException, SignatureNotFoundException {
         return ApkSigningBlockUtils.findSignature(apk, APK_SIGNATURE_SCHEME_V3_BLOCK_ID);
     }
