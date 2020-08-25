@@ -652,7 +652,7 @@ void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
             (unsigned long)mCurrentSlicedBucket.size());
     if (verbose) {
         for (const auto& it : mCurrentSlicedBucket) {
-          for (const auto& interval : it.second) {
+          for (const auto& interval : it.second.intervals) {
               fprintf(out, "\t(what)%s\t(states)%s  (value)%s\n",
                       it.first.getDimensionKeyInWhat().toString().c_str(),
                       it.first.getStateValuesKey().toString().c_str(),
@@ -804,7 +804,8 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     // We need to get the intervals stored with the previous state key so we can
     // close these value intervals.
     const auto oldStateKey = baseInfos[0].currentState;
-    vector<Interval>& intervals = mCurrentSlicedBucket[MetricDimensionKey(whatKey, oldStateKey)];
+    vector<Interval>& intervals =
+            mCurrentSlicedBucket[MetricDimensionKey(whatKey, oldStateKey)].intervals;
     if (intervals.size() < mFieldMatchers.size()) {
         VLOG("Resizing number of intervals to %d", (int)mFieldMatchers.size());
         intervals.resize(mFieldMatchers.size());
@@ -990,7 +991,7 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
         bool bucketHasData = false;
         // The current bucket is large enough to keep.
         for (const auto& slice : mCurrentSlicedBucket) {
-            ValueBucket bucket = buildPartialBucket(bucketEndTime, slice.second);
+            PastValueBucket bucket = buildPartialBucket(bucketEndTime, slice.second.intervals);
             bucket.mConditionTrueNs = conditionTrueDuration;
             // it will auto create new vector of ValuebucketInfo if the key is not found.
             if (bucket.valueIndex.size() > 0) {
@@ -1030,9 +1031,9 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     mCurrentBucketNum += numBucketsForward;
 }
 
-ValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,
-                                                    const std::vector<Interval>& intervals) {
-    ValueBucket bucket;
+PastValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,
+                                                        const std::vector<Interval>& intervals) {
+    PastValueBucket bucket;
     bucket.mBucketStartNs = mCurrentBucketStartTimeNs;
     bucket.mBucketEndNs = bucketEndTime;
     for (const auto& interval : intervals) {
@@ -1059,7 +1060,7 @@ void ValueMetricProducer::initCurrentSlicedBucket(int64_t nextBucketStartTimeNs)
     // Cleanup data structure to aggregate values.
     for (auto it = mCurrentSlicedBucket.begin(); it != mCurrentSlicedBucket.end();) {
         bool obsolete = true;
-        for (auto& interval : it->second) {
+        for (auto& interval : it->second.intervals) {
             interval.hasValue = false;
             interval.sampleSize = 0;
             if (interval.seenNewData) {
@@ -1107,7 +1108,7 @@ void ValueMetricProducer::appendToFullBucket(const bool isFullBucketReached) {
                     continue;
                 }
                 // TODO: fix this when anomaly can accept double values
-                auto& interval = slice.second[0];
+                auto& interval = slice.second.intervals[0];
                 if (interval.hasValue) {
                     mCurrentFullBucket[slice.first] += interval.value.long_value;
                 }
@@ -1126,7 +1127,7 @@ void ValueMetricProducer::appendToFullBucket(const bool isFullBucketReached) {
                 for (auto& tracker : mAnomalyTrackers) {
                     if (tracker != nullptr) {
                         // TODO: fix this when anomaly can accept double values
-                        auto& interval = slice.second[0];
+                        auto& interval = slice.second.intervals[0];
                         if (interval.hasValue) {
                             tracker->addPastBucket(slice.first, interval.value.long_value,
                                                    mCurrentBucketNum);
@@ -1139,7 +1140,7 @@ void ValueMetricProducer::appendToFullBucket(const bool isFullBucketReached) {
         // Accumulate partial bucket.
         for (const auto& slice : mCurrentSlicedBucket) {
             // TODO: fix this when anomaly can accept double values
-            auto& interval = slice.second[0];
+            auto& interval = slice.second.intervals[0];
             if (interval.hasValue) {
                 mCurrentFullBucket[slice.first] += interval.value.long_value;
             }
