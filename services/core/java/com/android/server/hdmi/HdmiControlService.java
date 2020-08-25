@@ -3214,7 +3214,7 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    void setActiveSource(int logicalAddress, int physicalAddress) {
+    void setActiveSource(int logicalAddress, int physicalAddress, String caller) {
         synchronized (mLock) {
             mActiveSource.logicalAddress = logicalAddress;
             mActiveSource.physicalAddress = physicalAddress;
@@ -3225,14 +3225,17 @@ public class HdmiControlService extends SystemService {
             // mIsActiveSource only exists in source device, ignore this setting if the current
             // device is not an HdmiCecLocalDeviceSource.
             if (!(device instanceof HdmiCecLocalDeviceSource)) {
+                device.addActiveSourceHistoryItem(new ActiveSource(logicalAddress, physicalAddress),
+                        false, caller);
                 continue;
             }
-            if (logicalAddress == device.getDeviceInfo().getLogicalAddress()
-                && physicalAddress == getPhysicalAddress()) {
-                ((HdmiCecLocalDeviceSource) device).setIsActiveSource(true);
-            } else {
-                ((HdmiCecLocalDeviceSource) device).setIsActiveSource(false);
-            }
+            boolean deviceIsActiveSource =
+                    logicalAddress == device.getDeviceInfo().getLogicalAddress()
+                            && physicalAddress == getPhysicalAddress();
+
+            ((HdmiCecLocalDeviceSource) device).setIsActiveSource(deviceIsActiveSource);
+            device.addActiveSourceHistoryItem(new ActiveSource(logicalAddress, physicalAddress),
+                    deviceIsActiveSource, caller);
         }
     }
 

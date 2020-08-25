@@ -119,11 +119,11 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    protected void setActiveSource(int physicalAddress) {
+    protected void setActiveSource(int physicalAddress, String caller) {
         assertRunOnServiceThread();
         // Invalidate the internal active source record. This will also update mIsActiveSource.
         ActiveSource activeSource = ActiveSource.of(Constants.ADDR_INVALID, physicalAddress);
-        setActiveSource(activeSource);
+        setActiveSource(activeSource, caller);
     }
 
     @ServiceThreadOnly
@@ -133,7 +133,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
         if (!getActiveSource().equals(activeSource)) {
-            setActiveSource(activeSource);
+            setActiveSource(activeSource, "HdmiCecLocalDeviceSource#handleActiveSource()");
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
         updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
@@ -162,7 +162,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setAndBroadcastActiveSource(message, physicalAddress);
         }
         if (physicalAddress != mService.getPhysicalAddress()) {
-            setActiveSource(physicalAddress);
+            setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleSetStreamPath()");
         }
         switchInputOnReceivingNewActivePath(physicalAddress);
         return true;
@@ -174,7 +174,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
         if (physicalAddress != mService.getPhysicalAddress()) {
-            setActiveSource(physicalAddress);
+            setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleRoutingChange()");
         }
         if (!isRoutingControlFeatureEnabled()) {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
@@ -196,7 +196,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         if (physicalAddress != mService.getPhysicalAddress()) {
-            setActiveSource(physicalAddress);
+            setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleRoutingInformation()");
         }
         if (!isRoutingControlFeatureEnabled()) {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);

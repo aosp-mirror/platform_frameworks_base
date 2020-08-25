@@ -361,7 +361,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         // Invalidate the internal active source record when goes to standby
         // This set will also update mIsActiveSource
-        mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
+        mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS,
+                "HdmiCecLocalDeviceAudioSystem#onStandby()");
         mTvSystemAudioModeSupport = null;
         // Record the last state of System Audio Control before going to standby
         synchronized (mLock) {
