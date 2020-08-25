@@ -1139,9 +1139,17 @@ public class AppOpsManager {
     // TODO: Add as AppProtoEnums
     public static final int OP_PHONE_CALL_CAMERA = 101;
 
+    /**
+     * Audio is being recorded for hotword detection.
+     *
+     * @hide
+     */
+    // TODO: Add as AppProtoEnums
+    public static final int OP_RECORD_AUDIO_HOTWORD = 102;
+
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 102;
+    public static final int _NUM_OP = 103;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1472,6 +1480,13 @@ public class AppOpsManager {
      */
     public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
 
+    /**
+     * Audio is being recorded for hotword detection.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1663,6 +1678,7 @@ public class AppOpsManager {
             OP_NO_ISOLATED_STORAGE,             // NO_ISOLATED_STORAGE
             OP_PHONE_CALL_MICROPHONE,           // OP_PHONE_CALL_MICROPHONE
             OP_PHONE_CALL_CAMERA,               // OP_PHONE_CALL_CAMERA
+            OP_RECORD_AUDIO_HOTWORD,            // RECORD_AUDIO_HOTWORD
     };
 
     /**
@@ -1771,6 +1787,7 @@ public class AppOpsManager {
             OPSTR_NO_ISOLATED_STORAGE,
             OPSTR_PHONE_CALL_MICROPHONE,
             OPSTR_PHONE_CALL_CAMERA,
+            OPSTR_RECORD_AUDIO_HOTWORD,
     };
 
     /**
@@ -1880,6 +1897,7 @@ public class AppOpsManager {
             "NO_ISOLATED_STORAGE",
             "PHONE_CALL_MICROPHONE",
             "PHONE_CALL_CAMERA",
+            "RECORD_AUDIO_HOTWORD",
     };
 
     /**
@@ -1990,6 +2008,7 @@ public class AppOpsManager {
             null, // no permission for OP_NO_ISOLATED_STORAGE
             null, // no permission for OP_PHONE_CALL_MICROPHONE
             null, // no permission for OP_PHONE_CALL_CAMERA
+            null, // no permission for OP_RECORD_AUDIO_HOTWORD
     };
 
     /**
@@ -2100,6 +2119,7 @@ public class AppOpsManager {
             null, // NO_ISOLATED_STORAGE
             null, // PHONE_CALL_MICROPHONE
             null, // PHONE_CALL_MICROPHONE
+            null, // RECORD_AUDIO_HOTWORD
     };
 
     /**
@@ -2209,6 +2229,7 @@ public class AppOpsManager {
             null, // NO_ISOLATED_STORAGE
             null, // PHONE_CALL_MICROPHONE
             null, // PHONE_CALL_CAMERA
+            null, // RECORD_AUDIO_HOTWORD
     };
 
     /**
@@ -2317,6 +2338,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // OP_NO_ISOLATED_STORAGE
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_MICROPHONE
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
+            AppOpsManager.MODE_ALLOWED, // OP_RECORD_AUDIO_HOTWORD
     };
 
     /**
@@ -2429,6 +2451,7 @@ public class AppOpsManager {
             true, // NO_ISOLATED_STORAGE
             false, // PHONE_CALL_MICROPHONE
             false, // PHONE_CALL_CAMERA
+            false, // RECORD_AUDIO_HOTWORD
     };
 
     /**
