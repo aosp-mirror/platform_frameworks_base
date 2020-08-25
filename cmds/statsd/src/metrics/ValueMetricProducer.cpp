@@ -411,7 +411,7 @@ void ValueMetricProducer::skipCurrentBucket(const int64_t dropTimeNs,
 
 void ValueMetricProducer::resetBase() {
     for (auto& slice : mCurrentBaseInfo) {
-        for (auto& baseInfo : slice.second) {
+        for (auto& baseInfo : slice.second.baseInfos) {
             baseInfo.hasBase = false;
         }
     }
@@ -623,7 +623,7 @@ void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<Log
                 mMatchedMetricDimensionKeys.find(whatKey) != mMatchedMetricDimensionKeys.end();
         if (!presentInPulledData && whatKey.contains(mStateChangePrimaryKey.second)) {
             auto it = mCurrentBaseInfo.find(whatKey);
-            for (auto& baseInfo : it->second) {
+            for (auto& baseInfo : it->second.baseInfos) {
                 baseInfo.hasBase = false;
             }
         }
@@ -788,22 +788,21 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         return;
     }
 
-    vector<BaseInfo>& baseInfos = mCurrentBaseInfo[whatKey];
+    DimensionsInWhatInfo& dimensionsInWhatInfo = mCurrentBaseInfo[whatKey];
+    vector<BaseInfo>& baseInfos = dimensionsInWhatInfo.baseInfos;
     if (baseInfos.size() < mFieldMatchers.size()) {
         VLOG("Resizing number of intervals to %d", (int)mFieldMatchers.size());
         baseInfos.resize(mFieldMatchers.size());
     }
 
-    for (BaseInfo& baseInfo : baseInfos) {
-        if (!baseInfo.hasCurrentState) {
-            baseInfo.currentState = getUnknownStateKey();
-            baseInfo.hasCurrentState = true;
-        }
+    if (!dimensionsInWhatInfo.hasCurrentState) {
+        dimensionsInWhatInfo.currentState = getUnknownStateKey();
+        dimensionsInWhatInfo.hasCurrentState = true;
     }
 
     // We need to get the intervals stored with the previous state key so we can
     // close these value intervals.
-    const auto oldStateKey = baseInfos[0].currentState;
+    const auto oldStateKey = dimensionsInWhatInfo.currentState;
     vector<Interval>& intervals =
             mCurrentSlicedBucket[MetricDimensionKey(whatKey, oldStateKey)].intervals;
     if (intervals.size() < mFieldMatchers.size()) {
@@ -819,14 +818,14 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     // Discussion here: http://ag/6124370.
     bool useAnomalyDetection = true;
 
+    dimensionsInWhatInfo.hasCurrentState = true;
+    dimensionsInWhatInfo.currentState = stateKey;
     for (int i = 0; i < (int)mFieldMatchers.size(); i++) {
         const Matcher& matcher = mFieldMatchers[i];
         BaseInfo& baseInfo = baseInfos[i];
         Interval& interval = intervals[i];
         interval.valueIndex = i;
         Value value;
-        baseInfo.hasCurrentState = true;
-        baseInfo.currentState = stateKey;
         if (!getDoubleOrLong(event, matcher, value)) {
             VLOG("Failed to get value %d from event %s", i, event.ToString().c_str());
             StatsdStats::getInstance().noteBadValueType(mMetricId);
