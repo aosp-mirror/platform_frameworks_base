@@ -93,4 +93,8 @@
     <string name="one_handed_tutorial_title">Using one-handed mode</string>
     <!-- One-Handed Tutorial description [CHAR LIMIT=NONE] -->
     <string name="one_handed_tutorial_description">To exit, swipe up from the bottom of the screen or tap anywhere above the app</string>
+    <!-- Accessibility description for start one-handed mode [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_start_one_handed">Start one-handed mode</string>
+    <!-- Accessibility description for stop one-handed mode [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_stop_one_handed">Exit one-handed mode</string>
 </resources>
