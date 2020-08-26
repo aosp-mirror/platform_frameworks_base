@@ -5833,9 +5833,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isSystemUid(identity) || isRootUid(identity)
-                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL));
 
         final ActiveAdmin admin;
         synchronized (getLockObject()) {
