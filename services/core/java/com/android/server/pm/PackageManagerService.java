@@ -19542,6 +19542,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (outInfo != null) {
+            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                outInfo.dataRemoved = true;
+            }
             outInfo.removedPackage = ps.name;
             outInfo.installerPackageName = ps.installSource.installerPackageName;
             outInfo.isStaticSharedLib = pkg != null && pkg.getStaticSharedLibName() != null;
