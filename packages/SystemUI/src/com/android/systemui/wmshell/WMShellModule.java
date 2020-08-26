@@ -22,8 +22,6 @@ import android.view.IWindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.pip.phone.PipMenuActivity;
-import com.android.systemui.pip.phone.dagger.PipMenuActivityClass;
 import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -48,14 +46,6 @@ public class WMShellModule {
             DisplayController displayController, @Main Handler mainHandler,
             TransactionPool transactionPool) {
         return new DisplayImeController(wmService, displayController, mainHandler, transactionPool);
-    }
-
-    /** TODO(b/150319024): PipMenuActivity will move to a Window */
-    @SysUISingleton
-    @PipMenuActivityClass
-    @Provides
-    static Class<?> providePipMenuActivityClass() {
-        return PipMenuActivity.class;
     }
 
     @SysUISingleton

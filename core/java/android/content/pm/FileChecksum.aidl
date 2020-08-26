@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip.phone.dagger;
+package android.content.pm;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+parcelable FileChecksum;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface PipMenuActivityClass {
-}

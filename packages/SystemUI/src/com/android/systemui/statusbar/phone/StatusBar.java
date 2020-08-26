@@ -1160,8 +1160,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanelViewController.initDependencies(
                 this,
                 mGroupManager,
-                mNotificationShelfController,
-                mScrimController);
+                mNotificationShelfController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),

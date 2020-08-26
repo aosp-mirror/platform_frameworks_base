@@ -34,7 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -127,7 +127,7 @@ public interface NotificationsModule {
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
-            CurrentUserContextTracker contextTracker,
+            UserContextProvider contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
             BubbleController bubbleController,

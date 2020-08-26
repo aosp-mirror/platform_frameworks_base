@@ -29,7 +29,11 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.stackdivider.SplitScreen;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.protolog.ShellProtoLogImpl;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -107,5 +111,36 @@ public final class WMShell extends SystemUI {
                         splitScreen.onActivityLaunchOnSecondaryDisplayFailed();
                     }
                 });
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        // Handle commands if provided
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "enable-text-logging": {
+                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
+                    startTextLogging(groups);
+                    pw.println("Starting logging on groups: " + Arrays.toString(groups));
+                    return;
+                }
+                case "disable-text-logging": {
+                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
+                    stopTextLogging(groups);
+                    pw.println("Stopping logging on groups: " + Arrays.toString(groups));
+                    return;
+                }
+            }
+        }
+
+        // Dump WMShell stuff here if no commands were handled
+    }
+
+    private void startTextLogging(String... groups) {
+        ShellProtoLogImpl.getSingleInstance().startTextLogging(mContext, groups);
+    }
+
+    private void stopTextLogging(String... groups) {
+        ShellProtoLogImpl.getSingleInstance().stopTextLogging(groups);
     }
 }

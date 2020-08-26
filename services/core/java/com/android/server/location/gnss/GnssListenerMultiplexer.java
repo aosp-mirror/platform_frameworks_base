@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.util.identity.CallerIdentity;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
@@ -218,16 +219,27 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     /**
      * Adds a listener with the given identity and request.
      */
-    protected void addListener(TRequest request, CallerIdentity identity, TListener listener) {
-        addRegistration(listener.asBinder(),
-                new GnssListenerRegistration(request, identity, listener));
+    protected void addListener(TRequest request, CallerIdentity callerIdentity,
+            TListener listener) {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            addRegistration(listener.asBinder(),
+                    new GnssListenerRegistration(request, callerIdentity, listener));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
      * Removes the given listener.
      */
     public void removeListener(TListener listener) {
-        removeRegistration(listener.asBinder());
+        long identity = Binder.clearCallingIdentity();
+        try {
+            removeRegistration(listener.asBinder());
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override

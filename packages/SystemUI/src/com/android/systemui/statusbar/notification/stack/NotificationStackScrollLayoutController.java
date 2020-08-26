@@ -34,6 +34,8 @@ import android.widget.FrameLayout;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.ExpandHelper;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -58,7 +60,9 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -70,6 +74,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 
@@ -100,6 +105,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationSectionsManager mNotificationSectionsManager;
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
+    private final ScrimController mScrimController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -110,6 +116,7 @@ public class NotificationStackScrollLayoutController {
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
+    private NotificationSwipeHelper mSwipeHelper;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -217,7 +224,16 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void onMenuReset(View row) {
-            mView.onMenuReset(row);
+            View translatingParentView = mSwipeHelper.getTranslatingParentView();
+            if (translatingParentView != null && row == translatingParentView) {
+                mSwipeHelper.clearExposedMenuView();
+                mSwipeHelper.clearTranslatingParentView();
+                if (row instanceof ExpandableNotificationRow) {
+                    mHeadsUpManager.setMenuShown(
+                            ((ExpandableNotificationRow) row).getEntry(), false);
+
+                }
+            }
         }
 
         @Override
@@ -228,7 +244,7 @@ public class NotificationStackScrollLayoutController {
                         .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION));
                 mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
-                mView.onMenuShown(row);
+                mSwipeHelper.onMenuShown(row);
                 mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
                         false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
                         false /* resetMenu */);
@@ -246,7 +262,7 @@ public class NotificationStackScrollLayoutController {
                     }
 
                     // Close the menu row since we went directly to the guts
-                    mView.resetExposedMenuView(false, true);
+                    mSwipeHelper.resetExposedMenuView(false, true);
                 }
             }
         }
@@ -438,7 +454,31 @@ public class NotificationStackScrollLayoutController {
                 }
             };
 
-    private NotificationSwipeHelper mSwipeHelper;
+    private final OnHeadsUpChangedListener mOnHeadsUpChangedListener =
+            new OnHeadsUpChangedListener() {
+        @Override
+        public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+            mView.setInHeadsUpPinnedMode(inPinnedMode);
+        }
+
+        @Override
+        public void onHeadsUpPinned(NotificationEntry entry) {
+
+        }
+
+        @Override
+        public void onHeadsUpUnPinned(NotificationEntry entry) {
+
+        }
+
+        @Override
+        public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+            long numEntries = mHeadsUpManager.getAllEntries().count();
+            NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
+            mView.setNumHeadsUp(numEntries);
+            mView.setTopHeadsUpEntry(topEntry);
+        }
+    };
 
     @Inject
     public NotificationStackScrollLayoutController(
@@ -460,7 +500,8 @@ public class NotificationStackScrollLayoutController {
             NotificationSectionsManager notificationSectionsManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            StatusBar statusBar) {
+            StatusBar statusBar,
+            ScrimController scrimController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -480,11 +521,13 @@ public class NotificationStackScrollLayoutController {
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
+        mScrimController = scrimController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
         mView.setController(this);
+        mView.setTouchHandler(new TouchHandler());
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
@@ -496,7 +539,11 @@ public class NotificationStackScrollLayoutController {
                 mSwipeHelper);
 
         mHeadsUpManager.addListener(mNotificationRoundnessManager); // TODO: why is this here?
+        mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
+        mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
+
+        mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
         mView.setCurrentUserid(mLockscreenUserManager.getCurrentUserId());
@@ -738,7 +785,12 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void checkSnoozeLeavebehind() {
-        mView.checkSnoozeLeavebehind();
+        if (mView.getCheckSnoozeLeaveBehind()) {
+            mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
+            mView.setCheckForLeaveBehind(false);
+        }
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -759,10 +811,6 @@ public class NotificationStackScrollLayoutController {
 
     public void updateTopPadding(float qsHeight, boolean animate) {
         mView.updateTopPadding(qsHeight, animate);
-    }
-
-    public void resetCheckSnoozeLeavebehind() {
-        mView.resetCheckSnoozeLeavebehind();
     }
 
     public boolean isScrolledToBottom() {
@@ -815,9 +863,11 @@ public class NotificationStackScrollLayoutController {
 
     public void onExpansionStarted() {
         mView.onExpansionStarted();
+        checkSnoozeLeavebehind();
     }
 
     public void onExpansionStopped() {
+        mView.setCheckForLeaveBehind(false);
         mView.onExpansionStopped();
     }
 
@@ -910,7 +960,23 @@ public class NotificationStackScrollLayoutController {
     }
 
     public RemoteInputController.Delegate createDelegate() {
-        return mView.createDelegate();
+        return new RemoteInputController.Delegate() {
+            public void setRemoteInputActive(NotificationEntry entry,
+                    boolean remoteInputActive) {
+                mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
+                entry.notifyHeightChanged(true /* needsAnimation */);
+                updateFooter();
+            }
+
+            public void lockScrollTo(NotificationEntry entry) {
+                mView.lockScrollTo(entry.getRow());
+            }
+
+            public void requestDisallowLongPressAndDismiss() {
+                mView.requestDisallowLongPress();
+                mView.requestDisallowDismiss();
+            }
+        };
     }
 
     public void updateSectionBoundaries(String reason) {
@@ -958,16 +1024,8 @@ public class NotificationStackScrollLayoutController {
         mView.setShelfController(notificationShelfController);
     }
 
-    public void setScrimController(ScrimController scrimController) {
-        mView.setScrimController(scrimController);
-    }
-
     public ExpandableView getFirstChildNotGone() {
         return mView.getFirstChildNotGone();
-    }
-
-    public void setInHeadsUpPinnedMode(boolean inPinnedMode) {
-        mView.setInHeadsUpPinnedMode(inPinnedMode);
     }
 
     public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
@@ -1002,12 +1060,38 @@ public class NotificationStackScrollLayoutController {
         return mView.calculateGapHeight(previousView, child, count);
     }
 
-    public NotificationRoundnessManager getNoticationRoundessManager() {
+    NotificationRoundnessManager getNoticationRoundessManager() {
         return mNotificationRoundnessManager;
     }
 
     public NotificationListContainer getNotificationListContainer() {
         return mNotificationListContainer;
+    }
+
+    public void resetCheckSnoozeLeavebehind() {
+        mView.resetCheckSnoozeLeavebehind();
+    }
+
+    public void closeControlsIfOutsideTouch(MotionEvent ev) {
+        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+        NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
+        View translatingParentView = mSwipeHelper.getTranslatingParentView();
+        View view = null;
+        if (guts != null && !guts.getGutsContent().isLeavebehind()) {
+            // Only close visible guts if they're not a leavebehind.
+            view = guts;
+        } else if (menuRow != null && menuRow.isMenuVisible()
+                && translatingParentView != null) {
+            // Checking menu
+            view = translatingParentView;
+        }
+        if (view != null && !NotificationSwipeHelper.isTouchInView(ev, view)) {
+            // Touch was outside visible guts / menu notification, close what's visible
+            mNotificationGutsManager.closeAndSaveGuts(false /* removeLeavebehind */,
+                    false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
+            mSwipeHelper.resetExposedMenuView(true /* animate */, true /* force */);
+        }
     }
 
     private class NotificationListContainerImpl implements NotificationListContainer {
@@ -1084,7 +1168,7 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void resetExposedMenuView(boolean animate, boolean force) {
-            mView.resetExposedMenuView(animate, force);
+            mSwipeHelper.resetExposedMenuView(animate, force);
         }
 
         @Override
@@ -1146,6 +1230,101 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setWillExpand(boolean willExpand) {
             mView.setWillExpand(willExpand);
+        }
+    }
+
+    class TouchHandler implements Gefingerpoken {
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            mView.initDownStates(ev);
+            mView.handleEmptySpaceClick(ev);
+
+            NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+            boolean expandWantsIt = false;
+            boolean swipingInProgress = mView.isSwipingInProgress();
+            if (!swipingInProgress && !mView.getOnlyScrollingInThisMotion() && guts == null) {
+                expandWantsIt = mView.getExpandHelper().onInterceptTouchEvent(ev);
+            }
+            boolean scrollWantsIt = false;
+            if (!swipingInProgress && !mView.isExpandingNotification()) {
+                scrollWantsIt = mView.onInterceptTouchEventScroll(ev);
+            }
+            boolean swipeWantsIt = false;
+            if (!mView.isBeingDragged()
+                    && !mView.isExpandingNotification()
+                    && !mView.getExpandedInThisMotion()
+                    && !mView.getOnlyScrollingInThisMotion()
+                    && !mView.getDisallowDismissInThisMotion()) {
+                swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
+            }
+            // Check if we need to clear any snooze leavebehinds
+            boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
+            if (!NotificationSwipeHelper.isTouchInView(ev, guts) && isUp && !swipeWantsIt &&
+                    !expandWantsIt && !scrollWantsIt) {
+                mView.setCheckForLeaveBehind(false);
+                mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                        false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                        false /* resetMenu */);
+            }
+            if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+                mView.setCheckForLeaveBehind(true);
+            }
+            return swipeWantsIt || scrollWantsIt || expandWantsIt;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+            boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
+                    || ev.getActionMasked() == MotionEvent.ACTION_UP;
+            mView.handleEmptySpaceClick(ev);
+            boolean expandWantsIt = false;
+            boolean swipingInProgress = mView.getSwipingInProgress();
+            boolean onlyScrollingInThisMotion = mView.getOnlyScrollingInThisMotion();
+            boolean expandingNotification = mView.isExpandingNotification();
+            if (mView.getIsExpanded() && !swipingInProgress && !onlyScrollingInThisMotion
+                    && guts == null) {
+                ExpandHelper expandHelper = mView.getExpandHelper();
+                if (isCancelOrUp) {
+                    expandHelper.onlyObserveMovements(false);
+                }
+                boolean wasExpandingBefore = expandingNotification;
+                expandWantsIt = expandHelper.onTouchEvent(ev);
+                expandingNotification = mView.isExpandingNotification();
+                if (mView.getExpandedInThisMotion() && !expandingNotification && wasExpandingBefore
+                        && !mView.getDisallowScrollingInThisMotion()) {
+                    mView.dispatchDownEventToScroller(ev);
+                }
+            }
+            boolean scrollerWantsIt = false;
+            if (mView.isExpanded() && !swipingInProgress && !expandingNotification
+                    && !mView.getDisallowScrollingInThisMotion()) {
+                scrollerWantsIt = mView.onScrollTouch(ev);
+            }
+            boolean horizontalSwipeWantsIt = false;
+            if (!mView.isBeingDragged()
+                    && !expandingNotification
+                    && !mView.getExpandedInThisMotion()
+                    && !onlyScrollingInThisMotion
+                    && !mView.getDisallowDismissInThisMotion()) {
+                horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
+            }
+
+            // Check if we need to clear any snooze leavebehinds
+            if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
+                    && guts.getGutsContent() instanceof NotificationSnooze) {
+                NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
+                if ((ns.isExpanded() && isCancelOrUp)
+                        || (!horizontalSwipeWantsIt && scrollerWantsIt)) {
+                    // If the leavebehind is expanded we clear it on the next up event, otherwise we
+                    // clear it on the next non-horizontal swipe or expand event.
+                    checkSnoozeLeavebehind();
+                }
+            }
+            if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+                mView.setCheckForLeaveBehind(true);
+            }
+            return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt;
         }
     }
 }

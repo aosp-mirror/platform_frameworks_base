@@ -3072,9 +3072,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardStatusBar != null) {
             mKeyguardStatusBar.dump(fd, pw, args);
         }
-        if (mKeyguardStatusView != null) {
-            mKeyguardStatusView.dump(fd, pw, args);
-        }
     }
 
     public boolean hasActiveClearableNotifications() {
@@ -3143,15 +3140,13 @@ public class NotificationPanelViewController extends PanelViewController {
     public void initDependencies(
             StatusBar statusBar,
             NotificationGroupManager groupManager,
-            NotificationShelfController notificationShelfController,
-            ScrimController scrimController) {
+            NotificationShelfController notificationShelfController) {
         setStatusBar(statusBar);
         setGroupManager(mGroupManager);
         mNotificationStackScrollLayoutController.setNotificationPanelController(this);
         mNotificationStackScrollLayoutController.setStatusBar(statusBar);
         mNotificationStackScrollLayoutController.setGroupManager(groupManager);
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
-        mNotificationStackScrollLayoutController.setScrimController(scrimController);
         updateShowEmptyShadeView();
         mNotificationShelfController = notificationShelfController;
         updateMaxDisplayedNotifications(true);
@@ -3549,7 +3544,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private class MyOnHeadsUpChangedListener implements OnHeadsUpChangedListener {
         @Override
         public void onHeadsUpPinnedModeChanged(final boolean inPinnedMode) {
-            mNotificationStackScrollLayoutController.setInHeadsUpPinnedMode(inPinnedMode);
             if (inPinnedMode) {
                 mHeadsUpExistenceChangedRunnable.run();
                 updateNotificationTranslucency();

@@ -40,7 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.LongRunning;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.io.IOException;
@@ -79,12 +79,12 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     private final Executor mLongExecutor;
     private final UiEventLogger mUiEventLogger;
     private final NotificationManager mNotificationManager;
-    private final CurrentUserContextTracker mUserContextTracker;
+    private final UserContextProvider mUserContextTracker;
 
     @Inject
     public RecordingService(RecordingController controller, @LongRunning Executor executor,
             UiEventLogger uiEventLogger, NotificationManager notificationManager,
-            CurrentUserContextTracker userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
+            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
         mController = controller;
         mLongExecutor = executor;
         mUiEventLogger = uiEventLogger;
@@ -120,7 +120,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         String action = intent.getAction();
         Log.d(TAG, "onStartCommand " + action);
 
-        int mCurrentUserId = mUserContextTracker.getCurrentUserContext().getUserId();
+        int mCurrentUserId = mUserContextTracker.getUserContext().getUserId();
         UserHandle currentUser = new UserHandle(mCurrentUserId);
         switch (action) {
             case ACTION_START:
@@ -136,7 +136,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 setTapsVisible(mShowTaps);
 
                 mRecorder = new ScreenMediaRecorder(
-                        mUserContextTracker.getCurrentUserContext(),
+                        mUserContextTracker.getUserContext(),
                         mCurrentUserId,
                         mAudioSource,
                         this
@@ -156,7 +156,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 // we want to post the notifications for that user, which is NOT current user
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userId == -1) {
-                    userId = mUserContextTracker.getCurrentUserContext().getUserId();
+                    userId = mUserContextTracker.getUserContext().getUserId();
                 }
                 Log.d(TAG, "notifying for user " + userId);
                 stopRecording(userId);
