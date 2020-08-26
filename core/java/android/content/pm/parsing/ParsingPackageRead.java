@@ -548,7 +548,7 @@ public interface ParsingPackageRead extends Parcelable {
     String getPackageName();
 
     /** Path of base APK */
-    String getBaseCodePath();
+    String getBaseApkPath();
 
     /**
      * Path where this package was found on disk. For monolithic packages
@@ -556,7 +556,7 @@ public interface ParsingPackageRead extends Parcelable {
      * path to the cluster directory.
      */
     @NonNull
-    String getCodePath();
+    String getPath();
 
     /**
      * @see ApplicationInfo#compatibleWidthLimitDp

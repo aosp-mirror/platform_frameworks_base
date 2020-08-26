@@ -312,7 +312,7 @@ public class PackageParserTest {
 
     private static PackageSetting mockPkgSetting(AndroidPackage pkg) {
         return new PackageSetting(pkg.getPackageName(), pkg.getRealPackage(),
-                new File(pkg.getCodePath()), null, pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
+                new File(pkg.getPath()), null, pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
                 null, pkg.getVersionCode(),
                 PackageInfoUtils.appInfoFlags(pkg, null),
                 PackageInfoUtils.appInfoPrivateFlags(pkg, null),
@@ -335,8 +335,8 @@ public class PackageParserTest {
         assertEquals(a.getPackageName(), b.getPackageName());
         assertArrayEquals(a.getSplitNames(), b.getSplitNames());
         assertEquals(a.getVolumeUuid(), b.getVolumeUuid());
-        assertEquals(a.getCodePath(), b.getCodePath());
-        assertEquals(a.getBaseCodePath(), b.getBaseCodePath());
+        assertEquals(a.getPath(), b.getPath());
+        assertEquals(a.getBaseApkPath(), b.getBaseApkPath());
         assertArrayEquals(a.getSplitCodePaths(), b.getSplitCodePaths());
         assertArrayEquals(a.getSplitRevisionCodes(), b.getSplitRevisionCodes());
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());

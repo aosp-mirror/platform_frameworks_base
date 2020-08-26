@@ -136,7 +136,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         // Trying to derive the paths, thus need the raw ABI info from the parsed package, and the
         // current state in PackageSetting is irrelevant.
         return deriveNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
-                appLib32InstallDir, pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+                appLib32InstallDir, pkg.getPath(), pkg.getBaseApkPath(), pkg.isSystem(),
                 isUpdatedSystemApp);
     }
 
@@ -205,11 +205,11 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
     @Override
     public Abis getBundledAppAbis(AndroidPackage pkg) {
-        final String apkName = deriveCodePathName(pkg.getCodePath());
+        final String apkName = deriveCodePathName(pkg.getPath());
 
         // If "/system/lib64/apkname" exists, assume that is the per-package
         // native library directory to use; otherwise use "/system/lib/apkname".
-        final String apkRoot = calculateBundledApkRoot(pkg.getBaseCodePath());
+        final String apkRoot = calculateBundledApkRoot(pkg.getBaseApkPath());
         final Abis abis = getBundledAppAbi(pkg, apkRoot, apkName);
         return abis;
     }
@@ -223,7 +223,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
      * @param apkName the name of the installed package.
      */
     private Abis getBundledAppAbi(AndroidPackage pkg, String apkRoot, String apkName) {
-        final File codeFile = new File(pkg.getCodePath());
+        final File codeFile = new File(pkg.getPath());
 
         final boolean has64BitLibs;
         final boolean has32BitLibs;
@@ -304,15 +304,15 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         String pkgRawSecondaryCpuAbi = AndroidPackageUtils.getRawSecondaryCpuAbi(pkg);
         final NativeLibraryPaths initialLibraryPaths = deriveNativeLibraryPaths(
                 new Abis(pkgRawPrimaryCpuAbi, pkgRawSecondaryCpuAbi),
-                PackageManagerService.sAppLib32InstallDir, pkg.getCodePath(),
-                pkg.getBaseCodePath(), pkg.isSystem(),
+                PackageManagerService.sAppLib32InstallDir, pkg.getPath(),
+                pkg.getBaseApkPath(), pkg.isSystem(),
                 isUpdatedSystemApp);
 
         final boolean extractLibs = shouldExtractLibs(pkg, isUpdatedSystemApp);
 
         final String nativeLibraryRootStr = initialLibraryPaths.nativeLibraryRootDir;
         final boolean useIsaSpecificSubdirs = initialLibraryPaths.nativeLibraryRootRequiresIsa;
-        final boolean onIncremental = isIncrementalPath(pkg.getCodePath());
+        final boolean onIncremental = isIncrementalPath(pkg.getPath());
 
         String primaryCpuAbi = null;
         String secondaryCpuAbi = null;
@@ -453,7 +453,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         final Abis abis = new Abis(primaryCpuAbi, secondaryCpuAbi);
         return new Pair<>(abis,
                 deriveNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
-                        pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+                        pkg.getPath(), pkg.getBaseApkPath(), pkg.isSystem(),
                         isUpdatedSystemApp));
     }
 

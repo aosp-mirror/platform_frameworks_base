@@ -58,7 +58,7 @@ public class AndroidPackageUtils {
         PackageImpl pkg = (PackageImpl) aPkg;
         ArrayList<String> paths = new ArrayList<>();
         if (pkg.isHasCode()) {
-            paths.add(pkg.getBaseCodePath());
+            paths.add(pkg.getBaseApkPath());
         }
         String[] splitCodePaths = pkg.getSplitCodePaths();
         if (!ArrayUtils.isEmpty(splitCodePaths)) {
@@ -77,7 +77,7 @@ public class AndroidPackageUtils {
     public static List<String> getAllCodePaths(AndroidPackage aPkg) {
         PackageImpl pkg = (PackageImpl) aPkg;
         ArrayList<String> paths = new ArrayList<>();
-        paths.add(pkg.getBaseCodePath());
+        paths.add(pkg.getBaseApkPath());
 
         String[] splitCodePaths = pkg.getSplitCodePaths();
         if (!ArrayUtils.isEmpty(splitCodePaths)) {
@@ -147,7 +147,7 @@ public class AndroidPackageUtils {
         if (pkg.isSystem() && !isUpdatedSystemApp) {
             return false;
         }
-        if (IncrementalManager.isIncrementalPath(pkg.getCodePath())) {
+        if (IncrementalManager.isIncrementalPath(pkg.getPath())) {
             return false;
         }
         return true;

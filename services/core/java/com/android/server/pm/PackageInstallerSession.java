@@ -2078,7 +2078,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (ps == null) {
             return 0;
         }
-        final File apkDirOrPath = ps.getCodePath();
+        final File apkDirOrPath = ps.getPath();
         if (apkDirOrPath == null) {
             return 0;
         }

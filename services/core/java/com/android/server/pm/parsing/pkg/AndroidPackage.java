@@ -23,7 +23,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -65,18 +64,16 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /** Path of base APK */
     @NonNull
-    String getBaseCodePath();
+    String getBaseApkPath();
 
     /** Revision code of base APK */
     int getBaseRevisionCode();
 
     /**
-     * Path where this package was found on disk. For monolithic packages
-     * this is path to single base APK file; for cluster packages this is
-     * path to the cluster directory.
+     * The path to the folder containing the base APK and any installed splits.
      */
     @NonNull
-    String getCodePath();
+    String getPath();
 
     /**
      * Permissions requested but not in the manifest. These may have been split or migrated from

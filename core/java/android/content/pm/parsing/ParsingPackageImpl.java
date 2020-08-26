@@ -145,7 +145,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private String realPackage;
 
     @NonNull
-    protected String baseCodePath;
+    protected String mBaseApkPath;
 
     private boolean requiredForAllUsers;
     @Nullable
@@ -280,7 +280,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
-    protected String codePath;
+    protected String mPath;
 
     private boolean use32BitAbi;
     private boolean visibleToInstantApps;
@@ -429,11 +429,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private ArraySet<String> mimeGroups;
 
     @VisibleForTesting
-    public ParsingPackageImpl(@NonNull String packageName, @NonNull String baseCodePath,
-            @NonNull String codePath, @Nullable TypedArray manifestArray) {
+    public ParsingPackageImpl(@NonNull String packageName, @NonNull String baseApkPath,
+            @NonNull String path, @Nullable TypedArray manifestArray) {
         this.packageName = TextUtils.safeIntern(packageName);
-        this.baseCodePath = baseCodePath;
-        this.codePath = codePath;
+        this.mBaseApkPath = baseApkPath;
+        this.mPath = path;
 
         if (manifestArray != null) {
             versionCode = manifestArray.getInteger(R.styleable.AndroidManifest_versionCode, 0);
@@ -954,10 +954,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.zygotePreloadName = zygotePreloadName;
         appInfo.crossProfile = isCrossProfile();
         appInfo.setGwpAsanMode(gwpAsanMode);
-        appInfo.setBaseCodePath(baseCodePath);
-        appInfo.setBaseResourcePath(baseCodePath);
-        appInfo.setCodePath(codePath);
-        appInfo.setResourcePath(codePath);
+        appInfo.setBaseCodePath(mBaseApkPath);
+        appInfo.setBaseResourcePath(mBaseApkPath);
+        appInfo.setCodePath(mPath);
+        appInfo.setResourcePath(mPath);
         appInfo.setSplitCodePaths(splitCodePaths);
         appInfo.setSplitResourcePaths(splitCodePaths);
         appInfo.setVersionCode(PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode));
@@ -995,7 +995,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeString(this.compileSdkVersionCodeName);
         sForInternedString.parcel(this.packageName, dest, flags);
         dest.writeString(this.realPackage);
-        dest.writeString(this.baseCodePath);
+        dest.writeString(this.mBaseApkPath);
         dest.writeBoolean(this.requiredForAllUsers);
         dest.writeString(this.restrictedAccountType);
         dest.writeString(this.requiredAccountType);
@@ -1050,7 +1050,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBundle(this.metaData);
         sForInternedString.parcel(this.volumeUuid, dest, flags);
         dest.writeParcelable(this.signingDetails, flags);
-        dest.writeString(this.codePath);
+        dest.writeString(this.mPath);
         dest.writeBoolean(this.use32BitAbi);
         dest.writeBoolean(this.visibleToInstantApps);
         dest.writeBoolean(this.forceQueryable);
@@ -1159,7 +1159,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.compileSdkVersionCodeName = in.readString();
         this.packageName = sForInternedString.unparcel(in);
         this.realPackage = in.readString();
-        this.baseCodePath = in.readString();
+        this.mBaseApkPath = in.readString();
         this.requiredForAllUsers = in.readBoolean();
         this.restrictedAccountType = in.readString();
         this.requiredAccountType = in.readString();
@@ -1214,7 +1214,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.metaData = in.readBundle(boot);
         this.volumeUuid = sForInternedString.unparcel(in);
         this.signingDetails = in.readParcelable(boot);
-        this.codePath = in.readString();
+        this.mPath = in.readString();
         this.use32BitAbi = in.readBoolean();
         this.visibleToInstantApps = in.readBoolean();
         this.forceQueryable = in.readBoolean();
@@ -1363,8 +1363,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public String getBaseCodePath() {
-        return baseCodePath;
+    public String getBaseApkPath() {
+        return mBaseApkPath;
     }
 
     @Override
@@ -1649,8 +1649,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public String getCodePath() {
-        return codePath;
+    public String getPath() {
+        return mPath;
     }
 
     @Override

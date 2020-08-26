@@ -136,9 +136,9 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     private int uid = -1;
 
     @VisibleForTesting
-    public PackageImpl(@NonNull String packageName, @NonNull String baseCodePath,
-            @NonNull String codePath, @Nullable TypedArray manifestArray, boolean isCoreApp) {
-        super(packageName, baseCodePath, codePath, manifestArray);
+    public PackageImpl(@NonNull String packageName, @NonNull String baseApkPath,
+            @NonNull String path, @Nullable TypedArray manifestArray, boolean isCoreApp) {
+        super(packageName, baseApkPath, path, manifestArray);
         this.manifestPackageName = this.packageName;
         this.coreApp = isCoreApp;
     }
@@ -247,7 +247,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public PackageImpl setCodePath(@NonNull String value) {
-        this.codePath = value;
+        this.mPath = value;
         return this;
     }
 
@@ -322,7 +322,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     @Override
     public PackageImpl setBaseCodePath(@NonNull String baseCodePath) {
-        this.baseCodePath = TextUtils.safeIntern(baseCodePath);
+        this.mBaseApkPath = TextUtils.safeIntern(baseCodePath);
         return this;
     }
 

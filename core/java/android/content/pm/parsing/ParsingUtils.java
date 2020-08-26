@@ -62,7 +62,7 @@ public class ParsingUtils {
             return input.error("Bad element under " + parentTag + ": " + parser.getName());
         }
         Slog.w(TAG, "Unknown element under " + parentTag + ": "
-                + parser.getName() + " at " + pkg.getBaseCodePath() + " "
+                + parser.getName() + " at " + pkg.getBaseApkPath() + " "
                 + parser.getPositionDescription());
         XmlUtils.skipCurrentTag(parser);
         return input.success(null); // Type doesn't matter

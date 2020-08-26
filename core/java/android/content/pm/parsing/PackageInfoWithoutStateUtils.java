@@ -579,8 +579,8 @@ public class PackageInfoWithoutStateUtils {
         ii.handleProfiling = i.isHandleProfiling();
         ii.functionalTest = i.isFunctionalTest();
 
-        ii.sourceDir = pkg.getBaseCodePath();
-        ii.publicSourceDir = pkg.getBaseCodePath();
+        ii.sourceDir = pkg.getBaseApkPath();
+        ii.publicSourceDir = pkg.getBaseApkPath();
         ii.splitNames = pkg.getSplitNames();
         ii.splitSourceDirs = pkg.getSplitCodePaths();
         ii.splitPublicSourceDirs = pkg.getSplitCodePaths();

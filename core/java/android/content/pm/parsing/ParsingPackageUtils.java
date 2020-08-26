@@ -163,10 +163,10 @@ public class ParsingPackageUtils {
             @Override
             public ParsingPackage startParsingPackage(
                     @NonNull String packageName,
-                    @NonNull String baseCodePath,
-                    @NonNull String codePath,
+                    @NonNull String baseApkPath,
+                    @NonNull String path,
                     @NonNull TypedArray manifestArray, boolean isCoreApp) {
-                return new ParsingPackageImpl(packageName, baseCodePath, codePath, manifestArray);
+                return new ParsingPackageImpl(packageName, baseApkPath, path, manifestArray);
             }
         });
         try {
@@ -1215,9 +1215,9 @@ public class ParsingPackageUtils {
                 features = ArrayUtils.add(features, featureInfo);
             } else {
                 Slog.w(TAG,
-                        "Unknown element under <feature-group>: " + innerTagName +
-                                " at " + pkg.getBaseCodePath() + " " +
-                                parser.getPositionDescription());
+                        "Unknown element under <feature-group>: " + innerTagName
+                                + " at " + pkg.getBaseApkPath() + " "
+                                + parser.getPositionDescription());
             }
         }
 
@@ -2438,7 +2438,7 @@ public class ParsingPackageUtils {
                     R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyValue);
             if (!PackageParser.checkRequiredSystemProperties(propName, propValue)) {
                 String message = "Skipping target and overlay pair " + target + " and "
-                        + pkg.getBaseCodePath()
+                        + pkg.getBaseApkPath()
                         + ": overlay ignored due to required system property: "
                         + propName + " with value: " + propValue;
                 Slog.i(TAG, message);
@@ -2693,7 +2693,7 @@ public class ParsingPackageUtils {
                                     "<meta-data> only supports string, integer, float, color, "
                                             + "boolean, and resource reference types: "
                                             + parser.getName() + " at "
-                                            + pkg.getBaseCodePath() + " "
+                                            + pkg.getBaseApkPath() + " "
                                             + parser.getPositionDescription());
                         } else {
                             return input.error("<meta-data> only supports string, integer, float, "
@@ -2730,7 +2730,7 @@ public class ParsingPackageUtils {
         try {
             ParseResult<SigningDetails> result = getSigningDetails(
                     input,
-                    pkg.getBaseCodePath(),
+                    pkg.getBaseApkPath(),
                     skipVerify,
                     pkg.isStaticSharedLibrary(),
                     signingDetails,
@@ -2876,7 +2876,7 @@ public class ParsingPackageUtils {
         boolean hasFeature(String feature);
 
         ParsingPackage startParsingPackage(@NonNull String packageName,
-                @NonNull String baseCodePath, @NonNull String codePath,
+                @NonNull String baseApkPath, @NonNull String path,
                 @NonNull TypedArray manifestArray, boolean isCoreApp);
     }
 }

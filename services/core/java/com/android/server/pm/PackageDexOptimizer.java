@@ -199,7 +199,7 @@ public class PackageDexOptimizer {
             throw new IllegalStateException("Inconsistent information "
                 + "between PackageParser.Package and its ApplicationInfo. "
                 + "pkg.getAllCodePaths=" + paths
-                + " pkg.getBaseCodePath=" + pkg.getBaseCodePath()
+                + " pkg.getBaseCodePath=" + pkg.getBaseApkPath()
                 + " pkg.getSplitCodePaths="
                 + (splitCodePaths == null ? "null" : Arrays.toString(splitCodePaths)));
         }
@@ -772,7 +772,7 @@ public class PackageDexOptimizer {
         if (!AndroidPackageUtils.canHaveOatDir(pkg, isUpdatedSystemApp)) {
             return null;
         }
-        File codePath = new File(pkg.getCodePath());
+        File codePath = new File(pkg.getPath());
         if (!codePath.isDirectory()) {
             return null;
         }

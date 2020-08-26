@@ -778,7 +778,7 @@ public abstract class ApexManager {
         void registerApkInApex(AndroidPackage pkg) {
             synchronized (mLock) {
                 for (ActiveApexInfo aai : mActiveApexInfosCache) {
-                    if (pkg.getBaseCodePath().startsWith(aai.apexDirectory.getAbsolutePath())) {
+                    if (pkg.getBaseApkPath().startsWith(aai.apexDirectory.getAbsolutePath())) {
                         List<String> apks = mApksInApex.get(aai.apexModuleName);
                         if (apks == null) {
                             apks = Lists.newArrayList();

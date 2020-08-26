@@ -3526,7 +3526,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 deniedPermissions == null || !deniedPermissions.contains(perm);
                         if (permissionViolation) {
                             Slog.w(TAG, "Privileged permission " + perm + " for package "
-                                    + pkg.getPackageName() + " (" + pkg.getCodePath()
+                                    + pkg.getPackageName() + " (" + pkg.getPath()
                                     + ") not in privapp-permissions whitelist");
 
                             if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
@@ -3534,7 +3534,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                     mPrivappPermissionsViolations = new ArraySet<>();
                                 }
                                 mPrivappPermissionsViolations.add(
-                                        pkg.getPackageName() + " (" + pkg.getCodePath() + "): "
+                                        pkg.getPackageName() + " (" + pkg.getPath() + "): "
                                                 + perm);
                             }
                         } else {
