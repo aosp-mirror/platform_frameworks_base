@@ -28,6 +28,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-support-multidex
 
 LOCAL_DEX_PREOPT := false
 
+LOCAL_EMMA_INSTRUMENT := false
+
 mainDexList:= \
 	$(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 

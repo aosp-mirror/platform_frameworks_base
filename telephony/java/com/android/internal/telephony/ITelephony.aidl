@@ -222,40 +222,27 @@ interface ITelephony {
     boolean setRadioPower(boolean turnOn);
 
     /**
-     * Request to update location information in service state
+     * This method has been removed due to security and stability issues.
      */
     @UnsupportedAppUsage
     void updateServiceLocation();
 
     /**
-     * Request to update location information for a subscrition in service state
-     * @param subId user preferred subId.
+     * Version of updateServiceLocation that records the caller and validates permissions.
      */
-    void updateServiceLocationForSubscriber(int subId);
+    void updateServiceLocationWithPackageName(String callingPkg);
 
     /**
-     * Enable location update notifications.
+     * This method has been removed due to security and stability issues.
      */
     @UnsupportedAppUsage
     void enableLocationUpdates();
 
     /**
-     * Enable location update notifications.
-     * @param subId user preferred subId.
-     */
-    void enableLocationUpdatesForSubscriber(int subId);
-
-    /**
-     * Disable location update notifications.
+     * This method has been removed due to security and stability issues.
      */
     @UnsupportedAppUsage
     void disableLocationUpdates();
-
-    /**
-     * Disable location update notifications.
-     * @param subId user preferred subId.
-     */
-    void disableLocationUpdatesForSubscriber(int subId);
 
     /**
      * Allow mobile data connections.
@@ -851,6 +838,14 @@ interface ITelephony {
     IImsRcsFeature getRcsFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
 
     /**
+     * Unregister a callback that was previously registered through
+     * {@link #getMmTelFeatureAndListen} or {@link #getRcsFeatureAndListen}. This should always be
+     * called when the callback is no longer being used.
+     */
+    void unregisterImsFeatureCallback(int slotId, int featureType,
+            in IImsServiceFeatureCallback callback);
+
+    /**
     * Returns the IImsRegistration associated with the slot and feature specified.
     */
     IImsRegistration getImsRegistration(int slotId, int feature);
@@ -946,6 +941,35 @@ interface ITelephony {
      * @return true on success; false on any failure.
      */
     boolean setAllowedNetworkTypes(int subId, long allowedNetworkTypes);
+
+    /**
+     * Get the allowed network types for certain reason.
+     *
+     * @param subId the id of the subscription.
+     * @param reason the reason the allowed network type change is taking place
+     * @return allowedNetworkTypes the allowed network types.
+     */
+    long getAllowedNetworkTypesForReason(int subId, int reason);
+
+    /**
+     * Get the effective allowed network types on the device. This API will
+     * return an intersection of allowed network types for all reasons,
+     * including the configuration done through setAllowedNetworkTypes
+     *
+     * @param subId the id of the subscription.
+     * @return allowedNetworkTypes the allowed network types.
+     */
+     long getEffectiveAllowedNetworkTypes(int subId);
+
+    /**
+     * Set the allowed network types and provide the reason triggering the allowed network change.
+     *
+     * @param subId the id of the subscription.
+     * @param reason the reason the allowed network type change is taking place
+     * @param allowedNetworkTypes the allowed network types.
+     * @return true on success; false on any failure.
+     */
+    boolean setAllowedNetworkTypesForReason(int subId, int reason, long allowedNetworkTypes);
 
     /**
      * Set the preferred network type.

@@ -56,14 +56,15 @@ public class ImsRcsManager {
      * Activity Action: Show the opt-in dialog for enabling or disabling RCS contact discovery
      * using User Capability Exchange (UCE).
      * <p>
-     * An application that depends on contact discovery being enabled may send this intent
+     * An application that depends on RCS contact discovery being enabled must send this intent
      * using {@link Context#startActivity(Intent)} to ask the user to opt-in for contacts upload for
-     * capability exchange if it is currently disabled. Whether or not this setting has been enabled
-     * can be queried using {@link RcsUceAdapter#isUceSettingEnabled()}.
+     * capability exchange if it is currently disabled. Whether or not RCS contact discovery has
+     * been enabled by the user can be queried using {@link RcsUceAdapter#isUceSettingEnabled()}.
      * <p>
-     * This intent should only be sent if the carrier supports RCS capability exchange, which can be
-     * queried using the key {@link CarrierConfigManager#KEY_USE_RCS_PRESENCE_BOOL}. Otherwise, the
-     * setting will not be present.
+     * This intent will always be handled by the system, however the application should only send
+     * this Intent if the carrier supports RCS contact discovery, which can be queried using the key
+     * {@link CarrierConfigManager#KEY_USE_RCS_PRESENCE_BOOL}. Otherwise, the RCS contact discovery
+     * opt-in dialog will not be shown.
      * <p>
      * Input: A mandatory {@link Settings#EXTRA_SUB_ID} extra containing the subscription that the
      * setting will be be shown for.

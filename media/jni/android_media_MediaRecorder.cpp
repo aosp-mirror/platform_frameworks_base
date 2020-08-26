@@ -37,7 +37,7 @@
 #include <nativehelper/ScopedUtfChars.h>
 
 #include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include "android_media_AudioErrors.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_MicrophoneInfo.h"

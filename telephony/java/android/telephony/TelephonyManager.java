@@ -110,8 +110,6 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
 import com.android.telephony.Rlog;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -124,8 +122,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Provides access to information about the telephony services on
@@ -2189,58 +2185,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Enables location update notifications.  {@link PhoneStateListener#onCellLocationChanged
-     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_LOCATION_UPDATES)
-    public void enableLocationUpdates() {
-        enableLocationUpdates(getSubId());
-    }
-
-    /**
-     * Enables location update notifications for a subscription.
-     * {@link PhoneStateListener#onCellLocationChanged
-     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
-     *
-     * @param subId for which the location updates are enabled
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_LOCATION_UPDATES)
-    public void enableLocationUpdates(int subId) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.enableLocationUpdatesForSubscriber(subId);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
-     * Disables location update notifications.  {@link PhoneStateListener#onCellLocationChanged
-     * PhoneStateListener.onCellLocationChanged} will be called on location updates.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_LOCATION_UPDATES)
-    public void disableLocationUpdates() {
-        disableLocationUpdates(getSubId());
-    }
-
-    /** @hide */
-    public void disableLocationUpdates(int subId) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.disableLocationUpdatesForSubscriber(subId);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
      * Returns the neighboring cell information of the device.
      *
      * @return List of NeighboringCellInfo or null if info unavailable.
@@ -2440,7 +2384,8 @@ public class TelephonyManager {
             return PhoneConstants.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
-            if (getLteOnCdmaModeStatic() == PhoneConstants.LTE_ON_CDMA_TRUE) {
+            if (TelephonyProperties.lte_on_cdma_device().orElse(
+                    PhoneConstants.LTE_ON_CDMA_FALSE) == PhoneConstants.LTE_ON_CDMA_TRUE) {
                 return PhoneConstants.PHONE_TYPE_CDMA;
             } else {
                 return PhoneConstants.PHONE_TYPE_GSM;
@@ -2451,91 +2396,12 @@ public class TelephonyManager {
     }
 
     /**
-     * The contents of the /proc/cmdline file
-     */
-    @UnsupportedAppUsage
-    private static String getProcCmdLine()
-    {
-        String cmdline = "";
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream("/proc/cmdline");
-            byte [] buffer = new byte[2048];
-            int count = is.read(buffer);
-            if (count > 0) {
-                cmdline = new String(buffer, 0, count);
-            }
-        } catch (IOException e) {
-            Rlog.d(TAG, "No /proc/cmdline exception=" + e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-        Rlog.d(TAG, "/proc/cmdline=" + cmdline);
-        return cmdline;
-    }
-
-    /**
      * @return The max value for the timeout passed in {@link #requestNumberVerification}.
      * @hide
      */
     @SystemApi
     public static long getMaxNumberVerificationTimeoutMillis() {
         return MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS;
-    }
-
-    /** Kernel command line */
-    private static final String sKernelCmdLine = getProcCmdLine();
-
-    /** Pattern for selecting the product type from the kernel command line */
-    private static final Pattern sProductTypePattern =
-        Pattern.compile("\\sproduct_type\\s*=\\s*(\\w+)");
-
-    /** The ProductType used for LTE on CDMA devices */
-    private static final String sLteOnCdmaProductType =
-            TelephonyProperties.lte_on_cdma_product_type().orElse("");
-
-    /**
-     * Return if the current radio is LTE on CDMA. This
-     * is a tri-state return value as for a period of time
-     * the mode may be unknown.
-     *
-     * @return {@link PhoneConstants#LTE_ON_CDMA_UNKNOWN}, {@link PhoneConstants#LTE_ON_CDMA_FALSE}
-     * or {@link PhoneConstants#LTE_ON_CDMA_TRUE}
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static int getLteOnCdmaModeStatic() {
-        int retVal;
-        int curVal;
-        String productType = "";
-
-        curVal = TelephonyProperties.lte_on_cdma_device().orElse(
-            PhoneConstants.LTE_ON_CDMA_UNKNOWN);
-        retVal = curVal;
-        if (retVal == PhoneConstants.LTE_ON_CDMA_UNKNOWN) {
-            Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
-            if (matcher.find()) {
-                productType = matcher.group(1);
-                if (sLteOnCdmaProductType.equals(productType)) {
-                    retVal = PhoneConstants.LTE_ON_CDMA_TRUE;
-                } else {
-                    retVal = PhoneConstants.LTE_ON_CDMA_FALSE;
-                }
-            } else {
-                retVal = PhoneConstants.LTE_ON_CDMA_FALSE;
-            }
-        }
-
-        Rlog.d(TAG, "getLteOnCdmaMode=" + retVal + " curVal=" + curVal +
-                " product_type='" + productType +
-                "' lteOnCdmaProductType='" + sLteOnCdmaProductType + "'");
-        return retVal;
     }
 
     //
@@ -7330,6 +7196,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Unregister a IImsServiceFeatureCallback previously associated with an ImsFeature through
+     * {@link #getImsMmTelFeatureAndListen(int, IImsServiceFeatureCallback)} or
+     * {@link #getImsRcsFeatureAndListen(int, IImsServiceFeatureCallback)}.
+     * @param slotIndex The SIM slot associated with the callback.
+     * @param featureType The {@link android.telephony.ims.feature.ImsFeature.FeatureType}
+     *                    associated with the callback.
+     * @param callback The callback to be unregistered.
+     * @hide
+     */
+    public void unregisterImsFeatureCallback(int slotIndex, int featureType,
+            IImsServiceFeatureCallback callback) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.unregisterImsFeatureCallback(slotIndex, featureType, callback);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "unregisterImsFeatureCallback, RemoteException: "
+                    + e.getMessage());
+        }
+    }
+
+    /**
      * @return the {@IImsRegistration} interface that corresponds with the slot index and feature.
      * @param slotIndex The SIM slot corresponding to the ImsService ImsRegistration is active for.
      * @param feature An integer indicating the feature that we wish to get the ImsRegistration for.
@@ -8084,6 +7973,140 @@ public class TelephonyManager {
             Rlog.e(TAG, "setAllowedNetworkTypes RemoteException", ex);
         }
         return false;
+    }
+
+    /** @hide */
+    @IntDef({
+            ALLOWED_NETWORK_TYPES_REASON_POWER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AllowedNetworkTypesReason{}
+
+    /**
+     * To indicate allowed network type change is requested by power manager.
+     * Power Manger configuration won't affect the settings configured through
+     * {@link setAllowedNetworkTypes} and will result in allowing network types that are in both
+     * configurations (i.e intersection of both sets).
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 0;
+
+    /**
+     * Set the allowed network types of the device and
+     * provide the reason triggering the allowed network change.
+     * This can be called for following reasons
+     * <ol>
+     * <li>Allowed network types control by power manager
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
+     * </ol>
+     * This API will result in allowing an intersection of allowed network types for all reasons,
+     * including the configuration done through {@link setAllowedNetworkTypes}.
+     * While this API and {@link setAllowedNetworkTypes} is controlling allowed network types
+     * on device, user preference will still be set through {@link #setPreferredNetworkTypeBitmask}.
+     * Thus resultant network type configured on modem will be an intersection of the network types
+     * from setAllowedNetworkTypesForReason, {@link setAllowedNetworkTypes}
+     * and {@link #setPreferredNetworkTypeBitmask}.
+     *
+     * @param reason the reason the allowed network type change is taking place
+     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setAllowedNetworkTypesForReason(@AllowedNetworkTypesReason int reason,
+            @NetworkTypeBitMask long allowedNetworkTypes) {
+        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+            throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setAllowedNetworkTypesForReason(getSubId(), reason,
+                        allowedNetworkTypes);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setAllowedNetworkTypesForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the allowed network types for certain reason.
+     *
+     * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
+     * specific reason. For effective allowed network types configured on device,
+     * query {@link getEffectiveAllowedNetworkTypes}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *s
+     * @param reason the reason the allowed network type change is taking place
+     * @return the allowed network type bitmask
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
+            @AllowedNetworkTypesReason int reason) {
+        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+            throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getAllowedNetworkTypesForReason(getSubId(), reason);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getAllowedNetworkTypesForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return -1;
+    }
+
+    /**
+     * Get bit mask of all network types.
+     *
+     * @return bit mask of all network types
+     * @hide
+     */
+    public static @NetworkTypeBitMask long getAllNetworkTypesBitmask() {
+        return NETWORK_STANDARDS_FAMILY_BITMASK_3GPP | NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2;
+    }
+
+    /**
+     * Get the allowed network types configured on the device.
+     * This API will return an intersection of allowed network types for all reasons,
+     * including the configuration done through setAllowedNetworkTypes
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return the allowed network type bitmask
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NetworkTypeBitMask long getEffectiveAllowedNetworkTypes() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getEffectiveAllowedNetworkTypes(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getEffectiveAllowedNetworkTypes RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**
@@ -8946,17 +8969,14 @@ public class TelephonyManager {
         return RADIO_POWER_UNAVAILABLE;
     }
 
-    /** @hide */
+    /**
+     * This method should not be used due to privacy and stability concerns.
+     *
+     * @hide
+     */
     @SystemApi
-    @SuppressLint("Doclava125")
     public void updateServiceLocation() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.updateServiceLocation();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#updateServiceLocation", e);
-        }
+        Log.e(TAG, "Do not call TelephonyManager#updateServiceLocation()");
     }
 
     /** @hide */
@@ -12585,7 +12605,6 @@ public class TelephonyManager {
             @Nullable String mvnoMatchData) {
         try {
             if (!mccmnc.equals(getSimOperator())) {
-                Log.d(TAG, "The mccmnc does not match");
                 return false;
             }
             ITelephony service = getITelephony();

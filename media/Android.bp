@@ -70,10 +70,10 @@ metalava_updatable_media_args = " --error UnhiddenSystemApi " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) "
+    "--hide HiddenTypedefConstant "
 
 droidstubs {
-    name: "updatable-media-stubs",
+    name: "updatable-media-stubs-srcs-public",
     srcs: [
         ":updatable-media-srcs",
         ":framework-media-annotation-srcs",
@@ -83,13 +83,34 @@ droidstubs {
         // TODO(b/135922046) remove this
         include_dirs: ["frameworks/base/core/java"],
     },
-    sdk_version: "system_current",
+    sdk_version: "module_current",
+}
+
+droidstubs {
+    name: "updatable-media-stubs-srcs-system",
+    srcs: [
+        ":updatable-media-srcs",
+        ":framework-media-annotation-srcs",
+    ],
+    args: metalava_updatable_media_args +
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) ",
+    aidl: {
+        // TODO(b/135922046) remove this
+        include_dirs: ["frameworks/base/core/java"],
+    },
+    sdk_version: "module_current",
+}
+
+java_library {
+    name: "updatable_media_stubs.public",
+    srcs: [":updatable-media-stubs-srcs-public"],
+    sdk_version: "module_current",
 }
 
 java_library {
     name: "updatable_media_stubs",
-    srcs: [":updatable-media-stubs"],
-    sdk_version: "system_current",
+    srcs: [":updatable-media-stubs-srcs-system"],
+    sdk_version: "module_current",
 }
 
 java_library {

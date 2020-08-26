@@ -34,6 +34,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.icu.text.DecimalFormatSymbols;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -60,8 +61,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
-
-import libcore.icu.LocaleData;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -209,7 +208,7 @@ public class NumberPicker extends LinearLayout {
         }
 
         private static char getZeroDigit(Locale locale) {
-            return LocaleData.get(locale).zeroDigit;
+            return DecimalFormatSymbols.getInstance(locale).getZeroDigit();
         }
 
         private java.util.Formatter createFormatter(Locale locale) {

@@ -74,6 +74,7 @@ import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.inputmethod.InputMethodSystemProperty;
 
+import com.android.i18n.timezone.ZoneInfoDb;
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -164,8 +165,6 @@ import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
-
-import libcore.timezone.ZoneInfoDb;
 
 import dalvik.system.VMRuntime;
 
@@ -554,12 +553,6 @@ public final class SystemServer {
                 Slog.wtf(SYSTEM_SERVER_TIMING_TAG,
                         "SystemServer init took too long. uptimeMillis=" + uptimeMillis);
             }
-        }
-
-        // Diagnostic to ensure that the system is in a base healthy state. Done here as a common
-        // non-zygote process.
-        if (!VMRuntime.hasBootImageSpaces()) {
-            Slog.wtf(TAG, "Runtime is not running with a boot image!");
         }
 
         // Loop forever.

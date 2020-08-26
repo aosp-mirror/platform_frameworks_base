@@ -46,7 +46,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.annotation.TestApi;
 import android.apex.ApexInfo;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
@@ -922,7 +921,7 @@ public class PackageParser {
      * Automatically detects if the package is a monolithic style (single APK
      * file) or cluster style (directory of APKs).
      * <p>
-     * This performs sanity checking on cluster style packages, such as
+     * This performs checking on cluster style packages, such as
      * requiring identical package name and version codes, a single base APK,
      * and unique split names.
      *
@@ -1039,7 +1038,7 @@ public class PackageParser {
      * package is a monolithic style (single APK file) or cluster style
      * (directory of APKs).
      * <p>
-     * This performs sanity checking on cluster style packages, such as
+     * This performs checking on cluster style packages, such as
      * requiring identical package name and version codes, a single base APK,
      * and unique split names.
      * <p>
@@ -1256,7 +1255,7 @@ public class PackageParser {
 
     /**
      * Parse all APKs contained in the given directory, treating them as a
-     * single package. This also performs sanity checking, such as requiring
+     * single package. This also performs checking, such as requiring
      * identical package name and version codes, a single base APK, and unique
      * split names.
      * <p>
@@ -2682,7 +2681,6 @@ public class PackageParser {
      *         not compatible with this platform
      * @hide Exposed for unit testing only.
      */
-    @TestApi
     public static int computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
             @NonNull String[] outError) {
@@ -2747,7 +2745,6 @@ public class PackageParser {
      *         compatible with this platform
      * @hide Exposed for unit testing only.
      */
-    @TestApi
     public static int computeMinSdkVersion(@IntRange(from = 1) int minVers,
             @Nullable String minCode, @IntRange(from = 1) int platformSdkVersion,
             @NonNull String[] platformSdkCodenames, @NonNull String[] outError) {
@@ -4845,7 +4842,6 @@ public class PackageParser {
      *                                AndroidManifest.xml.
      * @hide Exposed for unit testing only.
      */
-    @TestApi
     public static int getActivityConfigChanges(int configChanges, int recreateOnConfigChanges) {
         return configChanges | ((~recreateOnConfigChanges) & RECREATE_ON_CONFIG_CHANGES_MASK);
     }

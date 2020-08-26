@@ -38,7 +38,9 @@ import java.util.Arrays;
  * Representation of a MAC address.
  *
  * This class only supports 48 bits long addresses and does not support 64 bits long addresses.
- * Instances of this class are immutable.
+ * Instances of this class are immutable. This class provides implementations of hashCode()
+ * and equals() that make it suitable for use as keys in standard implementations of
+ * {@link java.util.Map}.
  */
 public final class MacAddress implements Parcelable {
 
@@ -122,12 +124,22 @@ public final class MacAddress implements Parcelable {
     }
 
     /**
+     * Convert this MacAddress to a byte array.
+     *
+     * The returned array is in network order. For example, if this MacAddress is 1:2:3:4:5:6,
+     * the returned array is [1, 2, 3, 4, 5, 6].
+     *
      * @return a byte array representation of this MacAddress.
      */
     public @NonNull byte[] toByteArray() {
         return byteAddrFromLongAddr(mAddr);
     }
 
+    /**
+     * Returns a human-readable representation of this MacAddress.
+     * The exact format is implementation-dependent and should not be assumed to have any
+     * particular format.
+     */
     @Override
     public @NonNull String toString() {
         return stringAddrFromLongAddr(mAddr);

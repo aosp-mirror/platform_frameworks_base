@@ -21,12 +21,8 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
 
 #include <android-base/unique_fd.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <inttypes.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 #include <string>
 

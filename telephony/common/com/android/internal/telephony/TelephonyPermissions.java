@@ -75,7 +75,8 @@ public final class TelephonyPermissions {
      *   <li>return false: if the caller lacks all of these permissions and doesn't support runtime
      *       permissions. This implies that the user revoked the ability to read phone state
      *       manually (via AppOps). In this case we can't throw as it would break app compatibility,
-     *       so we return false to indicate that the calling function should return dummy data.
+     *       so we return false to indicate that the calling function should return placeholder
+     *       data.
      * </ul>
      *
      * <p>Note: for simplicity, this method always returns false for callers using legacy
@@ -120,7 +121,8 @@ public final class TelephonyPermissions {
      *   <li>return false: if the caller lacks all of these permissions and doesn't support runtime
      *       permissions. This implies that the user revoked the ability to read phone state
      *       manually (via AppOps). In this case we can't throw as it would break app compatibility,
-     *       so we return false to indicate that the calling function should return dummy data.
+     *       so we return false to indicate that the calling function should return placeholder
+     *       data.
      * </ul>
      *
      * <p>Note: for simplicity, this method always returns false for callers using legacy
@@ -226,7 +228,7 @@ public final class TelephonyPermissions {
      *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
      *       permission. In this case the caller would expect to have access to the device
      *       identifiers so false is returned instead of throwing a SecurityException to indicate
-     *       the calling function should return dummy data.
+     *       the calling function should return placeholder data.
      * </ul>
      */
     public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context,
@@ -250,7 +252,7 @@ public final class TelephonyPermissions {
      *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
      *       permission or carrier privileges. In this case the caller would expect to have access
      *       to the device identifiers so false is returned instead of throwing a SecurityException
-     *       to indicate the calling function should return dummy data.
+     *       to indicate the calling function should return placeholder data.
      * </ul>
      */
     public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context, int subId,
@@ -272,7 +274,7 @@ public final class TelephonyPermissions {
      *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
      *       permission. In this case the caller would expect to have access to the device
      *       identifiers so false is returned instead of throwing a SecurityException to indicate
-     *       the calling function should return dummy data.
+     *       the calling function should return placeholder data.
      * </ul>
      */
     public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
@@ -296,7 +298,7 @@ public final class TelephonyPermissions {
      *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
      *       permission. In this case the caller would expect to have access to the device
      *       identifiers so false is returned instead of throwing a SecurityException to indicate
-     *       the calling function should return dummy data.
+     *       the calling function should return placeholder data.
      * </ul>
      */
     private static boolean checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
@@ -648,7 +650,7 @@ public final class TelephonyPermissions {
     private static boolean checkCarrierPrivilegeForAnySubId(Context context, int uid) {
         SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-        int[] activeSubIds = sm.getActiveSubscriptionIdList(/* visibleOnly */ false);
+        int[] activeSubIds = sm.getCompleteActiveSubscriptionIdList();
         for (int activeSubId : activeSubIds) {
             if (getCarrierPrivilegeStatus(context, activeSubId, uid)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
@@ -659,6 +661,10 @@ public final class TelephonyPermissions {
     }
 
     private static int getCarrierPrivilegeStatus(Context context, int subId, int uid) {
+        if (uid == Process.SYSTEM_UID || uid == Process.PHONE_UID) {
+            // Skip the check if it's one of these special uids
+            return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(

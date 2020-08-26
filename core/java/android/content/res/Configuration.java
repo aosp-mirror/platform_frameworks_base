@@ -1772,7 +1772,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public boolean isOtherSeqNewer(Configuration other) {
         if (other == null) {
-            // Sanity check.
+            // Validation check.
             return false;
         }
         if (other.seq == 0) {

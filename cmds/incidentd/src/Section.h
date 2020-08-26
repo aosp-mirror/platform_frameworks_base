@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <map>
 
+#include <log/log_read.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>

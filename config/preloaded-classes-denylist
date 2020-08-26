@@ -1,0 +1,8 @@
+android.content.AsyncTaskLoader$LoadTask
+android.net.ConnectivityThread$Singleton
+android.os.AsyncTask
+android.os.FileObserver
+android.os.NullVibrator
+android.speech.tts.TextToSpeech$Connection$SetupConnectionAsyncTask
+android.widget.Magnifier
+com.android.server.BootReceiver$2

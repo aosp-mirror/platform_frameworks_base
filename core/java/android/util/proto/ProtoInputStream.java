@@ -96,7 +96,7 @@ public final class ProtoInputStream extends ProtoStream {
     private byte mState = 0;
 
     /**
-     * Keeps track of the currently read nested Objects, for end object sanity checking and debug
+     * Keeps track of the currently read nested Objects, for end object checking and debug
      */
     private ArrayList<Long> mExpectedObjectTokenStack = null;
 
@@ -511,7 +511,7 @@ public final class ProtoInputStream extends ProtoStream {
                     (int) fieldId, getOffset() + messageSize));
         }
 
-        // Sanity check
+        // Validation check
         if (mDepth > 0
                 && getOffsetFromToken(mExpectedObjectTokenStack.get(mDepth))
                 > getOffsetFromToken(mExpectedObjectTokenStack.get(mDepth - 1))) {
@@ -534,7 +534,7 @@ public final class ProtoInputStream extends ProtoStream {
      * @param token - token
      */
     public void end(long token) {
-        // Sanity check to make sure user is keeping track of their embedded messages
+        // Make sure user is keeping track of their embedded messages
         if (mExpectedObjectTokenStack.get(mDepth) != token) {
             throw new ProtoParseException(
                     "end token " + token + " does not match current message token "

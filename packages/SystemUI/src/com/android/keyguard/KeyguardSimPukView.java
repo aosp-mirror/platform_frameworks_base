@@ -191,7 +191,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             void onSimLockChangedResponse(final PinResult result) {
                 if (result == null) Log.e(LOG_TAG, "onSimCheckResponse, pin result is NULL");
                 else {
-                    Log.d(LOG_TAG, "onSimCheckResponse " + " dummy One result "
+                    Log.d(LOG_TAG, "onSimCheckResponse " + " empty One result "
                             + result.toString());
                     if (result.getAttemptsRemaining() >= 0) {
                         mRemainingAttempts = result.getAttemptsRemaining();

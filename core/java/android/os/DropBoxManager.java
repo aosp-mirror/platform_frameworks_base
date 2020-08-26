@@ -276,7 +276,7 @@ public class DropBoxManager {
     }
 
     /**
-     * Create a dummy instance for testing.  All methods will fail unless
+     * Create an instance for testing. All methods will fail unless
      * overridden with an appropriate mock implementation.  To obtain a
      * functional instance, use {@link android.content.Context#getSystemService}.
      */

@@ -1869,8 +1869,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
      *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
      *               process
-     * @param inputContext communication channel for the dummy
-     *                     {@link android.view.inputmethod.InputConnection}
+     * @param inputContext communication channel for the fallback {@link InputConnection}
      * @param selfReportedDisplayId self-reported display ID to which the client is associated.
      *                              Whether the client is still allowed to access to this display
      *                              or not needs to be evaluated every time the client interacts
@@ -3021,9 +3020,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
             switchUserLocked(userId);
         }
-        // Master feature flag that overrides other conditions and forces IME preRendering.
+
+        // Main feature flag that overrides other conditions and forces IME preRendering.
         if (DEBUG) {
-            Slog.v(TAG, "IME PreRendering MASTER flag: "
+            Slog.v(TAG, "IME PreRendering main flag: "
                     + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() + ", LowRam: " + mIsLowRam);
         }
         // pre-rendering not supported on low-ram devices.

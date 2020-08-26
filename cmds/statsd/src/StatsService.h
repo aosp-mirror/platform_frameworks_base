@@ -36,11 +36,9 @@
 #include <binder/ParcelFileDescriptor.h>
 #include <utils/Looper.h>
 
-#include <deque>
 #include <mutex>
 
 using namespace android;
-using namespace android::base;
 using namespace android::binder;
 using namespace android::frameworks::stats::V1_0;
 using namespace android::os;

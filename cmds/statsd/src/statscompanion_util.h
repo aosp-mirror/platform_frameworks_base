@@ -18,12 +18,6 @@
 
 #include "StatsLogProcessor.h"
 
-using namespace android;
-using namespace android::base;
-using namespace android::binder;
-using namespace android::os;
-using namespace std;
-
 namespace android {
 namespace os {
 namespace statsd {

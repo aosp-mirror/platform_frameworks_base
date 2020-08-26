@@ -137,7 +137,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         // Sending empty PIN here to query the number of remaining PIN attempts
         new CheckSimPin("", mSubId) {
             void onSimCheckResponse(final PinResult result) {
-                Log.d(LOG_TAG, "onSimCheckResponse " + " dummy One result "
+                Log.d(LOG_TAG, "onSimCheckResponse " + " empty One result "
                         + result.toString());
                 if (result.getAttemptsRemaining() >= 0) {
                     mRemainingAttempts = result.getAttemptsRemaining();

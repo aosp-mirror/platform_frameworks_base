@@ -560,6 +560,15 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
 
     /**
+     * Flag specifying whether to show an alert dialog for 5G disable when the user disables VoLTE.
+     * By default this value is {@code false}.
+     *
+     * @hide
+     */
+    public static final String KEY_VOLTE_5G_LIMITED_ALERT_DIALOG_BOOL =
+            "volte_5g_limited_alert_dialog_bool";
+
+    /**
      * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
      * over from WIFI to LTE.
      * <p>
@@ -764,7 +773,7 @@ public class CarrierConfigManager {
      * {@link #KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL}). If false, this device will fallback to
      * circuit switch for supplementary services and will disable this capability for IMS entirely.
      *
-     * The default value for this key is {@code true}.
+     * The default value for this key is {@code false}.
      */
     public static final String KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL =
             "carrier_supports_ss_over_ut_bool";
@@ -1077,6 +1086,15 @@ public class CarrierConfigManager {
         "show_signal_strength_in_sim_status_bool";
 
     /**
+     * Flag specifying if we should interpret all signal strength as one bar higher
+     * This is a replacement for the former resource config_inflateSignalStrength
+     * The default value is false.
+     * @hide
+     */
+    public static final String KEY_INFLATE_SIGNAL_STRENGTH_BOOL =
+            "inflate_signal_strength_bool";
+
+    /**
      * Flag specifying whether an additional (client initiated) intent needs to be sent on System
      * update
      */
@@ -1148,15 +1166,14 @@ public class CarrierConfigManager {
     /**
      * Determines whether adhoc conference calls are supported by a carrier.  When {@code true},
      * adhoc conference calling is supported, {@code false otherwise}.
-     * @hide
      */
     public static final String KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL =
             "support_adhoc_conference_calls_bool";
 
     /**
-     * Determines whether conference participants can be added to existing call.  When {@code true},
+     * Determines whether conference participants can be added to existing call to form an adhoc
+     * conference call (in contrast to merging calls to form a conference).  When {@code true},
      * adding conference participants to existing call is supported, {@code false otherwise}.
-     * @hide
      */
     public static final String KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL =
             "support_add_conference_participants_bool";
@@ -1405,6 +1422,14 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * To override wifi calling's carrier name string using ef_pnn from sim card when SPN in empty.
+     *
+     * @hide
+     */
+    public static final String KEY_WFC_CARRIER_NAME_OVERRIDE_BY_PNN_BOOL =
+            "wfc_carrier_name_override_by_pnn_bool";
+
+    /**
      * Override the SPN Display Condition 2 integer bits (lsb). B2, B1 is the last two bits of the
      * spn display condition coding.
      *
@@ -1632,6 +1657,12 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL =
             "show_precise_failed_cause_bool";
+
+    /**
+     * Boolean to decide whether NR is enabled.
+     * @hide
+     */
+    public static final String KEY_NR_ENABLED_BOOL = "nr_enabled_bool";
 
     /**
      * Boolean to decide whether LTE is enabled.
@@ -2305,6 +2336,16 @@ public class CarrierConfigManager {
             "call_forwarding_blocks_while_roaming_string_array";
 
     /**
+     * Call forwarding number prefixes defined by {@link
+     * #KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY} which will be allowed while the
+     * device is reporting that it is roaming and IMS is registered over LTE or Wi-Fi.
+     * By default this value is {@code true}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_IMS_CALL_FORWARDING_WHILE_ROAMING_BOOL =
+            "support_ims_call_forwarding_while_roaming_bool";
+
+    /**
      * The day of the month (1-31) on which the data cycle rolls over.
      * <p>
      * If the current month does not have this day, the cycle will roll over at
@@ -2472,15 +2513,15 @@ public class CarrierConfigManager {
     /**
      * List of 4 customized 5G SS reference signal received quality (SSRSRQ) thresholds.
      * <p>
-     * Reference: 3GPP TS 38.215
+     * Reference: 3GPP TS 38.215; 3GPP TS 38.133 section 10
      * <p>
-     * 4 threshold integers must be within the boundaries [-20 dB, -3 dB], and the levels are:
+     * 4 threshold integers must be within the boundaries [-43 dB, 20 dB], and the levels are:
      * <UL>
-     *     <LI>"NONE: [-20, threshold1]"</LI>
+     *     <LI>"NONE: [-43, threshold1]"</LI>
      *     <LI>"POOR: (threshold1, threshold2]"</LI>
      *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
      *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
-     *     <LI>"EXCELLENT:  (threshold4, -3]"</LI>
+     *     <LI>"EXCELLENT:  (threshold4, 20]"</LI>
      * </UL>
      * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
@@ -2798,14 +2839,12 @@ public class CarrierConfigManager {
     /**
      * A list of 4 customized LTE Reference Signal Signal to Noise Ratio (RSSNR) thresholds.
      *
-     * 4 threshold integers must be within the boundaries [-200, 300], and the levels are:
-     *     "NONE: [-200, threshold1)"
+     * 4 threshold integers must be within the boundaries [-20 dB, 30 dB], and the levels are:
+     *     "NONE: [-20, threshold1)"
      *     "POOR: [threshold1, threshold2)"
      *     "MODERATE: [threshold2, threshold3)"
      *     "GOOD:  [threshold3, threshold4)"
-     *     "EXCELLENT:  [threshold4, 300]"
-     * Note: the unit of the values is 10*db; it is derived by multiplying 10 on the original dB
-     * value reported by modem.
+     *     "EXCELLENT:  [threshold4, 30]"
      *
      * This key is considered invalid if the format is violated. If the key is invalid or
      * not configured, a default value set will apply.
@@ -3140,6 +3179,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
             "5g_icon_display_secondary_grace_period_string";
+
+    /**
+     * Whether device reset all of NR timers when device camped on a network that haven't 5G
+     * capability and RRC currently in IDLE state.
+     *
+     * The default value is false;
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL =
+            "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
@@ -3756,6 +3806,15 @@ public class CarrierConfigManager {
     public static final String KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY =
             "missed_incoming_call_sms_pattern_string_array";
 
+    /**
+     * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
+     * the default APN (i.e. internet) will be used for tethering.
+     *
+     * @hide
+     */
+    public static final String KEY_DISABLE_DUN_APN_WHILE_ROAMING =
+            "disable_dun_apn_while_roaming";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3777,6 +3836,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_VOLTE_5G_LIMITED_ALERT_DIALOG_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGING_RTT_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
@@ -3873,6 +3933,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL, true);
+        sDefaults.putBoolean(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
@@ -3956,6 +4017,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_WFC_CARRIER_NAME_OVERRIDE_BY_PNN_BOOL, false);
         sDefaults.putInt(KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT, -1);
         sDefaults.putStringArray(KEY_SPDI_OVERRIDE_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_PNN_OVERRIDE_STRING_ARRAY, null);
@@ -4093,6 +4155,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
+        sDefaults.putBoolean(KEY_SUPPORT_IMS_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
         sDefaults.putInt(KEY_LTE_EARFCNS_RSRP_BOOST_INT, 0);
         sDefaults.putStringArray(KEY_BOOSTED_LTE_EARFCNS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL, false);
@@ -4119,6 +4182,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
@@ -4143,10 +4207,10 @@ public class CarrierConfigManager {
                 });
         sDefaults.putIntArray(KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
                 new int[] {
-                        -30, /* SIGNAL_STRENGTH_POOR */
-                        10,  /* SIGNAL_STRENGTH_MODERATE */
-                        45,  /* SIGNAL_STRENGTH_GOOD */
-                        130  /* SIGNAL_STRENGTH_GREAT */
+                        -3, /* SIGNAL_STRENGTH_POOR */
+                        1,  /* SIGNAL_STRENGTH_MODERATE */
+                        5,  /* SIGNAL_STRENGTH_GOOD */
+                        13  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY,
                 new int[] {
@@ -4164,12 +4228,12 @@ public class CarrierConfigManager {
                     -65,  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY,
-                // Boundaries: [-20 dB, -3 dB]
+                // Boundaries: [-43 dB, 20 dB]
                 new int[] {
-                    -16, /* SIGNAL_STRENGTH_POOR */
-                    -12, /* SIGNAL_STRENGTH_MODERATE */
-                    -9, /* SIGNAL_STRENGTH_GOOD */
-                    -6  /* SIGNAL_STRENGTH_GREAT */
+                    -31, /* SIGNAL_STRENGTH_POOR */
+                    -19, /* SIGNAL_STRENGTH_MODERATE */
+                    -7, /* SIGNAL_STRENGTH_GOOD */
+                    6  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-23 dB, 40 dB]
@@ -4186,8 +4250,8 @@ public class CarrierConfigManager {
                 "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
                 "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
                 "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550", "eHRPD:750,48",
-                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
-                "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
+                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,18000",
+                "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
@@ -4206,6 +4270,7 @@ public class CarrierConfigManager {
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
@@ -4280,6 +4345,7 @@ public class CarrierConfigManager {
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
+        sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING, false);
     }
 
     /**

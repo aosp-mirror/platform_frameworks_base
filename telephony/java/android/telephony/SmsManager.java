@@ -615,10 +615,12 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
+            Log.e(TAG, "Invalid Priority " + priority);
             priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+            Log.e(TAG, "Invalid Validity Period " + validityPeriod);
             validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
         }
 
@@ -1174,10 +1176,12 @@ public final class SmsManager {
         }
 
         if (priority < 0x00 || priority > 0x03) {
+            Log.e(TAG, "Invalid Priority " + priority);
             priority = SMS_MESSAGE_PRIORITY_NOT_SPECIFIED;
         }
 
         if (validityPeriod < 0x05 || validityPeriod > 0x09b0a0) {
+            Log.e(TAG, "Invalid Validity Period " + validityPeriod);
             validityPeriod = SMS_MESSAGE_PERIOD_NOT_SPECIFIED;
         }
 
@@ -1652,8 +1656,7 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
-     * @param messageIndex This is the same index used to access a message
-     * from {@link #getMessagesFromIcc()}.
+     * @param messageIndex the message index of the message in the ICC (1-based index).
      * @return true for success, false if the operation fails. Failure can be due to IPC failure,
      * RIL/modem error which results in SMS failed to be deleted on SIM
      *
@@ -1736,7 +1739,7 @@ public final class SmsManager {
      * operation is performed on the correct subscription.
      * </p>
      *
-     * @return <code>List</code> of <code>SmsMessage</code> objects
+     * @return <code>List</code> of <code>SmsMessage</code> objects for valid records only.
      *
      * {@hide}
      */

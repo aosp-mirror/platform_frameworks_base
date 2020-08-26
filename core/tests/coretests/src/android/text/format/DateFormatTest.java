@@ -16,9 +16,12 @@
 
 package android.text.format;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import android.icu.text.DateFormatSymbols;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -27,6 +30,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 @Presubmit
@@ -54,5 +58,81 @@ public class DateFormatTest {
     public void testIs24HourLocale() {
         assertFalse(DateFormat.is24HourLocale(Locale.US));
         assertTrue(DateFormat.is24HourLocale(Locale.GERMANY));
+    }
+
+    @Test
+    public void testgetIcuDateFormatSymbols() {
+        DateFormatSymbols dfs = DateFormat.getIcuDateFormatSymbols(Locale.US);
+        assertEquals("AM", dfs.getAmPmStrings()[0]);
+        assertEquals("PM", dfs.getAmPmStrings()[1]);
+        assertEquals("a", dfs.getAmpmNarrowStrings()[0]);
+        assertEquals("p", dfs.getAmpmNarrowStrings()[1]);
+    }
+
+    @Test
+    public void testGetDateFormatOrder() {
+        // lv and fa use differing orders depending on whether you're using numeric or
+        // textual months.
+        Locale lv = new Locale("lv");
+        assertEquals("[d, M, y]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(lv, "yyyy-M-dd"))));
+        assertEquals("[y, d, M]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(lv, "yyyy-MMM-dd"))));
+        assertEquals("[d, M, \u0000]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(lv, "MMM-dd"))));
+        Locale fa = new Locale("fa");
+        assertEquals("[y, M, d]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(fa, "yyyy-M-dd"))));
+        assertEquals("[d, M, y]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(fa, "yyyy-MMM-dd"))));
+        assertEquals("[d, M, \u0000]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(fa, "MMM-dd"))));
+
+        // English differs on each side of the Atlantic.
+        Locale enUS = Locale.US;
+        assertEquals("[M, d, y]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(enUS, "yyyy-M-dd"))));
+        assertEquals("[M, d, y]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(enUS, "yyyy-MMM-dd"))));
+        assertEquals("[M, d, \u0000]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(enUS, "MMM-dd"))));
+        Locale enGB = Locale.UK;
+        assertEquals("[d, M, y]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(enGB, "yyyy-M-dd"))));
+        assertEquals("[d, M, y]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(enGB, "yyyy-MMM-dd"))));
+        assertEquals("[d, M, \u0000]", Arrays.toString(DateFormat.getDateFormatOrder(
+                best(enGB, "MMM-dd"))));
+
+        assertEquals("[y, M, d]", Arrays.toString(DateFormat.getDateFormatOrder(
+                "yyyy - 'why' '' 'ddd' MMM-dd")));
+
+        try {
+            DateFormat.getDateFormatOrder("the quick brown fox jumped over the lazy dog");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            DateFormat.getDateFormatOrder("'");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            DateFormat.getDateFormatOrder("yyyy'");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            DateFormat.getDateFormatOrder("yyyy'MMM");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    private static String best(Locale l, String skeleton) {
+        return DateFormat.getBestDateTimePattern(l, skeleton);
     }
 }

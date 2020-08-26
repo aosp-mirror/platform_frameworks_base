@@ -21,8 +21,6 @@
 #include "GaugeMetricProducer.h"
 #include "../stats_log_util.h"
 
-#include <cutils/log.h>
-
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FLOAT;

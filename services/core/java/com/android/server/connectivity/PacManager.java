@@ -196,13 +196,7 @@ public class PacManager {
                 mPacUrl = Uri.EMPTY;
                 mCurrentPac = null;
                 if (mProxyService != null) {
-                    try {
-                        mProxyService.stopPacSystem();
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to stop PAC service", e);
-                    } finally {
-                        unbind();
-                    }
+                    unbind();
                 }
             }
             return DO_SEND_BROADCAST;
@@ -327,11 +321,6 @@ public class PacManager {
                     if (mProxyService == null) {
                         Log.e(TAG, "No proxy service");
                     } else {
-                        try {
-                            mProxyService.startPacSystem();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Unable to reach ProxyService - PAC will not be started", e);
-                        }
                         mNetThreadHandler.post(mPacDownloader);
                     }
                 }

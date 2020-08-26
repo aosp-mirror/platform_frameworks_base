@@ -41,19 +41,18 @@ public abstract class IdentityCredential {
     /**
      * Create an ephemeral key pair to use to establish a secure channel with a reader.
      *
-     * <p>Most applications will use only the public key, and only to send it to the reader,
-     * allowing the private key to be used internally for {@link #encryptMessageToReader(byte[])}
-     * and {@link #decryptMessageFromReader(byte[])}. The private key is also provided for
-     * applications that wish to use a cipher suite that is not supported by
-     * {@link IdentityCredentialStore}.
+     * <p>Applications should use this key-pair for the communications channel with the reader
+     * using a protocol / cipher-suite appropriate for the application. One example of such a
+     * protocol is the one used for Mobile Driving Licenses, see ISO 18013-5 section 9.2.1 "Session
+     * encryption".
      *
      * @return ephemeral key pair to use to establish a secure channel with a reader.
      */
     public @NonNull abstract KeyPair createEphemeralKeyPair();
 
     /**
-     * Set the ephemeral public key provided by the reader. This must be called before
-     * {@link #encryptMessageToReader} or {@link #decryptMessageFromReader} can be called.
+     * Set the ephemeral public key provided by the reader. If called, this must be called before
+     * {@link #getEntries(byte[], Map, byte[], byte[])} is called.
      *
      * @param readerEphemeralPublicKey The ephemeral public key provided by the reader to
      *                                 establish a secure session.
@@ -65,6 +64,11 @@ public abstract class IdentityCredential {
     /**
      * Encrypt a message for transmission to the reader.
      *
+     * <p>Do not use. In this version of the API, this method produces an incorrect
+     * result. Instead, applications should implement message encryption/decryption themselves as
+     * detailed in the {@link #createEphemeralKeyPair()} method. In a future API-level, this
+     * method will be deprecated.
+     *
      * @param messagePlaintext unencrypted message to encrypt.
      * @return encrypted message.
      */
@@ -72,6 +76,11 @@ public abstract class IdentityCredential {
 
     /**
      * Decrypt a message received from the reader.
+     *
+     * <p>Do not use. In this version of the API, this method produces an incorrect
+     * result. Instead, applications should implement message encryption/decryption themselves as
+     * detailed in the {@link #createEphemeralKeyPair()} method. In a future API-level, this
+     * method will be deprecated.
      *
      * @param messageCiphertext encrypted message to decrypt.
      * @return decrypted message.
@@ -178,7 +187,7 @@ public abstract class IdentityCredential {
      *
      * <p>If {@code readerAuth} is not {@code null} it must be the bytes of a {@code COSE_Sign1}
      * structure as defined in RFC 8152. For the payload nil shall be used and the
-     * detached payload is the ReaderAuthentication CBOR described below.
+     * detached payload is the ReaderAuthenticationBytes CBOR described below.
      * <pre>
      *     ReaderAuthentication = [
      *       "ReaderAuthentication",
@@ -186,7 +195,9 @@ public abstract class IdentityCredential {
      *       ItemsRequestBytes
      *     ]
      *
-     *     ItemsRequestBytes = #6.24(bstr .cbor ItemsRequest)   ; Bytes of ItemsRequest
+     *     ItemsRequestBytes = #6.24(bstr .cbor ItemsRequest)
+     *
+     *     ReaderAuthenticationBytes = #6.24(bstr .cbor ReaderAuthentication)
      * </pre>
      *
      * <p>where {@code ItemsRequestBytes} are the bytes in the {@code requestMessage} parameter.

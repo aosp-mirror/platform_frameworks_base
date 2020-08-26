@@ -185,8 +185,8 @@ class ZygoteConnection {
             return null;
         }
 
-        if (parsedArgs.mApiBlacklistExemptions != null) {
-            return handleApiBlacklistExemptions(zygoteServer, parsedArgs.mApiBlacklistExemptions);
+        if (parsedArgs.mApiDenylistExemptions != null) {
+            return handleApiDenylistExemptions(zygoteServer, parsedArgs.mApiDenylistExemptions);
         }
 
         if (parsedArgs.mHiddenApiAccessLogSampleRate != -1
@@ -365,11 +365,11 @@ class ZygoteConnection {
     }
 
     /**
-     * Makes the necessary changes to implement a new API blacklist exemption policy, and then
+     * Makes the necessary changes to implement a new API deny list exemption policy, and then
      * responds to the system server, letting it know that the task has been completed.
      *
      * This necessitates a change to the internal state of the Zygote.  As such, if the USAP
-     * pool is enabled all existing USAPs have an incorrect API blacklist exemption list.  To
+     * pool is enabled all existing USAPs have an incorrect API deny list exemption list.  To
      * properly handle this request the pool must be emptied and refilled.  This process can return
      * a Runnable object that must be returned to ZygoteServer.runSelectLoop to be invoked.
      *
@@ -378,9 +378,9 @@ class ZygoteConnection {
      * @return A Runnable object representing a new app in any USAPs spawned from here; the
      *         zygote process will always receive a null value from this function.
      */
-    private Runnable handleApiBlacklistExemptions(ZygoteServer zygoteServer, String[] exemptions) {
+    private Runnable handleApiDenylistExemptions(ZygoteServer zygoteServer, String[] exemptions) {
         return stateChangeWithUsapPoolReset(zygoteServer,
-                () -> ZygoteInit.setApiBlacklistExemptions(exemptions));
+                () -> ZygoteInit.setApiDenylistExemptions(exemptions));
     }
 
     private Runnable handleUsapPoolStatusChange(ZygoteServer zygoteServer, boolean newStatus) {

@@ -118,7 +118,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
      * @param rssi in dBm [-113,-51], UNKNOWN
      * @param rsrp in dBm [-140,-43], UNKNOWN
      * @param rsrq in dB [-34, 3], UNKNOWN
-     * @param rssnr in 10*dB [-200, +300], UNKNOWN
+     * @param rssnr in dB [-20, +30], UNKNOWN
      * @param cqi [0, 15], UNKNOWN
      * @param timingAdvance [0, 1282], UNKNOWN
      *
@@ -131,7 +131,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mSignalStrength = mRssi;
         mRsrp = inRangeOrUnavailable(rsrp, -140, -43);
         mRsrq = inRangeOrUnavailable(rsrq, -34, 3);
-        mRssnr = inRangeOrUnavailable(rssnr, -200, 300);
+        mRssnr = inRangeOrUnavailable(rssnr, -20, 30);
         mCqi = inRangeOrUnavailable(cqi, 0, 15);
         mTimingAdvance = inRangeOrUnavailable(timingAdvance, 0, 1282);
         updateLevel(null, null);
@@ -143,7 +143,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         this(convertRssiAsuToDBm(lte.signalStrength),
                 lte.rsrp != CellInfo.UNAVAILABLE ? -lte.rsrp : lte.rsrp,
                 lte.rsrq != CellInfo.UNAVAILABLE ? -lte.rsrq : lte.rsrq,
-                lte.rssnr, lte.cqi, lte.timingAdvance);
+                convertRssnrUnitFromTenDbToDB(lte.rssnr), lte.cqi, lte.timingAdvance);
     }
 
     /** @hide */
@@ -208,10 +208,10 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     };
     // Lifted from Default carrier configs and max range of RSSNR
     private static final int[] sRssnrThresholds = new int[] {
-            -30, /* SIGNAL_STRENGTH_POOR */
-            10,  /* SIGNAL_STRENGTH_MODERATE */
-            45,  /* SIGNAL_STRENGTH_GOOD */
-            130  /* SIGNAL_STRENGTH_GREAT */
+            -3, /* SIGNAL_STRENGTH_POOR */
+            1,  /* SIGNAL_STRENGTH_MODERATE */
+            5,  /* SIGNAL_STRENGTH_GOOD */
+            13  /* SIGNAL_STRENGTH_GREAT */
     };
     private static final int sRsrpBoost = 0;
 
@@ -554,6 +554,10 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
      */
     private static void log(String s) {
         Rlog.w(LOG_TAG, s);
+    }
+
+    private static int convertRssnrUnitFromTenDbToDB(int rssnr) {
+        return rssnr / 10;
     }
 
     private static int convertRssiAsuToDBm(int rssiAsu) {

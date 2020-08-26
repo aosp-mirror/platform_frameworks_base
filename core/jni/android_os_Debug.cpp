@@ -40,7 +40,7 @@
 #include <utils/misc.h>
 #include <utils/String8.h>
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include <dmabufinfo/dmabufinfo.h>
@@ -846,8 +846,10 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
     } cfg_state = CONFIG_UNKNOWN;
 
     if (cfg_state == CONFIG_UNKNOWN) {
-        const std::map<std::string, std::string> configs =
-            vintf::VintfObject::GetInstance()->getRuntimeInfo()->kernelConfigs();
+        auto runtime_info = vintf::VintfObject::GetInstance()->getRuntimeInfo(
+                vintf::RuntimeInfo::FetchFlag::CONFIG_GZ);
+        CHECK(runtime_info != nullptr) << "Kernel configs cannot be fetched. b/151092221";
+        const std::map<std::string, std::string>& configs = runtime_info->kernelConfigs();
         std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
         cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
     }
@@ -911,7 +913,7 @@ int register_android_os_Debug(JNIEnv *env)
 {
     jclass clazz = env->FindClass("android/os/Debug$MemoryInfo");
 
-    // Sanity check the number of other statistics expected in Java matches here.
+    // Check the number of other statistics expected in Java matches here.
     jfieldID numOtherStats_field = env->GetStaticFieldID(clazz, "NUM_OTHER_STATS", "I");
     jint numOtherStats = env->GetStaticIntField(clazz, numOtherStats_field);
     jfieldID numDvkStats_field = env->GetStaticFieldID(clazz, "NUM_DVK_STATS", "I");

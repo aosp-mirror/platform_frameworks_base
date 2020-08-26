@@ -22,7 +22,6 @@
 
 #include <map>
 #include <mutex>
-#include <set>
 #include <string>
 
 #include <stdio.h>
@@ -45,7 +44,7 @@ public:
     void Startup();
 
     /*
-     * Dummy initializer for tests.
+     * No-op initializer for tests.
      */
     void StartupForTest();
 

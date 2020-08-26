@@ -17,19 +17,17 @@
 #ifndef METRIC_PRODUCER_H
 #define METRIC_PRODUCER_H
 
-#include <shared_mutex>
-
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
+#include <utils/RefBase.h>
+
+#include <unordered_map>
+
 #include "HashableDimensionKey.h"
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
 #include "config/ConfigKey.h"
 #include "matchers/matcher_util.h"
 #include "packages/PackageInfoListener.h"
-
-#include <log/logprint.h>
-#include <utils/RefBase.h>
-#include <unordered_map>
 
 namespace android {
 namespace os {

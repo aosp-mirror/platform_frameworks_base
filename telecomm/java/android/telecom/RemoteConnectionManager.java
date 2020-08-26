@@ -73,6 +73,37 @@ public class RemoteConnectionManager {
         return null;
     }
 
+    /**
+     * Ask a {@code RemoteConnectionService} to create a {@code RemoteConference}.
+     * @param connectionManagerPhoneAccount See description at
+     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the incoming conference call.
+     * @param isIncoming {@code true} if it's an incoming conference.
+     * @return
+     */
+    public RemoteConference createRemoteConference(
+            PhoneAccountHandle connectionManagerPhoneAccount,
+            ConnectionRequest request,
+            boolean isIncoming) {
+        PhoneAccountHandle accountHandle = request.getAccountHandle();
+        if (accountHandle == null) {
+            throw new IllegalArgumentException("accountHandle must be specified.");
+        }
+
+        ComponentName componentName = request.getAccountHandle().getComponentName();
+        if (!mRemoteConnectionServices.containsKey(componentName)) {
+            throw new UnsupportedOperationException("accountHandle not supported: "
+                    + componentName);
+        }
+
+        RemoteConnectionService remoteService = mRemoteConnectionServices.get(componentName);
+        if (remoteService != null) {
+            return remoteService.createRemoteConference(
+                    connectionManagerPhoneAccount, request, isIncoming);
+        }
+        return null;
+    }
+
     public void conferenceRemoteConnections(RemoteConnection a, RemoteConnection b) {
         if (a.getConnectionService() == b.getConnectionService()) {
             try {

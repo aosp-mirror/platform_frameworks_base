@@ -266,7 +266,6 @@ public final class PreciseDataConnectionState implements Parcelable {
      *
      * @return the ApnSetting that was used to configure this data connection.
      */
-    // FIXME: This shouldn't be nullable; update once the ApnSetting is supplied correctly
     public @Nullable ApnSetting getApnSetting() {
         return mApnSetting;
     }

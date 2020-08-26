@@ -35,7 +35,7 @@ interface IMbmsDownloadService
 
     int setTempFileRootDirectory(int subId, String rootDirectoryPath);
 
-    int addServiceAnnouncementFile(int subId, in byte[] fileContents);
+    int addServiceAnnouncement(int subId, in byte[] contents);
 
     int download(in DownloadRequest downloadRequest);
 

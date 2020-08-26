@@ -1,5 +1,4 @@
-/* //device/libs/android_runtime/android_server_AlarmManagerService.cpp
-**
+/*
 ** Copyright 2006, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +18,8 @@
 
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
+#include <android-base/file.h>
+#include <android-base/unique_fd.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
@@ -75,8 +76,8 @@ typedef std::array<int, N_ANDROID_TIMERFDS> TimerFds;
 class AlarmImpl
 {
 public:
-    AlarmImpl(const TimerFds &fds, int epollfd, int rtc_id) :
-        fds{fds}, epollfd{epollfd}, rtc_id{rtc_id} { }
+    AlarmImpl(const TimerFds &fds, int epollfd, const std::string& rtc_dev) :
+        fds{fds}, epollfd{epollfd}, rtc_dev{rtc_dev} { }
     ~AlarmImpl();
 
     int set(int type, struct timespec *ts);
@@ -87,7 +88,7 @@ public:
 private:
     const TimerFds fds;
     const int epollfd;
-    const int rtc_id;
+    std::string rtc_dev;
 };
 
 AlarmImpl::~AlarmImpl()
@@ -132,38 +133,24 @@ int AlarmImpl::getTime(int type, struct itimerspec *spec)
 
 int AlarmImpl::setTime(struct timeval *tv)
 {
-    struct rtc_time rtc;
-    struct tm tm, *gmtime_res;
-    int fd;
-    int res;
-
-    res = settimeofday(tv, NULL);
-    if (res < 0) {
-        ALOGV("settimeofday() failed: %s\n", strerror(errno));
+    if (settimeofday(tv, NULL) == -1) {
+        ALOGV("settimeofday() failed: %s", strerror(errno));
         return -1;
     }
 
-    if (rtc_id < 0) {
-        ALOGV("Not setting RTC because wall clock RTC was not found");
-        errno = ENODEV;
+    android::base::unique_fd fd{open(rtc_dev.c_str(), O_RDWR)};
+    if (!fd.ok()) {
+        ALOGE("Unable to open %s: %s", rtc_dev.c_str(), strerror(errno));
         return -1;
     }
 
-    android::String8 rtc_dev = String8::format("/dev/rtc%d", rtc_id);
-    fd = open(rtc_dev.string(), O_RDWR);
-    if (fd < 0) {
-        ALOGV("Unable to open %s: %s\n", rtc_dev.string(), strerror(errno));
-        return res;
+    struct tm tm;
+    if (!gmtime_r(&tv->tv_sec, &tm)) {
+        ALOGV("gmtime_r() failed: %s", strerror(errno));
+        return -1;
     }
 
-    gmtime_res = gmtime_r(&tv->tv_sec, &tm);
-    if (!gmtime_res) {
-        ALOGV("gmtime_r() failed: %s\n", strerror(errno));
-        res = -1;
-        goto done;
-    }
-
-    memset(&rtc, 0, sizeof(rtc));
+    struct rtc_time rtc = {};
     rtc.tm_sec = tm.tm_sec;
     rtc.tm_min = tm.tm_min;
     rtc.tm_hour = tm.tm_hour;
@@ -173,12 +160,12 @@ int AlarmImpl::setTime(struct timeval *tv)
     rtc.tm_wday = tm.tm_wday;
     rtc.tm_yday = tm.tm_yday;
     rtc.tm_isdst = tm.tm_isdst;
-    res = ioctl(fd, RTC_SET_TIME, &rtc);
-    if (res < 0)
-        ALOGV("RTC_SET_TIME ioctl failed: %s\n", strerror(errno));
-done:
-    close(fd);
-    return res;
+    if (ioctl(fd, RTC_SET_TIME, &rtc) == -1) {
+        ALOGV("RTC_SET_TIME ioctl failed: %s", strerror(errno));
+        return -1;
+    }
+
+    return 0;
 }
 
 int AlarmImpl::waitForAlarm()
@@ -251,65 +238,6 @@ static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv*, jobjec
     return 0;
 }
 
-static const char rtc_sysfs[] = "/sys/class/rtc";
-
-static bool rtc_is_hctosys(unsigned int rtc_id)
-{
-    android::String8 hctosys_path = String8::format("%s/rtc%u/hctosys",
-            rtc_sysfs, rtc_id);
-    FILE *file = fopen(hctosys_path.string(), "re");
-    if (!file) {
-        ALOGE("failed to open %s: %s", hctosys_path.string(), strerror(errno));
-        return false;
-    }
-
-    unsigned int hctosys;
-    bool ret = false;
-    int err = fscanf(file, "%u", &hctosys);
-    if (err == EOF)
-        ALOGE("failed to read from %s: %s", hctosys_path.string(),
-                strerror(errno));
-    else if (err == 0)
-        ALOGE("%s did not have expected contents", hctosys_path.string());
-    else
-        ret = hctosys;
-
-    fclose(file);
-    return ret;
-}
-
-static int wall_clock_rtc()
-{
-    std::unique_ptr<DIR, int(*)(DIR*)> dir(opendir(rtc_sysfs), closedir);
-    if (!dir.get()) {
-        ALOGE("failed to open %s: %s", rtc_sysfs, strerror(errno));
-        return -1;
-    }
-
-    struct dirent *dirent;
-    while (errno = 0, dirent = readdir(dir.get())) {
-        unsigned int rtc_id;
-        int matched = sscanf(dirent->d_name, "rtc%u", &rtc_id);
-
-        if (matched < 0)
-            break;
-        else if (matched != 1)
-            continue;
-
-        if (rtc_is_hctosys(rtc_id)) {
-            ALOGV("found wall clock RTC %u", rtc_id);
-            return rtc_id;
-        }
-    }
-
-    if (errno == 0)
-        ALOGW("no wall clock RTC found");
-    else
-        ALOGE("failed to enumerate RTCs: %s", strerror(errno));
-
-    return -1;
-}
-
 static void log_timerfd_create_error(clockid_t id)
 {
     if (errno == EINVAL) {
@@ -343,8 +271,7 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
 
     epollfd = epoll_create(fds.size());
     if (epollfd < 0) {
-        ALOGE("epoll_create(%zu) failed: %s", fds.size(),
-                strerror(errno));
+        ALOGE("epoll_create(%zu) failed: %s", fds.size(), strerror(errno));
         return 0;
     }
 
@@ -360,7 +287,19 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
         }
     }
 
-    AlarmImpl *ret = new AlarmImpl(fds, epollfd, wall_clock_rtc());
+    // Find the wall clock RTC. We expect this always to be /dev/rtc0, but
+    // check the /dev/rtc symlink first so that legacy devices that don't use
+    // rtc0 can add a symlink rather than need to carry a local patch to this
+    // code.
+    //
+    // TODO: if you're reading this in a world where all devices are using the
+    // GKI, you can remove the readlink and just assume /dev/rtc0.
+    std::string dev_rtc;
+    if (!android::base::Readlink("/dev/rtc", &dev_rtc)) {
+        dev_rtc = "/dev/rtc0";
+    }
+
+    std::unique_ptr<AlarmImpl> alarm{new AlarmImpl(fds, epollfd, dev_rtc)};
 
     for (size_t i = 0; i < fds.size(); i++) {
         epoll_event event;
@@ -370,13 +309,11 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
         int err = epoll_ctl(epollfd, EPOLL_CTL_ADD, fds[i], &event);
         if (err < 0) {
             ALOGE("epoll_ctl(EPOLL_CTL_ADD) failed: %s", strerror(errno));
-            delete ret;
             return 0;
         }
     }
 
-    struct itimerspec spec;
-    memset(&spec, 0, sizeof(spec));
+    struct itimerspec spec = {};
     /* 0 = disarmed; the timerfd doesn't need to be armed to get
        RTC change notifications, just set up as cancelable */
 
@@ -384,11 +321,10 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
             TFD_TIMER_ABSTIME | TFD_TIMER_CANCEL_ON_SET, &spec, NULL);
     if (err < 0) {
         ALOGE("timerfd_settime() failed: %s", strerror(errno));
-        delete ret;
         return 0;
     }
 
-    return reinterpret_cast<jlong>(ret);
+    return reinterpret_cast<jlong>(alarm.release());
 }
 
 static jlong android_server_AlarmManagerService_getNextAlarm(JNIEnv*, jobject, jlong nativeData, jint type)

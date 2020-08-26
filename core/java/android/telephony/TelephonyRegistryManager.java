@@ -18,7 +18,6 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -109,7 +108,6 @@ public class TelephonyRegistryManager {
         IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
             @Override
             public void onSubscriptionsChanged () {
-                Log.d(TAG, "onSubscriptionsChangedListener callback received.");
                 executor.execute(() -> listener.onSubscriptionsChanged());
             }
         };
@@ -248,7 +246,6 @@ public class TelephonyRegistryManager {
      * @param incomingNumber incoming phone number.
      * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
             @Nullable String incomingNumber) {

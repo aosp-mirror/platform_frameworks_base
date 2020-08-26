@@ -60,13 +60,6 @@ public class TetherUtilTest {
     }
 
     @Test
-    public void isEntitlementCheckRequired_noConfigManager_returnTrue() {
-        doReturn(null).when(mContext).getSystemService(Context.CARRIER_CONFIG_SERVICE);
-
-        assertThat(TetherUtil.isEntitlementCheckRequired(mContext)).isTrue();
-    }
-
-    @Test
     public void isTetherAvailable_supported_configDisallowed_hasUserRestriction_returnTrue() {
         setupIsTetherAvailable(true, true, true);
 

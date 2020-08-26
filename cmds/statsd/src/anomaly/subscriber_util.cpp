@@ -17,10 +17,6 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include <android/os/IIncidentManager.h>
-#include <android/os/IncidentReportArgs.h>
-#include <binder/IServiceManager.h>
-
 #include "external/Perfetto.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"

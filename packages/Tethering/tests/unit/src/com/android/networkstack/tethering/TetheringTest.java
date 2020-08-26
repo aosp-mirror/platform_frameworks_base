@@ -16,6 +16,7 @@
 
 package com.android.networkstack.tethering;
 
+import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_NCM;
@@ -39,7 +40,6 @@ import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
-import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -48,6 +48,7 @@ import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.net.module.util.Inet4AddressUtils.intToInet4AddressHTH;
 import static com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
 import static com.android.networkstack.tethering.UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES;
 
@@ -81,6 +82,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -141,7 +143,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.testutils.MiscAssertsKt;
+import com.android.testutils.MiscAsserts;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -204,6 +206,7 @@ public class TetheringTest {
     @Mock private EthernetManager mEm;
     @Mock private TetheringNotificationUpdater mNotificationUpdater;
     @Mock private BpfCoordinator mBpfCoordinator;
+    @Mock private PackageManager mPackageManager;
 
     private final MockIpServerDependencies mIpServerDependencies =
             spy(new MockIpServerDependencies());
@@ -261,6 +264,11 @@ public class TetheringTest {
             if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
             if (Context.ETHERNET_SERVICE.equals(name)) return mEm;
             return super.getSystemService(name);
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mPackageManager;
         }
 
         @Override
@@ -329,17 +337,17 @@ public class TetheringTest {
     }
 
     public class MockTetheringDependencies extends TetheringDependencies {
-        StateMachine mUpstreamNetworkMonitorMasterSM;
+        StateMachine mUpstreamNetworkMonitorSM;
         ArrayList<IpServer> mIpv6CoordinatorNotifyList;
 
         public void reset() {
-            mUpstreamNetworkMonitorMasterSM = null;
+            mUpstreamNetworkMonitorSM = null;
             mIpv6CoordinatorNotifyList = null;
         }
 
         @Override
-        public BpfCoordinator getBpfCoordinator(Handler handler, INetd netd,
-                SharedLog log, BpfCoordinator.Dependencies deps) {
+        public BpfCoordinator getBpfCoordinator(
+                BpfCoordinator.Dependencies deps) {
             return mBpfCoordinator;
         }
 
@@ -360,7 +368,7 @@ public class TetheringTest {
         @Override
         public UpstreamNetworkMonitor getUpstreamNetworkMonitor(Context ctx,
                 StateMachine target, SharedLog log, int what) {
-            mUpstreamNetworkMonitorMasterSM = target;
+            mUpstreamNetworkMonitorSM = target;
             return mUpstreamNetworkMonitor;
         }
 
@@ -424,6 +432,11 @@ public class TetheringTest {
         @Override
         public TetheringNotificationUpdater getNotificationUpdater(Context ctx, Looper looper) {
             return mNotificationUpdater;
+        }
+
+        @Override
+        public boolean isTetheringDenied() {
+            return false;
         }
     }
 
@@ -898,8 +911,8 @@ public class TetheringTest {
         initTetheringUpstream(upstreamState);
 
         // Upstream LinkProperties changed: UpstreamNetworkMonitor sends EVENT_ON_LINKPROPERTIES.
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamState);
@@ -1113,7 +1126,7 @@ public class TetheringTest {
         verify(mNetd, times(1)).ipfwdEnableForwarding(TETHERING_NAME);
         // This never gets called because of the exception thrown above.
         verify(mNetd, times(0)).tetherStartWithConfiguration(any());
-        // When the master state machine transitions to an error state it tells
+        // When the main state machine transitions to an error state it tells
         // downstream interfaces, which causes us to tell Wi-Fi about the error
         // so it can take down AP mode.
         verify(mNetd, times(1)).tetherApplyDnsInterfaces();
@@ -1347,7 +1360,7 @@ public class TetheringTest {
         assertEquals(0, parcel.localOnlyList.length);
         assertEquals(0, parcel.erroredIfaceList.length);
         assertEquals(0, parcel.lastErrorList.length);
-        MiscAssertsKt.assertFieldCountEquals(5, TetherStatesParcel.class);
+        MiscAsserts.assertFieldCountEquals(5, TetherStatesParcel.class);
     }
 
     @Test
@@ -1740,8 +1753,8 @@ public class TetheringTest {
 
     @Test
     public void testUpstreamNetworkChanged() {
-        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
-                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final Tethering.TetherMainSM stateMachine = (Tethering.TetherMainSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
@@ -1752,8 +1765,8 @@ public class TetheringTest {
 
     @Test
     public void testUpstreamCapabilitiesChanged() {
-        final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
-                mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
+        final Tethering.TetherMainSM stateMachine = (Tethering.TetherMainSM)
+                mTetheringDependencies.mUpstreamNetworkMonitorSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
         initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
@@ -1878,8 +1891,8 @@ public class TetheringTest {
                 any(), any());
         reset(mNetd, mUsbManager);
         upstreamNetwork = buildV4WifiUpstreamState(ipv4Address, 30, wifiNetwork);
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamNetwork);
@@ -1916,8 +1929,8 @@ public class TetheringTest {
 
         final UpstreamNetworkState upstreamNetwork = buildV4WifiUpstreamState(
                 upstreamAddress, 16, wifiNetwork);
-        mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
-                Tethering.TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+        mTetheringDependencies.mUpstreamNetworkMonitorSM.sendMessage(
+                Tethering.TetherMainSM.EVENT_UPSTREAM_CALLBACK,
                 UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES,
                 0,
                 upstreamNetwork);
@@ -1949,6 +1962,23 @@ public class TetheringTest {
         assertContains(Arrays.asList(mTethering.getTetherableIfaces()), TEST_ETH_IFNAME);
         assertEquals(TETHER_ERROR_IFACE_CFG_ERROR, mTethering.getLastTetherError(TEST_USB_IFNAME));
         assertEquals(TETHER_ERROR_IFACE_CFG_ERROR, mTethering.getLastTetherError(TEST_ETH_IFNAME));
+    }
+
+    @Test
+    public void testProvisioningNeededButUnavailable() throws Exception {
+        assertTrue(mTethering.isTetheringSupported());
+        verify(mPackageManager, never()).getPackageInfo(PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
+
+        setupForRequiredProvisioning();
+        assertTrue(mTethering.isTetheringSupported());
+        verify(mPackageManager).getPackageInfo(PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
+        reset(mPackageManager);
+
+        doThrow(PackageManager.NameNotFoundException.class).when(mPackageManager).getPackageInfo(
+                PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
+        setupForRequiredProvisioning();
+        assertFalse(mTethering.isTetheringSupported());
+        verify(mPackageManager).getPackageInfo(PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an

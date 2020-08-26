@@ -22,7 +22,7 @@
 #include "core_jni_helpers.h"
 
 #include <HardwareBitmapUploader.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>

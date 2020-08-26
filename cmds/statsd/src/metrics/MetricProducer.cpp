@@ -29,7 +29,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
 
 // for ActiveMetric
 const int FIELD_ID_ACTIVE_METRIC_ID = 1;

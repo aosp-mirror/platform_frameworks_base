@@ -95,6 +95,19 @@
 
 #include "nativebridge/native_bridge.h"
 
+/* Functions in the callchain during the fork shall not be protected with
+   Armv8.3-A Pointer Authentication, otherwise child will not be able to return. */
+#ifdef __ARM_FEATURE_PAC_DEFAULT
+#ifdef __ARM_FEATURE_BTI_DEFAULT
+#define NO_PAC_FUNC __attribute__((target("branch-protection=bti")))
+#else
+#define NO_PAC_FUNC __attribute__((target("branch-protection=none")))
+#endif /* __ARM_FEATURE_BTI_DEFAULT */
+#else /* !__ARM_FEATURE_PAC_DEFAULT */
+#define NO_PAC_FUNC
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
+
+
 namespace {
 
 // TODO (chriswailes): Add a function to initialize native Zygote data.
@@ -494,8 +507,16 @@ static void UnsetChldSignalHandler() {
 
 // Calls POSIX setgroups() using the int[] object as an argument.
 // A nullptr argument is tolerated.
-static void SetGids(JNIEnv* env, jintArray managed_gids, fail_fn_t fail_fn) {
+static void SetGids(JNIEnv* env, jintArray managed_gids, jboolean is_child_zygote,
+                    fail_fn_t fail_fn) {
   if (managed_gids == nullptr) {
+    if (is_child_zygote) {
+      // For child zygotes like webview and app zygote, we want to clear out
+      // any supplemental groups the parent zygote had.
+      if (setgroups(0, NULL) == -1) {
+        fail_fn(CREATE_ERROR("Failed to remove supplementary groups for child zygote"));
+      }
+    }
     return;
   }
 
@@ -985,7 +1006,23 @@ static void ClearUsapTable() {
   gUsapPoolCount = 0;
 }
 
+NO_PAC_FUNC
+static void PAuthKeyChange(JNIEnv* env) {
+#ifdef __aarch64__
+  unsigned long int hwcaps = getauxval(AT_HWCAP);
+  if (hwcaps & HWCAP_PACA) {
+    const unsigned long key_mask = PR_PAC_APIAKEY | PR_PAC_APIBKEY |
+                                   PR_PAC_APDAKEY | PR_PAC_APDBKEY | PR_PAC_APGAKEY;
+    if (prctl(PR_PAC_RESET_KEYS, key_mask, 0, 0, 0) != 0) {
+      ALOGE("Failed to change the PAC keys: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "PAC key change failed.");
+    }
+  }
+#endif
+}
+
 // Utility routine to fork a process from the zygote.
+NO_PAC_FUNC
 static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
                         const std::vector<int>& fds_to_close,
                         const std::vector<int>& fds_to_ignore,
@@ -1036,6 +1073,7 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
     }
 
     // The child process.
+    PAuthKeyChange(env);
     PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
@@ -1133,7 +1171,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     }
   }
 
-  SetGids(env, gids, fail_fn);
+  SetGids(env, gids, is_child_zygote, fail_fn);
   SetRLimits(env, rlimits, fail_fn);
 
   if (need_pre_initialize_native_bridge) {
@@ -1210,8 +1248,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 #ifdef ANDROID_EXPERIMENTAL_MTE
       SetTagCheckingLevel(PR_MTE_TCF_SYNC);
 #endif
-      // TODO(pcc): Use SYNC here once the allocator supports it.
-      heap_tagging_level = M_HEAP_TAGGING_LEVEL_ASYNC;
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_SYNC;
       break;
     default:
 #ifdef ANDROID_EXPERIMENTAL_MTE
@@ -1486,6 +1523,7 @@ static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jcl
   PreApplicationInit();
 }
 
+NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits,
@@ -1533,6 +1571,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     return pid;
 }
 
+NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits, jlong permitted_capabilities,
@@ -1600,6 +1639,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
  * @param is_priority_fork  Controls the nice level assigned to the newly created process
  * @return
  */
+NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkUsap(JNIEnv* env,
                                                           jclass,
                                                           jint read_pipe_fd,

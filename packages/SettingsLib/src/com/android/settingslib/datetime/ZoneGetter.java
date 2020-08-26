@@ -32,11 +32,10 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.text.BidiFormatter;
 import androidx.core.text.TextDirectionHeuristicsCompat;
 
+import com.android.i18n.timezone.CountryTimeZones;
+import com.android.i18n.timezone.CountryTimeZones.TimeZoneMapping;
+import com.android.i18n.timezone.TimeZoneFinder;
 import com.android.settingslib.R;
-
-import libcore.timezone.CountryTimeZones;
-import libcore.timezone.CountryTimeZones.TimeZoneMapping;
-import libcore.timezone.TimeZoneFinder;
 
 import org.xmlpull.v1.XmlPullParserException;
 

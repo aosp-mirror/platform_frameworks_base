@@ -1,0 +1,74 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsKeystoreTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.RequiresDevice"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.SignatureTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.RsaSignaturePerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.RsaKeyGenPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.RsaCipherPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.MacTest#testLargeMsgKat"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.KeyPairGeneratorTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.KeyGeneratorTest#testHmacKeySupportedSizes"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.HmacMacPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.EcdsaSignaturePerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.EcKeyGenPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.DesCipherPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.CipherTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.AttestationPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.AndroidKeyStoreTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.AesCipherPerformanceTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.AESCipherNistCavpKatTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.DESedeECBPKCS7PaddingCipherTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.DESedeECBNoPaddingCipherTest"
+        },
+        {
+          "exclude-filter": "android.keystore.cts.DESedeECBPKCS7PaddingCipherTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsKeystoreTestCases"
+    }
+  ]
+}

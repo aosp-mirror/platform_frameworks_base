@@ -19,10 +19,8 @@
 #include "LogEvent.h"
 
 #include <condition_variable>
-#include <memory>
 #include <mutex>
 #include <queue>
-#include <thread>
 
 namespace android {
 namespace os {

@@ -19,13 +19,12 @@ package android.text.format;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.icu.text.DateFormatSymbols;
+import android.icu.text.DateTimePatternGenerator;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
-
-import libcore.icu.ICU;
-import libcore.icu.LocaleData;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -251,7 +250,8 @@ public class DateFormat {
      * @return a string pattern suitable for use with {@link java.text.SimpleDateFormat}.
      */
     public static String getBestDateTimePattern(Locale locale, String skeleton) {
-        return ICU.getBestDateTimePattern(skeleton, locale);
+        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(locale);
+        return dtpg.getBestPattern(skeleton);
     }
 
     /**
@@ -285,8 +285,10 @@ public class DateFormat {
      */
     @UnsupportedAppUsage
     public static String getTimeFormatString(Context context, int userHandle) {
-        final LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        return is24HourFormat(context, userHandle) ? d.timeFormat_Hm : d.timeFormat_hm;
+        DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstance(
+                context.getResources().getConfiguration().locale);
+        return is24HourFormat(context, userHandle) ? dtpg.getBestPattern("Hm")
+            : dtpg.getBestPattern("hm");
     }
 
     /**
@@ -333,7 +335,52 @@ public class DateFormat {
      * order returned here.
      */
     public static char[] getDateFormatOrder(Context context) {
-        return ICU.getDateFormatOrder(getDateFormatString(context));
+        return getDateFormatOrder(getDateFormatString(context));
+    }
+
+    /**
+     * @hide Used by internal framework class {@link android.widget.DatePickerSpinnerDelegate}.
+     */
+    public static char[] getDateFormatOrder(String pattern) {
+        char[] result = new char[3];
+        int resultIndex = 0;
+        boolean sawDay = false;
+        boolean sawMonth = false;
+        boolean sawYear = false;
+
+        for (int i = 0; i < pattern.length(); ++i) {
+            char ch = pattern.charAt(i);
+            if (ch == 'd' || ch == 'L' || ch == 'M' || ch == 'y') {
+                if (ch == 'd' && !sawDay) {
+                    result[resultIndex++] = 'd';
+                    sawDay = true;
+                } else if ((ch == 'L' || ch == 'M') && !sawMonth) {
+                    result[resultIndex++] = 'M';
+                    sawMonth = true;
+                } else if ((ch == 'y') && !sawYear) {
+                    result[resultIndex++] = 'y';
+                    sawYear = true;
+                }
+            } else if (ch == 'G') {
+                // Ignore the era specifier, if present.
+            } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+                throw new IllegalArgumentException("Bad pattern character '" + ch + "' in "
+                    + pattern);
+            } else if (ch == '\'') {
+                if (i < pattern.length() - 1 && pattern.charAt(i + 1) == '\'') {
+                    ++i;
+                } else {
+                    i = pattern.indexOf('\'', i + 1);
+                    if (i == -1) {
+                        throw new IllegalArgumentException("Bad quoting in " + pattern);
+                    }
+                    ++i;
+                }
+            } else {
+                // Ignore spaces and punctuation.
+            }
+        }
+        return result;
     }
 
     private static String getDateFormatString(Context context) {
@@ -428,7 +475,8 @@ public class DateFormat {
         SpannableStringBuilder s = new SpannableStringBuilder(inFormat);
         int count;
 
-        LocaleData localeData = LocaleData.get(Locale.getDefault());
+        DateFormatSymbols dfs = getIcuDateFormatSymbols(Locale.getDefault());
+        String[] amPm = dfs.getAmPmStrings();
 
         int len = inFormat.length();
 
@@ -450,14 +498,14 @@ public class DateFormat {
             switch (c) {
                 case 'A':
                 case 'a':
-                    replacement = localeData.amPm[inDate.get(Calendar.AM_PM) - Calendar.AM];
+                    replacement = amPm[inDate.get(Calendar.AM_PM) - Calendar.AM];
                     break;
                 case 'd':
                     replacement = zeroPad(inDate.get(Calendar.DATE), count);
                     break;
                 case 'c':
                 case 'E':
-                    replacement = getDayOfWeekString(localeData,
+                    replacement = getDayOfWeekString(dfs,
                                                      inDate.get(Calendar.DAY_OF_WEEK), count, c);
                     break;
                 case 'K': // hour in am/pm (0-11)
@@ -485,8 +533,7 @@ public class DateFormat {
                     break;
                 case 'L':
                 case 'M':
-                    replacement = getMonthString(localeData,
-                                                 inDate.get(Calendar.MONTH), count, c);
+                    replacement = getMonthString(dfs, inDate.get(Calendar.MONTH), count, c);
                     break;
                 case 'm':
                     replacement = zeroPad(inDate.get(Calendar.MINUTE), count);
@@ -519,25 +566,29 @@ public class DateFormat {
         }
     }
 
-    private static String getDayOfWeekString(LocaleData ld, int day, int count, int kind) {
+    private static String getDayOfWeekString(DateFormatSymbols dfs, int day, int count, int kind) {
         boolean standalone = (kind == 'c');
+        int context = standalone ? DateFormatSymbols.STANDALONE : DateFormatSymbols.FORMAT;
+        final int width;
         if (count == 5) {
-            return standalone ? ld.tinyStandAloneWeekdayNames[day] : ld.tinyWeekdayNames[day];
+            width = DateFormatSymbols.NARROW;
         } else if (count == 4) {
-            return standalone ? ld.longStandAloneWeekdayNames[day] : ld.longWeekdayNames[day];
+            width = DateFormatSymbols.WIDE;
         } else {
-            return standalone ? ld.shortStandAloneWeekdayNames[day] : ld.shortWeekdayNames[day];
+            width = DateFormatSymbols.ABBREVIATED;
         }
+        return dfs.getWeekdays(context, width)[day];
     }
 
-    private static String getMonthString(LocaleData ld, int month, int count, int kind) {
+    private static String getMonthString(DateFormatSymbols dfs, int month, int count, int kind) {
         boolean standalone = (kind == 'L');
+        int monthContext = standalone ? DateFormatSymbols.STANDALONE : DateFormatSymbols.FORMAT;
         if (count == 5) {
-            return standalone ? ld.tinyStandAloneMonthNames[month] : ld.tinyMonthNames[month];
+            return dfs.getMonths(monthContext, DateFormatSymbols.NARROW)[month];
         } else if (count == 4) {
-            return standalone ? ld.longStandAloneMonthNames[month] : ld.longMonthNames[month];
+            return dfs.getMonths(monthContext, DateFormatSymbols.WIDE)[month];
         } else if (count == 3) {
-            return standalone ? ld.shortStandAloneMonthNames[month] : ld.shortMonthNames[month];
+            return dfs.getMonths(monthContext, DateFormatSymbols.ABBREVIATED)[month];
         } else {
             // Calendar.JANUARY == 0, so add 1 to month.
             return zeroPad(month+1, count);
@@ -631,5 +682,17 @@ public class DateFormat {
 
     private static String zeroPad(int inValue, int inMinDigits) {
         return String.format(Locale.getDefault(), "%0" + inMinDigits + "d", inValue);
+    }
+
+    /**
+     * We use Gregorian calendar for date formats in android.text.format and various UI widget
+     * historically. It's a utility method to get an {@link DateFormatSymbols} instance. Note that
+     * {@link DateFormatSymbols} has cache, and external cache is not needed unless same instance is
+     * requested repeatedly in the performance critical code.
+     *
+     * @hide
+     */
+    public static DateFormatSymbols getIcuDateFormatSymbols(Locale locale) {
+        return new DateFormatSymbols(android.icu.util.GregorianCalendar.class, locale);
     }
 }

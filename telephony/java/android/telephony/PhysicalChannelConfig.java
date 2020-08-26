@@ -19,8 +19,8 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import android.telephony.Annotation.NetworkType;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -241,13 +241,13 @@ public final class PhysicalChannelConfig implements Parcelable {
                 .append(",mCellBandwidthDownlinkKhz=")
                 .append(mCellBandwidthDownlinkKhz)
                 .append(",mRat=")
-                .append(mRat)
+                .append(TelephonyManager.getNetworkTypeName(mRat))
                 .append(",mFrequencyRange=")
-                .append(mFrequencyRange)
+                .append(ServiceState.frequencyRangeToString(mFrequencyRange))
                 .append(",mChannelNumber=")
                 .append(mChannelNumber)
                 .append(",mContextIds=")
-                .append(mContextIds.toString())
+                .append(Arrays.toString(mContextIds))
                 .append(",mPhysicalCellId=")
                 .append(mPhysicalCellId)
                 .append("}")

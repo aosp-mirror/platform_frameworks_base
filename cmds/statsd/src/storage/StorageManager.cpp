@@ -23,10 +23,8 @@
 #include "stats_log_util.h"
 
 #include <android-base/file.h>
-#include <dirent.h>
 #include <private/android_filesystem_config.h>
 #include <fstream>
-#include <iostream>
 
 namespace android {
 namespace os {

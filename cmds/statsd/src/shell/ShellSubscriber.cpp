@@ -18,7 +18,6 @@
 
 #include "ShellSubscriber.h"
 
-#include <android-base/file.h>
 #include "matchers/matcher_util.h"
 #include "stats_log_util.h"
 

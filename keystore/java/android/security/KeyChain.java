@@ -343,6 +343,16 @@ public final class KeyChain {
     public static final int KEY_ATTESTATION_FAILURE = 4;
 
     /**
+     * Used by DPC or delegated app in
+     * {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias} or
+     * {@link android.app.admin.DelegatedAdminReceiver#onChoosePrivateKeyAlias} to identify that
+     * the requesting app is not granted access to any key, and nor will the user be able to grant
+     * access manually.
+     */
+    public static final String KEY_ALIAS_SELECTION_DENIED =
+            "android:alias-selection-denied";
+
+    /**
      * Returns an {@code Intent} that can be used for credential
      * installation. The intent may be used without any extras, in
      * which case the user will be able to install credentials from

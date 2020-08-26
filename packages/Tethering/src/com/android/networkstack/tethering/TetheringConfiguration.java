@@ -84,6 +84,9 @@ public class TetheringConfiguration {
     public static final String TETHER_ENABLE_LEGACY_DHCP_SERVER =
             "tether_enable_legacy_dhcp_server";
 
+    public static final String USE_LEGACY_WIFI_P2P_DEDICATED_IP =
+            "use_legacy_wifi_p2p_dedicated_ip";
+
     /**
      * Default value that used to periodic polls tether offload stats from tethering offload HAL
      * to make the data warnings work.
@@ -92,6 +95,7 @@ public class TetheringConfiguration {
 
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
+    public final String[] tetherableWigigRegexs;
     public final String[] tetherableWifiP2pRegexs;
     public final String[] tetherableBluetoothRegexs;
     public final String[] tetherableNcmRegexs;
@@ -101,16 +105,18 @@ public class TetheringConfiguration {
     public final String[] legacyDhcpRanges;
     public final String[] defaultIPv4DNS;
     public final boolean enableLegacyDhcpServer;
-    // TODO: Add to TetheringConfigurationParcel if required.
-    public final boolean enableBpfOffload;
 
     public final String[] provisioningApp;
     public final String provisioningAppNoUi;
     public final int provisioningCheckPeriod;
+    public final String provisioningResponse;
 
     public final int activeDataSubId;
 
     private final int mOffloadPollInterval;
+    // TODO: Add to TetheringConfigurationParcel if required.
+    private final boolean mEnableBpfOffload;
+    private final boolean mEnableWifiP2pDedicatedIp;
 
     public TetheringConfiguration(Context ctx, SharedLog log, int id) {
         final SharedLog configLog = log.forSubComponent("config");
@@ -124,6 +130,7 @@ public class TetheringConfiguration {
         // us an interface name. Careful consideration needs to be given to
         // implications for Settings and for provisioning checks.
         tetherableWifiRegexs = getResourceStringArray(res, R.array.config_tether_wifi_regexs);
+        tetherableWigigRegexs = getResourceStringArray(res, R.array.config_tether_wigig_regexs);
         tetherableWifiP2pRegexs = getResourceStringArray(
                 res, R.array.config_tether_wifi_p2p_regexs);
         tetherableBluetoothRegexs = getResourceStringArray(
@@ -137,18 +144,25 @@ public class TetheringConfiguration {
 
         legacyDhcpRanges = getLegacyDhcpRanges(res);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
-        enableBpfOffload = getEnableBpfOffload(res);
+        mEnableBpfOffload = getEnableBpfOffload(res);
         enableLegacyDhcpServer = getEnableLegacyDhcpServer(res);
 
         provisioningApp = getResourceStringArray(res, R.array.config_mobile_hotspot_provision_app);
-        provisioningAppNoUi = getProvisioningAppNoUi(res);
+        provisioningAppNoUi = getResourceString(res,
+                R.string.config_mobile_hotspot_provision_app_no_ui);
         provisioningCheckPeriod = getResourceInteger(res,
                 R.integer.config_mobile_hotspot_provision_check_period,
                 0 /* No periodic re-check */);
+        provisioningResponse = getResourceString(res,
+                R.string.config_mobile_hotspot_provision_response);
 
         mOffloadPollInterval = getResourceInteger(res,
                 R.integer.config_tether_offload_poll_interval,
                 DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
+
+        mEnableWifiP2pDedicatedIp = getResourceBoolean(res,
+                R.bool.config_tether_enable_legacy_wifi_p2p_dedicated_ip,
+                false /* defaultValue */);
 
         configLog.log(toString());
     }
@@ -161,6 +175,11 @@ public class TetheringConfiguration {
     /** Check whether input interface belong to wifi.*/
     public boolean isWifi(String iface) {
         return matchesDownstreamRegexs(iface, tetherableWifiRegexs);
+    }
+
+    /** Check whether input interface belong to wigig.*/
+    public boolean isWigig(String iface) {
+        return matchesDownstreamRegexs(iface, tetherableWigigRegexs);
     }
 
     /** Check whether this interface is Wifi P2P interface. */
@@ -186,6 +205,11 @@ public class TetheringConfiguration {
     /** Check whether no ui entitlement application is available.*/
     public boolean hasMobileHotspotProvisionApp() {
         return !TextUtils.isEmpty(provisioningAppNoUi);
+    }
+
+    /** Check whether dedicated wifi p2p address is enabled. */
+    public boolean shouldEnableWifiP2pDedicatedIp() {
+        return mEnableWifiP2pDedicatedIp;
     }
 
     /** Does the dumping.*/
@@ -218,10 +242,13 @@ public class TetheringConfiguration {
         pw.println(provisioningAppNoUi);
 
         pw.print("enableBpfOffload: ");
-        pw.println(enableBpfOffload);
+        pw.println(mEnableBpfOffload);
 
         pw.print("enableLegacyDhcpServer: ");
         pw.println(enableLegacyDhcpServer);
+
+        pw.print("enableWifiP2pDedicatedIp: ");
+        pw.println(mEnableWifiP2pDedicatedIp);
     }
 
     /** Returns the string representation of this object.*/
@@ -240,7 +267,7 @@ public class TetheringConfiguration {
                 toIntArray(preferredUpstreamIfaceTypes)));
         sj.add(String.format("provisioningApp:%s", makeString(provisioningApp)));
         sj.add(String.format("provisioningAppNoUi:%s", provisioningAppNoUi));
-        sj.add(String.format("enableBpfOffload:%s", enableBpfOffload));
+        sj.add(String.format("enableBpfOffload:%s", mEnableBpfOffload));
         sj.add(String.format("enableLegacyDhcpServer:%s", enableLegacyDhcpServer));
         return String.format("TetheringConfiguration{%s}", sj.toString());
     }
@@ -277,6 +304,10 @@ public class TetheringConfiguration {
 
     public int getOffloadPollInterval() {
         return mOffloadPollInterval;
+    }
+
+    public boolean isBpfOffloadEnabled() {
+        return mEnableBpfOffload;
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
@@ -337,9 +368,9 @@ public class TetheringConfiguration {
         return copy(LEGACY_DHCP_DEFAULT_RANGE);
     }
 
-    private static String getProvisioningAppNoUi(Resources res) {
+    private static String getResourceString(Resources res, final int resId) {
         try {
-            return res.getString(R.string.config_mobile_hotspot_provision_app_no_ui);
+            return res.getString(resId);
         } catch (Resources.NotFoundException e) {
             return "";
         }

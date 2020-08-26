@@ -1157,7 +1157,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean show4gForLte = false;
         boolean hideLtePlus = false;
         boolean hspaDataDistinguishable;
-        boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
 
         static Config readConfig(Context context) {
@@ -1169,8 +1168,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     res.getBoolean(com.android.internal.R.bool.config_alwaysUseCdmaRssi);
             config.hspaDataDistinguishable =
                     res.getBoolean(R.bool.config_hspa_data_distinguishable);
-            config.inflateSignalStrengths = res.getBoolean(
-                    com.android.internal.R.bool.config_inflateSignalStrength);
 
             CarrierConfigManager configMgr = (CarrierConfigManager)
                     context.getSystemService(Context.CARRIER_CONFIG_SERVICE);

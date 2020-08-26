@@ -228,7 +228,7 @@ public class AppPredictionPerUserService extends
         if (connected) {
             synchronized (mLock) {
                 if (mZombie) {
-                    // Sanity check - shouldn't happen
+                    // Validation check - shouldn't happen
                     if (mRemoteService == null) {
                         Slog.w(TAG, "Cannot resurrect sessions because remote service is null");
                         return;

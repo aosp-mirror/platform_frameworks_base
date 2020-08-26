@@ -26,6 +26,7 @@ using ::testing::Not;
 namespace aapt {
 
 static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xml::XmlResource* res,
+                                                       bool strip_api_annotations,
                                                        std::string* out_str);
 
 TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
@@ -39,7 +40,8 @@ TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
       </manifest>)");
 
   std::string actual;
-  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(),
+                                   false /* strip_api_annotations */, &actual));
 
   ASSERT_THAT(actual, HasSubstr("public static final class permission {"));
   ASSERT_THAT(actual, HasSubstr("public static final class permission_group {"));
@@ -91,7 +93,8 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
       </manifest>)");
 
   std::string actual;
-  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(),
+                                   false /* strip_api_annotations */, &actual));
 
   const char* expected_access_internet = R"(    /**
      * Required to access the internet.
@@ -123,6 +126,55 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
   EXPECT_THAT(actual, HasSubstr(expected_test));
 }
 
+TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresentButNoApiAnnotations) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+        <!-- Required to access the internet.
+             Added in API 1. -->
+        <permission android:name="android.permission.ACCESS_INTERNET" />
+        <!-- @deprecated This permission is for playing outside. -->
+        <permission android:name="android.permission.PLAY_OUTSIDE" />
+        <!-- This is a private permission for system only!
+             @hide
+             @SystemApi -->
+        <permission android:name="android.permission.SECRET" />
+        <!-- @TestApi This is a test only permission. -->
+        <permission android:name="android.permission.TEST_ONLY" />
+      </manifest>)");
+
+  std::string actual;
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(),
+                                   true /* strip_api_annotations */, &actual));
+
+  const char* expected_access_internet = R"(    /**
+     * Required to access the internet.
+     * Added in API 1.
+     */
+    public static final String ACCESS_INTERNET="android.permission.ACCESS_INTERNET";)";
+  EXPECT_THAT(actual, HasSubstr(expected_access_internet));
+
+  const char* expected_play_outside = R"(    /**
+     * @deprecated This permission is for playing outside.
+     */
+    @Deprecated
+    public static final String PLAY_OUTSIDE="android.permission.PLAY_OUTSIDE";)";
+  EXPECT_THAT(actual, HasSubstr(expected_play_outside));
+
+  const char* expected_secret = R"(    /**
+     * This is a private permission for system only!
+     * @hide
+     */
+    public static final String SECRET="android.permission.SECRET";)";
+  EXPECT_THAT(actual, HasSubstr(expected_secret));
+
+  const char* expected_test = R"(    /**
+     * This is a test only permission.
+     */
+    public static final String TEST_ONLY="android.permission.TEST_ONLY";)";
+  EXPECT_THAT(actual, HasSubstr(expected_test));
+}
+
 // This is bad but part of public API behaviour so we need to preserve it.
 TEST(ManifestClassGeneratorTest, LastSeenPermissionWithSameLeafNameTakesPrecedence) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
@@ -135,7 +187,8 @@ TEST(ManifestClassGeneratorTest, LastSeenPermissionWithSameLeafNameTakesPreceden
       </manifest>)");
 
   std::string actual;
-  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(),
+                                   false  /* strip_api_annotations */, &actual));
   EXPECT_THAT(actual, HasSubstr("ACCESS_INTERNET=\"com.android.aapt.test.ACCESS_INTERNET\";"));
   EXPECT_THAT(actual, Not(HasSubstr("ACCESS_INTERNET=\"android.permission.ACCESS_INTERNET\";")));
   EXPECT_THAT(actual, Not(HasSubstr("ACCESS_INTERNET=\"com.android.sample.ACCESS_INTERNET\";")));
@@ -149,11 +202,13 @@ TEST(ManifestClassGeneratorTest, NormalizePermissionNames) {
         </manifest>)");
 
   std::string actual;
-  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(), &actual));
+  ASSERT_TRUE(GetManifestClassText(context.get(), manifest.get(),
+                                   false  /* strip_api_annotations */, &actual));
   EXPECT_THAT(actual, HasSubstr("access_internet=\"android.permission.access-internet\";"));
 }
 
 static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xml::XmlResource* res,
+                                                       bool strip_api_annotations,
                                                        std::string* out_str) {
   std::unique_ptr<ClassDefinition> manifest_class =
       GenerateManifestClass(context->GetDiagnostics(), res);
@@ -162,7 +217,7 @@ static ::testing::AssertionResult GetManifestClassText(IAaptContext* context, xm
   }
 
   StringOutputStream out(out_str);
-  manifest_class->WriteJavaFile(manifest_class.get(), "android", true, &out);
+  manifest_class->WriteJavaFile(manifest_class.get(), "android", true, strip_api_annotations, &out);
   out.Flush();
   return ::testing::AssertionSuccess();
 }

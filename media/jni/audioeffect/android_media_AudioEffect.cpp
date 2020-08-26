@@ -337,20 +337,20 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     }
 
     // create the native AudioEffect object
-    lpAudioEffect = new AudioEffect(typeStr,
-                                    String16(opPackageNameStr.c_str()),
-                                    uuidStr,
-                                    priority,
-                                    effectCallback,
-                                    &lpJniStorage->mCallbackData,
-                                    (audio_session_t) sessionId,
-                                    AUDIO_IO_HANDLE_NONE,
-                                    device);
+    lpAudioEffect = new AudioEffect(String16(opPackageNameStr.c_str()));
     if (lpAudioEffect == 0) {
         ALOGE("Error creating AudioEffect");
         goto setup_failure;
     }
 
+    lpAudioEffect->set(typeStr,
+                       uuidStr,
+                       priority,
+                       effectCallback,
+                       &lpJniStorage->mCallbackData,
+                       (audio_session_t) sessionId,
+                       AUDIO_IO_HANDLE_NONE,
+                       device);
     lStatus = AudioEffectJni::translateNativeErrorToJava(lpAudioEffect->initCheck());
     if (lStatus != AUDIOEFFECT_SUCCESS && lStatus != AUDIOEFFECT_ERROR_ALREADY_EXISTS) {
         ALOGE("AudioEffect initCheck failed %d", lStatus);

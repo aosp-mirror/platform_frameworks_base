@@ -35,7 +35,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
-import libcore.timezone.ZoneInfoDb;
+import com.android.i18n.timezone.ZoneInfoDb;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
