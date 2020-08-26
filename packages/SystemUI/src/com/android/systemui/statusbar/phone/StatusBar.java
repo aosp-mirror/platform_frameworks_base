@@ -1506,9 +1506,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager.registerStatusBar(
                 /* statusBar= */ this, getBouncerContainer(),
                 mNotificationPanelViewController, mBiometricUnlockController,
-                mDismissCallbackRegistry,
                 mNotificationShadeWindowView.findViewById(R.id.lock_icon_container),
-                mStackScroller, mKeyguardBypassController, mFalsingManager);
+                mStackScroller, mKeyguardBypassController);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);

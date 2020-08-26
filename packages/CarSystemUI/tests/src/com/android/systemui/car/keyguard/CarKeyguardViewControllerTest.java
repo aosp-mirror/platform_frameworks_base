@@ -26,7 +26,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -35,20 +34,17 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.CarSystemUiTest;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
-import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -58,31 +54,36 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
-
 @CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class CarKeyguardViewControllerTest extends SysuiTestCase {
 
-    private TestableCarKeyguardViewController mCarKeyguardViewController;
+    private CarKeyguardViewController mCarKeyguardViewController;
 
     @Mock
     private OverlayViewGlobalStateController mOverlayViewGlobalStateController;
     @Mock
-    private KeyguardBouncer mBouncer;
-    @Mock
-    private CarNavigationBarController mCarNavigationBarController;
-    @Mock
     private CarKeyguardViewController.OnKeyguardCancelClickedListener mCancelClickedListener;
+    @Mock
+    private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    @Mock
+    private KeyguardBouncerComponent mKeyguardBouncerComponent;
+    @Mock
+    private KeyguardBouncer mBouncer;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mCarKeyguardViewController = new TestableCarKeyguardViewController(
-                mContext,
+        when(mKeyguardBouncerComponentFactory.build(
+                any(ViewGroup.class),
+                any(KeyguardBouncer.BouncerExpansionCallback.class)))
+                .thenReturn(mKeyguardBouncerComponent);
+        when(mKeyguardBouncerComponent.createKeyguardBouncer()).thenReturn(mBouncer);
+
+        mCarKeyguardViewController = new CarKeyguardViewController(
                 Handler.getMain(),
                 mock(CarServiceProvider.class),
                 mOverlayViewGlobalStateController,
@@ -91,10 +92,7 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
                 () -> mock(BiometricUnlockController.class),
                 mock(ViewMediatorCallback.class),
                 mock(CarNavigationBarController.class),
-                mock(LockPatternUtils.class),
-                mock(DismissCallbackRegistry.class),
-                mock(FalsingManager.class),
-                () -> mock(KeyguardBypassController.class)
+                mKeyguardBouncerComponentFactory
         );
         mCarKeyguardViewController.inflate((ViewGroup) LayoutInflater.from(mContext).inflate(
                 R.layout.sysui_overlay_window, /* root= */ null));
@@ -202,33 +200,4 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
 
         verify(mBouncer).hide(/* destroyView= */ true);
     }
-
-    private class TestableCarKeyguardViewController extends CarKeyguardViewController {
-
-        TestableCarKeyguardViewController(Context context,
-                Handler mainHandler,
-                CarServiceProvider carServiceProvider,
-                OverlayViewGlobalStateController overlayViewGlobalStateController,
-                KeyguardStateController keyguardStateController,
-                KeyguardUpdateMonitor keyguardUpdateMonitor,
-                Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
-                ViewMediatorCallback viewMediatorCallback,
-                CarNavigationBarController carNavigationBarController,
-                LockPatternUtils lockPatternUtils,
-                DismissCallbackRegistry dismissCallbackRegistry,
-                FalsingManager falsingManager,
-                Lazy<KeyguardBypassController> keyguardBypassControllerLazy) {
-            super(context, mainHandler, carServiceProvider, overlayViewGlobalStateController,
-                    keyguardStateController, keyguardUpdateMonitor, biometricUnlockControllerLazy,
-                    viewMediatorCallback, carNavigationBarController, lockPatternUtils,
-                    dismissCallbackRegistry, falsingManager, keyguardBypassControllerLazy);
-        }
-
-        @Override
-        public void onFinishInflate() {
-            super.onFinishInflate();
-            setKeyguardBouncer(CarKeyguardViewControllerTest.this.mBouncer);
-        }
-    }
-
 }

@@ -796,16 +796,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 securityMode != SecurityMode.None && newView.needsInput());
     }
 
-    private KeyguardSecurityViewFlipper getFlipper() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child instanceof KeyguardSecurityViewFlipper) {
-                return (KeyguardSecurityViewFlipper) child;
-            }
-        }
-        return null;
-    }
-
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {
         public void userActivity() {
             if (mSecurityCallback != null) {

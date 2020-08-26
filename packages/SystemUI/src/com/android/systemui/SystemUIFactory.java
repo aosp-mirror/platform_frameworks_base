@@ -19,24 +19,14 @@ package com.android.systemui;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.concurrent.Executor;
 
@@ -128,18 +118,5 @@ public class SystemUIFactory {
             Executor executor,
             Handler uiHandler) {
         return new ScreenshotNotificationSmartActionsProvider();
-    }
-
-    public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils, ViewGroup container,
-            DismissCallbackRegistry dismissCallbackRegistry,
-            KeyguardBouncer.BouncerExpansionCallback expansionCallback,
-            KeyguardStateController keyguardStateController, FalsingManager falsingManager,
-            KeyguardBypassController bypassController) {
-        return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, falsingManager,
-                expansionCallback, keyguardStateController,
-                Dependency.get(KeyguardUpdateMonitor.class), bypassController,
-                new Handler(Looper.getMainLooper()));
     }
 }
