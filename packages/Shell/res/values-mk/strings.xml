@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Извештаи за грешки"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Се генерира извештајот за грешки <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Извештајот за грешки <xliff:g id="ID">#%d</xliff:g> е снимен"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Се додаваат детали на извештајот за грешка"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Почекајте..."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Извештајот за грешки наскоро ќе се појави на телефонот"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Изберете да го споделите извештајот за грешки"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Допрете за да го споделите извештајот за грешки"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Изберете да го спод. извештајот за грешки без слика од екранот или почекајте да се подготви сликата"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Допрете за споделување извештај за грешки без слика од екранот или почекајте да се подготви сликата"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Допрете за споделување извештај за грешки без слика од екранот или почекајте да се подготви сликата"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Извештаите за грешка содржат податоци од разни датотеки за евиденција на системот, вклучувајќи и податоци што можеби ги сметате за чувствителни (како што се користење на апликациите и податоци за локацијата). Извештаите за грешки споделувајте ги само со апликации и луѓе во кои имате доверба."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Не покажувај повторно"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Извештаи за грешки"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Датотеката со извештај за грешка не можеше да се прочита"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Не можевме да ги додадеме деталите на извештајот за грешки во zip-датотеката"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"неименувани"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Детали"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Слика од екранот"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Успешно е направена слика од екранот."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Не може да се направи слика од екранот."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Детали за извештајот за грешки <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Име на датотека"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Наслов на грешката"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Преглед на грешката"</string>
+    <string name="save" msgid="4781509040564835759">"Зачувај"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Споделете извештај за грешки"</string>
+</resources>
