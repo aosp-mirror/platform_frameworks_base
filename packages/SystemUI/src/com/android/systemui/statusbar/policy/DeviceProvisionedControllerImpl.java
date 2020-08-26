@@ -15,8 +15,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
@@ -30,6 +28,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 
@@ -43,8 +43,8 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
 
     protected static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
     protected final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
-    private final ContentResolver mContentResolver;
-    private final Context mContext;
+    private final GlobalSettings mGlobalSettings;
+    private final SecureSettings mSecureSettings;
     private final Uri mDeviceProvisionedUri;
     private final Uri mUserSetupUri;
     protected final ContentObserver mSettingsObserver;
@@ -52,13 +52,14 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     /**
      */
     @Inject
-    public DeviceProvisionedControllerImpl(Context context, @Main Handler mainHandler,
-            BroadcastDispatcher broadcastDispatcher) {
+    public DeviceProvisionedControllerImpl(@Main Handler mainHandler,
+            BroadcastDispatcher broadcastDispatcher, GlobalSettings globalSettings,
+            SecureSettings secureSettings) {
         super(broadcastDispatcher);
-        mContext = context;
-        mContentResolver = context.getContentResolver();
-        mDeviceProvisionedUri = Global.getUriFor(Global.DEVICE_PROVISIONED);
-        mUserSetupUri = Secure.getUriFor(Secure.USER_SETUP_COMPLETE);
+        mGlobalSettings = globalSettings;
+        mSecureSettings = secureSettings;
+        mDeviceProvisionedUri = mGlobalSettings.getUriFor(Global.DEVICE_PROVISIONED);
+        mUserSetupUri = mSecureSettings.getUriFor(Secure.USER_SETUP_COMPLETE);
         mSettingsObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri, int flags) {
@@ -74,13 +75,12 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
 
     @Override
     public boolean isDeviceProvisioned() {
-        return Global.getInt(mContentResolver, Global.DEVICE_PROVISIONED, 0) != 0;
+        return mGlobalSettings.getInt(Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
     @Override
     public boolean isUserSetup(int currentUser) {
-        return Secure.getIntForUser(mContentResolver, Secure.USER_SETUP_COMPLETE, 0, currentUser)
-                != 0;
+        return mSecureSettings.getIntForUser(Secure.USER_SETUP_COMPLETE, 0, currentUser) != 0;
     }
 
     @Override
@@ -107,24 +107,24 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     }
 
     protected void startListening(int user) {
-        mContentResolver.registerContentObserver(mDeviceProvisionedUri, true,
+        mGlobalSettings.registerContentObserverForUser(mDeviceProvisionedUri, true,
                 mSettingsObserver, 0);
-        mContentResolver.registerContentObserver(mUserSetupUri, true,
+        mSecureSettings.registerContentObserverForUser(mUserSetupUri, true,
                 mSettingsObserver, user);
         startTracking();
     }
 
     protected void stopListening() {
         stopTracking();
-        mContentResolver.unregisterContentObserver(mSettingsObserver);
+        mGlobalSettings.unregisterContentObserver(mSettingsObserver);
     }
 
     @Override
     public void onUserSwitched(int newUserId) {
-        mContentResolver.unregisterContentObserver(mSettingsObserver);
-        mContentResolver.registerContentObserver(mDeviceProvisionedUri, true,
+        mGlobalSettings.unregisterContentObserver(mSettingsObserver);
+        mGlobalSettings.registerContentObserverForUser(mDeviceProvisionedUri, true,
                 mSettingsObserver, 0);
-        mContentResolver.registerContentObserver(mUserSetupUri, true,
+        mSecureSettings.registerContentObserverForUser(mUserSetupUri, true,
                 mSettingsObserver, newUserId);
         notifyUserChanged();
     }
