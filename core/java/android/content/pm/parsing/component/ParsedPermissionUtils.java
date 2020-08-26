@@ -19,15 +19,15 @@ package android.content.pm.parsing.component;
 import android.annotation.NonNull;
 import android.content.pm.PermissionInfo;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.Slog;
 
 import com.android.internal.R;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -36,7 +36,7 @@ import java.io.IOException;
 /** @hide */
 public class ParsedPermissionUtils {
 
-    private static final String TAG = ParsingPackageUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     @NonNull
     public static ParseResult<ParsedPermission> parsePermission(ParsingPackage pkg, Resources res,
@@ -104,11 +104,6 @@ public class ParsedPermissionUtils {
             }
         } finally {
             sa.recycle();
-        }
-
-        // TODO(b/135203078): This is impossible because of default value in above getInt
-        if (permission.protectionLevel == -1) {
-            return input.error("<permission> does not specify protectionLevel");
         }
 
         permission.protectionLevel = PermissionInfo.fixProtectionLevel(permission.protectionLevel);

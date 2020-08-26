@@ -22,7 +22,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
 
-import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
 
 import java.util.ArrayList;
@@ -163,7 +162,7 @@ public final class ParsedIntentInfo extends IntentFilter {
     }
 
     public String toString() {
-        return "ProviderIntentInfo{"
+        return "ParsedIntentInfo{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + '}';
     }

@@ -33,7 +33,6 @@ import java.io.IOException;
 /** @hide **/
 public class ParsingUtils {
 
-    // TODO(b/135203078): Consolidate log tags
     public static final String TAG = "PackageParsing";
 
     @Nullable

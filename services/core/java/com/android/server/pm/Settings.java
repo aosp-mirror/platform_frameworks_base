@@ -102,7 +102,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
-import com.android.server.pm.Installer.Batch;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -4564,7 +4563,6 @@ public final class Settings {
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().signatureSchemeVersion;
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
-            // TODO(b/135203078): Is there anything to print here with AppInfo removed?
             pw.print(prefix); pw.print("  applicationInfo=");
             pw.println(pkg.toAppInfoToString());
             pw.print(prefix); pw.print("  flags=");
@@ -5160,7 +5158,6 @@ public final class Settings {
     }
 
     void dumpComponents(PrintWriter pw, String prefix, PackageSetting ps) {
-        // TODO(b/135203078): ParsedComponent toString methods for dumping
         dumpComponents(pw, prefix, "activities:", ps.pkg.getActivities());
         dumpComponents(pw, prefix, "services:", ps.pkg.getServices());
         dumpComponents(pw, prefix, "receivers:", ps.pkg.getReceivers());

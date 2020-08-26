@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
@@ -43,7 +42,7 @@ import java.util.Iterator;
 /** @hide */
 public class ParsedIntentInfoUtils {
 
-    private static final String TAG = ParsingPackageUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     @NonNull
     public static ParseResult<ParsedIntentInfo> parseIntentInfo(String className,
