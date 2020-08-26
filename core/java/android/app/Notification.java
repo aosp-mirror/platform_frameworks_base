@@ -183,7 +183,7 @@ public class Notification implements Parcelable
      * <p>
      * Avoids spamming the system with overly large strings such as full e-mails.
      */
-    private static final int MAX_CHARSEQUENCE_LENGTH = 5 * 1024;
+    private static final int MAX_CHARSEQUENCE_LENGTH = 1024;
 
     /**
      * Maximum entries of reply text that are accepted by Builder and friends.
@@ -6086,7 +6086,7 @@ public class Notification implements Parcelable
              * consistent during re-posts of the notification.
              */
             public Message(CharSequence text, long timestamp, CharSequence sender){
-                mText = text;
+                mText = safeCharSequence(text);
                 mTimestamp = timestamp;
                 mSender = sender;
             }
@@ -6175,7 +6175,7 @@ public class Notification implements Parcelable
                 }
                 bundle.putLong(KEY_TIMESTAMP, mTimestamp);
                 if (mSender != null) {
-                    bundle.putCharSequence(KEY_SENDER, mSender);
+                    bundle.putCharSequence(KEY_SENDER, safeCharSequence(mSender));
                 }
                 if (mDataMimeType != null) {
                     bundle.putString(KEY_DATA_MIME_TYPE, mDataMimeType);
