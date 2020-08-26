@@ -46,6 +46,7 @@ import com.android.wm.shell.common.TransactionPool;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -72,6 +73,8 @@ public class SplitScreenController implements SplitScreen,
     private final WindowManagerProxy mWindowManagerProxy;
 
     private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
+            new ArrayList<>();
+    private final ArrayList<WeakReference<BiConsumer<Rect, Rect>>> mBoundsChangedListeners =
             new ArrayList<>();
 
 
@@ -257,8 +260,8 @@ public class SplitScreenController implements SplitScreen,
         mView = (DividerView)
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
         DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
-        mView.injectDependencies(mWindowManager, mDividerState, mForcedResizableController, mSplits,
-                mSplitLayout, mImePositionProcessor, mWindowManagerProxy);
+        mView.injectDependencies(this, mWindowManager, mDividerState, mForcedResizableController,
+                mSplits, mSplitLayout, mImePositionProcessor, mWindowManagerProxy);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
         mView.setMinimizedDockStack(mMinimized, mHomeStackResizable, null /* transaction */);
         final int size = dctx.getResources().getDimensionPixelSize(
@@ -463,6 +466,24 @@ public class SplitScreenController implements SplitScreen,
         listener.accept(isDividerVisible());
         synchronized (mDockedStackExistsListeners) {
             mDockedStackExistsListeners.add(new WeakReference<>(listener));
+        }
+    }
+
+    @Override
+    public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
+        synchronized (mBoundsChangedListeners) {
+            mBoundsChangedListeners.add(new WeakReference<>(listener));
+        }
+    }
+
+    /** Notifies the bounds of split screen changed. */
+    void notifyBoundsChanged(Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
+        synchronized (mBoundsChangedListeners) {
+            mBoundsChangedListeners.removeIf(wf -> {
+                BiConsumer<Rect, Rect> l = wf.get();
+                if (l != null) l.accept(secondaryWindowBounds, secondaryWindowInsets);
+                return l == null;
+            });
         }
     }
 
