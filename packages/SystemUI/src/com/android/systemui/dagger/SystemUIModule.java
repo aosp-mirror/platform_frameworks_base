@@ -18,12 +18,15 @@ package com.android.systemui.dagger;
 
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
+import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.power.dagger.PowerModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
@@ -37,11 +40,15 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
+import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.util.concurrency.ConcurrencyModule;
+import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
+import com.android.systemui.volume.dagger.VolumeModule;
 
 import dagger.Binds;
 import dagger.BindsOptionalOf;
@@ -53,15 +60,23 @@ import dagger.Provides;
  * implementation.
  */
 @Module(includes = {
+            AppOpsModule.class,
             AssistModule.class,
             ConcurrencyModule.class,
+            ControlsModule.class,
             DemoModeModule.class,
             LogModule.class,
             PeopleHubModule.class,
+            PowerModule.class,
+            PluginModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SettingsModule.class,
-            SettingsUtilModule.class
+            SettingsUtilModule.class,
+            StatusBarPolicyModule.class,
+            TunerModule.class,
+            UtilModule.class,
+            VolumeModule.class
         },
         subcomponents = {StatusBarComponent.class,
                 NotificationRowComponent.class,

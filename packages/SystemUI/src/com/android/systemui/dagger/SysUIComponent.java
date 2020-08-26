@@ -35,7 +35,6 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {
         DefaultComponentBinder.class,
         DependencyProvider.class,
-        DependencyBinder.class,
         PipModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,

@@ -37,6 +37,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -45,13 +47,19 @@ import com.android.systemui.statusbar.notification.collection.inflation.LowPrior
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.ManagedProfileController;
+import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
@@ -136,6 +144,12 @@ public interface StatusBarDependenciesModule {
         return new SmartReplyController(entryManager, statusBarService, clickNotifier);
     }
 
+
+    /** */
+    @Binds
+    NotificationRemoteInputManager.Callback provideNotificationRemoteInputManagerCallback(
+            StatusBarRemoteInputCallback callbackImpl);
+
     /** */
     @SysUISingleton
     @Provides
@@ -179,4 +193,22 @@ public interface StatusBarDependenciesModule {
     static CommandQueue provideCommandQueue(Context context, ProtoTracer protoTracer) {
         return new CommandQueue(context, protoTracer);
     }
+
+    /**
+     */
+    @Binds
+    ManagedProfileController provideManagedProfileController(
+            ManagedProfileControllerImpl controllerImpl);
+
+    /**
+     */
+    @Binds
+    SysuiStatusBarStateController providesSysuiStatusBarStateController(
+            StatusBarStateControllerImpl statusBarStateControllerImpl);
+
+    /**
+     */
+    @Binds
+    StatusBarIconController provideStatusBarIconController(
+            StatusBarIconControllerImpl controllerImpl);
 }
