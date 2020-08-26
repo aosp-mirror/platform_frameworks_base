@@ -73,7 +73,7 @@ public class WindowMagnificationManager implements
         public void onReceive(Context context, Intent intent) {
             final int displayId = context.getDisplayId();
             removeMagnificationButton(displayId);
-            disableWindowMagnification(displayId);
+            disableWindowMagnification(displayId, false);
         }
     };
 
@@ -136,10 +136,10 @@ public class WindowMagnificationManager implements
     /**
      * Requests {@link IWindowMagnificationConnection} through
      * {@link StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)} and
-     * destroys all window magnifiers if necessary.
+     * destroys all window magnifications if necessary.
      *
      * @param connect {@code true} if needs connection, otherwise set the connection to null and
-     *                            destroy all window magnifiers.
+     *                            destroy all window magnifications.
      * @return {@code true} if {@link IWindowMagnificationConnection} state is going to change.
      */
     public boolean requestConnection(boolean connect) {
@@ -171,7 +171,7 @@ public class WindowMagnificationManager implements
     private void disableAllWindowMagnifiers() {
         for (int i = 0; i < mWindowMagnifiers.size(); i++) {
             final WindowMagnifier magnifier = mWindowMagnifiers.valueAt(i);
-            magnifier.disable();
+            magnifier.disableWindowMagnificationInternal();
         }
         mWindowMagnifiers.clear();
     }
@@ -187,12 +187,12 @@ public class WindowMagnificationManager implements
 
     @Override
     public boolean processScroll(int displayId, float distanceX, float distanceY) {
-        moveWindowMagnifier(displayId, -distanceX, -distanceY);
+        moveWindowMagnification(displayId, -distanceX, -distanceY);
         return /* event consumed: */ true;
     }
 
     /**
-     * Scales the magnified region on the specified display if the window magnifier is enabled.
+     * Scales the magnified region on the specified display if the window magnifier is initiated.
      *
      * @param displayId The logical display id.
      * @param scale The target scale, must be >= 1
@@ -209,7 +209,7 @@ public class WindowMagnificationManager implements
     }
 
     /**
-     * Enables the window magnifier with specified center and scale on the specified display.
+     * Enables window magnification with specified center and scale on the specified display.
      *  @param displayId The logical display id.
      * @param scale The target scale, must be >= 1.
      * @param centerX The screen-relative X coordinate around which to center,
@@ -217,29 +217,29 @@ public class WindowMagnificationManager implements
      * @param centerY The screen-relative Y coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
      */
-    void enableWindowMagnifier(int displayId, float scale, float centerX, float centerY) {
+    void enableWindowMagnification(int displayId, float scale, float centerX, float centerY) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
                 magnifier = createWindowMagnifier(displayId);
             }
-            magnifier.enable(scale, centerX, centerY);
+            magnifier.enableWindowMagnificationInternal(scale, centerX, centerY);
         }
     }
 
     /**
-     * Disables the window magnifier on the specified display.
+     * Disables window magnification on the specified display.
      *
      * @param displayId The logical display id.
      * @param clear {@true} Clears the state of the window magnifier
      */
-    void disableWindowMagnifier(int displayId, boolean clear) {
+    void disableWindowMagnification(int displayId, boolean clear) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
                 return;
             }
-            magnifier.disable();
+            magnifier.disableWindowMagnificationInternal();
             if (clear) {
                 mWindowMagnifiers.delete(displayId);
             }
@@ -264,10 +264,10 @@ public class WindowMagnificationManager implements
     }
 
     /**
-     * Indicates whether this window magnifier is enabled on specified display.
+     * Indicates whether window magnification is enabled on specified display.
      *
      * @param displayId The logical display id.
-     * @return {@code true} if the window magnifier is enabled.
+     * @return {@code true} if the window magnification is enabled.
      */
     boolean isWindowMagnifierEnabled(int displayId) {
         synchronized (mLock) {
@@ -323,7 +323,7 @@ public class WindowMagnificationManager implements
     }
 
     /**
-     * Moves the window magnifier with specified offset.
+     * Moves window magnification on the specified display with the specified offset.
      *
      * @param displayId The logical display id.
      * @param offsetX the amount in pixels to offset the region in the X direction, in current
@@ -331,7 +331,7 @@ public class WindowMagnificationManager implements
      * @param offsetY the amount in pixels to offset the region in the Y direction, in current
      *                screen pixels.
      */
-    void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
+    void moveWindowMagnification(int displayId, float offsetX, float offsetY) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
@@ -425,7 +425,8 @@ public class WindowMagnificationManager implements
     }
 
     /**
-     * A class to  manipulate the window magnifier and contains the relevant information.
+     * A class manipulates window magnification per display and contains the magnification
+     * information.
      */
     private static class WindowMagnifier {
 
@@ -434,7 +435,7 @@ public class WindowMagnificationManager implements
         private boolean mEnabled;
 
         private final WindowMagnificationManager mWindowMagnificationManager;
-        //Records the bounds of window magnifier.
+        //Records the bounds of window magnification.
         private final Rect mBounds = new Rect();
         //The magnified bounds on the screen.
         private final Rect mSourceBounds = new Rect();
@@ -444,12 +445,12 @@ public class WindowMagnificationManager implements
         }
 
         @GuardedBy("mLock")
-        void enable(float scale, float centerX, float centerY) {
+        void enableWindowMagnificationInternal(float scale, float centerX, float centerY) {
             if (mEnabled) {
                 return;
             }
             final float normScale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
-            if (mWindowMagnificationManager.enableWindowMagnification(mDisplayId, normScale,
+            if (mWindowMagnificationManager.enableWindowMagnificationInternal(mDisplayId, normScale,
                     centerX, centerY)) {
                 mScale = normScale;
                 mEnabled = true;
@@ -457,8 +458,9 @@ public class WindowMagnificationManager implements
         }
 
         @GuardedBy("mLock")
-        void disable() {
-            if (mEnabled && mWindowMagnificationManager.disableWindowMagnification(mDisplayId)) {
+        void disableWindowMagnificationInternal() {
+            if (mEnabled && mWindowMagnificationManager.disableWindowMagnificationInternal(
+                    mDisplayId)) {
                 mEnabled = false;
             }
         }
@@ -519,7 +521,7 @@ public class WindowMagnificationManager implements
         }
     }
 
-    private boolean enableWindowMagnification(int displayId, float scale, float centerX,
+    private boolean enableWindowMagnificationInternal(int displayId, float scale, float centerX,
             float centerY) {
         return mConnectionWrapper != null && mConnectionWrapper.enableWindowMagnification(
                 displayId, scale, centerX, centerY);
@@ -529,7 +531,7 @@ public class WindowMagnificationManager implements
         return mConnectionWrapper != null && mConnectionWrapper.setScale(displayId, scale);
     }
 
-    private boolean disableWindowMagnification(int displayId) {
+    private boolean disableWindowMagnificationInternal(int displayId) {
         return mConnectionWrapper != null && mConnectionWrapper.disableWindowMagnification(
                 displayId);
     }
