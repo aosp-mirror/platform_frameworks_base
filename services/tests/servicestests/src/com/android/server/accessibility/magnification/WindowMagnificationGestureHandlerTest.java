@@ -81,7 +81,7 @@ public class WindowMagnificationGestureHandlerTest {
 
     @After
     public void tearDown() {
-        mWindowMagnificationManager.disableWindowMagnifier(DISPLAY_0, true);
+        mWindowMagnificationManager.disableWindowMagnification(DISPLAY_0, true);
     }
 
     @Test
@@ -225,7 +225,7 @@ public class WindowMagnificationGestureHandlerTest {
             }
             break;
             case STATE_SHOW_MAGNIFIER: {
-                mWindowMagnificationManager.disableWindowMagnifier(DISPLAY_0, false);
+                mWindowMagnificationManager.disableWindowMagnification(DISPLAY_0, false);
             }
             break;
             case STATE_TWO_FINGERS_DOWN: {
