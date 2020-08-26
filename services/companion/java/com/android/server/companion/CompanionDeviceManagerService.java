@@ -612,8 +612,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
-    private AtomicFile getStorageFileForUser(int uid) {
-        return mUidToStorage.computeIfAbsent(uid, (u) ->
+    private AtomicFile getStorageFileForUser(int userId) {
+        return mUidToStorage.computeIfAbsent(userId, (u) ->
                 new AtomicFile(new File(
                         //TODO deprecated method - what's the right replacement?
                         Environment.getUserSystemDirectory(u),
