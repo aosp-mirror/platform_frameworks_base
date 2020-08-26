@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.DebugUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -429,7 +430,8 @@ class SurfaceAnimator {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        pw.print(" mAnimationType=" + mAnimationType);
+        pw.print(" mAnimationType=" + DebugUtils.valueToString(SurfaceAnimator.class,
+                "ANIMATION_TYPE_", mAnimationType));
         pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
         pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
@@ -442,56 +444,56 @@ class SurfaceAnimator {
      * No animation is specified.
      * @hide
      */
-    static final int ANIMATION_TYPE_NONE = 0;
+    public static final int ANIMATION_TYPE_NONE = 0;
 
     /**
      * Animation for an app transition.
      * @hide
      */
-    static final int ANIMATION_TYPE_APP_TRANSITION = 1;
+    public static final int ANIMATION_TYPE_APP_TRANSITION = 1;
 
     /**
      * Animation for screen rotation.
      * @hide
      */
-    static final int ANIMATION_TYPE_SCREEN_ROTATION = 1 << 1;
+    public static final int ANIMATION_TYPE_SCREEN_ROTATION = 1 << 1;
 
     /**
      * Animation for dimming.
      * @hide
      */
-    static final int ANIMATION_TYPE_DIMMER = 1 << 2;
+    public static final int ANIMATION_TYPE_DIMMER = 1 << 2;
 
     /**
      * Animation for recent apps.
      * @hide
      */
-    static final int ANIMATION_TYPE_RECENTS = 1 << 3;
+    public static final int ANIMATION_TYPE_RECENTS = 1 << 3;
 
     /**
      * Animation for a {@link WindowState} without animating the activity.
      * @hide
      */
-    static final int ANIMATION_TYPE_WINDOW_ANIMATION = 1 << 4;
+    public static final int ANIMATION_TYPE_WINDOW_ANIMATION = 1 << 4;
 
     /**
      * Animation to control insets. This is actually not an animation, but is used to give the
      * client a leash over the system window causing insets.
      * @hide
      */
-    static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
+    public static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
 
     /**
      * Animation when a fixed rotation transform is applied to a window token.
      * @hide
      */
-    static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
+    public static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
 
     /**
      * Bitmask to include all animation types. This is NOT an {@link AnimationType}
      * @hide
      */
-    static final int ANIMATION_TYPE_ALL = -1;
+    public static final int ANIMATION_TYPE_ALL = -1;
 
     /**
      * The type of the animation.
