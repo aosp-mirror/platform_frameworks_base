@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="3701846017049540910">"ஷெல்"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"பிழை அறிக்கைகள்"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"பிழை அறிக்கை <xliff:g id="ID">#%d</xliff:g> உருவாக்கப்படுகிறது"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"பிழை அறிக்கை <xliff:g id="ID">#%d</xliff:g> எடுக்கப்பட்டது"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"பிழை அறிக்கையில் விவரங்களைச் சேர்க்கிறது"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"காத்திருக்கவும்…"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"பிழை அறிக்கை சிறிது நேரத்தில் மொபைலில் தோன்றும்"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"பிழை அறிக்கையைப் பகிர, தேர்ந்தெடுக்கவும்"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"பிழை அறிக்கையைப் பகிர, தட்டவும்"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"ஸ்கிரீன்ஷாட் இன்றி பிழை அறிக்கையை பகிர தேர்ந்தெடுக்கவும்/ஸ்கிரீன்ஷாட் முடியும்வரை காத்திருக்கவும்"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ஸ்கிரீன்ஷாட் இல்லாமல் பிழை அறிக்கையைப் பகிர, தட்டவும் அல்லது ஸ்கிரீன்ஷாட் முடியும்வரை காத்திருக்கவும்"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ஸ்கிரீன்ஷாட் இல்லாமல் பிழை அறிக்கையைப் பகிர, தட்டவும் அல்லது ஸ்கிரீன்ஷாட் முடியும்வரை காத்திருக்கவும்"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"பிழை அறிக்கைகளில் முறைமையின் பல்வேறு பதிவுக் கோப்புகளின் தரவு (இதில் முக்கியமானவை என நீங்கள் கருதும் பயன்பாடின் உபயோகம், இருப்பிடத் தரவு போன்றவை அடங்கும்) இருக்கும். நீங்கள் நம்பும் நபர்கள் மற்றும் பயன்பாடுகளுடன் மட்டும் பிழை அறிக்கைகளைப் பகிரவும்."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"மீண்டும் காட்டாதே"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"பிழை அறிக்கைகள்"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"பிழை அறிக்கையைப் படிக்க முடியவில்லை"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"பிழை அறிக்கை விவரங்களை ஜிப் கோப்பில் சேர்க்க முடியவில்லை"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"பெயரிடப்படாதது"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"விவரங்கள்"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ஸ்கிரீன்ஷாட்"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ஸ்கிரீன்ஷாட் எடுக்கப்பட்டது."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ஸ்கிரீன் ஷாட்டை எடுக்க முடியவில்லை."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"பிழை அறிக்கை <xliff:g id="ID">#%d</xliff:g> இன் விவரங்கள்"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"கோப்புப்பெயர்"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"பிழை தலைப்பு"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"பிழை குறித்த சுருக்க விவரம்"</string>
+    <string name="save" msgid="4781509040564835759">"சேமி"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"பிழை அறிக்கையைப் பகிர்"</string>
+</resources>
