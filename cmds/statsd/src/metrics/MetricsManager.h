@@ -242,8 +242,11 @@ private:
     // To make updating configs faster, we map the id of a AtomMatchingTracker, MetricProducer, and
     // ConditionTracker to its index in the corresponding vector.
 
-    // Maps the id of an atom matcher to its index in mAllAtomMatchingTrackers.
+    // Maps the id of an atom matching tracker to its index in mAllAtomMatchingTrackers.
     std::unordered_map<int64_t, int> mAtomMatchingTrackerMap;
+
+    // Maps the id of a condition tracker to its index in mAllConditionTrackers.
+    std::unordered_map<int64_t, int> mConditionTrackerMap;
 
     // To make the log processing more efficient, we want to do as much filtering as possible
     // before we go into individual trackers and conditions to match.

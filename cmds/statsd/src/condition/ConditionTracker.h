@@ -31,17 +31,16 @@ namespace statsd {
 
 class ConditionTracker : public virtual RefBase {
 public:
-    ConditionTracker(const int64_t& id, const int index)
+    ConditionTracker(const int64_t& id, const int index, const uint64_t protoHash)
         : mConditionId(id),
           mIndex(index),
           mInitialized(false),
           mTrackerIndex(),
           mUnSlicedPartCondition(ConditionState::kUnknown),
-          mSliced(false){};
+          mSliced(false),
+          mProtoHash(protoHash){};
 
     virtual ~ConditionTracker(){};
-
-    inline const int64_t& getId() { return mConditionId; }
 
     // Initialize this ConditionTracker. This initialization is done recursively (DFS). It can also
     // be done in the constructor, but we do it separately because (1) easy to return a bool to
@@ -50,7 +49,7 @@ public:
     // fill the condition cache with the current condition.
     // allConditionConfig: the list of all Predicate config from statsd_config.
     // allConditionTrackers: the list of all ConditionTrackers (this is needed because we may also
-    //                       need to call init() on children conditions)
+    //                       need to call init() on child conditions)
     // conditionIdIndexMap: the mapping from condition id to its index.
     // stack: a bit map to keep track which nodes have been visited on the stack in the recursion.
     // conditionCache: tracks initial conditions of all ConditionTrackers. returns the
@@ -59,6 +58,26 @@ public:
                       const std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       const std::unordered_map<int64_t, int>& conditionIdIndexMap,
                       std::vector<bool>& stack, std::vector<ConditionState>& conditionCache) = 0;
+
+    // Update appropriate state on config updates. Primarily, all indices need to be updated.
+    // This predicate and all of its children are guaranteed to be preserved across the update.
+    // This function is recursive and will call onConfigUpdated on child conditions. It does not
+    // manage cycle detection since all preserved conditions should not have any cycles.
+    //
+    // allConditionProtos: the new predicates.
+    // index: the new index of this tracker in allConditionProtos and allConditionTrackers.
+    // allConditionTrackers: the list of all ConditionTrackers (this is needed because we may also
+    //                       need to call onConfigUpdated() on child conditions)
+    // [atomMatchingTrackerMap]: map of atom matcher id to index after the config update
+    // [conditionTrackerMap]: map of condition tracker id to index after the config update.
+    // returns whether or not the update is successful
+    virtual bool onConfigUpdated(const std::vector<Predicate>& allConditionProtos, const int index,
+                                 const std::vector<sp<ConditionTracker>>& allConditionTrackers,
+                                 const std::unordered_map<int64_t, int>& atomMatchingTrackerMap,
+                                 const std::unordered_map<int64_t, int>& conditionTrackerMap) {
+        mIndex = index;
+        return true;
+    }
 
     // evaluate current condition given the new event.
     // event: the new log event
@@ -112,6 +131,10 @@ public:
         return mConditionId;
     }
 
+    inline uint64_t getProtoHash() const {
+        return mProtoHash;
+    }
+
     virtual void getTrueSlicedDimensions(
         const std::vector<sp<ConditionTracker>>& allConditions,
         std::set<HashableDimensionKey>* dimensions) const = 0;
@@ -133,7 +156,7 @@ protected:
     const int64_t mConditionId;
 
     // the index of this condition in the manager's condition list.
-    const int mIndex;
+    int mIndex;
 
     // if it's properly initialized.
     bool mInitialized;
@@ -151,6 +174,12 @@ protected:
     ConditionState mUnSlicedPartCondition;
 
     bool mSliced;
+
+    // Hash of the Predicate's proto bytes from StatsdConfig.
+    // Used to determine if the definition of this condition has changed across a config update.
+    const uint64_t mProtoHash;
+
+    FRIEND_TEST(ConfigUpdateTest, TestUpdateConditions);
 };
 
 }  // namespace statsd
