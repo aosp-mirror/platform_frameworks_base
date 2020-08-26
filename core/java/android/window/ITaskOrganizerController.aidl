@@ -60,5 +60,6 @@ interface ITaskOrganizerController {
      * Requests that the given task organizer is notified when back is pressed on the root activity
      * of one of its controlled tasks.
      */
-    void setInterceptBackPressedOnTaskRoot(ITaskOrganizer organizer, boolean interceptBackPressed);
+    void setInterceptBackPressedOnTaskRoot(in WindowContainerToken task,
+            boolean interceptBackPressed);
 }
