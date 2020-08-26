@@ -608,7 +608,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                                 mReceivedPointerTracker.getReceivedPointerDownY(id)
                                         - rawEvent.getY(index);
                         final double moveDelta = Math.hypot(deltaX, deltaY);
-                        if (moveDelta < mTouchSlop) {
+                        if (moveDelta < (2 * mTouchSlop)) {
                             return;
                         }
                     }
