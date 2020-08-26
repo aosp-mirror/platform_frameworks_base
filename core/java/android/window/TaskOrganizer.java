@@ -149,9 +149,10 @@ public class TaskOrganizer extends WindowOrganizer {
      * of one of its controlled tasks.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void setInterceptBackPressedOnTaskRoot(boolean interceptBackPressed) {
+    public void setInterceptBackPressedOnTaskRoot(@NonNull WindowContainerToken task,
+            boolean interceptBackPressed) {
         try {
-            getController().setInterceptBackPressedOnTaskRoot(mInterface, interceptBackPressed);
+            getController().setInterceptBackPressedOnTaskRoot(task, interceptBackPressed);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
