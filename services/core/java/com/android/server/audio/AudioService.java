@@ -6428,8 +6428,8 @@ public class AudioService extends IAudioService.Stub
                                     CHECK_MODE_FOR_UID_PERIOD_MS);
                             break;
                         }
-                        // For now just log the fact that an app is hogging the audio mode.
-                        // TODO(b/160260850): remove abusive app from audio mode stack.
+                        setModeInt(AudioSystem.MODE_NORMAL, h.getBinder(), h.getPid(), h.getUid(),
+                                h.isPrivileged(), "MSG_CHECK_MODE_FOR_UID");
                         mModeLogger.log(new PhoneStateEvent(h.getPackage(), h.getPid()));
                     }
                     break;
