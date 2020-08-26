@@ -52,6 +52,9 @@ abstract public class VerityUtils {
     /** The maximum size of signature file.  This is just to avoid potential abuse. */
     private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
 
+    /** SHA256 hash size. */
+    private static final int HASH_SIZE_BYTES = 32;
+
     private static final boolean DEBUG = false;
 
     /** Returns true if the given file looks like containing an fs-verity signature. */
@@ -90,8 +93,23 @@ abstract public class VerityUtils {
         return (retval == 1);
     }
 
+    /** Returns hash of a root node for the fs-verity enabled file. */
+    public static byte[] getFsverityRootHash(@NonNull String filePath) {
+        byte[] result = new byte[HASH_SIZE_BYTES];
+        int retval = measureFsverityNative(filePath, result);
+        if (retval < 0) {
+            if (retval != -OsConstants.ENODATA) {
+                Slog.e(TAG, "Failed to measure fs-verity, errno " + -retval + ": " + filePath);
+            }
+            return null;
+        }
+        return result;
+    }
+
     private static native int enableFsverityNative(@NonNull String filePath,
             @NonNull byte[] pkcs7Signature);
+    private static native int measureFsverityNative(@NonNull String filePath,
+            @NonNull byte[] digest);
     private static native int statxForFsverityNative(@NonNull String filePath);
 
     /**

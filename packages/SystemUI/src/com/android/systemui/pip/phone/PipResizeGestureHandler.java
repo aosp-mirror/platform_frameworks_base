@@ -111,6 +111,7 @@ public class PipResizeGestureHandler {
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
     private PipTaskOrganizer mPipTaskOrganizer;
+    private PipMenuActivityController mPipMenuActivityController;
     private PipUiEventLogger mPipUiEventLogger;
 
     private int mCtrlType;
@@ -119,7 +120,7 @@ public class PipResizeGestureHandler {
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
             PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
             Runnable updateMovementBoundsRunnable, SysUiState sysUiState,
-            PipUiEventLogger pipUiEventLogger) {
+            PipUiEventLogger pipUiEventLogger, PipMenuActivityController menuActivityController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
@@ -129,6 +130,7 @@ public class PipResizeGestureHandler {
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mSysUiState = sysUiState;
+        mPipMenuActivityController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
 
         context.getDisplay().getRealSize(mMaxSize);
@@ -298,12 +300,17 @@ public class PipResizeGestureHandler {
         float x = ev.getX();
         float y = ev.getY();
         if (action == MotionEvent.ACTION_DOWN) {
+            final Rect currentPipBounds = mMotionHelper.getBounds();
             mLastResizeBounds.setEmpty();
             mAllowGesture = isInValidSysUiState() && isWithinTouchRegion((int) x, (int) y);
             if (mAllowGesture) {
                 setCtrlType((int) x, (int) y);
                 mDownPoint.set(x, y);
                 mLastDownBounds.set(mMotionHelper.getBounds());
+            }
+            if (!currentPipBounds.contains((int) ev.getX(), (int) ev.getY())
+                    && mPipMenuActivityController.isMenuVisible()) {
+                mPipMenuActivityController.hideMenu();
             }
 
         } else if (mAllowGesture) {

@@ -49,6 +49,9 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
+import android.view.View;
+import android.view.WindowManager;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -57,6 +60,7 @@ import android.window.WindowOrganizer;
 
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.pip.phone.PipMenuActivityController;
 import com.android.systemui.pip.phone.PipUpdateThread;
 import com.android.systemui.stackdivider.SplitScreen;
 import com.android.wm.shell.R;
@@ -95,6 +99,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
     private static final int MSG_FINISH_RESIZE = 4;
     private static final int MSG_RESIZE_USER = 5;
 
+    private final Context mContext;
     private final Handler mMainHandler;
     private final Handler mUpdateHandler;
     private final PipBoundsHandler mPipBoundsHandler;
@@ -107,6 +112,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
     private final Map<IBinder, Configuration> mInitialState = new HashMap<>();
     private final Optional<SplitScreen> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
+    private SurfaceControlViewHost mPipViewHost;
+    private SurfaceControl mPipMenuSurface;
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -212,6 +219,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer) {
+        mContext = context;
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
@@ -502,6 +510,45 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             mMainHandler.post(r);
         }
     }
+
+    /**
+     * Setup the ViewHost and attach the provided menu view to the ViewHost.
+     */
+    public void attachPipMenuViewHost(View menuView, WindowManager.LayoutParams lp) {
+        if (mPipMenuSurface != null) {
+            Log.e(TAG, "PIP Menu View already created and attached.");
+            return;
+        }
+
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            throw new RuntimeException("PipMenuView needs to be attached on the main thread.");
+        }
+
+        mPipViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(),
+                (android.os.Binder) null);
+        mPipMenuSurface = mPipViewHost.getSurfacePackage().getSurfaceControl();
+        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        transaction.reparent(mPipMenuSurface, mLeash);
+        transaction.show(mPipMenuSurface);
+        transaction.setRelativeLayer(mPipMenuSurface, mLeash, 1);
+        transaction.apply();
+        mPipViewHost.setView(menuView, lp);
+    }
+
+
+    /**
+     * Releases the PIP Menu's View host, remove it from PIP task surface.
+     */
+    public void detachPipMenuViewHost() {
+        if (mPipMenuSurface != null) {
+            SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+            transaction.remove(mPipMenuSurface);
+            transaction.apply();
+            mPipMenuSurface = null;
+            mPipViewHost = null;
+        }
+    }
+
 
     /**
      * Note that dismissing PiP is now originated from SystemUI, see {@link #exitPip(int)}.
@@ -838,6 +885,12 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareFinishResizeTransaction(destinationBounds, direction, tx, wct);
         applyFinishBoundsResize(wct, direction);
+        runOnMainHandler(() -> {
+            if (mPipViewHost != null) {
+                mPipViewHost.relayout(PipMenuActivityController.getPipMenuLayoutParams(
+                        destinationBounds.width(), destinationBounds.height()));
+            }
+        });
     }
 
     private void prepareFinishResizeTransaction(Rect destinationBounds,

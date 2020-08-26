@@ -409,6 +409,11 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String BACK_GESTURE_SLOP_MULTIPLIER = "back_gesture_slop_multiplier";
 
+    /**
+     * (long) Screenshot keychord delay (how long the buttons must be pressed), in ms
+     */
+    public static final String SCREENSHOT_KEYCHORD_DELAY = "screenshot_keychord_delay";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

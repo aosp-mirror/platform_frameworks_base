@@ -12,14 +12,88 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Begin ProtoLog
+java_library {
+    name: "wm_shell_protolog-groups",
+    srcs: [
+        "src/com/android/wm/shell/protolog/ShellProtoLogGroup.java",
+        ":protolog-common-src",
+    ],
+}
+
+filegroup {
+    name: "wm_shell-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
+}
+
+genrule {
+    name: "wm_shell_protolog_src",
+    srcs: [
+        ":wm_shell_protolog-groups",
+        ":wm_shell-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) transform-protolog-calls " +
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--protolog-impl-class com.android.wm.shell.protolog.ShellProtoLogImpl " +
+      "--protolog-cache-class com.android.wm.shell.protolog.ShellProtoLogCache " +
+      "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+      "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+      "--output-srcjar $(out) " +
+      "$(locations :wm_shell-sources)",
+    out: ["wm_shell_protolog.srcjar"],
+}
+
+genrule {
+    name: "generate-wm_shell_protolog.json",
+    srcs: [
+        ":wm_shell_protolog-groups",
+        ":wm_shell-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+      "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+      "--viewer-conf $(out) " +
+      "$(locations :wm_shell-sources)",
+    out: ["wm_shell_protolog.json"],
+}
+
+filegroup {
+    name: "wm_shell_protolog.json",
+    srcs: ["res/raw/wm_shell_protolog.json"],
+}
+
+genrule {
+    name: "checked-wm_shell_protolog.json",
+    srcs: [
+        ":generate-wm_shell_protolog.json",
+        ":wm_shell_protolog.json",
+    ],
+    cmd: "cp $(location :generate-wm_shell_protolog.json) $(out) && " +
+      "{ ! (diff $(out) $(location :wm_shell_protolog.json) | grep -q '^<') || " +
+      "{ echo -e '\\n\\n################################################################\\n#\\n" +
+      "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
+      "#  cp $(location :generate-wm_shell_protolog.json) " +
+      "$(location :wm_shell_protolog.json)\\n#\\n" +
+      "################################################################\\n\\n' >&2 && false; } }",
+    out: ["wm_shell_protolog.json"],
+}
+// End ProtoLog
+
 android_library {
     name: "WindowManager-Shell",
     srcs: [
-        "src/**/*.java",
+        ":wm_shell_protolog_src",
         "src/**/I*.aidl",
     ],
     resource_dirs: [
         "res",
+    ],
+    static_libs: [
+        "protolog-lib",
     ],
     manifest: "AndroidManifest.xml",
 }

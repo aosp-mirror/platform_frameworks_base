@@ -142,7 +142,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     // Used to calculate the movement bounds
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
-    private final Rect mTmpNormalBounds = new Rect();
 
     // Keeps track of the IME visibility to adjust the PiP when the IME is visible
     private boolean mImeVisible;
@@ -216,10 +215,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mHandler.post(() -> {
                 // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
-                final Rect destinationBounds = new Rect();
-                mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        destinationBounds, mTmpDisplayInfo);
-                mDefaultPipBounds.set(destinationBounds);
+                mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mPipBounds,
+                        mDefaultPipBounds, mTmpDisplayInfo);
             });
         }
 

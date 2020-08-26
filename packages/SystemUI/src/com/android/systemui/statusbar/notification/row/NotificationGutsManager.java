@@ -52,7 +52,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -121,7 +121,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final INotificationManager mNotificationManager;
     private final LauncherApps mLauncherApps;
     private final ShortcutManager mShortcutManager;
-    private final CurrentUserContextTracker mContextTracker;
+    private final UserContextProvider mContextTracker;
     private final Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider;
     private final UiEventLogger mUiEventLogger;
 
@@ -138,7 +138,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
-            CurrentUserContextTracker contextTracker,
+            UserContextProvider contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
             BubbleController bubbleController,
@@ -484,7 +484,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 onSettingsClick,
                 onSnoozeClickListener,
                 iconFactoryLoader,
-                mContextTracker.getCurrentUserContext(),
+                mContextTracker.getUserContext(),
                 mBuilderProvider,
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mMainHandler,

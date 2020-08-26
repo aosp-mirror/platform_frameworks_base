@@ -644,18 +644,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 if (mGestureDetector.isMultiFingerGesturesEnabled()) {
                     if (mGestureDetector.isTwoFingerPassthroughEnabled()) {
                         if (event.getPointerCount() == 3) {
-                            boolean isOnBottomEdge = true;
                             // If three fingers went down on the bottom edge of the screen, delegate
                             // immediately.
-                            final long screenHeight =
-                                    mContext.getResources().getDisplayMetrics().heightPixels;
-                            for (int i = 0; i < TouchState.MAX_POINTER_COUNT; ++i) {
-                                if (mReceivedPointerTracker.getReceivedPointerDownY(i)
-                                        < (screenHeight - mEdgeSwipeHeightPixels)) {
-                                    isOnBottomEdge = false;
-                                }
-                            }
-                            if (isOnBottomEdge) {
+                            if (allPointersDownOnBottomEdge(event)) {
                                 if (DEBUG) {
                                     Slog.d(LOG_TAG, "Three-finger edge swipe detected.");
                                 }
@@ -1061,6 +1052,22 @@ public class TouchExplorer extends BaseEventStreamTransformation
                         event.getFlags());
         event.setDownTime(time);
         return downEvent;
+    }
+
+    private boolean allPointersDownOnBottomEdge(MotionEvent event) {
+        final long screenHeight =
+                mContext.getResources().getDisplayMetrics().heightPixels;
+        for (int i = 0; i < event.getPointerCount(); ++i) {
+            final int pointerId = event.getPointerId(i);
+            final float pointerDownY = mReceivedPointerTracker.getReceivedPointerDownY(pointerId);
+            if (pointerDownY < (screenHeight - mEdgeSwipeHeightPixels)) {
+                if (DEBUG) {
+                    Slog.d(LOG_TAG, "The pointer is not on the bottom edge" + pointerDownY);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     public TouchState getState() {

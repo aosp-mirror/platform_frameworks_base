@@ -35,7 +35,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.android.systemui.R;
-import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.settings.UserContextProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class ScreenRecordDialog extends Activity {
     private static final String TAG = "ScreenRecordDialog";
 
     private final RecordingController mController;
-    private final CurrentUserContextTracker mCurrentUserContextTracker;
+    private final UserContextProvider mUserContextProvider;
     private Switch mTapsSwitch;
     private Switch mAudioSwitch;
     private Spinner mOptions;
@@ -59,9 +59,9 @@ public class ScreenRecordDialog extends Activity {
 
     @Inject
     public ScreenRecordDialog(RecordingController controller,
-            CurrentUserContextTracker currentUserContextTracker) {
+            UserContextProvider userContextProvider) {
         mController = controller;
-        mCurrentUserContextTracker = currentUserContextTracker;
+        mUserContextProvider = userContextProvider;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ScreenRecordDialog extends Activity {
     }
 
     private void requestScreenCapture() {
-        Context userContext = mCurrentUserContextTracker.getCurrentUserContext();
+        Context userContext = mUserContextProvider.getUserContext();
         boolean showTaps = mTapsSwitch.isChecked();
         ScreenRecordingAudioSource audioMode = mAudioSwitch.isChecked()
                 ? (ScreenRecordingAudioSource) mOptions.getSelectedItem()

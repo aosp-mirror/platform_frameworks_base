@@ -18,12 +18,9 @@ package com.android.server.location.listeners;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Binder;
 import android.os.Build;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
-import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.listeners.ListenerExecutor.ListenerOperation;
@@ -31,8 +28,10 @@ import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -42,7 +41,7 @@ import java.util.function.Predicate;
  * divided into two categories, active registrations and inactive registrations, as defined by
  * {@link #isActive(ListenerRegistration)}. If a registration's active state changes,
  * {@link #updateRegistrations(Predicate)} must be invoked and return true for any registration
- * whose active state may have changed.
+ * whose active state may have changed. Listeners will only be invoked for active registrations.
  *
  * Callbacks invoked for various changes will always be ordered according to this lifecycle list:
  *
@@ -63,14 +62,6 @@ import java.util.function.Predicate;
  * other operation or callback. Removal is allowed re-entrantly, however only via
  * {@link #removeRegistration(Object, ListenerRegistration)}, not via any other removal method. This
  * ensures re-entrant removal does not accidentally remove the incorrect registration.
- *
- * All callbacks will be invoked with a cleared binder identity.
- *
- * Listeners owned by other processes will be run on a direct executor (and thus while holding a
- * lock). Listeners owned by the same process this multiplexer is in will be run asynchronously (and
- * thus without holding a lock). The underlying assumption is that listeners owned by other
- * processes will simply be forwarding the call to those other processes and perhaps performing
- * simple bookkeeping, with no potential for deadlock.
  *
  * @param <TKey>           key type
  * @param <TRequest>       request type
@@ -149,46 +140,51 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     }
 
     /**
-     * Invoked before the first registration occurs. This is a convenient entry point for
-     * registering listeners, etc, which only need to be present while there are any registrations.
+     * Invoked when the multiplexer goes from having no registrations to having some registrations.
+     * This is a convenient entry point for registering listeners, etc, which only need to be
+     * present while there are any registrations. Invoked while holding the multiplexer's internal
+     * lock.
      */
     protected void onRegister() {}
 
     /**
-     * Invoked after the last unregistration occurs. This is a convenient entry point for
-     * unregistering listeners, etc, which only need to be present while there are any
-     * registrations.
+     * Invoked when the multiplexer goes from having some registrations to having no registrations.
+     * This is a convenient entry point for unregistering listeners, etc, which only need to be
+     * present while there are any registrations. Invoked while holding the multiplexer's internal
+     * lock.
      */
     protected void onUnregister() {}
 
     /**
-     * Invoked when a registration is added.
+     * Invoked when a registration is added. Invoked while holding the multiplexer's internal lock.
      */
     protected void onRegistrationAdded(@NonNull TKey key, @NonNull TRegistration registration) {}
 
     /**
-     * Invoked when a registration is removed.
+     * Invoked when a registration is removed. Invoked while holding the multiplexer's internal
+     * lock.
      */
     protected void onRegistrationRemoved(@NonNull TKey key, @NonNull TRegistration registration) {}
 
     /**
-     * Invoked when the manager goes from having no active registrations to having some active
+     * Invoked when the multiplexer goes from having no active registrations to having some active
      * registrations. This is a convenient entry point for registering listeners, etc, which only
-     * need to be present while there are active registrations.
+     * need to be present while there are active registrations. Invoked while holding the
+     * multiplexer's internal lock.
      */
     protected void onActive() {}
 
     /**
-     * Invoked when the manager goes from having some active registrations to having no active
+     * Invoked when the multiplexer goes from having some active registrations to having no active
      * registrations. This is a convenient entry point for unregistering listeners, etc, which only
-     * need to be present while there are active registrations.
+     * need to be present while there are active registrations. Invoked while holding the
+     * multiplexer's internal lock.
      */
     protected void onInactive() {}
 
     /**
-     * Adds a new registration with the given key. Registration may fail if
-     * {@link ListenerRegistration#onRegister(Object)} returns false, in which case the registration
-     * will not be added. This method cannot be called to add a registration re-entrantly.
+     * Adds a new registration with the given key. This method cannot be called to add a
+     * registration re-entrantly.
      */
     protected final void addRegistration(@NonNull TKey key, @NonNull TRegistration registration) {
         Objects.requireNonNull(key);
@@ -204,7 +200,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             // involve removing a prior registration. note that try-with-resources ordering is
             // meaningful here as well. we want to close the reentrancy guard first, as this may
             // generate additional service updates, then close the update service buffer.
-            long identity = Binder.clearCallingIdentity();
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
@@ -224,16 +219,13 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                 registration.onRegister(key);
                 onRegistrationAdded(key, registration);
                 onRegistrationActiveChanged(registration);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
     }
 
     /**
-     * Removes the registration with the given key. If unregistration occurs,
-     * {@link #onRegistrationRemoved(Object, ListenerRegistration)} will be called. This method
-     * cannot be called to remove a registration re-entrantly.
+     * Removes the registration with the given key. This method cannot be called to remove a
+     * registration re-entrantly.
      */
     protected final void removeRegistration(@NonNull Object key) {
         synchronized (mRegistrations) {
@@ -250,9 +242,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     }
 
     /**
-     * Removes all registrations with keys that satisfy the given predicate. If unregistration
-     * occurs, {@link #onRegistrationRemoved(Object, ListenerRegistration)} will be called. This
-     * method cannot be called to remove a registration re-entrantly.
+     * Removes all registrations with keys that satisfy the given predicate. This method cannot be
+     * called to remove a registration re-entrantly.
      */
     protected final void removeRegistrationIf(@NonNull Predicate<TKey> predicate) {
         synchronized (mRegistrations) {
@@ -281,11 +272,8 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
     /**
      * Removes the given registration with the given key. If the given key has a different
-     * registration at the time this method is called, nothing happens. If unregistration occurs,
-     * {@link #onRegistrationRemoved(Object, ListenerRegistration)} will be called. This method
-     * allows for re-entrancy, and may be called to remove a registration re-entrantly. In this case
-     * the registration will immediately be marked inactive and unregistered, and will be removed
-     * completely at some later time.
+     * registration at the time this method is called, nothing happens. This method allows for
+     * re-entrancy, and may be called to remove a registration re-entrantly.
      */
     protected final void removeRegistration(@NonNull Object key,
             @NonNull ListenerRegistration<?, ?> registration) {
@@ -324,7 +312,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
         // in multiple service updates. note that try-with-resources ordering is meaningful here as
         // well. we want to close the reentrancy guard first, as this may generate additional
         // service updates, then close the update service buffer.
-        long identity = Binder.clearCallingIdentity();
         try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
              ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
@@ -337,8 +324,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                     onUnregister();
                 }
             }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -362,34 +347,42 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                 }
             }
 
-            long identity = Binder.clearCallingIdentity();
-            try {
-                if (actives.isEmpty()) {
+            if (actives.isEmpty()) {
+                mCurrentRequest = null;
+                if (mServiceRegistered) {
+                    mServiceRegistered = false;
                     mCurrentRequest = null;
-                    if (mServiceRegistered) {
-                        mServiceRegistered = false;
-                        mCurrentRequest = null;
-                        unregisterWithService();
-                    }
-                    return;
+                    unregisterWithService();
                 }
-
-                TMergedRequest merged = mergeRequests(actives);
-                if (!mServiceRegistered || !Objects.equals(merged, mCurrentRequest)) {
-                    if (mServiceRegistered) {
-                        mServiceRegistered = reregisterWithService(mCurrentRequest, merged);
-                    } else {
-                        mServiceRegistered = registerWithService(merged);
-                    }
-                    if (mServiceRegistered) {
-                        mCurrentRequest = merged;
-                    } else {
-                        mCurrentRequest = null;
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                return;
             }
+
+            TMergedRequest merged = mergeRequests(actives);
+            if (!mServiceRegistered || !Objects.equals(merged, mCurrentRequest)) {
+                if (mServiceRegistered) {
+                    mServiceRegistered = reregisterWithService(mCurrentRequest, merged);
+                } else {
+                    mServiceRegistered = registerWithService(merged);
+                }
+                if (mServiceRegistered) {
+                    mCurrentRequest = merged;
+                } else {
+                    mCurrentRequest = null;
+                }
+            }
+        }
+    }
+
+    /**
+     * Clears currently stored service state, and invokes {@link #updateService()} to force a new
+     * call to {@link #registerWithService(Object)} if necessary. This is useful, for instance, if
+     * the backing service has crashed or otherwise lost state, and needs to be re-initialized.
+     */
+    protected final void resetService() {
+        synchronized (mRegistrations) {
+            mServiceRegistered = false;
+            mCurrentRequest = null;
+            updateService();
         }
     }
 
@@ -404,9 +397,9 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
     /**
      * Evaluates the predicate on all registrations. The predicate should return true if the active
-     * state of the registration may have changed as a result. Any {@link #updateService()}
-     * invocations made while this method is executing will be deferred until after the method is
-     * complete so as to avoid redundant work.
+     * state of the registration may have changed as a result. If the active state of any
+     * registration has changed, {@link #updateService()} will automatically be invoked to handle
+     * the resulting changes.
      */
     protected final void updateRegistrations(@NonNull Predicate<TRegistration> predicate) {
         synchronized (mRegistrations) {
@@ -415,7 +408,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             // callbacks. note that try-with-resources ordering is meaningful here as well. we want
             // to close the reentrancy guard first, as this may generate additional service updates,
             // then close the update service buffer.
-            long identity = Binder.clearCallingIdentity();
             try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
@@ -426,8 +418,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                         onRegistrationActiveChanged(registration);
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
     }
@@ -450,7 +440,10 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                     execute(registration, operation);
                 }
             } else {
-                registration.onInactive();
+                ListenerOperation<TListener> operation = registration.onInactive();
+                if (operation != null) {
+                    execute(registration, operation);
+                }
                 if (--mActiveRegistrationsCount == 0) {
                     onInactive();
                 }
@@ -468,7 +461,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     protected final void deliverToListeners(
             @NonNull Function<TRegistration, ListenerOperation<TListener>> function) {
         synchronized (mRegistrations) {
-            long identity = Binder.clearCallingIdentity();
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
                 final int size = mRegistrations.size();
                 for (int i = 0; i < size; i++) {
@@ -480,8 +472,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                         }
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
     }
@@ -495,7 +485,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      */
     protected final void deliverToListeners(@NonNull ListenerOperation<TListener> operation) {
         synchronized (mRegistrations) {
-            long identity = Binder.clearCallingIdentity();
             try (ReentrancyGuard ignored = mReentrancyGuard.acquire()) {
                 final int size = mRegistrations.size();
                 for (int i = 0; i < size; i++) {
@@ -504,8 +493,6 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                         execute(registration, operation);
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
     }
@@ -522,27 +509,26 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     /**
      * Dumps debug information.
      */
-    public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mRegistrations) {
-            ipw.print("service: ");
-            dumpServiceState(ipw);
-            ipw.println();
+            pw.print("service: ");
+            dumpServiceState(pw);
+            pw.println();
 
             if (!mRegistrations.isEmpty()) {
-                ipw.println("listeners:");
+                pw.println("listeners:");
 
-                ipw.increaseIndent();
                 final int size = mRegistrations.size();
                 for (int i = 0; i < size; i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
-                    ipw.print(registration);
+                    pw.print("  ");
+                    pw.print(registration);
                     if (!registration.isActive()) {
-                        ipw.println(" (inactive)");
+                        pw.println(" (inactive)");
                     } else {
-                        ipw.println();
+                        pw.println();
                     }
                 }
-                ipw.decreaseIndent();
             }
         }
     }
@@ -577,7 +563,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
         @GuardedBy("mRegistrations")
         private int mGuardCount;
         @GuardedBy("mRegistrations")
-        private @Nullable ArraySet<Pair<Object, ListenerRegistration<?, ?>>> mScheduledRemovals;
+        private @Nullable ArraySet<Entry<Object, ListenerRegistration<?, ?>>> mScheduledRemovals;
 
         ReentrancyGuard() {
             mGuardCount = 0;
@@ -602,7 +588,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
             if (mScheduledRemovals == null) {
                 mScheduledRemovals = new ArraySet<>(mRegistrations.size());
             }
-            mScheduledRemovals.add(new Pair<>(key, registration));
+            mScheduledRemovals.add(new AbstractMap.SimpleImmutableEntry<>(key, registration));
         }
 
         ReentrancyGuard acquire() {
@@ -612,7 +598,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
         @Override
         public void close() {
-            ArraySet<Pair<Object, ListenerRegistration<?, ?>>> scheduledRemovals = null;
+            ArraySet<Entry<Object, ListenerRegistration<?, ?>>> scheduledRemovals = null;
 
             Preconditions.checkState(mGuardCount > 0);
             if (--mGuardCount == 0) {
@@ -620,14 +606,15 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                 mScheduledRemovals = null;
             }
 
-            if (scheduledRemovals != null) {
-                try (UpdateServiceBuffer ignored = mUpdateServiceBuffer.acquire()) {
-                    final int size = scheduledRemovals.size();
-                    for (int i = 0; i < size; i++) {
-                        Pair<Object, ListenerRegistration<?, ?>> pair = scheduledRemovals.valueAt(
-                                i);
-                        removeRegistration(pair.first, pair.second);
-                    }
+            if (scheduledRemovals == null) {
+                return;
+            }
+
+            try (UpdateServiceBuffer ignored = mUpdateServiceBuffer.acquire()) {
+                final int size = scheduledRemovals.size();
+                for (int i = 0; i < size; i++) {
+                    Entry<Object, ListenerRegistration<?, ?>> entry = scheduledRemovals.valueAt(i);
+                    removeRegistration(entry.getKey(), entry.getValue());
                 }
             }
         }

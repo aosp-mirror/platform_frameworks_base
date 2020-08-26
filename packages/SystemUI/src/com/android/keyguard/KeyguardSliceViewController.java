@@ -86,7 +86,10 @@ public class KeyguardSliceViewController implements Dumpable {
                         mLiveData.observeForever(mObserver);
                     }
                     mConfigurationController.addCallback(mConfigurationListener);
-                    mDumpManager.registerDumpable(TAG, KeyguardSliceViewController.this);
+                    mDumpManager.registerDumpable(
+                            TAG + "@" + Integer.toHexString(
+                                    KeyguardSliceViewController.this.hashCode()),
+                            KeyguardSliceViewController.this);
                 }
 
                 @Override
@@ -230,5 +233,7 @@ public class KeyguardSliceViewController implements Dumpable {
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
         pw.println("  mClickActions: " + mClickActions);
+
+        mKeyguardStatusView.dump(fd, pw, args);
     }
 }

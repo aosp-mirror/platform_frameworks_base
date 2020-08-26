@@ -177,6 +177,7 @@ public final class NotificationEntry extends ListEntry {
     @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
     private boolean mShelfIconVisible;
+    private boolean mIsAlerting;
 
     /**
      * @param sbn the StatusBarNotification from system server
@@ -953,6 +954,14 @@ public final class NotificationEntry extends ListEntry {
      */
     public void markForUserTriggeredMovement(boolean marked) {
         mIsMarkedForUserTriggeredMovement = marked;
+    }
+
+    public void setIsAlerting(boolean isAlerting) {
+        mIsAlerting = isAlerting;
+    }
+
+    public boolean isAlerting() {
+        return mIsAlerting;
     }
 
     /** Information about a suggestion that is being edited. */
