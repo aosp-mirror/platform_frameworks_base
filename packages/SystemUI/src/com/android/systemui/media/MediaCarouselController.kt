@@ -172,7 +172,6 @@ class MediaCarouselController @Inject constructor(
                     // This view is inactive, let's remove this! This happens e.g when dismissing /
                     // timing out a view. We still have the data around because resumption could
                     // be on, but we should save the resources and release this.
-                    oldKey?.let { MediaPlayerData.removeMediaPlayer(it) }
                     onMediaDataRemoved(key)
                 } else {
                     addOrUpdatePlayer(key, oldKey, data)
