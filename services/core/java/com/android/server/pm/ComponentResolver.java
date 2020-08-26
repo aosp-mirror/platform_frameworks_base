@@ -890,54 +890,55 @@ public class ComponentResolver {
             return;
         }
 
-        if (systemActivities == null) {
-            // the system package is not disabled; we're parsing the system partition
-            if (isProtectedAction(intent)) {
-                if (mDeferProtectedFilters) {
-                    // We can't deal with these just yet. No component should ever obtain a
-                    // >0 priority for a protected actions, with ONE exception -- the setup
-                    // wizard. The setup wizard, however, cannot be known until we're able to
-                    // query it for the category CATEGORY_SETUP_WIZARD. Which we can't do
-                    // until all intent filters have been processed. Chicken, meet egg.
-                    // Let the filter temporarily have a high priority and rectify the
-                    // priorities after all system packages have been scanned.
-                    if (mProtectedFilters == null) {
-                        mProtectedFilters = new ArrayList<>();
-                    }
-                    mProtectedFilters.add(Pair.create(activity, intent));
+        if (isProtectedAction(intent)) {
+            if (mDeferProtectedFilters) {
+                // We can't deal with these just yet. No component should ever obtain a
+                // >0 priority for a protected actions, with ONE exception -- the setup
+                // wizard. The setup wizard, however, cannot be known until we're able to
+                // query it for the category CATEGORY_SETUP_WIZARD. Which we can't do
+                // until all intent filters have been processed. Chicken, meet egg.
+                // Let the filter temporarily have a high priority and rectify the
+                // priorities after all system packages have been scanned.
+                if (mProtectedFilters == null) {
+                    mProtectedFilters = new ArrayList<>();
+                }
+                mProtectedFilters.add(Pair.create(activity, intent));
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "Protected action; save for later;"
+                            + " package: " + packageName
+                            + " activity: " + className
+                            + " origPrio: " + intent.getPriority());
+                }
+            } else {
+                if (DEBUG_FILTERS && setupWizardPackage == null) {
+                    Slog.i(TAG, "No setup wizard;"
+                            + " All protected intents capped to priority 0");
+                }
+                if (packageName.equals(setupWizardPackage)) {
                     if (DEBUG_FILTERS) {
-                        Slog.i(TAG, "Protected action; save for later;"
+                        Slog.i(TAG, "Found setup wizard;"
+                                + " allow priority " + intent.getPriority() + ";"
                                 + " package: " + packageName
                                 + " activity: " + className
-                                + " origPrio: " + intent.getPriority());
+                                + " priority: " + intent.getPriority());
                     }
-                    return;
-                } else {
-                    if (DEBUG_FILTERS && setupWizardPackage == null) {
-                        Slog.i(TAG, "No setup wizard;"
-                                + " All protected intents capped to priority 0");
-                    }
-                    if (packageName.equals(setupWizardPackage)) {
-                        if (DEBUG_FILTERS) {
-                            Slog.i(TAG, "Found setup wizard;"
-                                    + " allow priority " + intent.getPriority() + ";"
-                                    + " package: " + packageName
-                                    + " activity: " + className
-                                    + " priority: " + intent.getPriority());
-                        }
-                        // setup wizard gets whatever it wants
-                        return;
-                    }
-                    if (DEBUG_FILTERS) {
-                        Slog.i(TAG, "Protected action; cap priority to 0;"
-                                + " package: " + packageName
-                                + " activity: " + className
-                                + " origPrio: " + intent.getPriority());
-                    }
-                    intent.setPriority(0);
+                    // setup wizard gets whatever it wants
                     return;
                 }
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "Protected action; cap priority to 0;"
+                            + " package: " + packageName
+                            + " activity: " + className
+                            + " origPrio: " + intent.getPriority());
+                }
+                intent.setPriority(0);
             }
+            return;
+        }
+
+        if (systemActivities == null) {
+            // the system package is not disabled; we're parsing the system partition
+
             // privileged apps on the system image get whatever priority they request
             return;
         }
