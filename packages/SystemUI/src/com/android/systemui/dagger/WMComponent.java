@@ -16,6 +16,8 @@
 
 package com.android.systemui.dagger;
 
+import javax.inject.Inject;
+
 import dagger.Subcomponent;
 
 /**
@@ -32,4 +34,19 @@ public interface WMComponent {
     interface Builder {
         WMComponent build();
     }
+
+
+    /**
+     *  Example class used for passing an API to SysUI from WMShell.
+     *
+     *  TODO: Remove this once real WM classes are ready to go.
+     **/
+    @WMSingleton
+    class StubAPIClass {
+        @Inject
+        StubAPIClass() {}
+    }
+
+    /** Create a StubAPIClass. */
+    StubAPIClass createStubAPIClass();
 }
