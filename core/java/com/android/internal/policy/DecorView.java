@@ -24,6 +24,7 @@ import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.clearCompatInsets;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -1097,10 +1098,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 final Insets systemBarInsets = insets.getInsets(WindowInsets.Type.systemBars());
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                mLastTopInset = systemBarInsets.top;
-                mLastBottomInset = systemBarInsets.bottom;
-                mLastRightInset = systemBarInsets.right;
-                mLastLeftInset = systemBarInsets.left;
+                final boolean clearCompatInsets = clearCompatInsets(attrs.type, attrs.flags,
+                        getResources().getConfiguration().windowConfiguration.getWindowingMode());
+                mLastTopInset = clearCompatInsets ? 0 : systemBarInsets.top;
+                mLastBottomInset = clearCompatInsets ? 0 : systemBarInsets.bottom;
+                mLastRightInset = clearCompatInsets ? 0 : systemBarInsets.right;
+                mLastLeftInset = clearCompatInsets ? 0 : systemBarInsets.left;
 
                 // Don't animate if the presence of stable insets has changed, because that
                 // indicates that the window was either just added and received them for the

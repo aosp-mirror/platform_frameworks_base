@@ -500,9 +500,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** Pending control request that is waiting on IME to be ready to be shown */
     private PendingControlRequest mPendingImeControlRequest;
 
+    private int mWindowType;
     private int mLastLegacySoftInputMode;
     private int mLastLegacyWindowFlags;
     private int mLastLegacySystemUiFlags;
+    private int mLastWindowingMode;
     private DisplayCutout mLastDisplayCutout;
     private boolean mStartingAnimation;
     private int mCaptionInsetsHeight = 0;
@@ -571,7 +573,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
                     mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
                     mLastDisplayCutout, mLastLegacySoftInputMode, mLastLegacyWindowFlags,
-                    mLastLegacySystemUiFlags, null /* typeSideMap */);
+                    mLastLegacySystemUiFlags, mWindowType, mLastWindowingMode,
+                    null /* typeSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets, mUnmodifiableTmpRunningAnims);
             if (DEBUG) {
                 for (WindowInsetsAnimation anim : mUnmodifiableTmpRunningAnims) {
@@ -709,9 +712,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * @see InsetsState#calculateInsets
      */
     @VisibleForTesting
-    public WindowInsets calculateInsets(boolean isScreenRound,
-            boolean alwaysConsumeSystemBars, DisplayCutout cutout,
+    public WindowInsets calculateInsets(boolean isScreenRound, boolean alwaysConsumeSystemBars,
+            DisplayCutout cutout, int windowType, int windowingMode,
             int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags) {
+        mWindowType = windowType;
+        mLastWindowingMode = windowingMode;
         mLastLegacySoftInputMode = legacySoftInputMode;
         mLastLegacyWindowFlags = legacyWindowFlags;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
@@ -719,7 +724,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
                 isScreenRound, alwaysConsumeSystemBars, cutout,
                 legacySoftInputMode, legacyWindowFlags, legacySystemUiFlags,
-                null /* typeSideMap */);
+                windowType, windowingMode, null /* typeSideMap */);
         return mLastInsets;
     }
 

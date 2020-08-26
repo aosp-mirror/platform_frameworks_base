@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -615,8 +617,8 @@ class TaskSnapshotController {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
                 false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
                 null /* displayCutout */, 0 /* legacySoftInputMode */, 0 /* legacyWindowFlags */,
-                0 /* legacySystemUiFlags */, null /* typeSideMap */).getInsets(
-                        WindowInsets.Type.systemBars()).toRect();
+                0 /* legacySystemUiFlags */, TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                null /* typeSideMap */).getInsets(WindowInsets.Type.systemBars()).toRect();
     }
 
     void dump(PrintWriter pw, String prefix) {
