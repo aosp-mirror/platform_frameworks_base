@@ -16,9 +16,11 @@
 
 package com.android.systemui.stackdivider;
 
+import android.graphics.Rect;
 import android.window.WindowContainerToken;
 
 import java.io.PrintWriter;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -80,6 +82,9 @@ public interface SplitScreen {
 
     /** Registers listener that gets called whenever the existence of the divider changes. */
     void registerInSplitScreenListener(Consumer<Boolean> listener);
+
+    /** Registers listener that gets called whenever the split screen bounds changes. */
+    void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener);
 
     /** @return the container token for the secondary split root task. */
     WindowContainerToken getSecondaryRoot();
