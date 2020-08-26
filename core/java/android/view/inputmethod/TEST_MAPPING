@@ -1,0 +1,18 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsAutoFillServiceTestCases",
+      "options": [
+        {
+          "include-filter": "android.autofillservice.cts.inline"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+        }
+      ]
+    }
+  ]
+}
