@@ -16,7 +16,6 @@
 
 package com.android.systemui.util.concurrency;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -31,7 +30,6 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -39,7 +37,7 @@ import dagger.Provides;
  * Dagger Module for classes found within the concurrent package.
  */
 @Module
-public abstract class ConcurrencyModule {
+public abstract class SysUIConcurrencyModule {
     /** Background Looper */
     @Provides
     @SysUISingleton
@@ -62,13 +60,6 @@ public abstract class ConcurrencyModule {
         return thread.getLooper();
     }
 
-    /** Main Looper */
-    @Provides
-    @Main
-    public static  Looper provideMainLooper() {
-        return Looper.getMainLooper();
-    }
-
     /**
      * Background Handler.
      *
@@ -78,17 +69,6 @@ public abstract class ConcurrencyModule {
     @Background
     public static Handler provideBgHandler(@Background Looper bgLooper) {
         return new Handler(bgLooper);
-    }
-
-    /**
-     * Main Handler.
-     *
-     * Prefer the Main Executor when possible.
-     */
-    @Provides
-    @Main
-    public static Handler provideMainHandler(@Main Looper mainLooper) {
-        return new Handler(mainLooper);
     }
 
     /**
@@ -118,15 +98,6 @@ public abstract class ConcurrencyModule {
     @Background
     public static Executor provideBackgroundExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
-    }
-
-    /**
-     * Provide a Main-Thread Executor.
-     */
-    @Provides
-    @Main
-    public static Executor provideMainExecutor(Context context) {
-        return context.getMainExecutor();
     }
 
     /**
@@ -199,10 +170,4 @@ public abstract class ConcurrencyModule {
     public static Executor provideUiBackgroundExecutor() {
         return Executors.newSingleThreadExecutor();
     }
-
-    /**
-     * Binds {@link ThreadFactoryImpl} to {@link ThreadFactory}.
-     */
-    @Binds
-    public abstract ThreadFactory bindExecutorFactory(ThreadFactoryImpl impl);
 }

@@ -18,6 +18,8 @@ package com.android.systemui.dagger;
 
 import android.content.Context;
 
+import com.android.systemui.util.concurrency.ThreadFactory;
+
 import javax.inject.Singleton;
 
 import dagger.BindsInstance;
@@ -53,4 +55,9 @@ public interface GlobalRootComponent {
      * Builder for a SysuiComponent.
      */
     SysUIComponent.Builder getSysUIComponent();
+
+    /**
+     * Build a {@link ThreadFactory}.
+     */
+    ThreadFactory createThreadFactory();
 }
