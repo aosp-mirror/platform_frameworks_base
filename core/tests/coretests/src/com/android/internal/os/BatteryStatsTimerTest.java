@@ -49,7 +49,8 @@ public class BatteryStatsTimerTest extends TestCase {
             super(clocks, type, timeBase);
         }
 
-        protected long computeRunTimeLocked(long curBatteryRealtime) {
+        @Override
+        protected long computeRunTimeLocked(long curBatteryRealtime, long elapsedRealtimeUs) {
             lastComputeRunTimeRealtime = curBatteryRealtime;
             return nextComputeRunTime;
         }
@@ -67,19 +68,19 @@ public class BatteryStatsTimerTest extends TestCase {
         }
 
         public long getTotalTime() {
-            return mTotalTime;
+            return mTotalTimeUs;
         }
 
         public void setTotalTime(long val) {
-            mTotalTime = val;
+            mTotalTimeUs = val;
         }
 
         public long getTimeBeforeMark() {
-            return mTimeBeforeMark;
+            return mTimeBeforeMarkUs;
         }
 
         public void setTimeBeforeMark(long val) {
-            mTimeBeforeMark = val;
+            mTimeBeforeMarkUs = val;
         }
     }
 

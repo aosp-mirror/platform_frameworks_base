@@ -25,6 +25,7 @@ import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -62,7 +63,9 @@ import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.Watchdog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -76,6 +79,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -86,7 +90,8 @@ import java.util.concurrent.Future;
 public final class BatteryStatsService extends IBatteryStats.Stub
         implements PowerManagerInternal.LowPowerModeListener,
         BatteryStatsImpl.PlatformIdleStateCallback,
-        BatteryStatsImpl.RailEnergyDataCallback {
+        BatteryStatsImpl.RailEnergyDataCallback,
+        Watchdog.Monitor {
     static final String TAG = "BatteryStatsService";
     static final boolean DBG = false;
 
@@ -109,6 +114,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
     private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
     private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
+
+    private final HandlerThread mHandlerThread;
+    private final Handler mHandler;
+    private final Object mLock = new Object();
 
     /**
      * Replaces the information in the given rpmStats with up-to-date information.
@@ -190,6 +199,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return (umi != null) ? umi.getUserIds() : null;
             }
         };
+        mHandlerThread = new HandlerThread("batterystats-handler");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
         mStats = new BatteryStatsImpl(systemDir, handler, this,
                 this, mUserManagerUserInfoProvider);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
@@ -206,6 +218,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void systemServicesReady() {
         mStats.systemServicesReady(mContext);
+        Watchdog.getInstance().addMonitor(this);
     }
 
     private final class LocalService extends BatteryStatsInternal {
@@ -228,8 +241,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         @Override
         public void noteBinderCallStats(int workSourceUid, long incrementatCallCount,
                 Collection<BinderCallsStats.CallStat> callStats, int[] binderThreadNativeTids) {
-            mStats.noteBinderCallStats(workSourceUid, incrementatCallCount, callStats,
-                    binderThreadNativeTids);
+            synchronized (BatteryStatsService.this.mLock) {
+                mHandler.sendMessage(PooledLambda.obtainMessage(
+                        mStats::noteBinderCallStats, workSourceUid, incrementatCallCount,
+                        callStats, binderThreadNativeTids,
+                        SystemClock.elapsedRealtime(), SystemClock.uptimeMillis()));
+            }
+        }
+    }
+
+    @Override
+    public void monitor() {
+        synchronized (mLock) {
+        }
+        synchronized (mStats) {
         }
     }
 
@@ -250,6 +275,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         awaitUninterruptibly(mWorker.scheduleSync(reason, flags));
     }
 
+    private void awaitCompletion() {
+        synchronized (mLock) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            mHandler.post(() -> {
+                latch.countDown();
+            });
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
     /**
      * At the time when the constructor runs, the power manager has not yet been
      * initialized.  So we initialize the low power observer later.
@@ -259,14 +297,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         powerMgr.registerLowPowerModeObserver(this);
         synchronized (mStats) {
             mStats.notePowerSaveModeLocked(
-                    powerMgr.getLowPowerState(ServiceType.BATTERY_STATS)
-                            .batterySaverEnabled);
+                    powerMgr.getLowPowerState(ServiceType.BATTERY_STATS).batterySaverEnabled,
+                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         }
         (new WakeupReasonThread()).start();
     }
 
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
+
+        // Drain the handler queue to make sure we've handled all pending works.
+        awaitCompletion();
 
         syncStats("shutdown", BatteryExternalStatsWorker.UPDATE_ALL);
 
@@ -293,9 +334,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void onLowPowerModeChanged(PowerSaveState result) {
-        synchronized (mStats) {
-            mStats.notePowerSaveModeLocked(result.batterySaverEnabled);
+    public void onLowPowerModeChanged(final PowerSaveState result) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePowerSaveModeLocked(result.batterySaverEnabled,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
@@ -313,7 +361,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * object to update with the latest info, then write to disk.
      */
     public void scheduleWriteToDisk() {
-        mWorker.scheduleWrite();
+        synchronized (mLock) {
+            // We still schedule it on the handler so we'll have all existing pending works done.
+            mHandler.post(() -> {
+                mWorker.scheduleWrite();
+            });
+        }
     }
 
     // These are for direct use by the activity manager...
@@ -321,70 +374,124 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     /**
      * Remove a UID from the BatteryStats and BatteryStats' external dependencies.
      */
-    void removeUid(int uid) {
-        synchronized (mStats) {
-            mStats.removeUidStatsLocked(uid);
+    void removeUid(final int uid) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.removeUidStatsLocked(uid, elapsedRealtime);
+                }
+            });
         }
     }
 
-    void onCleanupUser(int userId) {
-        synchronized (mStats) {
-            mStats.onCleanupUserLocked(userId);
+    void onCleanupUser(final int userId) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.onCleanupUserLocked(userId, elapsedRealtime);
+                }
+            });
         }
     }
 
-    void onUserRemoved(int userId) {
-        synchronized (mStats) {
-            mStats.onUserRemovedLocked(userId);
+    void onUserRemoved(final int userId) {
+        synchronized (mLock) {
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.onUserRemovedLocked(userId);
+                }
+            });
         }
     }
 
-    void addIsolatedUid(int isolatedUid, int appUid) {
-        synchronized (mStats) {
-            mStats.addIsolatedUidLocked(isolatedUid, appUid);
+    void addIsolatedUid(final int isolatedUid, final int appUid) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.addIsolatedUidLocked(isolatedUid, appUid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    void removeIsolatedUid(int isolatedUid, int appUid) {
-        synchronized (mStats) {
-            mStats.scheduleRemoveIsolatedUidLocked(isolatedUid, appUid);
+    void removeIsolatedUid(final int isolatedUid, final int appUid) {
+        synchronized (mLock) {
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.scheduleRemoveIsolatedUidLocked(isolatedUid, appUid);
+                }
+            });
         }
     }
 
-    void noteProcessStart(String name, int uid) {
-        synchronized (mStats) {
-            mStats.noteProcessStartLocked(name, uid);
-            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__STARTED);
+    void noteProcessStart(final String name, final int uid) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteProcessStartLocked(name, uid, elapsedRealtime, uptime);
+                }
+            });
         }
+        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__STARTED);
     }
 
     void noteProcessCrash(String name, int uid) {
-        synchronized (mStats) {
-            mStats.noteProcessCrashLocked(name, uid);
-            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__CRASHED);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteProcessCrashLocked(name, uid, elapsedRealtime, uptime);
+                }
+            });
         }
+        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__CRASHED);
     }
 
     void noteProcessAnr(String name, int uid) {
-        synchronized (mStats) {
-            mStats.noteProcessAnrLocked(name, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteProcessAnrLocked(name, uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     void noteProcessFinish(String name, int uid) {
-        synchronized (mStats) {
-            mStats.noteProcessFinishLocked(name, uid);
-            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__FINISHED);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteProcessFinishLocked(name, uid, elapsedRealtime, uptime);
+                }
+            });
         }
+        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                FrameworkStatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__FINISHED);
     }
 
     /** @param state Process state from ActivityManager.java. */
     void noteUidProcessState(int uid, int state) {
-        synchronized (mStats) {
-            mStats.noteUidProcessStateLocked(uid, state);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteUidProcessStateLocked(uid, state, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
@@ -396,6 +503,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
+        // Drain the handler queue to make sure we've handled all pending works, so we'll get
+        // an accurate stats.
+        awaitCompletion();
         syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
@@ -411,6 +521,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
+        // Drain the handler queue to make sure we've handled all pending works, so we'll get
+        // an accurate stats.
+        awaitCompletion();
         syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
@@ -446,579 +559,1015 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteEvent(int code, String name, int uid) {
+    public void noteEvent(final int code, final String name, final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteEventLocked(code, name, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteEventLocked(code, name, uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteSyncStart(String name, int uid) {
+    public void noteSyncStart(final String name, final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteSyncStartLocked(name, uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SYNC_STATE_CHANGED, uid, null,
-                    name, FrameworkStatsLog.SYNC_STATE_CHANGED__STATE__ON);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteSyncStartLocked(name, uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SYNC_STATE_CHANGED, uid, null,
+                        name, FrameworkStatsLog.SYNC_STATE_CHANGED__STATE__ON);
+            });
         }
     }
 
-    public void noteSyncFinish(String name, int uid) {
+    public void noteSyncFinish(final String name, final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteSyncFinishLocked(name, uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SYNC_STATE_CHANGED, uid, null,
-                    name, FrameworkStatsLog.SYNC_STATE_CHANGED__STATE__OFF);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteSyncFinishLocked(name, uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SYNC_STATE_CHANGED, uid, null,
+                        name, FrameworkStatsLog.SYNC_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
     /** A scheduled job was started. */
-    public void noteJobStart(String name, int uid) {
+    public void noteJobStart(final String name, final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteJobStartLocked(name, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteJobStartLocked(name, uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     /** A scheduled job was finished. */
-    public void noteJobFinish(String name, int uid, int stopReason) {
+    public void noteJobFinish(final String name, final int uid, final int stopReason) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteJobFinishLocked(name, uid, stopReason);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteJobFinishLocked(name, uid, stopReason, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    void noteJobsDeferred(int uid, int numDeferred, long sinceLast) {
+    void noteJobsDeferred(final int uid, final int numDeferred, final long sinceLast) {
         // No need to enforce calling permission, as it is called from an internal interface
-        synchronized (mStats) {
-            mStats.noteJobsDeferredLocked(uid, numDeferred, sinceLast);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteJobsDeferredLocked(uid, numDeferred, sinceLast,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWakupAlarm(String name, int uid, WorkSource workSource, String tag) {
+    public void noteWakupAlarm(final String name, final int uid, final WorkSource workSource,
+            final String tag) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWakupAlarmLocked(name, uid, workSource, tag);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWakupAlarmLocked(name, uid, workSource, tag,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteAlarmStart(String name, WorkSource workSource, int uid) {
+    public void noteAlarmStart(final String name, final WorkSource workSource, final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteAlarmStartLocked(name, workSource, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteAlarmStartLocked(name, workSource, uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteAlarmFinish(String name, WorkSource workSource, int uid) {
+    public void noteAlarmFinish(final String name, final WorkSource workSource, final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteAlarmFinishLocked(name, workSource, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteAlarmFinishLocked(name, workSource, uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteStartWakelock(int uid, int pid, String name, String historyName, int type,
-            boolean unimportantForLogging) {
+    public void noteStartWakelock(final int uid, final int pid, final String name,
+            final String historyName, final int type, final boolean unimportantForLogging) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStartWakeLocked(uid, pid, null, name, historyName, type,
-                    unimportantForLogging, SystemClock.elapsedRealtime(),
-                    SystemClock.uptimeMillis());
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteStartWakeLocked(uid, pid, null, name, historyName, type,
+                            unimportantForLogging, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteStopWakelock(int uid, int pid, String name, String historyName, int type) {
+    public void noteStopWakelock(final int uid, final int pid, final String name,
+            final String historyName, final int type) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStopWakeLocked(uid, pid, null, name, historyName, type,
-                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteStopWakeLocked(uid, pid, null, name, historyName, type,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteStartWakelockFromSource(WorkSource ws, int pid, String name,
-            String historyName, int type, boolean unimportantForLogging) {
+    public void noteStartWakelockFromSource(final WorkSource ws, final int pid, final String name,
+            final String historyName, final int type, final boolean unimportantForLogging) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStartWakeFromSourceLocked(ws, pid, name, historyName,
-                    type, unimportantForLogging);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteStartWakeFromSourceLocked(ws, pid, name, historyName,
+                            type, unimportantForLogging, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteChangeWakelockFromSource(WorkSource ws, int pid, String name,
-            String historyName, int type, WorkSource newWs, int newPid, String newName,
-            String newHistoryName, int newType, boolean newUnimportantForLogging) {
+    public void noteChangeWakelockFromSource(final WorkSource ws, final int pid, final String name,
+            final String historyName, final int type, final WorkSource newWs, final int newPid,
+            final String newName, final String newHistoryName, final int newType,
+            final boolean newUnimportantForLogging) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteChangeWakelockFromSourceLocked(ws, pid, name, historyName, type,
-                    newWs, newPid, newName, newHistoryName, newType, newUnimportantForLogging);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteChangeWakelockFromSourceLocked(ws, pid, name, historyName, type,
+                            newWs, newPid, newName, newHistoryName, newType,
+                            newUnimportantForLogging, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteStopWakelockFromSource(WorkSource ws, int pid, String name, String historyName,
-            int type) {
+    public void noteStopWakelockFromSource(final WorkSource ws, final int pid, final String name,
+            final String historyName, final int type) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStopWakeFromSourceLocked(ws, pid, name, historyName, type);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteStopWakeFromSourceLocked(ws, pid, name, historyName, type,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
+    public void noteLongPartialWakelockStart(final String name, final String historyName,
+            final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteLongPartialWakelockStart(name, historyName, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteLongPartialWakelockStart(name, historyName, uid,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteLongPartialWakelockStartFromSource(String name, String historyName,
-            WorkSource workSource) {
+    public void noteLongPartialWakelockStartFromSource(final String name, final String historyName,
+            final WorkSource workSource) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteLongPartialWakelockStartFromSource(name, historyName, workSource);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteLongPartialWakelockStartFromSource(name, historyName, workSource,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
+    public void noteLongPartialWakelockFinish(final String name, final String historyName,
+            final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteLongPartialWakelockFinish(name, historyName, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteLongPartialWakelockFinish(name, historyName, uid,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteLongPartialWakelockFinishFromSource(String name, String historyName,
-            WorkSource workSource) {
+    public void noteLongPartialWakelockFinishFromSource(final String name, final String historyName,
+            final WorkSource workSource) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteLongPartialWakelockFinishFromSource(name, historyName, workSource);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteLongPartialWakelockFinishFromSource(name, historyName, workSource,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteStartSensor(int uid, int sensor) {
+    public void noteStartSensor(final int uid, final int sensor) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStartSensorLocked(uid, sensor);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid, null,
-                    sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__ON);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteStartSensorLocked(uid, sensor, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid,
+                        null, sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__ON);
+            });
         }
     }
 
-    public void noteStopSensor(int uid, int sensor) {
+    public void noteStopSensor(final int uid, final int sensor) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStopSensorLocked(uid, sensor);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid, null,
-                    sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__OFF);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteStopSensorLocked(uid, sensor, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid,
+                        null, sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
-    public void noteVibratorOn(int uid, long durationMillis) {
+    public void noteVibratorOn(final int uid, final long durationMillis) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteVibratorOnLocked(uid, durationMillis);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteVibratorOnLocked(uid, durationMillis, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteVibratorOff(int uid) {
+    public void noteVibratorOff(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteVibratorOffLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteVibratorOffLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteGpsChanged(WorkSource oldWs, WorkSource newWs) {
+    public void noteGpsChanged(final WorkSource oldWs, final WorkSource newWs) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteGpsChangedLocked(oldWs, newWs);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteGpsChangedLocked(oldWs, newWs, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteGpsSignalQuality(int signalLevel) {
-        synchronized (mStats) {
-            mStats.noteGpsSignalQualityLocked(signalLevel);
+    public void noteGpsSignalQuality(final int signalLevel) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteGpsSignalQualityLocked(signalLevel, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteScreenState(int state) {
+    public void noteScreenState(final int state) {
         enforceCallingPermission();
-        if (DBG) Slog.d(TAG, "begin noteScreenState");
-        synchronized (mStats) {
-            FrameworkStatsLog.write(FrameworkStatsLog.SCREEN_STATE_CHANGED, state);
-
-            mStats.noteScreenStateLocked(state);
-        }
-        if (DBG) Slog.d(TAG, "end noteScreenState");
-    }
-
-    public void noteScreenBrightness(int brightness) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            FrameworkStatsLog.write(FrameworkStatsLog.SCREEN_BRIGHTNESS_CHANGED, brightness);
-            mStats.noteScreenBrightnessLocked(brightness);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            final long currentTime = System.currentTimeMillis();
+            mHandler.post(() -> {
+                if (DBG) Slog.d(TAG, "begin noteScreenState");
+                synchronized (mStats) {
+                    mStats.noteScreenStateLocked(state, elapsedRealtime, uptime, currentTime);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.SCREEN_STATE_CHANGED, state);
+                if (DBG) Slog.d(TAG, "end noteScreenState");
+            });
         }
     }
 
-    public void noteUserActivity(int uid, int event) {
+    public void noteScreenBrightness(final int brightness) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteUserActivityLocked(uid, event);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteScreenBrightnessLocked(brightness, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.SCREEN_BRIGHTNESS_CHANGED, brightness);
+            });
         }
     }
 
-    public void noteWakeUp(String reason, int reasonUid) {
+    public void noteUserActivity(final int uid, final int event) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWakeUpLocked(reason, reasonUid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteUserActivityLocked(uid, event, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteInteractive(boolean interactive) {
+    public void noteWakeUp(final String reason, final int reasonUid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteInteractiveLocked(interactive);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWakeUpLocked(reason, reasonUid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteConnectivityChanged(int type, String extra) {
+    public void noteInteractive(final boolean interactive) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteConnectivityChangedLocked(type, extra);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteInteractiveLocked(interactive, elapsedRealtime);
+                }
+            });
         }
     }
 
-    public void noteMobileRadioPowerState(int powerState, long timestampNs, int uid) {
+    public void noteConnectivityChanged(final int type, final String extra) {
         enforceCallingPermission();
-        final boolean update;
-        synchronized (mStats) {
-            update = mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteConnectivityChangedLocked(type, extra, elapsedRealtime, uptime);
+                }
+            });
         }
+    }
 
-        if (update) {
-            mWorker.scheduleSync("modem-data", BatteryExternalStatsWorker.UPDATE_RADIO);
+    public void noteMobileRadioPowerState(final int powerState, final long timestampNs,
+            final int uid) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                final boolean update;
+                synchronized (mStats) {
+                    update = mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid,
+                            elapsedRealtime, uptime);
+                }
+
+                if (update) {
+                    mWorker.scheduleSync("modem-data", BatteryExternalStatsWorker.UPDATE_RADIO);
+                }
+            });
         }
     }
 
     public void notePhoneOn() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePhoneOnLocked();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePhoneOnLocked(elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     public void notePhoneOff() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePhoneOffLocked();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePhoneOffLocked(elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void notePhoneSignalStrength(SignalStrength signalStrength) {
+    public void notePhoneSignalStrength(final SignalStrength signalStrength) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePhoneSignalStrengthLocked(signalStrength);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePhoneSignalStrengthLocked(signalStrength, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType) {
+    public void notePhoneDataConnectionState(final int dataType, final boolean hasData,
+            final int serviceType) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePhoneDataConnectionStateLocked(dataType, hasData, serviceType);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePhoneDataConnectionStateLocked(dataType, hasData, serviceType,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void notePhoneState(int state) {
+    public void notePhoneState(final int state) {
         enforceCallingPermission();
-        int simState = mContext.getSystemService(TelephonyManager.class).getSimState();
-        synchronized (mStats) {
-            mStats.notePhoneStateLocked(state, simState);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                int simState = mContext.getSystemService(TelephonyManager.class).getSimState();
+                synchronized (mStats) {
+                    mStats.notePhoneStateLocked(state, simState, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     public void noteWifiOn() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiOnLocked();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiOnLocked(elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED,
+                        FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED__STATE__ON);
+            });
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED,
-                FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED__STATE__ON);
     }
 
     public void noteWifiOff() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiOffLocked();
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED,
-                FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED__STATE__OFF);
-    }
-
-    public void noteStartAudio(int uid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteAudioOnLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.AUDIO_STATE_CHANGED, uid, null,
-                    FrameworkStatsLog.AUDIO_STATE_CHANGED__STATE__ON);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiOffLocked(elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED,
+                        FrameworkStatsLog.WIFI_ENABLED_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
-    public void noteStopAudio(int uid) {
+    public void noteStartAudio(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteAudioOffLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.AUDIO_STATE_CHANGED, uid, null,
-                    FrameworkStatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteAudioOnLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.AUDIO_STATE_CHANGED, uid,
+                        null, FrameworkStatsLog.AUDIO_STATE_CHANGED__STATE__ON);
+            });
         }
     }
 
-    public void noteStartVideo(int uid) {
+    public void noteStopAudio(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteVideoOnLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED, uid,
-                    null, FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__ON);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteAudioOffLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.AUDIO_STATE_CHANGED, uid,
+                        null, FrameworkStatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
-    public void noteStopVideo(int uid) {
+    public void noteStartVideo(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteVideoOffLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED, uid,
-                    null, FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__OFF);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteVideoOnLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED,
+                        uid, null, FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__ON);
+            });
+        }
+    }
+
+    public void noteStopVideo(final int uid) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteVideoOffLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED,
+                        uid, null, FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
     public void noteResetAudio() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteResetAudioLocked();
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.AUDIO_STATE_CHANGED, -1, null,
-                    FrameworkStatsLog.AUDIO_STATE_CHANGED__STATE__RESET);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteResetAudioLocked(elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.AUDIO_STATE_CHANGED, -1, null,
+                        FrameworkStatsLog.AUDIO_STATE_CHANGED__STATE__RESET);
+            });
         }
     }
 
     public void noteResetVideo() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteResetVideoLocked();
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED, -1,
-                    null, FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__RESET);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteResetVideoLocked(elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED, -1,
+                        null, FrameworkStatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__RESET);
+            });
         }
     }
 
-    public void noteFlashlightOn(int uid) {
+    public void noteFlashlightOn(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteFlashlightOnLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED, uid,
-                    null, FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED__STATE__ON);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteFlashlightOnLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED, uid,
+                        null, FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED__STATE__ON);
+            });
         }
     }
 
-    public void noteFlashlightOff(int uid) {
+    public void noteFlashlightOff(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteFlashlightOffLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED, uid,
-                    null, FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteFlashlightOffLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED, uid,
+                        null, FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
-    public void noteStartCamera(int uid) {
+    public void noteStartCamera(final int uid) {
         enforceCallingPermission();
         if (DBG) Slog.d(TAG, "begin noteStartCamera");
-        synchronized (mStats) {
-            mStats.noteCameraOnLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.CAMERA_STATE_CHANGED, uid, null,
-                    FrameworkStatsLog.CAMERA_STATE_CHANGED__STATE__ON);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteCameraOnLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.CAMERA_STATE_CHANGED, uid,
+                        null, FrameworkStatsLog.CAMERA_STATE_CHANGED__STATE__ON);
+            });
         }
         if (DBG) Slog.d(TAG, "end noteStartCamera");
     }
 
-    public void noteStopCamera(int uid) {
+    public void noteStopCamera(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteCameraOffLocked(uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.CAMERA_STATE_CHANGED, uid, null,
-                    FrameworkStatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteCameraOffLocked(uid, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.CAMERA_STATE_CHANGED, uid,
+                        null, FrameworkStatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
     public void noteResetCamera() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteResetCameraLocked();
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.CAMERA_STATE_CHANGED, -1, null,
-                    FrameworkStatsLog.CAMERA_STATE_CHANGED__STATE__RESET);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteResetCameraLocked(elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.CAMERA_STATE_CHANGED, -1,
+                        null, FrameworkStatsLog.CAMERA_STATE_CHANGED__STATE__RESET);
+            });
         }
     }
 
     public void noteResetFlashlight() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteResetFlashlightLocked();
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED, -1,
-                    null, FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED__STATE__RESET);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteResetFlashlightLocked(elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED, -1,
+                        null, FrameworkStatsLog.FLASHLIGHT_STATE_CHANGED__STATE__RESET);
+            });
         }
     }
 
     @Override
-    public void noteWifiRadioPowerState(int powerState, long tsNanos, int uid) {
+    public void noteWifiRadioPowerState(final int powerState, final long tsNanos, final int uid) {
         enforceCallingPermission();
-
-        // There was a change in WiFi power state.
-        // Collect data now for the past activity.
-        synchronized (mStats) {
-            if (mStats.isOnBattery()) {
-                final String type = (powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH ||
-                        powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM) ? "active"
-                        : "inactive";
-                mWorker.scheduleSync("wifi-data: " + type, BatteryExternalStatsWorker.UPDATE_WIFI);
-            }
-            mStats.noteWifiRadioPowerState(powerState, tsNanos, uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                // There was a change in WiFi power state.
+                // Collect data now for the past activity.
+                synchronized (mStats) {
+                    if (mStats.isOnBattery()) {
+                        final String type =
+                                (powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM)
+                                ? "active" : "inactive";
+                        mWorker.scheduleSync("wifi-data: " + type,
+                                BatteryExternalStatsWorker.UPDATE_WIFI);
+                    }
+                    mStats.noteWifiRadioPowerState(powerState, tsNanos, uid,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiRunning(WorkSource ws) {
+    public void noteWifiRunning(final WorkSource ws) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiRunningLocked(ws);
-        }
-        // TODO: Log WIFI_RUNNING_STATE_CHANGED in a better spot to include Hotspot too.
-        FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
-                ws, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
-    }
-
-    public void noteWifiRunningChanged(WorkSource oldWs, WorkSource newWs) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiRunningChangedLocked(oldWs, newWs);
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
-                newWs, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
-        FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
-                oldWs, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
-    }
-
-    public void noteWifiStopped(WorkSource ws) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiStoppedLocked(ws);
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
-                ws, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
-    }
-
-    public void noteWifiState(int wifiState, String accessPoint) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiStateLocked(wifiState, accessPoint);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiRunningLocked(ws, elapsedRealtime, uptime);
+                }
+                // TODO: Log WIFI_RUNNING_STATE_CHANGED in a better spot to include Hotspot too.
+                FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
+                        ws, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
+            });
         }
     }
 
-    public void noteWifiSupplicantStateChanged(int supplState, boolean failedAuth) {
+    public void noteWifiRunningChanged(final WorkSource oldWs, final WorkSource newWs) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiSupplicantStateChangedLocked(supplState, failedAuth);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiRunningChangedLocked(oldWs, newWs, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
+                        newWs, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__ON);
+                FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
+                        oldWs, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
-    public void noteWifiRssiChanged(int newRssi) {
+    public void noteWifiStopped(final WorkSource ws) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiRssiChangedLocked(newRssi);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiStoppedLocked(ws, elapsedRealtime, uptime);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED,
+                        ws, FrameworkStatsLog.WIFI_RUNNING_STATE_CHANGED__STATE__OFF);
+            });
         }
     }
 
-    public void noteFullWifiLockAcquired(int uid) {
+    public void noteWifiState(final int wifiState, final String accessPoint) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteFullWifiLockAcquiredLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiStateLocked(wifiState, accessPoint, elapsedRealtime);
+                }
+            });
         }
     }
 
-    public void noteFullWifiLockReleased(int uid) {
+    public void noteWifiSupplicantStateChanged(final int supplState, final boolean failedAuth) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteFullWifiLockReleasedLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiSupplicantStateChangedLocked(supplState, failedAuth,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiScanStarted(int uid) {
+    public void noteWifiRssiChanged(final int newRssi) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiScanStartedLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiRssiChangedLocked(newRssi, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiScanStopped(int uid) {
+    public void noteFullWifiLockAcquired(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiScanStoppedLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteFullWifiLockAcquiredLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiMulticastEnabled(int uid) {
+    public void noteFullWifiLockReleased(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiMulticastEnabledLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteFullWifiLockReleasedLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiMulticastDisabled(int uid) {
+    public void noteWifiScanStarted(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiMulticastDisabledLocked(uid);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiScanStartedLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteFullWifiLockAcquiredFromSource(WorkSource ws) {
+    public void noteWifiScanStopped(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteFullWifiLockAcquiredFromSourceLocked(ws);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiScanStoppedLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteFullWifiLockReleasedFromSource(WorkSource ws) {
+    public void noteWifiMulticastEnabled(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteFullWifiLockReleasedFromSourceLocked(ws);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiMulticastEnabledLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiScanStartedFromSource(WorkSource ws) {
+    public void noteWifiMulticastDisabled(final int uid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiScanStartedFromSourceLocked(ws);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiMulticastDisabledLocked(uid, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiScanStoppedFromSource(WorkSource ws) {
+    public void noteFullWifiLockAcquiredFromSource(final WorkSource ws) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiScanStoppedFromSourceLocked(ws);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteFullWifiLockAcquiredFromSourceLocked(ws, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiBatchedScanStartedFromSource(WorkSource ws, int csph) {
+    public void noteFullWifiLockReleasedFromSource(final WorkSource ws) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiBatchedScanStartedFromSourceLocked(ws, csph);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteFullWifiLockReleasedFromSourceLocked(ws, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
-    public void noteWifiBatchedScanStoppedFromSource(WorkSource ws) {
+    public void noteWifiScanStartedFromSource(final WorkSource ws) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiBatchedScanStoppedFromSourceLocked(ws);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiScanStartedFromSourceLocked(ws, elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    public void noteWifiScanStoppedFromSource(final WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiScanStoppedFromSourceLocked(ws, elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    public void noteWifiBatchedScanStartedFromSource(final WorkSource ws, final int csph) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiBatchedScanStartedFromSourceLocked(ws, csph,
+                            elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    public void noteWifiBatchedScanStoppedFromSource(final WorkSource ws) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteWifiBatchedScanStoppedFromSourceLocked(ws, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteNetworkInterfaceType(String iface, int networkType) {
+    public void noteNetworkInterfaceType(final String iface, final int networkType) {
         enforceCallingPermission();
-        mStats.noteNetworkInterfaceType(iface, networkType);
+        synchronized (mLock) {
+            mHandler.post(() -> {
+                mStats.noteNetworkInterfaceType(iface, networkType);
+            });
+        }
     }
 
     @Override
@@ -1027,66 +1576,119 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         // During device boot, qtaguid isn't enabled until after the inital
         // loading of battery stats. Now that they're enabled, take our initial
         // snapshot for future delta calculation.
-        mWorker.scheduleSync("network-stats-enabled",
-                BatteryExternalStatsWorker.UPDATE_RADIO | BatteryExternalStatsWorker.UPDATE_WIFI);
-    }
-
-    @Override
-    public void noteDeviceIdleMode(int mode, String activeReason, int activeUid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteDeviceIdleModeLocked(mode, activeReason, activeUid);
-        }
-    }
-
-    public void notePackageInstalled(String pkgName, long versionCode) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePackageInstalledLocked(pkgName, versionCode);
-        }
-    }
-
-    public void notePackageUninstalled(String pkgName) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.notePackageUninstalledLocked(pkgName);
+        synchronized (mLock) {
+            // Still schedule it on the handler to make sure we have existing pending works done
+            mHandler.post(() -> {
+                mWorker.scheduleSync("network-stats-enabled",
+                        BatteryExternalStatsWorker.UPDATE_RADIO
+                        | BatteryExternalStatsWorker.UPDATE_WIFI);
+            });
         }
     }
 
     @Override
-    public void noteBleScanStarted(WorkSource ws, boolean isUnoptimized) {
+    public void noteDeviceIdleMode(final int mode, final String activeReason, final int activeUid) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteBluetoothScanStartedFromSourceLocked(ws, isUnoptimized);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteDeviceIdleModeLocked(mode, activeReason, activeUid,
+                            elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    public void notePackageInstalled(final String pkgName, final long versionCode) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePackageInstalledLocked(pkgName, versionCode,
+                            elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    public void notePackageUninstalled(final String pkgName) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.notePackageUninstalledLocked(pkgName, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteBleScanStopped(WorkSource ws, boolean isUnoptimized) {
+    public void noteBleScanStarted(final WorkSource ws, final boolean isUnoptimized) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteBluetoothScanStoppedFromSourceLocked(ws, isUnoptimized);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteBluetoothScanStartedFromSourceLocked(ws, isUnoptimized,
+                            elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void noteBleScanStopped(final WorkSource ws, final boolean isUnoptimized) {
+        enforceCallingPermission();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteBluetoothScanStoppedFromSourceLocked(ws, isUnoptimized,
+                            uptime, elapsedRealtime);
+                }
+            });
         }
     }
 
     @Override
     public void noteResetBleScan() {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteResetBluetoothScanLocked();
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteResetBluetoothScanLocked(elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteBleScanResults(WorkSource ws, int numNewResults) {
+    public void noteBleScanResults(final WorkSource ws, final int numNewResults) {
         enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteBluetoothScanResultsFromSourceLocked(ws, numNewResults);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteBluetoothScanResultsFromSourceLocked(ws, numNewResults,
+                            elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteWifiControllerActivity(WifiActivityEnergyInfo info) {
+    public void noteWifiControllerActivity(final WifiActivityEnergyInfo info) {
         enforceCallingPermission();
 
         if (info == null || !info.isValid()) {
@@ -1094,24 +1696,36 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
-        mStats.updateWifiState(info);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                mStats.updateWifiState(info, elapsedRealtime, uptime);
+            });
+        }
     }
 
     @Override
-    public void noteBluetoothControllerActivity(BluetoothActivityEnergyInfo info) {
+    public void noteBluetoothControllerActivity(final BluetoothActivityEnergyInfo info) {
         enforceCallingPermission();
         if (info == null || !info.isValid()) {
             Slog.e(TAG, "invalid bluetooth data given: " + info);
             return;
         }
 
-        synchronized (mStats) {
-            mStats.updateBluetoothStateLocked(info);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.updateBluetoothStateLocked(info, elapsedRealtime, uptime);
+                }
+            });
         }
     }
 
     @Override
-    public void noteModemControllerActivity(ModemActivityInfo info) {
+    public void noteModemControllerActivity(final ModemActivityInfo info) {
         enforceCallingPermission();
 
         if (info == null || !info.isValid()) {
@@ -1119,7 +1733,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
-        mStats.updateMobileRadioState(info);
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                mStats.updateMobileRadioState(info, elapsedRealtime, uptime);
+            });
+        }
     }
 
     public boolean isOnBattery() {
@@ -1132,32 +1752,43 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final int chargeFullUAh, final long chargeTimeToFullSeconds) {
         enforceCallingPermission();
 
-        // BatteryService calls us here and we may update external state. It would be wrong
-        // to block such a low level service like BatteryService on external stats like WiFi.
-        mWorker.scheduleRunnable(() -> {
-            synchronized (mStats) {
-                final boolean onBattery = BatteryStatsImpl.isOnBattery(plugType, status);
-                if (mStats.isOnBattery() == onBattery) {
-                    // The battery state has not changed, so we don't need to sync external
-                    // stats immediately.
-                    mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt,
-                            chargeUAh, chargeFullUAh, chargeTimeToFullSeconds);
-                    return;
-                }
-            }
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            final long currentTime = System.currentTimeMillis();
+            // We still schedule this task over the handler thread to make sure we've had
+            // all existing pending work handled before setting the battery state
+            mHandler.post(() -> {
+                // BatteryService calls us here and we may update external state. It would be wrong
+                // to block such a low level service like BatteryService on external stats like WiFi
+                mWorker.scheduleRunnable(() -> {
+                    synchronized (mStats) {
+                        final boolean onBattery = BatteryStatsImpl.isOnBattery(plugType, status);
+                        if (mStats.isOnBattery() == onBattery) {
+                            // The battery state has not changed, so we don't need to sync external
+                            // stats immediately.
+                            mStats.setBatteryStateLocked(status, health, plugType, level, temp,
+                                    volt, chargeUAh, chargeFullUAh, chargeTimeToFullSeconds,
+                                    elapsedRealtime, uptime, currentTime);
+                            return;
+                        }
+                    }
 
-            // Sync external stats first as the battery has changed states. If we don't sync
-            // before changing the state, we may not collect the relevant data later.
-            // Order here is guaranteed since we're scheduling from the same thread and we are
-            // using a single threaded executor.
-            mWorker.scheduleSync("battery-state", BatteryExternalStatsWorker.UPDATE_ALL);
-            mWorker.scheduleRunnable(() -> {
-                synchronized (mStats) {
-                    mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt,
-                            chargeUAh, chargeFullUAh, chargeTimeToFullSeconds);
-                }
+                    // Sync external stats first as the battery has changed states. If we don't sync
+                    // before changing the state, we may not collect the relevant data later.
+                    // Order here is guaranteed since we're scheduling from the same thread and we
+                    // are using a single threaded executor.
+                    mWorker.scheduleSync("battery-state", BatteryExternalStatsWorker.UPDATE_ALL);
+                    mWorker.scheduleRunnable(() -> {
+                        synchronized (mStats) {
+                            mStats.setBatteryStateLocked(status, health, plugType, level, temp,
+                                    volt, chargeUAh, chargeFullUAh, chargeTimeToFullSeconds,
+                                    elapsedRealtime, uptime, currentTime);
+                        }
+                    });
+                });
             });
-        });
+        }
     }
 
     public long getAwakeTimeBattery() {
@@ -1205,8 +1836,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             try {
                 String reason;
                 while ((reason = waitWakeup()) != null) {
+                    // Wait for the completion of pending works if there is any
+                    awaitCompletion();
+
                     synchronized (mStats) {
-                        mStats.noteWakeupReasonLocked(reason);
+                        mStats.noteWakeupReasonLocked(reason,
+                                SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
                     }
                 }
             } catch (RuntimeException e) {
@@ -1273,12 +1908,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private void dumpSettings(PrintWriter pw) {
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
         synchronized (mStats) {
             mStats.dumpConstantsLocked(pw);
         }
     }
 
     private void dumpCpuStats(PrintWriter pw) {
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
         synchronized (mStats) {
             mStats.dumpCpuStatsLocked(pw);
         }
@@ -1292,14 +1931,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return -1;
         }
         if ("full-wake-history".equals(args[i]) || "full-history".equals(args[i])) {
+            // Wait for the completion of pending works if there is any
+            awaitCompletion();
             synchronized (mStats) {
                 mStats.setRecordAllHistoryLocked(enable);
             }
         } else if ("no-auto-reset".equals(args[i])) {
+            // Wait for the completion of pending works if there is any
+            awaitCompletion();
             synchronized (mStats) {
                 mStats.setNoAutoReset(enable);
             }
         } else if ("pretend-screen-off".equals(args[i])) {
+            // Wait for the completion of pending works if there is any
+            awaitCompletion();
             synchronized (mStats) {
                 mStats.setPretendScreenOff(enable);
             }
@@ -1350,6 +1995,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         return;
                     }
                     final long events = ParseUtils.parseLong(args[i], 0);
+                    awaitCompletion();
                     synchronized (mStats) {
                         mStats.createFakeHistoryEvents(events);
                         pw.println("Battery history create events started.");
@@ -1365,6 +2011,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("--daily".equals(arg)) {
                     flags |= BatteryStats.DUMP_DAILY_ONLY;
                 } else if ("--reset".equals(arg)) {
+                    awaitCompletion();
                     synchronized (mStats) {
                         mStats.resetAllStatsCmdLocked();
                         pw.println("Battery stats reset.");
@@ -1372,6 +2019,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     }
                     mWorker.scheduleSync("dump", BatteryExternalStatsWorker.UPDATE_ALL);
                 } else if ("--write".equals(arg)) {
+                    awaitCompletion();
                     syncStats("dump", BatteryExternalStatsWorker.UPDATE_ALL);
                     synchronized (mStats) {
                         mStats.writeSyncLocked();
@@ -1379,12 +2027,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         noOutput = true;
                     }
                 } else if ("--new-daily".equals(arg)) {
+                    awaitCompletion();
                     synchronized (mStats) {
                         mStats.recordDailyStatsLocked();
                         pw.println("New daily stats written.");
                         noOutput = true;
                     }
                 } else if ("--read-daily".equals(arg)) {
+                    awaitCompletion();
                     synchronized (mStats) {
                         mStats.readDailyStatsLocked();
                         pw.println("Last daily stats read.");
@@ -1441,6 +2091,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             if (BatteryStatsHelper.checkWifiOnly(mContext)) {
                 flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
             }
+            awaitCompletion();
             // Fetch data from external sources and update the BatteryStatsImpl object with them.
             syncStats("dump", BatteryExternalStatsWorker.UPDATE_ALL);
         } finally {
@@ -1489,6 +2140,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             }
             if (DBG) Slog.d(TAG, "begin dumpProtoLocked from UID " + Binder.getCallingUid());
+            awaitCompletion();
             synchronized (mStats) {
                 mStats.dumpProtoLocked(mContext, fd, apps, flags, historyStart);
                 if (writeData) {
@@ -1528,6 +2180,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             }
             if (DBG) Slog.d(TAG, "begin dumpCheckinLocked from UID " + Binder.getCallingUid());
+            awaitCompletion();
             synchronized (mStats) {
                 mStats.dumpCheckinLocked(mContext, pw, apps, flags, historyStart);
                 if (writeData) {
@@ -1537,6 +2190,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             if (DBG) Slog.d(TAG, "end dumpCheckinLocked");
         } else {
             if (DBG) Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
+            awaitCompletion();
             synchronized (mStats) {
                 mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
                 if (writeData) {
@@ -1552,6 +2206,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public CellularBatteryStats getCellularBatteryStats() {
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
         synchronized (mStats) {
             return mStats.getCellularBatteryStats();
         }
@@ -1562,6 +2218,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public WifiBatteryStats getWifiBatteryStats() {
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
         synchronized (mStats) {
             return mStats.getWifiBatteryStats();
         }
@@ -1572,6 +2230,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * @hide
      */
     public GpsBatteryStats getGpsBatteryStats() {
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
         synchronized (mStats) {
             return mStats.getGpsBatteryStats();
         }
@@ -1588,6 +2248,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         long ident = Binder.clearCallingIdentity();
         try {
+            // Wait for the completion of pending works if there is any
+            awaitCompletion();
             if (shouldCollectExternalStats()) {
                 syncStats("get-health-stats-for-uids", BatteryExternalStatsWorker.UPDATE_ALL);
             }
@@ -1614,6 +2276,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         long ident = Binder.clearCallingIdentity();
         int i=-1;
         try {
+            // Wait for the completion of pending works if there is any
+            awaitCompletion();
             if (shouldCollectExternalStats()) {
                 syncStats("get-health-stats-for-uids", BatteryExternalStatsWorker.UPDATE_ALL);
             }
@@ -1683,6 +2347,126 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     delayMillis);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    void updateForegroundTimeIfOnBattery(final String packageName, final int uid,
+            final long cpuTimeDiff) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                if (!isOnBattery()) {
+                    return;
+                }
+                synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Proc ps =
+                            mStats.getProcessStatsLocked(uid, packageName, elapsedRealtime, uptime);
+                    if (ps != null) {
+                        ps.addForegroundTimeLocked(cpuTimeDiff);
+                    }
+                }
+            });
+        }
+    }
+
+    void noteCurrentTimeChanged() {
+        synchronized (mLock) {
+            final long currentTime = System.currentTimeMillis();
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteCurrentTimeChangedLocked(currentTime, elapsedRealtime, uptime);
+                }
+            });
+        }
+    }
+
+    void updateBatteryStatsOnActivityUsage(final String packageName, final String className,
+            final int uid, final int userId, final boolean resumed) {
+        synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
+                        uid, packageName, className,
+                        resumed
+                        ? FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND
+                        : FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
+                synchronized (mStats) {
+                    if (resumed) {
+                        mStats.noteActivityResumedLocked(uid, elapsedRealtime, uptime);
+                    } else {
+                        mStats.noteActivityPausedLocked(uid, elapsedRealtime, uptime);
+                    }
+                }
+            });
+        }
+    }
+
+    void noteProcessDied(final int uid, final int pid) {
+        synchronized (mLock) {
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.noteProcessDiedLocked(uid, pid);
+                }
+            });
+        }
+    }
+
+    void reportExcessiveCpu(final int uid, final String processName, final long uptimeSince,
+            long cputimeUsed) {
+        synchronized (mLock) {
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    mStats.reportExcessiveCpuLocked(uid, processName, uptimeSince, cputimeUsed);
+                }
+            });
+        }
+    }
+
+    void noteServiceStartRunning(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+        synchronized (mLock) {
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    stats.startRunningLocked(uptime);
+                }
+            });
+        }
+    }
+
+    void noteServiceStopRunning(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+        synchronized (mLock) {
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    stats.stopRunningLocked(uptime);
+                }
+            });
+        }
+    }
+
+    void noteServiceStartLaunch(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+        synchronized (mLock) {
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    stats.startLaunchedLocked(uptime);
+                }
+            });
+        }
+    }
+
+    void noteServiceStopLaunch(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+        synchronized (mLock) {
+            final long uptime = SystemClock.uptimeMillis();
+            mHandler.post(() -> {
+                synchronized (mStats) {
+                    stats.stopLaunchedLocked(uptime);
+                }
+            });
         }
     }
 }
