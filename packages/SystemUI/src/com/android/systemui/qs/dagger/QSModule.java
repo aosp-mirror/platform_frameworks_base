@@ -22,6 +22,7 @@ import android.os.Handler;
 
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.qs.AutoAddTracker;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -29,6 +30,7 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -56,4 +58,9 @@ public interface QSModule {
         manager.init();
         return manager;
     }
+
+
+    /** */
+    @Binds
+    QSHost provideQsHost(QSTileHost controllerImpl);
 }
