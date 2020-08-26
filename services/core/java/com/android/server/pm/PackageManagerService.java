@@ -13882,7 +13882,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean isCallerOwner = isCallerDeviceOrProfileOwner(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            final String activeLauncherPackageName = getActiveLauncherPackageName(userId);
+            final String activeLauncherPackageName = mPermissionManager.getDefaultHome(userId);
             final String dialerPackageName = mPermissionManager.getDefaultDialer(userId);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
@@ -13956,18 +13956,6 @@ public class PackageManagerService extends IPackageManager.Stub
             Binder.restoreCallingIdentity(callingId);
         }
         return canSuspend;
-    }
-
-    private String getActiveLauncherPackageName(int userId) {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        ResolveInfo resolveInfo = resolveIntent(
-                intent,
-                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                PackageManager.MATCH_DEFAULT_ONLY,
-                userId);
-
-        return resolveInfo == null ? null : resolveInfo.activityInfo.packageName;
     }
 
     @Override
@@ -20644,6 +20632,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (cn != null) {
             return cn;
         }
+        // TODO: This should not happen since there should always be a default package set for
+        //  ROLE_HOME in RoleManager. Continue with a warning log for now.
+        Slog.w(TAG, "Default package for ROLE_HOME is not set in RoleManager");
 
         // Find the launcher with the highest priority and return that component if there are no
         // other home activity with the same priority.
@@ -20692,6 +20683,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
+
         int resolveInfosSize = resolveInfos.size();
         for (int i = 0; i < resolveInfosSize; i++) {
             ResolveInfo resolveInfo = resolveInfos.get(i);
@@ -20749,6 +20741,11 @@ public class PackageManagerService extends IPackageManager.Stub
         if (callingPackages != null && ArrayUtils.contains(callingPackages,
                 mRequiredPermissionControllerPackage)) {
             // PermissionController manages default home directly.
+            return false;
+        }
+
+        if (packageName == null) {
+            // Keep the default home package in RoleManager.
             return false;
         }
         mPermissionManager.setDefaultHome(packageName, userId, (successful) -> {
