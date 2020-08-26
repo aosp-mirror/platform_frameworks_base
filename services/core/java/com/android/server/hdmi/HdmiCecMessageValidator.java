@@ -148,7 +148,7 @@ public class HdmiCecMessageValidator {
                 maxLengthValidator, DEST_ALL | SRC_UNREGISTERED);
 
         // Messages for the OSD.
-        addValidationInfo(Constants.MESSAGE_SET_OSD_STRING, maxLengthValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_OSD_STRING, new OsdStringValidator(), DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_OSD_NAME, new AsciiValidator(1, 14), DEST_DIRECT);
 
         // Messages for the Device Menu Control.
@@ -300,6 +300,18 @@ public class HdmiCecMessageValidator {
     }
 
     /**
+     * Check if the given value is a valid Display Control. A valid value is one which falls within
+     * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value Display Control
+     * @return true if the Display Control is valid
+     */
+    private boolean isValidDisplayControl(int value) {
+        value = value & 0xFF;
+        return (value == 0x00 || value == 0x40 || value == 0x80 || value == 0xC0);
+    }
+
+    /**
      * Check if the given params has valid ASCII characters.
      * A valid ASCII character is a printable character. It should fall within range description
      * defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
@@ -406,6 +418,27 @@ public class HdmiCecMessageValidator {
                 return ERROR_PARAMETER_SHORT;
             }
             return toErrorCode(isValidAsciiString(params, 0, mMaxLength));
+        }
+    }
+
+    /**
+     * Check if the given parameters is valid OSD String.
+     * A valid parameter should lie within the range description of ASCII defined in CEC 1.4
+     * Specification : Operand Descriptions (Section 17)
+     */
+    private class OsdStringValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            // If the length is longer than expected, we assume it's OK since the parameter can be
+            // extended in the future version.
+            if (params.length < 2) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(
+                    // Display Control
+                    isValidDisplayControl(params[0])
+                    // OSD String
+                    && isValidAsciiString(params, 1, 14));
         }
     }
 }

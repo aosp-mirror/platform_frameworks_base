@@ -84,6 +84,22 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_setOsdString() {
+        assertMessageValidity("40:64:80:41").isEqualTo(OK);
+        // Even though the parameter string in this message is longer than 14 bytes, it is accepted
+        // as this parameter might be extended in future versions.
+        assertMessageValidity("04:64:00:4C:69:76:69:6E:67:52:6F:6F:6D:20:54:56:C4").isEqualTo(OK);
+
+        assertMessageValidity("4F:64:40:41").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:64:C0:41").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:64:00").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Display Control
+        assertMessageValidity("40:64:20:4C:69:76").isEqualTo(ERROR_PARAMETER);
+        // Invalid ASCII characters
+        assertMessageValidity("40:64:40:4C:69:7F").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
     public void isValid_setOsdName() {
         assertMessageValidity("40:47:4C:69:76:69:6E:67:52:6F:6F:6D:54:56").isEqualTo(OK);
         assertMessageValidity("40:47:54:56").isEqualTo(OK);
