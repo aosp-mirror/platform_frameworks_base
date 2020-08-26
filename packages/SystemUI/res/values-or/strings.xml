@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ବାତିଲ୍‌ କରନ୍ତୁ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ସେୟାର୍‍ କରନ୍ତୁ"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ଡିଲିଟ୍ କରନ୍ତୁ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ବାତିଲ୍‌ କରିଦିଆଯାଇଛି"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ସେଭ୍‍ ହୋଇଛି, ଦେଖିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିଦିଆଯାଇଛି"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ଅନୁମତି ପାଇବାରେ ଅସଫଳ ହେଲା।"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ସ୍କ୍ରିନ୍ ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
@@ -125,7 +123,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ସ୍କ୍ରୀନ୍‌କୁ ଘୁରାନ୍ତୁ"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ଓଭରଭିଉ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"କ୍ୟାମେରା"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ଫୋନ୍‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ଭଏସ୍‌ ସହାୟକ"</string>
@@ -441,7 +439,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାକୁ ଆଉ <xliff:g id="CHARGING_TIME">%s</xliff:g> ଅଛି"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"ନେଟ୍‍ୱର୍କ\nମନିଟର୍‍ କରାଯାଇପାରେ"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"ସର୍ଚ୍ଚ"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ଉପରକୁ ସ୍ଲାଇଡ୍‍ କରନ୍ତୁ।"</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ବାମକୁ ସ୍ଲାଇଡ୍ କରନ୍ତୁ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ଆଲାର୍ମ, ରିମାଇଣ୍ଡର୍‌, ଇଭେଣ୍ଟ ଏବଂ ଆପଣ ନିର୍ଦ୍ଦିଷ୍ଟ କରିଥିବା କଲର୍‌ଙ୍କ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ମିଡିଆ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ବର୍ତ୍ତମାନର ସେସନ୍ ଲୁଚାନ୍ତୁ।"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ଲୁଚାନ୍ତୁ"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>

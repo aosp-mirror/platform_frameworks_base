@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Seguir"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancelar"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Eliminar"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Se ha cancelado la grabación de la pantalla"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Se ha guardado la grabación de la pantalla; toca para verla"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Se ha eliminado la grabación de la pantalla"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"No se ha podido eliminar la grabación de la pantalla"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No se han podido obtener los permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
@@ -502,10 +500,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactivar Ahorro de batería"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Empezar a grabar o enviar contenido?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Quieres iniciar la grabación o el envío de contenido con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Iniciar grabación o el envío de contenido en <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ocultar la sesión."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Cerrar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ajustes"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>

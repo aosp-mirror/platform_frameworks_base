@@ -1894,7 +1894,7 @@
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
-    <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS հավելվածը"</string>
+    <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS-ների փոխանակման հավելվածը"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Որոշ գործառույթներ կարող են չաշխատել"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Աշխատանքային պրոֆիլը կողպված է"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Հպեք՝ այն ապակողպելու համար"</string>

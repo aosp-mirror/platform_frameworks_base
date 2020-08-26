@@ -75,7 +75,7 @@ private:
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
     int64_t mFrameInterval;
-    nsecs_t mSwapDeadline;
+    nsecs_t mSwapDeadline = -1;
     // The amount of time we will erase from the total duration to account
     // for SF vsync offsets with HWC2 blocking dequeueBuffers.
     // (Vsync + mDequeueBlockTolerance) is the point at which we expect

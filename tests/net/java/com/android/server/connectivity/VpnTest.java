@@ -30,6 +30,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -49,6 +50,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -65,6 +67,7 @@ import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
 import android.net.LinkProperties;
+import android.net.LocalSocket;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo.DetailedState;
@@ -74,6 +77,7 @@ import android.net.VpnManager;
 import android.net.VpnService;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Process;
@@ -101,13 +105,20 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -133,7 +144,8 @@ public class VpnTest {
         managedProfileA.profileGroupId = primaryUser.id;
     }
 
-    static final String TEST_VPN_PKG = "com.dummy.vpn";
+    static final String EGRESS_IFACE = "wlan0";
+    static final String TEST_VPN_PKG = "com.testvpn.vpn";
     private static final String TEST_VPN_SERVER = "1.2.3.4";
     private static final String TEST_VPN_IDENTITY = "identity";
     private static final byte[] TEST_VPN_PSK = "psk".getBytes();
@@ -1012,31 +1024,190 @@ public class VpnTest {
         // a subsequent CL.
     }
 
-    @Test
-    public void testStartLegacyVpn() throws Exception {
+    public Vpn startLegacyVpn(final VpnProfile vpnProfile) throws Exception {
         final Vpn vpn = createVpn(primaryUser.id);
         setMockedUsers(primaryUser);
 
         // Dummy egress interface
-        final String egressIface = "DUMMY0";
         final LinkProperties lp = new LinkProperties();
-        lp.setInterfaceName(egressIface);
+        lp.setInterfaceName(EGRESS_IFACE);
 
         final RouteInfo defaultRoute = new RouteInfo(new IpPrefix(Inet4Address.ANY, 0),
-                        InetAddresses.parseNumericAddress("192.0.2.0"), egressIface);
+                        InetAddresses.parseNumericAddress("192.0.2.0"), EGRESS_IFACE);
         lp.addRoute(defaultRoute);
 
-        vpn.startLegacyVpn(mVpnProfile, mKeyStore, lp);
+        vpn.startLegacyVpn(vpnProfile, mKeyStore, lp);
+        return vpn;
+    }
 
+    @Test
+    public void testStartPlatformVpn() throws Exception {
+        startLegacyVpn(mVpnProfile);
         // TODO: Test the Ikev2VpnRunner started up properly. Relies on utility methods added in
-        // a subsequent CL.
+        // a subsequent patch.
+    }
+
+    @Test
+    public void testStartRacoonNumericAddress() throws Exception {
+        startRacoon("1.2.3.4", "1.2.3.4");
+    }
+
+    @Test
+    public void testStartRacoonHostname() throws Exception {
+        startRacoon("hostname", "5.6.7.8"); // address returned by deps.resolve
+    }
+
+    public void startRacoon(final String serverAddr, final String expectedAddr)
+            throws Exception {
+        final ConditionVariable legacyRunnerReady = new ConditionVariable();
+        final VpnProfile profile = new VpnProfile("testProfile" /* key */);
+        profile.type = VpnProfile.TYPE_L2TP_IPSEC_PSK;
+        profile.name = "testProfileName";
+        profile.username = "userName";
+        profile.password = "thePassword";
+        profile.server = serverAddr;
+        profile.ipsecIdentifier = "id";
+        profile.ipsecSecret = "secret";
+        profile.l2tpSecret = "l2tpsecret";
+        when(mConnectivityManager.getAllNetworks())
+            .thenReturn(new Network[] { new Network(101) });
+        when(mConnectivityManager.registerNetworkAgent(any(), any(), any(), any(),
+                anyInt(), any(), anyInt())).thenAnswer(invocation -> {
+                    // The runner has registered an agent and is now ready.
+                    legacyRunnerReady.open();
+                    return new Network(102);
+                });
+        final Vpn vpn = startLegacyVpn(profile);
+        final TestDeps deps = (TestDeps) vpn.mDeps;
+        try {
+            // udppsk and 1701 are the values for TYPE_L2TP_IPSEC_PSK
+            assertArrayEquals(
+                    new String[] { EGRESS_IFACE, expectedAddr, "udppsk",
+                            profile.ipsecIdentifier, profile.ipsecSecret, "1701" },
+                    deps.racoonArgs.get(10, TimeUnit.SECONDS));
+            // literal values are hardcoded in Vpn.java for mtpd args
+            assertArrayEquals(
+                    new String[] { EGRESS_IFACE, "l2tp", expectedAddr, "1701", profile.l2tpSecret,
+                            "name", profile.username, "password", profile.password,
+                            "linkname", "vpn", "refuse-eap", "nodefaultroute", "usepeerdns",
+                            "idle", "1800", "mtu", "1400", "mru", "1400" },
+                    deps.mtpdArgs.get(10, TimeUnit.SECONDS));
+            // Now wait for the runner to be ready before testing for the route.
+            legacyRunnerReady.block(10_000);
+            // In this test the expected address is always v4 so /32
+            final RouteInfo expectedRoute = new RouteInfo(new IpPrefix(expectedAddr + "/32"),
+                    RouteInfo.RTN_THROW);
+            assertTrue("Routes lack the expected throw route (" + expectedRoute + ") : "
+                    + vpn.mConfig.routes,
+                    vpn.mConfig.routes.contains(expectedRoute));
+        } finally {
+            // Now interrupt the thread, unblock the runner and clean up.
+            vpn.mVpnRunner.exitVpnRunner();
+            deps.getStateFile().delete(); // set to delete on exit, but this deletes it earlier
+            vpn.mVpnRunner.join(10_000); // wait for up to 10s for the runner to die and cleanup
+        }
+    }
+
+    private static final class TestDeps extends Vpn.Dependencies {
+        public final CompletableFuture<String[]> racoonArgs = new CompletableFuture();
+        public final CompletableFuture<String[]> mtpdArgs = new CompletableFuture();
+        public final File mStateFile;
+
+        private final HashMap<String, Boolean> mRunningServices = new HashMap<>();
+
+        TestDeps() {
+            try {
+                mStateFile = File.createTempFile("vpnTest", ".tmp");
+                mStateFile.deleteOnExit();
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void startService(final String serviceName) {
+            mRunningServices.put(serviceName, true);
+        }
+
+        @Override
+        public void stopService(final String serviceName) {
+            mRunningServices.put(serviceName, false);
+        }
+
+        @Override
+        public boolean isServiceRunning(final String serviceName) {
+            return mRunningServices.getOrDefault(serviceName, false);
+        }
+
+        @Override
+        public boolean isServiceStopped(final String serviceName) {
+            return !isServiceRunning(serviceName);
+        }
+
+        @Override
+        public File getStateFile() {
+            return mStateFile;
+        }
+
+        @Override
+        public void sendArgumentsToDaemon(
+                final String daemon, final LocalSocket socket, final String[] arguments,
+                final Vpn.RetryScheduler interruptChecker) throws IOException {
+            if ("racoon".equals(daemon)) {
+                racoonArgs.complete(arguments);
+            } else if ("mtpd".equals(daemon)) {
+                writeStateFile(arguments);
+                mtpdArgs.complete(arguments);
+            } else {
+                throw new UnsupportedOperationException("Unsupported daemon : " + daemon);
+            }
+        }
+
+        private void writeStateFile(final String[] arguments) throws IOException {
+            mStateFile.delete();
+            mStateFile.createNewFile();
+            mStateFile.deleteOnExit();
+            final BufferedWriter writer = new BufferedWriter(
+                    new FileWriter(mStateFile, false /* append */));
+            writer.write(EGRESS_IFACE);
+            writer.write("\n");
+            // addresses
+            writer.write("10.0.0.1/24\n");
+            // routes
+            writer.write("192.168.6.0/24\n");
+            // dns servers
+            writer.write("192.168.6.1\n");
+            // search domains
+            writer.write("vpn.searchdomains.com\n");
+            // endpoint - intentionally empty
+            writer.write("\n");
+            writer.flush();
+            writer.close();
+        }
+
+        @Override
+        @NonNull
+        public InetAddress resolve(final String endpoint) {
+            try {
+                // If a numeric IP address, return it.
+                return InetAddress.parseNumericAddress(endpoint);
+            } catch (IllegalArgumentException e) {
+                // Otherwise, return some token IP to test for.
+                return InetAddress.parseNumericAddress("5.6.7.8");
+            }
+        }
+
+        @Override
+        public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
+            return true;
+        }
     }
 
     /**
      * Mock some methods of vpn object.
      */
     private Vpn createVpn(@UserIdInt int userId) {
-        return new Vpn(Looper.myLooper(), mContext, mNetService,
+        return new Vpn(Looper.myLooper(), mContext, new TestDeps(), mNetService,
                 userId, mKeyStore, mSystemServices, mIkev2SessionCreator);
     }
 

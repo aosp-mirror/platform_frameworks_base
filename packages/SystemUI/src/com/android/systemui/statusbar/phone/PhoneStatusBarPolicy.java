@@ -284,13 +284,22 @@ public class PhoneStatusBarPolicy
                 mResources.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
 
+
         // privacy items
+        String microphoneString = mResources.getString(PrivacyType.TYPE_MICROPHONE.getNameId());
+        String microphoneDesc = mResources.getString(
+                R.string.ongoing_privacy_chip_content_multiple_apps, microphoneString);
         mIconController.setIcon(mSlotMicrophone, PrivacyType.TYPE_MICROPHONE.getIconId(),
-                mResources.getString(PrivacyType.TYPE_MICROPHONE.getNameId()));
+                microphoneDesc);
         mIconController.setIconVisibility(mSlotMicrophone, false);
+
+        String cameraString = mResources.getString(PrivacyType.TYPE_CAMERA.getNameId());
+        String cameraDesc = mResources.getString(
+                R.string.ongoing_privacy_chip_content_multiple_apps, cameraString);
         mIconController.setIcon(mSlotCamera, PrivacyType.TYPE_CAMERA.getIconId(),
-                mResources.getString(PrivacyType.TYPE_CAMERA.getNameId()));
+                cameraDesc);
         mIconController.setIconVisibility(mSlotCamera, false);
+
         mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
                 mResources.getString(R.string.accessibility_location_active));
         mIconController.setIconVisibility(mSlotLocation, false);
@@ -631,7 +640,7 @@ public class PhoneStatusBarPolicy
     }
 
     @Override  // PrivacyItemController.Callback
-    public void privacyChanged(List<PrivacyItem> privacyItems) {
+    public void onPrivacyItemsChanged(List<PrivacyItem> privacyItems) {
         updatePrivacyItems(privacyItems);
     }
 
@@ -664,16 +673,18 @@ public class PhoneStatusBarPolicy
 
         mIconController.setIconVisibility(mSlotCamera, showCamera);
         mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
-        mIconController.setIconVisibility(mSlotLocation, showLocation);
+        if (mPrivacyItemController.getAllIndicatorsAvailable()) {
+            mIconController.setIconVisibility(mSlotLocation, showLocation);
+        }
     }
 
     @Override
     public void onLocationActiveChanged(boolean active) {
-        if (!mPrivacyItemController.isPermissionsHubEnabled()) updateLocation();
+        if (!mPrivacyItemController.getAllIndicatorsAvailable()) updateLocationFromController();
     }
 
     // Updates the status view based on the current state of location requests.
-    private void updateLocation() {
+    private void updateLocationFromController() {
         if (mLocationController.isLocationActive()) {
             mIconController.setIconVisibility(mSlotLocation, true);
         } else {

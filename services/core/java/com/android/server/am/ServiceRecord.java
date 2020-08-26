@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -101,6 +104,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean whitelistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
     boolean delayed;        // are we waiting to start this service in the background?
     boolean fgRequired;     // is the service required to go foreground after starting?
+    boolean hideFgNotification; // Hide the fg service notification
     boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
@@ -820,6 +824,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     public void postNotification() {
+        if (hideFgNotification) {
+            return;
+        }
         final int appUid = appInfo.uid;
         final int appPid = app.pid;
         if (foregroundId != 0 && foregroundNoti != null) {
@@ -873,7 +880,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                                 runningIntent.setData(Uri.fromParts("package",
                                         appInfo.packageName, null));
                                 PendingIntent pi = PendingIntent.getActivityAsUser(ams.mContext, 0,
-                                        runningIntent, PendingIntent.FLAG_UPDATE_CURRENT, null,
+                                        runningIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE, null,
                                         UserHandle.of(userId));
                                 notiBuilder.setColor(ams.mContext.getColor(
                                         com.android.internal
@@ -912,7 +919,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         }
                         if (localForegroundNoti.getSmallIcon() == null) {
                             // Notifications whose icon is 0 are defined to not show
-                            // a notification, silently ignoring it.  We don't want to
+                            // a notification.  We don't want to
                             // just ignore it, we want to prevent the service from
                             // being foreground.
                             throw new RuntimeException("invalid service notification: "

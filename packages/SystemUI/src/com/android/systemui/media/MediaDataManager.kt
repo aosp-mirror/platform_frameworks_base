@@ -48,12 +48,15 @@ import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
+import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 
 // URI fields to try loading album art from
 private val ART_URIS = arrayOf(
@@ -89,7 +92,7 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 class MediaDataManager(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExecutor: Executor,
+    @Main private val foregroundExecutor: DelayableExecutor,
     private val mediaControllerFactory: MediaControllerFactory,
     private val broadcastDispatcher: BroadcastDispatcher,
     dumpManager: DumpManager,
@@ -101,12 +104,23 @@ class MediaDataManager(
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+    internal var appsBlockedFromResume: MutableSet<String> = Utils.getBlockedMediaApps(context)
+        set(value) {
+            // Update list
+            appsBlockedFromResume.clear()
+            appsBlockedFromResume.addAll(value)
+
+            // Remove any existing resume players that are now blocked
+            appsBlockedFromResume.forEach {
+                removeAllForPackage(it)
+            }
+        }
 
     @Inject
     constructor(
         context: Context,
         @Background backgroundExecutor: Executor,
-        @Main foregroundExecutor: Executor,
+        @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
         dumpManager: DumpManager,
         broadcastDispatcher: BroadcastDispatcher,
@@ -182,10 +196,7 @@ class MediaDataManager(
         val listenersCopy = listeners.toSet()
         val toRemove = mediaEntries.filter { it.value.packageName == packageName }
         toRemove.forEach {
-            mediaEntries.remove(it.key)
-            listenersCopy.forEach { listener ->
-                listener.onMediaDataRemoved(it.key)
-            }
+            removeEntry(it.key, listenersCopy)
         }
     }
 
@@ -265,6 +276,18 @@ class MediaDataManager(
             it.active = !timedOut
             onMediaDataLoaded(token, token, it)
         }
+    }
+
+    private fun removeEntry(key: String, listenersCopy: Set<Listener>) {
+        mediaEntries.remove(key)
+        listenersCopy.forEach {
+            it.onMediaDataRemoved(key)
+        }
+    }
+
+    fun dismissMediaData(key: String, delay: Long) {
+        val listenersCopy = listeners.toSet()
+        foregroundExecutor.executeDelayed({ removeEntry(key, listenersCopy) }, delay)
     }
 
     private fun loadMediaDataInBgForResumption(
@@ -513,7 +536,8 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
-        if (useMediaResumption && removed?.resumeAction != null) {
+        if (useMediaResumption && removed?.resumeAction != null &&
+                !isBlockedFromResume(removed?.packageName)) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
@@ -548,6 +572,13 @@ class MediaDataManager(
                 it.onMediaDataRemoved(key)
             }
         }
+    }
+
+    private fun isBlockedFromResume(packageName: String?): Boolean {
+        if (packageName == null) {
+            return true
+        }
+        return appsBlockedFromResume.contains(packageName)
     }
 
     fun setMediaResumptionEnabled(isEnabled: Boolean) {
@@ -592,6 +623,7 @@ class MediaDataManager(
             println("listeners: $listeners")
             println("mediaEntries: $mediaEntries")
             println("useMediaResumption: $useMediaResumption")
+            println("appsBlockedFromResume: $appsBlockedFromResume")
         }
     }
 }

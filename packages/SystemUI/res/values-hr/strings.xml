@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Nastavi"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Odustani"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Dijeli"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Izbriši"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Snimanje zaslona otkazano"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Snimanje zaslona spremljeno je, dodirnite da biste ga pregledali"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Snimanje zaslona izbrisano"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Pogreška prilikom brisanja snimanja zaslona"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Dohvaćanje dopuštenja nije uspjelo"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Pogreška prilikom pokretanja snimanja zaslona"</string>
@@ -505,10 +503,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Štednja baterije je uključena"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Smanjuje količinu rada i pozadinske podatke"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Isključite Štednju baterije"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkcionalnost imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Započeti snimanje ili emitiranje?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranja pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranje pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ne prikazuj ponovo"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši sve"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>
@@ -1081,7 +1079,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavanje preporuka"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mediji"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Sakrij trenutačnu sesiju."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sakrij"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Postavke"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, provjerite aplik."</string>

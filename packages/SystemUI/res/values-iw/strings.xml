@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"המשך"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ביטול"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"שיתוף"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"מחיקה"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"הקלטת המסך בוטלה"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"הקלטת המסך נשמרה, יש להקיש כדי להציג"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"הקלטת המסך נמחקה"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"שגיאה במחיקת הקלטת המסך"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"קבלת ההרשאות נכשלה"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"שגיאה בהפעלה של הקלטת המסך"</string>
@@ -508,7 +506,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"תכונת החיסכון בסוללה פועלת"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"כיבוי תכונת החיסכון בסוללה"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או העברה (casting). המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast). זה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"‏להתחיל להקליט או להעביר (cast)?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
@@ -522,7 +520,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"שיחות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ניקוי כל ההתראות השקטות"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"התראות הושהו על ידי מצב \'נא לא להפריע\'"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"התחל כעת"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"כן, אפשר להתחיל"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"אין התראות"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"ייתכן שהפרופיל נתון למעקב"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"ייתכן שהרשת נמצאת במעקב"</string>
@@ -1087,7 +1085,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"בטעינת המלצות"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"מדיה"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"הסתרת הסשן הנוכחי."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"הסתרה"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"סגירה"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"המשך"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"הגדרות"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>

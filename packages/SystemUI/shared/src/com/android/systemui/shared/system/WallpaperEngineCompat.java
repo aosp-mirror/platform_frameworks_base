@@ -26,6 +26,17 @@ public class WallpaperEngineCompat {
 
     private static final String TAG = "WallpaperEngineCompat";
 
+    /**
+     * Returns true if {@link IWallpaperEngine#scalePreview(Rect)} is available.
+     */
+    public static boolean supportsScalePreview() {
+        try {
+            return IWallpaperEngine.class.getMethod("scalePreview", Rect.class) != null;
+        } catch (NoSuchMethodException | SecurityException e) {
+            return false;
+        }
+    }
+
     private final IWallpaperEngine mWrappedEngine;
 
     public WallpaperEngineCompat(IWallpaperEngine wrappedEngine) {

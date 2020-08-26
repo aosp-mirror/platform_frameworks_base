@@ -784,8 +784,8 @@ public class ChooserActivity extends ResolverActivity implements
                 FrameworkStatsLog.SHARESHEET_STARTED,
                 getReferrerPackageName(),
                 target.getType(),
-                initialIntents == null ? 0 : initialIntents.length,
                 mCallerChooserTargets == null ? 0 : mCallerChooserTargets.length,
+                initialIntents == null ? 0 : initialIntents.length,
                 isWorkProfile(),
                 findPreferredContentPreview(getTargetIntent(), getContentResolver()),
                 target.getAction()

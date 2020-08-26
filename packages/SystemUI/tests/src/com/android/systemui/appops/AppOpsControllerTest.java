@@ -27,6 +27,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +37,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.AudioRecordingConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
@@ -47,9 +52,11 @@ import com.android.systemui.dump.DumpManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Collections;
 import java.util.List;
 
 @SmallTest
@@ -73,6 +80,12 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private PermissionFlagsCache mFlagsCache;
     @Mock
     private PackageManager mPackageManager;
+    @Mock(stubOnly = true)
+    private AudioManager mAudioManager;
+    @Mock(stubOnly = true)
+    private AudioManager.AudioRecordingCallback mRecordingCallback;
+    @Mock(stubOnly = true)
+    private AudioRecordingConfiguration mPausedMockRecording;
 
     private AppOpsControllerImpl mController;
     private TestableLooper mTestableLooper;
@@ -94,11 +107,20 @@ public class AppOpsControllerTest extends SysuiTestCase {
         when(mFlagsCache.getPermissionFlags(anyString(), anyString(),
                 eq(TEST_UID_NON_USER_SENSITIVE))).thenReturn(0);
 
+        doAnswer((invocation) -> mRecordingCallback = invocation.getArgument(0))
+                .when(mAudioManager).registerAudioRecordingCallback(any(), any());
+        when(mPausedMockRecording.getClientUid()).thenReturn(TEST_UID);
+        when(mPausedMockRecording.isClientSilenced()).thenReturn(true);
+
+        when(mAudioManager.getActiveRecordingConfigurations())
+                .thenReturn(List.of(mPausedMockRecording));
+
         mController = new AppOpsControllerImpl(
                 mContext,
                 mTestableLooper.getLooper(),
                 mDumpManager,
-                mFlagsCache
+                mFlagsCache,
+                mAudioManager
         );
     }
 
@@ -361,6 +383,89 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(mCallback).onActiveStateChanged(
                 AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME, true);
+    }
+
+    @Test
+    public void testPausedRecordingIsRetrievedOnCreation() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
+        mTestableLooper.processAllMessages();
+
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+
+        verify(mCallback, never())
+                .onActiveStateChanged(anyInt(), anyInt(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testPausedRecordingFilteredOut() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
+        mTestableLooper.processAllMessages();
+
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mController.getActiveAppOps().isEmpty());
+    }
+
+    @Test
+    public void testOnlyRecordAudioPaused() {
+        mController.addCallback(new int[]{
+                AppOpsManager.OP_RECORD_AUDIO,
+                AppOpsManager.OP_CAMERA
+        }, mCallback);
+        mTestableLooper.processAllMessages();
+
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+
+        verify(mCallback).onActiveStateChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, true);
+        List<AppOpItem> list = mController.getActiveAppOps();
+
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_CAMERA, list.get(0).getCode());
+    }
+
+    @Test
+    public void testUnpausedRecordingSentActive() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+
+        mTestableLooper.processAllMessages();
+        mRecordingCallback.onRecordingConfigChanged(Collections.emptyList());
+
+        mTestableLooper.processAllMessages();
+
+        verify(mCallback).onActiveStateChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+    }
+
+    @Test
+    public void testAudioPausedSentInactive() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+
+        AudioRecordingConfiguration mockARC = mock(AudioRecordingConfiguration.class);
+        when(mockARC.getClientUid()).thenReturn(TEST_UID_OTHER);
+        when(mockARC.isClientSilenced()).thenReturn(true);
+
+        mRecordingCallback.onRecordingConfigChanged(List.of(mockARC));
+        mTestableLooper.processAllMessages();
+
+        InOrder inOrder = inOrder(mCallback);
+        inOrder.verify(mCallback).onActiveStateChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        inOrder.verify(mCallback).onActiveStateChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, false);
     }
 
     private class TestHandler extends AppOpsControllerImpl.H {

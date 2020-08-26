@@ -108,15 +108,13 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Vazhdo"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anulo"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ndaj"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Fshi"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Regjistrimi i ekranit u anulua"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Regjistrimi i ekranit u ruajt, trokit për ta parë"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Regjistrimi i ekranit u fshi"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Gabim gjatë fshirjes së regjistrimit të ekranit"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Marrja e lejeve dështoi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Gabim gjatë nisjes së regjistrimit të ekranit"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opsionet e transferimit të dosjeve të USB-së"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Lidh si një lexues \"media\" (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Lidh si një luajtës të medias (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Montoje si kamerë (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalo \"Transferimi i skedarëve të Android\" për Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Prapa"</string>
@@ -502,8 +500,8 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"\"Kursyesi i baterisë\" është i aktivizuar"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Pakëson veprimtarinë dhe të dhënat në sfond"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Çaktivizo \"Kursyesin e baterisë\""</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Do të fillosh regjistrimin ose transmetimin?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Fillo regjistrimin ose transmetimin me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Mos e shfaq sërish"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Po ngarkon rekomandimet"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Fshih sesionin aktual."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Fshih"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Hiq"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Vazhdo"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cilësimet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Joaktive, kontrollo aplikacionin"</string>

@@ -25289,18 +25289,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int mode = mInjector.getAppOpsManager().checkOpNoThrow(
                 AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
                 Binder.getCallingUid(), packageName);
-        if (mode == MODE_ALLOWED) {
-            return false;
-        } else if (mode == MODE_IGNORED) {
-            return true;
-        } else {
-            synchronized (mLock) {
-                boolean manifestWhitelisted =
-                        mPackages.get(packageName).getAutoRevokePermissions()
-                                == ApplicationInfo.AUTO_REVOKE_DISALLOWED;
-                return manifestWhitelisted;
-            }
-        }
+        return mode == MODE_IGNORED;
     }
 
     @Override

@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"जारी राख्नुहोस्"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द गर्नुहोस्"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"सेयर गर्नुहोस्"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"मेट्नुहोस्"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रिन रेकर्ड गर्ने कार्य रद्द गरियो"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"स्क्रिन रेकर्डिङ सुरक्षित गरियो, हेर्न ट्याप गर्नुहोस्‌"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"स्क्रिनको रेकर्डिङ मेटाइयो"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रिनको रेकर्डिङ मेट्ने क्रममा त्रुटि"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"अनुमति प्राप्त गर्न सकिएन"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रिन रेकर्ड गर्न थाल्ने क्रममा त्रुटि भयो"</string>
@@ -729,11 +727,11 @@
     <string name="see_more_title" msgid="7409317011708185729">"थप हेर्नुहोस्"</string>
     <string name="appops_camera" msgid="5215967620896725715">"यो अनुप्रयोगले क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="appops_microphone" msgid="8805468338613070149">"यो अनुप्रयोगले माइक्रोफोनको प्रयोग गर्दै छ।"</string>
-    <string name="appops_overlay" msgid="4822261562576558490">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्दै छ।"</string>
+    <string name="appops_overlay" msgid="4822261562576558490">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्दै छ।"</string>
     <string name="appops_camera_mic" msgid="7032239823944420431">"यो अनुप्रयोगले माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
-    <string name="appops_camera_overlay" msgid="6466845606058816484">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
-    <string name="appops_mic_overlay" msgid="4609326508944233061">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
-    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_overlay" msgid="6466845606058816484">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै क्यामेराको प्रयोग गर्दै छ।"</string>
+    <string name="appops_mic_overlay" msgid="4609326508944233061">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै माइक्रोफोनको प्रयोग गर्दै छ।"</string>
+    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य एपमाथि प्रदर्शन गर्नुका साथै माइक्रोफोन र क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"सेटिङहरू"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ठिक छ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई खोलियो"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मिडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"हालको सत्र लुकाउनुहोस्।"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"लुकाउनुहोस्"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"हटाउनुहोस्"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"सुचारु गर्नुहोस्"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिङ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>

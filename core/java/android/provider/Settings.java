@@ -8929,6 +8929,14 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
 
         /**
+         * Controls which packages are blocked from persisting in media controls when resumption is
+         * enabled. The list of packages is set by the user in the Settings app.
+         * @see Settings.Secure#MEDIA_CONTROLS_RESUME
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_RESUME_BLOCKED = "qs_media_resumption_blocked";
+
+        /**
          * Controls if window magnification is enabled.
          * @hide
          */
@@ -8956,6 +8964,13 @@ public final class Settings {
          * @hide
          */
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
+
+        /**
+         * Whether the Adaptive connectivity option is enabled.
+         *
+         * @hide
+         */
+        public static final String ADAPTIVE_CONNECTIVITY_ENABLED = "adaptive_connectivity_enabled";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to

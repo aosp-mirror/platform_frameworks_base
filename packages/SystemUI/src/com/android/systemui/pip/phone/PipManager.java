@@ -46,6 +46,7 @@ import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
@@ -229,7 +230,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onAspectRatioChanged(float aspectRatio) {
-            mHandler.post(() -> mPipBoundsHandler.onAspectRatioChanged(aspectRatio));
+            mHandler.post(() -> {
+                mPipBoundsHandler.onAspectRatioChanged(aspectRatio);
+                mTouchHandler.onAspectRatioChanged();
+            });
         }
     }
 
@@ -241,7 +245,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
-            SysUiState sysUiState) {
+            SysUiState sysUiState,
+            PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -262,7 +267,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState);
+                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState,
+                pipUiEventLogger);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
@@ -355,17 +361,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     @Override
     public void onPipTransitionStarted(ComponentName activity, int direction) {
         if (isOutPipDirection(direction)) {
-            // On phones, the expansion animation that happens on pip tap before restoring
-            // to fullscreen makes it so that the bounds received here are the expanded
-            // bounds. We want to restore to the unexpanded bounds when re-entering pip,
-            // so we save the bounds before expansion (normal) instead of the current
-            // bounds.
-            mReentryBounds.set(mTouchHandler.getNormalBounds());
-            // Apply the snap fraction of the current bounds to the normal bounds.
-            final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
-            float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
-            mPipBoundsHandler.applySnapFraction(mReentryBounds, snapFraction);
-            // Save reentry bounds (normal non-expand bounds with current position applied).
+            // Exiting PIP, save the reentry bounds to restore to when re-entering.
+            updateReentryBounds();
             mPipBoundsHandler.onSaveReentryBounds(activity, mReentryBounds);
         }
         // Disable touches while the animation is running
@@ -377,6 +374,18 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 Log.e(TAG, "Failed to callback recents", e);
             }
         }
+    }
+
+    /**
+     * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
+     */
+    public void updateReentryBounds() {
+        final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
+        // Apply the snap fraction of the current bounds to the normal bounds.
+        final Rect bounds = mPipTaskOrganizer.getLastReportedBounds();
+        float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
+        mPipBoundsHandler.applySnapFraction(reentryBounds, snapFraction);
+        mReentryBounds.set(reentryBounds);
     }
 
     @Override

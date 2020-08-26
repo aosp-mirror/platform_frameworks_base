@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"पुन्हा सुरू करा"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द करा"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेअर करा"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"हटवा"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रीन रेकॉर्डिंग रद्द केले"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"स्क्रीन रेकॉर्डिंग सेव्ह केली, पाहण्यासाठी टॅप करा"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"स्क्रीन रेकॉर्डिंग हटवले"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रेकॉर्डिंग हटवताना एरर आली"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"परवानग्या मिळवता आल्या नाहीत"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन रेकॉर्डिंग सुरू करताना एरर आली"</string>
@@ -125,7 +123,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"स्क्रीन फिरवा"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"अवलोकन"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"शोधा"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"कॅमेरा"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"व्हॉइस सहाय्य"</string>
@@ -441,7 +439,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण होईपर्यंत"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"चार्ज होत नाही"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"नेटवर्कचे परीक्षण\nकेले जाऊ शकते"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"शोध"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी वर स्लाइड करा."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी डावीकडे स्लाइड करा."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"अलार्म, रिमाइंडर, इव्‍हेंट आणि तुम्ही निश्चित केलेल्या कॉलर व्यतिरिक्त तुम्हाला कोणत्याही आवाज आणि कंपनांचा व्यत्त्यय आणला जाणार नाही. तरीही तुम्ही प्ले करायचे ठरवलेले कोणतेही संगीत, व्हिडिओ आणि गेमचे आवाज ऐकू शकतात."</string>
@@ -504,8 +502,8 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बॅटरी सेव्हर बंद करा"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"हे कार्य पुरवठा करणाऱ्या सेवेस तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकॉर्ड किंवा कास्ट करणे सुरू करायचे आहे का ?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ने रेकॉर्ड करणे किंवा कास्ट करणे सुरू करा?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकॉर्ड करणे किंवा कास्ट करणे सुरू करायचे का ?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ने रेकॉर्ड करणे किंवा कास्ट करणे सुरू करायचे का?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थापित करा"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"सध्याचे सेशन लपवा."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"लपवा"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"डिसमिस करा"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग्ज"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>

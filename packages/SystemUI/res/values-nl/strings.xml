@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Hervatten"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Annuleren"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Delen"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Verwijderen"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Schermopname geannuleerd"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Schermopname opgeslagen, tik om te bekijken"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Schermopname verwijderd"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Fout bij verwijderen van schermopname"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Kan rechten niet ophalen"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fout bij starten van schermopname"</string>
@@ -354,7 +352,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Invoer"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Gehoorapparaten"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hoortoestellen"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Inschakelen..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Helderheid"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch draaien"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Aanbevelingen laden"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"De huidige sessie verbergen."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Verbergen"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Sluiten"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Hervatten"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Instellingen"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>

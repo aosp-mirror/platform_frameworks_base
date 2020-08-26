@@ -468,10 +468,10 @@
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Permet que l\'aplicació impedeixi que el dispositiu Android TV entri en repòs."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permet que l\'aplicació impedeixi que el telèfon entri en repòs."</string>
-    <string name="permlab_transmitIr" msgid="8077196086358004010">"transmissió d\'infraroigs"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Permet que l\'aplicació utilitzi el transmissor d\'infraroigs de la tauleta."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Permet que l\'aplicació faci servir el transmissor d\'infraroigs del dispositiu Android TV."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permet que l\'aplicació utilitzi el transmissor d\'infraroigs del telèfon."</string>
+    <string name="permlab_transmitIr" msgid="8077196086358004010">"transmissió d\'infrarojos"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Permet que l\'aplicació utilitzi el transmissor d\'infrarojos de la tauleta."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Permet que l\'aplicació faci servir el transmissor d\'infrarojos del dispositiu Android TV."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permet que l\'aplicació utilitzi el transmissor d\'infrarojos del telèfon."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"establir fons de pantalla"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permet que l\'aplicació estableixi el fons de pantalla del sistema."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ajustament de la mida del fons de pantalla"</string>

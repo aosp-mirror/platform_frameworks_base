@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ફરી શરૂ કરો"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"રદ કરો"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"શેર કરો"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ડિલીટ કરો"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"સ્ક્રીન રેકોર્ડિંગ રદ કર્યું"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"સ્ક્રીન રેકોર્ડિંગ સાચવ્યું, જોવા માટે ટૅપ કરો"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"સ્ક્રીન રેકોર્ડિંગ ડિલીટ કર્યું"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"સ્ક્રીન રેકોર્ડિંગ ડિલીટ કરવામાં ભૂલ આવી"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"પરવાનગીઓ મેળવવામાં નિષ્ફળ રહ્યાં"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"સ્ક્રીનને રેકૉર્ડ કરવાનું શરૂ કરવામાં ભૂલ"</string>
@@ -125,7 +123,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ઍક્સેસિબિલિટી"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"સ્ક્રીન ફેરવો"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ઝલક"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"શોધો"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"શોધ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરો"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"છુપાવો"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"છોડી દો"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>

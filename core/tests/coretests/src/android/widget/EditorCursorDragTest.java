@@ -201,6 +201,38 @@ public class EditorCursorDragTest {
     }
 
     @Test
+    public void testCursorDrag_diagonal_thresholdConfig() throws Throwable {
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= 9; i++) {
+            sb.append("here is some text").append(i).append("\n");
+        }
+        sb.append(Strings.repeat("abcdefghij\n", 400)).append("Last");
+        String text = sb.toString();
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        int index = text.indexOf("text9");
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(index));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
+
+        // Configure the drag direction threshold to require the drag to be exactly horizontal. With
+        // this set, a swipe that is slightly off horizontal should not trigger cursor drag.
+        editor.setCursorDragMinAngleFromVertical(90);
+        int startIdx = text.indexOf("5");
+        int endIdx = text.indexOf("here is some text3");
+        onView(withId(R.id.textview)).perform(dragOnText(startIdx, endIdx));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
+
+        // Configure the drag direction threshold to require the drag to be 45 degrees or more from
+        // vertical. With this set, the same swipe gesture as above should now trigger cursor drag.
+        editor.setCursorDragMinAngleFromVertical(45);
+        onView(withId(R.id.textview)).perform(dragOnText(startIdx, endIdx));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(endIdx));
+    }
+
+    @Test
     public void testCursorDrag_vertical_whenTextViewContentsFitOnScreen() throws Throwable {
         String text = "012345_aaa\n"
                 + "0123456789\n"

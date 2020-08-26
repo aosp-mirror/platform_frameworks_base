@@ -53,12 +53,12 @@ import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Helper on top of PipTouchHandler that handles inputs OUTSIDE of the PIP window, which is used to
@@ -89,6 +89,7 @@ public class PipResizeGestureHandler {
     private final Point mMaxSize = new Point();
     private final Point mMinSize = new Point();
     private final Rect mLastResizeBounds = new Rect();
+    private final Rect mUserResizeBounds = new Rect();
     private final Rect mLastDownBounds = new Rect();
     private final Rect mDragCornerSize = new Rect();
     private final Rect mTmpTopLeftCorner = new Rect();
@@ -110,13 +111,15 @@ public class PipResizeGestureHandler {
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
     private PipTaskOrganizer mPipTaskOrganizer;
+    private PipUiEventLogger mPipUiEventLogger;
 
     private int mCtrlType;
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
             PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
-            Runnable updateMovementBoundsRunnable, SysUiState sysUiState) {
+            Runnable updateMovementBoundsRunnable, SysUiState sysUiState,
+            PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
@@ -126,6 +129,7 @@ public class PipResizeGestureHandler {
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mSysUiState = sysUiState;
+        mPipUiEventLogger = pipUiEventLogger;
 
         context.getDisplay().getRealSize(mMaxSize);
         reloadResources();
@@ -182,6 +186,7 @@ public class PipResizeGestureHandler {
 
     void onActivityUnpinned() {
         mIsAttached = false;
+        mUserResizeBounds.setEmpty();
         updateIsEnabled();
     }
 
@@ -330,6 +335,7 @@ public class PipResizeGestureHandler {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     if (!mLastResizeBounds.isEmpty()) {
+                        mUserResizeBounds.set(mLastResizeBounds);
                         mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
                                 (Rect bounds) -> {
                                     new Handler(Looper.getMainLooper()).post(() -> {
@@ -338,6 +344,8 @@ public class PipResizeGestureHandler {
                                         resetState();
                                     });
                                 });
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
                     } else {
                         resetState();
                     }
@@ -350,6 +358,18 @@ public class PipResizeGestureHandler {
         mCtrlType = CTRL_NONE;
         mAllowGesture = false;
         mThresholdCrossed = false;
+    }
+
+    void setUserResizeBounds(Rect bounds) {
+        mUserResizeBounds.set(bounds);
+    }
+
+    void invalidateUserResizeBounds() {
+        mUserResizeBounds.setEmpty();
+    }
+
+    Rect getUserResizeBounds() {
+        return mUserResizeBounds;
     }
 
     void updateMaxSize(int maxX, int maxY) {

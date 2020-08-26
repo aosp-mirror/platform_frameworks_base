@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ສືບຕໍ່"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ຍົກເລີກ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ແບ່ງປັນ"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ລຶບ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ຍົກເລີກການບັນທຶກໜ້າຈໍແລ້ວ"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ຈັດເກັບການບັນທຶກໜ້າຈໍ, ແຕະເພື່ອເບິ່ງ"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ລຶບການບັນທຶກໜ້າຈໍອອກແລ້ວ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ເກີດຄວາມຜິດພາດໃນການລຶບການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ໂຫຼດສິດອະນຸຍາດບໍ່ສຳເລັດ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ເກີດຄວາມຜິດພາດໃນການບັນທຶກໜ້າຈໍ"</string>
@@ -1075,7 +1073,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ກຳລັງໂຫຼດຄຳແນະນຳ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ມີເດຍ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ເຊື່ອງເຊດຊັນປັດຈຸບັນ."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ເຊື່ອງ"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ປິດໄວ້"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ສືບຕໍ່"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ການຕັ້ງຄ່າ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ບໍ່ເຮັດວຽກ, ກະລຸນາກວດສອບແອັບ"</string>
