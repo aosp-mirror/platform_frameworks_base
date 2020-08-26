@@ -179,6 +179,21 @@ public class KernelCpuUidBpfMapReaderTest {
         testOpenAndReadData(changedData);
     }
 
+    @Test
+    public void testRemoveUidsInRange_firstAndLastAbsent() {
+        final SparseArray<long[]> data = getTestSparseArray(200, 50);
+        data.delete(0);
+        data.delete(5);
+        mReader.setData(data);
+        testOpenAndReadData(data);
+        SparseArray<long[]> changedData = new SparseArray<>();
+        for (int i = 6; i < 200; i++) {
+            changedData.put(i, data.get(i));
+        }
+        mReader.removeUidsInRange(0, 5);
+        testOpenAndReadData(changedData);
+    }
+
     private void testOpenAndReadData(SparseArray<long[]> expectedData) {
         try (BpfMapIterator iter = mReader.open()) {
             long[] actual;

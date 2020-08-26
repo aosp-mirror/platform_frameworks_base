@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -99,6 +100,37 @@ public interface Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ContentsFlags {}
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PARCELABLE_STABILITY_" }, value = {
+            PARCELABLE_STABILITY_LOCAL,
+            PARCELABLE_STABILITY_VINTF,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Stability {}
+
+    /**
+     * Something that is not meant to cross compilation boundaries.
+     *
+     * Note: unlike binder/Stability.h which uses bitsets to detect stability,
+     * since we don't currently have a notion of different local locations,
+     * higher stability levels are formed at higher levels.
+     *
+     * For instance, contained entirely within system partitions.
+     * @see #getStability()
+     * @see ParcelableHolder
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int PARCELABLE_STABILITY_LOCAL = 0x0000;
+    /**
+     * Something that is meant to be used between system and vendor.
+     * @see #getStability()
+     * @see ParcelableHolder
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int PARCELABLE_STABILITY_VINTF = 0x0001;
+
     /**
      * Descriptor bit used with {@link #describeContents()}: indicates that
      * the Parcelable object's flattened representation includes a file descriptor.
@@ -129,8 +161,9 @@ public interface Parcelable {
      * @return true if this parcelable is stable.
      * @hide
      */
-    default boolean isStable() {
-        return false;
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    default @Stability int getStability() {
+        return PARCELABLE_STABILITY_LOCAL;
     }
 
     /**

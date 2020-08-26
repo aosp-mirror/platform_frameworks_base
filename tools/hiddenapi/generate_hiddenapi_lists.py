@@ -13,9 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Generate API lists for non-SDK API enforcement.
-"""
+"""Generate API lists for non-SDK API enforcement."""
 import argparse
 from collections import defaultdict
 import functools
@@ -24,27 +22,27 @@ import re
 import sys
 
 # Names of flags recognized by the `hiddenapi` tool.
-FLAG_WHITELIST = "whitelist"
-FLAG_GREYLIST = "greylist"
-FLAG_BLACKLIST = "blacklist"
-FLAG_GREYLIST_MAX_O = "greylist-max-o"
-FLAG_GREYLIST_MAX_P = "greylist-max-p"
-FLAG_GREYLIST_MAX_Q = "greylist-max-q"
-FLAG_GREYLIST_MAX_R = "greylist-max-r"
-FLAG_CORE_PLATFORM_API = "core-platform-api"
-FLAG_PUBLIC_API = "public-api"
-FLAG_SYSTEM_API = "system-api"
-FLAG_TEST_API = "test-api"
+FLAG_SDK = 'sdk'
+FLAG_UNSUPPORTED = 'unsupported'
+FLAG_BLOCKED = 'blocked'
+FLAG_MAX_TARGET_O = 'max-target-o'
+FLAG_MAX_TARGET_P = 'max-target-p'
+FLAG_MAX_TARGET_Q = 'max-target-q'
+FLAG_MAX_TARGET_R = 'max-target-r'
+FLAG_CORE_PLATFORM_API = 'core-platform-api'
+FLAG_PUBLIC_API = 'public-api'
+FLAG_SYSTEM_API = 'system-api'
+FLAG_TEST_API = 'test-api'
 
 # List of all known flags.
 FLAGS_API_LIST = [
-    FLAG_WHITELIST,
-    FLAG_GREYLIST,
-    FLAG_BLACKLIST,
-    FLAG_GREYLIST_MAX_O,
-    FLAG_GREYLIST_MAX_P,
-    FLAG_GREYLIST_MAX_Q,
-    FLAG_GREYLIST_MAX_R,
+    FLAG_SDK,
+    FLAG_UNSUPPORTED,
+    FLAG_BLOCKED,
+    FLAG_MAX_TARGET_O,
+    FLAG_MAX_TARGET_P,
+    FLAG_MAX_TARGET_Q,
+    FLAG_MAX_TARGET_R,
 ]
 ALL_FLAGS = FLAGS_API_LIST + [
     FLAG_CORE_PLATFORM_API,
@@ -58,7 +56,7 @@ ALL_FLAGS_SET = set(ALL_FLAGS)
 
 # Suffix used in command line args to express that only known and
 # otherwise unassigned entries should be assign the given flag.
-# For example, the P dark greylist is checked in as it was in P,
+# For example, the max-target-P list is checked in as it was in P,
 # but signatures have changes since then. The flag instructs this
 # script to skip any entries which do not exist any more.
 FLAG_IGNORE_CONFLICTS_SUFFIX = "-ignore-conflicts"
@@ -87,6 +85,7 @@ SERIALIZATION_REGEX = re.compile(r'.*->(' + '|'.join(SERIALIZATION_PATTERNS) + r
 HAS_NO_API_LIST_ASSIGNED = lambda api, flags: not FLAGS_API_LIST_SET.intersection(flags)
 IS_SERIALIZATION = lambda api, flags: SERIALIZATION_REGEX.match(api)
 
+
 def get_args():
     """Parses command line arguments.
 
@@ -113,6 +112,7 @@ def get_args():
 
     return parser.parse_args()
 
+
 def read_lines(filename):
     """Reads entire file and return it as a list of lines.
 
@@ -130,8 +130,9 @@ def read_lines(filename):
     lines = map(lambda line: line.strip(), lines)
     return set(lines)
 
+
 def write_lines(filename, lines):
-    """Writes list of lines into a file, overwriting the file it it exists.
+    """Writes list of lines into a file, overwriting the file if it exists.
 
     Args:
         filename (string): Path to the file to be writting into.
@@ -140,6 +141,7 @@ def write_lines(filename, lines):
     lines = map(lambda line: line + '\n', lines)
     with open(filename, 'w') as f:
         f.writelines(lines)
+
 
 def extract_package(signature):
     """Extracts the package from a signature.
@@ -158,6 +160,7 @@ def extract_package(signature):
     # If full_class_name doesn't contain '/', then package_name will be ''.
     package_name = full_class_name.rpartition("/")[0]
     return package_name.replace('/', '.')
+
 
 class FlagsDict:
     def __init__(self):
@@ -212,10 +215,16 @@ class FlagsDict:
     def generate_csv(self):
         """Constructs CSV entries from a dictionary.
 
+        Old versions of flags are used to generate the file.
+
         Returns:
             List of lines comprising a CSV file. See "parse_and_merge_csv" for format description.
         """
-        return sorted(map(lambda api: ",".join([api] + sorted(self._dict[api])), self._dict))
+        lines = []
+        for api in self._dict:
+          flags = sorted(self._dict[api])
+          lines.append(",".join([api] + flags))
+        return sorted(lines)
 
     def parse_and_merge_csv(self, csv_lines, source = "<unknown>"):
         """Parses CSV entries and merges them into a given dictionary.
@@ -237,17 +246,16 @@ class FlagsDict:
         self._dict_keyset.update([ csv[0] for csv in csv_values ])
 
         # Check that all flags are known.
-        csv_flags = set(functools.reduce(
-            lambda x, y: set(x).union(y),
-            [ csv[1:] for csv in csv_values ],
-            []))
+        csv_flags = set()
+        for csv in csv_values:
+          csv_flags.update(csv[1:])
         self._check_flags_set(csv_flags, source)
 
         # Iterate over all CSV lines, find entry in dict and append flags to it.
         for csv in csv_values:
             flags = csv[1:]
             if (FLAG_PUBLIC_API in flags) or (FLAG_SYSTEM_API in flags):
-                flags.append(FLAG_WHITELIST)
+                flags.append(FLAG_SDK)
             self._dict[csv[0]].update(flags)
 
     def assign_flag(self, flag, apis, source="<unknown>"):
@@ -271,6 +279,7 @@ class FlagsDict:
         for api in apis:
             self._dict[api].add(flag)
 
+
 def main(argv):
     # Parse arguments.
     args = vars(get_args())
@@ -287,8 +296,8 @@ def main(argv):
         flags.parse_and_merge_csv(read_lines(filename), filename)
 
     # Combine inputs which do not require any particular order.
-    # (1) Assign serialization API to whitelist.
-    flags.assign_flag(FLAG_WHITELIST, flags.filter_apis(IS_SERIALIZATION))
+    # (1) Assign serialization API to SDK.
+    flags.assign_flag(FLAG_SDK, flags.filter_apis(IS_SERIALIZATION))
 
     # (2) Merge text files with a known flag into the dictionary.
     for flag in ALL_FLAGS:
@@ -314,8 +323,8 @@ def main(argv):
             valid_entries = flags.filter_apis(should_add_signature_to_list)
             flags.assign_flag(flag, valid_entries)
 
-    # Assign all remaining entries to the blacklist.
-    flags.assign_flag(FLAG_BLACKLIST, flags.filter_apis(HAS_NO_API_LIST_ASSIGNED))
+    # Mark all remaining entries as blocked.
+    flags.assign_flag(FLAG_BLOCKED, flags.filter_apis(HAS_NO_API_LIST_ASSIGNED))
 
     # Write output.
     write_lines(args["output"], flags.generate_csv())

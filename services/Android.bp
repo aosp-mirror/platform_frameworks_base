@@ -111,7 +111,6 @@ droidstubs {
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
         // TODO: remove the --hide options below
         " --hide-package com.google.android.startop.iorap" +
-        " --hide ReferencesHidden" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//visibility:private"],
@@ -141,7 +140,14 @@ droidstubs {
 
 java_library {
     name: "android_system_server_stubs_current",
+    defaults: ["android_stubs_dists_default"],
     srcs: [":services-stubs.sources"],
     installable: false,
     static_libs: ["android_module_lib_stubs_current"],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    dist: {
+        dir: "apistubs/android/system-server",
+    },
 }

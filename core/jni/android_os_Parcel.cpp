@@ -20,7 +20,7 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -328,7 +328,7 @@ static jbyteArray android_os_Parcel_createByteArray(JNIEnv* env, jclass clazz, j
     if (parcel != NULL) {
         int32_t len = parcel->readInt32();
 
-        // sanity check the stored length against the true data size
+        // Validate the stored length against the true data size
         if (len >= 0 && len <= (int32_t)parcel->dataAvail()) {
             ret = env->NewByteArray(len);
 

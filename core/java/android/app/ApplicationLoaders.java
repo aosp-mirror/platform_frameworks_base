@@ -232,8 +232,8 @@ public class ApplicationLoaders {
 
         // cached must be built and loaded in the same environment
         if (!sharedLibrariesEquals(sharedLibraries, cached.sharedLibraries)) {
-            Log.w(TAG, "Unexpected environment for cached library: (" + sharedLibraries + "|"
-                    + cached.sharedLibraries + ")");
+            Log.w(TAG, "Unexpected environment loading cached library " + zip + " (real|cached): ("
+                    + sharedLibraries + "|" + cached.sharedLibraries + ")");
             return null;
         }
 

@@ -15,7 +15,7 @@
         },
         // CTS tests
         {
-            "name": "CtsAppCompatHostTestCases#"
+            "name": "CtsAppCompatHostTestCases"
         }
     ]
 }

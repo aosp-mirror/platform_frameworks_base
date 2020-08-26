@@ -150,12 +150,10 @@ doc_defaults {
         ":current-support-api",
         ":current-androidx-api",
     ],
-    create_stubs: false,
 }
 
 doc_defaults {
     name: "framework-dokka-docs-default",
-    create_stubs: false,
 }
 
 droiddoc {

@@ -34,6 +34,7 @@ import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.wifi.WifiInfo.sanitizeSsid;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -52,6 +53,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,6 +87,15 @@ public class NetworkTemplate implements Parcelable {
      * @hide
      */
     public static final int NETWORK_TYPE_ALL = -1;
+    /**
+     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
+     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
+     * with NR state as connected. This should not be overlapped with any of the
+     * {@code TelephonyManager.NETWORK_TYPE_*} constants.
+     *
+     * @hide
+     */
+    public static final int NETWORK_TYPE_5G_NSA = -2;
 
     private static boolean isKnownMatchRule(final int rule) {
         switch (rule) {
@@ -472,9 +484,42 @@ public class NetworkTemplate implements Parcelable {
                 return TelephonyManager.NETWORK_TYPE_LTE;
             case TelephonyManager.NETWORK_TYPE_NR:
                 return TelephonyManager.NETWORK_TYPE_NR;
+            // Virtual RAT type for 5G NSA mode, see {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+            case NetworkTemplate.NETWORK_TYPE_5G_NSA:
+                return NetworkTemplate.NETWORK_TYPE_5G_NSA;
             default:
                 return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
+    }
+
+    /**
+     * Return all supported collapsed RAT types that could be returned by
+     * {@link #getCollapsedRatType(int)}.
+     */
+    @NonNull
+    public static final int[] getAllCollapsedRatTypes() {
+        final int[] ratTypes = TelephonyManager.getAllNetworkTypes();
+        final HashSet<Integer> collapsedRatTypes = new HashSet<>();
+        for (final int ratType : ratTypes) {
+            collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(ratType));
+        }
+        // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
+        // it is not in TelephonyManager#NETWORK_TYPE_* constants.
+        // See {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+        collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(NETWORK_TYPE_5G_NSA));
+        // Ensure that unknown type is returned.
+        collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        return toIntArray(collapsedRatTypes);
+    }
+
+    @NonNull
+    private static int[] toIntArray(@NonNull Collection<Integer> list) {
+        final int[] array = new int[list.size()];
+        int i = 0;
+        for (final Integer item : list) {
+            array[i++] = item;
+        }
+        return array;
     }
 
     /**

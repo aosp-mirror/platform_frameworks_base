@@ -142,7 +142,7 @@ public class ImsConfigImplBase {
         /**
          * Sets the value for IMS service/capabilities parameters by the operator device
          * management entity. It sets the config item value in the provisioned storage
-         * from which the master value is derived, and write it into local cache.
+         * from which the main value is derived, and write it into local cache.
          * Synchronous blocking call.
          *
          * @param item integer key
@@ -167,7 +167,7 @@ public class ImsConfigImplBase {
         /**
          * Sets the value for IMS service/capabilities parameters by the operator device
          * management entity. It sets the config item value in the provisioned storage
-         * from which the master value is derived, and write it into local cache.
+         * from which the main value is derived, and write it into local cache.
          * Synchronous blocking call.
          *
          * @param item as defined in com.android.ims.ImsConfig#ConfigConstants.

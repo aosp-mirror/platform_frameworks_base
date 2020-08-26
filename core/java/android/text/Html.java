@@ -549,7 +549,7 @@ public class Html {
                     out.append(((ImageSpan) style[j]).getSource());
                     out.append("\">");
 
-                    // Don't output the dummy character underlying the image.
+                    // Don't output the placeholder character underlying the image.
                     i = next;
                 }
                 if (style[j] instanceof AbsoluteSizeSpan) {

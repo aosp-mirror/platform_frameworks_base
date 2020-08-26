@@ -27,9 +27,6 @@
 #include <unistd.h>
 
 #include <cutils/sockets.h>
-#include <private/android_filesystem_config.h>
-#include <private/android_logger.h>
-#include <unordered_map>
 
 #include "StatsSocketListener.h"
 #include "guardrail/StatsdStats.h"

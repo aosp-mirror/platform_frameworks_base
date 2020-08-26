@@ -298,6 +298,7 @@
   <java-symbol type="string" name="config_wlan_network_service_package" />
   <java-symbol type="string" name="config_wwan_network_service_class" />
   <java-symbol type="string" name="config_wlan_network_service_class" />
+  <java-symbol type="bool" name="config_wlan_data_service_conn_persistence_on_restart" />
   <java-symbol type="string" name="config_wwan_data_service_package" />
   <java-symbol type="string" name="config_wlan_data_service_package" />
   <java-symbol type="string" name="config_wwan_data_service_class" />
@@ -1918,8 +1919,7 @@
   <java-symbol type="bool" name="config_tether_upstream_automatic" />
   <java-symbol type="array" name="config_tether_usb_regexs" />
   <java-symbol type="array" name="config_tether_wifi_regexs" />
-  <java-symbol type="array" name="config_tether_wifi_p2p_regexs" />
-  <java-symbol type="array" name="config_usbHostBlacklist" />
+  <java-symbol type="array" name="config_usbHostDenylist" />
   <java-symbol type="array" name="config_serialPorts" />
   <java-symbol type="array" name="radioAttributes" />
   <java-symbol type="array" name="config_oemUsbModeOverride" />
@@ -3860,7 +3860,6 @@
   <java-symbol type="color" name="decor_view_status_guard_light" />
 
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
-  <java-symbol type="bool" name="config_inflateSignalStrength" />
   <java-symbol type="array" name="config_restrictedPreinstalledCarrierApps" />
 
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />

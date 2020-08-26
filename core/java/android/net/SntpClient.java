@@ -25,6 +25,7 @@ import com.android.internal.util.TrafficStatsConstants;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 /**
@@ -86,21 +87,26 @@ public class SntpClient {
      * Sends an SNTP request to the given host and processes the response.
      *
      * @param host host name of the server.
-     * @param timeout network timeout in milliseconds.
+     * @param timeout network timeout in milliseconds. the timeout doesn't include the DNS lookup
+     *                time, and it applies to each individual query to the resolved addresses of
+     *                the NTP server.
      * @param network network over which to send the request.
      * @return true if the transaction was successful.
      */
     public boolean requestTime(String host, int timeout, Network network) {
         final Network networkForResolv = network.getPrivateDnsBypassingCopy();
-        InetAddress address = null;
         try {
-            address = networkForResolv.getByName(host);
-        } catch (Exception e) {
+            final InetAddress[] addresses = networkForResolv.getAllByName(host);
+            for (int i = 0; i < addresses.length; i++) {
+                if (requestTime(addresses[i], NTP_PORT, timeout, networkForResolv)) return true;
+            }
+        } catch (UnknownHostException e) {
+            Log.w(TAG, "Unknown host: " + host);
             EventLogTags.writeNtpFailure(host, e.toString());
-            if (DBG) Log.d(TAG, "request time failed: " + e);
-            return false;
         }
-        return requestTime(address, NTP_PORT, timeout, networkForResolv);
+
+        if (DBG) Log.d(TAG, "request time failed");
+        return false;
     }
 
     public boolean requestTime(InetAddress address, int port, int timeout, Network network) {
@@ -139,10 +145,11 @@ public class SntpClient {
             final long originateTime = readTimeStamp(buffer, ORIGINATE_TIME_OFFSET);
             final long receiveTime = readTimeStamp(buffer, RECEIVE_TIME_OFFSET);
             final long transmitTime = readTimeStamp(buffer, TRANSMIT_TIME_OFFSET);
+            final long referenceTime = readTimeStamp(buffer, REFERENCE_TIME_OFFSET);
 
-            /* do sanity check according to RFC */
+            /* Do validation according to RFC */
             // TODO: validate originateTime == requestTime.
-            checkValidServerReply(leap, mode, stratum, transmitTime);
+            checkValidServerReply(leap, mode, stratum, transmitTime, referenceTime);
 
             long roundTripTime = responseTicks - requestTicks - (transmitTime - receiveTime);
             // receiveTime = originateTime + transit + skew
@@ -218,7 +225,7 @@ public class SntpClient {
     }
 
     private static void checkValidServerReply(
-            byte leap, byte mode, int stratum, long transmitTime)
+            byte leap, byte mode, int stratum, long transmitTime, long referenceTime)
             throws InvalidServerReplyException {
         if (leap == NTP_LEAP_NOSYNC) {
             throw new InvalidServerReplyException("unsynchronized server");
@@ -231,6 +238,9 @@ public class SntpClient {
         }
         if (transmitTime == 0) {
             throw new InvalidServerReplyException("zero transmitTime");
+        }
+        if (referenceTime == 0) {
+            throw new InvalidServerReplyException("zero reference timestamp");
         }
     }
 

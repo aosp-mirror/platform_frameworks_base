@@ -16,6 +16,9 @@ cc_library_shared {
     name: "libinputservice",
     srcs: [
         "PointerController.cpp",
+        "PointerControllerContext.cpp",
+        "MouseCursorController.cpp",
+        "TouchSpotController.cpp",
         "SpriteController.cpp",
         "SpriteIcon.cpp",
     ],

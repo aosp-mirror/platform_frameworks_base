@@ -1302,7 +1302,7 @@ public final class FileUtils {
 
     /** {@hide} */
     public static int translateModeStringToPosix(String mode) {
-        // Sanity check for invalid chars
+        // Quick check for invalid chars
         for (int i = 0; i < mode.length(); i++) {
             switch (mode.charAt(i)) {
                 case 'r':

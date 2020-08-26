@@ -18,11 +18,12 @@ package android.net;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.net.module.util.InetAddressUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

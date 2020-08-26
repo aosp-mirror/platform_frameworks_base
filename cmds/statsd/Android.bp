@@ -118,7 +118,6 @@ cc_defaults {
 
     static_libs: [
         "libhealthhalutils",
-        "libplatformprotos",
     ],
 
     shared_libs: [

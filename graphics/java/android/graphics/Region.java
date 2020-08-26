@@ -409,10 +409,10 @@ public class Region implements Parcelable {
         mNativeRegion = ni;
     }
 
-    /* add dummy parameter so constructor can be called from jni without
+    /* Add an unused parameter so constructor can be called from jni without
        triggering 'not cloneable' exception */
     @UnsupportedAppUsage
-    private Region(long ni, int dummy) {
+    private Region(long ni, int unused) {
         this(ni);
     }
 

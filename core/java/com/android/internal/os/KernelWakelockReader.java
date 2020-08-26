@@ -153,19 +153,32 @@ public class KernelWakelockReader {
     }
 
     /**
+     * Attempt to wait for suspend_control service if not immediately available.
+     */
+    private ISuspendControlService waitForSuspendControlService() throws ServiceNotFoundException {
+        final String name = "suspend_control";
+        final int numRetries = 5;
+        for (int i = 0; i < numRetries; i++) {
+            mSuspendControlService = ISuspendControlService.Stub.asInterface(
+                                        ServiceManager.getService(name));
+            if (mSuspendControlService != null) {
+                return mSuspendControlService;
+            }
+        }
+        throw new ServiceNotFoundException(name);
+    }
+
+    /**
      * On success, returns the updated stats from SystemSupend, else returns null.
      */
     private KernelWakelockStats getWakelockStatsFromSystemSuspend(
             final KernelWakelockStats staleStats) {
         WakeLockInfo[] wlStats = null;
-        if (mSuspendControlService == null) {
-            try {
-                mSuspendControlService = ISuspendControlService.Stub.asInterface(
-                    ServiceManager.getServiceOrThrow("suspend_control"));
-            } catch (ServiceNotFoundException e) {
-                Slog.wtf(TAG, "Required service suspend_control not available", e);
-                return null;
-            }
+        try {
+            mSuspendControlService = waitForSuspendControlService();
+        } catch (ServiceNotFoundException e) {
+            Slog.wtf(TAG, "Required service suspend_control not available", e);
+            return null;
         }
 
         try {

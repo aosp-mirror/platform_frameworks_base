@@ -1,0 +1,97 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+package android.stats.connectivity;
+option java_multiple_files = true;
+option java_outer_classname = "TetheringProto";
+
+enum ErrorCode {
+    EC_NO_ERROR = 0;
+    EC_UNKNOWN_IFACE = 1;
+    EC_SERVICE_UNAVAIL = 2;
+    EC_UNSUPPORTED = 3;
+    EC_UNAVAIL_IFACE = 4;
+    EC_INTERNAL_ERROR = 5;
+    EC_TETHER_IFACE_ERROR = 6;
+    EC_UNTETHER_IFACE_ERROR = 7;
+    EC_ENABLE_FORWARDING_ERROR = 8;
+    EC_DISABLE_FORWARDING_ERROR = 9;
+    EC_IFACE_CFG_ERROR = 10;
+    EC_PROVISIONING_FAILED = 11;
+    EC_DHCPSERVER_ERROR = 12;
+    EC_ENTITLEMENT_UNKNOWN = 13;
+    EC_NO_CHANGE_TETHERING_PERMISSION = 14;
+    EC_NO_ACCESS_TETHERING_PERMISSION = 15;
+    EC_UNKNOWN_TYPE = 16;
+}
+
+enum DownstreamType {
+    // Unspecific tethering type.
+    DS_UNSPECIFIED = 0;
+    // Wifi tethering type.
+    DS_TETHERING_WIFI = 1;
+    // USB tethering type.
+    DS_TETHERING_USB = 2;
+    // Bluetooth tethering type.
+    DS_TETHERING_BLUETOOTH = 3;
+    // Wifi P2p tethering type.
+    DS_TETHERING_WIFI_P2P = 4;
+    // NCM (Network Control Model) local tethering type.
+    DS_TETHERING_NCM = 5;
+    // Ethernet tethering type.
+    DS_TETHERING_ETHERNET = 6;
+}
+
+enum UpstreamType {
+    UT_UNKNOWN = 0;
+    // Indicates upstream using a Cellular transport.
+    UT_CELLULAR = 1;
+    // Indicates upstream using a Wi-Fi transport.
+    UT_WIFI = 2;
+    // Indicates upstream using a Bluetooth transport.
+    UT_BLUETOOTH = 3;
+    // Indicates upstream using an Ethernet transport.
+    UT_ETHERNET = 4;
+    // Indicates upstream using a Wi-Fi Aware transport.
+    UT_WIFI_AWARE = 5;
+    // Indicates upstream using a LoWPAN transport.
+    UT_LOWPAN = 6;
+    // Indicates upstream using a Cellular+VPN transport.
+    UT_CELLULAR_VPN = 7;
+    // Indicates upstream using a Wi-Fi+VPN transport.
+    UT_WIFI_VPN = 8;
+    // Indicates upstream using a Bluetooth+VPN transport.
+    UT_BLUETOOTH_VPN = 9;
+    // Indicates upstream using an Ethernet+VPN transport.
+    UT_ETHERNET_VPN = 10;
+    // Indicates upstream using a Wi-Fi+Cellular+VPN transport.
+    UT_WIFI_CELLULAR_VPN = 11;
+    // Indicates upstream using for test only.
+    UT_TEST = 12;
+    // Indicates upstream using DUN capability + Cellular transport.
+    UT_DUN_CELLULAR = 13;
+}
+
+enum UserType {
+    // Unknown.
+    USER_UNKNOWN = 0;
+    // Settings.
+    USER_SETTINGS = 1;
+    // System UI.
+    USER_SYSTEMUI = 2;
+    // Google mobile service.
+    USER_GMS = 3;
+}

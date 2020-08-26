@@ -21,10 +21,8 @@
 #include "matchers/LogMatchingTracker.h"
 #include "matchers/matcher_util.h"
 
-#include <log/logprint.h>
 #include <utils/RefBase.h>
 
-#include <unordered_set>
 #include <unordered_map>
 
 namespace android {

@@ -1230,7 +1230,7 @@
          with the modem or some other restricted hardware, add "/dev/bus/usb/001/"
          to this list.  If this is empty, no parts of the host USB bus will be excluded.
     -->
-    <string-array name="config_usbHostBlacklist" translatable="false">
+    <string-array name="config_usbHostDenylist" translatable="false">
     </string-array>
 
     <!-- List of paths to serial ports that are available to the serial manager.
@@ -2954,6 +2954,9 @@
              eutran : eutranSupportedRelease
              nfc : contactlessSupportedRelease
              crl : rspCrlSupportedVersion
+             nrepc : nrEpcSupportedRelease
+             nr5gc : nr5gcSupportedRelease
+             eutran5gc : eutran5gcSupportedRelease
     -->
     <string-array translatable="false" name="config_telephonyEuiccDeviceCapabilities">
         <!-- Example:
@@ -2965,6 +2968,9 @@
         <item>"eutran,11"</item>
         <item>"nfc,1"</item>
         <item>"crl,1"</item>
+        <item>"nrepc,15"</item>
+        <item>"nr5gc,15"</item>
+        <item>"eutran5gc,15"</item>
         -->
     </string-array>
 
@@ -3063,6 +3069,11 @@
     <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
          empty string is passed in -->
     <string name="config_wlan_data_service_package" translatable="false"></string>
+
+    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
+         tunnels across service restart. If iwlan tunnels are not persisted across restart,
+         Framework will clean up dangling data connections when service restarts -->
+    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
 
     <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
          empty string is passed in -->
@@ -4339,10 +4350,6 @@
     even after user setup is complete. The defined component should be used for supervision purposes
     only. The component must be part of a system app. -->
     <string name="config_defaultSupervisionProfileOwnerComponent" translatable="false"></string>
-
-    <!-- Whether to artificially interpret all signal strengths as
-         one bar higher than they actually are -->
-    <bool name="config_inflateSignalStrength">false</bool>
 
     <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
          grants, even if the UICC claims that the app should be privileged. See b/138150105 -->

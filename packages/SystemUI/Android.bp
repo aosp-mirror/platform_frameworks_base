@@ -62,7 +62,7 @@ android_library {
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
-        "dagger2-2.19",
+        "dagger2",
         "jsr330"
     ],
     manifest: "AndroidManifest.xml",
@@ -73,7 +73,7 @@ android_library {
 
     kotlincflags: ["-Xjvm-default=enable"],
 
-    plugins: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler"],
 }
 
 android_library {
@@ -118,7 +118,7 @@ android_library {
         "mockito-target-inline-minus-junit4",
         "testables",
         "truth-prebuilt",
-        "dagger2-2.19",
+        "dagger2",
         "jsr330"
     ],
     libs: [
@@ -131,7 +131,7 @@ android_library {
         "--extra-packages",
         "com.android.systemui",
     ],
-    plugins: ["dagger2-compiler-2.19"],
+    plugins: ["dagger2-compiler"],
 }
 
 android_app {

@@ -22,7 +22,6 @@
 #include <binder/IResultReceiver.h>
 #include <condition_variable>
 #include <mutex>
-#include <string>
 #include <thread>
 #include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_config.pb.h"

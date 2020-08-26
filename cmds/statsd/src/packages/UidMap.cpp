@@ -21,10 +21,6 @@
 #include "guardrail/StatsdStats.h"
 #include "packages/UidMap.h"
 
-#include <android/os/IStatsCompanionService.h>
-#include <binder/IServiceManager.h>
-#include <utils/Errors.h>
-
 #include <inttypes.h>
 
 using namespace android;

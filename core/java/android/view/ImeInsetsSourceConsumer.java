@@ -61,7 +61,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     public void onServedEditorChanged(EditorInfo info) {
-        if (isDummyOrEmptyEditor(info)) {
+        if (isFallbackOrEmptyEditor(info)) {
             mShowOnNextImeRender = false;
         }
         mFocusedEditor = info;
@@ -112,15 +112,15 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         getImm().notifyImeHidden();
     }
 
-    private boolean isDummyOrEmptyEditor(EditorInfo info) {
-        // TODO(b/123044812): Handle dummy input gracefully in IME Insets API
+    private boolean isFallbackOrEmptyEditor(EditorInfo info) {
+        // TODO(b/123044812): Handle fallback input gracefully in IME Insets API
         return info == null || (info.fieldId <= 0 && info.inputType <= 0);
     }
 
     private boolean isServedEditorRendered() {
         if (mFocusedEditor == null || mPreRenderedEditor == null
-                || isDummyOrEmptyEditor(mFocusedEditor)
-                || isDummyOrEmptyEditor(mPreRenderedEditor)) {
+                || isFallbackOrEmptyEditor(mFocusedEditor)
+                || isFallbackOrEmptyEditor(mPreRenderedEditor)) {
             // No view is focused or ready.
             return false;
         }

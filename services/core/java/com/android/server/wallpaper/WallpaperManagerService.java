@@ -3038,7 +3038,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     mLockWallpaperMap.put(userId, wallpaper);
                     ensureSaneWallpaperData(wallpaper, DEFAULT_DISPLAY);
                 } else {
-                    // sanity fallback: we're in bad shape, but establishing a known
+                    // rationality fallback: we're in bad shape, but establishing a known
                     // valid system+lock WallpaperData will keep us from dying.
                     Slog.wtf(TAG, "Didn't find wallpaper in non-lock case!");
                     wallpaper = new WallpaperData(userId, WALLPAPER, WALLPAPER_CROP);

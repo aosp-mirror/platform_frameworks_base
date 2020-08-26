@@ -36,7 +36,6 @@ using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 using std::lock_guard;
-using std::map;
 using std::shared_ptr;
 using std::string;
 using std::vector;

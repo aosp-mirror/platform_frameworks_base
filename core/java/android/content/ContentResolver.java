@@ -594,7 +594,7 @@ public abstract class ContentResolver implements ContentInterface {
 
     /**
      * In addition to {@link #SYNC_EXEMPTION_PROMOTE_BUCKET}, we put the sync adapter app in the
-     * temp whitelist for 10 minutes, so that even RARE apps can run syncs right away.
+     * temp allowlist for 10 minutes, so that even RARE apps can run syncs right away.
      * @hide
      */
     public static final int SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP = 2;

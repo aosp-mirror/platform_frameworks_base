@@ -95,10 +95,9 @@ public class SubscriptionManager {
     /** An invalid subscription identifier */
     public static final int INVALID_SUBSCRIPTION_ID = -1;
 
-    /** Base value for Dummy SUBSCRIPTION_ID's. */
-    /** FIXME: Remove DummySubId's, but for now have them map just below INVALID_SUBSCRIPTION_ID
-     /** @hide */
-    public static final int DUMMY_SUBSCRIPTION_ID_BASE = INVALID_SUBSCRIPTION_ID - 1;
+    /** Base value for placeholder SUBSCRIPTION_ID's. */
+    /** @hide */
+    public static final int PLACEHOLDER_SUBSCRIPTION_ID_BASE = INVALID_SUBSCRIPTION_ID - 1;
 
     /** An invalid phone identifier */
     /** @hide */
@@ -2183,6 +2182,7 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @NonNull int[] getActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */ true);
     }
@@ -2200,7 +2200,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public @NonNull int[] getActiveAndHiddenSubscriptionIdList() {
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull int[] getCompleteActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */false);
     }
 

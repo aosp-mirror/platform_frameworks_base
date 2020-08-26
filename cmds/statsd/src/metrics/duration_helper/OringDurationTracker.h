@@ -19,7 +19,6 @@
 
 #include "DurationTracker.h"
 
-#include <set>
 namespace android {
 namespace os {
 namespace statsd {

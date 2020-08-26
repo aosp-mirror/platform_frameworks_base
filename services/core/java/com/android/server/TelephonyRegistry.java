@@ -111,11 +111,11 @@ import java.util.NoSuchElementException;
  * Change-Id: I450c968bda93767554b5188ee63e10c9f43c5aa4 fixes bugs 16148026
  * and 15973975 by saving the phoneId of the registrant and then using the
  * phoneId when deciding to to make a callback. This is necessary because
- * a subId changes from to a dummy value when a SIM is removed and thus won't
+ * a subId changes from to a placeholder value when a SIM is removed and thus won't
  * compare properly. Because getPhoneIdFromSubId(int subId) handles
- * the dummy value conversion we properly do the callbacks.
+ * the placeholder value conversion we properly do the callbacks.
  *
- * Eventually we may want to remove the notion of dummy value but for now this
+ * Eventually we may want to remove the notion of placeholder value but for now this
  * looks like the best approach.
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -1457,7 +1457,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void notifyCarrierNetworkChange(boolean active) {
         // only CarrierService with carrier privilege rule should have the permission
         int[] subIds = Arrays.stream(SubscriptionManager.from(mContext)
-                    .getActiveAndHiddenSubscriptionIdList())
+                    .getCompleteActiveSubscriptionIdList())
                     .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(mContext,
                             i)).toArray();
         if (ArrayUtils.isEmpty(subIds)) {
@@ -1605,7 +1605,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
-                            && idMatch(r.subId, subId, phoneId)) {
+                            && idMatchWithoutDefaultPhoneCheck(r.subId, subId)) {
                         try {
                             r.callback.onDisplayInfoChanged(telephonyDisplayInfo);
                         } catch (RemoteException ex) {
@@ -2701,6 +2701,24 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private static void loge(String s) {
         Rlog.e(TAG, s);
+    }
+
+    /**
+     * If the registrant specified a subId, then we should only notify it if subIds match.
+     * If the registrant registered with DEFAULT subId, we should notify only when the related subId
+     * is default subId (which could be INVALID if there's no default subId).
+     *
+     * This should be the correct way to check record ID match. in idMatch the record's phoneId is
+     * speculated based on subId passed by the registrant so it's not a good reference.
+     * But to avoid triggering potential regression only replace idMatch with it when an issue with
+     * idMatch is reported. Eventually this should replace all instances of idMatch.
+     */
+    private boolean idMatchWithoutDefaultPhoneCheck(int subIdInRecord, int subIdToNotify) {
+        if (subIdInRecord == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
+            return (subIdToNotify == mDefaultSubId);
+        } else {
+            return (subIdInRecord == subIdToNotify);
+        }
     }
 
     boolean idMatch(int rSubId, int subId, int phoneId) {

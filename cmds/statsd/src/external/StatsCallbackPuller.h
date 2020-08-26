@@ -17,7 +17,7 @@
 #pragma once
 
 #include <android/os/IStatsPullerCallback.h>
-#include <utils/String16.h>
+
 #include "StatsPuller.h"
 
 namespace android {

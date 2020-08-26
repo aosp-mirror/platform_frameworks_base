@@ -170,7 +170,7 @@ public class DexMetadataHelper {
 
     /**
      * Validate that the given file is a dex metadata archive.
-     * This is just a sanity validation that the file is a zip archive.
+     * This is just a validation that the file is a zip archive.
      *
      * @throws PackageParserException if the file is not a .dm file.
      */
@@ -196,7 +196,7 @@ public class DexMetadataHelper {
      * (for any foo.dm there should be either a 'foo' of a 'foo.apk' file).
      * If that's not the case it throws {@code IllegalStateException}.
      *
-     * This is used to perform a basic sanity check during adb install commands.
+     * This is used to perform a basic check during adb install commands.
      * (The installer does not support stand alone .dm files)
      */
     public static void validateDexPaths(String[] paths) {

@@ -16,9 +16,6 @@
 #ifndef COMBINATION_LOG_MATCHING_TRACKER_H
 #define COMBINATION_LOG_MATCHING_TRACKER_H
 
-#include <log/log_read.h>
-#include <log/logprint.h>
-#include <set>
 #include <unordered_map>
 #include <vector>
 #include "LogMatchingTracker.h"

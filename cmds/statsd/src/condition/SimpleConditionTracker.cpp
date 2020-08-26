@@ -24,11 +24,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
-using std::string;
-using std::unique_ptr;
 using std::unordered_map;
-using std::vector;
 
 SimpleConditionTracker::SimpleConditionTracker(
         const ConfigKey& key, const int64_t& id, const int index,

@@ -48,6 +48,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
+import android.net.DnsResolver;
 import android.net.INetworkManagementEventObserver;
 import android.net.Ikev2VpnProfile;
 import android.net.IpPrefix;
@@ -79,6 +80,7 @@ import android.net.ipsec.ike.IkeSessionParams;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -123,6 +125,7 @@ import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -134,6 +137,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -148,8 +153,8 @@ public class Vpn {
     private static final boolean LOGD = true;
 
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
-    // the device idle whitelist during service launch and VPN bootstrap.
-    private static final long VPN_LAUNCH_IDLE_WHITELIST_DURATION_MS = 60 * 1000;
+    // the device idle allowlist during service launch and VPN bootstrap.
+    private static final long VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS = 60 * 1000;
 
     // Settings for how much of the address space should be routed so that Vpn considers
     // "most" of the address space is routed. This is used to determine whether this Vpn
@@ -175,7 +180,8 @@ public class Vpn {
     // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
     // is actually O(n²)+O(n²).
     private static final int MAX_ROUTES_TO_EVALUATE = 150;
-
+    private static final String LOCKDOWN_ALLOWLIST_SETTING_NAME =
+            Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST;
     /**
      * Largest profile size allowable for Platform VPNs.
      *
@@ -190,6 +196,7 @@ public class Vpn {
     // automated reconnection
 
     private final Context mContext;
+    @VisibleForTesting final Dependencies mDeps;
     private final NetworkInfo mNetworkInfo;
     @VisibleForTesting protected String mPackage;
     private int mOwnerUID;
@@ -230,7 +237,7 @@ public class Vpn {
      * Set of packages in addition to the VPN app itself that can access the network directly when
      * VPN is not connected even if {@code mLockdown} is set.
      */
-    private @NonNull List<String> mLockdownWhitelist = Collections.emptyList();
+    private @NonNull List<String> mLockdownAllowlist = Collections.emptyList();
 
      /**
      * A memory of what UIDs this class told netd to block for the lockdown feature.
@@ -252,17 +259,143 @@ public class Vpn {
     // Handle of the user initiating VPN.
     private final int mUserHandle;
 
+    interface RetryScheduler {
+        void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
+    }
+
+    static class Dependencies {
+        public void startService(final String serviceName) {
+            SystemService.start(serviceName);
+        }
+
+        public void stopService(final String serviceName) {
+            SystemService.stop(serviceName);
+        }
+
+        public boolean isServiceRunning(final String serviceName) {
+            return SystemService.isRunning(serviceName);
+        }
+
+        public boolean isServiceStopped(final String serviceName) {
+            return SystemService.isStopped(serviceName);
+        }
+
+        public File getStateFile() {
+            return new File("/data/misc/vpn/state");
+        }
+
+        public void sendArgumentsToDaemon(
+                final String daemon, final LocalSocket socket, final String[] arguments,
+                final RetryScheduler retryScheduler) throws IOException, InterruptedException {
+            final LocalSocketAddress address = new LocalSocketAddress(
+                    daemon, LocalSocketAddress.Namespace.RESERVED);
+
+            // Wait for the socket to connect.
+            while (true) {
+                try {
+                    socket.connect(address);
+                    break;
+                } catch (Exception e) {
+                    // ignore
+                }
+                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
+            }
+            socket.setSoTimeout(500);
+
+            final OutputStream out = socket.getOutputStream();
+            for (String argument : arguments) {
+                byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
+                if (bytes.length >= 0xFFFF) {
+                    throw new IllegalArgumentException("Argument is too large");
+                }
+                out.write(bytes.length >> 8);
+                out.write(bytes.length);
+                out.write(bytes);
+                retryScheduler.checkInterruptAndDelay(false /* sleepLonger */);
+            }
+            out.write(0xFF);
+            out.write(0xFF);
+
+            // Wait for End-of-File.
+            final InputStream in = socket.getInputStream();
+            while (true) {
+                try {
+                    if (in.read() == -1) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
+            }
+        }
+
+        @NonNull
+        public InetAddress resolve(final String endpoint)
+                throws ExecutionException, InterruptedException {
+            try {
+                return InetAddress.parseNumericAddress(endpoint);
+            } catch (IllegalArgumentException e) {
+                // Endpoint is not numeric : fall through and resolve
+            }
+
+            final CancellationSignal cancellationSignal = new CancellationSignal();
+            try {
+                final DnsResolver resolver = DnsResolver.getInstance();
+                final CompletableFuture<InetAddress> result = new CompletableFuture();
+                final DnsResolver.Callback<List<InetAddress>> cb =
+                        new DnsResolver.Callback<List<InetAddress>>() {
+                            @Override
+                            public void onAnswer(@NonNull final List<InetAddress> answer,
+                                    final int rcode) {
+                                if (answer.size() > 0) {
+                                    result.complete(answer.get(0));
+                                } else {
+                                    result.completeExceptionally(
+                                            new UnknownHostException(endpoint));
+                                }
+                            }
+
+                            @Override
+                            public void onError(@Nullable final DnsResolver.DnsException error) {
+                                // Unfortunately UnknownHostException doesn't accept a cause, so
+                                // print a message here instead. Only show the summary, not the
+                                // full stack trace.
+                                Log.e(TAG, "Async dns resolver error : " + error);
+                                result.completeExceptionally(new UnknownHostException(endpoint));
+                            }
+                        };
+                resolver.query(null /* network, null for default */, endpoint,
+                        DnsResolver.FLAG_EMPTY, r -> r.run(), cancellationSignal, cb);
+                return result.get();
+            } catch (final ExecutionException e) {
+                Log.e(TAG, "Cannot resolve VPN endpoint : " + endpoint + ".", e);
+                throw e;
+            } catch (final InterruptedException e) {
+                Log.e(TAG, "Legacy VPN was interrupted while resolving the endpoint", e);
+                cancellationSignal.cancel();
+                throw e;
+            }
+        }
+
+        public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
+            return vpn.jniCheck(iface) == 0;
+        }
+    }
+
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
             @UserIdInt int userHandle, @NonNull KeyStore keyStore) {
-        this(looper, context, netService, userHandle, keyStore,
+        this(looper, context, new Dependencies(), netService, userHandle, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
     @VisibleForTesting
-    protected Vpn(Looper looper, Context context, INetworkManagementService netService,
+    protected Vpn(Looper looper, Context context, Dependencies deps,
+            INetworkManagementService netService,
             int userHandle, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
+        mDeps = deps;
         mNetd = netService;
         mUserHandle = userHandle;
         mLooper = looper;
@@ -388,7 +521,7 @@ public class Vpn {
             }
         }
         if (!hadUnderlyingNetworks) {
-            // No idea what the underlying networks are; assume sane defaults
+            // No idea what the underlying networks are; assume the safer defaults
             metered = true;
             roaming = false;
             congested = false;
@@ -521,18 +654,18 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
-     * @param lockdownWhitelist packages to be whitelisted from lockdown.
+     * @param lockdownAllowlist packages to be allowed from lockdown.
      * @param keyStore the Keystore instance to use for checking of PlatformVpnProfile(s)
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
     public synchronized boolean setAlwaysOnPackage(
             @Nullable String packageName,
             boolean lockdown,
-            @Nullable List<String> lockdownWhitelist,
+            @Nullable List<String> lockdownAllowlist,
             @NonNull KeyStore keyStore) {
         enforceControlPermissionOrInternalCaller();
 
-        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownWhitelist, keyStore)) {
+        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist, keyStore)) {
             saveAlwaysOnPackage();
             return true;
         }
@@ -547,7 +680,7 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
-     * @param lockdownWhitelist packages to be whitelisted from lockdown. This is only used if
+     * @param lockdownAllowlist packages to be allowed to bypass lockdown. This is only used if
      *     {@code lockdown} is {@code true}. Packages must not contain commas.
      * @param keyStore the system keystore instance to check for profiles
      * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
@@ -555,16 +688,16 @@ public class Vpn {
     @GuardedBy("this")
     private boolean setAlwaysOnPackageInternal(
             @Nullable String packageName, boolean lockdown,
-            @Nullable List<String> lockdownWhitelist, @NonNull KeyStore keyStore) {
+            @Nullable List<String> lockdownAllowlist, @NonNull KeyStore keyStore) {
         if (VpnConfig.LEGACY_VPN.equals(packageName)) {
             Log.w(TAG, "Not setting legacy VPN \"" + packageName + "\" as always-on.");
             return false;
         }
 
-        if (lockdownWhitelist != null) {
-            for (String pkg : lockdownWhitelist) {
+        if (lockdownAllowlist != null) {
+            for (String pkg : lockdownAllowlist) {
                 if (pkg.contains(",")) {
-                    Log.w(TAG, "Not setting always-on vpn, invalid whitelisted package: " + pkg);
+                    Log.w(TAG, "Not setting always-on vpn, invalid allowed package: " + pkg);
                     return false;
                 }
             }
@@ -592,8 +725,8 @@ public class Vpn {
         }
 
         mLockdown = (mAlwaysOn && lockdown);
-        mLockdownWhitelist = (mLockdown && lockdownWhitelist != null)
-                ? Collections.unmodifiableList(new ArrayList<>(lockdownWhitelist))
+        mLockdownAllowlist = (mLockdown && lockdownAllowlist != null)
+                ? Collections.unmodifiableList(new ArrayList<>(lockdownAllowlist))
                 : Collections.emptyList();
 
         if (isCurrentPreparedPackage(packageName)) {
@@ -622,10 +755,10 @@ public class Vpn {
     }
 
     /**
-     * @return an immutable list of packages whitelisted from always-on VPN lockdown.
+     * @return an immutable list of packages allowed to bypass always-on VPN lockdown.
      */
-    public synchronized List<String> getLockdownWhitelist() {
-        return mLockdown ? mLockdownWhitelist : null;
+    public synchronized List<String> getLockdownAllowlist() {
+        return mLockdown ? mLockdownAllowlist : null;
     }
 
     /**
@@ -640,8 +773,8 @@ public class Vpn {
             mSystemServices.settingsSecurePutIntForUser(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
                     (mAlwaysOn && mLockdown ? 1 : 0), mUserHandle);
             mSystemServices.settingsSecurePutStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST,
-                    String.join(",", mLockdownWhitelist), mUserHandle);
+                    LOCKDOWN_ALLOWLIST_SETTING_NAME,
+                    String.join(",", mLockdownAllowlist), mUserHandle);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -656,12 +789,12 @@ public class Vpn {
                     Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
             final boolean alwaysOnLockdown = mSystemServices.settingsSecureGetIntForUser(
                     Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, 0 /*default*/, mUserHandle) != 0;
-            final String whitelistString = mSystemServices.settingsSecureGetStringForUser(
-                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST, mUserHandle);
-            final List<String> whitelistedPackages = TextUtils.isEmpty(whitelistString)
-                    ? Collections.emptyList() : Arrays.asList(whitelistString.split(","));
+            final String allowlistString = mSystemServices.settingsSecureGetStringForUser(
+                    LOCKDOWN_ALLOWLIST_SETTING_NAME, mUserHandle);
+            final List<String> allowedPackages = TextUtils.isEmpty(allowlistString)
+                    ? Collections.emptyList() : Arrays.asList(allowlistString.split(","));
             setAlwaysOnPackageInternal(
-                    alwaysOnPackage, alwaysOnLockdown, whitelistedPackages, keyStore);
+                    alwaysOnPackage, alwaysOnLockdown, allowedPackages, keyStore);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -717,7 +850,7 @@ public class Vpn {
             DeviceIdleController.LocalService idleController =
                     LocalServices.getService(DeviceIdleController.LocalService.class);
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(), alwaysOnPackage,
-                    VPN_LAUNCH_IDLE_WHITELIST_DURATION_MS, mUserHandle, false, "vpn");
+                    VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS, mUserHandle, false, "vpn");
 
             // Start the VPN service declared in the app's manifest.
             Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
@@ -1080,7 +1213,7 @@ public class Vpn {
         // applications have changed. Consider diffing UID ranges and only applying the delta.
         if (!Objects.equals(oldConfig.allowedApplications, mConfig.allowedApplications) ||
                 !Objects.equals(oldConfig.disallowedApplications, mConfig.disallowedApplications)) {
-            Log.i(TAG, "Handover not possible due to changes to whitelisted/blacklisted apps");
+            Log.i(TAG, "Handover not possible due to changes to allowed/denied apps");
             return false;
         }
 
@@ -1106,7 +1239,8 @@ public class Vpn {
         NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig();
         networkAgentConfig.allowBypass = mConfig.allowBypass && !mLockdown;
 
-        mNetworkCapabilities.setOwnerUid(Binder.getCallingUid());
+        mNetworkCapabilities.setOwnerUid(mOwnerUID);
+        mNetworkCapabilities.setAdministratorUids(new int[] {mOwnerUID});
         mNetworkCapabilities.setUids(createUserAndRestrictedProfilesRanges(mUserHandle,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
         long token = Binder.clearCallingIdentity();
@@ -1307,13 +1441,13 @@ public class Vpn {
      * associated with one user, and any restricted profiles attached to that user.
      *
      * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
-     * the UID ranges will match the app whitelist or blacklist specified there. Otherwise, all UIDs
+     * the UID ranges will match the app list specified there. Otherwise, all UIDs
      * in each user and profile will be included.
      *
      * @param userHandle The userId to create UID ranges for along with any of its restricted
      *                   profiles.
-     * @param allowedApplications (optional) whitelist of applications to include.
-     * @param disallowedApplications (optional) blacklist of applications to exclude.
+     * @param allowedApplications (optional) List of applications to allow.
+     * @param disallowedApplications (optional) List of applications to deny.
      */
     @VisibleForTesting
     Set<UidRange> createUserAndRestrictedProfilesRanges(@UserIdInt int userHandle,
@@ -1347,13 +1481,13 @@ public class Vpn {
      * associated with one user.
      *
      * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
-     * the UID ranges will match the app whitelist or blacklist specified there. Otherwise, all UIDs
+     * the UID ranges will match the app allowlist or denylist specified there. Otherwise, all UIDs
      * in the user will be included.
      *
      * @param ranges {@link Set} of {@link UidRange}s to which to add.
      * @param userHandle The userId to add to {@param ranges}.
-     * @param allowedApplications (optional) whitelist of applications to include.
-     * @param disallowedApplications (optional) blacklist of applications to exclude.
+     * @param allowedApplications (optional) allowlist of applications to include.
+     * @param disallowedApplications (optional) denylist of applications to exclude.
      */
     @VisibleForTesting
     void addUserToRanges(@NonNull Set<UidRange> ranges, @UserIdInt int userHandle,
@@ -1475,7 +1609,7 @@ public class Vpn {
 
     /**
      * Restricts network access from all UIDs affected by this {@link Vpn}, apart from the VPN
-     * service app itself and whitelisted packages, to only sockets that have had {@code protect()}
+     * service app itself and allowed packages, to only sockets that have had {@code protect()}
      * called on them. All non-VPN traffic is blocked via a {@code PROHIBIT} response from the
      * kernel.
      *
@@ -1497,7 +1631,7 @@ public class Vpn {
         if (isNullOrLegacyVpn(mPackage)) {
             exemptedPackages = null;
         } else {
-            exemptedPackages = new ArrayList<>(mLockdownWhitelist);
+            exemptedPackages = new ArrayList<>(mLockdownAllowlist);
             exemptedPackages.add(mPackage);
         }
         final Set<UidRange> rangesToTellNetdToRemove = new ArraySet<>(mBlockedUidsAsToldToNetd);
@@ -1542,7 +1676,7 @@ public class Vpn {
      * Tell netd to add or remove a list of {@link UidRange}s to the list of UIDs that are only
      * allowed to make connections through sockets that have had {@code protect()} called on them.
      *
-     * @param enforce {@code true} to add to the blacklist, {@code false} to remove.
+     * @param enforce {@code true} to add to the denylist, {@code false} to remove.
      * @param ranges {@link Collection} of {@link UidRange}s to add (if {@param enforce} is
      *               {@code true}) or to remove.
      * @return {@code true} if all of the UIDs were added/removed. {@code false} otherwise,
@@ -2128,7 +2262,8 @@ public class Vpn {
     }
 
     /** This class represents the common interface for all VPN runners. */
-    private abstract class VpnRunner extends Thread {
+    @VisibleForTesting
+    abstract class VpnRunner extends Thread {
 
         protected VpnRunner(String name) {
             super(name);
@@ -2637,7 +2772,7 @@ public class Vpn {
                     } catch (InterruptedException e) {
                     }
                     for (String daemon : mDaemons) {
-                        SystemService.stop(daemon);
+                        mDeps.stopService(daemon);
                     }
                 }
                 agentDisconnect();
@@ -2654,21 +2789,55 @@ public class Vpn {
             }
         }
 
+        private void checkAndFixupArguments(@NonNull final InetAddress endpointAddress) {
+            final String endpointAddressString = endpointAddress.getHostAddress();
+            // Perform some safety checks before inserting the address in place.
+            // Position 0 in mDaemons and mArguments must be racoon, and position 1 must be mtpd.
+            if (!"racoon".equals(mDaemons[0]) || !"mtpd".equals(mDaemons[1])) {
+                throw new IllegalStateException("Unexpected daemons order");
+            }
+
+            // Respectively, the positions at which racoon and mtpd take the server address
+            // argument are 1 and 2. Not all types of VPN require both daemons however, and
+            // in that case the corresponding argument array is null.
+            if (mArguments[0] != null) {
+                if (!mProfile.server.equals(mArguments[0][1])) {
+                    throw new IllegalStateException("Invalid server argument for racoon");
+                }
+                mArguments[0][1] = endpointAddressString;
+            }
+
+            if (mArguments[1] != null) {
+                if (!mProfile.server.equals(mArguments[1][2])) {
+                    throw new IllegalStateException("Invalid server argument for mtpd");
+                }
+                mArguments[1][2] = endpointAddressString;
+            }
+        }
+
         private void bringup() {
             // Catch all exceptions so we can clean up a few things.
             try {
+                // resolve never returns null. If it does because of some bug, it will be
+                // caught by the catch() block below and cleanup gracefully.
+                final InetAddress endpointAddress = mDeps.resolve(mProfile.server);
+
+                // Big hack : dynamically replace the address of the server in the arguments
+                // with the resolved address.
+                checkAndFixupArguments(endpointAddress);
+
                 // Initialize the timer.
                 mBringupStartTime = SystemClock.elapsedRealtime();
 
                 // Wait for the daemons to stop.
                 for (String daemon : mDaemons) {
-                    while (!SystemService.isStopped(daemon)) {
+                    while (!mDeps.isServiceStopped(daemon)) {
                         checkInterruptAndDelay(true);
                     }
                 }
 
                 // Clear the previous state.
-                File state = new File("/data/misc/vpn/state");
+                final File state = mDeps.getStateFile();
                 state.delete();
                 if (state.exists()) {
                     throw new IllegalStateException("Cannot delete the state");
@@ -2695,57 +2864,19 @@ public class Vpn {
 
                     // Start the daemon.
                     String daemon = mDaemons[i];
-                    SystemService.start(daemon);
+                    mDeps.startService(daemon);
 
                     // Wait for the daemon to start.
-                    while (!SystemService.isRunning(daemon)) {
+                    while (!mDeps.isServiceRunning(daemon)) {
                         checkInterruptAndDelay(true);
                     }
 
                     // Create the control socket.
                     mSockets[i] = new LocalSocket();
-                    LocalSocketAddress address = new LocalSocketAddress(
-                            daemon, LocalSocketAddress.Namespace.RESERVED);
 
-                    // Wait for the socket to connect.
-                    while (true) {
-                        try {
-                            mSockets[i].connect(address);
-                            break;
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        checkInterruptAndDelay(true);
-                    }
-                    mSockets[i].setSoTimeout(500);
-
-                    // Send over the arguments.
-                    OutputStream out = mSockets[i].getOutputStream();
-                    for (String argument : arguments) {
-                        byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
-                        if (bytes.length >= 0xFFFF) {
-                            throw new IllegalArgumentException("Argument is too large");
-                        }
-                        out.write(bytes.length >> 8);
-                        out.write(bytes.length);
-                        out.write(bytes);
-                        checkInterruptAndDelay(false);
-                    }
-                    out.write(0xFF);
-                    out.write(0xFF);
-
-                    // Wait for End-of-File.
-                    InputStream in = mSockets[i].getInputStream();
-                    while (true) {
-                        try {
-                            if (in.read() == -1) {
-                                break;
-                            }
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        checkInterruptAndDelay(true);
-                    }
+                    // Wait for the socket to connect and send over the arguments.
+                    mDeps.sendArgumentsToDaemon(daemon, mSockets[i], arguments,
+                            this::checkInterruptAndDelay);
                 }
 
                 // Wait for the daemons to create the new state.
@@ -2753,7 +2884,7 @@ public class Vpn {
                     // Check if a running daemon is dead.
                     for (int i = 0; i < mDaemons.length; ++i) {
                         String daemon = mDaemons[i];
-                        if (mArguments[i] != null && !SystemService.isRunning(daemon)) {
+                        if (mArguments[i] != null && !mDeps.isServiceRunning(daemon)) {
                             throw new IllegalStateException(daemon + " is dead");
                         }
                     }
@@ -2763,7 +2894,8 @@ public class Vpn {
                 // Now we are connected. Read and parse the new state.
                 String[] parameters = FileUtils.readTextFile(state, 0, null).split("\n", -1);
                 if (parameters.length != 7) {
-                    throw new IllegalStateException("Cannot parse the state");
+                    throw new IllegalStateException("Cannot parse the state: '"
+                            + String.join("', '", parameters) + "'");
                 }
 
                 // Set the interface and the addresses in the config.
@@ -2792,20 +2924,15 @@ public class Vpn {
                 }
 
                 // Add a throw route for the VPN server endpoint, if one was specified.
-                String endpoint = parameters[5].isEmpty() ? mProfile.server : parameters[5];
-                if (!endpoint.isEmpty()) {
-                    try {
-                        InetAddress addr = InetAddress.parseNumericAddress(endpoint);
-                        if (addr instanceof Inet4Address) {
-                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 32), RTN_THROW));
-                        } else if (addr instanceof Inet6Address) {
-                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 128), RTN_THROW));
-                        } else {
-                            Log.e(TAG, "Unknown IP address family for VPN endpoint: " + endpoint);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "Exception constructing throw route to " + endpoint + ": " + e);
-                    }
+                if (endpointAddress instanceof Inet4Address) {
+                    mConfig.routes.add(new RouteInfo(
+                            new IpPrefix(endpointAddress, 32), RTN_THROW));
+                } else if (endpointAddress instanceof Inet6Address) {
+                    mConfig.routes.add(new RouteInfo(
+                            new IpPrefix(endpointAddress, 128), RTN_THROW));
+                } else {
+                    Log.e(TAG, "Unknown IP address family for VPN endpoint: "
+                            + endpointAddress);
                 }
 
                 // Here is the last step and it must be done synchronously.
@@ -2817,7 +2944,7 @@ public class Vpn {
                     checkInterruptAndDelay(false);
 
                     // Check if the interface is gone while we are waiting.
-                    if (jniCheck(mConfig.interfaze) == 0) {
+                    if (mDeps.checkInterfacePresent(Vpn.this, mConfig.interfaze)) {
                         throw new IllegalStateException(mConfig.interfaze + " is gone");
                     }
 
@@ -2848,7 +2975,7 @@ public class Vpn {
             while (true) {
                 Thread.sleep(2000);
                 for (int i = 0; i < mDaemons.length; i++) {
-                    if (mArguments[i] != null && SystemService.isStopped(mDaemons[i])) {
+                    if (mArguments[i] != null && mDeps.isServiceStopped(mDaemons[i])) {
                         return;
                     }
                 }

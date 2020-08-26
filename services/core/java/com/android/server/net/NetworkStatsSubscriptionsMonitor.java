@@ -16,11 +16,14 @@
 
 package com.android.server.net;
 
+import static android.net.NetworkTemplate.NETWORK_TYPE_5G_NSA;
 import static android.net.NetworkTemplate.getCollapsedRatType;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Looper;
 import android.telephony.Annotation;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
@@ -28,6 +31,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -38,8 +42,6 @@ import java.util.concurrent.Executor;
 /**
  * Helper class that watches for events that are triggered per subscription.
  */
-// TODO (b/152176562): Write tests to verify subscription changes generate corresponding
-//  register/unregister calls.
 public class NetworkStatsSubscriptionsMonitor extends
         SubscriptionManager.OnSubscriptionsChangedListener {
 
@@ -76,9 +78,9 @@ public class NetworkStatsSubscriptionsMonitor extends
     @NonNull
     private final Executor mExecutor;
 
-    NetworkStatsSubscriptionsMonitor(@NonNull Context context, @NonNull Executor executor,
-            @NonNull Delegate delegate) {
-        super();
+    NetworkStatsSubscriptionsMonitor(@NonNull Context context, @NonNull Looper looper,
+            @NonNull Executor executor, @NonNull Delegate delegate) {
+        super(looper);
         mSubscriptionManager = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mTeleManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -98,11 +100,16 @@ public class NetworkStatsSubscriptionsMonitor extends
             if (match != null) continue;
 
             // Create listener for every newly added sub. Also store subscriberId into it to
-            // prevent binder call to telephony when querying RAT.
+            // prevent binder call to telephony when querying RAT. If the subscriberId is empty
+            // for any reason, such as SIM PIN locked, skip registration.
+            // SubscriberId will be unavailable again if 1. modem crashed 2. reboot
+            // 3. re-insert SIM. If that happens, the listeners will be eventually synchronized
+            // with active sub list once all subscriberIds are ready.
             final String subscriberId = mTeleManager.getSubscriberId(subId);
             if (TextUtils.isEmpty(subscriberId)) {
-                Log.wtf(NetworkStatsService.TAG,
-                        "Empty subscriberId for newly added sub: " + subId);
+                Log.d(NetworkStatsService.TAG, "Empty subscriberId for newly added sub "
+                        + subId + ", skip listener registration");
+                continue;
             }
             final RatTypeListener listener =
                     new RatTypeListener(mExecutor, this, subId, subscriberId);
@@ -111,6 +118,7 @@ public class NetworkStatsSubscriptionsMonitor extends
             // Register listener to the telephony manager that associated with specific sub.
             mTeleManager.createForSubscriptionId(subId)
                     .listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE);
+            Log.d(NetworkStatsService.TAG, "RAT type listener registered for sub " + subId);
         }
 
         for (final RatTypeListener listener : new ArrayList<>(mRatListeners)) {
@@ -125,7 +133,7 @@ public class NetworkStatsSubscriptionsMonitor extends
     @NonNull
     private List<Integer> getActiveSubIdList(@NonNull SubscriptionManager subscriptionManager) {
         final ArrayList<Integer> ret = new ArrayList<>();
-        final int[] ids = subscriptionManager.getActiveAndHiddenSubscriptionIdList();
+        final int[] ids = subscriptionManager.getCompleteActiveSubscriptionIdList();
         for (int id : ids) ret.add(id);
         return ret;
     }
@@ -163,6 +171,7 @@ public class NetworkStatsSubscriptionsMonitor extends
     private void handleRemoveRatTypeListener(@NonNull RatTypeListener listener) {
         mTeleManager.createForSubscriptionId(listener.mSubId)
                 .listen(listener, PhoneStateListener.LISTEN_NONE);
+        Log.d(NetworkStatsService.TAG, "RAT type listener unregistered for sub " + listener.mSubId);
         mRatListeners.remove(listener);
 
         // Removal of subscriptions doesn't generate RAT changed event, fire it for every
@@ -196,7 +205,18 @@ public class NetworkStatsSubscriptionsMonitor extends
 
         @Override
         public void onServiceStateChanged(@NonNull ServiceState ss) {
-            final int networkType = ss.getDataNetworkType();
+            // In 5G SA (Stand Alone) mode, the primary cell itself will be 5G hence telephony
+            // would report RAT = 5G_NR.
+            // However, in 5G NSA (Non Stand Alone) mode, the primary cell is still LTE and
+            // network allocates a secondary 5G cell so telephony reports RAT = LTE along with
+            // NR state as connected. In such case, attributes the data usage to NR.
+            // See b/160727498.
+            final boolean is5GNsa = (ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE
+                    || ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE_CA)
+                    && ss.getNrState() == NetworkRegistrationInfo.NR_STATE_CONNECTED;
+
+            final int networkType =
+                    (is5GNsa ? NETWORK_TYPE_5G_NSA : ss.getDataNetworkType());
             final int collapsedRatType = getCollapsedRatType(networkType);
             if (collapsedRatType == mLastCollapsedRatType) return;
 
@@ -206,6 +226,11 @@ public class NetworkStatsSubscriptionsMonitor extends
             }
             mLastCollapsedRatType = collapsedRatType;
             mMonitor.mDelegate.onCollapsedRatTypeChanged(mSubscriberId, mLastCollapsedRatType);
+        }
+
+        @VisibleForTesting
+        public int getSubId() {
+            return mSubId;
         }
     }
 }

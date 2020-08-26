@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -231,7 +232,9 @@ public final class EuiccProfileInfo implements Parcelable {
             mState = baseProfile.mState;
             mCarrierIdentifier = baseProfile.mCarrierIdentifier;
             mPolicyRules = baseProfile.mPolicyRules;
-            mAccessRules = Arrays.asList(baseProfile.mAccessRules);
+            mAccessRules = baseProfile.mAccessRules == null
+                            ? Collections.emptyList()
+                            : Arrays.asList(baseProfile.mAccessRules);
         }
 
         /** Builds the profile instance. */

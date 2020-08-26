@@ -265,7 +265,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     /**
      * Set that we are exiting the headsUp pinned mode, but some notifications might still be
-     * animating out. This is used to keep the touchable regions in a sane state.
+     * animating out. This is used to keep the touchable regions in a reasonable state.
      */
     public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
         if (headsUpGoingAway != mHeadsUpGoingAway) {

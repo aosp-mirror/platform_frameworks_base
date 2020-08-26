@@ -38,6 +38,7 @@ java_sdk_library {
     ],
 
     compile_dex: true,
+    default_to_stubs: true,
 }
 
 // Build the android.test.base_static library

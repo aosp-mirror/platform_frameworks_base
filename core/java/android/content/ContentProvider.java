@@ -1421,13 +1421,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * Implementation when a caller has performed an insert on the content
      * provider, but that call has been rejected for the operation given
      * to {@link #setAppOps(int, int)}.  The default implementation simply
-     * returns a dummy URI that is the base URI with a 0 path element
-     * appended.
+     * returns a URI that is the base URI with a 0 path element appended.
      */
     public Uri rejectInsert(Uri uri, ContentValues values) {
         // If not allowed, we need to return some reasonable URI.  Maybe the
         // content provider should be responsible for this, but for now we
-        // will just return the base URI with a dummy '0' tagged on to it.
+        // will just return the base URI with a '0' tagged on to it.
         // You shouldn't be able to read if you can't write, anyway, so it
         // shouldn't matter much what is returned.
         return uri.buildUpon().appendPath("0").build();

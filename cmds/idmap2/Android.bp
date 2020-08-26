@@ -23,9 +23,16 @@ cc_defaults {
         "misc-*",
         "readability-*",
     ],
+    tidy_checks_as_errors: [
+        "modernize-*",
+        "-modernize-avoid-c-arrays",
+        "-modernize-use-trailing-return-type",
+        "android-*",
+        "misc-*",
+        "readability-*",
+    ],
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*,-bugprone*",
     ],
 }
 

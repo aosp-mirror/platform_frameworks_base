@@ -16,12 +16,12 @@
 
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
-#include "statslog.h"
+
+#include "StatsLogProcessor.h"
 
 #include <android-base/file.h>
-#include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
-#include "StatsLogProcessor.h"
+
 #include "android-base/stringprintf.h"
 #include "atoms_info.h"
 #include "external/StatsPullerManager.h"
@@ -29,11 +29,8 @@
 #include "metrics/CountMetricProducer.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
+#include "statslog.h"
 #include "storage/StorageManager.h"
-
-#include <log/log_event_list.h>
-#include <utils/Errors.h>
-#include <utils/SystemClock.h>
 
 using namespace android;
 using android::base::StringPrintf;
@@ -45,8 +42,6 @@ using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
-using std::make_unique;
-using std::unique_ptr;
 using std::vector;
 
 namespace android {

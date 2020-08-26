@@ -852,6 +852,19 @@ public class ProvisioningManager {
     public static final int KEY_RTT_ENABLED = 66;
 
     /**
+     * An obfuscated string defined by the carrier to indicate VoWiFi entitlement status.
+     *
+     * <p>Implementation note: how to generate the value and how it affects VoWiFi service
+     * should follow carrier requirements. For example, set an empty string could result in
+     * VoWiFi being disabled by IMS service, and set to a specific string could enable.
+     *
+     * <p>Value is in String format.
+     * @see #setProvisioningStringValue(int, String)
+     * @see #getProvisioningStringValue(int)
+     */
+    public static final int KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID = 67;
+
+    /**
      * Callback for IMS provisioning changes.
      */
     public static class Callback {

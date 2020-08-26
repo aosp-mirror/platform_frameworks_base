@@ -273,6 +273,11 @@ interface ITelecomService {
     boolean setDefaultDialer(in String packageName);
 
     /**
+     * Stop suppressing blocked numbers after a call to emergency services. Shell only.
+     */
+    void stopBlockSuppression();
+
+    /**
     * @see TelecomServiceImpl#createManageBlockedNumbersIntent
     **/
     Intent createManageBlockedNumbersIntent();
@@ -316,6 +321,8 @@ interface ITelecomService {
      * @see TelecomServiceImpl#handleCallIntent
      */
     void handleCallIntent(in Intent intent, in String callingPackageProxy);
+
+    void cleanupStuckCalls();
 
     void setTestDefaultCallRedirectionApp(String packageName);
 

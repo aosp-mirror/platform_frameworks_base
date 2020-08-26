@@ -36,8 +36,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE := DynamicCodeLoggerNativeTestLibrary
 LOCAL_SRC_FILES := src/cpp/com_android_dcl_Jni.cpp
-LOCAL_C_INCLUDES += \
-    $(JNI_H_INCLUDE)
+LOCAL_HEADER_LIBRARIES := jni_headers
 LOCAL_SDK_VERSION := 28
 LOCAL_NDK_STL_VARIANT := c++_static
 

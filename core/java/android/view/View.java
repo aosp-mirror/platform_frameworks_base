@@ -942,8 +942,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Prior to P, {@code #startDragAndDrop} accepts a builder which produces an empty drag shadow.
-     * Currently zero size SurfaceControl cannot be created thus we create a dummy 1x1 surface
-     * instead.
+     * Currently zero size SurfaceControl cannot be created thus we create a 1x1 surface instead.
      */
     private static boolean sAcceptZeroSizeDragShadow;
 
@@ -22859,7 +22858,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            displaying, else return the result of calling through to the
      *            super class.
      *
-     * @return boolean If true than the Drawable is being displayed in the
+     * @return boolean If true then the Drawable is being displayed in the
      *         view; else false and it is not allowed to animate.
      *
      * @see #unscheduleDrawable(android.graphics.drawable.Drawable)
@@ -29334,7 +29333,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Dump all private flags in readable format, useful for documentation and
-     * sanity checking.
+     * consistency checking.
      */
     private static void dumpFlags() {
         final HashMap<String, String> found = Maps.newHashMap();

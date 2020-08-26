@@ -17,7 +17,7 @@
 package android.net;
 
 /** @hide */
-interface ITetheredInterfaceCallback {
+oneway interface ITetheredInterfaceCallback {
     void onAvailable(in String iface);
     void onUnavailable();
 }

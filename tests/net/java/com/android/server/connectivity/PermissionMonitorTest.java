@@ -76,7 +76,6 @@ import com.android.server.LocalServices;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -87,7 +86,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -116,8 +114,8 @@ public class PermissionMonitorTest {
     @Mock private INetd mNetdService;
     @Mock private PackageManagerInternal mMockPmi;
     @Mock private UserManager mUserManager;
+    @Mock private PermissionMonitor.Dependencies mDeps;
 
-    private PackageManagerInternal.PackageListObserver mObserver;
     private PermissionMonitor mPermissionMonitor;
 
     @Before
@@ -131,7 +129,7 @@ public class PermissionMonitorTest {
                         new UserInfo(MOCK_USER2, "", 0),
                 }));
 
-        mPermissionMonitor = spy(new PermissionMonitor(mContext, mNetdService));
+        mPermissionMonitor = spy(new PermissionMonitor(mContext, mNetdService, mDeps));
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPmi);
@@ -139,11 +137,7 @@ public class PermissionMonitorTest {
                   /* observer */ null));
         when(mPackageManager.getInstalledPackages(anyInt())).thenReturn(/* empty app list */ null);
         mPermissionMonitor.startMonitoring();
-
-        final ArgumentCaptor<PackageManagerInternal.PackageListObserver> observerCaptor =
-                ArgumentCaptor.forClass(PackageManagerInternal.PackageListObserver.class);
-        verify(mMockPmi).getPackageList(observerCaptor.capture());
-        mObserver = observerCaptor.getValue();
+        verify(mMockPmi).getPackageList(mPermissionMonitor);
     }
 
     private boolean hasRestrictedNetworkPermission(String partition, int targetSdkVersion, int uid,
@@ -290,14 +284,14 @@ public class PermissionMonitorTest {
 
     @Test
     public void testHasRestrictedNetworkPermissionSystemUid() {
-        doReturn(VERSION_P).when(mPermissionMonitor).getDeviceFirstSdkInt();
+        doReturn(VERSION_P).when(mDeps).getDeviceFirstSdkInt();
         assertTrue(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CONNECTIVITY_INTERNAL));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CONNECTIVITY_USE_RESTRICTED_NETWORKS));
 
-        doReturn(VERSION_Q).when(mPermissionMonitor).getDeviceFirstSdkInt();
+        doReturn(VERSION_Q).when(mDeps).getDeviceFirstSdkInt();
         assertFalse(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID));
         assertFalse(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CONNECTIVITY_INTERNAL));
@@ -450,13 +444,13 @@ public class PermissionMonitorTest {
                 new int[]{MOCK_UID1});
 
         // Remove MOCK_UID1, expect no permission left for all user.
-        mPermissionMonitor.onPackageRemoved(MOCK_UID1);
-        removePackageForUsers(new int[]{MOCK_USER1, MOCK_USER2}, MOCK_UID1);
+        mPermissionMonitor.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
+        removePackageForUsers(new int[]{MOCK_USER1, MOCK_USER2}, MOCK_PACKAGE1, MOCK_UID1);
         mNetdMonitor.expectNoPermission(new int[]{MOCK_USER1, MOCK_USER2}, new int[]{MOCK_UID1});
 
         // Remove SYSTEM_PACKAGE1, expect permission downgrade.
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{SYSTEM_PACKAGE2});
-        removePackageForUsers(new int[]{MOCK_USER1, MOCK_USER2}, SYSTEM_UID);
+        removePackageForUsers(new int[]{MOCK_USER1, MOCK_USER2}, SYSTEM_PACKAGE1, SYSTEM_UID);
         mNetdMonitor.expectPermission(NETWORK, new int[]{MOCK_USER1, MOCK_USER2},
                 new int[]{SYSTEM_UID});
 
@@ -465,7 +459,7 @@ public class PermissionMonitorTest {
 
         // Remove all packages, expect no permission left.
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{});
-        removePackageForUsers(new int[]{MOCK_USER2}, SYSTEM_UID);
+        removePackageForUsers(new int[]{MOCK_USER2}, SYSTEM_PACKAGE2, SYSTEM_UID);
         mNetdMonitor.expectNoPermission(new int[]{MOCK_USER1, MOCK_USER2},
                 new int[]{SYSTEM_UID, MOCK_UID1});
 
@@ -501,7 +495,8 @@ public class PermissionMonitorTest {
         reset(mNetdService);
 
         // When MOCK_UID1 package is uninstalled and reinstalled, expect Netd to be updated
-        mPermissionMonitor.onPackageRemoved(UserHandle.getUid(MOCK_USER1, MOCK_UID1));
+        mPermissionMonitor.onPackageRemoved(
+                MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
         verify(mNetdService).firewallRemoveUidInterfaceRules(aryEq(new int[] {MOCK_UID1}));
         mPermissionMonitor.onPackageAdded(MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
         verify(mNetdService).firewallAddUidInterfaceRules(eq("tun0"),
@@ -545,7 +540,8 @@ public class PermissionMonitorTest {
                 aryEq(new int[] {MOCK_UID1}));
 
         // Removed package should have its uid rules removed
-        mPermissionMonitor.onPackageRemoved(UserHandle.getUid(MOCK_USER1, MOCK_UID1));
+        mPermissionMonitor.onPackageRemoved(
+                MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
         verify(mNetdService).firewallRemoveUidInterfaceRules(aryEq(new int[] {MOCK_UID1}));
     }
 
@@ -559,9 +555,9 @@ public class PermissionMonitorTest {
         }
     }
 
-    private void removePackageForUsers(int[] users, int uid) {
+    private void removePackageForUsers(int[] users, String packageName, int uid) {
         for (final int user : users) {
-            mPermissionMonitor.onPackageRemoved(UserHandle.getUid(user, uid));
+            mPermissionMonitor.onPackageRemoved(packageName, UserHandle.getUid(user, uid));
         }
     }
 
@@ -647,7 +643,7 @@ public class PermissionMonitorTest {
     private PackageInfo addPackage(String packageName, int uid, String[] permissions)
             throws Exception {
         PackageInfo packageInfo = setPackagePermissions(packageName, uid, permissions);
-        mObserver.onPackageAdded(packageName, uid);
+        mPermissionMonitor.onPackageAdded(packageName, uid);
         return packageInfo;
     }
 
@@ -678,7 +674,7 @@ public class PermissionMonitorTest {
         when(mPackageManager.getPackageInfo(eq(MOCK_PACKAGE2), anyInt())).thenReturn(packageInfo2);
         when(mPackageManager.getPackagesForUid(MOCK_UID1))
               .thenReturn(new String[]{MOCK_PACKAGE1, MOCK_PACKAGE2});
-        mObserver.onPackageAdded(MOCK_PACKAGE2, MOCK_UID1);
+        mPermissionMonitor.onPackageAdded(MOCK_PACKAGE2, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET
                 | INetd.PERMISSION_UPDATE_DEVICE_STATS, new int[]{MOCK_UID1});
     }
@@ -692,7 +688,7 @@ public class PermissionMonitorTest {
                 | INetd.PERMISSION_UPDATE_DEVICE_STATS, new int[]{MOCK_UID1});
 
         when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(new String[]{});
-        mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
+        mPermissionMonitor.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UNINSTALLED, new int[]{MOCK_UID1});
     }
 
@@ -705,7 +701,7 @@ public class PermissionMonitorTest {
                 | INetd.PERMISSION_UPDATE_DEVICE_STATS, new int[]{MOCK_UID1});
 
         when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(new String[]{});
-        mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
+        mPermissionMonitor.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UNINSTALLED, new int[]{MOCK_UID1});
 
         addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET});
@@ -719,10 +715,7 @@ public class PermissionMonitorTest {
         addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {});
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_NONE, new int[]{MOCK_UID1});
 
-        // When updating a package, the broadcast receiver gets two broadcasts (a remove and then an
-        // add), but the observer sees only one callback (an update).
-        setPackagePermissions(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET});
-        mObserver.onPackageChanged(MOCK_PACKAGE1, MOCK_UID1);
+        addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET});
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{MOCK_UID1});
     }
 
@@ -740,7 +733,7 @@ public class PermissionMonitorTest {
         when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(new String[]{
                 MOCK_PACKAGE2});
 
-        mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
+        mPermissionMonitor.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{MOCK_UID1});
     }
 

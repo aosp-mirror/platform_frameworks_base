@@ -30,7 +30,7 @@
 #include <DnsProxydProtocol.h> // NETID_USE_LOCAL_NAMESERVERS
 #include <android_runtime/AndroidRuntime.h>
 #include <cutils/properties.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
@@ -93,9 +93,10 @@ static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz,
 
 static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
-    int dummy = 0;
+    int optval_ignored = 0;
     int fd = jniGetFDFromFileDescriptor(env, javaFd);
-    if (setsockopt(fd, SOL_SOCKET, SO_DETACH_FILTER, &dummy, sizeof(dummy)) != 0) {
+    if (setsockopt(
+            fd, SOL_SOCKET, SO_DETACH_FILTER, &optval_ignored, sizeof(optval_ignored)) != 0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
                 "setsockopt(SO_DETACH_FILTER): %s", strerror(errno));
     }
@@ -226,6 +227,11 @@ static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
             class_Network, ctor, dnsNetId & ~NETID_USE_LOCAL_NAMESERVERS, privateDnsBypass);
 }
 
+static void android_net_utils_setAllowNetworkingForProcess(JNIEnv *env, jobject thiz,
+                                                           jboolean hasConnectivity) {
+    setAllowNetworkingForProcess(hasConnectivity == JNI_TRUE);
+}
+
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
     if (javaFd == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -266,6 +272,7 @@ static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, j
 /*
  * JNI registration.
  */
+// clang-format off
 static const JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
@@ -282,7 +289,9 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
     { "getDnsNetwork", "()Landroid/net/Network;", (void*) android_net_utils_getDnsNetwork },
+    { "setAllowNetworkingForProcess", "(Z)V", (void *)android_net_utils_setAllowNetworkingForProcess },
 };
+// clang-format on
 
 int register_android_net_NetworkUtils(JNIEnv* env)
 {

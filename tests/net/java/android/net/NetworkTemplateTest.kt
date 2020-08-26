@@ -26,6 +26,7 @@ import android.net.NetworkStats.METERED_ALL
 import android.net.NetworkStats.ROAMING_ALL
 import android.net.NetworkTemplate.MATCH_MOBILE
 import android.net.NetworkTemplate.MATCH_WIFI
+import android.net.NetworkTemplate.NETWORK_TYPE_5G_NSA
 import android.net.NetworkTemplate.NETWORK_TYPE_ALL
 import android.net.NetworkTemplate.buildTemplateMobileWithRatType
 import android.telephony.TelephonyManager
@@ -145,11 +146,13 @@ class NetworkTemplateTest {
         assertParcelSane(templateWifi, 8)
     }
 
-    // Verify NETWORK_TYPE_ALL does not conflict with TelephonyManager#NETWORK_TYPE_* constants.
+    // Verify NETWORK_TYPE_* constants in NetworkTemplate do not conflict with
+    // TelephonyManager#NETWORK_TYPE_* constants.
     @Test
-    fun testNetworkTypeAll() {
+    fun testNetworkTypeConstants() {
         for (ratType in TelephonyManager.getAllNetworkTypes()) {
             assertNotEquals(NETWORK_TYPE_ALL, ratType)
+            assertNotEquals(NETWORK_TYPE_5G_NSA, ratType)
         }
     }
 }

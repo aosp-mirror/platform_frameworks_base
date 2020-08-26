@@ -18,33 +18,40 @@ package com.android.networkstack.tethering
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.Resources
 import android.net.ConnectivityManager.TETHERING_WIFI
+import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
-import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING
 import android.os.UserHandle
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.android.internal.util.test.BroadcastInterceptingContext
+import com.android.networkstack.tethering.TetheringNotificationUpdater.ACTION_DISABLE_TETHERING
 import com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE
 import com.android.networkstack.tethering.TetheringNotificationUpdater.EVENT_SHOW_NO_UPSTREAM
 import com.android.networkstack.tethering.TetheringNotificationUpdater.NO_UPSTREAM_NOTIFICATION_ID
 import com.android.networkstack.tethering.TetheringNotificationUpdater.RESTRICTED_NOTIFICATION_ID
 import com.android.networkstack.tethering.TetheringNotificationUpdater.ROAMING_NOTIFICATION_ID
 import com.android.networkstack.tethering.TetheringNotificationUpdater.VERIZON_CARRIER_ID
+import com.android.networkstack.tethering.TetheringNotificationUpdater.getSettingsPackageName
 import com.android.testutils.waitForIdle
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -87,12 +94,17 @@ class TetheringNotificationUpdaterTest {
     // every test but should always be initialized before use (or the test should crash).
     private lateinit var context: TestContext
     private lateinit var notificationUpdater: TetheringNotificationUpdater
+
+    // Initializing the following members depends on initializing some of the mocks and
+    // is more logically done in setup().
     private lateinit var fakeTetheringThread: HandlerThread
 
     private val ROAMING_CAPABILITIES = NetworkCapabilities()
     private val HOME_CAPABILITIES = NetworkCapabilities().addCapability(NET_CAPABILITY_NOT_ROAMING)
     private val NOTIFICATION_ICON_ID = R.drawable.stat_sys_tether_general
     private val TIMEOUT_MS = 500L
+    private val ACTIVITY_PENDING_INTENT = 0
+    private val BROADCAST_PENDING_INTENT = 1
 
     private inner class TestContext(c: Context) : BroadcastInterceptingContext(c) {
         override fun createContextAsUser(user: UserHandle, flags: Int) =
@@ -146,10 +158,43 @@ class TetheringNotificationUpdaterTest {
         fakeTetheringThread.quitSafely()
     }
 
+    private fun verifyActivityPendingIntent(intent: Intent, flags: Int) {
+        // Use FLAG_NO_CREATE to verify whether PendingIntent has FLAG_IMMUTABLE flag(forcefully add
+        // the flag in creating arguments). If the described PendingIntent does not already exist,
+        // getActivity() will return null instead of PendingIntent object.
+        val pi = PendingIntent.getActivity(
+                context.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
+                0 /* requestCode */,
+                intent,
+                flags or FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
+                null /* options */)
+        assertNotNull("Activity PendingIntent with FLAG_IMMUTABLE does not exist.", pi)
+    }
+
+    private fun verifyBroadcastPendingIntent(intent: Intent, flags: Int) {
+        // Use FLAG_NO_CREATE to verify whether PendingIntent has FLAG_IMMUTABLE flag(forcefully add
+        // the flag in creating arguments). If the described PendingIntent does not already exist,
+        // getBroadcast() will return null instead of PendingIntent object.
+        val pi = PendingIntent.getBroadcast(
+                context.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
+                0 /* requestCode */,
+                intent,
+                flags or FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE)
+        assertNotNull("Broadcast PendingIntent with FLAG_IMMUTABLE does not exist.", pi)
+    }
+
     private fun Notification.title() = this.extras.getString(Notification.EXTRA_TITLE)
     private fun Notification.text() = this.extras.getString(Notification.EXTRA_TEXT)
 
-    private fun verifyNotification(iconId: Int, title: String, text: String, id: Int) {
+    private fun verifyNotification(
+        iconId: Int,
+        title: String,
+        text: String,
+        id: Int,
+        intentSenderType: Int,
+        intent: Intent,
+        flags: Int
+    ) {
         verify(notificationManager, never()).cancel(any(), eq(id))
 
         val notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
@@ -160,6 +205,11 @@ class TetheringNotificationUpdaterTest {
         assertEquals(iconId, notification.smallIcon.resId)
         assertEquals(title, notification.title())
         assertEquals(text, notification.text())
+
+        when (intentSenderType) {
+            ACTIVITY_PENDING_INTENT -> verifyActivityPendingIntent(intent, flags)
+            BROADCAST_PENDING_INTENT -> verifyBroadcastPendingIntent(intent, flags)
+        }
 
         reset(notificationManager)
     }
@@ -176,6 +226,10 @@ class TetheringNotificationUpdaterTest {
 
     @Test
     fun testRestrictedNotification() {
+        val settingsIntent = Intent(Settings.ACTION_TETHER_SETTINGS)
+                .setPackage(getSettingsPackageName(context.packageManager))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
         // Set test sub id.
         notificationUpdater.onActiveDataSubscriptionIdChanged(TEST_SUBID)
         verifyNotificationCancelled(listOf(NO_UPSTREAM_NOTIFICATION_ID, ROAMING_NOTIFICATION_ID))
@@ -183,7 +237,7 @@ class TetheringNotificationUpdaterTest {
         // User restrictions on. Show restricted notification.
         notificationUpdater.notifyTetheringDisabledByRestriction()
         verifyNotification(NOTIFICATION_ICON_ID, TEST_DISALLOW_TITLE, TEST_DISALLOW_MESSAGE,
-                RESTRICTED_NOTIFICATION_ID)
+                RESTRICTED_NOTIFICATION_ID, ACTIVITY_PENDING_INTENT, settingsIntent, FLAG_IMMUTABLE)
 
         // User restrictions off. Clear notification.
         notificationUpdater.tetheringRestrictionLifted()
@@ -196,7 +250,7 @@ class TetheringNotificationUpdaterTest {
         // User restrictions on again. Show restricted notification.
         notificationUpdater.notifyTetheringDisabledByRestriction()
         verifyNotification(NOTIFICATION_ICON_ID, TEST_DISALLOW_TITLE, TEST_DISALLOW_MESSAGE,
-                RESTRICTED_NOTIFICATION_ID)
+                RESTRICTED_NOTIFICATION_ID, ACTIVITY_PENDING_INTENT, settingsIntent, FLAG_IMMUTABLE)
     }
 
     val MAX_BACKOFF_MS = 200L
@@ -234,6 +288,8 @@ class TetheringNotificationUpdaterTest {
 
     @Test
     fun testNoUpstreamNotification() {
+        val disableIntent = Intent(ACTION_DISABLE_TETHERING).setPackage(context.packageName)
+
         // Set test sub id.
         notificationUpdater.onActiveDataSubscriptionIdChanged(TEST_SUBID)
         verifyNotificationCancelled(listOf(NO_UPSTREAM_NOTIFICATION_ID, ROAMING_NOTIFICATION_ID))
@@ -246,7 +302,8 @@ class TetheringNotificationUpdaterTest {
         notificationUpdater.onUpstreamCapabilitiesChanged(null)
         notificationUpdater.handler.waitForDelayedMessage(EVENT_SHOW_NO_UPSTREAM, TIMEOUT_MS)
         verifyNotification(NOTIFICATION_ICON_ID, TEST_NO_UPSTREAM_TITLE, TEST_NO_UPSTREAM_MESSAGE,
-                NO_UPSTREAM_NOTIFICATION_ID)
+                NO_UPSTREAM_NOTIFICATION_ID, BROADCAST_PENDING_INTENT, disableIntent,
+                FLAG_IMMUTABLE)
 
         // Same capabilities changed. Nothing happened.
         notificationUpdater.onUpstreamCapabilitiesChanged(null)
@@ -260,7 +317,8 @@ class TetheringNotificationUpdaterTest {
         notificationUpdater.onUpstreamCapabilitiesChanged(null)
         notificationUpdater.handler.waitForDelayedMessage(EVENT_SHOW_NO_UPSTREAM, TIMEOUT_MS)
         verifyNotification(NOTIFICATION_ICON_ID, TEST_NO_UPSTREAM_TITLE, TEST_NO_UPSTREAM_MESSAGE,
-                NO_UPSTREAM_NOTIFICATION_ID)
+                NO_UPSTREAM_NOTIFICATION_ID, BROADCAST_PENDING_INTENT, disableIntent,
+                FLAG_IMMUTABLE)
 
         // No downstream.
         notificationUpdater.onDownstreamChanged(DOWNSTREAM_NONE)
@@ -305,6 +363,11 @@ class TetheringNotificationUpdaterTest {
 
     @Test
     fun testRoamingNotification() {
+        val disableIntent = Intent(ACTION_DISABLE_TETHERING).setPackage(context.packageName)
+        val settingsIntent = Intent(Settings.ACTION_TETHER_SETTINGS)
+                .setPackage(getSettingsPackageName(context.packageManager))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
         // Set test sub id.
         notificationUpdater.onActiveDataSubscriptionIdChanged(TEST_SUBID)
         verifyNotificationCancelled(listOf(NO_UPSTREAM_NOTIFICATION_ID, ROAMING_NOTIFICATION_ID))
@@ -316,7 +379,7 @@ class TetheringNotificationUpdaterTest {
         // Upstream capabilities changed to roaming state. Show roaming notification.
         notificationUpdater.onUpstreamCapabilitiesChanged(ROAMING_CAPABILITIES)
         verifyNotification(NOTIFICATION_ICON_ID, TEST_ROAMING_TITLE, TEST_ROAMING_MESSAGE,
-                ROAMING_NOTIFICATION_ID)
+                ROAMING_NOTIFICATION_ID, ACTIVITY_PENDING_INTENT, settingsIntent, FLAG_IMMUTABLE)
 
         // Same capabilities change. Nothing happened.
         notificationUpdater.onUpstreamCapabilitiesChanged(ROAMING_CAPABILITIES)
@@ -329,14 +392,15 @@ class TetheringNotificationUpdaterTest {
         // Upstream capabilities changed to roaming state again. Show roaming notification.
         notificationUpdater.onUpstreamCapabilitiesChanged(ROAMING_CAPABILITIES)
         verifyNotification(NOTIFICATION_ICON_ID, TEST_ROAMING_TITLE, TEST_ROAMING_MESSAGE,
-                ROAMING_NOTIFICATION_ID)
+                ROAMING_NOTIFICATION_ID, ACTIVITY_PENDING_INTENT, settingsIntent, FLAG_IMMUTABLE)
 
         // No upstream. Clear roaming notification and show no upstream notification.
         notificationUpdater.onUpstreamCapabilitiesChanged(null)
         notificationUpdater.handler.waitForDelayedMessage(EVENT_SHOW_NO_UPSTREAM, TIMEOUT_MS)
         verifyNotificationCancelled(listOf(ROAMING_NOTIFICATION_ID), false)
         verifyNotification(NOTIFICATION_ICON_ID, TEST_NO_UPSTREAM_TITLE, TEST_NO_UPSTREAM_MESSAGE,
-                NO_UPSTREAM_NOTIFICATION_ID)
+                NO_UPSTREAM_NOTIFICATION_ID, BROADCAST_PENDING_INTENT, disableIntent,
+                FLAG_IMMUTABLE)
 
         // No downstream.
         notificationUpdater.onDownstreamChanged(DOWNSTREAM_NONE)
@@ -347,7 +411,8 @@ class TetheringNotificationUpdaterTest {
         notificationUpdater.handler.waitForDelayedMessage(EVENT_SHOW_NO_UPSTREAM, TIMEOUT_MS)
         verifyNotificationCancelled(listOf(ROAMING_NOTIFICATION_ID), false)
         verifyNotification(NOTIFICATION_ICON_ID, TEST_NO_UPSTREAM_TITLE, TEST_NO_UPSTREAM_MESSAGE,
-                NO_UPSTREAM_NOTIFICATION_ID)
+                NO_UPSTREAM_NOTIFICATION_ID, BROADCAST_PENDING_INTENT, disableIntent,
+                FLAG_IMMUTABLE)
 
         // Set R.bool.config_upstream_roaming_notification to false and change upstream
         // network to roaming state again. No roaming notification.
@@ -363,8 +428,7 @@ class TetheringNotificationUpdaterTest {
         val testSettingsPackageName = "com.android.test.settings"
         val pm = mock(PackageManager::class.java)
         doReturn(null).`when`(pm).resolveActivity(any(), anyInt())
-        assertEquals(defaultSettingsPackageName,
-                TetheringNotificationUpdater.getSettingsPackageName(pm))
+        assertEquals(defaultSettingsPackageName, getSettingsPackageName(pm))
 
         val resolveInfo = ResolveInfo().apply {
             activityInfo = ActivityInfo().apply {
@@ -375,7 +439,6 @@ class TetheringNotificationUpdaterTest {
             }
         }
         doReturn(resolveInfo).`when`(pm).resolveActivity(any(), anyInt())
-        assertEquals(testSettingsPackageName,
-                TetheringNotificationUpdater.getSettingsPackageName(pm))
+        assertEquals(testSettingsPackageName, getSettingsPackageName(pm))
     }
 }

@@ -21,7 +21,6 @@
 #include "../guardrail/StatsdStats.h"
 #include "../stats_log_util.h"
 
-#include <cutils/log.h>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -33,12 +32,8 @@ using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
-using std::list;
-using std::make_pair;
-using std::make_shared;
 using std::map;
 using std::shared_ptr;
-using std::unique_ptr;
 using std::unordered_map;
 
 namespace android {

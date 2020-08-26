@@ -55,7 +55,6 @@ import java.util.function.Supplier;
  * @hide
  */
 @SystemApi
-@SystemApi(client = MODULE_LIBRARIES)
 @TestApi
 public class TetheringManager {
     private static final String TAG = TetheringManager.class.getSimpleName();
@@ -170,6 +169,14 @@ public class TetheringManager {
      * @see #startTethering(TetheringRequest, Executor, StartTetheringCallback)
      */
     public static final int TETHERING_ETHERNET = 5;
+
+    /**
+     * WIGIG tethering type. Use a separate type to prevent
+     * conflicts with TETHERING_WIFI
+     * This type is only used internally by the tethering module
+     * @hide
+     */
+    public static final int TETHERING_WIGIG = 6;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

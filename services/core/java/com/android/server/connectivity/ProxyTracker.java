@@ -73,6 +73,8 @@ public class ProxyTracker {
     @GuardedBy("mProxyLock")
     private boolean mDefaultProxyEnabled = true;
 
+    private final Handler mConnectivityServiceHandler;
+
     // The object responsible for Proxy Auto Configuration (PAC).
     @NonNull
     private final PacManager mPacManager;
@@ -80,6 +82,7 @@ public class ProxyTracker {
     public ProxyTracker(@NonNull final Context context,
             @NonNull final Handler connectivityServiceInternalHandler, final int pacChangedEvent) {
         mContext = context;
+        mConnectivityServiceHandler = connectivityServiceInternalHandler;
         mPacManager = new PacManager(context, connectivityServiceInternalHandler, pacChangedEvent);
     }
 
@@ -149,6 +152,9 @@ public class ProxyTracker {
      * Read the global proxy settings and cache them in memory.
      */
     public void loadGlobalProxy() {
+        if (loadDeprecatedGlobalHttpProxy()) {
+            return;
+        }
         ContentResolver res = mContext.getContentResolver();
         String host = Settings.Global.getString(res, GLOBAL_HTTP_PROXY_HOST);
         int port = Settings.Global.getInt(res, GLOBAL_HTTP_PROXY_PORT, 0);
@@ -157,7 +163,7 @@ public class ProxyTracker {
         if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
             ProxyInfo proxyProperties;
             if (!TextUtils.isEmpty(pacFileUrl)) {
-                proxyProperties = new ProxyInfo(pacFileUrl);
+                proxyProperties = new ProxyInfo(Uri.parse(pacFileUrl));
             } else {
                 proxyProperties = new ProxyInfo(host, port, exclList);
             }
@@ -169,20 +175,24 @@ public class ProxyTracker {
             synchronized (mProxyLock) {
                 mGlobalProxy = proxyProperties;
             }
+
+            if (!TextUtils.isEmpty(pacFileUrl)) {
+                mConnectivityServiceHandler.post(
+                        () -> mPacManager.setCurrentProxyScriptUrl(proxyProperties));
+            }
         }
-        loadDeprecatedGlobalHttpProxy();
-        // TODO : shouldn't this function call mPacManager.setCurrentProxyScriptUrl ?
     }
 
     /**
      * Read the global proxy from the deprecated Settings.Global.HTTP_PROXY setting and apply it.
+     * Returns {@code true} when global proxy was set successfully from deprecated setting.
      */
-    public void loadDeprecatedGlobalHttpProxy() {
+    public boolean loadDeprecatedGlobalHttpProxy() {
         final String proxy = Settings.Global.getString(mContext.getContentResolver(), HTTP_PROXY);
         if (!TextUtils.isEmpty(proxy)) {
             String data[] = proxy.split(":");
             if (data.length == 0) {
-                return;
+                return false;
             }
 
             final String proxyHost = data[0];
@@ -191,12 +201,14 @@ public class ProxyTracker {
                 try {
                     proxyPort = Integer.parseInt(data[1]);
                 } catch (NumberFormatException e) {
-                    return;
+                    return false;
                 }
             }
             final ProxyInfo p = new ProxyInfo(proxyHost, proxyPort, "");
             setGlobalProxy(p);
+            return true;
         }
+        return false;
     }
 
     /**

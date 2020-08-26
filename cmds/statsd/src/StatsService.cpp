@@ -27,13 +27,11 @@
 #include "subscriber/SubscriberReporter.h"
 
 #include <android-base/file.h>
-#include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/PermissionController.h>
 #include <cutils/multiuser.h>
-#include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <frameworks/base/cmds/statsd/src/uid_data.pb.h>
 #include <private/android_filesystem_config.h>
@@ -42,17 +40,13 @@
 #include <stdlib.h>
 #include <sys/system_properties.h>
 #include <unistd.h>
-#include <utils/Looper.h>
 #include <utils/String16.h>
-#include <chrono>
 
 using namespace android;
 
 using android::base::StringPrintf;
 using android::util::FIELD_COUNT_REPEATED;
-using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
-using android::util::ProtoReader;
 
 namespace android {
 namespace os {

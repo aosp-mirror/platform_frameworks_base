@@ -227,7 +227,7 @@ public class NetworkStatsRecorder {
         for (int i = 0; i < delta.size(); i++) {
             entry = delta.getValues(i, entry);
 
-            // As a last-ditch sanity check, report any negative values and
+            // As a last-ditch check, report any negative values and
             // clamp them so recording below doesn't croak.
             if (entry.isNegative()) {
                 if (mObserver != null) {

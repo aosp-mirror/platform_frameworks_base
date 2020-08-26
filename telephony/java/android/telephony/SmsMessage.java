@@ -255,28 +255,6 @@ public class SmsMessage {
     }
 
     /**
-     * TS 27.005 3.4.1 lines[0] and lines[1] are the two lines read from the
-     * +CMT unsolicited response (PDU mode, of course)
-     *  +CMT: [&lt;alpha>],<length><CR><LF><pdu>
-     *
-     * Only public for debugging and for RIL
-     *
-     * {@hide}
-     */
-    public static SmsMessage newFromCMT(byte[] pdu) {
-        // received SMS in 3GPP format
-        SmsMessageBase wrappedMessage =
-                com.android.internal.telephony.gsm.SmsMessage.newFromCMT(pdu);
-
-        if (wrappedMessage != null) {
-            return new SmsMessage(wrappedMessage);
-        } else {
-            Rlog.e(LOG_TAG, "newFromCMT(): wrappedMessage is null");
-            return null;
-        }
-    }
-
-    /**
      * Creates an SmsMessage from an SMS EF record.
      *
      * @param index Index of SMS EF record.

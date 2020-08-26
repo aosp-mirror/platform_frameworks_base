@@ -1859,11 +1859,28 @@ public abstract class ConnectionService extends Service {
                     new DisconnectCause(DisconnectCause.ERROR, "IMPL_RETURNED_NULL_CONFERENCE"),
                     request.getAccountHandle());
         }
-        if (conference.getExtras() != null) {
-            conference.getExtras().putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+
+        Bundle extras = request.getExtras();
+        Bundle newExtras = new Bundle();
+        newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+        if (extras != null) {
+            // If the request originated from a remote connection service, we will add some
+            // tracking information that Telecom can use to keep informed of which package
+            // made the remote request, and which remote connection service was used.
+            if (extras.containsKey(Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME)) {
+                newExtras.putString(
+                        Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME,
+                        extras.getString(
+                                Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME));
+                newExtras.putParcelable(Connection.EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE,
+                        request.getAccountHandle());
+            }
         }
+        conference.putExtras(newExtras);
+
         mConferenceById.put(callId, conference);
         mIdByConference.put(conference, callId);
+
         conference.addListener(mConferenceListener);
         ParcelableConference parcelableConference = new ParcelableConference.Builder(
                 request.getAccountHandle(), conference.getState())
@@ -1936,6 +1953,30 @@ public abstract class ConnectionService extends Service {
             Log.i(this, "createConnection, implementation returned null connection.");
             connection = Connection.createFailedConnection(
                     new DisconnectCause(DisconnectCause.ERROR, "IMPL_RETURNED_NULL_CONNECTION"));
+        } else {
+            try {
+                Bundle extras = request.getExtras();
+                if (extras != null) {
+                    // If the request originated from a remote connection service, we will add some
+                    // tracking information that Telecom can use to keep informed of which package
+                    // made the remote request, and which remote connection service was used.
+                    if (extras.containsKey(
+                            Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME)) {
+                        Bundle newExtras = new Bundle();
+                        newExtras.putString(
+                                Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME,
+                                extras.getString(
+                                        Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME
+                                ));
+                        newExtras.putParcelable(Connection.EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE,
+                                request.getAccountHandle());
+                        connection.putExtras(newExtras);
+                    }
+                }
+            } catch (UnsupportedOperationException ose) {
+                // Do nothing; if the ConnectionService reported a failure it will be an instance
+                // of an immutable Connection which we cannot edit, so we're out of luck.
+            }
         }
 
         boolean isSelfManaged =
@@ -2447,6 +2488,42 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Ask some other {@code ConnectionService} to create a {@code RemoteConference} given an
+     * incoming request. This is used by {@code ConnectionService}s that are registered with
+     * {@link PhoneAccount#CAPABILITY_ADHOC_CONFERENCE_CALLING}.
+     *
+     * @param connectionManagerPhoneAccount See description at
+     *          {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the incoming conference call.
+     * @return The {@code RemoteConference} object to satisfy this call, or {@code null} to not
+     *         handle the call.
+     */
+    public final @Nullable RemoteConference createRemoteIncomingConference(
+            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
+            @Nullable ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConference(connectionManagerPhoneAccount,
+                request, true);
+    }
+
+    /**
+     * Ask some other {@code ConnectionService} to create a {@code RemoteConference} given an
+     * outgoing request. This is used by {@code ConnectionService}s that are registered with
+     * {@link PhoneAccount#CAPABILITY_ADHOC_CONFERENCE_CALLING}.
+     *
+     * @param connectionManagerPhoneAccount See description at
+     *          {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+     * @param request Details about the outgoing conference call.
+     * @return The {@code RemoteConference} object to satisfy this call, or {@code null} to not
+     *         handle the call.
+     */
+    public final @Nullable RemoteConference createRemoteOutgoingConference(
+            @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
+            @Nullable ConnectionRequest request) {
+        return mRemoteConnectionManager.createRemoteConference(connectionManagerPhoneAccount,
+                request, false);
+    }
+
+    /**
      * Indicates to the relevant {@code RemoteConnectionService} that the specified
      * {@link RemoteConnection}s should be merged into a conference call.
      * <p>
@@ -2638,15 +2715,15 @@ public abstract class ConnectionService extends Service {
         return null;
     }
     /**
-     * Create a {@code Connection} given an incoming request. This is used to attach to existing
-     * incoming conference call.
+     * Create a {@code Conference} given an incoming request. This is used to attach to an incoming
+     * conference call initiated via
+     * {@link TelecomManager#addNewIncomingConference(PhoneAccountHandle, Bundle)}.
      *
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
-     * @param request Details about the incoming call.
-     * @return The {@code Connection} object to satisfy this call, or {@code null} to
+     * @param request Details about the incoming conference call.
+     * @return The {@code Conference} object to satisfy this call, or {@code null} to
      *         not handle the call.
-     * @hide
      */
     public @Nullable Conference onCreateIncomingConference(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
@@ -2731,7 +2808,6 @@ public abstract class ConnectionService extends Service {
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request The incoming connection request.
-     * @hide
      */
     public void onCreateIncomingConferenceFailed(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
@@ -2752,7 +2828,6 @@ public abstract class ConnectionService extends Service {
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request The outgoing connection request.
-     * @hide
      */
     public void onCreateOutgoingConferenceFailed(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
@@ -2801,7 +2876,8 @@ public abstract class ConnectionService extends Service {
 
     /**
      * Create a {@code Conference} given an outgoing request. This is used to initiate new
-     * outgoing conference call.
+     * outgoing conference call requested via
+     * {@link TelecomManager#startConference(List, Bundle)}.
      *
      * @param connectionManagerPhoneAccount The connection manager account to use for managing
      *         this call.
@@ -2821,7 +2897,6 @@ public abstract class ConnectionService extends Service {
      * @param request Details about the outgoing call.
      * @return The {@code Conference} object to satisfy this call, or the result of an invocation
      *         of {@link Connection#createFailedConnection(DisconnectCause)} to not handle the call.
-     * @hide
      */
     public @Nullable Conference onCreateOutgoingConference(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,

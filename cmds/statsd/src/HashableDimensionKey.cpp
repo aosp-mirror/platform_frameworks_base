@@ -16,8 +16,6 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include <mutex>
-
 #include "HashableDimensionKey.h"
 #include "FieldValue.h"
 

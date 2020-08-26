@@ -19,42 +19,9 @@ import static android.os.UserManager.DISALLOW_CONFIG_TETHERING;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.telephony.CarrierConfigManager;
-
-import androidx.annotation.VisibleForTesting;
 
 public class TetherUtil {
-
-    @VisibleForTesting
-    static boolean isEntitlementCheckRequired(Context context) {
-        final CarrierConfigManager configManager = (CarrierConfigManager) context
-             .getSystemService(Context.CARRIER_CONFIG_SERVICE);
-        if (configManager == null || configManager.getConfig() == null) {
-            // return service default
-            return true;
-        }
-        return configManager.getConfig().getBoolean(CarrierConfigManager
-             .KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
-    }
-
-    public static boolean isProvisioningNeeded(Context context) {
-        // Keep in sync with other usage of config_mobile_hotspot_provision_app.
-        // ConnectivityManager#enforceTetherChangePermission
-        String[] provisionApp = context.getResources().getStringArray(
-                com.android.internal.R.array.config_mobile_hotspot_provision_app);
-        if (SystemProperties.getBoolean("net.tethering.noprovisioning", false)
-                || provisionApp == null) {
-            return false;
-        }
-        // Check carrier config for entitlement checks
-        if (isEntitlementCheckRequired(context) == false) {
-            return false;
-        }
-        return (provisionApp.length == 2);
-    }
-
     public static boolean isTetherAvailable(Context context) {
         final ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
         final boolean tetherConfigDisallowed = RestrictedLockUtilsInternal

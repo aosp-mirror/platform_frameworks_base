@@ -269,7 +269,7 @@ public class InstantAppNotifier extends SystemUI
                         0,
                         new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                                 .setData(Uri.fromParts("package", pkg, null)),
-                        0,
+                        PendingIntent.FLAG_IMMUTABLE,
                         null,
                         user);
         Notification.Action action =
@@ -282,7 +282,7 @@ public class InstantAppNotifier extends SystemUI
                                 mContext,
                                 0,
                                 new Intent(Intent.ACTION_VIEW).setData(Uri.parse(helpUrl)),
-                                0,
+                                PendingIntent.FLAG_IMMUTABLE,
                                 null,
                                 user)
                         : null;
@@ -303,7 +303,7 @@ public class InstantAppNotifier extends SystemUI
                             mContext,
                             0 /* requestCode */,
                             browserIntent,
-                            0 /* flags */,
+                            PendingIntent.FLAG_IMMUTABLE /* flags */,
                             null,
                             user);
             ComponentName aiaComponent = null;
@@ -325,8 +325,8 @@ public class InstantAppNotifier extends SystemUI
                             .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.longVersionCode)
                             .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
-            PendingIntent webPendingIntent =
-                    PendingIntent.getActivityAsUser(mContext, 0, goToWebIntent, 0, null, user);
+            PendingIntent webPendingIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                    goToWebIntent, PendingIntent.FLAG_IMMUTABLE, null, user);
             Notification.Action webAction =
                     new Notification.Action.Builder(
                                     null, mContext.getString(R.string.go_to_web), webPendingIntent)

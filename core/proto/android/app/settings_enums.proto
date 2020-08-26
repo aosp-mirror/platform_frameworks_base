@@ -2422,6 +2422,11 @@ enum PageId {
     // OS: Q
     SETTINGS_GESTURE_TAP = 1751;
 
+    // OPEN: Settings > Security & screen lock -> Encryption & credentials > Install a certificate
+    // CATEGORY: SETTINGS
+    // OS: R
+    INSTALL_CERTIFICATE_FROM_STORAGE = 1803;
+
     // OPEN: Settings > Developer Options > Platform Compat
     // CATEGORY: SETTINGS
     // OS: R

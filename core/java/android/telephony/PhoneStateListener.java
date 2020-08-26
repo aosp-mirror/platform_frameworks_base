@@ -157,8 +157,8 @@ public class PhoneStateListener {
      * Listen for changes to the device's cell location. Note that
      * this will result in frequent callbacks to the listener.
      * {@more}
-     * Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION
-     * ACCESS_COARSE_LOCATION}
+     * Requires Permission: {@link android.Manifest.permission#ACCESS_FINE_LOCATION
+     * ACCESS_FINE_LOCATION}
      * <p>
      * If you need regular location updates but want more control over
      * the update interval or location precision, you can set up a listener

@@ -23,10 +23,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.SystemClock;
 
-import libcore.timezone.CountryTimeZones;
-import libcore.timezone.CountryTimeZones.TimeZoneMapping;
-import libcore.timezone.TimeZoneFinder;
-import libcore.timezone.ZoneInfoDb;
+import com.android.i18n.timezone.CountryTimeZones;
+import com.android.i18n.timezone.CountryTimeZones.TimeZoneMapping;
+import com.android.i18n.timezone.TimeZoneFinder;
+import com.android.i18n.timezone.ZoneInfoDb;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;

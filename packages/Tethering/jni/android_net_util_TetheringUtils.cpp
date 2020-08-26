@@ -18,6 +18,7 @@
 #include <error.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIHelpCompat.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <net/if.h>
 #include <netinet/icmp6.h>

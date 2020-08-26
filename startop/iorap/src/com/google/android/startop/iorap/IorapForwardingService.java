@@ -96,7 +96,7 @@ public class IorapForwardingService extends SystemService {
         try {
             iorap = IIorap.Stub.asInterface(ServiceManager.getServiceOrThrow("iorapd"));
         } catch (ServiceManager.ServiceNotFoundException e) {
-            handleRemoteError(e);
+            Log.w(TAG, e.getMessage());
             return null;
         }
 

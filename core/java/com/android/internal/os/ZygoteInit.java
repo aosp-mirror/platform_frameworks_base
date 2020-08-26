@@ -580,7 +580,7 @@ public class ZygoteInit {
         VMRuntime.registerAppInfo(profilePath, codePaths);
     }
 
-    public static void setApiBlacklistExemptions(String[] exemptions) {
+    public static void setApiDenylistExemptions(String[] exemptions) {
         VMRuntime.getRuntime().setHiddenApiExemptions(exemptions);
     }
 

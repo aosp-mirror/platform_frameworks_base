@@ -815,7 +815,7 @@ public class ImsCallSession {
      * Transfers an ongoing call.
      *
      * @param number number to be transferred to.
-     * @param isConfirmationRequired indicates blind or assured transfer.
+     * @param isConfirmationRequired indicates whether confirmation of the transfer is required.
      */
     public void transfer(@NonNull String number, boolean isConfirmationRequired) {
         if (mClosed) {
