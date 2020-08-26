@@ -3020,9 +3020,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
             switchUserLocked(userId);
         }
-        // Master feature flag that overrides other conditions and forces IME preRendering.
+
+        // Main feature flag that overrides other conditions and forces IME preRendering.
         if (DEBUG) {
-            Slog.v(TAG, "IME PreRendering MASTER flag: "
+            Slog.v(TAG, "IME PreRendering main flag: "
                     + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() + ", LowRam: " + mIsLowRam);
         }
         // pre-rendering not supported on low-ram devices.
