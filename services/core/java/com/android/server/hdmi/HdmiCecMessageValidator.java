@@ -128,7 +128,7 @@ public class HdmiCecMessageValidator {
         FixedLengthValidator oneByteValidator = new FixedLengthValidator(1);
         addValidationInfo(Constants.MESSAGE_CEC_VERSION, oneByteValidator, DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
-                new FixedLengthValidator(3), DEST_BROADCAST);
+                new AsciiValidator(3), DEST_BROADCAST);
 
         // TODO: Handle messages for the Deck Control.
 
@@ -149,7 +149,7 @@ public class HdmiCecMessageValidator {
 
         // Messages for the OSD.
         addValidationInfo(Constants.MESSAGE_SET_OSD_STRING, maxLengthValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_SET_OSD_NAME, maxLengthValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_OSD_NAME, new AsciiValidator(1, 14), DEST_DIRECT);
 
         // Messages for the Device Menu Control.
         addValidationInfo(Constants.MESSAGE_MENU_REQUEST, oneByteValidator, DEST_DIRECT);
@@ -299,6 +299,25 @@ public class HdmiCecMessageValidator {
         return (value >= min && value <= max);
     }
 
+    /**
+     * Check if the given params has valid ASCII characters.
+     * A valid ASCII character is a printable character. It should fall within range description
+     * defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param params parameter consisting of string
+     * @param offset Start offset of string
+     * @param maxLength Maximum length of string to be evaluated
+     * @return true if the given type is valid
+     */
+    private boolean isValidAsciiString(byte[] params, int offset, int maxLength) {
+        for (int i = offset; i < params.length && i < maxLength; i++) {
+            if (!isWithinRange(params[i], 0x20, 0x7E)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
@@ -357,6 +376,36 @@ public class HdmiCecMessageValidator {
                             || isWithinRange(params[0], 0x10, 0x17)
                             || isWithinRange(params[0], 0x1A, 0x1B)
                             || params[0] == 0x1F);
+        }
+    }
+
+    /**
+     * Check if the given parameters represents printable characters.
+     * A valid parameter should lie within the range description of ASCII defined in CEC 1.4
+     * Specification : Operand Descriptions (Section 17)
+     */
+    private class AsciiValidator implements ParameterValidator {
+        private final int mMinLength;
+        private final int mMaxLength;
+
+        AsciiValidator(int length) {
+            mMinLength = length;
+            mMaxLength = length;
+        }
+
+        AsciiValidator(int minLength, int maxLength) {
+            mMinLength = minLength;
+            mMaxLength = maxLength;
+        }
+
+        @Override
+        public int isValid(byte[] params) {
+            // If the length is longer than expected, we assume it's OK since the parameter can be
+            // extended in the future version.
+            if (params.length < mMinLength) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidAsciiString(params, 0, mMaxLength));
         }
     }
 }

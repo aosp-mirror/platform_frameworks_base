@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_DESTINATION;
+import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER_SHORT;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_SOURCE;
 import static com.android.server.hdmi.HdmiCecMessageValidator.OK;
@@ -69,6 +70,28 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("0F:90:00").isEqualTo(ERROR_DESTINATION);
         assertMessageValidity("F0:90").isEqualTo(ERROR_SOURCE);
         assertMessageValidity("04:90").isEqualTo(ERROR_PARAMETER_SHORT);
+    }
+
+    @Test
+    public void isValid_setMenuLanguage() {
+        assertMessageValidity("4F:32:53:50:41").isEqualTo(OK);
+        assertMessageValidity("0F:32:45:4E:47:8C:49:D3:48").isEqualTo(OK);
+
+        assertMessageValidity("40:32:53:50:41").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:32").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("4F:32:45:55").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("4F:32:19:7F:83").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_setOsdName() {
+        assertMessageValidity("40:47:4C:69:76:69:6E:67:52:6F:6F:6D:54:56").isEqualTo(OK);
+        assertMessageValidity("40:47:54:56").isEqualTo(OK);
+
+        assertMessageValidity("4F:47:54:56").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:47:54:56").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:47").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:47:4C:69:7F").isEqualTo(ERROR_PARAMETER);
     }
 
     private IntegerSubject assertMessageValidity(String message) {
