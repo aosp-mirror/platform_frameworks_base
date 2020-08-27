@@ -6222,7 +6222,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             int[] users;
             if (userId == UserHandle.USER_ALL) {
-                // TODO(b/157921703): this call is returning all users, not just live ones - we
+                // TODO(b/162888972): this call is returning all users, not just live ones - we
                 // need to either fix the method called, or rename the variable
                 List<UserInfo> liveUsers = UserManager.get(mContext).getUsers();
 
