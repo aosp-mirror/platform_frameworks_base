@@ -91,7 +91,6 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     private RecyclerView mNotificationList;
     private NotificationViewController mNotificationViewController;
 
-    private boolean mIsTracking;
     private boolean mNotificationListAtEnd;
     private float mFirstTouchDownOnGlassPane;
     private boolean mNotificationListAtEndAtTimeOfTouch;
@@ -306,7 +305,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
                 mFirstTouchDownOnGlassPane = event.getRawX();
                 mNotificationListAtEndAtTimeOfTouch = mNotificationListAtEnd;
                 // Reset the tracker when there is a touch down on the glass pane.
-                mIsTracking = false;
+                setIsTracking(false);
                 // Pass the down event to gesture detector so that it knows where the touch event
                 // started.
                 closeGestureDetector.onTouchEvent(event);
@@ -341,15 +340,15 @@ public class NotificationPanelViewController extends OverlayPanelViewController
 
             // If the card is swiping we should not allow the notification shade to close.
             // Hence setting mNotificationListAtEndAtTimeOfTouch to false will stop that
-            // for us. We are also checking for mIsTracking because while swiping the
+            // for us. We are also checking for isTracking() because while swiping the
             // notification shade to close if the user goes a bit horizontal while swiping
             // upwards then also this should close.
-            if (mIsNotificationCardSwiping && !mIsTracking) {
+            if (mIsNotificationCardSwiping && !isTracking()) {
                 mNotificationListAtEndAtTimeOfTouch = false;
             }
 
             boolean handled = closeGestureDetector.onTouchEvent(event);
-            boolean isTracking = mIsTracking;
+            boolean isTracking = isTracking();
             Rect rect = getLayout().getClipBounds();
             float clippedHeight = 0;
             if (rect != null) {
