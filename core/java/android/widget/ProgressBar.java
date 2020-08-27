@@ -52,6 +52,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -306,9 +307,6 @@ public class ProgressBar extends View {
         setMax(a.getInt(R.styleable.ProgressBar_max, mMax));
 
         setProgress(a.getInt(R.styleable.ProgressBar_progress, mProgress));
-        // onProgressRefresh() is only called when the progress changes. So we should set
-        // stateDescription during initialization here.
-        super.setStateDescription(formatStateDescription(mProgress));
 
         setSecondaryProgress(a.getInt(
                 R.styleable.ProgressBar_secondaryProgress, mSecondaryProgress));
@@ -1601,7 +1599,8 @@ public class ProgressBar extends View {
     }
 
     void onProgressRefresh(float scale, boolean fromUser, int progress) {
-        if (mCustomStateDescription == null) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()
+                && mCustomStateDescription == null) {
             super.setStateDescription(formatStateDescription(mProgress));
         }
     }
@@ -2325,6 +2324,7 @@ public class ProgressBar extends View {
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT, getMin(), getMax(),
                     getProgress());
             info.setRangeInfo(rangeInfo);
+            info.setStateDescription(formatStateDescription(mProgress));
         }
     }
 
