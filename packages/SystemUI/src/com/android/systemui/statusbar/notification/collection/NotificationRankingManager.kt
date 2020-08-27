@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVI
 import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
-import com.android.systemui.statusbar.phone.NotificationGroupManager
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy
 import java.util.Objects
@@ -52,7 +52,7 @@ private const val TAG = "NotifRankingManager"
  */
 open class NotificationRankingManager @Inject constructor(
     private val mediaManagerLazy: Lazy<NotificationMediaManager>,
-    private val groupManager: NotificationGroupManager,
+    private val groupManager: NotificationGroupManagerLegacy,
     private val headsUpManager: HeadsUpManager,
     private val notifFilter: NotificationFilter,
     private val logger: NotificationEntryManagerLogger,
@@ -191,7 +191,7 @@ open class NotificationRankingManager @Inject constructor(
     private fun NotificationEntry.isConversation() = getPeopleNotificationType() != TYPE_NON_PERSON
 
     private fun NotificationEntry.getPeopleNotificationType() =
-            peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+            peopleNotificationIdentifier.getPeopleNotificationType(this)
 
     private fun NotificationEntry.isHighPriority() =
             highPriorityProvider.isHighPriority(this)

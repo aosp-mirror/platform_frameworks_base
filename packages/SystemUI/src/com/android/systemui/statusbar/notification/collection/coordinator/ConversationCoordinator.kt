@@ -53,8 +53,7 @@ class ConversationCoordinator @Inject constructor(
     }
 
     private fun isConversation(entry: NotificationEntry): Boolean =
-        peopleNotificationIdentifier.getPeopleNotificationType(entry.sbn, entry.ranking) !=
-            TYPE_NON_PERSON
+        peopleNotificationIdentifier.getPeopleNotificationType(entry) != TYPE_NON_PERSON
 
     companion object {
         private const val TAG = "ConversationCoordinator"

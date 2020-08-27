@@ -50,10 +50,15 @@ import com.android.systemui.statusbar.notification.collection.coordinator.Visual
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.OnUserInteractionCallbackImplLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
@@ -67,7 +72,6 @@ import com.android.systemui.statusbar.notification.row.NotificationBlockingHelpe
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
@@ -91,7 +95,7 @@ public interface NotificationsModule {
     @Provides
     static NotificationEntryManager provideNotificationEntryManager(
             NotificationEntryManagerLogger logger,
-            NotificationGroupManager groupManager,
+            NotificationGroupManagerLegacy groupManager,
             NotificationRankingManager rankingManager,
             NotificationEntryManager.KeyguardEnvironment keyguardEnvironment,
             FeatureFlags featureFlags,
@@ -204,6 +208,29 @@ public interface NotificationsModule {
             MetricsLogger metricsLogger) {
         return new NotificationBlockingHelperManager(
                 context, notificationGutsManager, notificationEntryManager, metricsLogger);
+    }
+
+    /** Provides an instance of {@link GroupMembershipManager} */
+    @SysUISingleton
+    @Provides
+    static GroupMembershipManager provideGroupMembershipManager(
+            FeatureFlags featureFlags,
+            Lazy<NotificationGroupManagerLegacy> groupManagerLegacy) {
+        return featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? new GroupMembershipManagerImpl()
+                : groupManagerLegacy.get();
+    }
+
+    /** Provides an instance of {@link GroupExpansionManager} */
+    @SysUISingleton
+    @Provides
+    static GroupExpansionManager provideGroupExpansionManager(
+            FeatureFlags featureFlags,
+            Lazy<GroupMembershipManager> groupMembershipManager,
+            Lazy<NotificationGroupManagerLegacy> groupManagerLegacy) {
+        return featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? new GroupExpansionManagerImpl(groupMembershipManager.get())
+                : groupManagerLegacy.get();
     }
 
     /** Initializes the notification data pipeline (can be disabled via config). */

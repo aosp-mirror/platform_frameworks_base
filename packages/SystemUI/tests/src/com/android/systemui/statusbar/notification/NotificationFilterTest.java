@@ -48,10 +48,10 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.After;
@@ -109,8 +109,8 @@ public class NotificationFilterTest extends SysuiTestCase {
                 eq(UID_ALLOW_DURING_SETUP)))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
         mDependency.injectTestDependency(ForegroundServiceController.class, mFsc);
-        mDependency.injectTestDependency(NotificationGroupManager.class,
-                new NotificationGroupManager(
+        mDependency.injectTestDependency(NotificationGroupManagerLegacy.class,
+                new NotificationGroupManagerLegacy(
                         mock(StatusBarStateController.class),
                         () -> mock(PeopleNotificationIdentifier.class)));
         mDependency.injectMockDependency(ShadeController.class);

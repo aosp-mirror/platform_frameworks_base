@@ -24,7 +24,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -260,8 +259,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
         mFeedbackItem = createFeedbackItem(mContext);
         NotificationEntry entry = mParent.getEntry();
-        int personNotifType = mPeopleNotificationIdentifier
-                .getPeopleNotificationType(entry.getSbn(), entry.getRanking());
+        int personNotifType = mPeopleNotificationIdentifier.getPeopleNotificationType(entry);
         if (personNotifType == PeopleNotificationIdentifier.TYPE_PERSON) {
             mInfoItem = createPartialConversationItem(mContext);
         } else if (personNotifType >= PeopleNotificationIdentifier.TYPE_FULL_PERSON) {

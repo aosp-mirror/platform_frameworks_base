@@ -48,13 +48,13 @@ import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -139,7 +139,7 @@ public class NotificationEntryManager implements
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
 
     private final KeyguardEnvironment mKeyguardEnvironment;
-    private final NotificationGroupManager mGroupManager;
+    private final NotificationGroupManagerLegacy mGroupManager;
     private final NotificationRankingManager mRankingManager;
     private final FeatureFlags mFeatureFlags;
     private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
@@ -199,7 +199,7 @@ public class NotificationEntryManager implements
      */
     public NotificationEntryManager(
             NotificationEntryManagerLogger logger,
-            NotificationGroupManager groupManager,
+            NotificationGroupManagerLegacy groupManager,
             NotificationRankingManager rankingManager,
             KeyguardEnvironment keyguardEnvironment,
             FeatureFlags featureFlags,
