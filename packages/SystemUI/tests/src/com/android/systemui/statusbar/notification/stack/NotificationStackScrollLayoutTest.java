@@ -449,6 +449,60 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 .DISMISS_SILENT_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
     }
 
+    @Test
+    public void testAddNotificationUpdatesSpeedBumpIndex() {
+        // initial state == -1
+        assertEquals(-1, mStackScroller.getSpeedBumpIndex());
+
+        // add notification that's before the speed bump
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(row.getEntry()).thenReturn(entry);
+        when(entry.isAmbient()).thenReturn(false);
+        mStackScroller.addContainerView(row);
+
+        // speed bump = 1
+        assertEquals(1, mStackScroller.getSpeedBumpIndex());
+    }
+
+    @Test
+    public void testAddAmbientNotificationNoSpeedBumpUpdate() {
+        // initial state == -1
+        assertEquals(-1, mStackScroller.getSpeedBumpIndex());
+
+        // add notification that's after the speed bump
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(row.getEntry()).thenReturn(entry);
+        when(entry.isAmbient()).thenReturn(true);
+        mStackScroller.addContainerView(row);
+
+        // speed bump is set to 0
+        assertEquals(0, mStackScroller.getSpeedBumpIndex());
+    }
+
+    @Test
+    public void testRemoveNotificationUpdatesSpeedBump() {
+        // initial state == -1
+        assertEquals(-1, mStackScroller.getSpeedBumpIndex());
+
+        // add 3 notification that are after the speed bump
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(row.getEntry()).thenReturn(entry);
+        when(entry.isAmbient()).thenReturn(false);
+        mStackScroller.addContainerView(row);
+
+        // speed bump is 1
+        assertEquals(1, mStackScroller.getSpeedBumpIndex());
+
+        // remove the notification that was before the speed bump
+        mStackScroller.removeContainerView(row);
+
+        // speed bump is now 0
+        assertEquals(0, mStackScroller.getSpeedBumpIndex());
+    }
+
     private void setBarStateForTest(int state) {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.
