@@ -175,7 +175,7 @@ public class RollbackTest {
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
 
             UserManager um = (UserManager) context.getSystemService(context.USER_SERVICE);
-            List<Integer> userIds = um.getAliveUsers()
+            List<Integer> userIds = um.getUsers(true)
                     .stream().map(user -> user.id).collect(Collectors.toList());
             assertThat(InstallUtils.isOnlyInstalledForUser(TestApp.A,
                     context.getUserId(), userIds)).isTrue();

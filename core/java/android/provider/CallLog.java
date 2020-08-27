@@ -870,7 +870,7 @@ public class CallLog {
 
                 // Otherwise, insert to all other users that are running and unlocked.
 
-                final List<UserInfo> users = userManager.getAliveUsers();
+                final List<UserInfo> users = userManager.getUsers(true);
 
                 final int count = users.size();
                 for (int i = 0; i < count; i++) {

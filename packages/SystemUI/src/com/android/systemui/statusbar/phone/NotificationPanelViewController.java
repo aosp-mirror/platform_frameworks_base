@@ -107,7 +107,6 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -121,6 +120,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
@@ -168,6 +168,9 @@ public class NotificationPanelViewController extends PanelViewController {
             mOnHeadsUpChangedListener =
             new MyOnHeadsUpChangedListener();
     private final HeightListener mHeightListener = new HeightListener();
+    private final ZenModeControllerCallback
+            mZenModeControllerCallback =
+            new ZenModeControllerCallback();
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
     private final StatusBarStateListener mStatusBarStateListener = new StatusBarStateListener();
     private final ExpansionCallback mExpansionCallback = new ExpansionCallback();
@@ -175,6 +178,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final NotificationPanelView mView;
     private final MetricsLogger mMetricsLogger;
     private final ActivityManager mActivityManager;
+    private final ZenModeController mZenModeController;
     private final ConfigurationController mConfigurationController;
     private final FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
@@ -338,6 +342,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mKeyguardStatusViewAnimating;
     private ValueAnimator mQsSizeChangeAnimator;
 
+    private boolean mShowEmptyShadeView;
+
     private boolean mQsScrimEnabled = true;
     private boolean mQsTouchAboveFalsingThreshold;
     private int mQsFalsingThreshold;
@@ -499,7 +505,7 @@ public class NotificationPanelViewController extends PanelViewController {
             LatencyTracker latencyTracker, PowerManager powerManager,
             AccessibilityManager accessibilityManager, @DisplayId int displayId,
             KeyguardUpdateMonitor keyguardUpdateMonitor, MetricsLogger metricsLogger,
-            ActivityManager activityManager,
+            ActivityManager activityManager, ZenModeController zenModeController,
             ConfigurationController configurationController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
@@ -516,6 +522,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mView = view;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
+        mZenModeController = zenModeController;
         mConfigurationController = configurationController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mMediaHierarchyManager = mediaHierarchyManager;
@@ -717,6 +724,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void reInflateViews() {
+        updateShowEmptyShadeView();
+
         // Re-inflate the status view group.
         int index = mView.indexOfChild(mKeyguardStatusView);
         mView.removeView(mKeyguardStatusView);
@@ -1718,6 +1727,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setScrollingEnabled(
                 mBarState != KEYGUARD && (!mQsExpanded
                         || mQsExpansionFromOverscroll));
+        updateEmptyShadeView();
 
         mQsNavbarScrim.setVisibility(
                 mBarState == StatusBarState.SHADE && mQsExpanded && !mStackScrollerOverscrolling
@@ -2135,7 +2145,7 @@ public class NotificationPanelViewController extends PanelViewController {
         // it in expanded QS state as well so we don't run into troubles when fading the view in/out
         // and expanding/collapsing the whole panel from/to quick settings.
         if (mNotificationStackScrollLayoutController.getNotGoneChildCount() == 0
-                && mNotificationStackScrollLayoutController.isShowingEmptyShadeView()) {
+                && mShowEmptyShadeView) {
             notificationHeight = mNotificationStackScrollLayoutController.getEmptyShadeViewHeight();
         }
         int maxQsHeight = mQsMaxExpansionHeight;
@@ -2549,6 +2559,17 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     public boolean isDozing() {
         return mDozing;
+    }
+
+    public void showEmptyShadeView(boolean emptyShadeViewVisible) {
+        mShowEmptyShadeView = emptyShadeViewVisible;
+        updateEmptyShadeView();
+    }
+
+    private void updateEmptyShadeView() {
+        // Hide "No notifications" in QS.
+        mNotificationStackScrollLayoutController.updateEmptyShadeView(
+                mShowEmptyShadeView && !mQsExpanded);
     }
 
     public void setQsScrimEnabled(boolean qsScrimEnabled) {
@@ -3057,21 +3078,22 @@ public class NotificationPanelViewController extends PanelViewController {
         return mNotificationStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL);
     }
 
+    private void updateShowEmptyShadeView() {
+        boolean
+                showEmptyShadeView =
+                mBarState != KEYGUARD && !mEntryManager.hasActiveNotifications();
+        showEmptyShadeView(showEmptyShadeView);
+    }
+
     public RemoteInputController.Delegate createRemoteInputDelegate() {
         return mNotificationStackScrollLayoutController.createDelegate();
     }
 
-    /**
-     * Updates the notification views' sections and status bar icons. This is
-     * triggered by the NotificationPresenter whenever there are changes to the underlying
-     * notification data being displayed. In the new notification pipeline, this is handled in
-     * {@link ShadeViewManager}.
-     */
-    public void updateNotificationViews(String reason) {
+    void updateNotificationViews(String reason) {
         mNotificationStackScrollLayoutController.updateSectionBoundaries(reason);
         mNotificationStackScrollLayoutController.updateSpeedBumpIndex();
         mNotificationStackScrollLayoutController.updateFooter();
-
+        updateShowEmptyShadeView();
         mNotificationIconAreaController.updateNotificationIcons(createVisibleEntriesList());
     }
 
@@ -3125,6 +3147,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setStatusBar(statusBar);
         mNotificationStackScrollLayoutController.setGroupManager(groupManager);
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
+        updateShowEmptyShadeView();
         mNotificationShelfController = notificationShelfController;
         updateMaxDisplayedNotifications(true);
     }
@@ -3579,7 +3602,19 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    private class ZenModeControllerCallback implements ZenModeController.Callback {
+        @Override
+        public void onZenChanged(int zen) {
+            updateShowEmptyShadeView();
+        }
+    }
+
     private class ConfigurationListener implements ConfigurationController.ConfigurationListener {
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            updateShowEmptyShadeView();
+        }
+
         @Override
         public void onThemeChanged() {
             final int themeResId = mView.getContext().getThemeResId();
@@ -3677,6 +3712,7 @@ public class NotificationPanelViewController extends PanelViewController {
         public void onViewAttachedToWindow(View v) {
             FragmentHostManager.get(mView).addTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.addCallback(mStatusBarStateListener);
+            mZenModeController.addCallback(mZenModeControllerCallback);
             mConfigurationController.addCallback(mConfigurationListener);
             mUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
             // Theme might have changed between inflating this view and attaching it to the
@@ -3689,6 +3725,7 @@ public class NotificationPanelViewController extends PanelViewController {
         public void onViewDetachedFromWindow(View v) {
             FragmentHostManager.get(mView).removeTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.removeCallback(mStatusBarStateListener);
+            mZenModeController.removeCallback(mZenModeControllerCallback);
             mConfigurationController.removeCallback(mConfigurationListener);
             mUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         }

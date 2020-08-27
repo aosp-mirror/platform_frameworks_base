@@ -169,7 +169,7 @@ class Owners {
             // First, try to read from the legacy file.
             final File legacy = getLegacyConfigFile();
 
-            final List<UserInfo> users = mUserManager.getAliveUsers();
+            final List<UserInfo> users = mUserManager.getUsers(true);
 
             if (readLegacyOwnerFileLocked(legacy)) {
                 if (DEBUG) {
