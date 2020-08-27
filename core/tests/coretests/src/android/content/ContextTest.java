@@ -19,6 +19,7 @@ package android.content;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -188,19 +189,38 @@ public class ContextTest {
 
         assertFalse(wrapper.isUiContext());
 
-        wrapper = new ContextWrapper(new TestUiContext());
+        wrapper = new ContextWrapper(getUiContext());
 
         assertTrue(wrapper.isUiContext());
     }
 
-    private static class TestUiContext extends ContextWrapper {
-        TestUiContext() {
-            super(null /* base */);
-        }
+    @Test
+    public void testIsUiContext_UiContextDerivedContext() {
+        final Context uiContext = getUiContext();
+        Context context = uiContext.createAttributionContext(null /* attributionTag */);
 
-        @Override
-        public boolean isUiContext() {
-            return true;
-        }
+        assertTrue(context.isUiContext());
+
+        context = uiContext.createConfigurationContext(new Configuration());
+
+        assertTrue(context.isUiContext());
+    }
+
+    @Test
+    public void testIsUiContext_UiContextDerivedDisplayContext() {
+        final Context uiContext = getUiContext();
+        final Display secondaryDisplay =
+                getSecondaryDisplay(uiContext.getSystemService(DisplayManager.class));
+        final Context context = uiContext.createDisplayContext(secondaryDisplay);
+
+        assertFalse(context.isUiContext());
+    }
+
+    private Context getUiContext() {
+        final Context appContext = ApplicationProvider.getApplicationContext();
+        final DisplayManager displayManager = appContext.getSystemService(DisplayManager.class);
+        final Display display = displayManager.getDisplay(DEFAULT_DISPLAY);
+        return appContext.createDisplayContext(display)
+                .createWindowContext(TYPE_APPLICATION_OVERLAY, null /* options */);
     }
 }
