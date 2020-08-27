@@ -5659,6 +5659,69 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setModulation(int);
   }
 
+  public class DtmbFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getBandwidthCapability();
+    method public int getCodeRateCapability();
+    method public int getGuardIntervalCapability();
+    method public int getModulationCapability();
+    method public int getTimeInterleaveModeCapability();
+    method public int getTransmissionModeCapability();
+  }
+
+  public class DtmbFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    method @NonNull public static android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder builder();
+    method public int getBandwidth();
+    method public int getCodeRate();
+    method public int getGuardInterval();
+    method public int getModulation();
+    method public int getTimeInterleaveMode();
+    method public int getTransmissionMode();
+    method public int getType();
+    field public static final int BANDWIDTH_6MHZ = 4; // 0x4
+    field public static final int BANDWIDTH_8MHZ = 2; // 0x2
+    field public static final int BANDWIDTH_AUTO = 1; // 0x1
+    field public static final int BANDWIDTH_UNDEFINED = 0; // 0x0
+    field public static final int CODERATE_2_5 = 2; // 0x2
+    field public static final int CODERATE_3_5 = 4; // 0x4
+    field public static final int CODERATE_4_5 = 8; // 0x8
+    field public static final int CODERATE_AUTO = 1; // 0x1
+    field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int GUARD_INTERVAL_AUTO = 1; // 0x1
+    field public static final int GUARD_INTERVAL_PN_420_CONST = 16; // 0x10
+    field public static final int GUARD_INTERVAL_PN_420_VARIOUS = 2; // 0x2
+    field public static final int GUARD_INTERVAL_PN_595_CONST = 4; // 0x4
+    field public static final int GUARD_INTERVAL_PN_945_CONST = 32; // 0x20
+    field public static final int GUARD_INTERVAL_PN_945_VARIOUS = 8; // 0x8
+    field public static final int GUARD_INTERVAL_PN_RESERVED = 64; // 0x40
+    field public static final int GUARD_INTERVAL_UNDEFINED = 0; // 0x0
+    field public static final int MODULATION_CONSTELLATION_16QAM = 8; // 0x8
+    field public static final int MODULATION_CONSTELLATION_32QAM = 16; // 0x10
+    field public static final int MODULATION_CONSTELLATION_4QAM = 2; // 0x2
+    field public static final int MODULATION_CONSTELLATION_4QAM_NR = 4; // 0x4
+    field public static final int MODULATION_CONSTELLATION_64QAM = 32; // 0x20
+    field public static final int MODULATION_CONSTELLATION_AUTO = 1; // 0x1
+    field public static final int MODULATION_CONSTELLATION_UNDEFINED = 0; // 0x0
+    field public static final int TIME_INTERLEAVE_MODE_AUTO = 1; // 0x1
+    field public static final int TIME_INTERLEAVE_MODE_TIMER_INT_240 = 2; // 0x2
+    field public static final int TIME_INTERLEAVE_MODE_TIMER_INT_720 = 4; // 0x4
+    field public static final int TIME_INTERLEAVE_MODE_UNDEFINED = 0; // 0x0
+    field public static final int TRANSMISSION_MODE_AUTO = 1; // 0x1
+    field public static final int TRANSMISSION_MODE_C1 = 2; // 0x2
+    field public static final int TRANSMISSION_MODE_C3780 = 4; // 0x4
+    field public static final int TRANSMISSION_MODE_UNDEFINED = 0; // 0x0
+  }
+
+  public static final class DtmbFrontendSettings.Builder {
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setBandwidth(int);
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setCodeRate(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setFrequency(int);
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setGuardInterval(int);
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setModulation(int);
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setTimeInterleaveMode(int);
+    method @NonNull public android.media.tv.tuner.frontend.DtmbFrontendSettings.Builder setTransmissionMode(int);
+  }
+
   public class DvbcFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
     method public int getAnnexCapability();
     method public int getFecCapability();
@@ -5982,6 +6045,7 @@ package android.media.tv.tuner.frontend {
     field public static final int TYPE_ANALOG = 1; // 0x1
     field public static final int TYPE_ATSC = 2; // 0x2
     field public static final int TYPE_ATSC3 = 3; // 0x3
+    field public static final int TYPE_DTMB = 10; // 0xa
     field public static final int TYPE_DVBC = 4; // 0x4
     field public static final int TYPE_DVBS = 5; // 0x5
     field public static final int TYPE_DVBT = 6; // 0x6
