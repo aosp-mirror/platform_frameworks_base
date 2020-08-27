@@ -49,6 +49,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -71,6 +72,7 @@ import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -109,7 +111,8 @@ import java.util.List;
  * Methods ending in "H" must be called on the (ui) handler.
  */
 public class VolumeDialogImpl implements VolumeDialog,
-        ConfigurationController.ConfigurationListener {
+        ConfigurationController.ConfigurationListener,
+        ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = Util.logTag(VolumeDialogImpl.class);
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
@@ -126,6 +129,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final H mHandler = new H();
     private final VolumeDialogController mController;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final Region mTouchableRegion = new Region();
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -204,6 +208,33 @@ public class VolumeDialogImpl implements VolumeDialog,
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
+    @Override
+    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo internalInsetsInfo) {
+        // Set touchable region insets on the root dialog view. This tells WindowManager that
+        // touches outside of this region should not be delivered to the volume window, and instead
+        // go to the window below. This is the only way to do this - returning false in
+        // onDispatchTouchEvent results in the event being ignored entirely, rather than passed to
+        // the next window.
+        internalInsetsInfo.setTouchableInsets(
+                ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+
+        mTouchableRegion.setEmpty();
+
+        // Set the touchable region to the union of all child view bounds. We don't use touches on
+        // the volume dialog container itself, so this is fine.
+        for (int i = 0; i < mDialogView.getChildCount(); i++) {
+            final View view = mDialogView.getChildAt(i);
+            mTouchableRegion.op(
+                    view.getLeft(),
+                    view.getTop(),
+                    view.getRight(),
+                    view.getBottom(),
+                    Region.Op.UNION);
+        }
+
+        internalInsetsInfo.touchableRegion.set(mTouchableRegion);
+    }
+
     private void initDialog() {
         mDialog = new CustomDialog(mContext);
 
@@ -235,6 +266,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialogView.setAlpha(0);
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
+            mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
             if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
             mDialogView.setAlpha(0);
             mDialogView.animate()
@@ -252,6 +284,11 @@ public class VolumeDialogImpl implements VolumeDialog,
                     })
                     .start();
         });
+
+        mDialog.setOnDismissListener(dialogInterface ->
+                mDialogView
+                        .getViewTreeObserver()
+                        .removeOnComputeInternalInsetsListener(VolumeDialogImpl.this));
 
         mDialogView.setOnHoverListener((v, event) -> {
             int action = event.getActionMasked();
@@ -1369,6 +1406,11 @@ public class VolumeDialogImpl implements VolumeDialog,
             super(context, R.style.volume_dialog_theme);
         }
 
+        /**
+         * NOTE: This will only be called for touches within the touchable region of the volume
+         * dialog, as returned by {@link #onComputeInternalInsets}. Other touches, even if they are
+         * within the bounds of the volume dialog, will fall through to the window below.
+         */
         @Override
         public boolean dispatchTouchEvent(MotionEvent ev) {
             rescheduleTimeoutH();
@@ -1387,6 +1429,12 @@ public class VolumeDialogImpl implements VolumeDialog,
             mHandler.sendEmptyMessage(H.RECHECK_ALL);
         }
 
+        /**
+         * NOTE: This will be called with ACTION_OUTSIDE MotionEvents for touches that occur outside
+         * of the touchable region of the volume dialog (as returned by
+         * {@link #onComputeInternalInsets}) even if those touches occurred within the bounds of the
+         * volume dialog.
+         */
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             if (mShowing) {
