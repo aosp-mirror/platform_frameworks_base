@@ -79,7 +79,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
@@ -174,8 +173,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private KeyguardClockSwitch mKeyguardClockSwitch;
     private PanelViewController.TouchHandler mTouchHandler;
     @Mock
-    private ZenModeController mZenModeController;
-    @Mock
     private ConfigurationController mConfigurationController;
     @Mock
     private MediaHierarchyManager mMediaHiearchyManager;
@@ -259,7 +256,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mDozeLog,
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
-                mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
+                mMetricsLogger, mActivityManager, mConfigurationController,
                 flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,

@@ -379,7 +379,7 @@ public class TrustManagerService extends SystemService {
     }
 
     private void updateTrustAll() {
-        List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
+        List<UserInfo> userInfos = mUserManager.getAliveUsers();
         for (UserInfo userInfo : userInfos) {
             updateTrust(userInfo.id, 0);
         }
@@ -485,7 +485,7 @@ public class TrustManagerService extends SystemService {
 
         List<UserInfo> userInfos;
         if (userIdOrAll == UserHandle.USER_ALL) {
-            userInfos = mUserManager.getUsers(true /* excludeDying */);
+            userInfos = mUserManager.getAliveUsers();
         } else {
             userInfos = new ArrayList<>();
             userInfos.add(mUserManager.getUserInfo(userIdOrAll));
@@ -644,7 +644,7 @@ public class TrustManagerService extends SystemService {
         }
         List<UserInfo> userInfos;
         if (userId == UserHandle.USER_ALL) {
-            userInfos = mUserManager.getUsers(true /* excludeDying */);
+            userInfos = mUserManager.getAliveUsers();
         } else {
             userInfos = new ArrayList<>();
             userInfos.add(mUserManager.getUserInfo(userId));
@@ -1171,7 +1171,7 @@ public class TrustManagerService extends SystemService {
                 fout.println("disabled because the third-party apps can't run yet.");
                 return;
             }
-            final List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
+            final List<UserInfo> userInfos = mUserManager.getAliveUsers();
             mHandler.runWithScissors(new Runnable() {
                 @Override
                 public void run() {

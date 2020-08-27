@@ -262,7 +262,6 @@ import com.android.server.EventLogTags;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.UiThread;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -966,8 +965,7 @@ public class NotificationManagerService extends SystemService {
                     nv.recycle();
                 }
                 reportUserInteraction(r);
-                mAssistants.notifyAssistantActionClicked(
-                        r.getSbn(), actionIndex, action, generatedByAssistant);
+                mAssistants.notifyAssistantActionClicked(r.getSbn(), action, generatedByAssistant);
             }
         }
 
@@ -8629,12 +8627,25 @@ public class NotificationManagerService extends SystemService {
                 ServiceManager.getService(Context.COMPANION_DEVICE_SERVICE));
     }
 
-    private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
+    @VisibleForTesting
+    boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
         if (!listener.enabledAndUserMatches(sbn.getUserId())) {
             return false;
         }
-        // TODO: remove this for older listeners.
-        return true;
+        return isInteractionVisibleToListener(listener, sbn.getUserId());
+    }
+
+    /**
+     * Returns whether the given assistant should be informed about interactions on the given user.
+     *
+     * Normally an assistant would be able to see all interactions on the current user and any
+     * associated profiles because they are notification listeners, but since NASes have one
+     * instance per user, we want to filter out interactions that are not for the user that the
+     * given NAS is bound in.
+     */
+    private boolean isInteractionVisibleToListener(ManagedServiceInfo info, int userId) {
+        boolean isAssistantService = mAssistants.isServiceTokenValidLocked(info.service);
+        return !isAssistantService || info.isSameUser(userId);
     }
 
     private boolean isPackageSuspendedForUser(String pkg, int uid) {
@@ -8856,8 +8867,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {
-            // There should be only one, but it's a list, so while we enforce
-            // singularity elsewhere, we keep it general here, to avoid surprises.
             for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
                 ArrayList<String> keys = new ArrayList<>(records.size());
                 for (NotificationRecord r : records) {
@@ -8875,6 +8884,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         protected void onPanelRevealed(int items) {
+            // send to all currently bounds NASes since notifications from both users will appear in
+            // the panel
             for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
                 mHandler.post(() -> {
                     final INotificationListener assistant = (INotificationListener) info.service;
@@ -8888,6 +8899,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         protected void onPanelHidden() {
+            // send to all currently bounds NASes since notifications from both users will appear in
+            // the panel
             for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
                 mHandler.post(() -> {
                     final INotificationListener assistant = (INotificationListener) info.service;
@@ -8976,7 +8989,7 @@ public class NotificationManagerService extends SystemService {
             }
             notifyAssistantLocked(
                     sbn,
-                    false /* sameUserOnly */,
+                    true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
                             assistant.onNotificationVisibilityChanged(key, isVisible);
@@ -8994,7 +9007,7 @@ public class NotificationManagerService extends SystemService {
             final String key = sbn.getKey();
             notifyAssistantLocked(
                     sbn,
-                    false /* sameUserOnly */,
+                    true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
                             assistant.onNotificationExpansionChanged(key, isUserAction, isExpanded);
@@ -9010,7 +9023,7 @@ public class NotificationManagerService extends SystemService {
             final String key = sbn.getKey();
             notifyAssistantLocked(
                     sbn,
-                    false /* sameUserOnly */,
+                    true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
                             assistant.onNotificationDirectReply(key);
@@ -9026,7 +9039,7 @@ public class NotificationManagerService extends SystemService {
             final String key = sbn.getKey();
             notifyAssistantLocked(
                     sbn,
-                    false /* sameUserOnly */,
+                    true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
                             assistant.onSuggestedReplySent(
@@ -9043,12 +9056,12 @@ public class NotificationManagerService extends SystemService {
 
         @GuardedBy("mNotificationLock")
         void notifyAssistantActionClicked(
-                final StatusBarNotification sbn, int actionIndex, Notification.Action action,
+                final StatusBarNotification sbn, Notification.Action action,
                 boolean generatedByAssistant) {
             final String key = sbn.getKey();
             notifyAssistantLocked(
                     sbn,
-                    false /* sameUserOnly */,
+                    true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
                             assistant.onActionClicked(
@@ -9072,7 +9085,7 @@ public class NotificationManagerService extends SystemService {
                 final StatusBarNotification sbn, final String snoozeCriterionId) {
             notifyAssistantLocked(
                     sbn,
-                    false /* sameUserOnly */,
+                    true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
                             assistant.onNotificationSnoozedUntilContext(
@@ -9129,7 +9142,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         protected void resetDefaultAssistantsIfNecessary() {
-            final List<UserInfo> activeUsers = mUm.getUsers(true);
+            final List<UserInfo> activeUsers = mUm.getAliveUsers();
             for (UserInfo userInfo : activeUsers) {
                 int userId = userInfo.getUserHandle().getIdentifier();
                 if (!hasUserSet(userId)) {
@@ -9293,10 +9306,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         public void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) {
+            // send to all currently bounds NASes since notifications from both users will appear in
+            // the status bar
             for (final ManagedServiceInfo info : getServices()) {
                 mHandler.post(() -> {
                     final INotificationListener listener = (INotificationListener) info.service;
-                     try {
+                    try {
                         listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
                     } catch (RemoteException ex) {
                         Slog.e(TAG, "unable to notify listener "
@@ -9470,7 +9485,8 @@ public class NotificationManagerService extends SystemService {
                     && changedHiddenNotifications.size() > 0;
 
             for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                if (!serviceInfo.isEnabledForCurrentProfiles() || !isInteractionVisibleToListener(
+                        serviceInfo, ActivityManager.getCurrentUser())) {
                     continue;
                 }
 
@@ -9489,12 +9505,7 @@ public class NotificationManagerService extends SystemService {
                     final NotificationRankingUpdate update = makeRankingUpdateLocked(
                             serviceInfo);
 
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyRankingUpdate(serviceInfo, update);
-                        }
-                    });
+                    mHandler.post(() -> notifyRankingUpdate(serviceInfo, update));
                 }
             }
         }
@@ -9502,15 +9513,11 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         public void notifyListenerHintsChangedLocked(final int hints) {
             for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                if (!serviceInfo.isEnabledForCurrentProfiles() || !isInteractionVisibleToListener(
+                        serviceInfo, ActivityManager.getCurrentUser())) {
                     continue;
                 }
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyListenerHintsChanged(serviceInfo, hints);
-                    }
-                });
+                mHandler.post(() -> notifyListenerHintsChanged(serviceInfo, hints));
             }
         }
 
@@ -9562,15 +9569,12 @@ public class NotificationManagerService extends SystemService {
 
         public void notifyInterruptionFilterChanged(final int interruptionFilter) {
             for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                if (!serviceInfo.isEnabledForCurrentProfiles() || !isInteractionVisibleToListener(
+                        serviceInfo, ActivityManager.getCurrentUser())) {
                     continue;
                 }
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyInterruptionFilterChanged(serviceInfo, interruptionFilter);
-                    }
-                });
+                mHandler.post(
+                        () -> notifyInterruptionFilterChanged(serviceInfo, interruptionFilter));
             }
         }
 
@@ -9579,15 +9583,16 @@ public class NotificationManagerService extends SystemService {
             if (channel == null) {
                 return;
             }
-            for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.enabledAndUserMatches(UserHandle.getCallingUserId())) {
+            for (final ManagedServiceInfo info : getServices()) {
+                if (!info.enabledAndUserMatches(UserHandle.getCallingUserId())
+                        || !isInteractionVisibleToListener(info, UserHandle.getCallingUserId())) {
                     continue;
                 }
 
                 BackgroundThread.getHandler().post(() -> {
-                    if (serviceInfo.isSystem || hasCompanionDevice(serviceInfo)) {
+                    if (info.isSystem || hasCompanionDevice(info)) {
                         notifyNotificationChannelChanged(
-                                serviceInfo, pkg, user, channel, modificationType);
+                                info, pkg, user, channel, modificationType);
                     }
                 });
             }
@@ -9599,15 +9604,16 @@ public class NotificationManagerService extends SystemService {
             if (group == null) {
                 return;
             }
-            for (final ManagedServiceInfo serviceInfo : getServices()) {
-                if (!serviceInfo.enabledAndUserMatches(UserHandle.getCallingUserId())) {
+            for (final ManagedServiceInfo info : getServices()) {
+                if (!info.enabledAndUserMatches(UserHandle.getCallingUserId())
+                        || !isInteractionVisibleToListener(info, UserHandle.getCallingUserId())) {
                     continue;
                 }
 
                 BackgroundThread.getHandler().post(() -> {
-                    if (serviceInfo.isSystem || hasCompanionDevice(serviceInfo)) {
+                    if (info.isSystem || hasCompanionDevice(info)) {
                         notifyNotificationChannelGroupChanged(
-                                serviceInfo, pkg, user, group, modificationType);
+                                info, pkg, user, group, modificationType);
                     }
                 });
             }
@@ -9626,9 +9632,6 @@ public class NotificationManagerService extends SystemService {
 
         private void notifyRemoved(ManagedServiceInfo info, StatusBarNotification sbn,
                 NotificationRankingUpdate rankingUpdate, NotificationStats stats, int reason) {
-            if (!info.enabledAndUserMatches(sbn.getUserId())) {
-                return;
-            }
             final INotificationListener listener = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {

@@ -672,7 +672,8 @@ public class MediaPlayer extends PlayerBase
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaPlayer>(this));
+        native_setup(new WeakReference<MediaPlayer>(this),
+                getCurrentOpPackageName());
 
         baseRegisterPlayer();
     }
@@ -2378,7 +2379,7 @@ public class MediaPlayer extends PlayerBase
     private native final int native_setMetadataFilter(Parcel request);
 
     private static native final void native_init();
-    private native final void native_setup(Object mediaplayer_this);
+    private native void native_setup(Object mediaplayerThis, @NonNull String opPackageName);
     private native final void native_finalize();
 
     /**

@@ -206,7 +206,7 @@ public class UserSwitcherController implements Dumpable {
             @Override
             protected ArrayList<UserRecord> doInBackground(SparseArray<Bitmap>... params) {
                 final SparseArray<Bitmap> bitmaps = params[0];
-                List<UserInfo> infos = mUserManager.getUsers(true);
+                List<UserInfo> infos = mUserManager.getAliveUsers();
                 if (infos == null) {
                     return null;
                 }
