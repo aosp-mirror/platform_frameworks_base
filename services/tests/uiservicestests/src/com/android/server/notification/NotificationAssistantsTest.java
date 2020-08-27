@@ -103,7 +103,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
             when(mUm.getUserInfo(eq(user.id))).thenReturn(user);
         }
         when(mUm.getUsers()).thenReturn(users);
-        when(mUm.getUsers(anyBoolean())).thenReturn(users);
+        when(mUm.getAliveUsers()).thenReturn(users);
         IntArray profileIds = new IntArray();
         profileIds.add(0);
         profileIds.add(11);

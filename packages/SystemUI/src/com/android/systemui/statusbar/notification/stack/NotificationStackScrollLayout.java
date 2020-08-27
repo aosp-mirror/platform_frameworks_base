@@ -4990,17 +4990,29 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void removeContainerView(View v) {
         Assert.isMainThread();
         removeView(v);
+        if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
+            mController.updateShowEmptyShadeView();
+            updateFooter();
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void addContainerView(View v) {
         Assert.isMainThread();
         addView(v);
+        if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
+            mController.updateShowEmptyShadeView();
+            updateFooter();
+        }
     }
 
     public void addContainerViewAt(View v, int index) {
         Assert.isMainThread();
         addView(v, index);
+        if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
+            mController.updateShowEmptyShadeView();
+            updateFooter();
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5099,6 +5111,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mQsExpanded = qsExpanded;
         updateAlgorithmLayoutMinHeight();
         updateScrollability();
+    }
+
+    boolean isQsExpanded() {
+        return mQsExpanded;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
