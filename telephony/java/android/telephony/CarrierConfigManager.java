@@ -1678,6 +1678,15 @@ public class CarrierConfigManager {
             "hide_lte_plus_data_icon_bool";
 
     /**
+     * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
+     * LTE+ data icon. It is 20000 by default, meaning the LTE+ icon will be shown if the device is
+     * using carrier aggregation and the combined channel bandwidth is strictly greater than 20 MHz.
+     * @hide
+     */
+    public static final String KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT =
+            "lte_plus_threshold_bandwidth_khz_int";
+
+    /**
      * The string is used to filter redundant string from PLMN Network Name that's supplied by
      * specific carrier.
      *
@@ -4259,6 +4268,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
