@@ -15,6 +15,10 @@
  */
 package com.android.networkstack.tethering;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
@@ -30,13 +34,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.ip.IpServer;
-import android.net.util.NetworkConstants;
 import android.net.util.PrefixUtils;
 
 import androidx.test.filters.SmallTest;
@@ -48,13 +51,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public final class PrivateAddressCoordinatorTest {
-    private static final String TEST_MOBILE_IFNAME = "test_rmnet_data0";
-    private static final String TEST_WIFI_IFNAME = "test_wlan0";
+    private static final String TEST_IFNAME = "test0";
 
     @Mock private IpServer mHotspotIpServer;
     @Mock private IpServer mUsbIpServer;
@@ -69,7 +69,8 @@ public final class PrivateAddressCoordinatorTest {
     private final LinkAddress mLegacyWifiP2pAddress = new LinkAddress("192.168.49.1/24");
     private final Network mWifiNetwork = new Network(1);
     private final Network mMobileNetwork = new Network(2);
-    private final Network[] mAllNetworks = {mMobileNetwork, mWifiNetwork};
+    private final Network mVpnNetwork = new Network(3);
+    private final Network[] mAllNetworks = {mMobileNetwork, mWifiNetwork, mVpnNetwork};
 
     private void setUpIpServers() throws Exception {
         when(mUsbIpServer.interfaceType()).thenReturn(TETHERING_USB);
@@ -184,33 +185,25 @@ public final class PrivateAddressCoordinatorTest {
         assertEquals("Fail to reselect available prefix: ", predefinedPrefix, allowUseFreePrefix);
     }
 
-    private LinkProperties buildUpstreamLinkProperties(boolean withIPv4, boolean withIPv6,
-            boolean isMobile) {
-        final String testIface;
-        final String testIpv4Address;
-        if (isMobile) {
-            testIface = TEST_MOBILE_IFNAME;
-            testIpv4Address = "10.0.0.1";
-        } else {
-            testIface = TEST_WIFI_IFNAME;
-            testIpv4Address = "192.168.43.5";
-        }
-
+    private UpstreamNetworkState buildUpstreamNetworkState(final Network network,
+            final LinkAddress v4Addr, final LinkAddress v6Addr, final NetworkCapabilities cap) {
         final LinkProperties prop = new LinkProperties();
-        prop.setInterfaceName(testIface);
+        prop.setInterfaceName(TEST_IFNAME);
+        if (v4Addr != null) prop.addLinkAddress(v4Addr);
 
-        if (withIPv4) {
-            prop.addLinkAddress(
-                    new LinkAddress(InetAddresses.parseNumericAddress(testIpv4Address),
-                            NetworkConstants.IPV4_ADDR_BITS));
+        if (v6Addr != null) prop.addLinkAddress(v6Addr);
+
+        return new UpstreamNetworkState(prop, cap, network);
+    }
+
+    private NetworkCapabilities makeNetworkCapabilities(final int transportType) {
+        final NetworkCapabilities cap = new NetworkCapabilities();
+        cap.addTransportType(transportType);
+        if (transportType == TRANSPORT_VPN) {
+            cap.removeCapability(NET_CAPABILITY_NOT_VPN);
         }
 
-        if (withIPv6) {
-            prop.addLinkAddress(
-                    new LinkAddress(InetAddresses.parseNumericAddress("2001:db8::"),
-                            NetworkConstants.RFC7421_PREFIX_LENGTH));
-        }
-        return prop;
+        return cap;
     }
 
     @Test
@@ -220,53 +213,76 @@ public final class PrivateAddressCoordinatorTest {
         final IpPrefix predefinedPrefix = new IpPrefix("192.168.43.0/24");
         // Force always get subAddress "43.5" for conflict testing.
         when(mPrivateAddressCoordinator.getRandomSubAddr()).thenReturn(fakeHotspotSubAddr);
-        // 1. Enable hotspot with prefix 192.168.43.0/24
+        // - Enable hotspot with prefix 192.168.43.0/24
         final LinkAddress hotspotAddr = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(hotspotAddr);
         assertEquals("Wrong wifi prefix: ", predefinedPrefix, hotspotPrefix);
         when(mHotspotIpServer.getAddress()).thenReturn(hotspotAddr);
-        // 2. Update v6 only mobile network, hotspot prefix should not be removed.
-        List<String> testConflicts;
-        final LinkProperties v6OnlyMobileProp = buildUpstreamLinkProperties(false, true, true);
-        mPrivateAddressCoordinator.updateUpstreamPrefix(mMobileNetwork, v6OnlyMobileProp);
+        // - test mobile network with null NetworkCapabilities. Ideally this should not happen,
+        // just make sure no crash in this case.
+        final UpstreamNetworkState noCapUpstream = buildUpstreamNetworkState(mMobileNetwork,
+                new LinkAddress("10.0.0.8/24"), null, null);
+        mPrivateAddressCoordinator.updateUpstreamPrefix(noCapUpstream);
+        verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
+        // - test mobile upstream with no address.
+        final UpstreamNetworkState noAddress = buildUpstreamNetworkState(mMobileNetwork,
+                null, null, makeNetworkCapabilities(TRANSPORT_CELLULAR));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(noCapUpstream);
+        verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
+        // - Update v6 only mobile network, hotspot prefix should not be removed.
+        final UpstreamNetworkState v6OnlyMobile = buildUpstreamNetworkState(mMobileNetwork,
+                null, new LinkAddress("2001:db8::/64"),
+                makeNetworkCapabilities(TRANSPORT_CELLULAR));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v6OnlyMobile);
         verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
         mPrivateAddressCoordinator.removeUpstreamPrefix(mMobileNetwork);
-        // 3. Update v4 only mobile network, hotspot prefix should not be removed.
-        final LinkProperties v4OnlyMobileProp = buildUpstreamLinkProperties(true, false, true);
-        mPrivateAddressCoordinator.updateUpstreamPrefix(mMobileNetwork, v4OnlyMobileProp);
+        // - Update v4 only mobile network, hotspot prefix should not be removed.
+        final UpstreamNetworkState v4OnlyMobile = buildUpstreamNetworkState(mMobileNetwork,
+                new LinkAddress("10.0.0.8/24"), null,
+                makeNetworkCapabilities(TRANSPORT_CELLULAR));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v4OnlyMobile);
         verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
-        // 4. Update v4v6 mobile network, hotspot prefix should not be removed.
-        final LinkProperties v4v6MobileProp = buildUpstreamLinkProperties(true, true, true);
-        mPrivateAddressCoordinator.updateUpstreamPrefix(mMobileNetwork, v4v6MobileProp);
+        // - Update v4v6 mobile network, hotspot prefix should not be removed.
+        final UpstreamNetworkState v4v6Mobile = buildUpstreamNetworkState(mMobileNetwork,
+                new LinkAddress("10.0.0.8/24"), new LinkAddress("2001:db8::/64"),
+                makeNetworkCapabilities(TRANSPORT_CELLULAR));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v4v6Mobile);
         verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
-        // 5. Update v6 only wifi network, hotspot prefix should not be removed.
-        final LinkProperties v6OnlyWifiProp = buildUpstreamLinkProperties(false, true, false);
-        mPrivateAddressCoordinator.updateUpstreamPrefix(mWifiNetwork, v6OnlyWifiProp);
+        // - Update v6 only wifi network, hotspot prefix should not be removed.
+        final UpstreamNetworkState v6OnlyWifi = buildUpstreamNetworkState(mWifiNetwork,
+                null, new LinkAddress("2001:db8::/64"), makeNetworkCapabilities(TRANSPORT_WIFI));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v6OnlyWifi);
         verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
         mPrivateAddressCoordinator.removeUpstreamPrefix(mWifiNetwork);
-        // 6. Update v4 only wifi network, it conflict with hotspot prefix.
-        final LinkProperties v4OnlyWifiProp = buildUpstreamLinkProperties(true, false, false);
-        mPrivateAddressCoordinator.updateUpstreamPrefix(mWifiNetwork, v4OnlyWifiProp);
+        // - Update vpn network, it conflict with hotspot prefix but VPN networks are ignored.
+        final UpstreamNetworkState v4OnlyVpn = buildUpstreamNetworkState(mVpnNetwork,
+                new LinkAddress("192.168.43.5/24"), null, makeNetworkCapabilities(TRANSPORT_VPN));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v4OnlyVpn);
+        verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
+        // - Update v4 only wifi network, it conflict with hotspot prefix.
+        final UpstreamNetworkState v4OnlyWifi = buildUpstreamNetworkState(mWifiNetwork,
+                new LinkAddress("192.168.43.5/24"), null, makeNetworkCapabilities(TRANSPORT_WIFI));
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v4OnlyWifi);
         verify(mHotspotIpServer).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
         reset(mHotspotIpServer);
-        // 7. Restart hotspot again and its prefix is different previous.
+        // - Restart hotspot again and its prefix is different previous.
         mPrivateAddressCoordinator.releaseDownstream(mHotspotIpServer);
         final LinkAddress hotspotAddr2 = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix2 = PrefixUtils.asIpPrefix(hotspotAddr2);
         assertNotEquals(hotspotPrefix, hotspotPrefix2);
         when(mHotspotIpServer.getAddress()).thenReturn(hotspotAddr2);
-        mPrivateAddressCoordinator.updateUpstreamPrefix(mWifiNetwork, v4OnlyWifiProp);
+        mPrivateAddressCoordinator.updateUpstreamPrefix(v4OnlyWifi);
         verify(mHotspotIpServer, never()).sendMessage(IpServer.CMD_NOTIFY_PREFIX_CONFLICT);
-        // 7. Usb tethering can be enabled and its prefix is different with conflict one.
+        // - Usb tethering can be enabled and its prefix is different with conflict one.
         final LinkAddress usbAddr = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mUsbIpServer);
         final IpPrefix usbPrefix = PrefixUtils.asIpPrefix(usbAddr);
         assertNotEquals(predefinedPrefix, usbPrefix);
         assertNotEquals(hotspotPrefix2, usbPrefix);
         when(mUsbIpServer.getAddress()).thenReturn(usbAddr);
-        // 8. Disable wifi upstream, then wifi's prefix can be selected again.
+        // - Disable wifi upstream, then wifi's prefix can be selected again.
         mPrivateAddressCoordinator.removeUpstreamPrefix(mWifiNetwork);
         final LinkAddress ethAddr = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mEthernetIpServer);
