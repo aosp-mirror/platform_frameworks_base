@@ -83,6 +83,16 @@ genrule {
 }
 // End ProtoLog
 
+java_library {
+    name: "WindowManager-Shell-proto",
+
+    srcs: ["proto/*.proto"],
+
+    proto: {
+        type: "nano",
+    },
+}
+
 android_library {
     name: "WindowManager-Shell",
     srcs: [
@@ -94,6 +104,7 @@ android_library {
     ],
     static_libs: [
         "protolog-lib",
+        "WindowManager-Shell-proto",
     ],
     manifest: "AndroidManifest.xml",
 }
