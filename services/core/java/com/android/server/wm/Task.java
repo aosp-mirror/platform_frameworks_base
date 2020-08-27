@@ -6348,7 +6348,7 @@ class Task extends WindowContainer<WindowContainer> {
         return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
-    void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
+    void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
@@ -7585,7 +7585,11 @@ class Task extends WindowContainer<WindowContainer> {
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.
         if (isFocusedStackOnDisplay()
-                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
+                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()
+                // Avoid resuming activities on secondary displays since we don't want bubble
+                // activities to be resumed while bubble is still collapsed.
+                // TODO(b/113840485): Having keyguard going away state for secondary displays.
+                && display.isDefaultDisplay) {
             return false;
         }
 
