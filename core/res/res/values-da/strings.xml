@@ -657,7 +657,7 @@
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"observer netværksforhold"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Tillader, at en applikation observerer netværksforhold. Bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"skift kalibrering for inputenheden"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Tillader, at appen ændrer kalibreringsparametrene for berøringsskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Tillader, at appen ændrer kalibreringsparametrene for touchskærmen. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"få adgang til DRM-certifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Tillader, at en applikation provisionerer og anvender DRM-certifikater. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"modtag status for Android Beam-overførsler"</string>
