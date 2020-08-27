@@ -13,6 +13,7 @@ package com.android.settingslib.wifi;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 
 import android.content.Context;
 import android.content.Intent;
@@ -246,6 +247,10 @@ public class WifiStatusTracker {
                 } else {
                     statusLabel = mContext.getString(R.string.wifi_status_no_internet);
                 }
+                return;
+            } else if (!isDefaultNetwork && mDefaultNetworkCapabilities != null
+                    && mDefaultNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+                statusLabel = mContext.getString(R.string.wifi_connected_low_quality);
                 return;
             }
         }
