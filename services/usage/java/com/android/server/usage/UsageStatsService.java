@@ -183,7 +183,6 @@ public class UsageStatsService extends SystemService implements
     private static class ActivityData {
         private final String mTaskRootPackage;
         private final String mTaskRootClass;
-        public int lastEvent = Event.NONE;
         private ActivityData(String taskRootPackage, String taskRootClass) {
             mTaskRootPackage = taskRootPackage;
             mTaskRootClass = taskRootClass;
@@ -786,7 +785,6 @@ public class UsageStatsService extends SystemService implements
         switch (event.mEventType) {
             case Event.ACTIVITY_RESUMED:
             case Event.ACTIVITY_PAUSED:
-            case Event.ACTIVITY_STOPPED:
                 uid = mPackageManagerInternal.getPackageUid(event.mPackage, 0, userId);
                 break;
             default:
@@ -819,10 +817,8 @@ public class UsageStatsService extends SystemService implements
                                     .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
-                    final ActivityData resumedData = new ActivityData(event.mTaskRootPackage,
-                            event.mTaskRootClass);
-                    resumedData.lastEvent = Event.ACTIVITY_RESUMED;
-                    mVisibleActivities.put(event.mInstanceId, resumedData);
+                    mVisibleActivities.put(event.mInstanceId,
+                            new ActivityData(event.mTaskRootPackage, event.mTaskRootClass));
                     try {
                         switch(mUsageSource) {
                             case USAGE_SOURCE_CURRENT_ACTIVITY:
@@ -838,17 +834,16 @@ public class UsageStatsService extends SystemService implements
                     }
                     break;
                 case Event.ACTIVITY_PAUSED:
-                    final ActivityData pausedData = mVisibleActivities.get(event.mInstanceId);
-                    if (pausedData == null) {
-                        Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
-                                + "/" + event.mClass + " event : " + event.mEventType
-                                + " instanceId : " + event.mInstanceId + ")");
-                    } else {
-                        pausedData.lastEvent = Event.ACTIVITY_PAUSED;
-                        if (event.mTaskRootPackage == null) {
-                            // Task Root info is missing. Repair the event based on previous data
-                            event.mTaskRootPackage = pausedData.mTaskRootPackage;
-                            event.mTaskRootClass = pausedData.mTaskRootClass;
+                    if (event.mTaskRootPackage == null) {
+                        // Task Root info is missing. Repair the event based on previous data
+                        final ActivityData prevData = mVisibleActivities.get(event.mInstanceId);
+                        if (prevData == null) {
+                            Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
+                                    + "/" + event.mClass + " event : " + event.mEventType
+                                    + " instanceId : " + event.mInstanceId + ")");
+                        } else {
+                            event.mTaskRootPackage = prevData.mTaskRootPackage;
+                            event.mTaskRootClass = prevData.mTaskRootClass;
                         }
                     }
                     FrameworkStatsLog.write(
@@ -869,16 +864,6 @@ public class UsageStatsService extends SystemService implements
                     if (prevData == null) {
                         // The activity stop was already handled.
                         return;
-                    }
-
-                    if (prevData.lastEvent != Event.ACTIVITY_PAUSED) {
-                        FrameworkStatsLog.write(
-                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                                uid,
-                                event.mPackage,
-                                event.mClass,
-                                FrameworkStatsLog
-                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
                     }
 
                     ArraySet<String> tokens;

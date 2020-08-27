@@ -5579,7 +5579,7 @@ package android.window {
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void registerOrganizer();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setInterceptBackPressedOnTaskRoot(boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void unregisterOrganizer();
   }

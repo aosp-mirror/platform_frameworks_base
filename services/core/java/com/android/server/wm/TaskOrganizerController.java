@@ -38,7 +38,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
@@ -51,7 +50,6 @@ import com.android.internal.util.ArrayUtils;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -208,6 +206,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
         private final int mUid;
+        private boolean mInterceptBackPressedOnTaskRoot;
 
         TaskOrganizerState(ITaskOrganizer organizer, int uid) {
             final Consumer<Runnable> deferTaskOrgCallbacksConsumer =
@@ -223,6 +222,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
+        }
+
+        void setInterceptBackPressedOnTaskRoot(boolean interceptBackPressed) {
+            mInterceptBackPressedOnTaskRoot = interceptBackPressed;
         }
 
         void addTask(Task t) {
@@ -244,7 +247,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 mOrganizer.onTaskVanished(t);
             }
             mOrganizedTasks.remove(t);
-            mInterceptBackPressedOnRootTasks.remove(t.mTaskId);
         }
 
         void dispose() {
@@ -276,8 +278,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap<>();
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     private final ArrayList<Task> mPendingTaskInfoChanges = new ArrayList<>();
-    // Set of organized tasks (by taskId) that dispatch back pressed to their organizers
-    private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet();
 
     private final ActivityTaskManagerService mService;
 
@@ -623,7 +623,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void setInterceptBackPressedOnTaskRoot(WindowContainerToken token,
+    public void setInterceptBackPressedOnTaskRoot(ITaskOrganizer organizer,
             boolean interceptBackPressed) {
         enforceStackPermission("setInterceptBackPressedOnTaskRoot()");
         final long origId = Binder.clearCallingIdentity();
@@ -631,15 +631,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Set intercept back pressed on root=%b",
                         interceptBackPressed);
-                final Task task = WindowContainer.fromBinder(token.asBinder()).asTask();
-                if (task == null) {
-                    Slog.w(TAG, "Could not resolve task from token");
-                    return;
-                }
-                if (interceptBackPressed) {
-                    mInterceptBackPressedOnRootTasks.add(task.mTaskId);
-                } else {
-                    mInterceptBackPressedOnRootTasks.remove(task.mTaskId);
+                final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+                if (state != null) {
+                    state.setInterceptBackPressedOnTaskRoot(interceptBackPressed);
                 }
             }
         } finally {
@@ -648,12 +642,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     public boolean handleInterceptBackPressedOnTaskRoot(Task task) {
-        if (task == null || !task.isOrganized()
-                || !mInterceptBackPressedOnRootTasks.contains(task.mTaskId)) {
+        if (task == null || !task.isOrganized()) {
             return false;
         }
 
         final TaskOrganizerState state = mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder());
+        if (!state.mInterceptBackPressedOnTaskRoot) {
+            return false;
+        }
+
         state.mOrganizer.onBackPressedOnTaskRoot(task);
         return true;
     }
