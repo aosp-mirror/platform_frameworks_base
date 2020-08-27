@@ -81,6 +81,12 @@ public final class ScanResult implements Parcelable {
     public String capabilities;
 
     /**
+     * The interface name on which the scan result was received.
+     * @hide
+     */
+    public String ifaceName;
+
+    /**
      * @hide
      * No security protocol.
      */
@@ -939,6 +945,7 @@ public final class ScanResult implements Parcelable {
             flags = source.flags;
             radioChainInfos = source.radioChainInfos;
             this.mWifiStandard = source.mWifiStandard;
+            this.ifaceName = source.ifaceName;
         }
     }
 
@@ -977,6 +984,7 @@ public final class ScanResult implements Parcelable {
         sb.append(", 80211mcResponder: ");
         sb.append(((flags & FLAG_80211mc_RESPONDER) != 0) ? "is supported" : "is not supported");
         sb.append(", Radio Chain Infos: ").append(Arrays.toString(radioChainInfos));
+        sb.append(", interface name: ").append(ifaceName);
         return sb.toString();
     }
 
@@ -1056,6 +1064,7 @@ public final class ScanResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeString((ifaceName != null) ? ifaceName.toString() : "");
     }
 
     /** Implement the Parcelable interface */
@@ -1134,6 +1143,7 @@ public final class ScanResult implements Parcelable {
                         sr.radioChainInfos[i].level = in.readInt();
                     }
                 }
+                sr.ifaceName = in.readString();
                 return sr;
             }
 

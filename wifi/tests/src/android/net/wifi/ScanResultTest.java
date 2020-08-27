@@ -44,6 +44,7 @@ public class ScanResultTest {
     public static final long TEST_TSF = 04660l;
     public static final @WifiAnnotations.WifiStandard int TEST_WIFI_STANDARD =
             ScanResult.WIFI_STANDARD_11AC;
+    public static final String TEST_IFACE_NAME = "test_ifname";
 
     /**
      * Frequency to channel map. This include some frequencies used outside the US.
@@ -219,7 +220,7 @@ public class ScanResultTest {
                 + "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, "
                 + "standard: 11ac, "
                 + "80211mcResponder: is not supported, "
-                + "Radio Chain Infos: null", scanResult.toString());
+                + "Radio Chain Infos: null, interface name: test_ifname", scanResult.toString());
     }
 
     /**
@@ -242,7 +243,8 @@ public class ScanResultTest {
                 + "standard: 11ac, "
                 + "80211mcResponder: is not supported, "
                 + "Radio Chain Infos: [RadioChainInfo: id=0, level=-45, "
-                + "RadioChainInfo: id=1, level=-54]", scanResult.toString());
+                + "RadioChainInfo: id=1, level=-54], interface name: test_ifname",
+                scanResult.toString());
     }
 
     /**
@@ -283,6 +285,8 @@ public class ScanResultTest {
         result.frequency = TEST_FREQUENCY;
         result.timestamp = TEST_TSF;
         result.setWifiStandard(TEST_WIFI_STANDARD);
+        result.ifaceName = TEST_IFACE_NAME;
+
         return result;
     }
 
