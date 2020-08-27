@@ -458,7 +458,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
                 || mTmpTaskInfo.isResizeable != lastInfo.isResizeable
                 || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams
-                || !TaskDescription.equals(mTmpTaskInfo.taskDescription, lastInfo.taskDescription);
+                || !TaskDescription.equals(mTmpTaskInfo.taskDescription, lastInfo.taskDescription)
+                || mTmpTaskInfo.requestedOrientation != lastInfo.requestedOrientation;
         if (!changed) {
             int cfgChanges = mTmpTaskInfo.configuration.diff(lastInfo.configuration);
             final int winCfgChanges = (cfgChanges & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0

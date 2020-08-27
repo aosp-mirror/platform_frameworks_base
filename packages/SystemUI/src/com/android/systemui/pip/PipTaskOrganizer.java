@@ -40,7 +40,6 @@ import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
@@ -104,7 +103,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     private final Rect mLastReportedBounds = new Rect();
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
-    private final Map<IBinder, Configuration> mInitialState = new HashMap<>();
+    private final Map<IBinder, PipWindowConfigurationCompact> mCompactState = new HashMap<>();
     private final Divider mSplitDivider;
 
     // These callbacks are called on the update thread
@@ -202,6 +201,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      */
     private boolean mShouldDeferEnteringPip;
 
+    private @ActivityInfo.ScreenOrientation int mRequestedOrientation;
+
     @Inject
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
@@ -281,11 +282,13 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
-        final Configuration initialConfig = mInitialState.remove(mToken.asBinder());
-        final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
+        final PipWindowConfigurationCompact config = mCompactState.remove(mToken.asBinder());
+        config.syncWithScreenOrientation(mRequestedOrientation,
+                mPipBoundsHandler.getDisplayRotation());
+        final boolean orientationDiffers = config.getRotation()
                 != mPipBoundsHandler.getDisplayRotation();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
+        final Rect destinationBounds = config.getBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds)
                 ? TRANSITION_DIRECTION_TO_SPLIT_SCREEN
                 : TRANSITION_DIRECTION_TO_FULLSCREEN;
@@ -351,7 +354,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration)
                 .start());
-        mInitialState.remove(mToken.asBinder());
+        mCompactState.remove(mToken.asBinder());
         mExitingPip = true;
     }
 
@@ -377,8 +380,10 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mInPip = true;
         mExitingPip = false;
         mLeash = leash;
-        mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
+        mCompactState.put(mToken.asBinder(),
+                new PipWindowConfigurationCompact(mTaskInfo.configuration.windowConfiguration));
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
+        mRequestedOrientation = info.requestedOrientation;
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
         mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
@@ -521,6 +526,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
+        mRequestedOrientation = info.requestedOrientation;
+        // check PictureInPictureParams for aspect ratio change.
         final PictureInPictureParams newParams = info.pictureInPictureParams;
         if (newParams == null || !applyPictureInPictureParams(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
@@ -558,8 +565,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
-     * TODO(b/152809058): consolidate the display info handling logic in SysUI
-     *
      * @param destinationBoundsOut the current destination bounds will be populated to this param
      */
     @SuppressWarnings("unchecked")
@@ -963,9 +968,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
         pw.println(innerPrefix + "mLastReportedBounds=" + mLastReportedBounds);
         pw.println(innerPrefix + "mInitialState:");
-        for (Map.Entry<IBinder, Configuration> e : mInitialState.entrySet()) {
+        for (Map.Entry<IBinder, PipWindowConfigurationCompact> e : mCompactState.entrySet()) {
             pw.println(innerPrefix + "  binder=" + e.getKey()
-                    + " winConfig=" + e.getValue().windowConfiguration);
+                    + " config=" + e.getValue());
         }
     }
 
