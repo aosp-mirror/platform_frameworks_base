@@ -47,9 +47,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -81,7 +78,6 @@ import com.android.systemui.statusbar.notification.row.NotificationBlockingHelpe
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.LeakDetector;
@@ -128,6 +124,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
+    @Mock NotificationStackScrollLayoutController mStackScrollLayoutController;
     private NotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
@@ -216,6 +213,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setStatusBar(mBar);
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
+        when(mStackScrollLayoutController.getNoticationRoundessManager())
+                .thenReturn(mock(NotificationRoundnessManager.class));
+        mStackScroller.setController(mStackScrollLayoutController);
 
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)

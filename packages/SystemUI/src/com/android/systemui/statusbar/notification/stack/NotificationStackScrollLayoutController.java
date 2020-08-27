@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -117,6 +118,8 @@ public class NotificationStackScrollLayoutController {
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
+    private boolean mShowEmptyShadeView;
+    private int mBarState;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -127,6 +130,8 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onViewAttachedToWindow(View v) {
                     mConfigurationController.addCallback(mConfigurationListener);
+                    mZenModeController.addCallback(mZenModeControllerCallback);
+                    mBarState = mStatusBarStateController.getState();
                     mStatusBarStateController.addCallback(
                             mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
                 }
@@ -134,6 +139,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onViewDetachedFromWindow(View v) {
                     mConfigurationController.removeCallback(mConfigurationListener);
+                    mZenModeController.removeCallback(mZenModeControllerCallback);
                     mStatusBarStateController.removeCallback(mStateListener);
                 }
             };
@@ -154,11 +160,13 @@ public class NotificationStackScrollLayoutController {
     final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onDensityOrFontScaleChanged() {
+            updateShowEmptyShadeView();
             mView.reinflateViews();
         }
 
         @Override
         public void onOverlayChanged() {
+            updateShowEmptyShadeView();
             mView.updateCornerRadius();
             mView.reinflateViews();
         }
@@ -179,14 +187,15 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onStatePreChange(int oldState, int newState) {
                     if (oldState == StatusBarState.SHADE_LOCKED
-                            && newState == StatusBarState.KEYGUARD) {
+                            && newState == KEYGUARD) {
                         mView.requestAnimateEverything();
                     }
                 }
 
                 @Override
                 public void onStateChanged(int newState) {
-                    mView.setStatusBarState(newState);
+                    mBarState = newState;
+                    mView.setStatusBarState(mBarState);
                 }
 
                 @Override
@@ -479,6 +488,14 @@ public class NotificationStackScrollLayoutController {
             mView.setTopHeadsUpEntry(topEntry);
         }
     };
+
+    private final ZenModeController.Callback mZenModeControllerCallback =
+            new ZenModeController.Callback() {
+                @Override
+                public void onZenChanged(int zen) {
+                    updateShowEmptyShadeView();
+                }
+            };
 
     @Inject
     public NotificationStackScrollLayoutController(
@@ -795,6 +812,7 @@ public class NotificationStackScrollLayoutController {
 
     public void setQsExpanded(boolean expanded) {
         mView.setQsExpanded(expanded);
+        updateShowEmptyShadeView();
     }
 
     public void setScrollingEnabled(boolean enabled) {
@@ -903,8 +921,21 @@ public class NotificationStackScrollLayoutController {
         return mView.getFooterViewHeightWithPadding();
     }
 
-    public void updateEmptyShadeView(boolean visible) {
-        mView.updateEmptyShadeView(visible, mZenModeController.areNotificationsHiddenInShade());
+    /**
+     * Update whether we should show the empty shade view (no notifications in the shade).
+     * If so, send the update to our view.
+     */
+    public void updateShowEmptyShadeView() {
+        mShowEmptyShadeView = mBarState != KEYGUARD
+                && !mView.isQsExpanded()
+                && mView.getVisibleNotificationCount() == 0;
+        mView.updateEmptyShadeView(
+                mShowEmptyShadeView,
+                mZenModeController.areNotificationsHiddenInShade());
+    }
+
+    public boolean isShowingEmptyShadeView() {
+        return mShowEmptyShadeView;
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
