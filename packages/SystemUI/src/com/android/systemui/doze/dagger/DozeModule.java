@@ -20,6 +20,8 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.os.Handler;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeAuthRemover;
@@ -91,6 +93,7 @@ public abstract class DozeModule {
 
     @Provides
     @BrightnessSensor
+    @Nullable
     static Sensor providesBrightnessSensor(AsyncSensorManager sensorManager, Context context) {
         return DozeSensors.findSensorWithType(sensorManager,
                 context.getString(R.string.doze_brightness_sensor_type));
