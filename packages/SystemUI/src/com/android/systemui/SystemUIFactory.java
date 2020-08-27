@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -83,11 +84,16 @@ public class SystemUIFactory {
 
     public SystemUIFactory() {}
 
-    private void init(Context context) {
+    private void init(Context context) throws ExecutionException, InterruptedException {
         mRootComponent = buildGlobalRootComponent(context);
+        // Stand up WMComponent
         mWMComponent = mRootComponent.getWMComponentBuilder().build();
-        // TODO: use WMComponent to pass APIs into the SysUIComponent.
-        mSysUIComponent = mRootComponent.getSysUIComponent().build();
+
+        // And finally, retrieve whatever SysUI needs from WMShell and build SysUI.
+        // TODO: StubAPIClass is just a placeholder.
+        mSysUIComponent = mRootComponent.getSysUIComponent()
+                .setStubAPIClass(mWMComponent.createStubAPIClass())
+                .build();
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
@@ -101,8 +107,13 @@ public class SystemUIFactory {
                 .build();
     }
 
+
     public GlobalRootComponent getRootComponent() {
         return mRootComponent;
+    }
+
+    public WMComponent getWMComponent() {
+        return mWMComponent;
     }
 
     public SysUIComponent getSysUIComponent() {

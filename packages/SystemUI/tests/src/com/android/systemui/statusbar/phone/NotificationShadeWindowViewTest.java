@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
@@ -85,6 +86,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock private SuperStatusBarViewFactory mStatusBarViewFactory;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
+    @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
 
     @Before
     public void setUp() {
@@ -123,11 +125,11 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mView,
                 mNotificationPanelViewController,
-                mStatusBarViewFactory);
+                mStatusBarViewFactory,
+                mNotificationStackScrollLayoutController);
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
-
     }
 
     @Test

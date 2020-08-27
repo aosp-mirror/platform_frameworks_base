@@ -345,7 +345,6 @@ interface IDevicePolicyManager {
     void setKeepUninstalledPackages(in ComponentName admin, in String callerPackage, in List<String> packageList);
     List<String> getKeepUninstalledPackages(in ComponentName admin, in String callerPackage);
     boolean isManagedProfile(in ComponentName admin);
-    boolean isSystemOnlyUser(in ComponentName admin);
     String getWifiMacAddress(in ComponentName admin);
     void reboot(in ComponentName admin);
 

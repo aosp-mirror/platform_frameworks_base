@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
@@ -690,6 +691,82 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(keyPressed);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(keyReleased);
+    }
+
+    @Test
+    public void sendVolumeKeyEvent_toTv_activeSource() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setSystemAudioActivated(false);
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
+
+        HdmiCecMessage pressed = HdmiCecMessageBuilder.buildUserControlPressed(
+                mPlaybackLogicalAddress, ADDR_TV, HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP);
+        HdmiCecMessage released = HdmiCecMessageBuilder.buildUserControlReleased(
+                mPlaybackLogicalAddress, ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isTrue();
+        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+    }
+
+    @Test
+    public void sendVolumeKeyEvent_toAudio_activeSource() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setSystemAudioActivated(true);
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
+
+        HdmiCecMessage pressed = HdmiCecMessageBuilder.buildUserControlPressed(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM, HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP);
+        HdmiCecMessage released = HdmiCecMessageBuilder.buildUserControlReleased(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isTrue();
+        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+    }
+
+    @Test
+    public void sendVolumeKeyEvent_toTv_inactiveSource() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setSystemAudioActivated(false);
+        mHdmiControlService.setActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
+
+        HdmiCecMessage pressed = HdmiCecMessageBuilder.buildUserControlPressed(
+                mPlaybackLogicalAddress, ADDR_TV, HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP);
+        HdmiCecMessage released = HdmiCecMessageBuilder.buildUserControlReleased(
+                mPlaybackLogicalAddress, ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
+    }
+
+    @Test
+    public void sendVolumeKeyEvent_toAudio_inactiveSource() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setSystemAudioActivated(true);
+        mHdmiControlService.setActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
+
+        HdmiCecMessage pressed = HdmiCecMessageBuilder.buildUserControlPressed(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM, HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP);
+        HdmiCecMessage released = HdmiCecMessageBuilder.buildUserControlReleased(
+                mPlaybackLogicalAddress, ADDR_AUDIO_SYSTEM);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.mIsActiveSource).isFalse();
+        assertThat(mNativeWrapper.getResultMessages()).containsAllOf(pressed, released);
     }
 
     @Test

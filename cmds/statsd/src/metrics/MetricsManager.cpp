@@ -80,7 +80,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     mConfigValid = initStatsdConfig(
             key, config, uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchingTrackers, mAtomMatchingTrackerMap,
-            mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
+            mAllConditionTrackers, mConditionTrackerMap, mAllMetricProducers, mAllAnomalyTrackers,
             mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
             mTrackerToConditionMap, mActivationAtomTrackerToMetricMap,
             mDeactivationAtomTrackerToMetricMap, mAlertTrackerMap, mMetricIndexesWithActivation,
@@ -204,13 +204,20 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
                                   const sp<AlarmMonitor>& periodicAlarmMonitor) {
     vector<sp<AtomMatchingTracker>> newAtomMatchingTrackers;
     unordered_map<int64_t, int> newAtomMatchingTrackerMap;
+    vector<sp<ConditionTracker>> newConditionTrackers;
+    unordered_map<int64_t, int> newConditionTrackerMap;
     mTagIds.clear();
+    mTrackerToConditionMap.clear();
     mConfigValid = updateStatsdConfig(
             mConfigKey, config, mUidMap, mPullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
-            timeBaseNs, currentTimeNs, mAllAtomMatchingTrackers, mAtomMatchingTrackerMap, mTagIds,
-            newAtomMatchingTrackers, newAtomMatchingTrackerMap);
+            timeBaseNs, currentTimeNs, mAllAtomMatchingTrackers, mAtomMatchingTrackerMap,
+            mAllConditionTrackers, mConditionTrackerMap, mTagIds, newAtomMatchingTrackers,
+            newAtomMatchingTrackerMap, newConditionTrackers, newConditionTrackerMap,
+            mTrackerToConditionMap);
     mAllAtomMatchingTrackers = newAtomMatchingTrackers;
     mAtomMatchingTrackerMap = newAtomMatchingTrackerMap;
+    mAllConditionTrackers = newConditionTrackers;
+    mConditionTrackerMap = newConditionTrackerMap;
     return mConfigValid;
 }
 

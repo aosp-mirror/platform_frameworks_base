@@ -74,12 +74,33 @@ sp<AtomMatchingTracker> createAtomMatchingTracker(const AtomMatcher& logMatcher,
         case AtomMatcher::ContentsCase::kSimpleAtomMatcher:
             return new SimpleAtomMatchingTracker(logMatcher.id(), index, protoHash,
                                                  logMatcher.simple_atom_matcher(), uidMap);
-            break;
         case AtomMatcher::ContentsCase::kCombination:
             return new CombinationAtomMatchingTracker(logMatcher.id(), index, protoHash);
-            break;
         default:
             ALOGE("Matcher \"%lld\" malformed", (long long)logMatcher.id());
+            return nullptr;
+    }
+}
+
+sp<ConditionTracker> createConditionTracker(
+        const ConfigKey& key, const Predicate& predicate, const int index,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap) {
+    string serializedPredicate;
+    if (!predicate.SerializeToString(&serializedPredicate)) {
+        ALOGE("Unable to serialize predicate %lld", (long long)predicate.id());
+        return nullptr;
+    }
+    uint64_t protoHash = Hash64(serializedPredicate);
+    switch (predicate.contents_case()) {
+        case Predicate::ContentsCase::kSimplePredicate: {
+            return new SimpleConditionTracker(key, predicate.id(), protoHash, index,
+                                              predicate.simple_predicate(), atomMatchingTrackerMap);
+        }
+        case Predicate::ContentsCase::kCombination: {
+            return new CombinationConditionTracker(predicate.id(), index, protoHash);
+        }
+        default:
+            ALOGE("Predicate \"%lld\" malformed", (long long)predicate.id());
             return nullptr;
     }
 }
@@ -266,8 +287,7 @@ bool initAtomMatchingTrackers(const StatsdConfig& config, const sp<UidMap>& uidM
 
     for (int i = 0; i < atomMatcherCount; i++) {
         const AtomMatcher& logMatcher = config.atom_matcher(i);
-        int index = allAtomMatchingTrackers.size();
-        sp<AtomMatchingTracker> tracker = createAtomMatchingTracker(logMatcher, index, uidMap);
+        sp<AtomMatchingTracker> tracker = createAtomMatchingTracker(logMatcher, i, uidMap);
         if (tracker == nullptr) {
             return false;
         }
@@ -276,7 +296,7 @@ bool initAtomMatchingTrackers(const StatsdConfig& config, const sp<UidMap>& uidM
             ALOGE("Duplicate AtomMatcher found!");
             return false;
         }
-        atomMatchingTrackerMap[logMatcher.id()] = index;
+        atomMatchingTrackerMap[logMatcher.id()] = i;
         matcherConfigs.push_back(logMatcher);
     }
 
@@ -307,28 +327,17 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 
     for (int i = 0; i < conditionTrackerCount; i++) {
         const Predicate& condition = config.predicate(i);
-        int index = allConditionTrackers.size();
-        switch (condition.contents_case()) {
-            case Predicate::ContentsCase::kSimplePredicate: {
-                allConditionTrackers.push_back(new SimpleConditionTracker(
-                        key, condition.id(), index, condition.simple_predicate(),
-                        atomMatchingTrackerMap));
-                break;
-            }
-            case Predicate::ContentsCase::kCombination: {
-                allConditionTrackers.push_back(
-                        new CombinationConditionTracker(condition.id(), index));
-                break;
-            }
-            default:
-                ALOGE("Predicate \"%lld\" malformed", (long long)condition.id());
-                return false;
+        sp<ConditionTracker> tracker =
+                createConditionTracker(key, condition, i, atomMatchingTrackerMap);
+        if (tracker == nullptr) {
+            return false;
         }
+        allConditionTrackers.push_back(tracker);
         if (conditionTrackerMap.find(condition.id()) != conditionTrackerMap.end()) {
             ALOGE("Duplicate Predicate found!");
             return false;
         }
-        conditionTrackerMap[condition.id()] = index;
+        conditionTrackerMap[condition.id()] = i;
         conditionConfigs.push_back(condition);
     }
 
@@ -934,6 +943,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
                       unordered_map<int64_t, int>& atomMatchingTrackerMap,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
+                      unordered_map<int64_t, int>& conditionTrackerMap,
                       vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
                       vector<sp<AlarmTracker>>& allPeriodicAlarmTrackers,
@@ -944,7 +954,6 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
                       unordered_map<int64_t, int>& alertTrackerMap,
                       vector<int>& metricsWithActivation, std::set<int64_t>& noReportMetricIds) {
-    unordered_map<int64_t, int> conditionTrackerMap;
     vector<ConditionState> initialConditionCache;
     unordered_map<int64_t, int> metricProducerMap;
     unordered_map<int64_t, int> stateAtomIdMap;

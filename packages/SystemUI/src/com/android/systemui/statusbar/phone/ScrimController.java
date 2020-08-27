@@ -141,6 +141,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private ScrimView mScrimBehind;
     private ScrimView mScrimForBubble;
 
+    private Runnable mScrimBehindChangeRunnable;
+
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
@@ -240,6 +242,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mScrimForBubble = scrimForBubble;
+
+        if (mScrimBehindChangeRunnable != null) {
+            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable);
+            mScrimBehindChangeRunnable = null;
+        }
 
         final ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
@@ -934,7 +941,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
-        mScrimBehind.setChangeRunnable(changeRunnable);
+        // TODO: remove this. This is necessary because of an order-of-operations limitation.
+        // The fix is to move more of these class into @StatusBarScope
+        if (mScrimBehind == null) {
+            mScrimBehindChangeRunnable = changeRunnable;
+        } else {
+            mScrimBehind.setChangeRunnable(changeRunnable);
+        }
     }
 
     public void setCurrentUser(int currentUser) {

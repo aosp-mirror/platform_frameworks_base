@@ -608,7 +608,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                                 mReceivedPointerTracker.getReceivedPointerDownY(id)
                                         - rawEvent.getY(index);
                         final double moveDelta = Math.hypot(deltaX, deltaY);
-                        if (moveDelta < mTouchSlop) {
+                        if (moveDelta < (2 * mTouchSlop)) {
                             return;
                         }
                     }
@@ -651,7 +651,13 @@ public class TouchExplorer extends BaseEventStreamTransformation
                                     Slog.d(LOG_TAG, "Three-finger edge swipe detected.");
                                 }
                                 mState.startDelegating();
-                                mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
+                                if (mState.isTouchExploring()) {
+                                    mDispatcher.sendDownForAllNotInjectedPointers(event,
+                                            policyFlags);
+                                } else {
+                                    mDispatcher.sendDownForAllNotInjectedPointersWithOriginalDown(
+                                            event, policyFlags);
+                                }
                             }
                         }
                     }

@@ -15,6 +15,7 @@
  */
 
 #define DEBUG false  // STOPSHIP if true
+#include "Log.h"
 
 #include "config_update_utils.h"
 
@@ -44,7 +45,7 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
     // Check if new matcher.
     const auto& oldAtomMatchingTrackerIt = oldAtomMatchingTrackerMap.find(id);
     if (oldAtomMatchingTrackerIt == oldAtomMatchingTrackerMap.end()) {
-        matchersToUpdate[matcherIdx] = UPDATE_REPLACE;
+        matchersToUpdate[matcherIdx] = UPDATE_NEW;
         return true;
     }
 
@@ -103,11 +104,13 @@ bool determineMatcherUpdateStatus(const StatsdConfig& config, const int matcherI
     return true;
 }
 
-bool updateAtomTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
-                        const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
-                        const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
-                        set<int>& allTagIds, unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
-                        vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers) {
+bool updateAtomMatchingTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
+                                const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                                const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
+                                set<int>& allTagIds,
+                                unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+                                vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
+                                set<int64_t>& replacedMatchers) {
     const int atomMatcherCount = config.atom_matcher_size();
 
     vector<AtomMatcher> matcherProtos;
@@ -157,7 +160,10 @@ bool updateAtomTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
                 newAtomMatchingTrackers.push_back(tracker);
                 break;
             }
-            case UPDATE_REPLACE: {
+            case UPDATE_REPLACE:
+                replacedMatchers.insert(id);
+                [[fallthrough]];  // Intentionally fallthrough to create the new matcher.
+            case UPDATE_NEW: {
                 sp<AtomMatchingTracker> tracker = createAtomMatchingTracker(matcher, i, uidMap);
                 if (tracker == nullptr) {
                     return false;
@@ -187,6 +193,207 @@ bool updateAtomTrackers(const StatsdConfig& config, const sp<UidMap>& uidMap,
     return true;
 }
 
+// Recursive function to determine if a condition needs to be updated. Populates conditionsToUpdate.
+// Returns whether the function was successful or not.
+bool determineConditionUpdateStatus(const StatsdConfig& config, const int conditionIdx,
+                                    const unordered_map<int64_t, int>& oldConditionTrackerMap,
+                                    const vector<sp<ConditionTracker>>& oldConditionTrackers,
+                                    const unordered_map<int64_t, int>& newConditionTrackerMap,
+                                    const set<int64_t>& replacedMatchers,
+                                    vector<UpdateStatus>& conditionsToUpdate,
+                                    vector<bool>& cycleTracker) {
+    // Have already examined this condition.
+    if (conditionsToUpdate[conditionIdx] != UPDATE_UNKNOWN) {
+        return true;
+    }
+
+    const Predicate& predicate = config.predicate(conditionIdx);
+    int64_t id = predicate.id();
+    // Check if new condition.
+    const auto& oldConditionTrackerIt = oldConditionTrackerMap.find(id);
+    if (oldConditionTrackerIt == oldConditionTrackerMap.end()) {
+        conditionsToUpdate[conditionIdx] = UPDATE_NEW;
+        return true;
+    }
+
+    // This is an existing condition. Check if it has changed.
+    string serializedCondition;
+    if (!predicate.SerializeToString(&serializedCondition)) {
+        ALOGE("Unable to serialize matcher %lld", (long long)id);
+        return false;
+    }
+    uint64_t newProtoHash = Hash64(serializedCondition);
+    if (newProtoHash != oldConditionTrackers[oldConditionTrackerIt->second]->getProtoHash()) {
+        conditionsToUpdate[conditionIdx] = UPDATE_REPLACE;
+        return true;
+    }
+
+    switch (predicate.contents_case()) {
+        case Predicate::ContentsCase::kSimplePredicate: {
+            // Need to check if any of the underlying matchers changed.
+            const SimplePredicate& simplePredicate = predicate.simple_predicate();
+            if (simplePredicate.has_start()) {
+                if (replacedMatchers.find(simplePredicate.start()) != replacedMatchers.end()) {
+                    conditionsToUpdate[conditionIdx] = UPDATE_REPLACE;
+                    return true;
+                }
+            }
+            if (simplePredicate.has_stop()) {
+                if (replacedMatchers.find(simplePredicate.stop()) != replacedMatchers.end()) {
+                    conditionsToUpdate[conditionIdx] = UPDATE_REPLACE;
+                    return true;
+                }
+            }
+            if (simplePredicate.has_stop_all()) {
+                if (replacedMatchers.find(simplePredicate.stop_all()) != replacedMatchers.end()) {
+                    conditionsToUpdate[conditionIdx] = UPDATE_REPLACE;
+                    return true;
+                }
+            }
+            conditionsToUpdate[conditionIdx] = UPDATE_PRESERVE;
+            return true;
+        }
+        case Predicate::ContentsCase::kCombination: {
+            // Need to recurse on the children to see if any of the child predicates changed.
+            cycleTracker[conditionIdx] = true;
+            UpdateStatus status = UPDATE_PRESERVE;
+            for (const int64_t childPredicateId : predicate.combination().predicate()) {
+                const auto& childIt = newConditionTrackerMap.find(childPredicateId);
+                if (childIt == newConditionTrackerMap.end()) {
+                    ALOGW("Predicate %lld not found in the config", (long long)childPredicateId);
+                    return false;
+                }
+                const int childIdx = childIt->second;
+                if (cycleTracker[childIdx]) {
+                    ALOGE("Cycle detected in predicate config");
+                    return false;
+                }
+                if (!determineConditionUpdateStatus(config, childIdx, oldConditionTrackerMap,
+                                                    oldConditionTrackers, newConditionTrackerMap,
+                                                    replacedMatchers, conditionsToUpdate,
+                                                    cycleTracker)) {
+                    return false;
+                }
+
+                if (conditionsToUpdate[childIdx] == UPDATE_REPLACE) {
+                    status = UPDATE_REPLACE;
+                    break;
+                }
+            }
+            conditionsToUpdate[conditionIdx] = status;
+            cycleTracker[conditionIdx] = false;
+            return true;
+        }
+        default: {
+            ALOGE("Predicate \"%lld\" malformed", (long long)id);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool updateConditions(const ConfigKey& key, const StatsdConfig& config,
+                      const unordered_map<int64_t, int>& atomMatchingTrackerMap,
+                      const set<int64_t>& replacedMatchers,
+                      const unordered_map<int64_t, int>& oldConditionTrackerMap,
+                      const vector<sp<ConditionTracker>>& oldConditionTrackers,
+                      unordered_map<int64_t, int>& newConditionTrackerMap,
+                      vector<sp<ConditionTracker>>& newConditionTrackers,
+                      unordered_map<int, vector<int>>& trackerToConditionMap,
+                      vector<ConditionState>& conditionCache, set<int64_t>& replacedConditions) {
+    vector<Predicate> conditionProtos;
+    const int conditionTrackerCount = config.predicate_size();
+    conditionProtos.reserve(conditionTrackerCount);
+    newConditionTrackers.reserve(conditionTrackerCount);
+    conditionCache.assign(conditionTrackerCount, ConditionState::kNotEvaluated);
+
+    for (int i = 0; i < conditionTrackerCount; i++) {
+        const Predicate& condition = config.predicate(i);
+        if (newConditionTrackerMap.find(condition.id()) != newConditionTrackerMap.end()) {
+            ALOGE("Duplicate Predicate found!");
+            return false;
+        }
+        newConditionTrackerMap[condition.id()] = i;
+        conditionProtos.push_back(condition);
+    }
+
+    vector<UpdateStatus> conditionsToUpdate(conditionTrackerCount, UPDATE_UNKNOWN);
+    vector<bool> cycleTracker(conditionTrackerCount, false);
+    for (int i = 0; i < conditionTrackerCount; i++) {
+        if (!determineConditionUpdateStatus(config, i, oldConditionTrackerMap, oldConditionTrackers,
+                                            newConditionTrackerMap, replacedMatchers,
+                                            conditionsToUpdate, cycleTracker)) {
+            return false;
+        }
+    }
+
+    // Update status has been determined for all conditions. Now perform the update.
+    set<int> preservedConditions;
+    for (int i = 0; i < conditionTrackerCount; i++) {
+        const Predicate& predicate = config.predicate(i);
+        const int64_t id = predicate.id();
+        switch (conditionsToUpdate[i]) {
+            case UPDATE_PRESERVE: {
+                preservedConditions.insert(i);
+                const auto& oldConditionTrackerIt = oldConditionTrackerMap.find(id);
+                if (oldConditionTrackerIt == oldConditionTrackerMap.end()) {
+                    ALOGE("Could not find Predicate %lld in the previous config, but expected it "
+                          "to be there",
+                          (long long)id);
+                    return false;
+                }
+                const int oldIndex = oldConditionTrackerIt->second;
+                newConditionTrackers.push_back(oldConditionTrackers[oldIndex]);
+                break;
+            }
+            case UPDATE_REPLACE:
+                replacedConditions.insert(id);
+                [[fallthrough]];  // Intentionally fallthrough to create the new condition tracker.
+            case UPDATE_NEW: {
+                sp<ConditionTracker> tracker =
+                        createConditionTracker(key, predicate, i, atomMatchingTrackerMap);
+                if (tracker == nullptr) {
+                    return false;
+                }
+                newConditionTrackers.push_back(tracker);
+                break;
+            }
+            default: {
+                ALOGE("Condition \"%lld\" update state is unknown. This should never happen",
+                      (long long)id);
+                return false;
+            }
+        }
+    }
+
+    // Update indices of preserved predicates.
+    for (const int conditionIndex : preservedConditions) {
+        if (!newConditionTrackers[conditionIndex]->onConfigUpdated(
+                    conditionProtos, conditionIndex, newConditionTrackers, atomMatchingTrackerMap,
+                    newConditionTrackerMap)) {
+            ALOGE("Failed to update condition %lld",
+                  (long long)newConditionTrackers[conditionIndex]->getConditionId());
+            return false;
+        }
+    }
+
+    std::fill(cycleTracker.begin(), cycleTracker.end(), false);
+    for (int conditionIndex = 0; conditionIndex < conditionTrackerCount; conditionIndex++) {
+        const sp<ConditionTracker>& conditionTracker = newConditionTrackers[conditionIndex];
+        // Calling init on preserved conditions is OK. It is needed to fill the condition cache.
+        if (!conditionTracker->init(conditionProtos, newConditionTrackers, newConditionTrackerMap,
+                                    cycleTracker, conditionCache)) {
+            return false;
+        }
+        for (const int trackerIndex : conditionTracker->getAtomMatchingTrackerIndex()) {
+            vector<int>& conditionList = trackerToConditionMap[trackerIndex];
+            conditionList.push_back(conditionIndex);
+        }
+    }
+    return true;
+}
+
 bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp<UidMap>& uidMap,
                         const sp<StatsPullerManager>& pullerManager,
                         const sp<AlarmMonitor>& anomalyAlarmMonitor,
@@ -194,14 +401,34 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         const int64_t currentTimeNs,
                         const vector<sp<AtomMatchingTracker>>& oldAtomMatchingTrackers,
                         const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                        const vector<sp<ConditionTracker>>& oldConditionTrackers,
+                        const unordered_map<int64_t, int>& oldConditionTrackerMap,
                         set<int>& allTagIds,
                         vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
-                        unordered_map<int64_t, int>& newAtomMatchingTrackerMap) {
-    if (!updateAtomTrackers(config, uidMap, oldAtomMatchingTrackerMap, oldAtomMatchingTrackers,
-                            allTagIds, newAtomMatchingTrackerMap, newAtomMatchingTrackers)) {
+                        unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+                        vector<sp<ConditionTracker>>& newConditionTrackers,
+                        unordered_map<int64_t, int>& newConditionTrackerMap,
+                        unordered_map<int, vector<int>>& trackerToConditionMap) {
+    set<int64_t> replacedMatchers;
+    set<int64_t> replacedConditions;
+    vector<ConditionState> conditionCache;
+
+    if (!updateAtomMatchingTrackers(config, uidMap, oldAtomMatchingTrackerMap,
+                                    oldAtomMatchingTrackers, allTagIds, newAtomMatchingTrackerMap,
+                                    newAtomMatchingTrackers, replacedMatchers)) {
         ALOGE("updateAtomMatchingTrackers failed");
         return false;
     }
+    VLOG("updateAtomMatchingTrackers succeeded");
+
+    if (!updateConditions(key, config, newAtomMatchingTrackerMap, replacedMatchers,
+                          oldConditionTrackerMap, oldConditionTrackers, newConditionTrackerMap,
+                          newConditionTrackers, trackerToConditionMap, conditionCache,
+                          replacedConditions)) {
+        ALOGE("updateConditions failed");
+        return false;
+    }
+    VLOG("updateConditions succeeded");
 
     return true;
 }
