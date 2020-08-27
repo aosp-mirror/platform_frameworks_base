@@ -3306,8 +3306,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Send broadcast to default launcher only if it's a new install
         // TODO(b/144270665): Secure the usage of this broadcast.
         final boolean isNewInstall = extras == null || !extras.getBoolean(Intent.EXTRA_REPLACING);
-        if (success && isNewInstall && mPm.mInstallerService.okToSendBroadcasts()
-                && (params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
+        if (success && isNewInstall && mPm.mInstallerService.okToSendBroadcasts()) {
             mPm.sendSessionCommitBroadcast(generateInfoScrubbed(true /*icon*/), userId);
         }
 
