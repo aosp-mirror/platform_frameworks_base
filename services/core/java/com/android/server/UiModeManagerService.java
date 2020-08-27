@@ -489,6 +489,9 @@ final class UiModeManagerService extends SystemService {
      * @return True if the new value is different from the old value. False otherwise.
      */
     private boolean updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
+        if (mCarModeEnabled) {
+            return false;
+        }
         int oldNightMode = mNightMode;
         if (mSetupWizardComplete) {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
