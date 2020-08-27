@@ -913,10 +913,6 @@ public class DisplayPolicy {
                         (int) attrs.hideTimeoutMilliseconds,
                         AccessibilityManager.FLAG_CONTENT_TEXT);
                 attrs.windowAnimations = com.android.internal.R.style.Animation_Toast;
-                // Toast can show with below conditions when the screen is locked.
-                if (canToastShowWhenLocked(callingPid)) {
-                    attrs.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-                }
                 // Toasts can't be clickable
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 break;
@@ -944,16 +940,6 @@ public class DisplayPolicy {
         if (mNavigationBarAlt == win) {
             mNavigationBarAltPosition = getAltBarPosition(attrs);
         }
-    }
-
-    /**
-     * @return {@code true} if the calling activity initiate toast and is visible with
-     * {@link WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} flag.
-     */
-    boolean canToastShowWhenLocked(int callingPid) {
-        return mDisplayContent.forAllWindows(w -> {
-            return callingPid == w.mSession.mPid && w.isVisible() && w.canShowWhenLocked();
-        }, true /* traverseTopToBottom */);
     }
 
     /**
