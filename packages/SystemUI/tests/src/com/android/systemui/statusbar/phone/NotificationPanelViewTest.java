@@ -62,7 +62,6 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -81,6 +80,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -191,8 +191,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
-
-    private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
