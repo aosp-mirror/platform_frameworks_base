@@ -67,7 +67,35 @@ public interface SettingsProxy {
      * Implicitly calls {@link #getUriFor(String)} on the passed in name.
      */
     default void registerContentObserver(String name, ContentObserver settingsObserver) {
-        registerContentObserverForUser(name, settingsObserver, getUserId());
+        registerContentObserver(getUriFor(name), settingsObserver);
+    }
+
+    /**
+     * Convenience wrapper around
+     * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver)}.'
+     */
+    default void registerContentObserver(Uri uri, ContentObserver settingsObserver) {
+        registerContentObserverForUser(uri, settingsObserver, getUserId());
+    }
+
+    /**
+     * Convenience wrapper around
+     * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver)}.'
+     *
+     * Implicitly calls {@link #getUriFor(String)} on the passed in name.
+     */
+    default void registerContentObserver(String name, boolean notifyForDescendents,
+            ContentObserver settingsObserver) {
+        registerContentObserver(getUriFor(name), notifyForDescendents, settingsObserver);
+    }
+
+    /**
+     * Convenience wrapper around
+     * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver)}.'
+     */
+    default void registerContentObserver(Uri uri, boolean notifyForDescendents,
+            ContentObserver settingsObserver) {
+        registerContentObserverForUser(uri, notifyForDescendents, settingsObserver, getUserId());
     }
 
     /**
@@ -78,8 +106,42 @@ public interface SettingsProxy {
      */
     default void registerContentObserverForUser(
             String name, ContentObserver settingsObserver, int userHandle) {
+        registerContentObserverForUser(
+                getUriFor(name), settingsObserver, userHandle);
+    }
+
+    /**
+     * Convenience wrapper around
+     * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver, int)}
+     */
+    default void registerContentObserverForUser(
+            Uri uri, ContentObserver settingsObserver, int userHandle) {
+        registerContentObserverForUser(
+                uri, false, settingsObserver, userHandle);
+    }
+
+    /**
+     * Convenience wrapper around
+     * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver, int)}
+     *
+     * Implicitly calls {@link #getUriFor(String)} on the passed in name.
+     */
+    default void registerContentObserverForUser(
+            String name, boolean notifyForDescendents, ContentObserver settingsObserver,
+            int userHandle) {
+        registerContentObserverForUser(
+                getUriFor(name), notifyForDescendents, settingsObserver, userHandle);
+    }
+
+    /**
+     * Convenience wrapper around
+     * {@link ContentResolver#registerContentObserver(Uri, boolean, ContentObserver, int)}
+     */
+    default void registerContentObserverForUser(
+            Uri uri, boolean notifyForDescendents, ContentObserver settingsObserver,
+            int userHandle) {
         getContentResolver().registerContentObserver(
-                getUriFor(name), false, settingsObserver, userHandle);
+                uri, notifyForDescendents, settingsObserver, userHandle);
     }
 
     /** See {@link ContentResolver#unregisterContentObserver(ContentObserver)}. */
