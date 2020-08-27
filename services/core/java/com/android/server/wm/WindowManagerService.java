@@ -376,8 +376,11 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String BOOT_ANIMATION_SERVICE = "bootanim";
 
     static final int UPDATE_FOCUS_NORMAL = 0;
+    /** Caller will assign layers */
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
+    /** Caller is performing surface placement */
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
+    /** Caller will performSurfacePlacement */
     static final int UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
     /** Indicates we are removing the focused window when updating the focus. */
     static final int UPDATE_FOCUS_REMOVING_FOCUS = 4;
@@ -4730,12 +4733,30 @@ public class WindowManagerService extends IWindowManager.Stub
         return false;
     }
 
+    void reportFocusChanged(IBinder oldToken, IBinder newToken) {
+        WindowState lastFocus;
+        WindowState newFocus;
+        synchronized (mGlobalLock) {
+            lastFocus = mInputToWindowMap.get(oldToken);
+            newFocus = mInputToWindowMap.get(newToken);
+            ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Focus changing: %s -> %s", lastFocus, newFocus);
+        }
+
+        if (newFocus != null) {
+            newFocus.reportFocusChangedSerialized(true);
+            notifyFocusChanged();
+        }
+
+        if (lastFocus != null) {
+            lastFocus.reportFocusChangedSerialized(false);
+        }
+    }
+
     // -------------------------------------------------------------
     // Async Handler
     // -------------------------------------------------------------
 
     final class H extends android.os.Handler {
-        public static final int REPORT_FOCUS_CHANGE = 2;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
         public static final int PERSIST_ANIMATION_SCALE = 14;
@@ -4788,50 +4809,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "handleMessage: entry what=" + msg.what);
             }
             switch (msg.what) {
-                case REPORT_FOCUS_CHANGE: {
-                    final DisplayContent displayContent = (DisplayContent) msg.obj;
-                    WindowState lastFocus;
-                    WindowState newFocus;
-
-                    AccessibilityController accessibilityController = null;
-
-                    synchronized (mGlobalLock) {
-                        if (mAccessibilityController != null) {
-                            accessibilityController = mAccessibilityController;
-                        }
-
-                        lastFocus = displayContent.mLastFocus;
-                        newFocus = displayContent.mCurrentFocus;
-                        if (lastFocus == newFocus) {
-                            // Focus is not changing, so nothing to do.
-                            return;
-                        }
-                        displayContent.mLastFocus = newFocus;
-                        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Focus moving from %s"
-                                        + " to %s displayId=%d", lastFocus, newFocus,
-                                displayContent.getDisplayId());
-                    }
-
-                    // First notify the accessibility manager for the change so it has
-                    // the windows before the newly focused one starts firing events.
-                    if (accessibilityController != null) {
-                        accessibilityController.onWindowFocusChangedNotLocked(
-                                displayContent.getDisplayId());
-                    }
-
-                    if (newFocus != null) {
-                        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Gaining focus: %s", newFocus);
-                        newFocus.reportFocusChangedSerialized(true);
-                        notifyFocusChanged();
-                    }
-
-                    if (lastFocus != null) {
-                        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Losing focus: %s", lastFocus);
-                        lastFocus.reportFocusChangedSerialized(false);
-                    }
-                    break;
-                }
-
                 case WINDOW_FREEZE_TIMEOUT: {
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
                     synchronized (mGlobalLock) {
@@ -7994,6 +7971,8 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s",
+                touchedWindow);
         final DisplayContent displayContent = touchedWindow.getDisplayContent();
         if (!displayContent.isOnTop()) {
             displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
@@ -8022,10 +8001,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        try {
-            mActivityTaskManager.setFocusedTask(task.mTaskId);
-        } catch (RemoteException e) {
-        }
+        mAtmService.setFocusedTask(task.mTaskId);
     }
 
     /**

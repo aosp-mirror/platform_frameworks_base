@@ -370,7 +370,8 @@ final class InputMonitor {
      * Layer assignment is assumed to be complete by the time this is called.
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
-        ProtoLog.d(WM_DEBUG_FOCUS_LIGHT, "Input focus has changed to %s", newWindow);
+        ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Input focus has changed to %s display=%d",
+                newWindow, mDisplayId);
 
         if (newWindow != mInputFocus) {
             if (newWindow != null && newWindow.canReceiveKeys()) {
@@ -493,7 +494,7 @@ final class InputMonitor {
             final int type = w.mAttrs.type;
             final boolean isVisible = w.isVisibleLw();
             if (inputChannel == null || inputWindowHandle == null || w.mRemoved
-                    || (w.cantReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
+                    || (!w.canReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
                 if (w.mWinAnimator.hasSurface()) {
                     // Assign an InputInfo with type to the overlay window which can't receive input
                     // event. This is used to omit Surfaces from occlusion detection.

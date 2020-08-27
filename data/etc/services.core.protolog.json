@@ -325,12 +325,6 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "-1587841219": {
-      "message": "Focus moving from %s to %s displayId=%d",
-      "level": "INFO",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1568331821": {
       "message": "Enabling listeners",
       "level": "VERBOSE",
@@ -414,6 +408,12 @@
       "level": "INFO",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1438175584": {
+      "message": "Input focus has changed to %s display=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/InputMonitor.java"
     },
     "-1434147454": {
       "message": "cleanupAnimation(): Notify animation finished mPendingAnimations=%d reorderMode=%d",
@@ -564,6 +564,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
+    "-1142279614": {
+      "message": "Looking for focus: %s, flags=%d, canReceive=%b, reason=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-1130891072": {
       "message": "Orientation continue waiting for draw in %s",
@@ -799,12 +805,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-771282525": {
-      "message": "Losing focus: %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-771177730": {
       "message": "Removing focused app token:%s displayId=%d",
       "level": "VERBOSE",
@@ -847,12 +847,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DragState.java"
     },
-    "-687185281": {
-      "message": "New topFocusedDisplayId=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
     "-668956537": {
       "message": "  THUMBNAIL %s: CREATE",
       "level": "INFO",
@@ -877,6 +871,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowToken.java"
     },
+    "-639217716": {
+      "message": "setFocusedApp %s displayId=%d Callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-635082269": {
       "message": "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b wallEnabled=%b haveKeyguard=%b",
       "level": "INFO",
@@ -895,12 +895,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-603199586": {
-      "message": "Clearing focused app, displayId=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-593535526": {
       "message": "Binding proc %s with config %s",
       "level": "VERBOSE",
@@ -918,6 +912,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "-561092364": {
+      "message": "onPointerDownOutsideFocusLocked called on %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-549028919": {
       "message": "enableScreenIfNeededLocked: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b. %s",
@@ -1201,12 +1201,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
-    "-96848838": {
-      "message": "Gaining focus: %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-90559682": {
       "message": "Config is skipping already pausing %s",
       "level": "VERBOSE",
@@ -1363,6 +1357,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "115358443": {
+      "message": "Focus changing: %s -> %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "123161180": {
       "message": "SEVER CHILDREN",
       "level": "INFO",
@@ -1495,12 +1495,6 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
     },
-    "285317231": {
-      "message": "Input focus has changed to %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/InputMonitor.java"
-    },
     "288485303": {
       "message": "Attempted to set remove mode to a display that does not exist: %d",
       "level": "WARN",
@@ -1536,6 +1530,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
+    "312030608": {
+      "message": "New topFocusedDisplayId=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
     "315395835": {
       "message": "Trying to add window with invalid user=%d",
@@ -1699,12 +1699,6 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
-    "584499099": {
-      "message": "Set focused app to: %s moveFocusNow=%b displayId=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "585096182": {
       "message": "SURFACE isColorSpaceAgnostic=%b: %s",
       "level": "INFO",
@@ -1746,6 +1740,12 @@
       "level": "INFO",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "620519522": {
+      "message": "findFocusedWindow: No focusable windows, display=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "628276090": {
       "message": "Delaying app transition for screen rotation animation to finish",
@@ -1902,6 +1902,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "872933199": {
+      "message": "Changing focus from %s to %s displayId=%d Callers=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "873914452": {
       "message": "goodToGo()",
@@ -2137,12 +2143,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
-    "1358462645": {
-      "message": "Looking for focus: %s, flags=%d, canReceive=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "1360551978": {
       "message": "Trying to update display configuration for non-existing displayId=%d",
       "level": "WARN",
@@ -2232,12 +2232,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "1469292670": {
-      "message": "Changing focus from %s to %s displayId=%d Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1495525537": {
       "message": "createWallpaperAnimations()",
@@ -2675,12 +2669,6 @@
       "message": "setInputMethodTarget %s",
       "level": "INFO",
       "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
-    "2128604122": {
-      "message": "findFocusedWindow: No focusable windows.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "2128917433": {
