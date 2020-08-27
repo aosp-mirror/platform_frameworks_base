@@ -16,6 +16,7 @@
 
 package com.android.server.location.geofence;
 
+import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.KEY_PROXIMITY_ENTERING;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
@@ -350,11 +351,11 @@ public class GeofenceManager extends
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REQUEST_GEOFENCE,
                 registration.getIdentity().getPackageName(),
+                null,
                 /* LocationRequest= */ null,
                 /* hasListener= */ false,
                 true,
-                registration.getRequest(),
-                true);
+                registration.getRequest(), true);
     }
 
     @Override
@@ -363,16 +364,17 @@ public class GeofenceManager extends
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REQUEST_GEOFENCE,
                 registration.getIdentity().getPackageName(),
+                null,
                 /* LocationRequest= */ null,
                 /* hasListener= */ false,
                 true,
-                registration.getRequest(),
-                true);
+                registration.getRequest(), true);
     }
 
     @Override
     protected boolean registerWithService(LocationRequest locationRequest) {
-        getLocationManager().requestLocationUpdates(locationRequest, DIRECT_EXECUTOR, this);
+        getLocationManager().requestLocationUpdates(FUSED_PROVIDER, locationRequest,
+                DIRECT_EXECUTOR, this);
         return true;
     }
 
@@ -417,13 +419,11 @@ public class GeofenceManager extends
             intervalMs = mSettingsHelper.getBackgroundThrottleProximityAlertIntervalMs();
         }
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                LocationManager.FUSED_PROVIDER, intervalMs, 0, false);
-        request.setFastestInterval(0);
-        request.setHideFromAppOps(true);
-        request.setWorkSource(workSource);
-
-        return request;
+        return new LocationRequest.Builder(intervalMs)
+                .setMinUpdateIntervalMillis(0)
+                .setHiddenFromAppOps(true)
+                .setWorkSource(workSource)
+                .build();
     }
 
 

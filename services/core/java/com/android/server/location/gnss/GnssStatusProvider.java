@@ -71,11 +71,11 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
                 LocationStatsEnums.USAGE_STARTED,
                 LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
                 registration.getIdentity().getPackageName(),
-                /* LocationRequest= */ null,
-                /* hasListener= */ true,
-                /* hasIntent= */ false,
-                /* geofence= */ null,
-                registration.isForeground());
+                null,
+                null,
+                true,
+                false,
+                null, registration.isForeground());
     }
 
     @Override
@@ -84,10 +84,11 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
                 registration.getIdentity().getPackageName(),
-                /* LocationRequest= */ null,
-                /* hasListener= */ true,
-                /* hasIntent= */ false,
-                /* geofence= */ null,
+                null,
+                null,
+                true,
+                false,
+                null,
                 registration.isForeground());
     }
 

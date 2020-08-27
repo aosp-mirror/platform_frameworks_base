@@ -43,7 +43,6 @@ import org.mockito.InOrder;
 
 import java.util.Collection;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 @Presubmit
@@ -353,10 +352,6 @@ public class ListenerMultiplexerTest {
         public void removeListener(Consumer<TestListenerRegistration> consumer,
                 TestListenerRegistration registration) {
             removeRegistration(consumer, registration);
-        }
-
-        public void removeListenerIf(Predicate<Consumer<TestListenerRegistration>> predicate) {
-            removeRegistrationIf(predicate);
         }
 
         public void setActive(Integer request, boolean active) {

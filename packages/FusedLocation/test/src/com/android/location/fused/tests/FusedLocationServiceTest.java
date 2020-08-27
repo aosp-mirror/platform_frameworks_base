@@ -16,7 +16,6 @@
 
 package com.android.location.fused.tests;
 
-import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
@@ -121,8 +120,7 @@ public class FusedLocationServiceTest {
 
     @Test
     public void testNetworkRequest() throws Exception {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(FUSED_PROVIDER, 1000,
-                0, false);
+        LocationRequest request = new LocationRequest.Builder(1000).build();
 
         mProvider.setRequest(
                         new ProviderRequest.Builder()
@@ -139,8 +137,9 @@ public class FusedLocationServiceTest {
 
     @Test
     public void testGpsRequest() throws Exception {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(FUSED_PROVIDER, 1000,
-                0, false).setQuality(LocationRequest.POWER_HIGH);
+        LocationRequest request = new LocationRequest.Builder(1000)
+                .setQuality(LocationRequest.POWER_HIGH)
+                .build();
 
         mProvider.setRequest(
                 new ProviderRequest.Builder()

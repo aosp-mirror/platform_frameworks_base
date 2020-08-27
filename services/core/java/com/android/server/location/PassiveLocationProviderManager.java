@@ -20,10 +20,15 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.Binder;
 
+import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.util.Injector;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 class PassiveLocationProviderManager extends LocationProviderManager {
 
@@ -56,5 +61,21 @@ class PassiveLocationProviderManager extends LocationProviderManager {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+    }
+
+    @Override
+    protected ProviderRequest mergeRequests(Collection<Registration> registrations) {
+        ProviderRequest.Builder providerRequest = new ProviderRequest.Builder()
+                .setInterval(0);
+
+        ArrayList<LocationRequest> requests = new ArrayList<>(registrations.size());
+        for (Registration registration : registrations) {
+            requests.add(registration.getRequest());
+            if (registration.getRequest().isLocationSettingsIgnored()) {
+                providerRequest.setLocationSettingsIgnored(true);
+            }
+        }
+
+        return providerRequest.setLocationRequests(requests).build();
     }
 }

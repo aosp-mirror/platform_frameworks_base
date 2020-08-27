@@ -30,7 +30,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
-import android.os.Looper;
 import android.os.WorkSource;
 
 import com.android.internal.annotations.GuardedBy;
@@ -182,6 +181,7 @@ public class FusedLocationProvider extends LocationProviderBase {
             for (LocationRequestUnbundled request : mRequest.getLocationRequests()) {
                 switch (request.getQuality()) {
                     case LocationRequestUnbundled.ACCURACY_FINE:
+                    case LocationRequestUnbundled.ACCURACY_BLOCK:
                     case LocationRequestUnbundled.POWER_HIGH:
                         if (request.getInterval() < gpsInterval) {
                             gpsInterval = request.getInterval();
@@ -190,7 +190,6 @@ public class FusedLocationProvider extends LocationProviderBase {
                             networkInterval = request.getInterval();
                         }
                         break;
-                    case LocationRequestUnbundled.ACCURACY_BLOCK:
                     case LocationRequestUnbundled.ACCURACY_CITY:
                     case LocationRequestUnbundled.POWER_LOW:
                         if (request.getInterval() < networkInterval) {
@@ -219,13 +218,12 @@ public class FusedLocationProvider extends LocationProviderBase {
             mLocationManager.removeUpdates(listener);
         }
         if (newInterval != Long.MAX_VALUE) {
-            LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                    provider, newInterval, 0, false);
-            if (mRequest.isLocationSettingsIgnored()) {
-                request.setLocationSettingsIgnored(true);
-            }
-            request.setWorkSource(mWorkSource);
-            mLocationManager.requestLocationUpdates(request, listener, Looper.getMainLooper());
+            LocationRequest request = new LocationRequest.Builder(newInterval)
+                    .setLocationSettingsIgnored(mRequest.isLocationSettingsIgnored())
+                    .setWorkSource(mWorkSource)
+                    .build();
+            mLocationManager.requestLocationUpdates(provider, request, mContext.getMainExecutor(),
+                    listener);
         }
     }
 

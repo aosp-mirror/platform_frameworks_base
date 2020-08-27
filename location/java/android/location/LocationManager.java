@@ -670,11 +670,8 @@ public class LocationManager {
     public Location getLastKnownLocation(@NonNull String provider) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, 0, 0, true);
-
         try {
-            return mService.getLastLocation(request, mContext.getPackageName(),
+            return mService.getLastLocation(provider, mContext.getPackageName(),
                     mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -682,23 +679,11 @@ public class LocationManager {
     }
 
     /**
-     * Asynchronously returns a single current location fix. This may activate sensors in order to
-     * compute a new location, unlike {@link #getLastKnownLocation(String)}, which will only return
-     * a cached fix if available. The given callback will be invoked once and only once, either with
-     * a valid location fix or with a null location fix if the provider was unable to generate a
-     * valid location.
+     * Asynchronously returns a single current location fix from the given provider.
      *
-     * <p>A client may supply an optional {@link CancellationSignal}. If this is used to cancel the
-     * operation, no callback should be expected after the cancellation.
-     *
-     * <p>This method may return locations from the very recent past (on the order of several
-     * seconds), but will never return older locations (for example, several minutes old or older).
-     * Clients may rely upon the guarantee that if this method returns a location, it will represent
-     * the best estimation of the location of the device in the present moment.
-     *
-     * <p>Clients calling this method from the background may notice that the method fails to
-     * determine a valid location fix more often than while in the foreground. Background
-     * applications may be throttled in their location accesses to some degree.
+     * <p>See
+     * {@link #getCurrentLocation(String, LocationRequest, CancellationSignal, Executor, Consumer)}
+     * for more information.
      *
      * @param provider           a provider listed by {@link #getAllProviders()}
      * @param cancellationSignal an optional signal that allows for cancelling this call
@@ -714,16 +699,19 @@ public class LocationManager {
     public void getCurrentLocation(@NonNull String provider,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Location> consumer) {
-        getCurrentLocation(LocationRequest.createFromDeprecatedProvider(provider, 0, 0, true),
+        getCurrentLocation(
+                provider,
+                new LocationRequest.Builder(0).build(),
                 cancellationSignal, executor, consumer);
     }
 
     /**
-     * Asynchronously returns a single current location fix based on the given
-     * {@link LocationRequest}.
+     * Asynchronously returns a single current location fix from the given provider based on the
+     * given {@link LocationRequest}.
      *
-     * <p>See {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)} for more
-     * information.
+     * <p>See
+     * {@link #getCurrentLocation(String, LocationRequest, CancellationSignal, Executor, Consumer)}
+     * for more information.
      *
      * @param locationRequest    the location request containing location parameters
      * @param cancellationSignal an optional signal that allows for cancelling this call
@@ -735,13 +723,66 @@ public class LocationManager {
      * @throws IllegalArgumentException if consumer is null
      * @throws SecurityException        if no suitable permission is present
      * @hide
+     * @deprecated Use
+     * {@link #getCurrentLocation(String, LocationRequest, CancellationSignal, Executor, Consumer)}
+     * instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void getCurrentLocation(@NonNull LocationRequest locationRequest,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Location> consumer) {
+        Preconditions.checkArgument(locationRequest.getProvider() != null);
+        getCurrentLocation(locationRequest.getProvider(), locationRequest, cancellationSignal,
+                executor, consumer);
+    }
+
+    /**
+     * Asynchronously returns a single current location fix from the given provider based on the
+     * given {@link LocationRequest}. This may activate sensors in order to compute a new location,
+     * unlike {@link #getLastKnownLocation(String)}, which will only return a cached fix if
+     * available. The given callback will be invoked once and only once, either with a valid
+     * location or with a null location if the provider was unable to generate a valid location.
+     *
+     * <p>A client may supply an optional {@link CancellationSignal}. If this is used to cancel the
+     * operation, no callback should be expected after the cancellation.
+     *
+     * <p>This method may return locations from the very recent past (on the order of several
+     * seconds), but will never return older locations (for example, several minutes old or older).
+     * Clients may rely upon the guarantee that if this method returns a location, it will represent
+     * the best estimation of the location of the device in the present moment.
+     *
+     * <p>Clients calling this method from the background may notice that the method fails to
+     * determine a valid location fix more often than while in the foreground. Background
+     * applications may be throttled in their location accesses to some degree.
+     *
+     * The given location request may be used to provide hints on how a fresh location is computed
+     * if necessary. In particular {@link LocationRequest#getDurationMillis()} can be used to
+     * provide maximum duration allowed before failing. The system will always cap the maximum
+     * amount of time a request for current location may run to some reasonable value (less than a
+     * minute for example) before the request is failed.
+     *
+     * @param provider           a provider listed by {@link #getAllProviders()}
+     * @param locationRequest    the location request containing location parameters
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor           the callback will take place on this {@link Executor}
+     * @param consumer           the callback invoked with either a {@link Location} or null
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if consumer is null
+     * @throws SecurityException        if no suitable permission is present
+     */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+    public void getCurrentLocation(@NonNull String provider,
+            @NonNull LocationRequest locationRequest,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Location> consumer) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(locationRequest != null, "invalid null location request");
+
         ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
         GetCurrentLocationTransport transport = new GetCurrentLocationTransport(executor, consumer,
                 remoteCancellationSignal);
@@ -752,7 +793,7 @@ public class LocationManager {
         }
 
         try {
-            mService.getCurrentLocation(locationRequest, remoteCancellationSignal,
+            mService.getCurrentLocation(provider, locationRequest, remoteCancellationSignal,
                     transport, mContext.getPackageName(), mContext.getAttributionTag(),
                     AppOpsManager.toReceiverId(consumer));
         } catch (RemoteException e) {
@@ -782,12 +823,16 @@ public class LocationManager {
     public void requestSingleUpdate(
             @NonNull String provider, @NonNull LocationListener listener, @Nullable Looper looper) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
-        Preconditions.checkArgument(listener != null, "invalid null listener");
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, 0, 0, true);
-        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
-        requestLocationUpdates(request, listener, looper);
+        Handler handler = looper == null ? new Handler() : new Handler(looper);
+        requestLocationUpdates(
+                provider,
+                new LocationRequest.Builder(0)
+                        .setMaxUpdates(1)
+                        .setDurationMillis(MAX_SINGLE_LOCATION_TIMEOUT_MS)
+                        .build(),
+                new HandlerExecutor(handler),
+                listener);
     }
 
     /**
@@ -814,12 +859,17 @@ public class LocationManager {
             @NonNull LocationListener listener,
             @Nullable Looper looper) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
-        Preconditions.checkArgument(listener != null, "invalid null listener");
 
-        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
-                criteria, 0, 0, true);
-        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
-        requestLocationUpdates(request, listener, looper);
+        Handler handler = looper == null ? new Handler() : new Handler(looper);
+        requestLocationUpdates(
+                FUSED_PROVIDER,
+                new LocationRequest.Builder(0)
+                        .setQuality(criteria)
+                        .setMaxUpdates(1)
+                        .setDurationMillis(MAX_SINGLE_LOCATION_TIMEOUT_MS)
+                        .build(),
+                new HandlerExecutor(handler),
+                listener);
     }
 
     /**
@@ -843,10 +893,13 @@ public class LocationManager {
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, 0, 0, true);
-        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
-        requestLocationUpdates(request, pendingIntent);
+        requestLocationUpdates(
+                provider,
+                new LocationRequest.Builder(0)
+                        .setMaxUpdates(1)
+                        .setDurationMillis(MAX_SINGLE_LOCATION_TIMEOUT_MS)
+                        .build(),
+                pendingIntent);
     }
 
     /**
@@ -871,60 +924,26 @@ public class LocationManager {
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
 
-        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
-                criteria, 0, 0, true);
-        request.setExpireIn(MAX_SINGLE_LOCATION_TIMEOUT_MS);
-        requestLocationUpdates(request, pendingIntent);
+        requestLocationUpdates(
+                FUSED_PROVIDER,
+                new LocationRequest.Builder(0)
+                        .setQuality(criteria)
+                        .setMaxUpdates(1)
+                        .setDurationMillis(MAX_SINGLE_LOCATION_TIMEOUT_MS)
+                        .build(),
+                pendingIntent);
     }
 
     /**
-     * Register for location updates from the given provider with the given arguments. {@link
-     * LocationListener} callbacks will take place on the given {@link Looper} or {@link Executor}.
-     * If a null {@link Looper} is supplied, the Looper of the calling thread will be used instead.
-     * Only one request can be registered for each unique listener, so any subsequent requests with
-     * the same listener will overwrite all associated arguments.
+     * Register for location updates from the given provider with the given arguments, and a
+     * callback on the {@link Looper} of the calling thread.
      *
-     * <p> It may take a while to receive the first location update. If an immediate location is
-     * required, applications may use the {@link #getLastKnownLocation(String)} method.
-     *
-     * <p> The location update interval can be controlled using the minimum time parameter. The
-     * elapsed time between location updates will never be less than this parameter, although it may
-     * be more depending on location availability and other factors. Choosing a sensible value for
-     * the minimum time parameter is important to conserve battery life. Every location update
-     * requires power from a variety of sensors. Select a minimum time parameter as high as possible
-     * while still providing a reasonable user experience. If your application is not in the
-     * foreground and showing location to the user then your application should consider switching
-     * to the {@link #PASSIVE_PROVIDER} instead.
-     *
-     * <p> The minimum distance parameter can also be used to control the frequency of location
-     * updates. If it is greater than 0 then the location provider will only send your application
-     * an update when the location has changed by at least minDistance meters, AND when the minimum
-     * time has elapsed. However it is more difficult for location providers to save power using the
-     * minimum distance parameter, so the minimum time parameter should be the primary tool for
-     * conserving battery life.
-     *
-     * <p> If your application wants to passively observe location updates triggered by other
-     * applications, but not consume any additional power otherwise, then use the {@link
-     * #PASSIVE_PROVIDER}. This provider does not turn on or modify active location providers, so
-     * you do not need to be as careful about minimum time and minimum distance parameters. However,
-     * if your application performs heavy work on a location update (such as network activity) then
-     * you should select non-zero values for the parameters to rate-limit your update frequency in
-     * the case another application enables a location provider with extremely fast updates.
-     *
-     * <p>In case the provider you have selected is disabled, location updates will cease, and a
-     * provider availability update will be sent. As soon as the provider is enabled again, another
-     * provider availability update will be sent and location updates will immediately resume.
-     *
-     * <p> When location callbacks are invoked, the system will hold a wakelock on your
-     * application's behalf for some period of time, but not indefinitely. If your application
-     * requires a long running wakelock within the location callback, you should acquire it
-     * yourself.
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
+     * for more detail on how this method works.
      *
      * <p class="note"> Prior to Jellybean, the minTime parameter was only a hint, and some location
      * provider implementations ignored it. For Jellybean and onwards however, it is mandatory for
      * Android compatible devices to observe both the minTime and minDistance parameters.
-     *
-     * <p>To unregister for location updates, use {@link #removeUpdates(LocationListener)}.
      *
      * @param provider     a provider listed by {@link #getAllProviders()}
      * @param minTimeMs    minimum time interval between location updates in milliseconds
@@ -939,20 +958,19 @@ public class LocationManager {
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(@NonNull String provider, long minTimeMs, float minDistanceM,
             @NonNull LocationListener listener) {
-        Preconditions.checkArgument(provider != null, "invalid null provider");
-        Preconditions.checkArgument(listener != null, "invalid null listener");
-
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, listener, null);
+        requestLocationUpdates(provider, minTimeMs, minDistanceM, listener, null);
     }
 
     /**
-     * Register for location updates using the named provider, and a callback on
-     * the specified {@link Looper}.
+     * Register for location updates from the given provider with the given arguments, and a
+     * callback on the specified {@link Looper}.
      *
-     * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
      * for more detail on how this method works.
+     *
+     * <p class="note">Prior to Jellybean, the minTime parameter was only a hint, and some location
+     * provider implementations ignored it. For Jellybean and onwards however, it is mandatory for
+     * Android compatible devices to observe both the minTime and minDistance parameters.
      *
      * @param provider     a provider listed by {@link #getAllProviders()}
      * @param minTimeMs    minimum time interval between location updates in milliseconds
@@ -968,20 +986,21 @@ public class LocationManager {
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(@NonNull String provider, long minTimeMs, float minDistanceM,
             @NonNull LocationListener listener, @Nullable Looper looper) {
-        Preconditions.checkArgument(provider != null, "invalid null provider");
-        Preconditions.checkArgument(listener != null, "invalid null listener");
-
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, listener, looper);
+        Handler handler = looper == null ? new Handler() : new Handler(looper);
+        requestLocationUpdates(provider, minTimeMs, minDistanceM, new HandlerExecutor(handler),
+                listener);
     }
 
     /**
      * Register for location updates using the named provider, and a callback on
      * the specified {@link Executor}.
      *
-     * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
      * for more detail on how this method works.
+     *
+     * <p class="note">Prior to Jellybean, the minTime parameter was only a hint, and some location
+     * provider implementations ignored it. For Jellybean and onwards however, it is mandatory for
+     * Android compatible devices to observe both the minTime and minDistance parameters.
      *
      * @param provider     a provider listed by {@link #getAllProviders()}
      * @param minTimeMs    minimum time interval between location updates in milliseconds
@@ -1001,16 +1020,22 @@ public class LocationManager {
             float minDistanceM,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull LocationListener listener) {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, executor, listener);
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
+        requestLocationUpdates(
+                provider,
+                new LocationRequest.Builder(minTimeMs)
+                        .setMinUpdateDistanceMeters(minDistanceM)
+                        .build(),
+                executor,
+                listener);
     }
 
     /**
      * Register for location updates using a provider selected through the given Criteria, and a
      * callback on the specified {@link Looper}.
      *
-     * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
      * for more detail on how this method works.
      *
      * @param minTimeMs minimum time interval between location updates in milliseconds
@@ -1026,19 +1051,16 @@ public class LocationManager {
     public void requestLocationUpdates(long minTimeMs, float minDistanceM,
             @NonNull Criteria criteria, @NonNull LocationListener listener,
             @Nullable Looper looper) {
-        Preconditions.checkArgument(criteria != null, "invalid null criteria");
-        Preconditions.checkArgument(listener != null, "invalid null listener");
-
-        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
-                criteria, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, listener, looper);
+        Handler handler = looper == null ? new Handler() : new Handler(looper);
+        requestLocationUpdates(minTimeMs, minDistanceM, criteria, new HandlerExecutor(handler),
+                listener);
     }
 
     /**
      * Register for location updates using a provider selected through the given Criteria, and a
      * callback on the specified {@link Executor}.
      *
-     * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
      * for more detail on how this method works.
      *
      * @param minTimeMs minimum time interval between location updates in milliseconds
@@ -1059,23 +1081,24 @@ public class LocationManager {
             @NonNull Criteria criteria,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull LocationListener listener) {
-        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
-                criteria, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, executor, listener);
+        Preconditions.checkArgument(criteria != null, "invalid null criteria");
+
+        requestLocationUpdates(
+                FUSED_PROVIDER,
+                new LocationRequest.Builder(minTimeMs)
+                        .setQuality(criteria)
+                        .setMinUpdateDistanceMeters(minDistanceM)
+                        .build(),
+                executor,
+                listener);
     }
 
     /**
      * Register for location updates using the named provider, and callbacks delivered via the
      * provided {@link PendingIntent}.
      *
-     * <p>The delivered pending intents will contain extras with the callback information. The keys
-     * used for the extras are {@link #KEY_LOCATION_CHANGED} and {@link #KEY_PROVIDER_ENABLED}. See
-     * the documentation for each respective extra key for information on the values.
-     *
-     * <p>To unregister for location updates, use {@link #removeUpdates(PendingIntent)}.
-     *
-     * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
-     * for more detail on how this method works.
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, PendingIntent)} for more
+     * detail on how this method works.
      *
      * @param provider      a provider listed by {@link #getAllProviders()}
      * @param minTimeMs     minimum time interval between location updates in milliseconds
@@ -1091,9 +1114,12 @@ public class LocationManager {
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                provider, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, pendingIntent);
+        requestLocationUpdates(
+                provider,
+                new LocationRequest.Builder(minTimeMs)
+                        .setMinUpdateDistanceMeters(minDistanceM)
+                        .build(),
+                pendingIntent);
     }
 
     /**
@@ -1116,10 +1142,13 @@ public class LocationManager {
     public void requestLocationUpdates(long minTimeMs, float minDistanceM,
             @NonNull Criteria criteria, @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
-
-        LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
-                criteria, minTimeMs, minDistanceM, false);
-        requestLocationUpdates(request, pendingIntent);
+        requestLocationUpdates(
+                FUSED_PROVIDER,
+                new LocationRequest.Builder(minTimeMs)
+                        .setQuality(criteria)
+                        .setMinUpdateDistanceMeters(minDistanceM)
+                        .build(),
+                pendingIntent);
     }
 
     /**
@@ -1131,7 +1160,7 @@ public class LocationManager {
      * choose default low power parameters for location updates, but this is heavily discouraged,
      * and an explicit LocationRequest should always be provided.
      *
-     * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
      * for more detail on how this method works.
      *
      * @param locationRequest the location request containing location parameters
@@ -1143,7 +1172,10 @@ public class LocationManager {
      * @throws SecurityException if no suitable permission is present
      *
      * @hide
+     * @deprecated Use
+     * {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
@@ -1159,8 +1191,8 @@ public class LocationManager {
      * Register for location updates using a {@link LocationRequest}, and a callback on the
      * specified {@link Executor}.
      *
-     * <p>See {@link #requestLocationUpdates(LocationRequest, LocationListener, Looper)} for more
-     * detail on how this method works.
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)}
+     * for more detail on how this method works.
      *
      * @param locationRequest the location request containing location parameters
      * @param executor the executor handling listener callbacks
@@ -1171,7 +1203,10 @@ public class LocationManager {
      * @throws SecurityException if no suitable permission is present
      *
      * @hide
+     * @deprecated Use
+     * {@link #requestLocationUpdates(String, LocationRequest, Executor, LocationListener)} instead.
      */
+    @Deprecated
     @SystemApi
     @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
@@ -1180,8 +1215,93 @@ public class LocationManager {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull LocationListener listener) {
         if (locationRequest == null) {
-            locationRequest = new LocationRequest();
+            locationRequest = LocationRequest.create();
         }
+        Preconditions.checkArgument(locationRequest.getProvider() != null);
+        requestLocationUpdates(locationRequest.getProvider(), locationRequest, executor, listener);
+    }
+
+    /**
+     * Register for location updates using a {@link LocationRequest}, and callbacks delivered via
+     * the provided {@link PendingIntent}.
+     *
+     * <p>See {@link #requestLocationUpdates(String, LocationRequest, PendingIntent)} for more
+     * detail on how this method works.
+     *
+     * @param locationRequest the location request containing location parameters
+     * @param pendingIntent the pending intent to send location updates
+     *
+     * @throws IllegalArgumentException if pendingIntent is null
+     * @throws SecurityException if no suitable permission is present
+     *
+     * @hide
+     * @deprecated Use {@link #requestLocationUpdates(String, LocationRequest, PendingIntent)}
+     * instead.
+     */
+    @Deprecated
+    @SystemApi
+    @TestApi
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+    public void requestLocationUpdates(
+            @Nullable LocationRequest locationRequest,
+            @NonNull PendingIntent pendingIntent) {
+        if (locationRequest == null) {
+            locationRequest = LocationRequest.create();
+        }
+        Preconditions.checkArgument(locationRequest.getProvider() != null);
+        requestLocationUpdates(locationRequest.getProvider(), locationRequest, pendingIntent);
+    }
+
+    /**
+     * Register for location updates from the specified provider, using a {@link LocationRequest},
+     * and a callback on the specified {@link Executor}.
+     *
+     * <p>Only one request can be registered for each unique listener/provider pair, so any
+     * subsequent requests with the same provider and listener will overwrite all associated
+     * arguments. The same listener may be used across multiple providers with different requests
+     * for each provider.
+     *
+     * <p>It may take a while to receive the first location update. If an immediate location is
+     * required, applications may use the {@link #getLastKnownLocation(String)} method.
+     *
+     * <p>See {@link LocationRequest} documentation for an explanation of various request parameters
+     * and how they can affect the received locations.
+     *
+     * <p> If your application wants to passively observe location updates from any provider, then
+     * use the {@link #PASSIVE_PROVIDER}. This provider does not turn on or modify active location
+     * providers, so you do not need to be as careful about minimum time and minimum distance
+     * parameters. However, if your application performs heavy work on a location update (such as
+     * network activity) then you should set an explicit fastest interval on your location request
+     * in case another application enables a location provider with extremely fast updates.
+     *
+     * <p>In case the provider you have selected is disabled, location updates will cease, and a
+     * provider availability update will be sent. As soon as the provider is enabled again, another
+     * provider availability update will be sent and location updates will immediately resume.
+     *
+     * <p> When location callbacks are invoked, the system will hold a wakelock on your
+     * application's behalf for some period of time, but not indefinitely. If your application
+     * requires a long running wakelock within the location callback, you should acquire it
+     * yourself.
+     *
+     * <p>To unregister for location updates, use {@link #removeUpdates(LocationListener)}.
+     *
+     * @param provider a provider listed by {@link #getAllProviders()}
+     * @param locationRequest the location request containing location parameters
+     * @param executor the executor handling listener callbacks
+     * @param listener the listener to receive location updates
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if locationRequest is null
+     * @throws IllegalArgumentException if listener is null
+     * @throws SecurityException if no suitable permission is present
+     */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+    public void requestLocationUpdates(@NonNull String provider,
+            @NonNull LocationRequest locationRequest,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull LocationListener listener) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(locationRequest != null, "invalid null location request");
 
         synchronized (sLocationListeners) {
             WeakReference<LocationListenerTransport> reference = sLocationListeners.get(listener);
@@ -1198,7 +1318,7 @@ public class LocationManager {
                 // make sure that callbacks are not made on the same thread - however it is the
                 // easiest way to guarantee that clients will not receive callbacks after
                 // unregistration is complete.
-                mService.registerLocationListener(locationRequest, transport,
+                mService.registerLocationListener(provider, locationRequest, transport,
                         mContext.getPackageName(), mContext.getAttributionTag(),
                         AppOpsManager.toReceiverId(listener));
             } catch (RemoteException e) {
@@ -1208,39 +1328,39 @@ public class LocationManager {
     }
 
     /**
-     * Register for location updates using a {@link LocationRequest}, and callbacks delivered via
-     * the provided {@link PendingIntent}.
+     * Register for location updates from the specified provider, using a {@link LocationRequest},
+     * and callbacks delivered via the provided {@link PendingIntent}.
      *
-     * <p>See {@link #requestLocationUpdates(LocationRequest, LocationListener, Looper)} and
-     * {@link #requestLocationUpdates(String, long, float, PendingIntent)} for more detail on how
-     * this method works.
+     * <p>The delivered pending intents will contain extras with the callback information. The keys
+     * used for the extras are {@link #KEY_LOCATION_CHANGED} and {@link #KEY_PROVIDER_ENABLED}. See
+     * the documentation for each respective extra key for information on the values.
      *
+     * <p>To unregister for location updates, use {@link #removeUpdates(PendingIntent)}.
+     *
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @param locationRequest the location request containing location parameters
      * @param pendingIntent the pending intent to send location updates
      *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if locationRequest is null
      * @throws IllegalArgumentException if pendingIntent is null
      * @throws SecurityException if no suitable permission is present
-     *
-     * @hide
      */
-    @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-    public void requestLocationUpdates(
-            @Nullable LocationRequest locationRequest,
+    public void requestLocationUpdates(@NonNull String provider,
+            @NonNull LocationRequest locationRequest,
             @NonNull PendingIntent pendingIntent) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(locationRequest != null, "invalid null location request");
         Preconditions.checkArgument(pendingIntent != null, "invalid null pending intent");
+
         if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
             Preconditions.checkArgument(pendingIntent.isTargetedToPackage(),
                     "pending intent must be targeted to a package");
         }
 
-        if (locationRequest == null) {
-            locationRequest = new LocationRequest();
-        }
-
         try {
-            mService.registerLocationPendingIntent(locationRequest, pendingIntent,
+            mService.registerLocationPendingIntent(provider, locationRequest, pendingIntent,
                     mContext.getPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

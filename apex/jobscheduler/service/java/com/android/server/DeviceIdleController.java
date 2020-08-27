@@ -2076,11 +2076,10 @@ public class DeviceIdleController extends SystemService
 
                 if (getContext().getResources().getBoolean(
                         com.android.internal.R.bool.config_autoPowerModePrefetchLocation)) {
-                    mLocationRequest = LocationRequest.create()
+                    mLocationRequest = new LocationRequest.Builder(/*intervalMillis=*/ 0)
                         .setQuality(LocationRequest.ACCURACY_FINE)
-                        .setInterval(0)
-                        .setFastestInterval(0)
-                        .setNumUpdates(1);
+                        .setMaxUpdates(1)
+                        .build();
                 }
 
                 mConstraintController = mInjector.getConstraintController(

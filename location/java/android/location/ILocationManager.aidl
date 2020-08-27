@@ -46,13 +46,13 @@ import com.android.internal.location.ProviderProperties;
  */
 interface ILocationManager
 {
-    Location getLastLocation(in LocationRequest request, String packageName, String attributionTag);
-    void getCurrentLocation(in LocationRequest request, in ICancellationSignal cancellationSignal, in ILocationCallback callback, String packageName, String attributionTag, String listenerId);
+    Location getLastLocation(String provider, String packageName, String attributionTag);
+    void getCurrentLocation(String provider, in LocationRequest request, in ICancellationSignal cancellationSignal, in ILocationCallback callback, String packageName, String attributionTag, String listenerId);
 
-    void registerLocationListener(in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
+    void registerLocationListener(String provider, in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
     void unregisterLocationListener(in ILocationListener listener);
 
-    void registerLocationPendingIntent(in LocationRequest request, in PendingIntent intent, String packageName, String attributionTag);
+    void registerLocationPendingIntent(String provider, in LocationRequest request, in PendingIntent intent, String packageName, String attributionTag);
     void unregisterLocationPendingIntent(in PendingIntent intent);
 
     void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
