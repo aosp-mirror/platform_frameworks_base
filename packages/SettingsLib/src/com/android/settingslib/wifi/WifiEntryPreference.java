@@ -35,6 +35,7 @@ import androidx.preference.PreferenceViewHolder;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 import com.android.wifitrackerlib.WifiEntry;
+import com.android.wifitrackerlib.WifiEntry.ConnectedInfo;
 
 /**
  * Preference to display a WifiEntry in a wifi picker.
@@ -64,6 +65,7 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
     private final IconInjector mIconInjector;
     private WifiEntry mWifiEntry;
     private int mLevel = -1;
+    private boolean mShowX; // Shows the Wi-Fi signl icon of Pie+x when it's true.
     private CharSequence mContentDescription;
     private OnButtonClickListener mOnButtonClickListener;
 
@@ -136,9 +138,15 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
     public void refresh() {
         setTitle(mWifiEntry.getTitle());
         final int level = mWifiEntry.getLevel();
-        if (level != mLevel) {
+        final ConnectedInfo connectedInfo = mWifiEntry.getConnectedInfo();
+        boolean showX = false;
+        if (connectedInfo != null) {
+            showX = !connectedInfo.isDefaultNetwork || !connectedInfo.isValidated;
+        }
+        if (level != mLevel || showX != mShowX) {
             mLevel = level;
-            updateIcon(mLevel);
+            mShowX = showX;
+            updateIcon(mShowX, mLevel);
             notifyChanged();
         }
 
@@ -184,13 +192,13 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
     }
 
 
-    private void updateIcon(int level) {
+    private void updateIcon(boolean showX, int level) {
         if (level == -1) {
             setIcon(null);
             return;
         }
 
-        final Drawable drawable = mIconInjector.getIcon(level);
+        final Drawable drawable = mIconInjector.getIcon(showX, level);
         if (drawable != null) {
             drawable.setTintList(Utils.getColorAttr(getContext(),
                     android.R.attr.colorControlNormal));
@@ -260,8 +268,8 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
             mContext = context;
         }
 
-        public Drawable getIcon(int level) {
-            return mContext.getDrawable(Utils.getWifiIconResource(level));
+        public Drawable getIcon(boolean showX, int level) {
+            return mContext.getDrawable(Utils.getWifiIconResource(showX, level));
         }
     }
 

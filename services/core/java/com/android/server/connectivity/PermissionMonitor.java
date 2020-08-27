@@ -174,7 +174,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             netdPermsUids.put(uid, netdPermsUids.get(uid) | otherNetdPerms);
         }
 
-        List<UserInfo> users = mUserManager.getUsers(true);  // exclude dying users
+        List<UserInfo> users = mUserManager.getAliveUsers();
         if (users != null) {
             for (UserInfo user : users) {
                 mUsers.add(user.id);

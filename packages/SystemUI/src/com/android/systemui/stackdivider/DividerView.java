@@ -62,10 +62,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.util.function.Consumer;
@@ -138,6 +136,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final Rect mOtherInsetRect = new Rect();
     private final Rect mLastResizeRect = new Rect();
     private final Rect mTmpRect = new Rect();
+    private SplitScreenController mSplitScreenController;
     private WindowManagerProxy mWindowManagerProxy;
     private DividerWindowManager mWindowManager;
     private VelocityTracker mVelocityTracker;
@@ -353,9 +352,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
-    public void injectDependencies(DividerWindowManager windowManager, DividerState dividerState,
+    void injectDependencies(SplitScreenController splitScreenController,
+            DividerWindowManager windowManager, DividerState dividerState,
             DividerCallbacks callback, SplitScreenTaskOrganizer tiles, SplitDisplayLayout sdl,
             DividerImeController imeController, WindowManagerProxy wmProxy) {
+        mSplitScreenController = splitScreenController;
         mWindowManager = windowManager;
         mState = dividerState;
         mCallback = callback;
@@ -697,8 +698,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mTmpRect.top = 0;
                 break;
         }
-        Dependency.get(OverviewProxyService.class)
-                .notifySplitScreenBoundsChanged(mOtherTaskRect, mTmpRect);
+        mSplitScreenController.notifyBoundsChanged(mOtherTaskRect, mTmpRect);
     }
 
     private void cancelFlingAnimation() {

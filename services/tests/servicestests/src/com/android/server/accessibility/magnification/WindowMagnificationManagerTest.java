@@ -68,8 +68,10 @@ public class WindowMagnificationManagerTest {
     private static final int CURRENT_USER_ID = UserHandle.USER_CURRENT;
 
     private MockWindowMagnificationConnection mMockConnection;
-    @Mock private Context mContext;
-    @Mock private StatusBarManagerInternal mMockStatusBarManagerInternal;
+    @Mock
+    private Context mContext;
+    @Mock
+    private StatusBarManagerInternal mMockStatusBarManagerInternal;
     private MockContentResolver mResolver;
     private WindowMagnificationManager mWindowMagnificationManager;
 
@@ -84,7 +86,7 @@ public class WindowMagnificationManagerTest {
 
         when(mContext.getContentResolver()).thenReturn(mResolver);
         doAnswer((InvocationOnMock invocation) -> {
-            final boolean connect =  (Boolean) invocation.getArguments()[0];
+            final boolean connect = (Boolean) invocation.getArguments()[0];
             mWindowMagnificationManager.setConnection(
                     connect ? mMockConnection.getConnection() : null);
             return null;
@@ -161,7 +163,7 @@ public class WindowMagnificationManagerTest {
     public void enable_TestDisplay_enableWindowMagnification() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 2f, 200f, 300f);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, 200f, 300f);
 
         verify(mMockConnection.getConnection()).enableWindowMagnification(TEST_DISPLAY, 2f,
                 200f, 300f);
@@ -170,9 +172,9 @@ public class WindowMagnificationManagerTest {
     @Test
     public void disable_testDisplay_disableWindowMagnification() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 3f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
 
-        mWindowMagnificationManager.disableWindowMagnifier(TEST_DISPLAY, false);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
 
         verify(mMockConnection.getConnection()).disableWindowMagnification(TEST_DISPLAY);
     }
@@ -183,7 +185,7 @@ public class WindowMagnificationManagerTest {
 
         assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
 
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 2f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, NaN, NaN);
 
         assertTrue(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
     }
@@ -198,7 +200,7 @@ public class WindowMagnificationManagerTest {
     @Test
     public void persistScale_setValue_expectedValueInProvider() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 2.0f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2.0f, NaN, NaN);
         mWindowMagnificationManager.setScale(TEST_DISPLAY, 2.5f);
 
         mWindowMagnificationManager.persistScale(TEST_DISPLAY);
@@ -211,7 +213,7 @@ public class WindowMagnificationManagerTest {
     @Test
     public void scaleSetterGetter_enabledOnTestDisplay_expectedValue() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 2.0f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2.0f, NaN, NaN);
 
         mWindowMagnificationManager.setScale(TEST_DISPLAY, 2.5f);
 
@@ -221,7 +223,7 @@ public class WindowMagnificationManagerTest {
     @Test
     public void scaleSetterGetter_scaleIsOutOfRang_getNormalizeValue() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 2.5f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2.5f, NaN, NaN);
 
         mWindowMagnificationManager.setScale(TEST_DISPLAY, 10.0f);
 
@@ -232,9 +234,9 @@ public class WindowMagnificationManagerTest {
     @Test
     public void moveWindowMagnifier() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 2f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, NaN, NaN);
 
-        mWindowMagnificationManager.moveWindowMagnifier(TEST_DISPLAY, 200, 300);
+        mWindowMagnificationManager.moveWindowMagnification(TEST_DISPLAY, 200, 300);
         verify(mMockConnection.getConnection()).moveWindowMagnifier(TEST_DISPLAY, 200, 300);
     }
 
@@ -254,7 +256,7 @@ public class WindowMagnificationManagerTest {
     @Test
     public void pointersInWindow_returnCorrectValue() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 3.0f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
         mMockConnection.getConnectionCallback().onWindowMagnifierBoundsChanged(TEST_DISPLAY,
                 new Rect(0, 0, 500, 500));
         PointF[] pointersLocation = new PointF[2];
@@ -268,7 +270,7 @@ public class WindowMagnificationManagerTest {
     @Test
     public void binderDied_windowMagnifierIsEnabled_resetState() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 3f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
 
         mMockConnection.getDeathRecipient().binderDied();
 
@@ -280,7 +282,7 @@ public class WindowMagnificationManagerTest {
             requestConnectionToNull_disableAllMagnifiersAndRequestWindowMagnificationConnection()
             throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 3f, NaN, NaN);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
 
         assertTrue(mWindowMagnificationManager.requestConnection(false));
 
@@ -306,21 +308,24 @@ public class WindowMagnificationManagerTest {
     @Test
     public void requestConnection_registerAndUnregisterBroadcastReceiver() {
         assertTrue(mWindowMagnificationManager.requestConnection(true));
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),  any(IntentFilter.class));
+        verify(mContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
 
         assertTrue(mWindowMagnificationManager.requestConnection(false));
         verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
     }
 
     @Test
-    public void onReceiveScreenOff_removeMagnificationButtonAndDisableWindowMagnification()
+    public void onScreenOff_windowMagnifierIsEnabled_removeButtonAndDisableWindowMagnification()
             throws RemoteException {
         mWindowMagnificationManager.requestConnection(true);
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2.5f, NaN, NaN);
+
         mWindowMagnificationManager.mScreenStateReceiver.onReceive(mContext,
                 new Intent(Intent.ACTION_SCREEN_OFF));
 
         verify(mMockConnection.getConnection()).removeMagnificationButton(TEST_DISPLAY);
         verify(mMockConnection.getConnection()).disableWindowMagnification(TEST_DISPLAY);
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
     }
 
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {

@@ -98,6 +98,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
 
@@ -592,6 +593,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     };
 
     private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
+    private final BiConsumer<Rect, Rect> mSplitScreenBoundsChangeListener =
+            this::notifySplitScreenBoundsChanged;
 
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
@@ -613,7 +616,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
         mConnectionBackoffAttempts = 0;
-        mSplitScreenOptional = splitScreenOptional;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
@@ -652,6 +654,10 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         });
         mCommandQueue = commandQueue;
+
+        splitScreenOptional.ifPresent(splitScreen ->
+                splitScreen.registerBoundsChangeListener(mSplitScreenBoundsChangeListener));
+        mSplitScreenOptional = splitScreenOptional;
 
         // Listen for user setup
         startTracking();

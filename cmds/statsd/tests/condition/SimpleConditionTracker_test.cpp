@@ -39,6 +39,7 @@ const ConfigKey kConfigKey(0, 12345);
 const int ATTRIBUTION_NODE_FIELD_ID = 1;
 const int ATTRIBUTION_UID_FIELD_ID = 1;
 const int TAG_ID = 1;
+const uint64_t protoHash = 0x123456789;
 
 SimplePredicate getWakeLockHeldCondition(bool countNesting, bool defaultFalse,
                                          bool outputSlicedUid, Position position) {
@@ -123,7 +124,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedInitialValueFalse) {
     trackerNameIndexMap[StringToId("SCREEN_TURNED_ON")] = 0;
     trackerNameIndexMap[StringToId("SCREEN_TURNED_OFF")] = 1;
 
-    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"),
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"), protoHash,
                                             0 /*tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
 
@@ -177,7 +178,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedInitialValueUnknown) {
     trackerNameIndexMap[StringToId("SCREEN_TURNED_ON")] = 0;
     trackerNameIndexMap[StringToId("SCREEN_TURNED_OFF")] = 1;
 
-    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"),
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"), protoHash,
                                             0 /*tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
 
@@ -231,8 +232,9 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     trackerNameIndexMap[StringToId("SCREEN_TURNED_ON")] = 0;
     trackerNameIndexMap[StringToId("SCREEN_TURNED_OFF")] = 1;
 
-    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"), 0 /*tracker index*/,
-                                            simplePredicate, trackerNameIndexMap);
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"), protoHash,
+                                            0 /*tracker index*/, simplePredicate,
+                                            trackerNameIndexMap);
     EXPECT_FALSE(conditionTracker.isSliced());
 
     // This event is not accessed in this test besides dimensions which is why this is okay.
@@ -317,7 +319,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     trackerNameIndexMap[StringToId("SCREEN_TURNED_ON")] = 0;
     trackerNameIndexMap[StringToId("SCREEN_TURNED_OFF")] = 1;
 
-    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"),
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"), protoHash,
                                             0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
     EXPECT_FALSE(conditionTracker.isSliced());
@@ -392,7 +394,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         trackerNameIndexMap[StringToId("WAKE_LOCK_RELEASE")] = 1;
         trackerNameIndexMap[StringToId("RELEASE_ALL")] = 2;
 
-        SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName),
+        SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName), protoHash,
                                                 0 /*condition tracker index*/, simplePredicate,
                                                 trackerNameIndexMap);
 
@@ -514,7 +516,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     trackerNameIndexMap[StringToId("WAKE_LOCK_RELEASE")] = 1;
     trackerNameIndexMap[StringToId("RELEASE_ALL")] = 2;
 
-    SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName),
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName), protoHash,
                                             0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
 
@@ -610,7 +612,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         trackerNameIndexMap[StringToId("WAKE_LOCK_RELEASE")] = 1;
         trackerNameIndexMap[StringToId("RELEASE_ALL")] = 2;
 
-        SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName),
+        SimpleConditionTracker conditionTracker(kConfigKey, StringToId(conditionName), protoHash,
                                                 0 /*condition tracker index*/, simplePredicate,
                                                 trackerNameIndexMap);
 

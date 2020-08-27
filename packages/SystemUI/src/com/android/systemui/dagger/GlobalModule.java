@@ -16,6 +16,8 @@
 
 package com.android.systemui.dagger;
 
+import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
+
 import dagger.Module;
 
 /**
@@ -33,6 +35,8 @@ import dagger.Module;
  *
  * Please use discretion when adding things to the global scope.
  */
-@Module(includes = {FrameworkServicesModule.class})
+@Module(includes = {
+        FrameworkServicesModule.class,
+        GlobalConcurrencyModule.class})
 public class GlobalModule {
 }

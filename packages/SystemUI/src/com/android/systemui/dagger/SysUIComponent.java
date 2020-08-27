@@ -26,6 +26,7 @@ import com.android.systemui.pip.phone.dagger.PipModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
@@ -35,7 +36,6 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {
         DefaultComponentBinder.class,
         DependencyProvider.class,
-        DependencyBinder.class,
         PipModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
@@ -47,6 +47,9 @@ public interface SysUIComponent {
      */
     @Subcomponent.Builder
     interface Builder {
+        @BindsInstance
+        Builder setStubAPIClass(WMComponent.StubAPIClass stubAPIClass);
+
         SysUIComponent build();
     }
 

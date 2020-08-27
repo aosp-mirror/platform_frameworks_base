@@ -12052,14 +12052,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isSystemOnlyUser(ComponentName admin) {
-        Objects.requireNonNull(admin, "ComponentName is null");
-        final CallerIdentity identity = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(isDeviceOwner(identity));
-        return UserManager.isSplitSystemUser() && identity.getUserId() == UserHandle.USER_SYSTEM;
-    }
-
-    @Override
     public void reboot(ComponentName admin) {
         Objects.requireNonNull(admin, "ComponentName is null");
         final CallerIdentity identity = getCallerIdentity(admin);

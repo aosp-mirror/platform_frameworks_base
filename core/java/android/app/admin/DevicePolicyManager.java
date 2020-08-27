@@ -9751,21 +9751,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Return if this user is a system-only user. An admin can manage a device from a system only
-     * user by calling {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE}.
-     * @param admin Which device owner this request is associated with.
-     * @return if this user is a system-only user.
-     */
-    public boolean isSystemOnlyUser(@NonNull ComponentName admin) {
-        try {
-            return mService.isSystemOnlyUser(admin);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Called by device owner, or profile owner on organization-owned device, to get the MAC
      * address of the Wi-Fi device.
      *

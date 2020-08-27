@@ -84,7 +84,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
             Log.e(TAG, e);
         }
         deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
-                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
+                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex");
     }
 
     @Before

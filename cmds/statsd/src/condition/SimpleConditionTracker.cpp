@@ -27,54 +27,21 @@ namespace statsd {
 using std::unordered_map;
 
 SimpleConditionTracker::SimpleConditionTracker(
-        const ConfigKey& key, const int64_t& id, const int index,
+        const ConfigKey& key, const int64_t& id, const uint64_t protoHash, const int index,
         const SimplePredicate& simplePredicate,
-        const unordered_map<int64_t, int>& trackerNameIndexMap)
-    : ConditionTracker(id, index), mConfigKey(key), mContainANYPositionInInternalDimensions(false) {
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap)
+    : ConditionTracker(id, index, protoHash),
+      mConfigKey(key),
+      mContainANYPositionInInternalDimensions(false) {
     VLOG("creating SimpleConditionTracker %lld", (long long)mConditionId);
     mCountNesting = simplePredicate.count_nesting();
 
-    if (simplePredicate.has_start()) {
-        auto pair = trackerNameIndexMap.find(simplePredicate.start());
-        if (pair == trackerNameIndexMap.end()) {
-            ALOGW("Start matcher %lld not found in the config", (long long)simplePredicate.start());
-            return;
-        }
-        mStartLogMatcherIndex = pair->second;
-        mTrackerIndex.insert(mStartLogMatcherIndex);
-    } else {
-        mStartLogMatcherIndex = -1;
-    }
-
-    if (simplePredicate.has_stop()) {
-        auto pair = trackerNameIndexMap.find(simplePredicate.stop());
-        if (pair == trackerNameIndexMap.end()) {
-            ALOGW("Stop matcher %lld not found in the config", (long long)simplePredicate.stop());
-            return;
-        }
-        mStopLogMatcherIndex = pair->second;
-        mTrackerIndex.insert(mStopLogMatcherIndex);
-    } else {
-        mStopLogMatcherIndex = -1;
-    }
-
-    if (simplePredicate.has_stop_all()) {
-        auto pair = trackerNameIndexMap.find(simplePredicate.stop_all());
-        if (pair == trackerNameIndexMap.end()) {
-            ALOGW("Stop all matcher %lld found in the config", (long long)simplePredicate.stop_all());
-            return;
-        }
-        mStopAllLogMatcherIndex = pair->second;
-        mTrackerIndex.insert(mStopAllLogMatcherIndex);
-    } else {
-        mStopAllLogMatcherIndex = -1;
-    }
+    setMatcherIndices(simplePredicate, atomMatchingTrackerMap);
 
     if (simplePredicate.has_dimensions()) {
         translateFieldMatcher(simplePredicate.dimensions(), &mOutputDimensions);
         if (mOutputDimensions.size() > 0) {
             mSliced = true;
-            mDimensionTag = mOutputDimensions[0].mMatcher.getTag();
         }
         mContainANYPositionInInternalDimensions = HasPositionANY(simplePredicate.dimensions());
     }
@@ -104,6 +71,59 @@ bool SimpleConditionTracker::init(const vector<Predicate>& allConditionConfig,
     }
     isConditionMet(conditionKey, allConditionTrackers, mSliced, conditionCache);
     return mInitialized;
+}
+
+bool SimpleConditionTracker::onConfigUpdated(
+        const vector<Predicate>& allConditionProtos, const int index,
+        const vector<sp<ConditionTracker>>& allConditionTrackers,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap,
+        const unordered_map<int64_t, int>& conditionTrackerMap) {
+    ConditionTracker::onConfigUpdated(allConditionProtos, index, allConditionTrackers,
+                                      atomMatchingTrackerMap, conditionTrackerMap);
+    setMatcherIndices(allConditionProtos[index].simple_predicate(), atomMatchingTrackerMap);
+    return true;
+}
+
+void SimpleConditionTracker::setMatcherIndices(
+        const SimplePredicate& simplePredicate,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap) {
+    mTrackerIndex.clear();
+    if (simplePredicate.has_start()) {
+        auto pair = atomMatchingTrackerMap.find(simplePredicate.start());
+        if (pair == atomMatchingTrackerMap.end()) {
+            ALOGW("Start matcher %lld not found in the config", (long long)simplePredicate.start());
+            return;
+        }
+        mStartLogMatcherIndex = pair->second;
+        mTrackerIndex.insert(mStartLogMatcherIndex);
+    } else {
+        mStartLogMatcherIndex = -1;
+    }
+
+    if (simplePredicate.has_stop()) {
+        auto pair = atomMatchingTrackerMap.find(simplePredicate.stop());
+        if (pair == atomMatchingTrackerMap.end()) {
+            ALOGW("Stop matcher %lld not found in the config", (long long)simplePredicate.stop());
+            return;
+        }
+        mStopLogMatcherIndex = pair->second;
+        mTrackerIndex.insert(mStopLogMatcherIndex);
+    } else {
+        mStopLogMatcherIndex = -1;
+    }
+
+    if (simplePredicate.has_stop_all()) {
+        auto pair = atomMatchingTrackerMap.find(simplePredicate.stop_all());
+        if (pair == atomMatchingTrackerMap.end()) {
+            ALOGW("Stop all matcher %lld found in the config",
+                  (long long)simplePredicate.stop_all());
+            return;
+        }
+        mStopAllLogMatcherIndex = pair->second;
+        mTrackerIndex.insert(mStopAllLogMatcherIndex);
+    } else {
+        mStopAllLogMatcherIndex = -1;
+    }
 }
 
 void SimpleConditionTracker::dumpState() {

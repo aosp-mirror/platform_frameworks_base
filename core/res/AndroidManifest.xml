@@ -3094,7 +3094,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows an application to be the status bar.  Currently used only by SystemUI.apk
-    @hide -->
+        @hide
+        @SystemApi -->
     <permission android:name="android.permission.STATUS_BAR_SERVICE"
         android:protectionLevel="signature" />
 
