@@ -18,7 +18,7 @@ package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
 import android.support.test.launcherhelper.ILauncherStrategy
-import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.helpers.StandardAppHelper
 
 abstract class FlickerAppHelper(
     instr: Instrumentation,

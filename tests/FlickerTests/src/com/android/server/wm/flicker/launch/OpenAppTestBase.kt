@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import com.android.server.wm.flicker.NonRotationTestBase
-import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.dsl.WmAssertion
 

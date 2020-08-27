@@ -24,7 +24,7 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import com.android.server.wm.flicker.FlickerTestBase
-import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.ImeAppHelper
