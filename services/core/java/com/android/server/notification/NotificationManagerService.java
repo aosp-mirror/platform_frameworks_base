@@ -9129,7 +9129,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         protected void resetDefaultAssistantsIfNecessary() {
-            final List<UserInfo> activeUsers = mUm.getUsers(true);
+            final List<UserInfo> activeUsers = mUm.getAliveUsers();
             for (UserInfo userInfo : activeUsers) {
                 int userId = userInfo.getUserHandle().getIdentifier();
                 if (!hasUserSet(userId)) {
