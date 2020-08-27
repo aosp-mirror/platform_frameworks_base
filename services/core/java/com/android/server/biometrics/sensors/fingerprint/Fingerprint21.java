@@ -440,7 +440,7 @@ class Fingerprint21 implements IHwBinder.DeathRecipient {
         //    is safe because authenticatorIds only change when A) new template has been enrolled,
         //    or B) all templates are removed.
         mHandler.post(() -> {
-            for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
+            for (UserInfo user : UserManager.get(mContext).getUsers(true /* excludeDying */)) {
                 final int targetUserId = user.id;
                 if (!mAuthenticatorIds.containsKey(targetUserId)) {
                     scheduleUpdateActiveUserWithoutHandler(targetUserId);

@@ -2576,7 +2576,7 @@ public class SettingsProvider extends ContentProvider {
         public void syncSsaidTableOnStart() {
             synchronized (mLock) {
                 // Verify that each user's packages and ssaid's are in sync.
-                for (UserInfo user : mUserManager.getAliveUsers()) {
+                for (UserInfo user : mUserManager.getUsers(true)) {
                     // Get all uids for the user's packages.
                     final List<PackageInfo> packages;
                     try {
@@ -3007,7 +3007,7 @@ public class SettingsProvider extends ContentProvider {
 
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    List<UserInfo> users = mUserManager.getAliveUsers();
+                    List<UserInfo> users = mUserManager.getUsers(true);
 
                     final int userCount = users.size();
                     for (int i = 0; i < userCount; i++) {
@@ -3244,7 +3244,7 @@ public class SettingsProvider extends ContentProvider {
             // is a singleton generation entry for the global settings which
             // is already incremented be the caller.
             final Uri uri = getNotificationUriFor(key, name);
-            final List<UserInfo> users = mUserManager.getAliveUsers();
+            final List<UserInfo> users = mUserManager.getUsers(/*excludeDying*/ true);
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
                 if (mUserManager.isUserRunning(UserHandle.of(userId))) {
@@ -3255,7 +3255,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private void notifyLocationChangeForRunningUsers() {
-            final List<UserInfo> users = mUserManager.getAliveUsers();
+            final List<UserInfo> users = mUserManager.getUsers(/*excludeDying=*/ true);
 
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;

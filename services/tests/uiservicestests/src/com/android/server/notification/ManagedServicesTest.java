@@ -978,7 +978,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         assertFalse(services.isSameUser(service, 0));
         assertTrue(services.isSameUser(service, 10));
-        assertTrue(services.isSameUser(service, UserHandle.USER_ALL));
     }
 
     @Test

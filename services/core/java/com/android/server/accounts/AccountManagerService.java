@@ -2114,7 +2114,7 @@ public class AccountManagerService
                  * Owner or system user account was renamed, rename the account for
                  * those users with which the account was shared.
                  */
-                    List<UserInfo> users = getUserManager().getAliveUsers();
+                    List<UserInfo> users = getUserManager().getUsers(true);
                     for (UserInfo user : users) {
                         if (user.isRestricted()
                                 && (user.restrictedProfileParentId == parentUserId)) {
@@ -2373,7 +2373,7 @@ public class AccountManagerService
             int parentUserId = accounts.userId;
             if (canHaveProfile(parentUserId)) {
                 // Remove from any restricted profiles that are sharing this account.
-                List<UserInfo> users = getUserManager().getAliveUsers();
+                List<UserInfo> users = getUserManager().getUsers(true);
                 for (UserInfo user : users) {
                     if (user.isRestricted() && parentUserId == (user.restrictedProfileParentId)) {
                         removeSharedAccountAsUser(account, user.id, callingUid);
@@ -4267,7 +4267,7 @@ public class AccountManagerService
      */
     @NonNull
     public AccountAndUser[] getAllAccounts() {
-        final List<UserInfo> users = getUserManager().getAliveUsers();
+        final List<UserInfo> users = getUserManager().getUsers(true);
         final int[] userIds = new int[users.size()];
         for (int i = 0; i < userIds.length; i++) {
             userIds[i] = users.get(i).id;

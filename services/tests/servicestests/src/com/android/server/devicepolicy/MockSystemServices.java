@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -235,7 +236,7 @@ public class MockSystemServices {
         }
         mUserInfos.add(uh);
         when(userManager.getUsers()).thenReturn(mUserInfos);
-        when(userManager.getAliveUsers()).thenReturn(mUserInfos);
+        when(userManager.getUsers(anyBoolean())).thenReturn(mUserInfos);
         when(userManager.isUserRunning(eq(new UserHandle(userId)))).thenReturn(true);
         when(userManager.getProfileParent(anyInt())).thenAnswer(
                 invocation -> {

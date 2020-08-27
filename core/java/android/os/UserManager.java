@@ -1293,7 +1293,7 @@ public class UserManager {
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
      * com.android.server.pm.UserRestrictionsUtils#USER_RESTRICTIONS}. For example
-     * {@link #KEY_RESTRICTIONS_PENDING} is not a real user restriction, but is a legitimate
+     * {@link #KEY_RESTRICTIONS_PENDING} is not a real user restriction, but is a a legitimate
      * value that can be passed into {@link #hasUserRestriction(String)}.
      * @hide
      */
@@ -3252,8 +3252,7 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @NonNull List<UserHandle> getUserHandles(boolean excludeDying) {
-        List<UserInfo> users = getUsers(/* excludePartial= */ true, excludeDying,
-                /* excludePreCreated= */ true);
+        List<UserInfo> users = getUsers(excludeDying);
         List<UserHandle> result = new ArrayList<>(users.size());
         for (UserInfo user : users) {
             result.add(user.getUserHandle());
@@ -3271,8 +3270,7 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public long[] getSerialNumbersOfUsers(boolean excludeDying) {
-        List<UserInfo> users = getUsers(/* excludePartial= */ true, excludeDying,
-                /* excludePreCreated= */ true);
+        List<UserInfo> users = getUsers(excludeDying);
         long[] result = new long[users.size()];
         for (int i = 0; i < result.length; i++) {
             result[i] = users.get(i).serialNumber;
@@ -3338,7 +3336,7 @@ public class UserManager {
     public boolean canAddMoreUsers() {
         // TODO(b/142482943): UMS has different logic, excluding Demo and Profile from counting. Why
         //                    not here? The logic is inconsistent. See UMS.canAddMoreManagedProfiles
-        final List<UserInfo> users = getAliveUsers();
+        final List<UserInfo> users = getUsers(true);
         final int totalUserCount = users.size();
         int aliveUserCount = 0;
         for (int i = 0; i < totalUserCount; i++) {
@@ -4146,7 +4144,7 @@ public class UserManager {
 
     /** Returns whether there are any users (other than the current user) to which to switch. */
     private boolean areThereUsersToWhichToSwitch() {
-        final List<UserInfo> users = getAliveUsers();
+        final List<UserInfo> users = getUsers(true);
         if (users == null) {
             return false;
         }

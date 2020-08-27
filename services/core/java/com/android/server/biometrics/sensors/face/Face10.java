@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
+import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Build;
@@ -382,7 +383,7 @@ class Face10 implements IHwBinder.DeathRecipient {
         //    is safe because authenticatorIds only change when A) new template has been enrolled,
         //    or B) all templates are removed.
         mHandler.post(() -> {
-            for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
+            for (UserInfo user : UserManager.get(mContext).getUsers(true /* excludeDying */)) {
                 final int targetUserId = user.id;
                 if (!mAuthenticatorIds.containsKey(targetUserId)) {
                     scheduleUpdateActiveUserWithoutHandler(targetUserId);
@@ -479,8 +480,7 @@ class Face10 implements IHwBinder.DeathRecipient {
      *    notifying the previous caller that the interrupting operation is complete (e.g. the
      *    interrupting client's challenge has been revoked, so that the interrupted client can
      *    start retry logic if necessary). See
-     *    {@link
-     *android.hardware.face.FaceManager.GenerateChallengeCallback#onChallengeInterruptFinished(int)}
+     *    {@link FaceManager.GenerateChallengeCallback#onChallengeInterruptFinished(int)}
      * The only case of conflicting challenges is currently resetLockout --> enroll. So, the second
      * option seems better as it prioritizes the new operation, which is user-facing.
      */

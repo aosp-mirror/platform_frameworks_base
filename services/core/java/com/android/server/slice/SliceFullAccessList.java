@@ -101,7 +101,7 @@ public class SliceFullAccessList {
     public void readXml(XmlPullParser parser) throws XmlPullParserException, IOException {
         // upgrade xml
         int xmlVersion = XmlUtils.readIntAttribute(parser, ATT_VERSION, 0);
-        final List<UserInfo> activeUsers = UserManager.get(mContext).getAliveUsers();
+        final List<UserInfo> activeUsers = UserManager.get(mContext).getUsers(true);
         for (UserInfo userInfo : activeUsers) {
             upgradeXml(xmlVersion, userInfo.getUserHandle().getIdentifier());
         }

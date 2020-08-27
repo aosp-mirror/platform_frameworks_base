@@ -807,8 +807,7 @@ public class AudioTrack extends PlayerBase
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
                 sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload, encapsulationMode, tunerConfiguration,
-                getCurrentOpPackageName());
+                offload, encapsulationMode, tunerConfiguration);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
@@ -894,8 +893,7 @@ public class AudioTrack extends PlayerBase
                     nativeTrackInJavaObj,
                     false /*offload*/,
                     ENCAPSULATION_MODE_NONE,
-                    null /* tunerConfiguration */,
-                    "" /* opPackagename */);
+                    null /* tunerConfiguration */);
             if (initResult != SUCCESS) {
                 loge("Error code "+initResult+" when initializing AudioTrack.");
                 return; // with mState == STATE_UNINITIALIZED
@@ -4064,8 +4062,7 @@ public class AudioTrack extends PlayerBase
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload, int encapsulationMode, Object tunerConfiguration,
-            @NonNull String opPackageName);
+            boolean offload, int encapsulationMode, Object tunerConfiguration);
 
     private native final void native_finalize();
 

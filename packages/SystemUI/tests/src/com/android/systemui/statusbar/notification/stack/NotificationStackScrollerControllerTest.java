@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.StatusBarState.SHADE;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -52,6 +49,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -64,7 +62,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -117,9 +114,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     private StatusBar mStatusBar;
     @Mock
     private ScrimController mScrimController;
-
-    @Captor
-    ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
 
     private NotificationStackScrollLayoutController mController;
 
@@ -187,49 +181,32 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateEmptyShadeView_notificationsVisible_zenHiding() {
+    public void testUpdateEmptyShadeView_notificationsVisible() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
         mController.attach(mNotificationStackScrollLayout);
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
 
-        setupShowEmptyShadeViewState(stateListener, true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
+        mController.updateEmptyShadeView(true /* visible */);
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 true /* visible */,
-
                 true /* notifVisibleInShade */);
-
-        setupShowEmptyShadeViewState(stateListener, false);
         reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
+        mController.updateEmptyShadeView(false /* visible */);
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 false /* visible */,
                 true /* notifVisibleInShade */);
     }
 
     @Test
-    public void testUpdateEmptyShadeView_notificationsHidden_zenNotHiding() {
+    public void testUpdateEmptyShadeView_notificationsHidden() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         mController.attach(mNotificationStackScrollLayout);
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
 
-        setupShowEmptyShadeViewState(stateListener, true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
+        mController.updateEmptyShadeView(true /* visible */);
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 true /* visible */,
                 false /* notifVisibleInShade */);
-
-        setupShowEmptyShadeViewState(stateListener, false);
         reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
+        mController.updateEmptyShadeView(false /* visible */);
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 false /* visible */,
                 false /* notifVisibleInShade */);
@@ -257,12 +234,15 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     public void testOnStatePostChange_verifyIfProfileIsPublic() {
         when(mNotificationLockscreenUserManager.isAnyProfilePublicMode()).thenReturn(true);
 
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListenerArgumentCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+
         mController.attach(mNotificationStackScrollLayout);
         verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
+                stateListenerArgumentCaptor.capture(), anyInt());
 
         StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
+                stateListenerArgumentCaptor.getValue();
 
         stateListener.onStatePostChange();
         verify(mNotificationStackScrollLayout).updateSensitiveness(false, true);
@@ -317,20 +297,6 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
     private LogMaker logMatcher(int category, int type) {
         return argThat(new LogMatcher(category, type));
-    }
-
-    private void setupShowEmptyShadeViewState(
-            StatusBarStateController.StateListener statusBarStateListener,
-            boolean toShow) {
-        if (toShow) {
-            statusBarStateListener.onStateChanged(SHADE);
-            mController.setQsExpanded(false);
-            mController.getView().removeAllViews();
-        } else {
-            statusBarStateListener.onStateChanged(KEYGUARD);
-            mController.setQsExpanded(true);
-            mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
-        }
     }
 
     static class LogMatcher implements ArgumentMatcher<LogMaker> {

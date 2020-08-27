@@ -131,7 +131,7 @@ public class UserGridRecyclerView extends RecyclerView {
     }
 
     private List<UserInfo> getUsersForUserGrid() {
-        return mUserManager.getAliveUsers()
+        return mUserManager.getUsers(/* excludeDying= */ true)
                 .stream()
                 .filter(UserInfo::supportsSwitchToByUser)
                 .collect(Collectors.toList());
@@ -338,7 +338,7 @@ public class UserGridRecyclerView extends RecyclerView {
                 maxSupportedUsers -= 1;
             }
 
-            List<UserInfo> users = mUserManager.getAliveUsers();
+            List<UserInfo> users = mUserManager.getUsers(/* excludeDying= */ true);
 
             // Count all users that are managed profiles of another user.
             int managedProfilesCount = 0;
