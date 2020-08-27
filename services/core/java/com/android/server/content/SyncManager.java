@@ -367,7 +367,7 @@ public class SyncManager {
     }
 
     private void removeStaleAccounts() {
-        for (UserInfo user : mUserManager.getUsers(true)) {
+        for (UserInfo user : mUserManager.getAliveUsers()) {
             // Skip any partially created/removed users
             if (user.partial) continue;
             Account[] accountsForUser = AccountManagerService.getSingleton().getAccounts(
@@ -777,7 +777,7 @@ public class SyncManager {
         if (!mSyncStorageEngine.shouldGrantSyncAdaptersAccountAccess()) {
             return;
         }
-        List<UserInfo> users = mUserManager.getUsers(true);
+        List<UserInfo> users = mUserManager.getAliveUsers();
         final int userCount = users.size();
         for (int i = 0; i < userCount; i++) {
             UserHandle userHandle = users.get(i).getUserHandle();
