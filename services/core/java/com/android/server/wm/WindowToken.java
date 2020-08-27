@@ -531,7 +531,7 @@ class WindowToken extends WindowContainer<WindowState> {
     void applyFixedRotationTransform(DisplayInfo info, DisplayFrames displayFrames,
             Configuration config) {
         if (mFixedRotationTransformState != null) {
-            return;
+            cleanUpFixedRotationTransformState(true /* replacing */);
         }
         mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
                 new Configuration(config), mDisplayContent.getRotation());
@@ -548,12 +548,12 @@ class WindowToken extends WindowContainer<WindowState> {
      * one. This takes the same effect as {@link #applyFixedRotationTransform}.
      */
     void linkFixedRotationTransform(WindowToken other) {
-        if (mFixedRotationTransformState != null) {
+        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
+        if (fixedRotationState == null || mFixedRotationTransformState == fixedRotationState) {
             return;
         }
-        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
-        if (fixedRotationState == null) {
-            return;
+        if (mFixedRotationTransformState != null) {
+            cleanUpFixedRotationTransformState(true /* replacing */);
         }
         mFixedRotationTransformState = fixedRotationState;
         fixedRotationState.mAssociatedTokens.add(this);
@@ -609,11 +609,17 @@ class WindowToken extends WindowContainer<WindowState> {
         // The state is cleared at the end, because it is used to indicate that other windows can
         // use seamless rotation when applying rotation to display.
         for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
-            state.mAssociatedTokens.get(i).cleanUpFixedRotationTransformState();
+            state.mAssociatedTokens.get(i).cleanUpFixedRotationTransformState(
+                    false /* replacing */);
         }
     }
 
-    private void cleanUpFixedRotationTransformState() {
+    private void cleanUpFixedRotationTransformState(boolean replacing) {
+        if (replacing && mFixedRotationTransformState.mAssociatedTokens.size() > 1) {
+            // The state is not only used by self. Make sure to leave the influence by others.
+            mFixedRotationTransformState.mAssociatedTokens.remove(this);
+            mFixedRotationTransformState.mRotatedContainers.remove(this);
+        }
         mFixedRotationTransformState = null;
         notifyFixedRotationTransform(false /* enabled */);
     }
