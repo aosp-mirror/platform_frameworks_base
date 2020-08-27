@@ -287,7 +287,9 @@ class EventDispatcher {
 
     /**
      * Sends down events to the view hierarchy for all pointers which are not already being
-     * delivered with original down location. i.e. pointers that are not yet injected.
+     * delivered with original down location. i.e. pointers that are not yet injected. The down time
+     * is also replaced by the original one.
+     *
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
@@ -336,7 +338,10 @@ class EventDispatcher {
         MotionEvent event =
                 MotionEvent.obtain(
                         prototype.getDownTime(),
-                        prototype.getEventTime(),
+                        // The event time is used for downTime while sending ACTION_DOWN. We adjust
+                        // it to avoid the motion velocity is too fast in the beginning after
+                        // Delegating.
+                        prototype.getDownTime(),
                         prototype.getAction(),
                         pointerCount,
                         properties,
