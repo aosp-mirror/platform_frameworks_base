@@ -1561,19 +1561,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         dispatchSessionFinished(error, detailMessage, null);
     }
 
-    private void onSessionVerificationFailure(int error, String detailMessage) {
-        Slog.e(TAG, "Failed to verify session " + sessionId + " [" + detailMessage + "]");
+    private void onSessionVerificationFailure(int error, String msg) {
+        final String msgWithErrorCode = PackageManager.installStatusToString(error, msg);
+        Slog.e(TAG, "Failed to verify session " + sessionId + " [" + msgWithErrorCode + "]");
         // Session is sealed and committed but could not be verified, we need to destroy it.
         destroyInternal();
         if (isStaged()) {
             setStagedSessionFailed(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, detailMessage);
+                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
             mStagingManager.notifyVerificationComplete(sessionId);
         } else {
             // Dispatch message to remove session from PackageInstallerService.
-            dispatchSessionFinished(error, detailMessage, null);
+            dispatchSessionFinished(error, msg, null);
         }
     }
 
