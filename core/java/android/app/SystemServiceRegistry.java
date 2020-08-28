@@ -103,6 +103,7 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaRouter;
+import android.media.MediaTranscodeManager;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
 import android.media.projection.MediaProjectionManager;
@@ -304,6 +305,15 @@ public final class SystemServiceRegistry {
             public AudioManager createService(ContextImpl ctx) {
                 return new AudioManager(ctx);
             }});
+
+        registerService(Context.MEDIA_TRANSCODING_SERVICE, MediaTranscodeManager.class,
+                new CachedServiceFetcher<MediaTranscodeManager>() {
+                    @Override
+                    public MediaTranscodeManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new MediaTranscodeManager(ctx);
+                    }
+                });
 
         registerService(Context.MEDIA_ROUTER_SERVICE, MediaRouter.class,
                 new CachedServiceFetcher<MediaRouter>() {

@@ -1681,6 +1681,7 @@ package android.content {
     field public static final String ETHERNET_SERVICE = "ethernet";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
+    field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
     field public static final String NETD_SERVICE = "netd";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
@@ -4271,6 +4272,60 @@ package android.media {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int ECHO_REFERENCE = 1997; // 0x7cd
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public static final int HOTWORD = 1999; // 0x7cf
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int RADIO_TUNER = 1998; // 0x7ce
+  }
+
+  public final class MediaTranscodeManager implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingJob enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException;
+    method protected void finalize();
+    field public static final int PRIORITY_OFFLINE = 2; // 0x2
+    field public static final int PRIORITY_REALTIME = 1; // 0x1
+    field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
+  }
+
+  @java.lang.FunctionalInterface public static interface MediaTranscodeManager.OnTranscodingFinishedListener {
+    method public void onTranscodingFinished(@NonNull android.media.MediaTranscodeManager.TranscodingJob);
+  }
+
+  public static final class MediaTranscodeManager.TranscodingJob {
+    method public void cancel();
+    method public int getJobId();
+    method @IntRange(from=0, to=100) public int getProgress();
+    method public int getResult();
+    method public int getStatus();
+    method public boolean retry();
+    method public void setOnProgressUpdateListener(@NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingJob.OnProgressUpdateListener);
+    method public void setOnProgressUpdateListener(int, @NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingJob.OnProgressUpdateListener);
+    field public static final int RESULT_CANCELED = 4; // 0x4
+    field public static final int RESULT_ERROR = 3; // 0x3
+    field public static final int RESULT_NONE = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 2; // 0x2
+    field public static final int STATUS_FINISHED = 3; // 0x3
+    field public static final int STATUS_PAUSED = 4; // 0x4
+    field public static final int STATUS_PENDING = 1; // 0x1
+    field public static final int STATUS_RUNNING = 2; // 0x2
+  }
+
+  @java.lang.FunctionalInterface public static interface MediaTranscodeManager.TranscodingJob.OnProgressUpdateListener {
+    method public void onProgressUpdate(@IntRange(from=0, to=100) int);
+  }
+
+  public static final class MediaTranscodeManager.TranscodingRequest {
+    method @NonNull public android.net.Uri getDestinationUri();
+    method public int getPriority();
+    method @NonNull public android.net.Uri getSourceUri();
+    method public int getType();
+    method @Nullable public android.media.MediaFormat getVideoTrackFormat();
+  }
+
+  public static final class MediaTranscodeManager.TranscodingRequest.Builder {
+    ctor public MediaTranscodeManager.TranscodingRequest.Builder();
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest build();
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationUri(@NonNull android.net.Uri);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setPriority(int);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceUri(@NonNull android.net.Uri);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setType(int);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setVideoTrackFormat(@NonNull android.media.MediaFormat);
   }
 
   public class PlayerProxy {

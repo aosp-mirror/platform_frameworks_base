@@ -4195,6 +4195,17 @@ public abstract class Context {
     public static final String AUDIO_SERVICE = "audio";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.media.MediaTranscodeManager} for transcoding media.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     * @see android.media.MediaTranscodeManager
+     */
+    @SystemApi
+    public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
+
+    /**
      * AuthService orchestrates biometric and PIN/pattern/password authentication.
      *
      * BiometricService was split into two services, AuthService and BiometricService, where
