@@ -43,11 +43,13 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
+import com.android.keyguard.KeyguardHostViewController;
+import com.android.keyguard.KeyguardRootViewController;
 import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -76,9 +78,9 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Mock
     private ViewMediatorCallback mViewMediatorCallback;
     @Mock
-    private LockPatternUtils mLockPatternUtils;
-    @Mock
     private DismissCallbackRegistry mDismissCallbackRegistry;
+    @Mock
+    private KeyguardHostViewController mKeyguardHostViewController;
     @Mock
     private KeyguardHostView mKeyguardHostView;
     @Mock
@@ -96,7 +98,13 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Mock
     private KeyguardSecurityModel mKeyguardSecurityModel;
     @Mock
+    private KeyguardRootViewController mRootViewController;
+    @Mock
     private ViewGroup mRootView;
+    @Mock
+    private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    @Mock
+    private KeyguardBouncerComponent mKeyguardBouncerComponent;
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
     private Integer mRootVisibility = View.INVISIBLE;
@@ -116,19 +124,23 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
                 .thenReturn(KeyguardSecurityModel.SecurityMode.None);
         DejankUtils.setImmediate(true);
+        when(mKeyguardBouncerComponentFactory.create()).thenReturn(mKeyguardBouncerComponent);
+        when(mKeyguardBouncerComponent.getKeyguardHostViewController())
+                .thenReturn(mKeyguardHostViewController);
+        when(mKeyguardBouncerComponent.getKeyguardRootViewController())
+                .thenReturn(mRootViewController);
+
+        when(mRootViewController.getView()).thenReturn(mRootView);
+        when(mKeyguardHostViewController.getView()).thenReturn(mKeyguardHostView);
+
         final ViewGroup container = new FrameLayout(getContext());
         when(mKeyguardHostView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mKeyguardHostView.getHeight()).thenReturn(500);
-        mBouncer = new KeyguardBouncer(getContext(), mViewMediatorCallback,
-                mLockPatternUtils, container, mDismissCallbackRegistry, mFalsingManager,
-                mExpansionCallback, mKeyguardStateController, mKeyguardUpdateMonitor,
-                mKeyguardBypassController, mHandler) {
-            @Override
-            protected void inflateView() {
-                mKeyguardView = mKeyguardHostView;
-                mRoot = mRootView;
-            }
-        };
+        mBouncer = new KeyguardBouncer.Factory(getContext(), mViewMediatorCallback,
+                mDismissCallbackRegistry, mFalsingManager,
+                mKeyguardStateController, mKeyguardUpdateMonitor,
+                mKeyguardBypassController, mHandler, mKeyguardBouncerComponentFactory)
+                .create(container, mExpansionCallback);
     }
 
     @Test

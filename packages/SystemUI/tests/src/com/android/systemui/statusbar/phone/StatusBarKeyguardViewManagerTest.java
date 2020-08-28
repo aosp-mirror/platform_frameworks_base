@@ -39,7 +39,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -92,9 +91,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private FaceAuthScreenBrightnessController mFaceAuthScreenBrightnessController;
     @Mock
-    private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
-    @Mock
-    private KeyguardBouncerComponent mKeyguardBouncerComponent;
+    private KeyguardBouncer.Factory mKeyguardBouncerFactory;
     @Mock
     private KeyguardBouncer mBouncer;
 
@@ -107,11 +104,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,
                 RETURNS_DEEP_STUBS));
 
-        when(mKeyguardBouncerComponentFactory.build(
+        when(mKeyguardBouncerFactory.create(
                 any(ViewGroup.class),
                 any(KeyguardBouncer.BouncerExpansionCallback.class)))
-                .thenReturn(mKeyguardBouncerComponent);
-        when(mKeyguardBouncerComponent.createKeyguardBouncer()).thenReturn(mBouncer);
+                .thenReturn(mBouncer);
 
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(
                 getContext(),
@@ -126,7 +122,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 Optional.of(mFaceAuthScreenBrightnessController),
                 mock(NotificationMediaManager.class),
-                mKeyguardBouncerComponentFactory);
+                mKeyguardBouncerFactory);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
                 mNotificationPanelView, mBiometrucUnlockController,
                 mLockIconContainer, mNotificationContainer, mBypassController);

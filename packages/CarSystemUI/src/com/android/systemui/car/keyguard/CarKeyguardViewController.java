@@ -30,7 +30,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
@@ -40,6 +39,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardBouncer.Factory;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -66,7 +66,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final ViewMediatorCallback mViewMediatorCallback;
     private final CarNavigationBarController mCarNavigationBarController;
-    private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    private final Factory mKeyguardBouncerFactory;
     // Needed to instantiate mBouncer.
     private final KeyguardBouncer.BouncerExpansionCallback
             mExpansionCallback = new KeyguardBouncer.BouncerExpansionCallback() {
@@ -107,7 +107,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             ViewMediatorCallback viewMediatorCallback,
             CarNavigationBarController carNavigationBarController,
-            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
+            KeyguardBouncer.Factory keyguardBouncerFactory) {
 
         super(R.id.keyguard_stub, overlayViewGlobalStateController);
 
@@ -118,7 +118,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mViewMediatorCallback = viewMediatorCallback;
         mCarNavigationBarController = carNavigationBarController;
-        mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
+        mKeyguardBouncerFactory = keyguardBouncerFactory;
 
         registerUserSwitchedListener();
     }
@@ -130,9 +130,8 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void onFinishInflate() {
-        mBouncer = mKeyguardBouncerComponentFactory
-                .build(getLayout().findViewById(R.id.keyguard_container), mExpansionCallback)
-                .createKeyguardBouncer();
+        mBouncer = mKeyguardBouncerFactory
+                .create(getLayout().findViewById(R.id.keyguard_container), mExpansionCallback);
         mBiometricUnlockControllerLazy.get().setKeyguardViewController(this);
     }
 

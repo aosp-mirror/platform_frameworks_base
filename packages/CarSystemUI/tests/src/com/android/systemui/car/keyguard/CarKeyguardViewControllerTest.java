@@ -36,7 +36,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
@@ -67,9 +66,7 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
     @Mock
     private CarKeyguardViewController.OnKeyguardCancelClickedListener mCancelClickedListener;
     @Mock
-    private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
-    @Mock
-    private KeyguardBouncerComponent mKeyguardBouncerComponent;
+    private KeyguardBouncer.Factory mKeyguardBouncerFactory;
     @Mock
     private KeyguardBouncer mBouncer;
 
@@ -77,11 +74,10 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mKeyguardBouncerComponentFactory.build(
+        when(mKeyguardBouncerFactory.create(
                 any(ViewGroup.class),
                 any(KeyguardBouncer.BouncerExpansionCallback.class)))
-                .thenReturn(mKeyguardBouncerComponent);
-        when(mKeyguardBouncerComponent.createKeyguardBouncer()).thenReturn(mBouncer);
+                .thenReturn(mBouncer);
 
         mCarKeyguardViewController = new CarKeyguardViewController(
                 Handler.getMain(),
@@ -92,7 +88,7 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
                 () -> mock(BiometricUnlockController.class),
                 mock(ViewMediatorCallback.class),
                 mock(CarNavigationBarController.class),
-                mKeyguardBouncerComponentFactory
+                mKeyguardBouncerFactory
         );
         mCarKeyguardViewController.inflate((ViewGroup) LayoutInflater.from(mContext).inflate(
                 R.layout.sysui_overlay_window, /* root= */ null));

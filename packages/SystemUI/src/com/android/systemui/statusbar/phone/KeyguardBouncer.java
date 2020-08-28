@@ -27,21 +27,21 @@ import android.os.UserManager;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
+import com.android.keyguard.KeyguardHostViewController;
+import com.android.keyguard.KeyguardRootViewController;
 import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.dagger.ContainerView;
-import com.android.keyguard.dagger.KeyguardBouncerScope;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
+import com.android.keyguard.dagger.RootView;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -57,7 +57,6 @@ import javax.inject.Inject;
 /**
  * A class which manages the bouncer on the lockscreen.
  */
-@KeyguardBouncerScope
 public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
@@ -68,7 +67,6 @@ public class KeyguardBouncer {
 
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
-    protected final LockPatternUtils mLockPatternUtils;
     protected final ViewGroup mContainer;
     private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
@@ -76,6 +74,7 @@ public class KeyguardBouncer {
     private final BouncerExpansionCallback mExpansionCallback;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -86,6 +85,7 @@ public class KeyguardBouncer {
     private final Runnable mRemoveViewRunnable = this::removeView;
     private final KeyguardBypassController mKeyguardBypassController;
     protected KeyguardHostView mKeyguardView;
+    private KeyguardHostViewController mKeyguardViewController;
     private final Runnable mResetRunnable = ()-> {
         if (mKeyguardView != null) {
             mKeyguardView.resetSecurityContainer();
@@ -95,22 +95,22 @@ public class KeyguardBouncer {
     private int mStatusBarHeight;
     private float mExpansion = EXPANSION_HIDDEN;
     protected ViewGroup mRoot;
+    private KeyguardRootViewController mRootViewController;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
     private boolean mIsAnimatingAway;
     private boolean mIsScrimmed;
 
-    @Inject
-    public KeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils, @ContainerView ViewGroup container,
+    private KeyguardBouncer(Context context, ViewMediatorCallback callback,
+            ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
             BouncerExpansionCallback expansionCallback,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController keyguardBypassController, Handler handler) {
+            KeyguardBypassController keyguardBypassController, Handler handler,
+            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
         mContext = context;
         mCallback = callback;
-        mLockPatternUtils = lockPatternUtils;
         mContainer = container;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFalsingManager = falsingManager;
@@ -118,6 +118,7 @@ public class KeyguardBouncer {
         mExpansionCallback = expansionCallback;
         mHandler = handler;
         mKeyguardStateController = keyguardStateController;
+        mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
     }
@@ -309,7 +310,7 @@ public class KeyguardBouncer {
         cancelShowRunnable();
         if (mKeyguardView != null) {
             mKeyguardView.cancelDismissAction();
-            mKeyguardView.cleanUp();
+            mKeyguardViewController.cleanUp();
         }
         mIsAnimatingAway = false;
         if (mRoot != null) {
@@ -442,10 +443,14 @@ public class KeyguardBouncer {
     protected void inflateView() {
         removeView();
         mHandler.removeCallbacks(mRemoveViewRunnable);
-        mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
-        mKeyguardView = mRoot.findViewById(R.id.keyguard_host_view);
-        mKeyguardView.setLockPatternUtils(mLockPatternUtils);
-        mKeyguardView.setViewMediatorCallback(mCallback);
+        KeyguardBouncerComponent component = mKeyguardBouncerComponentFactory.create();
+        mRootViewController = component.getKeyguardRootViewController();
+        mRootViewController.init();
+        mRoot = mRootViewController.getView();  // TODO(b/166448040): Don't access root view here.
+        mKeyguardViewController = component.getKeyguardHostViewController();
+        mKeyguardViewController.init();
+        mKeyguardView = mKeyguardViewController.getView();
+
         mContainer.addView(mRoot, mContainer.getChildCount());
         mStatusBarHeight = mRoot.getResources().getDimensionPixelOffset(
                 com.android.systemui.R.dimen.status_bar_height);
@@ -527,5 +532,44 @@ public class KeyguardBouncer {
         void onStartingToHide();
         void onStartingToShow();
         void onFullyHidden();
+    }
+
+    /** Create a {@link KeyguardBouncer} once a container and bouncer callback are available. */
+    public static class Factory {
+        private final Context mContext;
+        private final ViewMediatorCallback mCallback;
+        private final DismissCallbackRegistry mDismissCallbackRegistry;
+        private final FalsingManager mFalsingManager;
+        private final KeyguardStateController mKeyguardStateController;
+        private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+        private final KeyguardBypassController mKeyguardBypassController;
+        private final Handler mHandler;
+        private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+
+        @Inject
+        public Factory(Context context, ViewMediatorCallback callback,
+                DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
+                KeyguardStateController keyguardStateController,
+                KeyguardUpdateMonitor keyguardUpdateMonitor,
+                KeyguardBypassController keyguardBypassController, Handler handler,
+                KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
+            mContext = context;
+            mCallback = callback;
+            mDismissCallbackRegistry = dismissCallbackRegistry;
+            mFalsingManager = falsingManager;
+            mKeyguardStateController = keyguardStateController;
+            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+            mKeyguardBypassController = keyguardBypassController;
+            mHandler = handler;
+            mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
+        }
+
+        public KeyguardBouncer create(@RootView ViewGroup container,
+                BouncerExpansionCallback expansionCallback) {
+            return new KeyguardBouncer(mContext, mCallback, container,
+                    mDismissCallbackRegistry, mFalsingManager, expansionCallback,
+                    mKeyguardStateController, mKeyguardUpdateMonitor, mKeyguardBypassController,
+                    mHandler, mKeyguardBouncerComponentFactory);
+        }
     }
 }

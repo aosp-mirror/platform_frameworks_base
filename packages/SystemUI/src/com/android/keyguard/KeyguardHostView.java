@@ -306,13 +306,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         }
     }
 
-    /**
-     * Called before this view is being removed.
-     */
-    public void cleanUp() {
-        getSecurityContainer().onPause();
-    }
-
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (interceptMediaKey(event)) {

@@ -26,5 +26,5 @@ import javax.inject.Qualifier;
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-public @interface ContainerView {
+public @interface RootView {
 }
