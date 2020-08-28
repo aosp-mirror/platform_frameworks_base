@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.RemoteCallback;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 /**
@@ -37,8 +38,10 @@ oneway interface IWindowMagnificationConnection {
      *                or {@link Float#NaN} to leave unchanged.
      * @param centerY the screen-relative Y coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
+     * @param endCallback The callback called when the animation is completed.
      */
-    void enableWindowMagnification(int displayId, float scale, float centerX, float centerY);
+    void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+        in RemoteCallback endCallback);
 
     /**
      * Sets the scale of the window magnifier on specified display.
@@ -52,8 +55,9 @@ oneway interface IWindowMagnificationConnection {
      * Disables window magnification on specified display with animation.
      *
      * @param displayId The logical display id.
+     * @param endCallback The callback called when the animation is completed.
      */
-    void disableWindowMagnification(int displayId);
+    void disableWindowMagnification(int displayId, in RemoteCallback endCallback);
 
     /**
      * Moves the window magnifier on the specified display. It has no effect while animating.
