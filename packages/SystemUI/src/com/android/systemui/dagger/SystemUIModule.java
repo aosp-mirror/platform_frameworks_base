@@ -16,6 +16,7 @@
 
 package com.android.systemui.dagger;
 
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.appops.dagger.AppOpsModule;
@@ -82,6 +83,7 @@ import dagger.Provides;
                 NotificationRowComponent.class,
                 DozeComponent.class,
                 ExpandableNotificationRowComponent.class,
+                KeyguardBouncerComponent.class,
                 NotificationShelfComponent.class,
                 FragmentService.FragmentCreator.class})
 public abstract class SystemUIModule {

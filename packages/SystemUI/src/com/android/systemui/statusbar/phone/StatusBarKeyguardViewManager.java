@@ -44,15 +44,13 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -106,6 +104,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final NavigationModeController mNavigationModeController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final Optional<FaceAuthScreenBrightnessController> mFaceAuthScreenBrightnessController;
+    private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -216,7 +215,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             Optional<FaceAuthScreenBrightnessController> faceAuthScreenBrightnessController,
-            NotificationMediaManager notificationMediaManager) {
+            NotificationMediaManager notificationMediaManager,
+            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -229,6 +229,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBarStateController = sysuiStatusBarStateController;
         mDockManager = dockManager;
         mFaceAuthScreenBrightnessController = faceAuthScreenBrightnessController;
+        mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
     }
 
     @Override
@@ -236,9 +237,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
-            DismissCallbackRegistry dismissCallbackRegistry,
             ViewGroup lockIconContainer, View notificationContainer,
-            KeyguardBypassController bypassController, FalsingManager falsingManager) {
+            KeyguardBypassController bypassController) {
         mStatusBar = statusBar;
         mContainer = container;
         mLockIconContainer = lockIconContainer;
@@ -246,9 +246,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mLastLockVisible = mLockIconContainer.getVisibility() == View.VISIBLE;
         }
         mBiometricUnlockController = biometricUnlockController;
-        mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
-                mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
-                mExpansionCallback, mKeyguardStateController, falsingManager, bypassController);
+        mBouncer = mKeyguardBouncerComponentFactory
+                .build(container, mExpansionCallback)
+                .createKeyguardBouncer();
         mNotificationPanelViewController = notificationPanelViewController;
         notificationPanelViewController.addExpansionListener(this);
         mBypassController = bypassController;
