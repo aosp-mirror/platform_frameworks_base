@@ -19,8 +19,10 @@ apex {
 }
 
 apex_defaults {
-    native_shared_libs: [
+    jni_libs: [
         "libstats_jni",
+    ],
+    native_shared_libs: [
         "libstatspull",
         "libstatssocket",
     ],
