@@ -20,6 +20,7 @@ import android.os.Looper
 import android.util.ArrayMap
 import android.util.Log
 import android.view.View
+import androidx.dynamicanimation.animation.AnimationHandler
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FlingAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -122,6 +123,12 @@ class PhysicsAnimator<T> private constructor (target: T) {
 
     /** FlingConfig to use by default for properties whose fling configs were not provided. */
     private var defaultFling: FlingConfig = globalDefaultFling
+
+    /**
+     * AnimationHandler to use if it need custom AnimationHandler, if this is null, it will use
+     * the default AnimationHandler in the DynamicAnimation.
+     */
+    private var customAnimationHandler: AnimationHandler? = null
 
     /**
      * Internal listeners that respond to DynamicAnimations updating and ending, and dispatch to
@@ -447,6 +454,14 @@ class PhysicsAnimator<T> private constructor (target: T) {
         this.defaultFling = defaultFling
     }
 
+    /**
+     * Set the custom AnimationHandler for all aniatmion in this animator. Set this with null for
+     * restoring to default AnimationHandler.
+     */
+    fun setCustomAnimationHandler(handler: AnimationHandler) {
+        this.customAnimationHandler = handler
+    }
+
     /** Starts the animations! */
     fun start() {
         startAction()
@@ -501,10 +516,13 @@ class PhysicsAnimator<T> private constructor (target: T) {
                     // springs) on this property before flinging.
                     cancel(animatedProperty)
 
+                    // Apply the custom animation handler if it not null
+                    val flingAnim = getFlingAnimation(animatedProperty, target)
+                    flingAnim.animationHandler =
+                            customAnimationHandler ?: flingAnim.animationHandler
+
                     // Apply the configuration and start the animation.
-                    getFlingAnimation(animatedProperty, target)
-                            .also { flingConfig.applyToAnimation(it) }
-                            .start()
+                    flingAnim.also { flingConfig.applyToAnimation(it) }.start()
                 }
             }
 
@@ -516,6 +534,21 @@ class PhysicsAnimator<T> private constructor (target: T) {
                 if (flingConfig == null) {
                     // Apply the configuration and start the animation.
                     val springAnim = getSpringAnimation(animatedProperty, target)
+
+                    // If customAnimationHander is exist and has not been set to the animation,
+                    // it should set here.
+                    if (customAnimationHandler != null &&
+                            springAnim.animationHandler != customAnimationHandler) {
+                        // Cancel the animation before set animation handler
+                        if (springAnim.isRunning) {
+                            cancel(animatedProperty)
+                        }
+                        // Apply the custom animation handler if it not null
+                        springAnim.animationHandler =
+                                customAnimationHandler ?: springAnim.animationHandler
+                    }
+
+                    // Apply the configuration and start the animation.
                     springConfig.applyToAnimation(springAnim)
                     animationStartActions.add(springAnim::start)
                 } else {
@@ -570,10 +603,13 @@ class PhysicsAnimator<T> private constructor (target: T) {
                                     }
                                 }
 
+                                // Apply the custom animation handler if it not null
+                                val springAnim = getSpringAnimation(animatedProperty, target)
+                                springAnim.animationHandler =
+                                        customAnimationHandler ?: springAnim.animationHandler
+
                                 // Apply the configuration and start the spring animation.
-                                getSpringAnimation(animatedProperty, target)
-                                        .also { springConfig.applyToAnimation(it) }
-                                        .start()
+                                springAnim.also { springConfig.applyToAnimation(it) }.start()
                             }
                         }
                     })
