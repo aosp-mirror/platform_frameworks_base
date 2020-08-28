@@ -149,6 +149,11 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         private boolean mIsNetworkUntrusted;
 
+        /**
+         * Whether this network will use enhanced MAC randomization.
+         */
+        private boolean mIsEnhancedMacRandomizationEnabled;
+
         public Builder() {
             mSsid = null;
             mBssid =  null;
@@ -171,6 +176,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mWapiEnterpriseConfig = null;
             mIsNetworkUntrusted = false;
             mPriorityGroup = 0;
+            mIsEnhancedMacRandomizationEnabled = true;
         }
 
         /**
@@ -394,6 +400,29 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
 
         /**
+         * Specifies the MAC randomization method.
+         * <p>
+         * Suggested networks will never use the device (factory) MAC address to associate to the
+         * network - instead they use a locally generated random MAC address. This method controls
+         * the strategy for generating the random MAC address:
+         * <li> Persisted MAC randomization (false): generates the MAC address from a secret seed
+         * and information from the Wi-Fi configuration (SSID or Passpoint profile). That means that
+         * the same generated MAC address will be used for each subsequent association. </li>
+         * <li> Enhanced MAC randomization (true - the default): periodically generates a new MAC
+         * address new connections. Under this option, the randomized MAC address should change
+         * if the suggestion is removed and then added back. </li>
+         *
+         * @param enabled {@code true} to periodically change the randomized MAC address.
+         *                {@code false} to use the same randomized MAC for all connections to this
+         *                            network.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setIsEnhancedMacRandomizationEnabled(boolean enabled) {
+            mIsEnhancedMacRandomizationEnabled = enabled;
+            return this;
+        }
+
+        /**
          * Specifies whether the app needs to log in to a captive portal to obtain Internet access.
          * <p>
          * This will dictate if the directed broadcast
@@ -577,6 +606,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.meteredOverride = mMeteredOverride;
             wifiConfiguration.carrierId = mCarrierId;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
+            wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
+                    ? WifiConfiguration.RANDOMIZATION_ENHANCED
+                    : WifiConfiguration.RANDOMIZATION_PERSISTENT;
             return wifiConfiguration;
         }
 
@@ -607,6 +639,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             mPasspointConfiguration.setCarrierId(mCarrierId);
             mPasspointConfiguration.setMeteredOverride(wifiConfiguration.meteredOverride);
+            wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
+                    ? WifiConfiguration.RANDOMIZATION_ENHANCED
+                    : WifiConfiguration.RANDOMIZATION_PERSISTENT;
             return wifiConfiguration;
         }
 
