@@ -930,21 +930,34 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task stack = createStack();
         final Task task = createTask(stack);
         final ActivityRecord activity = createActivityRecordInTask(stack.mDisplayContent, task);
+        final Task stack2 = createStack();
+        final Task task2 = createTask(stack2);
+        final ActivityRecord activity2 = createActivityRecordInTask(stack.mDisplayContent, task2);
         final ITaskOrganizer organizer = registerMockOrganizer();
 
         // Setup the task to be controlled by the MW mode organizer
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertTrue(stack.isOrganized());
+        assertTrue(stack2.isOrganized());
 
         // Verify a back pressed does not call the organizer
         mWm.mAtmService.onBackPressedOnTaskRoot(activity.token);
         verify(organizer, never()).onBackPressedOnTaskRoot(any());
 
         // Enable intercepting back
-        mWm.mAtmService.mTaskOrganizerController.setInterceptBackPressedOnTaskRoot(organizer,
-                true);
+        mWm.mAtmService.mTaskOrganizerController.setInterceptBackPressedOnTaskRoot(
+                stack.mRemoteToken.toWindowContainerToken(), true);
 
         // Verify now that the back press does call the organizer
+        mWm.mAtmService.onBackPressedOnTaskRoot(activity.token);
+        verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
+
+        // Disable intercepting back
+        mWm.mAtmService.mTaskOrganizerController.setInterceptBackPressedOnTaskRoot(
+                stack.mRemoteToken.toWindowContainerToken(), false);
+
+        // Verify now that the back press no longer calls the organizer
         mWm.mAtmService.onBackPressedOnTaskRoot(activity.token);
         verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
     }

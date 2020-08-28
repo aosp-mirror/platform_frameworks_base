@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -56,6 +57,10 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -67,7 +72,6 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -117,6 +121,8 @@ public class NotificationStackScrollLayoutController {
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
+    private boolean mShowEmptyShadeView;
+    private int mBarState;
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
@@ -127,6 +133,8 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onViewAttachedToWindow(View v) {
                     mConfigurationController.addCallback(mConfigurationListener);
+                    mZenModeController.addCallback(mZenModeControllerCallback);
+                    mBarState = mStatusBarStateController.getState();
                     mStatusBarStateController.addCallback(
                             mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
                 }
@@ -134,6 +142,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onViewDetachedFromWindow(View v) {
                     mConfigurationController.removeCallback(mConfigurationListener);
+                    mZenModeController.removeCallback(mZenModeControllerCallback);
                     mStatusBarStateController.removeCallback(mStateListener);
                 }
             };
@@ -154,11 +163,13 @@ public class NotificationStackScrollLayoutController {
     final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onDensityOrFontScaleChanged() {
+            updateShowEmptyShadeView();
             mView.reinflateViews();
         }
 
         @Override
         public void onOverlayChanged() {
+            updateShowEmptyShadeView();
             mView.updateCornerRadius();
             mView.reinflateViews();
         }
@@ -179,14 +190,15 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onStatePreChange(int oldState, int newState) {
                     if (oldState == StatusBarState.SHADE_LOCKED
-                            && newState == StatusBarState.KEYGUARD) {
+                            && newState == KEYGUARD) {
                         mView.requestAnimateEverything();
                     }
                 }
 
                 @Override
                 public void onStateChanged(int newState) {
-                    mView.setStatusBarState(newState);
+                    mBarState = newState;
+                    mView.setStatusBarState(mBarState);
                 }
 
                 @Override
@@ -480,6 +492,14 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
+    private final ZenModeController.Callback mZenModeControllerCallback =
+            new ZenModeController.Callback() {
+                @Override
+                public void onZenChanged(int zen) {
+                    updateShowEmptyShadeView();
+                }
+            };
+
     @Inject
     public NotificationStackScrollLayoutController(
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
@@ -501,7 +521,9 @@ public class NotificationStackScrollLayoutController {
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             StatusBar statusBar,
-            ScrimController scrimController) {
+            ScrimController scrimController,
+            NotificationGroupManagerLegacy legacyGroupManager,
+            GroupExpansionManager groupManager) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -522,12 +544,28 @@ public class NotificationStackScrollLayoutController {
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;
         mScrimController = scrimController;
+        groupManager.registerGroupExpansionChangeListener((changedRow, expanded) -> {
+            mView.onGroupExpandChanged(changedRow, expanded);
+        });
+
+        legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
+            @Override
+            public void onGroupCreatedFromChildren(NotificationGroup group) {
+                mStatusBar.requestNotificationUpdate("onGroupCreatedFromChildren");
+            }
+
+            @Override
+            public void onGroupsChanged() {
+                mStatusBar.requestNotificationUpdate("onGroupsChanged");
+            }
+        });
     }
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
         mView.setController(this);
         mView.setTouchHandler(new TouchHandler());
+        mView.setStatusBar(mStatusBar);
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
@@ -795,6 +833,7 @@ public class NotificationStackScrollLayoutController {
 
     public void setQsExpanded(boolean expanded) {
         mView.setQsExpanded(expanded);
+        updateShowEmptyShadeView();
     }
 
     public void setScrollingEnabled(boolean enabled) {
@@ -903,8 +942,21 @@ public class NotificationStackScrollLayoutController {
         return mView.getFooterViewHeightWithPadding();
     }
 
-    public void updateEmptyShadeView(boolean visible) {
-        mView.updateEmptyShadeView(visible, mZenModeController.areNotificationsHiddenInShade());
+    /**
+     * Update whether we should show the empty shade view (no notifications in the shade).
+     * If so, send the update to our view.
+     */
+    public void updateShowEmptyShadeView() {
+        mShowEmptyShadeView = mBarState != KEYGUARD
+                && !mView.isQsExpanded()
+                && mView.getVisibleNotificationCount() == 0;
+        mView.updateEmptyShadeView(
+                mShowEmptyShadeView,
+                mZenModeController.areNotificationsHiddenInShade());
+    }
+
+    public boolean isShowingEmptyShadeView() {
+        return mShowEmptyShadeView;
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
@@ -1012,14 +1064,6 @@ public class NotificationStackScrollLayoutController {
         mView.setNotificationPanelController(notificationPanelViewController);
     }
 
-    public void setStatusBar(StatusBar statusBar) {
-        mView.setStatusBar(statusBar);
-    }
-
-    public void setGroupManager(NotificationGroupManager groupManager) {
-        mView.setGroupManager(groupManager);
-    }
-
     public void setShelfController(NotificationShelfController notificationShelfController) {
         mView.setShelfController(notificationShelfController);
     }
@@ -1095,6 +1139,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     private class NotificationListContainerImpl implements NotificationListContainer {
+
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {
             mView.setChildTransferInProgress(childTransferInProgress);

@@ -16,20 +16,19 @@
 
 package com.android.systemui.car;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.car.settings.CarSettings;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
-import android.provider.Settings;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 
@@ -40,30 +39,33 @@ import javax.inject.Inject;
 @SysUISingleton
 public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControllerImpl implements
         CarDeviceProvisionedController {
-    private static final Uri USER_SETUP_IN_PROGRESS_URI = Settings.Secure.getUriFor(
-            CarSettings.Secure.KEY_SETUP_WIZARD_IN_PROGRESS);
-    private final ContentObserver mCarSettingsObserver = new ContentObserver(
-            Dependency.get(Dependency.MAIN_HANDLER)) {
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri, int flags) {
-            if (USER_SETUP_IN_PROGRESS_URI.equals(uri)) {
-                notifyUserSetupInProgressChanged();
-            }
-        }
-    };
-    private final ContentResolver mContentResolver;
+    private final Uri mUserSetupInProgressUri;
+    private final ContentObserver mCarSettingsObserver;
+    private final Handler mMainHandler;
+    private final SecureSettings mSecureSettings;
 
     @Inject
-    public CarDeviceProvisionedControllerImpl(Context context, @Main Handler mainHandler,
-            BroadcastDispatcher broadcastDispatcher) {
-        super(context, mainHandler, broadcastDispatcher);
-        mContentResolver = context.getContentResolver();
+    public CarDeviceProvisionedControllerImpl(@Main Handler mainHandler,
+            BroadcastDispatcher broadcastDispatcher, GlobalSettings globalSetting,
+            SecureSettings secureSettings) {
+        super(mainHandler, broadcastDispatcher, globalSetting, secureSettings);
+        mMainHandler = mainHandler;
+        mSecureSettings = secureSettings;
+        mUserSetupInProgressUri = mSecureSettings.getUriFor(
+                CarSettings.Secure.KEY_SETUP_WIZARD_IN_PROGRESS);
+        mCarSettingsObserver = new ContentObserver(mMainHandler) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri, int flags) {
+                if (mUserSetupInProgressUri.equals(uri)) {
+                    notifyUserSetupInProgressChanged();
+                }
+            }
+        };
     }
 
     @Override
     public boolean isUserSetupInProgress(int user) {
-        return Settings.Secure.getIntForUser(mContentResolver,
+        return mSecureSettings.getIntForUser(
                 CarSettings.Secure.KEY_SETUP_WIZARD_IN_PROGRESS, /* def= */ 0, user) != 0;
     }
 
@@ -73,7 +75,7 @@ public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControl
     }
 
     @Override
-    public void addCallback(DeviceProvisionedListener listener) {
+    public void addCallback(@NonNull DeviceProvisionedListener listener) {
         super.addCallback(listener);
         if (listener instanceof CarDeviceProvisionedListener) {
             ((CarDeviceProvisionedListener) listener).onUserSetupInProgressChanged();
@@ -82,9 +84,9 @@ public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControl
 
     @Override
     protected void startListening(int user) {
-        mContentResolver.registerContentObserver(
-                USER_SETUP_IN_PROGRESS_URI, /* notifyForDescendants= */ true, mCarSettingsObserver,
-                user);
+        mSecureSettings.registerContentObserverForUser(
+                mUserSetupInProgressUri, /* notifyForDescendants= */ true,
+                mCarSettingsObserver, user);
         // The SUW Flag observer is registered before super.startListening() so that the observer is
         // in place before DeviceProvisionedController starts to track user switches which avoids
         // an edge case where our observer gets registered twice.
@@ -94,16 +96,16 @@ public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControl
     @Override
     protected void stopListening() {
         super.stopListening();
-        mContentResolver.unregisterContentObserver(mCarSettingsObserver);
+        mSecureSettings.unregisterContentObserver(mCarSettingsObserver);
     }
 
     @Override
     public void onUserSwitched(int newUserId) {
         super.onUserSwitched(newUserId);
-        mContentResolver.unregisterContentObserver(mCarSettingsObserver);
-        mContentResolver.registerContentObserver(
-                USER_SETUP_IN_PROGRESS_URI, /* notifyForDescendants= */ true, mCarSettingsObserver,
-                newUserId);
+        mSecureSettings.unregisterContentObserver(mCarSettingsObserver);
+        mSecureSettings.registerContentObserverForUser(
+                mUserSetupInProgressUri, /* notifyForDescendants= */ true,
+                mCarSettingsObserver, newUserId);
     }
 
     private void notifyUserSetupInProgressChanged() {

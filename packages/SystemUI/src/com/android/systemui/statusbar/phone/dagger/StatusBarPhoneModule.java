@@ -80,7 +80,6 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -158,7 +157,6 @@ public interface StatusBarPhoneModule {
             SysuiStatusBarStateController statusBarStateController,
             VibratorHelper vibratorHelper,
             BubbleController bubbleController,
-            NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
@@ -238,7 +236,6 @@ public interface StatusBarPhoneModule {
                 statusBarStateController,
                 vibratorHelper,
                 bubbleController,
-                groupManager,
                 visualStabilityManager,
                 deviceProvisionedController,
                 navigationBarController,

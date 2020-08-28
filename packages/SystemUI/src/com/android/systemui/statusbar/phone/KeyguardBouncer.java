@@ -40,6 +40,8 @@ import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.keyguard.dagger.ContainerView;
+import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -50,9 +52,12 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 /**
  * A class which manages the bouncer on the lockscreen.
  */
+@KeyguardBouncerScope
 public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
@@ -95,8 +100,9 @@ public class KeyguardBouncer {
     private boolean mIsAnimatingAway;
     private boolean mIsScrimmed;
 
+    @Inject
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils, ViewGroup container,
+            LockPatternUtils lockPatternUtils, @ContainerView ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
             BouncerExpansionCallback expansionCallback,
             KeyguardStateController keyguardStateController,

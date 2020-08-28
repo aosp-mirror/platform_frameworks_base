@@ -760,6 +760,8 @@ public class UserManagerService extends IUserManager.Stub {
         return null;
     }
 
+    // TODO(b/157921703): replace by getAliveUsers() or remove (so callers
+    // explicitly call the 3-booleans version)
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */
                 true);

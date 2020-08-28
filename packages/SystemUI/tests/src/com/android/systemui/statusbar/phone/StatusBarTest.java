@@ -220,7 +220,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NetworkController mNetworkController;
     @Mock private VibratorHelper mVibratorHelper;
     @Mock private BubbleController mBubbleController;
-    @Mock private NotificationGroupManager mGroupManager;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
@@ -376,7 +375,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mVibratorHelper,
                 mBubbleController,
-                mGroupManager,
                 mVisualStabilityManager,
                 mDeviceProvisionedController,
                 mNavigationBarController,

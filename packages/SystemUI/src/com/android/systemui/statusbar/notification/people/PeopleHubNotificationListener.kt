@@ -214,7 +214,7 @@ class PeopleHubDataSourceImpl @Inject constructor(
     }
 
     private fun NotificationEntry.extractPerson(): PersonModel? {
-        val type = peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+        val type = peopleNotificationIdentifier.getPeopleNotificationType(this)
         if (type == TYPE_NON_PERSON) {
             return null
         }
@@ -249,7 +249,7 @@ class PeopleHubDataSourceImpl @Inject constructor(
 
     private fun NotificationEntry.extractPersonKey(): PersonKey? {
         // TODO migrate to shortcut id when snoozing is conversation wide
-        val type = peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+        val type = peopleNotificationIdentifier.getPeopleNotificationType(this)
         return if (type != TYPE_NON_PERSON) key else null
     }
 }

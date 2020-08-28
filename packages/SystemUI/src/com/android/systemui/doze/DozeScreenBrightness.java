@@ -30,6 +30,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Display;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.doze.dagger.BrightnessSensor;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
@@ -75,7 +77,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Inject
     public DozeScreenBrightness(Context context, @WrappedService DozeMachine.Service service,
-            AsyncSensorManager sensorManager, @BrightnessSensor Sensor lightSensor,
+            AsyncSensorManager sensorManager, @Nullable @BrightnessSensor Sensor lightSensor,
             DozeHost host, Handler handler, AlwaysOnDisplayPolicy alwaysOnDisplayPolicy) {
         mContext = context;
         mDozeService = service;

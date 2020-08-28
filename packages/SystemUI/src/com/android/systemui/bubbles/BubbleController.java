@@ -104,11 +104,11 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.BubbleCoordinator;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -164,7 +164,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final BubbleTaskStackListener mTaskStackListener;
     private BubbleExpandListener mExpandListener;
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
-    private final NotificationGroupManager mNotificationGroupManager;
+    private final NotificationGroupManagerLegacy mNotificationGroupManager;
     private final ShadeController mShadeController;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
@@ -355,7 +355,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManager groupManager,
+            NotificationGroupManagerLegacy groupManager,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
@@ -588,11 +588,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
-        mNotificationGroupManager.addOnGroupChangeListener(
-                new NotificationGroupManager.OnGroupChangeListener() {
+        mNotificationGroupManager.registerGroupChangeListener(
+                new NotificationGroupManagerLegacy.OnGroupChangeListener() {
                     @Override
                     public void onGroupSuppressionChanged(
-                            NotificationGroupManager.NotificationGroup group,
+                            NotificationGroupManagerLegacy.NotificationGroup group,
                             boolean suppressed) {
                         // More notifications could be added causing summary to no longer
                         // be suppressed -- in this case need to remove the key.
@@ -650,8 +650,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // 3. User removes all bubbles
                 // 4. We expect all the removed bubbles AND the summary (note: the summary was
                 // never added to the suppressedSummary list in BubbleData, so we add this check)
-                NotificationEntry summary =
-                        mNotificationGroupManager.getLogicalGroupSummary(entry.getSbn());
+                NotificationEntry summary = mNotificationGroupManager.getLogicalGroupSummary(entry);
                 if (summary != null) {
                     ArrayList<NotificationEntry> summaryChildren =
                             mNotificationGroupManager.getLogicalChildren(summary.getSbn());

@@ -84,8 +84,8 @@ class ConversationCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testInPeopleSection() {
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(
-            entry.sbn, entry.ranking)).thenReturn(TYPE_PERSON)
+        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entry))
+            .thenReturn(TYPE_PERSON)
 
         // only put people notifications in this section
         assertTrue(peopleSectioner.isInSection(entry))

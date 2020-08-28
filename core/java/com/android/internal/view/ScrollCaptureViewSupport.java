@@ -30,20 +30,23 @@ import android.view.ScrollCaptureSession;
 import android.view.Surface;
 import android.view.View;
 
+import com.android.internal.view.ScrollCaptureViewHelper.ScrollResult;
+
 import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 /**
- * Provides a ScrollCaptureCallback implementation for to handle arbitrary View-based scrolling
- * containers.
- * <p>
- * To use this class, supply the target view and an implementation of {@ScrollCaptureViewHelper}
- * to the callback.
+ * Provides a base ScrollCaptureCallback implementation to handle arbitrary View-based scrolling
+ * containers. This class handles the bookkeeping aspects of {@link ScrollCaptureCallback}
+ * including rendering output using HWUI. Adaptable to any {@link View} using
+ * {@link ScrollCaptureViewHelper}.
  *
  * @param <V> the specific View subclass handled
- * @hide
+ * @see ScrollCaptureViewHelper
  */
 public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCallback {
+
+    private static final String TAG = "ScrollCaptureViewSupport";
 
     private final WeakReference<V> mWeakView;
     private final ScrollCaptureViewHelper<V> mViewHelper;
@@ -51,11 +54,6 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
     private Handler mUiHandler;
     private boolean mStarted;
     private boolean mEnded;
-
-    static <V extends View> ScrollCaptureCallback createCallback(V view,
-            ScrollCaptureViewHelper<V> impl) {
-        return new ScrollCaptureViewSupport<>(view, impl);
-    }
 
     ScrollCaptureViewSupport(V containingView, ScrollCaptureViewHelper<V> viewHelper) {
         mWeakView = new WeakReference<>(containingView);
@@ -82,6 +80,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
     @Override
     public final void onScrollCaptureStart(ScrollCaptureSession session, Runnable onReady) {
         V view = mWeakView.get();
+
         mEnded = false;
         mStarted = true;
 
@@ -103,21 +102,30 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             session.notifyBufferSent(0, null);
             return;
         }
-        Rect captureArea = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
+        // Ask the view to scroll as needed to bring this area into view.
+        ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
                 requestRect);
-        mRenderer.renderFrame(view, captureArea, mUiHandler,
-                () -> session.notifyBufferSent(0, captureArea));
+        view.invalidate(); // don't wait for vsync
+
+        // For image capture, shift back by scrollDelta to arrive at the location within the view
+        // where the requested content will be drawn
+        Rect viewCaptureArea = new Rect(scrollResult.availableArea);
+        viewCaptureArea.offset(0, -scrollResult.scrollDelta);
+
+        mRenderer.renderView(view, viewCaptureArea, mUiHandler,
+                (frameNumber) -> session.notifyBufferSent(frameNumber, scrollResult.availableArea));
     }
 
     @Override
     public final void onScrollCaptureEnd(Runnable onReady) {
         V view = mWeakView.get();
         if (mStarted && !mEnded) {
-            mViewHelper.onPrepareForEnd(view);
-            /* empty */
+            if (view != null) {
+                mViewHelper.onPrepareForEnd(view);
+                view.invalidate();
+            }
             mEnded = true;
-            mRenderer.trimMemory();
-            mRenderer.setSurface(null);
+            mRenderer.destroy();
         }
         onReady.run();
     }
@@ -142,7 +150,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         private static final String TAG = "ViewRenderer";
 
         private HardwareRenderer mRenderer;
-        private RenderNode mRootRenderNode;
+        private RenderNode mCaptureRenderNode;
         private final RectF mTempRectF = new RectF();
         private final Rect mSourceRect = new Rect();
         private final Rect mTempRect = new Rect();
@@ -151,10 +159,14 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         private long mLastRenderedSourceDrawingId = -1;
 
 
+        public interface FrameCompleteListener {
+            void onFrameComplete(long frameNumber);
+        }
+
         ViewRenderer() {
             mRenderer = new HardwareRenderer();
-            mRootRenderNode = new RenderNode("ScrollCaptureRoot");
-            mRenderer.setContentRoot(mRootRenderNode);
+            mCaptureRenderNode = new RenderNode("ScrollCaptureRoot");
+            mRenderer.setContentRoot(mCaptureRenderNode);
 
             // TODO: Figure out a way to flip this on when we are sure the source window is opaque
             mRenderer.setOpaque(false);
@@ -193,18 +205,36 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             // Enable shadows for elevation/Z
             mRenderer.setLightSourceGeometry(lightX, lightY, lightZ, lightRadius);
             mRenderer.setLightSourceAlpha(AMBIENT_SHADOW_ALPHA, SPOT_SHADOW_ALPHA);
-
         }
 
-        public void renderFrame(View localReference, Rect sourceRect, Handler handler,
-                Runnable onFrameCommitted) {
-            if (updateForView(localReference)) {
-                setupLighting(localReference);
+        private void updateRootNode(View source, Rect localSourceRect) {
+            final View rootView = source.getRootView();
+            transformToRoot(source, localSourceRect, mTempRect);
+
+            mCaptureRenderNode.setPosition(0, 0, mTempRect.width(), mTempRect.height());
+            RecordingCanvas canvas = mCaptureRenderNode.beginRecording();
+            canvas.enableZ();
+            canvas.translate(-mTempRect.left, -mTempRect.top);
+
+            RenderNode rootViewRenderNode = rootView.updateDisplayListIfDirty();
+            if (rootViewRenderNode.hasDisplayList()) {
+                canvas.drawRenderNode(rootViewRenderNode);
             }
-            buildRootDisplayList(localReference, sourceRect);
+            mCaptureRenderNode.endRecording();
+        }
+
+        public void renderView(View view, Rect sourceRect, Handler handler,
+                FrameCompleteListener frameListener) {
+            if (updateForView(view)) {
+                setupLighting(view);
+            }
+            view.invalidate();
+            updateRootNode(view, sourceRect);
             HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
             request.setVsyncTime(SystemClock.elapsedRealtimeNanos());
-            request.setFrameCommitCallback(handler::post, onFrameCommitted);
+            // private API b/c request.setFrameCommitCallback does not provide access to frameNumber
+            mRenderer.setFrameCompleteCallback(
+                    frameNr -> handler.post(() -> frameListener.onFrameComplete(frameNr)));
             request.setWaitForPresent(true);
             request.syncAndDraw();
         }
@@ -225,15 +255,5 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mTempRectF.round(outRect);
         }
 
-        private void buildRootDisplayList(View source, Rect localSourceRect) {
-            final View captureSource = source.getRootView();
-            transformToRoot(source, localSourceRect, mTempRect);
-            mRootRenderNode.setPosition(0, 0, mTempRect.width(), mTempRect.height());
-            RecordingCanvas canvas = mRootRenderNode.beginRecording(mTempRect.width(),
-                    mTempRect.height());
-            canvas.translate(-mTempRect.left, -mTempRect.top);
-            canvas.drawRenderNode(captureSource.updateDisplayListIfDirty());
-            mRootRenderNode.endRecording();
-        }
     }
 }

@@ -74,7 +74,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         // windowing mode tasks. Plan is to migrate this to a wm-shell front-end when that
         // infrastructure is ready.
         // mTaskOrganizer.registerOrganizer();
-        mTaskOrganizer.setInterceptBackPressedOnTaskRoot(true);
+        // mTaskOrganizer.setInterceptBackPressedOnTaskRoot(true);
 
         return super.onInitialize();
     }

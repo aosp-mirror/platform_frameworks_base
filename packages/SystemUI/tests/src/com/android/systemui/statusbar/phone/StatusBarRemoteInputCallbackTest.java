@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -72,7 +73,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager);
 
         mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext,
-                mock(NotificationGroupManager.class), mNotificationLockscreenUserManager,
+                mock(NotificationGroupManagerLegacy.class), mNotificationLockscreenUserManager,
                 mKeyguardStateController, mStatusBarStateController, mStatusBarKeyguardViewManager,
                 mActivityStarter, mShadeController, new CommandQueue(mContext),
                 mock(ActionClickLogger.class)));

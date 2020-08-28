@@ -1554,7 +1554,7 @@ abstract public class ManagedServices {
             if (!isEnabledForCurrentProfiles()) {
                 return false;
             }
-            return this.userid == userId;
+            return userId == USER_ALL || userId == this.userid;
         }
 
         public boolean enabledAndUserMatches(int nid) {

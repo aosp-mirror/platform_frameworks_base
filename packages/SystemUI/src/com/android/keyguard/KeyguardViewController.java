@@ -21,9 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
-import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
@@ -180,22 +178,18 @@ public interface KeyguardViewController {
 
     /**
      * Registers the StatusBar to which this Keyguard View is mounted.
-     *
      * @param statusBar
      * @param container
      * @param notificationPanelViewController
      * @param biometricUnlockController
-     * @param dismissCallbackRegistry
      * @param lockIconContainer
      * @param notificationContainer
      * @param bypassController
-     * @param falsingManager
      */
     void registerStatusBar(StatusBar statusBar,
             ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
-            DismissCallbackRegistry dismissCallbackRegistry,
             ViewGroup lockIconContainer, View notificationContainer,
-            KeyguardBypassController bypassController, FalsingManager falsingManager);
+            KeyguardBypassController bypassController);
 }
