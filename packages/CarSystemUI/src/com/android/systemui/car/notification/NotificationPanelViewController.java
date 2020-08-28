@@ -298,10 +298,10 @@ public class NotificationPanelViewController extends OverlayPanelViewController
         // The glass pane is used to view touch events before passed to the notification list.
         // This allows us to initialize gesture listeners and detect when to close the notifications
         glassPane.setOnTouchListener((v, event) -> {
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (isClosingAction(event)) {
                 mNotificationListAtEndAtTimeOfTouch = false;
             }
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            if (isOpeningAction(event)) {
                 mFirstTouchDownOnGlassPane = event.getRawX();
                 mNotificationListAtEndAtTimeOfTouch = mNotificationListAtEnd;
                 // Reset the tracker when there is a touch down on the glass pane.
@@ -354,8 +354,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
             if (rect != null) {
                 clippedHeight = rect.bottom;
             }
-            if (!handled && event.getActionMasked() == MotionEvent.ACTION_UP
-                    && mIsSwipingVerticallyToClose) {
+            if (!handled && isClosingAction(event) && mIsSwipingVerticallyToClose) {
                 if (getSettleClosePercentage() < getPercentageFromEndingEdge() && isTracking) {
                     animatePanel(DEFAULT_FLING_VELOCITY, false);
                 } else if (clippedHeight != getLayout().getHeight() && isTracking) {
@@ -368,7 +367,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController
             // Updating the mNotificationListAtEndAtTimeOfTouch state has to be done after
             // the event has been passed to the closeGestureDetector above, such that the
             // closeGestureDetector sees the up event before the state has changed.
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (isClosingAction(event)) {
                 mNotificationListAtEndAtTimeOfTouch = false;
             }
             return handled || isTracking;
