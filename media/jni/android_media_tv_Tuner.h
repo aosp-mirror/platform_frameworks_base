@@ -267,6 +267,7 @@ private:
     static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+    static jobject getDtmbFrontendCaps(JNIEnv *env, int id);
 };
 
 class C2DataIdInfo : public C2Param {
