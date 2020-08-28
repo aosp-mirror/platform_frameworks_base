@@ -2319,8 +2319,7 @@ class Task extends WindowContainer<WindowContainer> {
             taskDisplayArea.onStackWindowingModeChanged(this);
         }
 
-        final DisplayContent display = getDisplay();
-        if (display == null ) {
+        if (mDisplayContent == null) {
             return;
         }
 
@@ -2336,7 +2335,7 @@ class Task extends WindowContainer<WindowContainer> {
             final int newRotation = getWindowConfiguration().getRotation();
             final boolean rotationChanged = prevRotation != newRotation;
             if (rotationChanged) {
-                display.mDisplayContent.rotateBounds(
+                mDisplayContent.rotateBounds(
                         newParentConfig.windowConfiguration.getBounds(), prevRotation, newRotation,
                         newBounds);
                 hasNewOverrideBounds = true;
@@ -2594,15 +2593,12 @@ class Task extends WindowContainer<WindowContainer> {
         outNonDecorBounds.set(bounds);
         outStableBounds.set(bounds);
         final Task rootTask = getRootTask();
-        if (rootTask == null || rootTask.getDisplay() == null) {
-            return;
-        }
-        DisplayPolicy policy = rootTask.getDisplay().mDisplayContent.getDisplayPolicy();
-        if (policy == null) {
+        if (rootTask == null || rootTask.mDisplayContent == null) {
             return;
         }
         mTmpBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
+        final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
         policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
                 displayInfo.logicalHeight, displayInfo.displayCutout, mTmpInsets);
         intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, mTmpInsets);
@@ -2988,14 +2984,6 @@ class Task extends WindowContainer<WindowContainer> {
             mRootProcess.removeRecentTask(this);
             mRootProcess = null;
         }
-    }
-
-    @Override
-    DisplayContent getDisplayContent() {
-        // TODO: Why aren't we just using our own display content vs. parent's???
-        final Task stack = getRootTask();
-        return stack != null && stack != this
-                ? stack.getDisplayContent() : super.getDisplayContent();
     }
 
     int getDisplayId() {
@@ -5173,14 +5161,9 @@ class Task extends WindowContainer<WindowContainer> {
                 !PRESERVE_WINDOWS);
     }
 
-    DisplayContent getDisplay() {
-        return getDisplayContent();
-    }
-
     /** @return true if the stack can only contain one task */
     boolean isSingleTaskInstance() {
-        final DisplayContent display = getDisplay();
-        return display != null && display.isSingleTaskInstance();
+        return mDisplayContent != null && mDisplayContent.isSingleTaskInstance();
     }
 
     final boolean isHomeOrRecentsStack() {
@@ -5620,8 +5603,7 @@ class Task extends WindowContainer<WindowContainer> {
      * otherwise.
      */
     boolean isFocusedStackOnDisplay() {
-        final DisplayContent display = getDisplay();
-        return display != null && this == display.getFocusedStack();
+        return mDisplayContent != null && this == mDisplayContent.getFocusedStack();
     }
 
     /**
@@ -5760,7 +5742,7 @@ class Task extends WindowContainer<WindowContainer> {
      * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
     boolean canShowWithInsecureKeyguard() {
-        final DisplayContent displayContent = getDisplay();
+        final DisplayContent displayContent = mDisplayContent;
         if (displayContent == null) {
             throw new IllegalStateException("Stack is not attached to any display, stackId="
                     + getRootTaskId());
@@ -6399,7 +6381,7 @@ class Task extends WindowContainer<WindowContainer> {
         // The transition animation and starting window are not needed if {@code allowMoveToFront}
         // is false, because the activity won't be visible.
         if ((!isHomeOrRecentsStack() || hasActivity()) && allowMoveToFront) {
-            final DisplayContent dc = getDisplay().mDisplayContent;
+            final DisplayContent dc = mDisplayContent;
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
@@ -6410,7 +6392,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (newTask) {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
-                    } else if (getDisplay().isSingleTaskInstance()) {
+                    } else if (dc.isSingleTaskInstance()) {
                         // If a new task is being launched in a single task display, we don't need
                         // to play normal animation, but need to trigger a callback when an app
                         // transition is actually handled. So ignore already prepared activity, and
@@ -6454,7 +6436,7 @@ class Task extends WindowContainer<WindowContainer> {
                 ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 // Go ahead to execute app transition for this activity since the app transition
                 // will not be triggered through the resume channel.
-                getDisplay().mDisplayContent.executeAppTransition();
+                mDisplayContent.executeAppTransition();
             } else if (SHOW_APP_STARTING_PREVIEW && doShow) {
                 // Figure out if we are transitioning from another activity that is
                 // "has the same starting icon" as the next one.  This allows the
@@ -6567,7 +6549,7 @@ class Task extends WindowContainer<WindowContainer> {
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         Task finishedTask = r.getTask();
-        getDisplay().mDisplayContent.prepareAppTransition(
+        mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         r.finishIfPossible(reason, false /* oomAdj */);
 
@@ -6807,7 +6789,7 @@ class Task extends WindowContainer<WindowContainer> {
                 ActivityOptions.abort(options);
             }
         }
-        getDisplay().mDisplayContent.prepareAppTransition(transit, false,
+        mDisplayContent.prepareAppTransition(transit, false,
                 0 /* flags */, forceOverride);
     }
 
@@ -6855,7 +6837,7 @@ class Task extends WindowContainer<WindowContainer> {
             // Defer updating the IME target since the new IME target will try to get computed
             // before updating all closing and opening apps, which can cause the ime target to
             // get calculated incorrectly.
-            getDisplay().deferUpdateImeTarget();
+            mDisplayContent.deferUpdateImeTarget();
 
             // Shift all activities with this task up to the top
             // of the stack, keeping them in the same internal order.
@@ -6879,7 +6861,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
-                getDisplay().mDisplayContent.prepareAppTransition(TRANSIT_NONE, false);
+                mDisplayContent.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
                 if (r != null) {
                     mStackSupervisor.mNoAnimActivities.add(r);
                 }
@@ -6909,7 +6891,7 @@ class Task extends WindowContainer<WindowContainer> {
             mAtmService.getTaskChangeNotificationController()
                     .notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
-            getDisplay().continueUpdateImeTarget();
+            mDisplayContent.continueUpdateImeTarget();
         }
     }
 
@@ -6959,7 +6941,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task="
                 + tr.mTaskId);
 
-        getDisplay().mDisplayContent.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
+        mDisplayContent.prepareAppTransition(TRANSIT_TASK_TO_BACK, false /* alwaysKeepCurrent */);
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
@@ -6968,7 +6950,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
+                mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
                 false /* deferResume */);
 
         ActivityRecord topActivity = getDisplayArea().topRunningActivity();
@@ -6976,7 +6958,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (topStack != null && topStack != this && topActivity.isState(RESUMED)) {
             // Usually resuming a top activity triggers the next app transition, but nothing's got
             // resumed in this case, so we need to execute it explicitly.
-            getDisplay().mDisplayContent.executeAppTransition();
+            mDisplayContent.executeAppTransition();
         } else {
             mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
@@ -7575,12 +7557,12 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void executeAppTransition(ActivityOptions options) {
-        getDisplay().mDisplayContent.executeAppTransition();
+        mDisplayContent.executeAppTransition();
         ActivityOptions.abort(options);
     }
 
     boolean shouldSleepActivities() {
-        final DisplayContent display = getDisplay();
+        final DisplayContent display = mDisplayContent;
 
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.
