@@ -1850,6 +1850,7 @@ public class PackageInstaller {
 
         /** {@hide} */
         @SystemApi
+        @TestApi
         public void setInstallAsInstantApp(boolean isInstantApp) {
             if (isInstantApp) {
                 installFlags |= PackageManager.INSTALL_INSTANT_APP;

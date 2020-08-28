@@ -618,6 +618,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
+                && !isCalledBySystemOrShell(callingUid)
+                && (mPm.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM) == 0) {
+            throw new SecurityException(
+                    "Only system apps could use the PackageManager.INSTALL_INSTANT_APP flag.");
+        }
+
         if (params.isStaged && !isCalledBySystemOrShell(callingUid)) {
             if (mBypassNextStagedInstallerCheck) {
                 mBypassNextStagedInstallerCheck = false;
