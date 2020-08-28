@@ -40,7 +40,6 @@ import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -90,7 +89,6 @@ import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREEN
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
-
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
@@ -129,6 +127,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
@@ -162,7 +161,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -214,7 +212,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private int mTopFocusedDisplayId = INVALID_DISPLAY;
 
     // Map from the PID to the top most app which has a focused window of the process.
-    final HashMap<Integer, ActivityRecord> mTopFocusedAppByProcess = new HashMap<>();
+    final ArrayMap<Integer, ActivityRecord> mTopFocusedAppByProcess = new ArrayMap<>();
 
     // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
@@ -480,8 +478,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mTopFocusedDisplayId = topFocusedDisplayId;
             mWmService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
             mWmService.mPolicy.setTopFocusedDisplay(topFocusedDisplayId);
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "New topFocusedDisplayId=%d",
-                    topFocusedDisplayId);
+            ProtoLog.d(WM_DEBUG_FOCUS_LIGHT, "New topFocusedDisplayId=%d", topFocusedDisplayId);
         }
         return changed;
     }
