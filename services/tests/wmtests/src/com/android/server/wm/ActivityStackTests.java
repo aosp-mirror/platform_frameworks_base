@@ -1142,7 +1142,8 @@ public class ActivityStackTests extends WindowTestsBase {
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.info.flags |= FLAG_RESUME_WHILE_PAUSING;
 
-        mStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */, topActivity);
+        mStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */, topActivity,
+                "test");
         verify(mStack).completePauseLocked(anyBoolean(), eq(topActivity));
     }
 
