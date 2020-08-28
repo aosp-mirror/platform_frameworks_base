@@ -14541,11 +14541,13 @@ public class PackageManagerService extends IPackageManager.Stub
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.pkg);
         }
 
-        // A restore should be requested at this point if (a) the install
-        // succeeded, (b) the operation is not an update.
+        // A restore should be performed at this point if (a) the install
+        // succeeded, (b) the operation is not an update, and (c) the new
+        // package has not opted out of backup participation.
         final boolean update = res.removedInfo != null
                 && res.removedInfo.removedPackage != null;
-        boolean doRestore = !update;
+        boolean allowBackup = res.pkg != null && res.pkg.isAllowBackup();
+        boolean doRestore = !update && allowBackup;
 
         // Set up the post-install work request bookkeeping.  This will be used
         // and cleaned up by the post-install event handling regardless of whether
