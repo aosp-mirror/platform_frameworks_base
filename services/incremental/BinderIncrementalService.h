@@ -66,6 +66,8 @@ public:
                             int32_t destStorageId, const std::string& destPath,
                             int32_t* _aidl_return) final;
     binder::Status unlink(int32_t storageId, const std::string& path, int32_t* _aidl_return) final;
+    binder::Status isFileFullyLoaded(int32_t storageId, const std::string& path,
+                                     int32_t* _aidl_return) final;
     binder::Status getLoadingProgress(int32_t storageId, float* _aidl_return) final;
     binder::Status getMetadataByPath(int32_t storageId, const std::string& path,
                                      std::vector<uint8_t>* _aidl_return) final;

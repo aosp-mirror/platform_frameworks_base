@@ -195,8 +195,8 @@ public:
     ErrorCode unlink(const Control& control, std::string_view path) const final {
         return incfs::unlink(control, path);
     }
-    base::unique_fd openForSpecialOps(const Control& control, FileId id) const final {
-        return base::unique_fd{incfs::openForSpecialOps(control, id).release()};
+    incfs::UniqueFd openForSpecialOps(const Control& control, FileId id) const final {
+        return incfs::openForSpecialOps(control, id);
     }
     ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const final {
         return incfs::writeBlocks({blocks.data(), size_t(blocks.size())});
