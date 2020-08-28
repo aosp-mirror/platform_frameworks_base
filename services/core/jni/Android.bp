@@ -105,6 +105,7 @@ cc_defaults {
         "libkeystore_binder",
         "libmtp",
         "libnativehelper",
+        "libprocessgroup",
         "libutils",
         "libui",
         "libinput",

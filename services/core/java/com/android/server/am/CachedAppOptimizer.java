@@ -208,6 +208,8 @@ public final class CachedAppOptimizer {
     @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
     private volatile boolean mUseFreezer = DEFAULT_USE_FREEZER;
+    @GuardedBy("this")
+    private int mFreezerDisableCount = 1; // Freezer is initially disabled, until enabled
     private final Random mRandom = new Random();
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile float mCompactStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
@@ -420,6 +422,63 @@ public final class CachedAppOptimizer {
     }
 
     /**
+     * Enables or disabled the app freezer.
+     * @param enable Enables the freezer if true, disables it if false.
+     * @return true if the operation completed successfully, false otherwise.
+     */
+    public synchronized boolean enableFreezer(boolean enable) {
+        if (!mUseFreezer) {
+            return false;
+        }
+
+        if (enable) {
+            mFreezerDisableCount--;
+
+            if (mFreezerDisableCount > 0) {
+                return true;
+            } else if (mFreezerDisableCount < 0) {
+                Slog.e(TAG_AM, "unbalanced call to enableFreezer, ignoring");
+                mFreezerDisableCount = 0;
+                return false;
+            }
+        } else {
+            mFreezerDisableCount++;
+
+            if (mFreezerDisableCount > 1) {
+                return true;
+            }
+        }
+
+        try {
+            enableFreezerInternal(enable);
+            return true;
+        } catch (java.lang.RuntimeException e) {
+            if (enable) {
+                mFreezerDisableCount = 0;
+            } else {
+                mFreezerDisableCount = 1;
+            }
+
+            Slog.e(TAG_AM, "Exception handling freezer state (enable: " + enable + "): "
+                    + e.toString());
+        }
+
+        return false;
+    }
+
+    /**
+     * Enable or disable the freezer. When enable == false all frozen processes are unfrozen,
+     * but aren't removed from the freezer. While in this state, processes can be added or removed
+     * by using Process.setProcessFrozen(), but they wouldn't be actually frozen until the freezer
+     * is enabled. If enable == true all processes in the freezer are frozen.
+     *
+     * @param enable Specify whether to enable (true) or disable (false) the freezer.
+     *
+     * @hide
+     */
+    private static native void enableFreezerInternal(boolean enable);
+
+    /**
      * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
@@ -471,7 +530,7 @@ public final class CachedAppOptimizer {
 
         if (mUseFreezer && mFreezeHandler == null) {
             Slog.d(TAG_AM, "Freezer enabled");
-            Process.enableFreezer(true);
+            enableFreezer(true);
 
             if (!mCachedAppOptimizerThread.isAlive()) {
                 mCachedAppOptimizerThread.start();
@@ -482,7 +541,7 @@ public final class CachedAppOptimizer {
             Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
         } else {
-            Process.enableFreezer(false);
+            enableFreezer(false);
         }
     }
 
