@@ -518,11 +518,11 @@ message SecureSettingsProto {
     }
     optional Sounds sounds = 72;
 
+    optional SettingProto swipe_bottom_to_notification_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
     optional SettingProto sync_parent_sounds = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto system_navigation_keys_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto swipe_bottom_to_notification_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 

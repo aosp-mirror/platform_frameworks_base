@@ -25,6 +25,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
@@ -54,6 +55,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -67,7 +69,6 @@ import android.app.IAlarmCompleteListener;
 import android.app.IAlarmListener;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
@@ -79,6 +80,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -100,11 +102,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.concurrent.Executor;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -119,8 +125,6 @@ public class AlarmManagerServiceTest {
     private AlarmManagerService mService;
     private AppStandbyInternal.AppIdleStateChangeListener mAppStandbyListener;
     private AlarmManagerService.ChargingReceiver mChargingReceiver;
-    @Mock
-    private ContentResolver mMockResolver;
     @Mock
     private Context mMockContext;
     @Mock
@@ -137,6 +141,9 @@ public class AlarmManagerServiceTest {
     private AlarmManagerService.ClockReceiver mClockReceiver;
     @Mock
     private PowerManager.WakeLock mWakeLock;
+    @Mock
+    DeviceConfig.Properties mDeviceConfigProperties;
+    HashSet<String> mDeviceConfigKeys = new HashSet<>();
 
     private MockitoSession mMockingSession;
     private Injector mInjector;
@@ -253,6 +260,14 @@ public class AlarmManagerServiceTest {
         PowerManager.WakeLock getAlarmWakeLock() {
             return mWakeLock;
         }
+
+        @Override
+        void registerDeviceConfigListener(DeviceConfig.OnPropertiesChangedListener listener) {
+            // Do nothing.
+            // The tests become flaky with an error message of
+            // "IllegalStateException: Querying activity state off main thread is not allowed."
+            // when AlarmManager calls DeviceConfig.addOnPropertiesChangedListener().
+        }
     }
 
     @Before
@@ -260,6 +275,7 @@ public class AlarmManagerServiceTest {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .spyStatic(ActivityManager.class)
+                .spyStatic(DeviceConfig.class)
                 .mockStatic(LocalServices.class)
                 .spyStatic(Looper.class)
                 .mockStatic(Settings.Global.class)
@@ -283,9 +299,24 @@ public class AlarmManagerServiceTest {
                 eq(TEST_CALLING_USER), anyLong())).thenReturn(STANDBY_BUCKET_ACTIVE);
         doReturn(Looper.getMainLooper()).when(Looper::myLooper);
 
-        when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
-        doReturn("min_futurity=0,min_interval=0").when(() ->
-                Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
+        doReturn(mDeviceConfigKeys).when(mDeviceConfigProperties).getKeyset();
+        when(mDeviceConfigProperties.getLong(anyString(), anyLong()))
+                .thenAnswer((Answer<Long>) invocationOnMock -> {
+                    Object[] args = invocationOnMock.getArguments();
+                    return (Long) args[1];
+                });
+        when(mDeviceConfigProperties.getInt(anyString(), anyInt()))
+                .thenAnswer((Answer<Integer>) invocationOnMock -> {
+                    Object[] args = invocationOnMock.getArguments();
+                    return (Integer) args[1];
+                });
+        doAnswer((Answer<Void>) invocationOnMock -> null)
+                .when(() -> DeviceConfig.addOnPropertiesChangedListener(
+                        anyString(), any(Executor.class),
+                        any(DeviceConfig.OnPropertiesChangedListener.class)));
+        doReturn(mDeviceConfigProperties).when(
+                () -> DeviceConfig.getProperties(
+                        eq(DeviceConfig.NAMESPACE_ALARM_MANAGER), ArgumentMatchers.<String>any()));
 
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
@@ -302,8 +333,6 @@ public class AlarmManagerServiceTest {
 
         // Other boot phases don't matter
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-        assertEquals(0, mService.mConstants.MIN_FUTURITY);
-        assertEquals(0, mService.mConstants.MIN_INTERVAL);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
         ArgumentCaptor<AppStandbyInternal.AppIdleStateChangeListener> captor =
                 ArgumentCaptor.forClass(AppStandbyInternal.AppIdleStateChangeListener.class);
@@ -354,22 +383,27 @@ public class AlarmManagerServiceTest {
         return mockPi;
     }
 
+    private void setDeviceConfigLong(String key, long val) {
+        mDeviceConfigKeys.add(key);
+        doReturn(val).when(mDeviceConfigProperties).getLong(eq(key), anyLong());
+        mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
+    }
+
     /**
      * Lowers quotas to make testing feasible. Careful while calling as this will replace any
      * existing settings for the calling test.
      */
     private void setTestableQuotas() {
-        final StringBuilder constantsBuilder = new StringBuilder();
-        constantsBuilder.append(KEY_MIN_FUTURITY);
-        constantsBuilder.append("=0,");
-        // Capping active and working quotas to make testing feasible.
-        constantsBuilder.append(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
-        constantsBuilder.append("=8,");
-        constantsBuilder.append(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]);
-        constantsBuilder.append("=5,");
-        doReturn(constantsBuilder.toString()).when(() -> Settings.Global.getString(mMockResolver,
-                Settings.Global.ALARM_MANAGER_CONSTANTS));
-        mService.mConstants.onChange(false, null);
+        setDeviceConfigLong(KEY_MIN_FUTURITY, 0);
+        setDeviceConfigLong(KEY_MIN_INTERVAL, 0);
+        mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
+        mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]);
+        doReturn(8).when(mDeviceConfigProperties)
+                .getInt(eq(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]), anyInt());
+        doReturn(5).when(mDeviceConfigProperties)
+                .getInt(eq(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]), anyInt());
+
+        mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
     }
 
     @Test
@@ -427,25 +461,13 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void testUpdateConstants() {
-        final StringBuilder constantsBuilder = new StringBuilder();
-        constantsBuilder.append(KEY_MIN_FUTURITY);
-        constantsBuilder.append("=5,");
-        constantsBuilder.append(KEY_MIN_INTERVAL);
-        constantsBuilder.append("=10,");
-        constantsBuilder.append(KEY_MAX_INTERVAL);
-        constantsBuilder.append("=15,");
-        constantsBuilder.append(KEY_ALLOW_WHILE_IDLE_SHORT_TIME);
-        constantsBuilder.append("=20,");
-        constantsBuilder.append(KEY_ALLOW_WHILE_IDLE_LONG_TIME);
-        constantsBuilder.append("=25,");
-        constantsBuilder.append(KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION);
-        constantsBuilder.append("=30,");
-        constantsBuilder.append(KEY_LISTENER_TIMEOUT);
-        constantsBuilder.append("=35,");
-
-        doReturn(constantsBuilder.toString()).when(() -> Settings.Global.getString(mMockResolver,
-                Settings.Global.ALARM_MANAGER_CONSTANTS));
-        mService.mConstants.onChange(false, null);
+        setDeviceConfigLong(KEY_MIN_FUTURITY, 5);
+        setDeviceConfigLong(KEY_MIN_INTERVAL, 10);
+        setDeviceConfigLong(KEY_MAX_INTERVAL, 15);
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, 20);
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, 25);
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION, 30);
+        setDeviceConfigLong(KEY_LISTENER_TIMEOUT, 35);
         assertEquals(5, mService.mConstants.MIN_FUTURITY);
         assertEquals(10, mService.mConstants.MIN_INTERVAL);
         assertEquals(15, mService.mConstants.MAX_INTERVAL);
@@ -457,9 +479,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void testMinFuturity() {
-        doReturn("min_futurity=10").when(() ->
-                Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
-        mService.mConstants.onChange(false, null);
+        setDeviceConfigLong(KEY_MIN_FUTURITY, 10L);
         assertEquals(10, mService.mConstants.MIN_FUTURITY);
         final long triggerTime = mNowElapsedTest + 1;
         final long expectedTriggerTime = mNowElapsedTest + mService.mConstants.MIN_FUTURITY;
@@ -469,9 +489,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void testMinFuturityCoreUid() {
-        doReturn("min_futurity=10").when(() ->
-                Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
-        mService.mConstants.onChange(false, null);
+        setDeviceConfigLong(KEY_MIN_FUTURITY, 10L);
         assertEquals(10, mService.mConstants.MIN_FUTURITY);
         final long triggerTime = mNowElapsedTest + 1;
         doReturn(true).when(() -> UserHandle.isCore(TEST_CALLING_UID));
@@ -769,7 +787,7 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void testAlarmRestrictedInBatterSaver() throws Exception {
+    public void testAlarmRestrictedInBatterySaver() throws Exception {
         final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
         verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());

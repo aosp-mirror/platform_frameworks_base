@@ -47,7 +47,7 @@ message GlobalSettingsProto {
     }
     optional AirplaneMode airplane_mode = 5;
 
-    optional SettingProto alarm_manager_constants = 6;
+    reserved 6; // alarm_manager_constants
     optional SettingProto allow_user_switching_when_system_user_locked = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // This is a key=value list, separated by commas.
     optional SettingProto always_on_display_constants = 8;

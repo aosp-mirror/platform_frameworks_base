@@ -11808,29 +11808,6 @@ public final class Settings {
         public static final String POWER_MANAGER_CONSTANTS = "power_manager_constants";
 
         /**
-         * Alarm manager specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "min_futurity=5000,allow_while_idle_short_time=4500"
-         *
-         * The following keys are supported:
-         *
-         * <pre>
-         * min_futurity                         (long)
-         * min_interval                         (long)
-         * allow_while_idle_short_time          (long)
-         * allow_while_idle_long_time           (long)
-         * allow_while_idle_whitelist_duration  (long)
-         * </pre>
-         *
-         * <p>
-         * Type: string
-         * @hide
-         * @see com.android.server.AlarmManagerService.Constants
-         */
-        public static final String ALARM_MANAGER_CONSTANTS = "alarm_manager_constants";
-
-        /**
          * Job scheduler QuotaController specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *

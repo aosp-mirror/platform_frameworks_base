@@ -29,6 +29,7 @@ message ConfigSettingsProto {
   repeated NamespaceProto extra_namespaces = 2;
   repeated SettingProto activity_manager_native_boot_settings = 3;
   repeated SettingProto activity_manager_settings = 4;
+  repeated SettingProto alarm_manager_settings = 26;
   repeated SettingProto app_compat_settings = 5;
   repeated SettingProto autofill_settings = 6;
   repeated SettingProto blobstore_settings = 23;
@@ -51,7 +52,7 @@ message ConfigSettingsProto {
   repeated SettingProto telephony_settings = 21;
   repeated SettingProto textclassifier_settings = 22;
 
-  // Next tag: 26
+  // Next tag: 27
 
   message NamespaceProto {
     optional string namespace = 1;
