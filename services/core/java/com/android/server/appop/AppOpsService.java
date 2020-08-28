@@ -39,6 +39,7 @@ import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.RestrictionBypass;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
@@ -3400,7 +3401,19 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
-            return  AppOpsManager.MODE_IGNORED;
+            return AppOpsManager.MODE_IGNORED;
+        }
+
+        // As a special case for OP_RECORD_AUDIO_HOTWORD, which we use only for attribution
+        // purposes and not as a check, also make sure that the caller is allowed to access
+        // the data gated by OP_RECORD_AUDIO.
+        //
+        // TODO: Revert this change before Android 12.
+        if (code == OP_RECORD_AUDIO_HOTWORD) {
+            int result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+            if (result != AppOpsManager.MODE_ALLOWED) {
+                return result;
+            }
         }
 
         RestrictionBypass bypass;
