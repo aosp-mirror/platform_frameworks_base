@@ -610,6 +610,33 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Verify that the macRandomizationSetting defaults to RANDOMIZATION_ENHANCED and could be set
+     * to RANDOMIZATION_PERSISTENT.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderSetMacRandomization() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .build();
+        assertEquals(WifiConfiguration.RANDOMIZATION_ENHANCED,
+                suggestion.wifiConfiguration.macRandomizationSetting);
+
+        suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setIsEnhancedMacRandomizationEnabled(false)
+                .build();
+        assertEquals(WifiConfiguration.RANDOMIZATION_PERSISTENT,
+                suggestion.wifiConfiguration.macRandomizationSetting);
+
+        suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setIsEnhancedMacRandomizationEnabled(true)
+                .build();
+        assertEquals(WifiConfiguration.RANDOMIZATION_ENHANCED,
+                suggestion.wifiConfiguration.macRandomizationSetting);
+    }
+
+    /**
      * Check that parcel marshalling/unmarshalling works
      */
     @Test
