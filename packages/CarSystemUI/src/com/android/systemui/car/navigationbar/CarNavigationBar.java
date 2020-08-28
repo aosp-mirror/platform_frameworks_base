@@ -340,24 +340,28 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mTopNavigationBarView = mCarNavigationBarController.getTopBar(isDeviceSetupForUser());
         if (mTopNavigationBarView != null) {
             mSystemBarConfigs.insetSystemBar(SystemBarConfigs.TOP, mTopNavigationBarView);
+            mSystemBarConfigs.setInsetUpdater(SystemBarConfigs.TOP, mTopNavigationBarView);
             mTopNavigationBarWindow.addView(mTopNavigationBarView);
         }
 
         mBottomNavigationBarView = mCarNavigationBarController.getBottomBar(isDeviceSetupForUser());
         if (mBottomNavigationBarView != null) {
             mSystemBarConfigs.insetSystemBar(SystemBarConfigs.BOTTOM, mBottomNavigationBarView);
+            mSystemBarConfigs.setInsetUpdater(SystemBarConfigs.BOTTOM, mBottomNavigationBarView);
             mBottomNavigationBarWindow.addView(mBottomNavigationBarView);
         }
 
         mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(isDeviceSetupForUser());
         if (mLeftNavigationBarView != null) {
             mSystemBarConfigs.insetSystemBar(SystemBarConfigs.LEFT, mLeftNavigationBarView);
+            mSystemBarConfigs.setInsetUpdater(SystemBarConfigs.LEFT, mLeftNavigationBarView);
             mLeftNavigationBarWindow.addView(mLeftNavigationBarView);
         }
 
         mRightNavigationBarView = mCarNavigationBarController.getRightBar(isDeviceSetupForUser());
         if (mRightNavigationBarView != null) {
             mSystemBarConfigs.insetSystemBar(SystemBarConfigs.RIGHT, mRightNavigationBarView);
+            mSystemBarConfigs.setInsetUpdater(SystemBarConfigs.RIGHT, mRightNavigationBarView);
             mRightNavigationBarWindow.addView(mRightNavigationBarView);
         }
     }
@@ -367,7 +371,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     }
 
     private void attachNavBarBySide(int side) {
-        switch(side) {
+        switch (side) {
             case SystemBarConfigs.TOP:
                 if (mTopNavigationBarWindow != null) {
                     mWindowManager.addView(mTopNavigationBarWindow,
