@@ -190,7 +190,7 @@ class KeyguardController {
                     mAodShowing ? 1 : 0,
                     1 /* keyguardGoingAway */,
                     "keyguardGoingAway");
-            mRootWindowContainer.getDefaultDisplay().mDisplayContent
+            mRootWindowContainer.getDefaultDisplay()
                     .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
                             false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                             false /* forceOverride */);
@@ -314,7 +314,7 @@ class KeyguardController {
         if (isKeyguardLocked()) {
             mService.deferWindowLayout();
             try {
-                mRootWindowContainer.getDefaultDisplay().mDisplayContent
+                mRootWindowContainer.getDefaultDisplay()
                         .prepareAppTransition(resolveOccludeTransit(),
                                 false /* alwaysKeepCurrent */, 0 /* flags */,
                                 true /* forceOverride */);
@@ -344,8 +344,7 @@ class KeyguardController {
 
         // If we are about to unocclude the Keyguard, but we can dismiss it without security,
         // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
-        final DisplayContent dc =
-                mRootWindowContainer.getDefaultDisplay().mDisplayContent;
+        final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
         if (mKeyguardShowing && canDismissKeyguard()
                 && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
             dc.prepareAppTransition(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
@@ -368,7 +367,7 @@ class KeyguardController {
     }
 
     private int resolveOccludeTransit() {
-        final DisplayContent dc = mRootWindowContainer.getDefaultDisplay().mDisplayContent;
+        final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
         if (mBeforeUnoccludeTransit != TRANSIT_UNSET
                 && dc.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
                 // TODO(b/113840485): Handle app transition for individual display.
@@ -485,7 +484,7 @@ class KeyguardController {
             }
             // TODO(b/123372519): isShowingDream can only works on default display.
             if (mDisplayId == DEFAULT_DISPLAY) {
-                mOccluded |= mService.mRootWindowContainer.getDefaultDisplay().mDisplayContent
+                mOccluded |= mService.mRootWindowContainer.getDefaultDisplay()
                         .getDisplayPolicy().isShowingDreamLw();
             }
 

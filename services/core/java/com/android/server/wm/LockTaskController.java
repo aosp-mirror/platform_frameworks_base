@@ -619,7 +619,7 @@ public class LockTaskController {
             mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
             final Task rootTask = task.getRootTask();
             if (rootTask != null) {
-                rootTask.getDisplay().mDisplayContent.executeAppTransition();
+                rootTask.mDisplayContent.executeAppTransition();
             }
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
             mSupervisor.handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,

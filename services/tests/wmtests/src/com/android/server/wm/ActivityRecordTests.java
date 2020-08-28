@@ -415,12 +415,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void ignoreRequestedOrientationInFreeformWindows() {
         mStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         final Rect stableRect = new Rect();
-        mStack.getDisplay().mDisplayContent.getStableRect(stableRect);
+        mStack.mDisplayContent.getStableRect(stableRect);
 
         // Carve out non-decor insets from stableRect
         final Rect insets = new Rect();
-        final DisplayInfo displayInfo = mStack.getDisplay().getDisplayInfo();
-        final DisplayPolicy policy = mStack.getDisplay().getDisplayPolicy();
+        final DisplayInfo displayInfo = mStack.mDisplayContent.getDisplayInfo();
+        final DisplayPolicy policy = mStack.mDisplayContent.getDisplayPolicy();
         policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
                 displayInfo.logicalHeight, displayInfo.displayCutout, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
@@ -454,12 +454,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void ignoreRequestedOrientationInSplitWindows() {
         mStack.setWindowingMode(WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final Rect stableRect = new Rect();
-        mStack.getDisplay().getStableRect(stableRect);
+        mStack.mDisplayContent.getStableRect(stableRect);
 
         // Carve out non-decor insets from stableRect
         final Rect insets = new Rect();
-        final DisplayInfo displayInfo = mStack.getDisplay().getDisplayInfo();
-        final DisplayPolicy policy = mStack.getDisplay().getDisplayPolicy();
+        final DisplayInfo displayInfo = mStack.mDisplayContent.getDisplayInfo();
+        final DisplayPolicy policy = mStack.mDisplayContent.getDisplayPolicy();
         policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
                 displayInfo.logicalHeight, displayInfo.displayCutout, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
@@ -844,7 +844,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 FINISH_RESULT_REQUESTED, mActivity.finishIfPossible("test", false /* oomAdj */));
         assertEquals(PAUSING, mActivity.getState());
         verify(mActivity).setVisibility(eq(false));
-        verify(mActivity.getDisplay().mDisplayContent)
+        verify(mActivity.mDisplayContent)
                 .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
     }
 
@@ -888,9 +888,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
         verify(mActivity).setVisibility(eq(false));
-        verify(mActivity.getDisplay().mDisplayContent)
+        verify(mActivity.mDisplayContent)
                 .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
-        verify(mActivity.getDisplay().mDisplayContent, never()).executeAppTransition();
+        verify(mActivity.mDisplayContent, never()).executeAppTransition();
     }
 
     /**
@@ -904,9 +904,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
         verify(mActivity, atLeast(1)).setVisibility(eq(false));
-        verify(mActivity.getDisplay().mDisplayContent)
+        verify(mActivity.mDisplayContent)
                 .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
-        verify(mActivity.getDisplay().mDisplayContent).executeAppTransition();
+        verify(mActivity.mDisplayContent).executeAppTransition();
     }
 
     /**
@@ -922,7 +922,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
-        verify(mActivity.getDisplay().mDisplayContent, never())
+        verify(mActivity.mDisplayContent, never())
                 .prepareAppTransition(eq(TRANSIT_TASK_CLOSE), eq(false) /* alwaysKeepCurrent */);
     }
 
@@ -1166,7 +1166,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Finish the second activity
         secondActivity.finishing = true;
         secondActivity.completeFinishing("test");
-        verify(secondActivity.getDisplay()).ensureActivitiesVisible(null /* starting */,
+        verify(secondActivity.mDisplayContent).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
                 true /* notifyClients */);
 
@@ -1174,7 +1174,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         firstActivity.finishing = true;
         firstActivity.mVisibleRequested = true;
         firstActivity.completeFinishing("test");
-        verify(firstActivity.getDisplay(), times(2)).ensureActivitiesVisible(null /* starting */,
+        verify(firstActivity.mDisplayContent, times(2)).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
                 true /* notifyClients */);
     }

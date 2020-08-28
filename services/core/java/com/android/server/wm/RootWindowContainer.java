@@ -40,6 +40,7 @@ import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -89,6 +90,7 @@ import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREEN
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
@@ -2746,7 +2748,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         r.detachFromProcess();
-        r.getDisplay().mDisplayContent.prepareAppTransition(
+        r.mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         r.destroyIfPossible("handleAppCrashed");
     }

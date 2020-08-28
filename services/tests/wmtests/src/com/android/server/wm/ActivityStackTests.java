@@ -1432,7 +1432,7 @@ public class ActivityStackTests extends WindowTestsBase {
         final KeyguardController keyguardController = mSupervisor.getKeyguardController();
         display.isDefaultDisplay = isDefaultDisplay;
 
-        doReturn(display).when(mStack).getDisplay();
+        mStack.mDisplayContent = display;
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(focusedStack).when(mStack).isFocusedStackOnDisplay();
