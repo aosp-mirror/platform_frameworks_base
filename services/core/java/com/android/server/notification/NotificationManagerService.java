@@ -6259,6 +6259,8 @@ public class NotificationManagerService extends SystemService {
                     for (NotificationRecord r : enqueued) {
                         if (r.mUpdateTimeMs > mWhen) {
                             // At least one enqueue was posted after the cancel, so we're invalid
+                            Slog.i(TAG, "notification cancel ignored due to newer enqueued entry"
+                                    + "key=" + r.getSbn().getKey());
                             return;
                         }
                     }
