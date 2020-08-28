@@ -1970,7 +1970,21 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void powerOnRemoteDevice(int logicalAddress, int powerStatus) {
-            // TODO(amyjojo): implement the method
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    Slog.i(TAG, "Device "
+                            + logicalAddress + " power status is " + powerStatus
+                            + " before power on command sent out");
+                    if (getSwitchDevice() != null) {
+                        getSwitchDevice().sendUserControlPressedAndReleased(
+                                logicalAddress, HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION);
+                    } else {
+                        Slog.e(TAG, "Can't get the correct local device to handle routing.");
+                    }
+                }
+            });
         }
 
         @Override
