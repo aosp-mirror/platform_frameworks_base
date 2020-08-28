@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport.KEY_NETWORK_PROBES_ATTEMPTED_BITMASK;
@@ -1135,6 +1136,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 intentFilter,
                 null /* broadcastPermission */,
                 mHandler);
+
+        // Listen to lockdown VPN reset.
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(LockdownVpnTracker.ACTION_LOCKDOWN_RESET);
+        mContext.registerReceiverAsUser(
+                mIntentReceiver, UserHandle.ALL, intentFilter, NETWORK_STACK, mHandler);
 
         try {
             mNMS.registerObserver(mDataActivityObserver);
@@ -5195,6 +5202,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void onVpnLockdownReset() {
+        synchronized (mVpns) {
+            if (mLockdownTracker != null) mLockdownTracker.reset();
+        }
+    }
+
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -5205,6 +5218,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final Uri packageData = intent.getData();
             final String packageName =
                     packageData != null ? packageData.getSchemeSpecificPart() : null;
+
+            if (LockdownVpnTracker.ACTION_LOCKDOWN_RESET.equals(action)) {
+                onVpnLockdownReset();
+            }
+
+            // UserId should be filled for below intents, check the existence.
             if (userId == UserHandle.USER_NULL) return;
 
             if (Intent.ACTION_USER_STARTED.equals(action)) {
@@ -5223,6 +5242,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final boolean isReplacing = intent.getBooleanExtra(
                         Intent.EXTRA_REPLACING, false);
                 onPackageRemoved(packageName, uid, isReplacing);
+            } else {
+                Log.wtf(TAG, "received unexpected intent: " + action);
             }
         }
     };
