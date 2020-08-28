@@ -233,6 +233,9 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         private final Map<Integer, ParcelUuid> mSubIdToGroupMap;
         private final Set<ParcelUuid> mActiveGroups;
 
+        public static final TelephonySubscriptionSnapshot EMPTY_SNAPSHOT =
+                new TelephonySubscriptionSnapshot(Collections.emptyMap(), Collections.emptySet());
+
         @VisibleForTesting(visibility = Visibility.PRIVATE)
         TelephonySubscriptionSnapshot(
                 @NonNull Map<Integer, ParcelUuid> subIdToGroupMap,

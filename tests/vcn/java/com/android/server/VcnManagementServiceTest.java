@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
+import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +28,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -44,16 +48,19 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.VcnManagementService.VcnNetworkProvider;
+import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /** Tests for {@link VcnManagementService}. */
@@ -66,9 +73,10 @@ public class VcnManagementServiceTest {
     private static final Map<ParcelUuid, VcnConfig> TEST_VCN_CONFIG_MAP =
             Collections.unmodifiableMap(Collections.singletonMap(TEST_UUID_1, TEST_VCN_CONFIG));
 
+    private static final int TEST_SUBSCRIPTION_ID = 1;
     private static final SubscriptionInfo TEST_SUBSCRIPTION_INFO =
             new SubscriptionInfo(
-                    1 /* id */,
+                    TEST_SUBSCRIPTION_ID /* id */,
                     "" /* iccId */,
                     0 /* simSlotIndex */,
                     "Carrier" /* displayName */,
@@ -99,6 +107,8 @@ public class VcnManagementServiceTest {
     private final VcnContext mVcnContext = mock(VcnContext.class);
     private final PersistableBundleUtils.LockingReadWriteHelper mConfigReadWriteHelper =
             mock(PersistableBundleUtils.LockingReadWriteHelper.class);
+    private final TelephonySubscriptionTracker mSubscriptionTracker =
+            mock(TelephonySubscriptionTracker.class);
 
     private final VcnManagementService mVcnMgmtSvc;
 
@@ -116,6 +126,12 @@ public class VcnManagementServiceTest {
                         eq(mMockContext),
                         eq(mTestLooper.getLooper()),
                         any(VcnNetworkProvider.class));
+        doReturn(mSubscriptionTracker)
+                .when(mMockDeps)
+                .newTelephonySubscriptionTracker(
+                        eq(mMockContext),
+                        eq(mTestLooper.getLooper()),
+                        any(TelephonySubscriptionTrackerCallback.class));
         doReturn(mConfigReadWriteHelper)
                 .when(mMockDeps)
                 .newPersistableBundleLockingReadWriteHelper(any());
@@ -135,6 +151,9 @@ public class VcnManagementServiceTest {
 
         setupMockedCarrierPrivilege(true);
         mVcnMgmtSvc = new VcnManagementService(mMockContext, mMockDeps);
+
+        // Make sure the profiles are loaded.
+        mTestLooper.dispatchAll();
     }
 
     private void setupSystemService(Object service, String name, Class<?> serviceClass) {
@@ -157,6 +176,7 @@ public class VcnManagementServiceTest {
 
         verify(mConnMgr)
                 .registerNetworkProvider(any(VcnManagementService.VcnNetworkProvider.class));
+        verify(mSubscriptionTracker).register();
     }
 
     @Test
@@ -187,6 +207,94 @@ public class VcnManagementServiceTest {
 
         assertEquals(TEST_VCN_CONFIG_MAP, mVcnMgmtSvc.getConfigs());
         verify(mConfigReadWriteHelper).readFromDisk();
+    }
+
+    private void triggerSubscriptionTrackerCallback(Set<ParcelUuid> activeSubscriptionGroups) {
+        final TelephonySubscriptionSnapshot snapshot = mock(TelephonySubscriptionSnapshot.class);
+        doReturn(activeSubscriptionGroups).when(snapshot).getActiveSubscriptionGroups();
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        cb.onNewSnapshot(snapshot);
+    }
+
+    private TelephonySubscriptionTrackerCallback getTelephonySubscriptionTrackerCallback() {
+        final ArgumentCaptor<TelephonySubscriptionTrackerCallback> captor =
+                ArgumentCaptor.forClass(TelephonySubscriptionTrackerCallback.class);
+        verify(mMockDeps)
+                .newTelephonySubscriptionTracker(
+                        eq(mMockContext), eq(mTestLooper.getLooper()), captor.capture());
+        return captor.getValue();
+    }
+
+    private Vcn startAndGetVcnInstance(ParcelUuid uuid) {
+        mVcnMgmtSvc.setVcnConfig(uuid, TEST_VCN_CONFIG);
+        return mVcnMgmtSvc.getAllVcns().get(uuid);
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackStartsInstances() throws Exception {
+        triggerSubscriptionTrackerCallback(Collections.singleton(TEST_UUID_1));
+        verify(mMockDeps).newVcn(eq(mVcnContext), eq(TEST_UUID_1), eq(TEST_VCN_CONFIG));
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackStopsInstances() throws Exception {
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn vcn = startAndGetVcnInstance(TEST_UUID_2);
+
+        triggerSubscriptionTrackerCallback(Collections.emptySet());
+
+        // Verify teardown after delay
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(vcn).teardownAsynchronously();
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackSimSwitchesDoNotKillVcnInstances()
+            throws Exception {
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn vcn = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate SIM unloaded
+        triggerSubscriptionTrackerCallback(Collections.emptySet());
+
+        // Simulate new SIM loaded right during teardown delay.
+        mTestLooper.moveTimeForward(
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS / 2);
+        mTestLooper.dispatchAll();
+        triggerSubscriptionTrackerCallback(Collections.singleton(TEST_UUID_2));
+
+        // Verify that even after the full timeout duration, the VCN instance is not torn down
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(vcn, never()).teardownAsynchronously();
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackDoesNotKillNewVcnInstances() throws Exception {
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn oldInstance = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate SIM unloaded
+        triggerSubscriptionTrackerCallback(Collections.emptySet());
+
+        // Config cleared, SIM reloaded & config re-added right before teardown delay, staring new
+        // vcnInstance.
+        mTestLooper.moveTimeForward(
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS - 1);
+        mTestLooper.dispatchAll();
+        mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2);
+        final Vcn newInstance = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Verify that new instance was different, and the old one was torn down
+        assertTrue(oldInstance != newInstance);
+        verify(oldInstance).teardownAsynchronously();
+
+        // Verify that even after the full timeout duration, the new VCN instance is not torn down
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(newInstance, never()).teardownAsynchronously();
     }
 
     @Test
