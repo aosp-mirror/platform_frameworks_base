@@ -89,7 +89,7 @@ public class MediaTranscodingBenchmark
         Log.d(TAG, "setUp");
         super.setUp();
         mContext = getInstrumentation().getContext();
-        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext);
+        mMediaTranscodeManager = mContext.getSystemService(MediaTranscodeManager.class);
     }
 
     @Override
