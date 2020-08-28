@@ -35,13 +35,14 @@ import android.view.ViewParent;
  * <li>correctly implements {@link ViewParent#requestChildRectangleOnScreen(View,
  * Rect, boolean)}
  * </ul>
+ *
+ * @see ScrollCaptureViewSupport
  */
 public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGroup> {
     private int mStartScrollY;
     private boolean mScrollBarEnabled;
     private int mOverScrollMode;
 
-    /** @see ScrollCaptureViewHelper#onPrepareForStart(View, Rect) */
     public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
         mStartScrollY = view.getScrollY();
         mOverScrollMode = view.getOverScrollMode();
@@ -54,8 +55,8 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
         }
     }
 
-    /** @see ScrollCaptureViewHelper#onScrollRequested(View, Rect, Rect) */
-    public Rect onScrollRequested(@NonNull ViewGroup view, Rect scrollBounds, Rect requestRect) {
+    public ScrollResult onScrollRequested(@NonNull ViewGroup view, Rect scrollBounds,
+            Rect requestRect) {
         final View contentView = view.getChildAt(0); // returns null, does not throw IOOBE
         if (contentView == null) {
             return null;
@@ -87,6 +88,9 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
             \__ Requested Bounds[0,300 - 200,400] (200x100)
        */
 
+        ScrollResult result = new ScrollResult();
+        result.requestedArea = new Rect(requestRect);
+
         // 0) adjust the requestRect to account for scroll change since start
         //
         //  Scroll Bounds[50,50 - 250,250]  (w=200,h=200)
@@ -117,8 +121,6 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
                 view.getScrollX() - contentView.getLeft(),
                 view.getScrollY() - contentView.getTop());
 
-
-
         // requestRect is now local to contentView as requestedContentBounds
         // contentView (and each parent in turn if possible) will be scrolled
         // (if necessary) to make all of requestedContent visible, (if possible!)
@@ -126,35 +128,37 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
 
         // update new offset between starting and current scroll position
         scrollDelta = view.getScrollY() - mStartScrollY;
+        result.scrollDelta = scrollDelta;
 
-
-        // TODO: adjust to avoid occlusions/minimize scroll changes
+        // TODO: crop capture area to avoid occlusions/minimize scroll changes
 
         Point offset = new Point();
-        final Rect capturedRect = new Rect(requestedContentBounds); // empty
-        if (!view.getChildVisibleRect(contentView, capturedRect, offset)) {
-            capturedRect.setEmpty();
-            return capturedRect;
+        final Rect available = new Rect(requestedContentBounds); // empty
+        if (!view.getChildVisibleRect(contentView, available, offset)) {
+            available.setEmpty();
+            result.availableArea = available;
+            return result;
         }
         // Transform back from global to content-view local
-        capturedRect.offset(-offset.x, -offset.y);
+        available.offset(-offset.x, -offset.y);
 
         // Then back to container view
-        capturedRect.offset(
+        available.offset(
                 contentView.getLeft() - view.getScrollX(),
                 contentView.getTop() - view.getScrollY());
 
 
         // And back to relative to scrollBounds
-        capturedRect.offset(-scrollBounds.left, -scrollBounds.top);
+        available.offset(-scrollBounds.left, -scrollBounds.top);
 
-        // Apply scrollDelta again to return to make capturedRect relative to scrollBounds at
+        // Apply scrollDelta again to return to make `available` relative to `scrollBounds` at
         // the scroll position at start of capture.
-        capturedRect.offset(0, scrollDelta);
-        return capturedRect;
+        available.offset(0, scrollDelta);
+
+        result.availableArea = new Rect(available);
+        return result;
     }
 
-    /** @see ScrollCaptureViewHelper#onPrepareForEnd(View)  */
     public void onPrepareForEnd(@NonNull ViewGroup view) {
         view.scrollTo(0, mStartScrollY);
         if (mOverScrollMode != View.OVER_SCROLL_NEVER) {
