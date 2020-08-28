@@ -2127,11 +2127,21 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean update = res.removedInfo != null && res.removedInfo.removedPackage != null;
         final String packageName = res.name;
         final PackageSetting pkgSetting = succeeded ? getPackageSetting(packageName) : null;
-        if (succeeded && pkgSetting == null) {
+        final boolean removedBeforeUpdate = (pkgSetting == null)
+                || (pkgSetting.isSystem() && !pkgSetting.getPathString().equals(res.pkg.getPath()));
+        if (succeeded && removedBeforeUpdate) {
             Slog.e(TAG, packageName + " was removed before handlePackagePostInstall "
                     + "could be executed");
             res.returnCode = INSTALL_FAILED_PACKAGE_CHANGED;
             res.returnMsg = "Package was removed before install could complete.";
+
+            // Remove the update failed package's older resources safely now
+            InstallArgs args = res.removedInfo != null ? res.removedInfo.args : null;
+            if (args != null) {
+                synchronized (mInstallLock) {
+                    args.doPostDeleteLI(true);
+                }
+            }
             notifyInstallObserver(res, installObserver);
             return;
         }
