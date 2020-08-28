@@ -36,9 +36,11 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, 12345);
 
 namespace {
+const ConfigKey kConfigKey(0, 12345);
+const uint64_t protoHash = 0x1234567890;
+
 void makeLogEvent(LogEvent* logEvent, int32_t atomId, int64_t timestampNs, string str) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
@@ -66,7 +68,7 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     EventMetricProducer eventProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, bucketStartTimeNs);
+                                      wizard, protoHash, bucketStartTimeNs);
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
@@ -102,7 +104,8 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     EventMetricProducer eventProducer(kConfigKey, metric, 0 /*condition index*/,
-                                      {ConditionState::kUnknown}, wizard, bucketStartTimeNs);
+                                      {ConditionState::kUnknown}, wizard, protoHash,
+                                      bucketStartTimeNs);
 
     eventProducer.onConditionChanged(true /*condition*/, bucketStartTimeNs);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
@@ -157,7 +160,8 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     EXPECT_CALL(*wizard, query(_, key2, _)).WillOnce(Return(ConditionState::kTrue));
 
     EventMetricProducer eventProducer(kConfigKey, metric, 0 /*condition index*/,
-                                      {ConditionState::kUnknown}, wizard, bucketStartTimeNs);
+                                      {ConditionState::kUnknown}, wizard, protoHash,
+                                      bucketStartTimeNs);
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);

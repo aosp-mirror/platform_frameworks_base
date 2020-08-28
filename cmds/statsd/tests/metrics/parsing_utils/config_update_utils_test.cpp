@@ -58,6 +58,7 @@ unordered_map<int64_t, int> oldAtomMatchingTrackerMap;
 vector<sp<ConditionTracker>> oldConditionTrackers;
 unordered_map<int64_t, int> oldConditionTrackerMap;
 vector<sp<MetricProducer>> oldMetricProducers;
+unordered_map<int64_t, int> oldMetricProducerMap;
 std::vector<sp<AnomalyTracker>> oldAnomalyTrackers;
 std::vector<sp<AlarmTracker>> oldAlarmTrackers;
 unordered_map<int, std::vector<int>> conditionToMetricMap;
@@ -67,6 +68,7 @@ unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
 unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
 unordered_map<int64_t, int> alertTrackerMap;
 vector<int> metricsWithActivation;
+map<int64_t, uint64_t> oldStateHashes;
 std::set<int64_t> noReportMetricIds;
 
 class ConfigUpdateTest : public ::testing::Test {
@@ -81,6 +83,7 @@ public:
         oldConditionTrackers.clear();
         oldConditionTrackerMap.clear();
         oldMetricProducers.clear();
+        oldMetricProducerMap.clear();
         oldAnomalyTrackers.clear();
         oldAlarmTrackers.clear();
         conditionToMetricMap.clear();
@@ -90,6 +93,7 @@ public:
         deactivationAtomTrackerToMetricMap.clear();
         alertTrackerMap.clear();
         metricsWithActivation.clear();
+        oldStateHashes.clear();
         noReportMetricIds.clear();
     }
 };
@@ -98,10 +102,11 @@ bool initConfig(const StatsdConfig& config) {
     return initStatsdConfig(
             key, config, uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, timeBaseNs, allTagIds, oldAtomMatchingTrackers, oldAtomMatchingTrackerMap,
-            oldConditionTrackers, oldConditionTrackerMap, oldMetricProducers, oldAnomalyTrackers,
-            oldAlarmTrackers, conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
-            activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap, alertTrackerMap,
-            metricsWithActivation, noReportMetricIds);
+            oldConditionTrackers, oldConditionTrackerMap, oldMetricProducers, oldMetricProducerMap,
+            oldAnomalyTrackers, oldAlarmTrackers, conditionToMetricMap, trackerToMetricMap,
+            trackerToConditionMap, activationAtomTrackerToMetricMap,
+            deactivationAtomTrackerToMetricMap, alertTrackerMap, metricsWithActivation,
+            oldStateHashes, noReportMetricIds);
 }
 
 }  // anonymous namespace

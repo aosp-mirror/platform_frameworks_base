@@ -36,7 +36,7 @@ public:
     EventMetricProducer(
             const ConfigKey& key, const EventMetric& eventMetric, const int conditionIndex,
             const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
-            const int64_t startTimeNs,
+            const uint64_t protoHash, const int64_t startTimeNs,
             const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
             const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                     eventDeactivationMap = {},
@@ -44,6 +44,10 @@ public:
             const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
 
     virtual ~EventMetricProducer();
+
+    MetricType getMetricType() const override {
+        return METRIC_TYPE_EVENT;
+    }
 
 private:
     void onMatchedLogEventInternalLocked(
