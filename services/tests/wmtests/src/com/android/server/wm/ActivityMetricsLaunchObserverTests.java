@@ -33,6 +33,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 
+import android.app.ActivityOptions;
+import android.app.ActivityOptions.SourceInfo;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -68,6 +70,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     private ActivityRecord mTrampolineActivity;
     private ActivityRecord mTopActivity;
+    private ActivityOptions mActivityOptions;
     private boolean mLaunchTopByTrampoline;
 
     @Before
@@ -209,6 +212,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnReportFullyDrawn() {
+        mActivityOptions = ActivityOptions.makeBasic();
+        mActivityOptions.setSourceInfo(SourceInfo.TYPE_LAUNCHER, SystemClock.uptimeMillis() - 10);
         onActivityLaunched(mTopActivity);
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
@@ -216,7 +221,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mActivityMetricsLogger.logAppTransitionReportedDrawn(mTopActivity, false);
         notifyTransitionStarting(mTopActivity);
         // The pending fully drawn event should send when the actual windows drawn event occurs.
-        notifyWindowsDrawn(mTopActivity);
+        final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
+        assertWithMessage("Record start source").that(info.sourceType)
+                .isEqualTo(SourceInfo.TYPE_LAUNCHER);
+        assertWithMessage("Record event time").that(info.sourceEventDelayMs).isAtLeast(10);
 
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
         verifyOnActivityLaunchFinished(mTopActivity);
@@ -251,7 +259,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     private void notifyActivityLaunched(int resultCode, ActivityRecord activity) {
-        mActivityMetricsLogger.notifyActivityLaunched(mLaunchingState, resultCode, activity);
+        mActivityMetricsLogger.notifyActivityLaunched(mLaunchingState, resultCode, activity,
+                mActivityOptions);
     }
 
     private void notifyTransitionStarting(ActivityRecord activity) {
@@ -260,8 +269,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mActivityMetricsLogger.notifyTransitionStarting(reasons);
     }
 
-    private void notifyWindowsDrawn(ActivityRecord r) {
-        mActivityMetricsLogger.notifyWindowsDrawn(r, SystemClock.elapsedRealtimeNanos());
+    private ActivityMetricsLogger.TransitionInfoSnapshot notifyWindowsDrawn(ActivityRecord r) {
+        return mActivityMetricsLogger.notifyWindowsDrawn(r, SystemClock.elapsedRealtimeNanos());
     }
 
     @Test

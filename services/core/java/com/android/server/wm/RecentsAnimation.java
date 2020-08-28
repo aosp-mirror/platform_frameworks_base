@@ -250,7 +250,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
 
             mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
-                    START_TASK_TO_FRONT, targetActivity);
+                    START_TASK_TO_FRONT, targetActivity, null /* options */);
 
             // Register for stack order changes
             mDefaultTaskDisplayArea.registerStackOrderChangedListener(this);
