@@ -420,25 +420,25 @@ public final class CachedAppOptimizer {
     }
 
     /**
-     * Determines whether the freezer is correctly supported by this system
+     * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
         boolean supported = false;
         FileReader fr = null;
 
         try {
-            fr = new FileReader("/dev/freezer/frozen/freezer.killable");
-            int i = fr.read();
+            fr = new FileReader("/sys/fs/cgroup/freezer/cgroup.freeze");
+            char state = (char) fr.read();
 
-            if ((char) i == '1') {
+            if (state == '1' || state == '0') {
                 supported = true;
             } else {
-                Slog.w(TAG_AM, "Freezer killability is turned off, disabling freezer");
+                Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
             }
         } catch (java.io.FileNotFoundException e) {
-            Slog.d(TAG_AM, "Freezer.killable not present, disabling freezer");
+            Slog.d(TAG_AM, "cgroup.freeze not present");
         } catch (Exception e) {
-            Slog.d(TAG_AM, "Unable to read freezer.killable, disabling freezer: " + e.toString());
+            Slog.d(TAG_AM, "unable to read cgroup.freeze: " + e.toString());
         }
 
         if (fr != null) {
@@ -471,6 +471,8 @@ public final class CachedAppOptimizer {
 
         if (mUseFreezer && mFreezeHandler == null) {
             Slog.d(TAG_AM, "Freezer enabled");
+            Process.enableFreezer(true);
+
             if (!mCachedAppOptimizerThread.isAlive()) {
                 mCachedAppOptimizerThread.start();
             }
@@ -479,6 +481,8 @@ public final class CachedAppOptimizer {
 
             Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
+        } else {
+            Process.enableFreezer(false);
         }
     }
 
