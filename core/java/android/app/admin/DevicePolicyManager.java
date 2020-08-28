@@ -11992,6 +11992,9 @@ public class DevicePolicyManager {
      * </ul>
      * Common Criteria mode is disabled by default.
      *
+     * <p><em>Note:</em> if Common Critera mode is turned off after being enabled previously,
+     * all existing WiFi configurations will be lost.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled whether Common Criteria mode should be enabled or not.
      */
