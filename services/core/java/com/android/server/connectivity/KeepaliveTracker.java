@@ -29,6 +29,7 @@ import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+import static android.net.SocketKeepalive.ERROR_STOP_REASON_UNINITIALIZED;
 import static android.net.SocketKeepalive.ERROR_UNSUPPORTED;
 import static android.net.SocketKeepalive.MAX_INTERVAL_SEC;
 import static android.net.SocketKeepalive.MIN_INTERVAL_SEC;
@@ -152,6 +153,7 @@ public class KeepaliveTracker {
         private static final int STARTED = 3;
         private static final int STOPPING = 4;
         private int mStartedState = NOT_STARTED;
+        private int mStopReason = ERROR_STOP_REASON_UNINITIALIZED;
 
         KeepaliveInfo(@NonNull ISocketKeepaliveCallback callback,
                 @NonNull NetworkAgentInfo nai,
@@ -365,6 +367,11 @@ public class KeepaliveTracker {
                     Log.e(TAG, "Cannot stop unowned keepalive " + mSlot + " on " + mNai.network);
                 }
             }
+            // Store the reason of stopping, and report it after the keepalive is fully stopped.
+            if (mStopReason != ERROR_STOP_REASON_UNINITIALIZED) {
+                throw new IllegalStateException("Unexpected stop reason: " + mStopReason);
+            }
+            mStopReason = reason;
             Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.toShortString()
                     + ": " + reason);
             switch (mStartedState) {
@@ -403,24 +410,6 @@ public class KeepaliveTracker {
                     Log.wtf(TAG, "Error closing fd for keepalive " + mSlot + ": " + e);
                 }
             }
-
-            if (reason == SUCCESS) {
-                try {
-                    mCallback.onStopped();
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Discarded onStop callback: " + reason);
-                }
-            } else if (reason == DATA_RECEIVED) {
-                try {
-                    mCallback.onDataReceived();
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Discarded onDataReceived callback: " + reason);
-                }
-            } else {
-                notifyErrorCallback(mCallback, reason);
-            }
-
-            unlinkDeathRecipient();
         }
 
         void onFileDescriptorInitiatedStop(final int socketKeepaliveReason) {
@@ -505,12 +494,37 @@ public class KeepaliveTracker {
             Log.e(TAG, "Attempt to remove nonexistent keepalive " + slot + " on " + networkName);
             return;
         }
+
+        // Remove the keepalive from hash table so the slot can be considered available when reusing
+        // it.
         networkKeepalives.remove(slot);
         Log.d(TAG, "Remove keepalive " + slot + " on " + networkName + ", "
                 + networkKeepalives.size() + " remains.");
         if (networkKeepalives.isEmpty()) {
             mKeepalives.remove(nai);
         }
+
+        // Notify app that the keepalive is stopped.
+        final int reason = ki.mStopReason;
+        if (reason == SUCCESS) {
+            try {
+                ki.mCallback.onStopped();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Discarded onStop callback: " + reason);
+            }
+        } else if (reason == DATA_RECEIVED) {
+            try {
+                ki.mCallback.onDataReceived();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Discarded onDataReceived callback: " + reason);
+            }
+        } else if (reason == ERROR_STOP_REASON_UNINITIALIZED) {
+            throw new IllegalStateException("Unexpected stop reason: " + reason);
+        } else {
+            notifyErrorCallback(ki.mCallback, reason);
+        }
+
+        ki.unlinkDeathRecipient();
     }
 
     public void handleCheckKeepalivesStillValid(NetworkAgentInfo nai) {
