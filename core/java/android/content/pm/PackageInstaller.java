@@ -2512,12 +2512,16 @@ public class PackageInstaller {
         }
 
         /**
-         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code true},
-         * return true. If it was called with {@code false} or if it was not called return false.
+         * Get if this session is to be installed as Instant Apps.
          *
-         * @hide
+         * @param isInstantApp an unused parameter and is ignored.
+         * @return {@code true} if {@link SessionParams#setInstallAsInstantApp(boolean)} was called
+         * with {@code true}; {@code false} if it was called with {@code false} or if it was not
+         * called.
          *
          * @see #getInstallAsFullApp
+         *
+         * @hide
          */
         @SystemApi
         public boolean getInstallAsInstantApp(boolean isInstantApp) {
@@ -2525,12 +2529,16 @@ public class PackageInstaller {
         }
 
         /**
-         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code false},
-         * return true. If it was called with {@code true} or if it was not called return false.
+         * Get if this session is to be installed as full apps.
          *
-         * @hide
+         * @param isInstantApp an unused parameter and is ignored.
+         * @return {@code true} if {@link SessionParams#setInstallAsInstantApp(boolean)} was called
+         * with {@code false}; {code false} if it was called with {@code true} or if it was not
+         * called.
          *
          * @see #getInstallAsInstantApp
+         *
+         * @hide
          */
         @SystemApi
         public boolean getInstallAsFullApp(boolean isInstantApp) {
