@@ -2268,21 +2268,23 @@ public final class ActiveServices {
                     clist.remove(0);
                 }
 
-                if (r.binding.service.app != null) {
-                    if (r.binding.service.app.whitelistManager) {
-                        updateWhitelistManagerLocked(r.binding.service.app);
+                final ProcessRecord app = r.binding.service.app;
+                if (app != null) {
+                    if (app.whitelistManager) {
+                        updateWhitelistManagerLocked(app);
                     }
                     // This could have made the service less important.
                     if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
-                        r.binding.service.app.treatLikeActivity = true;
-                        mAm.updateLruProcessLocked(r.binding.service.app,
-                                r.binding.service.app.hasClientActivities()
-                                || r.binding.service.app.treatLikeActivity, null);
+                        app.treatLikeActivity = true;
+                        mAm.updateLruProcessLocked(app,
+                                app.hasClientActivities()
+                                || app.treatLikeActivity, null);
                     }
+                    mAm.enqueueOomAdjTargetLocked(app);
                 }
             }
 
-            mAm.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+            mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
 
         } finally {
             Binder.restoreCallingIdentity(origId);
