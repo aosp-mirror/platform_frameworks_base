@@ -17,7 +17,6 @@ package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -30,7 +29,6 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.R;
 import com.android.wifitrackerlib.WifiEntry;
-import com.android.wifitrackerlib.WifiEntry.ConnectedInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -179,43 +177,9 @@ public class WifiEntryPreferenceTest {
     }
 
     @Test
-    public void levelChanged_notDefaultWifiRefresh_shouldUpdateLevelIcon() {
+    public void levelChanged_showXWifiRefresh_shouldUpdateLevelIcon() {
         final List<Drawable> iconList = new ArrayList<>();
-        final ConnectedInfo mockConnectedInfo = mock(ConnectedInfo.class);
-        mockConnectedInfo.isDefaultNetwork = false;
-        when(mMockWifiEntry.getConnectedInfo()).thenReturn(mockConnectedInfo);
-        final WifiEntryPreference pref =
-                new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
-
-        when(mMockWifiEntry.getLevel()).thenReturn(0);
-        pref.refresh();
-        iconList.add(pref.getIcon());
-        when(mMockWifiEntry.getLevel()).thenReturn(1);
-        pref.refresh();
-        iconList.add(pref.getIcon());
-        when(mMockWifiEntry.getLevel()).thenReturn(2);
-        pref.refresh();
-        iconList.add(pref.getIcon());
-        when(mMockWifiEntry.getLevel()).thenReturn(3);
-        pref.refresh();
-        iconList.add(pref.getIcon());
-        when(mMockWifiEntry.getLevel()).thenReturn(4);
-        pref.refresh();
-        iconList.add(pref.getIcon());
-        when(mMockWifiEntry.getLevel()).thenReturn(-1);
-        pref.refresh();
-        iconList.add(pref.getIcon());
-
-        assertThat(iconList).containsExactly(mMockShowXDrawable0, mMockShowXDrawable1,
-                mMockShowXDrawable2, mMockShowXDrawable3, mMockShowXDrawable4, null);
-    }
-
-    @Test
-    public void levelChanged_notValidatedWifiRefresh_shouldUpdateLevelIcon() {
-        final List<Drawable> iconList = new ArrayList<>();
-        final ConnectedInfo mockConnectedInfo = mock(ConnectedInfo.class);
-        mockConnectedInfo.isValidated = false;
-        when(mMockWifiEntry.getConnectedInfo()).thenReturn(mockConnectedInfo);
+        when(mMockWifiEntry.shouldShowXLevelIcon()).thenReturn(true);
         final WifiEntryPreference pref =
                 new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
 

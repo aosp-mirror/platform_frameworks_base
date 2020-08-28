@@ -35,7 +35,6 @@ import androidx.preference.PreferenceViewHolder;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 import com.android.wifitrackerlib.WifiEntry;
-import com.android.wifitrackerlib.WifiEntry.ConnectedInfo;
 
 /**
  * Preference to display a WifiEntry in a wifi picker.
@@ -138,11 +137,7 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
     public void refresh() {
         setTitle(mWifiEntry.getTitle());
         final int level = mWifiEntry.getLevel();
-        final ConnectedInfo connectedInfo = mWifiEntry.getConnectedInfo();
-        boolean showX = false;
-        if (connectedInfo != null) {
-            showX = !connectedInfo.isDefaultNetwork || !connectedInfo.isValidated;
-        }
+        final boolean showX = mWifiEntry.shouldShowXLevelIcon();
         if (level != mLevel || showX != mShowX) {
             mLevel = level;
             mShowX = showX;
