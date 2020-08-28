@@ -221,6 +221,9 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     }
                 }
                 result = lockoutMode != LOCKOUT_NONE; // in a lockout mode
+                if(result) { // locked out
+                    mAlreadyDone = true;
+                }
             }
         } catch (RemoteException e) {
             Slog.e(getLogTag(), "Remote exception", e);
