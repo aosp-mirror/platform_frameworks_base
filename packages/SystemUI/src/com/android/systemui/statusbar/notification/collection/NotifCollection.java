@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
@@ -459,8 +460,7 @@ public class NotifCollection implements Dumpable {
                             + ": has not been marked for removal"));
         }
 
-        if (isDismissedByUser(entry)) {
-            // User-dismissed notifications cannot be lifetime-extended
+        if (cannotBeLifetimeExtended(entry)) {
             cancelLifetimeExtension(entry);
         } else {
             updateLifetimeExtension(entry);
@@ -583,7 +583,7 @@ public class NotifCollection implements Dumpable {
     }
 
     private void cancelLocalDismissal(NotificationEntry entry) {
-        if (isDismissedByUser(entry)) {
+        if (entry.getDismissState() != NOT_DISMISSED) {
             entry.setDismissState(NOT_DISMISSED);
             if (entry.getSbn().getNotification().isGroupSummary()) {
                 for (NotificationEntry otherEntry : mNotificationSet.values()) {
@@ -669,12 +669,16 @@ public class NotifCollection implements Dumpable {
      * immediately removed from the collection, but can sometimes stick around due to lifetime
      * extenders.
      */
-    private static boolean isCanceled(NotificationEntry entry) {
+    private boolean isCanceled(NotificationEntry entry) {
         return entry.mCancellationReason != REASON_NOT_CANCELED;
     }
 
-    private static boolean isDismissedByUser(NotificationEntry entry) {
-        return entry.getDismissState() != NOT_DISMISSED;
+    private boolean cannotBeLifetimeExtended(NotificationEntry entry) {
+        final boolean locallyDismissedByUser = entry.getDismissState() != NOT_DISMISSED;
+        final boolean systemServerReportedUserCancel =
+                entry.mCancellationReason == REASON_CLICK
+                        || entry.mCancellationReason == REASON_CANCEL;
+        return locallyDismissedByUser || systemServerReportedUserCancel;
     }
 
     /**
