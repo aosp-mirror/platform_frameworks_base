@@ -103,12 +103,14 @@ public class RoleObserverTest extends UiServiceTestCase {
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
     private List<UserInfo> mUsers;
+    private InjectableSystemClock mSystemClock = new FakeSystemClock();
 
     private static class TestableNotificationManagerService extends NotificationManagerService {
         TestableNotificationManagerService(Context context,
                 NotificationRecordLogger logger,
+                InjectableSystemClock systemClock,
                 InstanceIdSequence notificationInstanceIdSequence) {
-            super(context, logger, notificationInstanceIdSequence);
+            super(context, logger, systemClock, notificationInstanceIdSequence);
         }
 
         @Override
@@ -136,7 +138,7 @@ public class RoleObserverTest extends UiServiceTestCase {
         when(mUm.getUsers()).thenReturn(mUsers);
 
         mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
-                mNotificationInstanceIdSequence);
+                mSystemClock, mNotificationInstanceIdSequence);
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
