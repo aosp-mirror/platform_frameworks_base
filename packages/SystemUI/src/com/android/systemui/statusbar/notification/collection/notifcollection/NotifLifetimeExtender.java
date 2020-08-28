@@ -53,8 +53,12 @@ public interface NotifLifetimeExtender {
      */
     void cancelLifetimeExtension(NotificationEntry entry);
 
-    /** Callback for notifying the NotifCollection that a lifetime extension has expired. */
+    /** Callback for notifying the NotifCollection that a lifetime extension has expired.*/
     interface OnEndLifetimeExtensionCallback {
+        /**
+         * Stop extending the lifetime of `entry` with `extender` and then immediately re-evaluates
+         * whether to continue lifetime extending this notification or to remove it.
+         */
         void onEndLifetimeExtension(NotifLifetimeExtender extender, NotificationEntry entry);
     }
 }
