@@ -108,14 +108,10 @@ public class BubbleOverflowActivity extends Activity {
         mEmptyStateSubtitle = findViewById(R.id.bubble_overflow_empty_subtitle);
         mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
 
-        updateDimensions();
-        onDataChanged(mBubbleController.getOverflowBubbles());
-        mBubbleController.setOverflowCallback(() -> {
-            onDataChanged(mBubbleController.getOverflowBubbles());
-        });
+        updateOverflow();
     }
 
-    void updateDimensions() {
+    void updateOverflow() {
         Resources res = getResources();
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
         mRecyclerView.setLayoutManager(
@@ -137,6 +133,22 @@ public class BubbleOverflowActivity extends Activity {
         mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
                 mBubbleController::promoteBubbleFromOverflow, viewWidth, viewHeight);
         mRecyclerView.setAdapter(mAdapter);
+
+        mOverflowBubbles.clear();
+        mOverflowBubbles.addAll(mBubbleController.getOverflowBubbles());
+        mAdapter.notifyDataSetChanged();
+        updateEmptyStateVisibility();
+
+        mBubbleController.setOverflowListener(mDataListener);
+        updateTheme();
+    }
+
+    void updateEmptyStateVisibility() {
+        if (mOverflowBubbles.isEmpty()) {
+            mEmptyState.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyState.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -168,22 +180,40 @@ public class BubbleOverflowActivity extends Activity {
         mEmptyStateSubtitle.setTextColor(textColor);
     }
 
-    void onDataChanged(List<Bubble> bubbles) {
-        mOverflowBubbles.clear();
-        mOverflowBubbles.addAll(bubbles);
-        mAdapter.notifyDataSetChanged();
+    private final BubbleData.Listener mDataListener = new BubbleData.Listener() {
 
-        if (mOverflowBubbles.isEmpty()) {
-            mEmptyState.setVisibility(View.VISIBLE);
-        } else {
-            mEmptyState.setVisibility(View.GONE);
-        }
+        @Override
+        public void applyUpdate(BubbleData.Update update) {
 
-        if (DEBUG_OVERFLOW) {
-            Log.d(TAG, "Updated overflow bubbles:\n" + BubbleDebugConfig.formatBubblesString(
-                    mOverflowBubbles, /*selected*/ null));
+            Bubble toRemove = update.removedOverflowBubble;
+            if (toRemove != null) {
+                if (DEBUG_OVERFLOW) {
+                    Log.d(TAG, "remove: " + toRemove);
+                }
+                toRemove.cleanupViews();
+                final int i = mOverflowBubbles.indexOf(toRemove);
+                mOverflowBubbles.remove(toRemove);
+                mAdapter.notifyItemRemoved(i);
+            }
+
+            Bubble toAdd = update.addedOverflowBubble;
+            if (toAdd != null) {
+                if (DEBUG_OVERFLOW) {
+                    Log.d(TAG, "add: " + toAdd);
+                }
+                mOverflowBubbles.add(0, toAdd);
+                mAdapter.notifyItemInserted(0);
+            }
+
+            updateEmptyStateVisibility();
+
+            if (DEBUG_OVERFLOW) {
+                Log.d(TAG, BubbleDebugConfig.formatBubblesString(
+                        mBubbleController.getOverflowBubbles(),
+                        null));
+            }
         }
-    }
+    };
 
     @Override
     public void onStart() {
@@ -198,8 +228,7 @@ public class BubbleOverflowActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        updateDimensions();
-        updateTheme();
+        updateOverflow();
     }
 
     @Override
