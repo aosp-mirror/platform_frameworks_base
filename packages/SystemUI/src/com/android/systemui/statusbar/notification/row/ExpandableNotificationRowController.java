@@ -31,6 +31,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -39,7 +41,6 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.time.SystemClock;
 
@@ -62,7 +63,8 @@ public class ExpandableNotificationRowController implements NodeController {
     private final String mAppName;
     private final String mNotificationKey;
     private final KeyguardBypassController mKeyguardBypassController;
-    private final NotificationGroupManager mNotificationGroupManager;
+    private final GroupMembershipManager mGroupMembershipManager;
+    private final GroupExpansionManager mGroupExpansionManager;
     private final RowContentBindStage mRowContentBindStage;
     private final NotificationLogger mNotificationLogger;
     private final HeadsUpManager mHeadsUpManager;
@@ -85,7 +87,8 @@ public class ExpandableNotificationRowController implements NodeController {
             NotificationMediaManager mediaManager, PluginManager pluginManager,
             SystemClock clock, @AppName String appName, @NotificationKey String notificationKey,
             KeyguardBypassController keyguardBypassController,
-            NotificationGroupManager notificationGroupManager,
+            GroupMembershipManager groupMembershipManager,
+            GroupExpansionManager groupExpansionManager,
             RowContentBindStage rowContentBindStage,
             NotificationLogger notificationLogger, HeadsUpManager headsUpManager,
             ExpandableNotificationRow.OnExpandClickListener onExpandClickListener,
@@ -103,7 +106,8 @@ public class ExpandableNotificationRowController implements NodeController {
         mAppName = appName;
         mNotificationKey = notificationKey;
         mKeyguardBypassController = keyguardBypassController;
-        mNotificationGroupManager = notificationGroupManager;
+        mGroupMembershipManager = groupMembershipManager;
+        mGroupExpansionManager = groupExpansionManager;
         mRowContentBindStage = rowContentBindStage;
         mNotificationLogger = notificationLogger;
         mHeadsUpManager = headsUpManager;
@@ -128,7 +132,8 @@ public class ExpandableNotificationRowController implements NodeController {
                 mNotificationKey,
                 mExpansionLogger,
                 mKeyguardBypassController,
-                mNotificationGroupManager,
+                mGroupMembershipManager,
+                mGroupExpansionManager,
                 mHeadsUpManager,
                 mRowContentBindStage,
                 mOnExpandClickListener,

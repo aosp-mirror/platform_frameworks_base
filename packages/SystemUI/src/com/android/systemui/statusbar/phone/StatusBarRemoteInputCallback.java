@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.Callback;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -65,7 +66,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final ShadeController mShadeController;
     private final ActivityIntentHelper mActivityIntentHelper;
-    private final NotificationGroupManager mGroupManager;
+    private final GroupExpansionManager mGroupExpansionManager;
     private View mPendingWorkRemoteInputView;
     private View mPendingRemoteInputView;
     private KeyguardManager mKeyguardManager;
@@ -78,12 +79,15 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     /**
      */
     @Inject
-    public StatusBarRemoteInputCallback(Context context, NotificationGroupManager groupManager,
+    public StatusBarRemoteInputCallback(
+            Context context,
+            GroupExpansionManager groupExpansionManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            ActivityStarter activityStarter, ShadeController shadeController,
+            ActivityStarter activityStarter,
+            ShadeController shadeController,
             CommandQueue commandQueue,
             ActionClickLogger clickLogger) {
         mContext = context;
@@ -101,7 +105,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mCommandQueue.addCallback(this);
         mActionClickLogger = clickLogger;
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
-        mGroupManager = groupManager;
+        mGroupExpansionManager = groupExpansionManager;
     }
 
     @Override
@@ -182,7 +186,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         } else {
             if (row.isChildInGroup() && !row.areChildrenExpanded()) {
                 // The group isn't expanded, let's make sure it's visible!
-                mGroupManager.toggleGroupExpansion(row.getEntry().getSbn());
+                mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
             }
             row.setUserExpanded(true);
             row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);

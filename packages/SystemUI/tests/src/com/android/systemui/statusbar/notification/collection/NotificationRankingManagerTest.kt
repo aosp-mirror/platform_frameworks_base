@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
-import com.android.systemui.statusbar.phone.NotificationGroupManager
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
@@ -71,14 +71,14 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         notificationFilter = mock(NotificationFilter::class.java)
         rankingManager = TestableNotificationRankingManager(
                 lazyMedia,
-                mock(NotificationGroupManager::class.java),
+                mock(NotificationGroupManagerLegacy::class.java),
                 mock(HeadsUpManager::class.java),
                 notificationFilter,
                 mock(NotificationEntryManagerLogger::class.java),
                 sectionsManager,
                 personNotificationIdentifier,
                 HighPriorityProvider(personNotificationIdentifier,
-                    mock(NotificationGroupManager::class.java))
+                    mock(NotificationGroupManagerLegacy::class.java))
         )
     }
 
@@ -174,7 +174,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setOverrideGroupKey("")
                 .build()
 
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
 
         val bN = Notification.Builder(mContext, "test")
@@ -194,7 +194,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
             whenever(it.isHeadsUp).thenReturn(true)
         }
 
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_PERSON)
 
         assertEquals(listOf(b, a), rankingManager.updateRanking(null, listOf(a, b), "test"))
@@ -216,7 +216,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_PERSON)
 
         val bN = Notification.Builder(mContext, "test")
@@ -232,7 +232,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(b.sbn, b.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(b))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
 
         whenever(personNotificationIdentifier.compareTo(TYPE_PERSON, TYPE_IMPORTANT_PERSON))
@@ -261,7 +261,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_PERSON)
 
         val bN = Notification.Builder(mContext, "test")
@@ -277,7 +277,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(b.sbn, b.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(b))
                 .thenReturn(TYPE_FULL_PERSON)
 
         whenever(personNotificationIdentifier.compareTo(TYPE_PERSON, TYPE_FULL_PERSON))
@@ -400,7 +400,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .setUser(mContext.user)
                 .setOverrideGroupKey("")
                 .build()
-        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
 
         assertThat(rankingManager.updateRanking(null, listOf(a, b, c), "test"))
@@ -410,7 +410,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
 
     internal class TestableNotificationRankingManager(
         mediaManager: Lazy<NotificationMediaManager>,
-        groupManager: NotificationGroupManager,
+        groupManager: NotificationGroupManagerLegacy,
         headsUpManager: HeadsUpManager,
         filter: NotificationFilter,
         logger: NotificationEntryManagerLogger,

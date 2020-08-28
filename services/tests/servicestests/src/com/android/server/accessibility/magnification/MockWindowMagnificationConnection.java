@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.view.Display;
 import android.view.accessibility.IWindowMagnificationConnection;
@@ -69,13 +71,28 @@ class MockWindowMagnificationConnection  {
             if (displayId != TEST_DISPLAY) {
                 throw new IllegalArgumentException("only support default display :" + displayId);
             }
-            computeMirrorWindowFrame(invocation.getArgument(1), invocation.getArgument(2));
-
+            computeMirrorWindowFrame(invocation.getArgument(2), invocation.getArgument(3));
+            final RemoteCallback callback = invocation.getArgument(4);
+            if (callback != null) {
+                callback.sendResult(null);
+            }
             mIMirrorWindowCallback.onWindowMagnifierBoundsChanged(TEST_DISPLAY,
                     mMirrorWindowFrame);
             return null;
         }).when(mConnection).enableWindowMagnification(anyInt(),
-                anyFloat(), anyFloat(), anyFloat());
+                anyFloat(), anyFloat(), anyFloat(), nullable(RemoteCallback.class));
+
+        doAnswer((invocation) -> {
+            final int displayId = invocation.getArgument(0);
+            if (displayId != TEST_DISPLAY) {
+                throw new IllegalArgumentException("only support default display :" + displayId);
+            }
+            final RemoteCallback callback = invocation.getArgument(1);
+            if (callback != null) {
+                callback.sendResult(null);
+            }
+            return null;
+        }).when(mConnection).disableWindowMagnification(anyInt(), nullable(RemoteCallback.class));
     }
 
     private void computeMirrorWindowFrame(float centerX, float centerY) {

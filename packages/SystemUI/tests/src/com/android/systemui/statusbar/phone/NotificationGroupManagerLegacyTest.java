@@ -33,6 +33,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -47,11 +48,11 @@ import org.mockito.junit.MockitoRule;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class NotificationGroupManagerTest extends SysuiTestCase {
+public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
-    private NotificationGroupManager mGroupManager;
+    private NotificationGroupManagerLegacy mGroupManager;
     private final NotificationGroupTestHelper mGroupTestHelper =
             new NotificationGroupTestHelper(mContext);
 
@@ -64,7 +65,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
     }
 
     private void initializeGroupManager() {
-        mGroupManager = new NotificationGroupManager(
+        mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
                 () -> mock(PeopleNotificationIdentifier.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
@@ -78,7 +79,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        assertTrue(mGroupManager.isOnlyChildInGroup(childEntry.getSbn()));
+        assertTrue(mGroupManager.isOnlyChildInGroup(childEntry));
     }
 
     @Test
@@ -90,7 +91,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
 
-        assertTrue(mGroupManager.isChildInGroupWithSummary(childEntry.getSbn()));
+        assertTrue(mGroupManager.isChildInGroup(childEntry));
     }
 
     @Test
@@ -102,8 +103,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
 
-        assertTrue(mGroupManager.isSummaryOfGroup(summaryEntry.getSbn()));
-        assertEquals(summaryEntry, mGroupManager.getGroupSummary(childEntry.getSbn()));
+        assertTrue(mGroupManager.isGroupSummary(summaryEntry));
+        assertEquals(summaryEntry, mGroupManager.getGroupSummary(childEntry));
     }
 
     @Test
@@ -116,7 +117,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         mGroupManager.onEntryRemoved(childEntry);
 
-        assertFalse(mGroupManager.isChildInGroupWithSummary(childEntry.getSbn()));
+        assertFalse(mGroupManager.isChildInGroup(childEntry));
     }
 
     @Test
@@ -129,8 +130,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         mGroupManager.onEntryRemoved(summaryEntry);
 
-        assertNull(mGroupManager.getGroupSummary(childEntry.getSbn()));
-        assertFalse(mGroupManager.isSummaryOfGroup(summaryEntry.getSbn()));
+        assertNull(mGroupManager.getGroupSummary(childEntry));
+        assertFalse(mGroupManager.isGroupSummary(summaryEntry));
     }
 
     @Test
@@ -146,7 +147,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         // Child entries that are heads upped should be considered separate groups visually even if
         // they are the same group logically
-        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry.getSbn()));
-        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry.getSbn()));
+        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry));
+        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry));
     }
 }

@@ -36,12 +36,12 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     // Dependencies:
     private final DynamicChildBindController mDynamicChildBindController;
     protected final NotificationLockscreenUserManager mLockscreenUserManager;
-    protected final NotificationGroupManager mGroupManager;
+    protected final NotificationGroupManagerLegacy mGroupManager;
     protected final VisualStabilityManager mVisualStabilityManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationEntryManager mEntryManager;
@@ -107,7 +107,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             Context context,
             @Main Handler mainHandler,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
-            NotificationGroupManager groupManager,
+            NotificationGroupManagerLegacy groupManager,
             VisualStabilityManager visualStabilityManager,
             StatusBarStateController statusBarStateController,
             NotificationEntryManager notificationEntryManager,
@@ -187,13 +187,13 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             ent.setSensitive(sensitive, deviceSensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
             mLowPriorityInflationHelper.recheckLowPriorityViewAndInflate(ent, ent.getRow());
-            boolean isChildInGroup = mGroupManager.isChildInGroupWithSummary(ent.getSbn());
+            boolean isChildInGroup = mGroupManager.isChildInGroup(ent);
 
             boolean groupChangesAllowed =
                     mVisualStabilityManager.areGroupChangesAllowed() // user isn't looking at notifs
                     || !ent.hasFinishedInitialization(); // notif recently added
 
-            NotificationEntry parent = mGroupManager.getGroupSummary(ent.getSbn());
+            NotificationEntry parent = mGroupManager.getGroupSummary(ent);
             if (!groupChangesAllowed) {
                 // We don't to change groups while the user is looking at them
                 boolean wasChildInGroup = ent.isChildInGroup();
@@ -431,8 +431,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         while(!stack.isEmpty()) {
             ExpandableNotificationRow row = stack.pop();
             NotificationEntry entry = row.getEntry();
-            boolean isChildNotification =
-                    mGroupManager.isChildInGroupWithSummary(entry.getSbn());
+            boolean isChildNotification = mGroupManager.isChildInGroup(entry);
 
             if (!onKeyguard) {
                 // If mAlwaysExpandNonGroupedNotification is false, then only expand the
@@ -448,9 +447,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry);
             if (!showOnKeyguard) {
                 // min priority notifications should show if their summary is showing
-                if (mGroupManager.isChildInGroupWithSummary(entry.getSbn())) {
-                    NotificationEntry summary = mGroupManager.getLogicalGroupSummary(
-                            entry.getSbn());
+                if (mGroupManager.isChildInGroup(entry)) {
+                    NotificationEntry summary = mGroupManager.getLogicalGroupSummary(entry);
                     if (summary != null && mLockscreenUserManager.shouldShowOnKeyguard(summary)) {
                         showOnKeyguard = true;
                     }

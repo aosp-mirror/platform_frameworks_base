@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
@@ -68,7 +69,6 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
 import org.mockito.ArgumentCaptor;
@@ -96,7 +96,8 @@ public class NotificationTestHelper {
     private final Context mContext;
     private final TestableLooper mTestLooper;
     private int mId;
-    private final NotificationGroupManager mGroupManager;
+    private final NotificationGroupManagerLegacy mGroupMembershipManager;
+    private final NotificationGroupManagerLegacy mGroupExpansionManager;
     private ExpandableNotificationRow mRow;
     private HeadsUpManagerPhone mHeadsUpManager;
     private final NotifBindPipeline mBindPipeline;
@@ -116,13 +117,14 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
-        mGroupManager = new NotificationGroupManager(
+        mGroupMembershipManager = new NotificationGroupManagerLegacy(
                 mStatusBarStateController,
                 () -> mock(PeopleNotificationIdentifier.class));
+        mGroupExpansionManager = mGroupMembershipManager;
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
-                mock(KeyguardBypassController.class), mock(NotificationGroupManager.class),
+                mock(KeyguardBypassController.class), mock(NotificationGroupManagerLegacy.class),
                 mock(ConfigurationControllerImpl.class));
-        mGroupManager.setHeadsUpManager(mHeadsUpManager);
+        mGroupMembershipManager.setHeadsUpManager(mHeadsUpManager);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
                 mock(LauncherApps.class),
@@ -416,7 +418,8 @@ public class NotificationTestHelper {
                 entry.getKey(),
                 mock(ExpansionLogger.class),
                 mock(KeyguardBypassController.class),
-                mGroupManager,
+                mGroupMembershipManager,
+                mGroupExpansionManager,
                 mHeadsUpManager,
                 mBindStage,
                 mock(OnExpandClickListener.class),
@@ -434,7 +437,7 @@ public class NotificationTestHelper {
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
         // the callback chain, so we need to make up for not adding it to the group manager
         // here.
-        mGroupManager.onEntryAdded(entry);
+        mGroupMembershipManager.onEntryAdded(entry);
         return row;
     }
 

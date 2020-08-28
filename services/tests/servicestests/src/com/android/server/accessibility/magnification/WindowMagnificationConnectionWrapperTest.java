@@ -19,6 +19,7 @@ package com.android.server.accessibility.magnification;
 
 import static org.mockito.Mockito.verify;
 
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
@@ -43,18 +44,22 @@ public class WindowMagnificationConnectionWrapperTest {
     private IWindowMagnificationConnection mConnection;
     @Mock
     private IWindowMagnificationConnectionCallback mCallback;
+    @Mock
+    private RemoteCallback.OnResultListener mOnResultListener;
+    private RemoteCallback mRemoteCallback;
     private WindowMagnificationConnectionWrapper mConnectionWrapper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mConnectionWrapper = new WindowMagnificationConnectionWrapper(mConnection);
+        mRemoteCallback = new RemoteCallback(mOnResultListener);
     }
 
     @Test
     public void enableWindowMagnification() throws RemoteException {
-        mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f);
-        verify(mConnection).enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f);
+        mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f, mRemoteCallback);
+        verify(mConnection).enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f, mRemoteCallback);
     }
 
     @Test
@@ -65,8 +70,8 @@ public class WindowMagnificationConnectionWrapperTest {
 
     @Test
     public void disableWindowMagnification() throws RemoteException {
-        mConnectionWrapper.disableWindowMagnification(TEST_DISPLAY);
-        verify(mConnection).disableWindowMagnification(TEST_DISPLAY);
+        mConnectionWrapper.disableWindowMagnification(TEST_DISPLAY, mRemoteCallback);
+        verify(mConnection).disableWindowMagnification(TEST_DISPLAY, mRemoteCallback);
     }
 
     @Test

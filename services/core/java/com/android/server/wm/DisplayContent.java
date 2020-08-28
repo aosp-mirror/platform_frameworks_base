@@ -115,13 +115,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIG
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_STACKS;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.SEAMLESS_ROTATION_TIMEOUT_DURATION;
-import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
@@ -649,8 +647,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     private final ToBooleanFunction<WindowState> mFindFocusedWindow = w -> {
         final ActivityRecord focusedApp = mFocusedApp;
-        ProtoLog.v(WM_DEBUG_FOCUS, "Looking for focus: %s, flags=%d, canReceive=%b",
-                w, w.mAttrs.flags, w.canReceiveKeys());
+        ProtoLog.v(WM_DEBUG_FOCUS, "Looking for focus: %s, flags=%d, canReceive=%b, reason=%s",
+                w, w.mAttrs.flags, w.canReceiveKeys(),
+                w.canReceiveKeysReason(false /* fromUserTouch */));
 
         if (!w.canReceiveKeys()) {
             return false;
@@ -3072,7 +3071,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     WindowState findFocusedWindowIfNeeded(int topFocusedDisplayId) {
         return (mWmService.mPerDisplayFocusEnabled || topFocusedDisplayId == INVALID_DISPLAY)
-                ? findFocusedWindow() : null;
+                    ? findFocusedWindow() : null;
     }
 
     WindowState findFocusedWindow() {
@@ -3081,7 +3080,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         forAllWindows(mFindFocusedWindow, true /* traverseTopToBottom */);
 
         if (mTmpWindow == null) {
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: No focusable windows.");
+            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: No focusable windows, display=%d",
+                    getDisplayId());
             return null;
         }
         return mTmpWindow;
@@ -3116,18 +3116,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                 assignWindowLayers(false /* setLayoutNeeded */);
             }
+
+            if (imWindowChanged) {
+                mWmService.mWindowsChanged = true;
+                setLayoutNeeded();
+                newFocus = findFocusedWindowIfNeeded(topFocusedDisplayId);
+            }
         }
 
-        if (imWindowChanged) {
-            mWmService.mWindowsChanged = true;
-            setLayoutNeeded();
-            newFocus = findFocusedWindowIfNeeded(topFocusedDisplayId);
-        }
-        if (mCurrentFocus != newFocus) {
-            mWmService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
-        }
-
-        ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Changing focus from %s to %s displayId=%d Callers=%s",
+        ProtoLog.d(WM_DEBUG_FOCUS_LIGHT, "Changing focus from %s to %s displayId=%d Callers=%s",
                 mCurrentFocus, newFocus, getDisplayId(), Debug.getCallers(4));
         final WindowState oldFocus = mCurrentFocus;
         mCurrentFocus = newFocus;
@@ -3185,7 +3182,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
             pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
         }
+
+        // Notify the accessibility manager for the change so it has the windows before the newly
+        // focused one starts firing events.
+        // TODO(b/151179149) investigate what info accessibility service needs before input can
+        // dispatch focus to clients.
+        if (mWmService.mAccessibilityController != null) {
+            mWmService.mH.sendMessage(PooledLambda.obtainMessage(
+                    this::updateAccessibilityOnWindowFocusChanged,
+                    mWmService.mAccessibilityController));
+        }
+
+        mLastFocus = mCurrentFocus;
         return true;
+    }
+
+    void updateAccessibilityOnWindowFocusChanged(AccessibilityController accessibilityController) {
+        accessibilityController.onWindowFocusChangedNotLocked(getDisplayId());
     }
 
     private static void onWindowFocusChanged(WindowState oldFocus, WindowState newFocus) {
@@ -3219,6 +3232,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mFocusedApp == newFocus) {
             return false;
         }
+        ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "setFocusedApp %s displayId=%d Callers=%s",
+                newFocus, getDisplayId(), Debug.getCallers(4));
         mFocusedApp = newFocus;
         getInputMonitor().setFocusedAppLw(newFocus);
         updateTouchExcludeRegion();
@@ -4708,7 +4723,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Traverse all windows top down to assemble the gesture exclusion rects.
         // For each window, we only take the rects that fall within its touchable region.
         forAllWindows(w -> {
-            if (w.cantReceiveTouchInput() || !w.isVisible()
+            if (!w.canReceiveTouchInput() || !w.isVisible()
                     || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
                     || unhandled.isEmpty()) {
                 return;
@@ -5225,30 +5240,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && (mAtmService.mRunningVoice == null);
     }
 
-    void setFocusedApp(ActivityRecord r, boolean moveFocusNow) {
-        final ActivityRecord newFocus;
-        final IBinder token = r.appToken;
-        if (token == null) {
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Clearing focused app, displayId=%d",
-                    mDisplayId);
-            newFocus = null;
-        } else {
-            newFocus = mWmService.mRoot.getActivityRecord(token);
-            if (newFocus == null) {
-                Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token
-                        + ", displayId=" + mDisplayId);
-            }
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT,
-                    "Set focused app to: %s moveFocusNow=%b displayId=%d", newFocus,
-                    moveFocusNow, mDisplayId);
-        }
-
-        final boolean changed = setFocusedApp(newFocus);
-        if (moveFocusNow && changed) {
-            mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
-                    true /*updateInputWindows*/);
-        }
-    }
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {

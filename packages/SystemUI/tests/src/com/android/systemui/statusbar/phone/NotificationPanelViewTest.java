@@ -74,12 +74,12 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
@@ -118,7 +118,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationShelfController mNotificationShelfController;
     @Mock
-    private NotificationGroupManager mGroupManager;
+    private NotificationGroupManagerLegacy mGroupManager;
     @Mock
     private KeyguardStatusBarView mKeyguardStatusBar;
     @Mock
@@ -173,8 +173,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardClockSwitch mKeyguardClockSwitch;
     private PanelViewController.TouchHandler mTouchHandler;
-    @Mock
-    private ZenModeController mZenModeController;
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
@@ -259,16 +257,16 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mDozeLog,
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
-                mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
+                mMetricsLogger, mActivityManager, mConfigurationController,
                 flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
-                mNotificationAreaController,
-                mKeyguardStatusViewComponentFactory);
+                mKeyguardStatusViewComponentFactory,
+                mGroupManager,
+                mNotificationAreaController);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
-                mGroupManager,
                 mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelViewController.setBar(mPanelBar);

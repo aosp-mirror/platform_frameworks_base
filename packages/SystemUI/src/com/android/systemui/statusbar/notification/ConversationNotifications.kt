@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentView
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
-import com.android.systemui.statusbar.phone.NotificationGroupManager
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -64,7 +64,7 @@ class ConversationNotificationProcessor @Inject constructor(
 @SysUISingleton
 class ConversationNotificationManager @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
-    private val notificationGroupManager: NotificationGroupManager,
+    private val notificationGroupManager: NotificationGroupManagerLegacy,
     private val context: Context,
     @Main private val mainHandler: Handler
 ) {

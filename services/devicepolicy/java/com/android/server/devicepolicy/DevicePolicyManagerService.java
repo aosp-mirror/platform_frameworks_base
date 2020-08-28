@@ -5782,9 +5782,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
-        final CallerIdentity identity = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isSystemUid(identity) || isRootUid(identity)
-                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL));
 
         final ActiveAdmin admin;
         synchronized (getLockObject()) {
@@ -9438,8 +9435,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isDeviceOwner(identity));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            final List<UserInfo> userInfos = mInjector.getUserManager().getUsers(true
-                    /*excludeDying*/);
+            final List<UserInfo> userInfos = mInjector.getUserManager().getAliveUsers();
             final List<UserHandle> userHandles = new ArrayList<>();
             for (UserInfo userInfo : userInfos) {
                 UserHandle userHandle = userInfo.getUserHandle();
@@ -10362,7 +10358,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void maybeClearLockTaskPolicyLocked() {
         mInjector.binderWithCleanCallingIdentity(() -> {
-            final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
+            final List<UserInfo> userInfos = mUserManager.getAliveUsers();
             for (int i = userInfos.size() - 1; i >= 0; i--) {
                 int userId = userInfos.get(i).id;
                 if (canUserUseLockTaskLocked(userId)) {
@@ -10849,7 +10845,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * them.
      */
     void updateUserSetupCompleteAndPaired() {
-        List<UserInfo> users = mUserManager.getUsers(true);
+        List<UserInfo> users = mUserManager.getAliveUsers();
         final int N = users.size();
         for (int i = 0; i < N; i++) {
             int userHandle = users.get(i).id;
@@ -12571,7 +12567,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean areAllUsersAffiliatedWithDeviceLocked() {
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
+            final List<UserInfo> userInfos = mUserManager.getAliveUsers();
             for (int i = 0; i < userInfos.size(); i++) {
                 int userId = userInfos.get(i).id;
                 if (!isUserAffiliatedWithDeviceLocked(userId)) {
@@ -13040,7 +13036,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 } else {
                     // Caller is the device owner: Look for profile owners that it can bind to.
-                    final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
+                    final List<UserInfo> userInfos = mUserManager.getAliveUsers();
                     for (int i = 0; i < userInfos.size(); i++) {
                         final int userId = userInfos.get(i).id;
                         if (userId != callingUserId && canUserBindToDeviceOwnerLocked(userId)) {

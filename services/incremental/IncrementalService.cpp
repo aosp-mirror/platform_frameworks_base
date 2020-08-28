@@ -1603,7 +1603,8 @@ void IncrementalService::extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle
 
     const auto writeFd = mIncFs->openForSpecialOps(ifs->control, libFileId);
     if (!writeFd.ok()) {
-        LOG(ERROR) << "Failed to open write fd for: " << targetLibPath << " errno: " << writeFd;
+        LOG(ERROR) << "Failed to open write fd for: " << targetLibPath
+                   << " errno: " << writeFd.get();
         return;
     }
 
@@ -1671,6 +1672,37 @@ bool IncrementalService::waitForNativeBinariesExtraction(StorageId storage) {
                 (mPendingJobsMount != mount && mJobQueue.find(mount) == mJobQueue.end());
     });
     return mRunning;
+}
+
+int IncrementalService::isFileFullyLoaded(StorageId storage, const std::string& path) const {
+    std::unique_lock l(mLock);
+    const auto ifs = getIfsLocked(storage);
+    if (!ifs) {
+        LOG(ERROR) << "isFileFullyLoaded failed, invalid storageId: " << storage;
+        return -EINVAL;
+    }
+    const auto storageInfo = ifs->storages.find(storage);
+    if (storageInfo == ifs->storages.end()) {
+        LOG(ERROR) << "isFileFullyLoaded failed, no storage: " << storage;
+        return -EINVAL;
+    }
+    l.unlock();
+    return isFileFullyLoadedFromPath(*ifs, path);
+}
+
+int IncrementalService::isFileFullyLoadedFromPath(const IncFsMount& ifs,
+                                                  std::string_view filePath) const {
+    const auto [filledBlocks, totalBlocks] = mIncFs->countFilledBlocks(ifs.control, filePath);
+    if (filledBlocks < 0) {
+        LOG(ERROR) << "isFileFullyLoadedFromPath failed to get filled blocks count for: "
+                   << filePath << " errno: " << filledBlocks;
+        return filledBlocks;
+    }
+    if (totalBlocks < filledBlocks) {
+        LOG(ERROR) << "isFileFullyLoadedFromPath failed to get total num of blocks";
+        return -EINVAL;
+    }
+    return totalBlocks - filledBlocks;
 }
 
 float IncrementalService::getLoadingProgress(StorageId storage) const {

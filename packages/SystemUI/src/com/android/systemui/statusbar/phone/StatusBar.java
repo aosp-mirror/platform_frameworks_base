@@ -699,7 +699,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             SysuiStatusBarStateController statusBarStateController,
             VibratorHelper vibratorHelper,
             BubbleController bubbleController,
-            NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
@@ -780,7 +779,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarStateController = statusBarStateController;
         mVibratorHelper = vibratorHelper;
         mBubbleController = bubbleController;
-        mGroupManager = groupManager;
         mVisualStabilityManager = visualStabilityManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mNavigationBarController = navigationBarController;
@@ -1159,7 +1157,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationPanelViewController.initDependencies(
                 this,
-                mGroupManager,
                 mNotificationShelfController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
@@ -1506,9 +1503,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager.registerStatusBar(
                 /* statusBar= */ this, getBouncerContainer(),
                 mNotificationPanelViewController, mBiometricUnlockController,
-                mDismissCallbackRegistry,
                 mNotificationShadeWindowView.findViewById(R.id.lock_icon_container),
-                mStackScroller, mKeyguardBypassController, mFalsingManager);
+                mStackScroller, mKeyguardBypassController);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
@@ -4083,8 +4079,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // all notifications
     protected NotificationStackScrollLayout mStackScroller;
-
-    private final NotificationGroupManager mGroupManager;
 
     // handling reordering
     private final VisualStabilityManager mVisualStabilityManager;
