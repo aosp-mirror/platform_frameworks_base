@@ -22,6 +22,10 @@ java_library {
     proto: {
         type: "nano",
     },
+
+    libs: [
+        "WindowManager-Shell-proto",
+    ],
 }
 
 java_library {
