@@ -293,6 +293,11 @@ public class HdmiCecMessageValidator {
         return success ? OK : ERROR_PARAMETER;
     }
 
+    private boolean isWithinRange(int value, int min, int max) {
+        value = value & 0xFF;
+        return (value >= min && value <= max);
+    }
+
     private class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
