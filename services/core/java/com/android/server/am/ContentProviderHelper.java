@@ -198,22 +198,10 @@ public class ContentProviderHelper {
 
             if (providerRunning) {
                 cpi = cpr.info;
-                String msg;
 
                 if (r != null && cpr.canRunHere(r)) {
-                    if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
-                        throw new SecurityException("Content provider lookup "
-                                + cpr.name.flattenToShortString()
-                                + " failed: association not allowed with package " + msg);
-                    }
-                    checkTime(startTime,
-                            "getContentProviderImpl: before checkContentProviderPermission");
-                    if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
-                            != null) {
-                        throw new SecurityException(msg);
-                    }
-                    checkTime(startTime,
-                            "getContentProviderImpl: after checkContentProviderPermission");
+                    checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
+                            cpr.name.flattenToShortString(), startTime);
 
                     // This provider has been published or is in the process
                     // of being published...  but it is also allowed to run
@@ -234,26 +222,14 @@ public class ContentProviderHelper {
                 } catch (RemoteException e) {
                 }
 
-                if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
-                    throw new SecurityException(
-                            "Content provider lookup " + cpr.name.flattenToShortString()
-                                    + " failed: association not allowed with package " + msg);
-                }
-                checkTime(startTime,
-                        "getContentProviderImpl: before checkContentProviderPermission");
-                if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
-                        != null) {
-                    throw new SecurityException(msg);
-                }
-                checkTime(startTime,
-                        "getContentProviderImpl: after checkContentProviderPermission");
+                checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
+                        cpr.name.flattenToShortString(), startTime);
 
                 final long origId = Binder.clearCallingIdentity();
 
                 checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
 
-                // In this case the provider instance already exists, so we can
-                // return it right away.
+                // In this case the provider instance already exists so we can return it right away.
                 conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
                         stable, true, startTime, mService.mProcessList);
 
@@ -328,19 +304,8 @@ public class ContentProviderHelper {
                 cpi.applicationInfo = mService.getAppInfoForUser(cpi.applicationInfo, userId);
                 checkTime(startTime, "getContentProviderImpl: got app info for user");
 
-                String msg;
-                if ((msg = checkContentProviderAssociation(r, callingUid, cpi)) != null) {
-                    throw new SecurityException("Content provider lookup " + name
-                            + " failed: association not allowed with package " + msg);
-                }
-                checkTime(startTime,
-                        "getContentProviderImpl: before checkContentProviderPermission");
-                if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, !singleton))
-                        != null) {
-                    throw new SecurityException(msg);
-                }
-                checkTime(startTime,
-                        "getContentProviderImpl: after checkContentProviderPermission");
+                checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, !singleton,
+                        name, startTime);
 
                 if (!mService.mProcessesReady && !cpi.processName.equals("system")) {
                     // If this content provider does not run in the system
@@ -352,10 +317,12 @@ public class ContentProviderHelper {
 
                 // If system providers are not installed yet we aggressively crash to avoid
                 // creating multiple instance of these providers and then bad things happen!
-                if (!mSystemProvidersInstalled && cpi.applicationInfo.isSystemApp()
-                        && "system".equals(cpi.processName)) {
-                    throw new IllegalStateException("Cannot access system provider: '"
-                            + cpi.authority + "' before system providers are installed!");
+                synchronized (this) {
+                    if (!mSystemProvidersInstalled && cpi.applicationInfo.isSystemApp()
+                            && "system".equals(cpi.processName)) {
+                        throw new IllegalStateException("Cannot access system provider: '"
+                                + cpi.authority + "' before system providers are installed!");
+                    }
                 }
 
                 // Make sure that the user who owns this provider is running.  If not,
@@ -605,6 +572,23 @@ public class ContentProviderHelper {
         return cpr.newHolder(conn, false);
     }
 
+    private void checkAssociationAndPermissionLocked(ProcessRecord callingApp, ProviderInfo cpi,
+            int callingUid, int userId, boolean checkUser, String cprName, long startTime) {
+        String msg;
+        if ((msg = checkContentProviderAssociation(callingApp, callingUid, cpi)) != null) {
+            throw new SecurityException("Content provider lookup " + cprName
+                    + " failed: association not allowed with package " + msg);
+        }
+        checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
+        if ((msg = checkContentProviderPermission(
+                    cpi, Binder.getCallingPid(), Binder.getCallingUid(), userId, checkUser,
+                    callingApp != null ? callingApp.toString() : null))
+                != null) {
+            throw new SecurityException(msg);
+        }
+        checkTime(startTime, "getContentProviderImpl: after checkContentProviderPermission");
+    }
+
     void publishContentProviders(IApplicationThread caller, List<ContentProviderHolder> providers) {
         if (providers == null) {
             return;
@@ -623,7 +607,7 @@ public class ContentProviderHelper {
             }
 
             final long origId = Binder.clearCallingIdentity();
-
+            boolean providersPublished = false;
             for (int i = 0, size = providers.size(); i < size; i++) {
                 ContentProviderHolder src = providers.get(i);
                 if (src == null || src.info == null || src.provider == null) {
@@ -636,6 +620,7 @@ public class ContentProviderHelper {
                 if (DEBUG_MU) {
                     Slog.v(TAG_MU, "ContentProviderRecord uid = " + dst.uid);
                 }
+                providersPublished = true;
 
                 ComponentName comp = new ComponentName(dst.info.packageName, dst.info.name);
                 mProviderMap.putProviderByClass(comp, dst);
@@ -673,8 +658,19 @@ public class ContentProviderHelper {
                     dst.onProviderPublishStatusLocked(true);
                 }
                 dst.mRestartCount = 0;
+            }
+
+            // update the app's oom adj value and each provider's usage stats
+            if (providersPublished) {
                 mService.updateOomAdjLocked(r, true, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
-                maybeUpdateProviderUsageStatsLocked(r, src.info.packageName, src.info.authority);
+                for (int i = 0, size = providers.size(); i < size; i++) {
+                    ContentProviderHolder src = providers.get(i);
+                    if (src == null || src.info == null || src.provider == null) {
+                        continue;
+                    }
+                    maybeUpdateProviderUsageStatsLocked(r,
+                            src.info.packageName, src.info.authority);
+                }
             }
 
             Binder.restoreCallingIdentity(origId);
@@ -997,17 +993,19 @@ public class ContentProviderHelper {
                     + "; expected to find a valid ContentProvider for this authority";
         }
 
+        final int callingPid = Binder.getCallingPid();
         ProcessRecord r;
+        final String appName;
         synchronized (mService.mPidsSelfLocked) {
-            r = mService.mPidsSelfLocked.get(Binder.getCallingPid());
-        }
-        if (r == null) {
-            return "Failed to find PID " + Binder.getCallingPid();
+            r = mService.mPidsSelfLocked.get(callingPid);
+            if (r == null) {
+                return "Failed to find PID " + callingPid;
+            }
+            appName = r.toString();
         }
 
-        synchronized (mService) {
-            return checkContentProviderPermissionLocked(cpi, r, userId, true);
-        }
+        return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
+                userId, true, appName);
     }
 
     int checkContentProviderUriPermission(Uri uri, int userId, int callingUid, int modeFlags) {
@@ -1163,13 +1161,14 @@ public class ContentProviderHelper {
                 }
             }
         }
-        if (providers != null) {
-            mService.mSystemThread.installSystemProviders(providers);
-        }
 
-        synchronized (mService) {
+        synchronized (this) {
+            if (providers != null) {
+                mService.mSystemThread.installSystemProviders(providers);
+            }
             mSystemProvidersInstalled = true;
         }
+
         mService.mConstants.start(mService.mContext.getContentResolver());
         mService.mCoreSettingsObserver = new CoreSettingsObserver(mService);
         mService.mActivityTaskManager.installSystemProviders();
@@ -1305,10 +1304,8 @@ public class ContentProviderHelper {
      * given {@link ProviderInfo}. Final permission checking is always done
      * in {@link ContentProvider}.
      */
-    private String checkContentProviderPermissionLocked(ProviderInfo cpi, ProcessRecord r,
-            int userId, boolean checkUser) {
-        final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
-        final int callingUid = (r != null) ? r.uid : Binder.getCallingUid();
+    private String checkContentProviderPermission(ProviderInfo cpi, int callingPid, int callingUid,
+            int userId, boolean checkUser, String appName) {
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
@@ -1376,8 +1373,8 @@ public class ContentProviderHelper {
             suffix = " requires " + cpi.readPermission + " or " + cpi.writePermission;
         }
         final String msg = "Permission Denial: opening provider " + cpi.name
-                + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
-                + ", uid=" + callingUid + ")" + suffix;
+                + " from " + (appName != null ? appName : "(null)")
+                + " (pid=" + callingPid + ", uid=" + callingUid + ")" + suffix;
         Slog.w(TAG, msg);
         return msg;
     }
@@ -1398,18 +1395,17 @@ public class ContentProviderHelper {
     }
 
     ProviderInfo getProviderInfoLocked(String authority, @UserIdInt int userId, int pmFlags) {
-        ProviderInfo pi = null;
         ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userId);
         if (cpr != null) {
-            pi = cpr.info;
+            return cpr.info;
         } else {
             try {
-                pi = AppGlobals.getPackageManager().resolveContentProvider(
+                return AppGlobals.getPackageManager().resolveContentProvider(
                         authority, PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags, userId);
             } catch (RemoteException ex) {
+                return null;
             }
         }
-        return pi;
     }
 
     private void maybeUpdateProviderUsageStatsLocked(ProcessRecord app, String providerPkgName,
@@ -1418,7 +1414,6 @@ public class ContentProviderHelper {
                 || app.getCurProcState() > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
             return;
         }
-
 
         UserState userState = mService.mUserController.getStartedUserState(app.userId);
         if (userState == null) return;
