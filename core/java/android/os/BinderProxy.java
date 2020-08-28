@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -255,7 +256,12 @@ public final class BinderProxy implements IBinder {
             // out of system_server to all processes hosting binder objects it holds a reference to;
             // since some of those processes might be frozen, we don't want to block here
             // forever. Disable the freezer.
-            Process.enableFreezer(false);
+            try {
+                ActivityManager.getService().enableAppFreezer(false);
+            } catch (RemoteException e) {
+                Log.e(Binder.TAG, "RemoteException while disabling app freezer");
+            }
+
             for (WeakReference<BinderProxy> weakRef : proxiesToQuery) {
                 BinderProxy bp = weakRef.get();
                 String key;
@@ -278,7 +284,11 @@ public final class BinderProxy implements IBinder {
                     counts.put(key, i + 1);
                 }
             }
-            Process.enableFreezer(true);
+            try {
+                ActivityManager.getService().enableAppFreezer(true);
+            } catch (RemoteException e) {
+                Log.e(Binder.TAG, "RemoteException while re-enabling app freezer");
+            }
             Map.Entry<String, Integer>[] sorted = counts.entrySet().toArray(
                     new Map.Entry[counts.size()]);
 
