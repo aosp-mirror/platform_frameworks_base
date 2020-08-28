@@ -97,6 +97,7 @@ cc_defaults {
         "libnativehelper",
         "libnativewindow",
         "libpowermanager",
+        "libprocessgroup",
         "libutils",
         "libui",
         "libvibratorservice",
