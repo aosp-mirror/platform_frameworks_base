@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -117,7 +118,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationShelfController mNotificationShelfController;
     @Mock
-    private NotificationGroupManager mGroupManager;
+    private NotificationGroupManagerLegacy mGroupManager;
     @Mock
     private KeyguardStatusBarView mKeyguardStatusBar;
     @Mock
@@ -261,11 +262,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
-                mNotificationAreaController,
-                mKeyguardStatusViewComponentFactory);
+                mKeyguardStatusViewComponentFactory,
+                mGroupManager,
+                mNotificationAreaController);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
-                mGroupManager,
                 mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelViewController.setBar(mPanelBar);

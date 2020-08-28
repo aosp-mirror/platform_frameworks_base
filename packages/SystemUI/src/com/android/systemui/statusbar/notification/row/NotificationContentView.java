@@ -28,9 +28,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.provider.Settings;
-import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -52,11 +50,10 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
-import com.android.systemui.statusbar.notification.row.wrapper.NotificationTemplateViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -122,8 +119,8 @@ public class NotificationContentView extends FrameLayout {
     private int mSmallHeight;
     private int mHeadsUpHeight;
     private int mNotificationMaxHeight;
-    private StatusBarNotification mStatusBarNotification;
-    private NotificationGroupManager mGroupManager;
+    private NotificationEntry mNotificationEntry;
+    private GroupMembershipManager mGroupMembershipManager;
     private RemoteInputController mRemoteInputController;
     private Runnable mExpandedVisibleListener;
     private PeopleNotificationIdentifier mPeopleIdentifier;
@@ -778,7 +775,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private boolean isGroupExpanded() {
-        return mGroupManager.isGroupExpanded(mStatusBarNotification);
+        return mContainingNotification.isGroupExpanded();
     }
 
     public void setClipTopAmount(int clipTopAmount) {
@@ -908,10 +905,10 @@ public class NotificationContentView extends FrameLayout {
     public int getBackgroundColorForExpansionState() {
         // When expanding or user locked we want the new type, when collapsing we want
         // the original type
-        final int visibleType = (mContainingNotification.isGroupExpanded()
-                || mContainingNotification.isUserLocked())
-                        ? calculateVisibleType()
-                        : getVisibleType();
+        final int visibleType = (
+                isGroupExpanded() || mContainingNotification.isUserLocked())
+                    ? calculateVisibleType()
+                    : getVisibleType();
         return getBackgroundColor(visibleType);
     }
 
@@ -1145,7 +1142,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void onNotificationUpdated(NotificationEntry entry) {
-        mStatusBarNotification = entry.getSbn();
+        mNotificationEntry = entry;
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateAllSingleLineViews();
         ExpandableNotificationRow row = entry.getRow();
@@ -1176,7 +1173,7 @@ public class NotificationContentView extends FrameLayout {
         if (mIsChildInGroup) {
             boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
-                    mSingleLineView, mContractedChild, mStatusBarNotification, this);
+                    mSingleLineView, mContractedChild, mNotificationEntry.getSbn(), this);
             if (isNewView) {
                 updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
                         mSingleLineView, mSingleLineView);
@@ -1363,7 +1360,7 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
         boolean isPersonWithShortcut =
-                mPeopleIdentifier.getPeopleNotificationType(entry.getSbn(), entry.getRanking())
+                mPeopleIdentifier.getPeopleNotificationType(entry)
                         >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
         boolean showButton = isBubblesEnabled()
                 && isPersonWithShortcut
@@ -1516,8 +1513,8 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    public void setGroupManager(NotificationGroupManager groupManager) {
-        mGroupManager = groupManager;
+    public void setGroupMembershipManager(GroupMembershipManager groupMembershipManager) {
+        mGroupMembershipManager = groupMembershipManager;
     }
 
     public void setRemoteInputController(RemoteInputController r) {

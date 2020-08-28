@@ -66,10 +66,10 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -96,7 +96,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     private final NotificationEntryManager mEntryManager;
     private final NotifPipeline mNotifPipeline;
-    private final NotifCollection mNotifCollection;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final ActivityStarter mActivityStarter;
     private final NotificationClickNotifier mClickNotifier;
@@ -107,7 +106,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final BubbleController mBubbleController;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final NotificationRemoteInputManager mRemoteInputManager;
-    private final NotificationGroupManager mGroupManager;
+    private final GroupMembershipManager mGroupMembershipManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final ShadeController mShadeController;
     private final KeyguardStateController mKeyguardStateController;
@@ -135,7 +134,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             Executor uiBgExecutor,
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
-            NotifCollection notifCollection,
             HeadsUpManagerPhone headsUpManager,
             ActivityStarter activityStarter,
             NotificationClickNotifier clickNotifier,
@@ -146,7 +144,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             BubbleController bubbleController,
             Lazy<AssistManager> assistManagerLazy,
             NotificationRemoteInputManager remoteInputManager,
-            NotificationGroupManager groupManager,
+            GroupMembershipManager groupMembershipManager,
             NotificationLockscreenUserManager lockscreenUserManager,
             ShadeController shadeController,
             KeyguardStateController keyguardStateController,
@@ -170,7 +168,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mUiBgExecutor = uiBgExecutor;
         mEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
-        mNotifCollection = notifCollection;
         mHeadsUpManager = headsUpManager;
         mActivityStarter = activityStarter;
         mClickNotifier = clickNotifier;
@@ -181,7 +178,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mBubbleController = bubbleController;
         mAssistManagerLazy = assistManagerLazy;
         mRemoteInputManager = remoteInputManager;
-        mGroupManager = groupManager;
+        mGroupMembershipManager = groupMembershipManager;
         mLockscreenUserManager = lockscreenUserManager;
         mShadeController = shadeController;
         mKeyguardStateController = keyguardStateController;
@@ -228,8 +225,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     public void onNotificationClicked(StatusBarNotification sbn, ExpandableNotificationRow row) {
         mLogger.logStartingActivityFromClick(sbn.getKey());
 
+        final NotificationEntry entry = row.getEntry();
         RemoteInputController controller = mRemoteInputManager.getController();
-        if (controller.isRemoteInputActive(row.getEntry())
+        if (controller.isRemoteInputActive(entry)
                 && !TextUtils.isEmpty(row.getActiveRemoteInputText())) {
             // We have an active remote input typed and the user clicked on the notification.
             // this was probably unintentional, so we're closing the edit text instead.
@@ -240,7 +238,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         final PendingIntent intent = notification.contentIntent != null
                 ? notification.contentIntent
                 : notification.fullScreenIntent;
-        final boolean isBubble = row.getEntry().isBubble();
+        final boolean isBubble = entry.isBubble();
 
         // This code path is now executed for notification without a contentIntent.
         // The only valid case is Bubble notifications. Guard against other cases
@@ -260,7 +258,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction =
                 () -> handleNotificationClickAfterKeyguardDismissed(
-                        sbn, row, controller, intent,
+                        entry, row, controller, intent,
                         isActivityIntent, wasOccluded, showOverLockscreen);
         if (showOverLockscreen) {
             mIsCollapsingToShowActivityOverLockscreen = true;
@@ -272,27 +270,27 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     private boolean handleNotificationClickAfterKeyguardDismissed(
-            StatusBarNotification sbn,
+            NotificationEntry entry,
             ExpandableNotificationRow row,
             RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
             boolean wasOccluded,
             boolean showOverLockscreen) {
-        mLogger.logHandleClickAfterKeyguardDismissed(sbn.getKey());
+        mLogger.logHandleClickAfterKeyguardDismissed(entry.getKey());
 
         // TODO: Some of this code may be able to move to NotificationEntryManager.
         removeHUN(row);
         NotificationEntry parentToCancel = null;
-        if (shouldAutoCancel(sbn) && mGroupManager.isOnlyChildInGroup(sbn)) {
-            NotificationEntry summarySbn = mGroupManager.getLogicalGroupSummary(sbn);
+        if (shouldAutoCancel(entry.getSbn()) && mGroupMembershipManager.isOnlyChildInGroup(entry)) {
+            NotificationEntry summarySbn = mGroupMembershipManager.getLogicalGroupSummary(entry);
             if (shouldAutoCancel(summarySbn.getSbn())) {
                 parentToCancel = summarySbn;
             }
         }
         final NotificationEntry parentToCancelFinal = parentToCancel;
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
-                sbn, row, controller, intent,
+                entry, row, controller, intent,
                 isActivityIntent, wasOccluded, parentToCancelFinal);
 
         if (showOverLockscreen) {
@@ -309,16 +307,16 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     private void handleNotificationClickAfterPanelCollapsed(
-            StatusBarNotification sbn,
+            NotificationEntry entry,
             ExpandableNotificationRow row,
             RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
             boolean wasOccluded,
             NotificationEntry parentToCancelFinal) {
-        mLogger.logHandleClickAfterPanelCollapsed(sbn.getKey());
+        String notificationKey = entry.getKey();
+        mLogger.logHandleClickAfterPanelCollapsed(notificationKey);
 
-        String notificationKey = sbn.getKey();
         try {
             // The intent we are sending is for the application, which
             // won't have permission to immediately start an activity after
@@ -346,7 +344,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             }
         }
         Intent fillInIntent = null;
-        NotificationEntry entry = row.getEntry();
         CharSequence remoteInputText = null;
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
@@ -385,7 +382,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 // necessary in the new pipeline due to group pruning in ShadeListBuilder.
                 removeNotification(parentToCancelFinal);
             }
-            if (shouldAutoCancel(sbn)
+            if (shouldAutoCancel(entry.getSbn())
                     || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
                     notificationKey)) {
                 // Automatically remove all notifications that we may have kept around longer
@@ -605,7 +602,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final Executor mUiBgExecutor;
         private final NotificationEntryManager mEntryManager;
         private final NotifPipeline mNotifPipeline;
-        private final NotifCollection mNotifCollection;
         private final HeadsUpManagerPhone mHeadsUpManager;
         private final ActivityStarter mActivityStarter;
         private final NotificationClickNotifier mClickNotifier;
@@ -616,7 +612,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final BubbleController mBubbleController;
         private final Lazy<AssistManager> mAssistManagerLazy;
         private final NotificationRemoteInputManager mRemoteInputManager;
-        private final NotificationGroupManager mGroupManager;
+        private final GroupMembershipManager mGroupMembershipManager;
         private final NotificationLockscreenUserManager mLockscreenUserManager;
         private final ShadeController mShadeController;
         private final KeyguardStateController mKeyguardStateController;
@@ -643,7 +639,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 @UiBackground Executor uiBgExecutor,
                 NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
-                NotifCollection notifCollection,
                 HeadsUpManagerPhone headsUpManager,
                 ActivityStarter activityStarter,
                 NotificationClickNotifier clickNotifier,
@@ -654,7 +649,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 BubbleController bubbleController,
                 Lazy<AssistManager> assistManagerLazy,
                 NotificationRemoteInputManager remoteInputManager,
-                NotificationGroupManager groupManager,
+                GroupMembershipManager groupMembershipManager,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 ShadeController shadeController,
                 KeyguardStateController keyguardStateController,
@@ -674,7 +669,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mUiBgExecutor = uiBgExecutor;
             mEntryManager = entryManager;
             mNotifPipeline = notifPipeline;
-            mNotifCollection = notifCollection;
             mHeadsUpManager = headsUpManager;
             mActivityStarter = activityStarter;
             mClickNotifier = clickNotifier;
@@ -685,7 +679,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mBubbleController = bubbleController;
             mAssistManagerLazy = assistManagerLazy;
             mRemoteInputManager = remoteInputManager;
-            mGroupManager = groupManager;
+            mGroupMembershipManager = groupMembershipManager;
             mLockscreenUserManager = lockscreenUserManager;
             mShadeController = shadeController;
             mKeyguardStateController = keyguardStateController;
@@ -731,7 +725,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mUiBgExecutor,
                     mEntryManager,
                     mNotifPipeline,
-                    mNotifCollection,
                     mHeadsUpManager,
                     mActivityStarter,
                     mClickNotifier,
@@ -742,7 +735,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mBubbleController,
                     mAssistManagerLazy,
                     mRemoteInputManager,
-                    mGroupManager,
+                    mGroupMembershipManager,
                     mLockscreenUserManager,
                     mShadeController,
                     mKeyguardStateController,

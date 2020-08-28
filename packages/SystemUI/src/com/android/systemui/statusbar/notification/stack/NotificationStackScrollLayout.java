@@ -117,6 +117,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -129,8 +131,6 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -233,7 +233,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final StackScrollAlgorithm mStackScrollAlgorithm;
 
     private final AmbientState mAmbientState;
-    private NotificationGroupManager mGroupManager;
+    private GroupMembershipManager mGroupMembershipManager;
+    private GroupExpansionManager mGroupExpansionManager;
     private NotificationActivityStarter mNotificationActivityStarter;
     private HashSet<ExpandableView> mChildrenToAddAnimated = new HashSet<>();
     private ArrayList<View> mAddedHeadsUpChildren = new ArrayList<>();
@@ -415,7 +416,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
     private boolean mPulsing;
-    private boolean mGroupExpandedForMeasure;
     private boolean mScrollable;
     private View mForcedScroll;
 
@@ -560,7 +560,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             NotifPipeline notifPipeline,
             NotificationEntryManager entryManager,
             NotifCollection notifCollection,
-            UiEventLogger uiEventLogger
+            UiEventLogger uiEventLogger,
+            GroupMembershipManager groupMembershipManager,
+            GroupExpansionManager groupExpansionManager
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
@@ -636,6 +638,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
             });
         }
+        mGroupMembershipManager = groupMembershipManager;
+        mGroupExpansionManager = groupExpansionManager;
 
         mDynamicPrivacyController = dynamicPrivacyController;
         mStatusbarStateController = statusbarStateController;
@@ -1440,7 +1444,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         ExpandableNotificationRow row = mTopHeadsUpEntry.getRow();
         if (row.isChildInGroup()) {
             final NotificationEntry groupSummary =
-                    mGroupManager.getGroupSummary(row.getEntry().getSbn());
+                    mGroupMembershipManager.getGroupSummary(row.getEntry());
             if (groupSummary != null) {
                 row = groupSummary.getRow();
             }
@@ -1617,9 +1621,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     NotificationEntry entry = row.getEntry();
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
                             && mTopHeadsUpEntry.getRow() != row
-                            && mGroupManager.getGroupSummary(
-                            mTopHeadsUpEntry.getSbn())
-                            != entry) {
+                            && mGroupMembershipManager.getGroupSummary(mTopHeadsUpEntry) != entry) {
                         continue;
                     }
                     return row.getViewAtPosition(touchY - childTop);
@@ -3017,8 +3019,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
     private boolean isChildInGroup(View child) {
         return child instanceof ExpandableNotificationRow
-                && mGroupManager.isChildInGroupWithSummary(
-                ((ExpandableNotificationRow) child).getEntry().getSbn());
+                && mGroupMembershipManager.isChildInGroup(
+                ((ExpandableNotificationRow) child).getEntry());
     }
 
     /**
@@ -3083,6 +3085,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return hasAddEvent;
     }
 
+    // TODO (b/162832756): remove since this won't happen in new pipeline (we prune groups in
+    //  ShadeListBuilder)
     /**
      * @param child the child to query
      * @return whether a view is not a top level child but a child notification and that group is
@@ -3093,7 +3097,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             NotificationEntry groupSummary =
-                    mGroupManager.getGroupSummary(row.getEntry().getSbn());
+                    mGroupMembershipManager.getGroupSummary(row.getEntry());
             if (groupSummary != null && groupSummary.getRow() != row) {
                 return row.getVisibility() == View.INVISIBLE;
             }
@@ -4349,7 +4353,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (changed) {
             mWillExpand = false;
             if (!mIsExpanded) {
-                mGroupManager.collapseAllGroups();
+                mGroupExpansionManager.collapseGroups();
                 mExpandHelper.cancelImmediately();
             }
             updateNotificationAnimationStates();
@@ -4884,12 +4888,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setStatusBar(StatusBar statusBar) {
         this.mStatusBar = statusBar;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setGroupManager(NotificationGroupManager groupManager) {
-        this.mGroupManager = groupManager;
-        mGroupManager.addOnGroupChangeListener(mOnGroupChangeListener);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -6312,39 +6310,22 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public HeadsUpTouchHelper.Callback getHeadsUpCallback() { return mHeadsUpCallback; }
 
+    void onGroupExpandChanged(ExpandableNotificationRow changedRow, boolean expanded) {
+        boolean animated = mAnimationsEnabled && (mIsExpanded || changedRow.isPinned());
+        if (animated) {
+            mExpandedGroupView = changedRow;
+            mNeedsAnimation = true;
+        }
+        changedRow.setChildrenExpanded(expanded, animated);
+        onChildHeightChanged(changedRow, false /* needsAnimation */);
 
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private final OnGroupChangeListener mOnGroupChangeListener = new OnGroupChangeListener() {
-        @Override
-        public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
-            boolean animated = !mGroupExpandedForMeasure && mAnimationsEnabled
-                    && (mIsExpanded || changedRow.isPinned());
-            if (animated) {
-                mExpandedGroupView = changedRow;
-                mNeedsAnimation = true;
+        runAfterAnimationFinished(new Runnable() {
+            @Override
+            public void run() {
+                changedRow.onFinishedExpansionChange();
             }
-            changedRow.setChildrenExpanded(expanded, animated);
-            if (!mGroupExpandedForMeasure) {
-                onChildHeightChanged(changedRow, false /* needsAnimation */);
-            }
-            runAfterAnimationFinished(new Runnable() {
-                @Override
-                public void run() {
-                    changedRow.onFinishedExpansionChange();
-                }
-            });
-        }
-
-        @Override
-        public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
-            mStatusBar.requestNotificationUpdate("onGroupCreatedFromChildren");
-        }
-
-        @Override
-        public void onGroupsChanged() {
-            mStatusBar.requestNotificationUpdate("onGroupsChanged");
-        }
-    };
+        });
+    }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private ExpandHelper.Callback mExpandHelperCallback = new ExpandHelper.Callback() {

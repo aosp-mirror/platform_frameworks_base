@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -77,7 +78,6 @@ import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.LeakDetector;
@@ -111,7 +111,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mBarState;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
-    @Mock private NotificationGroupManager mGroupManager;
+    @Mock private NotificationGroupManagerLegacy mGroupMembershipManger;
+    @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
@@ -156,10 +157,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mEntryManager = new NotificationEntryManager(
                 mock(NotificationEntryManagerLogger.class),
-                mock(NotificationGroupManager.class),
+                mock(NotificationGroupManagerLegacy.class),
                 new NotificationRankingManager(
                         () -> mock(NotificationMediaManager.class),
-                        mGroupManager,
+                        mGroupMembershipManger,
                         mHeadsUpManager,
                         mock(NotificationFilter.class),
                         mock(NotificationEntryManagerLogger.class),
@@ -204,14 +205,15 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(NotifPipeline.class),
                 mEntryManager,
                 mock(NotifCollection.class),
-                mUiEventLoggerFake
+                mUiEventLoggerFake,
+                mGroupMembershipManger,
+                mGroupExpansionManager
         );
         mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
                 mNotificationSwipeHelper);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);
-        mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mStackScrollLayoutController.getNoticationRoundessManager())
                 .thenReturn(mock(NotificationRoundnessManager.class));
@@ -224,7 +226,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                         anyBoolean(),
                         anyBoolean(),
                         anyBoolean());
-        doNothing().when(mGroupManager).collapseAllGroups();
+        doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
     }

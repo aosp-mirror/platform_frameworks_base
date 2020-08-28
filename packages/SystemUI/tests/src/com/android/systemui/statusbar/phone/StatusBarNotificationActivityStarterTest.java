@@ -67,9 +67,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -122,8 +122,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private NotifPipeline mNotifPipeline;
-    @Mock
-    private NotifCollection mNotifCollection;
 
     @Mock
     private ActivityIntentHelper mActivityIntentHelper;
@@ -187,7 +185,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mUiBgExecutor,
                         mEntryManager,
                         mNotifPipeline,
-                        mNotifCollection,
                         mock(HeadsUpManagerPhone.class),
                         mActivityStarter,
                         mClickNotifier,
@@ -198,7 +195,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mBubbleController,
                         () -> mAssistManager,
                         mRemoteInputManager,
-                        mock(NotificationGroupManager.class),
+                        mock(NotificationGroupManagerLegacy.class),
                         mock(NotificationLockscreenUserManager.class),
                         mShadeController,
                         mKeyguardStateController,

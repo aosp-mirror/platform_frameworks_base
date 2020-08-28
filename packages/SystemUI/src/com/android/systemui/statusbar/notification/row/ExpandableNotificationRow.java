@@ -86,6 +86,8 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -97,7 +99,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
@@ -220,7 +221,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mNeedsRedaction;
     private boolean mLastChronometerRunning = true;
     private ViewStub mChildrenContainerStub;
-    private NotificationGroupManager mGroupManager;
+    private GroupMembershipManager mGroupMembershipManager;
+    private GroupExpansionManager mGroupExpansionManager;
     private boolean mChildrenExpanded;
     private boolean mIsSummaryWithChildren;
     private NotificationChildrenContainer mChildrenContainer;
@@ -269,10 +271,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         @Override
         public void onClick(View v) {
             if (!shouldShowPublic() && (!mIsLowPriority || isExpanded())
-                    && mGroupManager.isSummaryOfGroup(mEntry.getSbn())) {
+                    && mGroupMembershipManager.isGroupSummary(mEntry)) {
                 mGroupExpansionChanging = true;
-                final boolean wasExpanded = mGroupManager.isGroupExpanded(mEntry.getSbn());
-                boolean nowExpanded = mGroupManager.toggleGroupExpansion(mEntry.getSbn());
+                final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
+                boolean nowExpanded = mGroupExpansionManager.toggleGroupExpansion(mEntry);
                 mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
                         nowExpanded);
@@ -527,8 +529,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private boolean isConversation() {
-        return mPeopleNotificationIdentifier
-                .getPeopleNotificationType(mEntry.getSbn(), mEntry.getRanking())
+        return mPeopleNotificationIdentifier.getPeopleNotificationType(mEntry)
                 != PeopleNotificationIdentifier.TYPE_NON_PERSON;
     }
 
@@ -820,7 +821,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @return whether this notification is the only child in the group summary
      */
     public boolean isOnlyChildInGroup() {
-        return mGroupManager.isOnlyChildInGroup(mEntry.getSbn());
+        return mGroupMembershipManager.isOnlyChildInGroup(mEntry);
     }
 
     public ExpandableNotificationRow getNotificationParent() {
@@ -1425,8 +1426,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void performDismiss(boolean fromAccessibility) {
         if (isOnlyChildInGroup()) {
-            NotificationEntry groupSummary =
-                    mGroupManager.getLogicalGroupSummary(mEntry.getSbn());
+            NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(mEntry);
             if (groupSummary.isClearable()) {
                 // If this is the only child in the group, dismiss the group, but don't try to show
                 // the blocking helper affordance!
@@ -1579,7 +1579,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             String notificationKey,
             ExpansionLogger logger,
             KeyguardBypassController bypassController,
-            NotificationGroupManager groupManager,
+            GroupMembershipManager groupMembershipManager,
+            GroupExpansionManager groupExpansionManager,
             HeadsUpManager headsUpManager,
             RowContentBindStage rowContentBindStage,
             OnExpandClickListener onExpandClickListener,
@@ -1600,8 +1601,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mLogger = logger;
         mLoggingKey = notificationKey;
         mBypassController = bypassController;
-        mGroupManager = groupManager;
-        mPrivateLayout.setGroupManager(groupManager);
+        mGroupMembershipManager = groupMembershipManager;
+        mGroupExpansionManager = groupExpansionManager;
+        mPrivateLayout.setGroupMembershipManager(groupMembershipManager);
         mHeadsUpManager = headsUpManager;
         mRowContentBindStage = rowContentBindStage;
         mOnExpandClickListener = onExpandClickListener;
@@ -2184,8 +2186,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mFalsingManager.setNotificationExpanded();
         if (mIsSummaryWithChildren && !shouldShowPublic() && allowChildExpansion
                 && !mChildrenContainer.showingAsLowPriority()) {
-            final boolean wasExpanded = mGroupManager.isGroupExpanded(mEntry.getSbn());
-            mGroupManager.setGroupExpanded(mEntry.getSbn(), userExpanded);
+            final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
+            mGroupExpansionManager.setGroupExpanded(mEntry, userExpanded);
             onExpansionChanged(true /* userAction */, wasExpanded);
             return;
         }
@@ -2328,7 +2330,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean isGroupExpanded() {
-        return mGroupManager.isGroupExpanded(mEntry.getSbn());
+        return mGroupExpansionManager.isGroupExpanded(mEntry);
     }
 
     private void onAttachedChildrenCountChanged() {
@@ -2574,7 +2576,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void makeActionsVisibile() {
         setUserExpanded(true, true);
         if (isChildInGroup()) {
-            mGroupManager.setGroupExpanded(mEntry.getSbn(), true);
+            mGroupExpansionManager.setGroupExpanded(mEntry, true);
         }
         notifyHeightChanged(false /* needsAnimation */);
     }
@@ -2867,7 +2869,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void onExpandedByGesture(boolean userExpanded) {
         int event = MetricsEvent.ACTION_NOTIFICATION_GESTURE_EXPANDER;
-        if (mGroupManager.isSummaryOfGroup(mEntry.getSbn())) {
+        if (mGroupMembershipManager.isGroupSummary(mEntry)) {
             event = MetricsEvent.ACTION_NOTIFICATION_GROUP_GESTURE_EXPANDER;
         }
         MetricsLogger.action(mContext, event, userExpanded);
@@ -2912,7 +2914,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private void onExpansionChanged(boolean userAction, boolean wasExpanded) {
         boolean nowExpanded = isExpanded();
         if (mIsSummaryWithChildren && (!mIsLowPriority || wasExpanded)) {
-            nowExpanded = mGroupManager.isGroupExpanded(mEntry.getSbn());
+            nowExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
         }
         if (nowExpanded != wasExpanded) {
             updateShelfIconColor();
