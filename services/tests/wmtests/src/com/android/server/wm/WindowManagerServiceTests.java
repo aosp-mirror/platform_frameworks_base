@@ -114,11 +114,11 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedStack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, display);
         Task tappedTask = createTaskInStack(tappedStack, 0 /* userId */);
-        spyOn(mWm.mActivityTaskManager);
+        spyOn(mWm.mAtmService);
 
         mWm.handleTaskFocusChange(tappedTask);
 
-        verify(mWm.mActivityTaskManager).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
     }
 
     @Test
@@ -135,11 +135,11 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedStack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, display);
         Task tappedTask = createTaskInStack(tappedStack, 0 /* userId */);
-        spyOn(mWm.mActivityTaskManager);
+        spyOn(mWm.mAtmService);
 
         mWm.handleTaskFocusChange(tappedTask);
 
-        verify(mWm.mActivityTaskManager, never()).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId);
     }
 
     @Test
@@ -158,10 +158,10 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedStack = createTaskStackOnTaskDisplayArea(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, secondTda);
         Task tappedTask = createTaskInStack(tappedStack, 0 /* userId */);
-        spyOn(mWm.mActivityTaskManager);
+        spyOn(mWm.mAtmService);
 
         mWm.handleTaskFocusChange(tappedTask);
 
-        verify(mWm.mActivityTaskManager).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
     }
 }
