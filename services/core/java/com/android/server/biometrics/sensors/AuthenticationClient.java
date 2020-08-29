@@ -195,6 +195,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                     if (listener != null) {
                         listener.onAuthenticationFailed(getSensorId());
                     }
+                } else {
+                    mAlreadyDone = true;
                 }
             }
         } catch (RemoteException e) {

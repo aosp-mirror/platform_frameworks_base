@@ -125,6 +125,7 @@ import static com.android.server.wm.Task.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -2024,7 +2025,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             if (self.isState(
                     Task.ActivityState.RESUMED, Task.ActivityState.PAUSING)) {
-                self.getDisplay().mDisplayContent.mAppTransition.overridePendingAppTransition(
+                self.mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null, null);
             }
 
@@ -2408,7 +2409,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 } else {
                     stack.setWindowingMode(windowingMode);
-                    stack.getDisplay().ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
+                    stack.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                             true /* notifyClients */);
                 }
                 return true;
@@ -4175,7 +4176,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         if (params.hasSetAspectRatio()
                 && !mWindowManager.isValidPictureInPictureAspectRatio(
-                        r.getDisplay(), params.getAspectRatio())) {
+                        r.mDisplayContent, params.getAspectRatio())) {
             final float minAspectRatio = mContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
             final float maxAspectRatio = mContext.getResources().getFloat(
@@ -4619,7 +4620,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             final long origId = Binder.clearCallingIdentity();
             try {
-                display.mDisplayContent.registerRemoteAnimations(definition);
+                display.registerRemoteAnimations(definition);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -5465,8 +5466,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
-        r.getDisplay().setFocusedApp(r, true);
-
+        final boolean changed = r.mDisplayContent.setFocusedApp(r);
+        if (changed) {
+            mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                    true /*updateInputWindows*/);
+        }
         if (prevTask == null || task != prevTask) {
             if (prevTask != null) {
                 mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
@@ -6202,12 +6206,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // We might change the visibilities here, so prepare an empty app transition which
                 // might be overridden later if we actually change visibilities.
-                final DisplayContent displayContent =
-                        mRootWindowContainer.getDisplayContent(displayId);
-                if (displayContent == null) {
+                final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
+                if (dc == null) {
                     return;
                 }
-                final DisplayContent dc = displayContent.mDisplayContent;
                 final boolean wasTransitionSet =
                         dc.mAppTransition.getAppTransition() != TRANSIT_NONE;
                 if (!wasTransitionSet) {

@@ -304,13 +304,13 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"फाइल र मिडिया"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"तपाईंको यन्त्रमा तस्बिर, मिडिया, र फाइलहरूमाथि पहुँच गर्नुहोस्"</string>
+    <string name="permgroupdesc_storage" msgid="6351503740613026600">"तपाईंको यन्त्रमा फोटो, मिडिया, र फाइलहरूमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक क्रियाकलाप"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"आफ्नो शारीरिक क्रियाकलापको डेटामाथि पहुँच राख्नु"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"क्यामेरा"</string>
-    <string name="permgroupdesc_camera" msgid="7585150538459320326">"तस्बिर खिच्नुका साथै भिडियो रेकर्ड गर्नुहोस्"</string>
+    <string name="permgroupdesc_camera" msgid="7585150538459320326">"फोटो खिच्नुका साथै भिडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"कलका लगहरू"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"फोन कलको लग पढ्नुहोस् र लेख्नुहोस्"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"फोन"</string>
@@ -437,10 +437,10 @@
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM लाई आदेश पठाउन एपलाई अनुमति दिन्छ। यो निकै खतरनाक हुन्छ।"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"शारीरिक गतिविधि पहिचान गर्नुहोस्‌"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"यो अनुप्रयोगले तपाईंको शारीरिक गतिविधिको पहिचान गर्न सक्छ।"</string>
-    <string name="permlab_camera" msgid="6320282492904119413">"तस्बिरहरू र भिडियोहरू लिनुहोस्।"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"यस अनुप्रयोगले जुनसुकै समय क्यामेराको प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
-    <string name="permlab_systemCamera" msgid="3642917457796210580">"एप वा सेवालाई तस्बिर र भिडियो खिच्न प्रणालीका क्यामेराहरूमाथि पहुँच राख्न दिनुहोस्"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"प्रणालीको यस विशेषाधिकार प्राप्त अनुप्रयोगले जुनसुकै बेला प्रणालीको क्यामेरा प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ। अनुप्रयोगसँग पनि android.permission.CAMERA प्रयोग गर्ने अनुमति हुनु पर्छ"</string>
+    <string name="permlab_camera" msgid="6320282492904119413">"फोटोहरू र भिडियोहरू लिनुहोस्।"</string>
+    <string name="permdesc_camera" msgid="1354600178048761499">"यस अनुप्रयोगले जुनसुकै समय क्यामेराको प्रयोग गरी फोटो खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
+    <string name="permlab_systemCamera" msgid="3642917457796210580">"एप वा सेवालाई फोटो र भिडियो खिच्न प्रणालीका क्यामेराहरूमाथि पहुँच राख्न दिनुहोस्"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"प्रणालीको यस विशेषाधिकार प्राप्त अनुप्रयोगले जुनसुकै बेला प्रणालीको क्यामेरा प्रयोग गरी फोटो खिच्न र भिडियो रेकर्ड गर्न सक्छ। अनुप्रयोगसँग पनि android.permission.CAMERA प्रयोग गर्ने अनुमति हुनु पर्छ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"कुनै एप वा सेवालाई खोलिँदै वा बन्द गरिँदै गरेका क्यामेरा यन्त्रहरूका बारेमा कलब्याक प्राप्त गर्ने अनुमति दिनुहोस्।"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कुनै क्यामेरा यन्त्र खोलिँदा (कुन अनुप्रयोगले खोलेको भन्ने बारेमा) वा बन्द गरिँदा यो अनुप्रयोगले कलब्याक प्राप्त गर्न सक्छ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कम्पन नियन्त्रण गर्नुहोस्"</string>
@@ -1347,7 +1347,7 @@
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेटअप गर्न ट्याप गर्नुहोस्"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"तपाईंले यो यन्त्र पुनः फर्म्याट गर्नु पर्ने हुन सक्छ। यो यन्त्र हटाउन ट्याप गर्नुहोस्।"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"तस्बिरहरू र मिडिया स्थानान्तरणका लागि"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फोटोहरू र मिडिया स्थानान्तरणका लागि"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> मा समस्या देखियो"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"समस्या समाधान गर्न ट्याप गर्नुहोस्"</string>
@@ -1914,7 +1914,7 @@
     <string name="app_category_game" msgid="4534216074910244790">"खेलहरू"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"सङ्गीत तथा अडियो"</string>
     <string name="app_category_video" msgid="2590183854839565814">"चलचित्र तथा भिडियो"</string>
-    <string name="app_category_image" msgid="7307840291864213007">"तस्बिर तथा छविहरू"</string>
+    <string name="app_category_image" msgid="7307840291864213007">"फोटो तथा छविहरू"</string>
     <string name="app_category_social" msgid="2278269325488344054">"सामाजिक तथा सञ्चार"</string>
     <string name="app_category_news" msgid="1172762719574964544">"समाचार तथा पत्रिकाहरू"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"नक्सा तथा नेभिगेसन"</string>

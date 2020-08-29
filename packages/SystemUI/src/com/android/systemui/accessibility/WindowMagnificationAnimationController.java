@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
@@ -44,13 +45,13 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     @IntDef({STATE_DISABLED, STATE_ENABLED, STATE_DISABLING, STATE_ENABLING})
     @interface MagnificationState {}
 
-    //The window magnification is disabled.
+    // The window magnification is disabled.
     private static final int STATE_DISABLED = 0;
-    //The window magnification is enabled.
+    // The window magnification is enabled.
     private static final int STATE_ENABLED = 1;
-    //The window magnification is going to be disabled when the animation is end.
+    // The window magnification is going to be disabled when the animation is end.
     private  static final int STATE_DISABLING = 2;
-    //The animation is running for enabling the window magnification.
+    // The animation is running for enabling the window magnification.
     private static final int STATE_ENABLING = 3;
 
     private final WindowMagnificationController mController;
@@ -58,7 +59,11 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     private final AnimationSpec mStartSpec = new AnimationSpec();
     private final AnimationSpec mEndSpec = new AnimationSpec();
     private final Context mContext;
-
+    // Called when the animation is ended successfully without cancelling or mStartSpec and
+    // mEndSpec are equal.
+    private Runnable mAnimationEndCallback;
+    // The flag to ignore the animation end callback.
+    private boolean mEndAnimationCanceled = false;
     @MagnificationState
     private int mState = STATE_DISABLED;
 
@@ -83,26 +88,35 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
      * from 1.0 and the center won't be changed during the animation. If {@link #mState} is
      * {@code STATE_DISABLING}, the animation runs in reverse.
      *
-     * @param scale   the target scale, or {@link Float#NaN} to leave unchanged.
-     * @param centerX the screen-relative X coordinate around which to center,
+     * @param scale   The target scale, or {@link Float#NaN} to leave unchanged.
+     * @param centerX The screen-relative X coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
-     * @param centerY the screen-relative Y coordinate around which to center,
+     * @param centerY The screen-relative Y coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
+     * @param animationEndCallback Called when the transition is complete or the given arguments
+     *                      are as same as current values.
      *
      * @see #onAnimationUpdate(ValueAnimator)
      */
-    void enableWindowMagnification(float scale, float centerX, float centerY) {
-        if (mState == STATE_ENABLING) {
-            mValueAnimator.cancel();
-        }
+    void enableWindowMagnification(float scale, float centerX, float centerY,
+            @Nullable Runnable animationEndCallback) {
+        mAnimationEndCallback = animationEndCallback;
         setupEnableAnimationSpecs(scale, centerX, centerY);
-
         if (mEndSpec.equals(mStartSpec)) {
+            if (mState == STATE_DISABLED) {
+                mController.enableWindowMagnification(scale, centerX, centerY);
+            } else if (mState == STATE_ENABLING || mState == STATE_DISABLING) {
+                mValueAnimator.cancel();
+            }
+            sendCallbackIfNeeded();
             setState(STATE_ENABLED);
         } else {
             if (mState == STATE_DISABLING) {
                 mValueAnimator.reverse();
             } else {
+                if (mState == STATE_ENABLING) {
+                    mValueAnimator.cancel();
+                }
                 mValueAnimator.start();
             }
             setState(STATE_ENABLING);
@@ -115,7 +129,7 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         final float currentCenterY = mController.getCenterY();
 
         if (mState == STATE_DISABLED) {
-            //We don't need to offset the center during the animation.
+            // We don't need to offset the center during the animation.
             mStartSpec.set(/* scale*/ 1.0f, centerX, centerY);
             mEndSpec.set(Float.isNaN(scale) ? mContext.getResources().getInteger(
                     R.integer.magnification_default_scale) : scale, centerX, centerY);
@@ -145,9 +159,16 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     /**
      * Wraps {@link WindowMagnificationController#deleteWindowMagnification()}} with transition
      * animation. If the window magnification is enabling, it runs the animation in reverse.
+     *
+     * @param animationEndCallback Called when the transition is complete or the window
+     *                    magnification is disabled already.
      */
-    void deleteWindowMagnification() {
+    void deleteWindowMagnification(@Nullable Runnable animationEndCallback) {
+        mAnimationEndCallback = animationEndCallback;
         if (mState == STATE_DISABLED || mState == STATE_DISABLING) {
+            if (mState == STATE_DISABLED) {
+                sendCallbackIfNeeded();
+            }
             return;
         }
         mStartSpec.set(/* scale*/ 1.0f, Float.NaN, Float.NaN);
@@ -160,9 +181,9 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
     /**
      * Wraps {@link WindowMagnificationController#moveWindowMagnifier(float, float)}. If the
      * animation is running, it has no effect.
-     * @param offsetX the amount in pixels to offset the window magnifier in the X direction, in
+     * @param offsetX The amount in pixels to offset the window magnifier in the X direction, in
      *                current screen pixels.
-     * @param offsetY the amount in pixels to offset the window magnifier in the Y direction, in
+     * @param offsetY The amount in pixels to offset the window magnifier in the Y direction, in
      *                current screen pixels.
      */
     void moveWindowMagnifier(float offsetX, float offsetY) {
@@ -185,26 +206,41 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
 
     @Override
     public void onAnimationStart(Animator animation) {
+        mEndAnimationCanceled = false;
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation, boolean isReverse) {
+        if (mEndAnimationCanceled) {
+            return;
+        }
+        if (isReverse) {
+            mController.deleteWindowMagnification();
+            setState(STATE_DISABLED);
+        } else {
+            setState(STATE_ENABLED);
+        }
+        sendCallbackIfNeeded();
     }
 
     @Override
     public void onAnimationEnd(Animator animation) {
-        if (mState == STATE_DISABLING) {
-            mController.deleteWindowMagnification();
-            setState(STATE_DISABLED);
-        } else if (mState == STATE_ENABLING) {
-            setState(STATE_ENABLED);
-        } else {
-            Log.w(TAG, "onAnimationEnd unexpected state:" + mState);
-        }
     }
 
     @Override
     public void onAnimationCancel(Animator animation) {
+        mEndAnimationCanceled = true;
     }
 
     @Override
     public void onAnimationRepeat(Animator animation) {
+    }
+
+    private void sendCallbackIfNeeded() {
+        if (mAnimationEndCallback != null) {
+            mAnimationEndCallback.run();
+            mAnimationEndCallback = null;
+        }
     }
 
     @Override

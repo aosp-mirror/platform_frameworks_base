@@ -74,6 +74,7 @@ public:
     using Control = incfs::Control;
     using FileId = incfs::FileId;
     using ErrorCode = incfs::ErrorCode;
+    using UniqueFd = incfs::UniqueFd;
     using WaitResult = incfs::WaitResult;
 
     using ExistingMountCallback =
@@ -96,7 +97,7 @@ public:
     virtual ErrorCode link(const Control& control, std::string_view from,
                            std::string_view to) const = 0;
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
-    virtual base::unique_fd openForSpecialOps(const Control& control, FileId id) const = 0;
+    virtual UniqueFd openForSpecialOps(const Control& control, FileId id) const = 0;
     virtual ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const = 0;
     virtual WaitResult waitForPendingReads(
             const Control& control, std::chrono::milliseconds timeout,

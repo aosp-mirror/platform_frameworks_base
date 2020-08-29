@@ -507,6 +507,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setBssid(@NonNull android.net.MacAddress);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setCredentialSharedWithUser(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsAppInteractionRequired(boolean);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsEnhancedMacRandomizationEnabled(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsEnhancedOpen(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsHiddenSsid(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsInitialAutojoinEnabled(boolean);

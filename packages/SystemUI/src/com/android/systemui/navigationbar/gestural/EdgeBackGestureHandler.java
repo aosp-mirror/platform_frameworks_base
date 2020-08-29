@@ -584,7 +584,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             }
         }
 
-        Dependency.get(ProtoTracer.class).update();
+        Dependency.get(ProtoTracer.class).scheduleFrameUpdate();
     }
 
     private void updateDisabledForQuickstep() {

@@ -304,6 +304,25 @@ public final class IncrementalStorage {
     }
 
     /**
+     * Checks whether a file under the current storage directory is fully loaded.
+     *
+     * @param path The relative path of the file.
+     * @return True if the file is fully loaded.
+     */
+    public boolean isFileFullyLoaded(@NonNull String path) throws IOException {
+        try {
+            int res = mService.isFileFullyLoaded(mId, path);
+            if (res < 0) {
+                throw new IOException("isFileFullyLoaded() failed, errno " + -res);
+            }
+            return res == 0;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
+    /**
      * Returns the loading progress of a storage
      *
      * @return progress value between [0, 1].

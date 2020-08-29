@@ -24,6 +24,7 @@ import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.wm.EmbeddedWindowController.EmbeddedWindow;
@@ -252,7 +253,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         // All the calls below need to happen without the WM lock held since they call into AM.
         mService.mAtmInternal.saveANRState(reason);
 
-        if (activity != null && activity.appToken != null) {
+        if (activity != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
             final boolean abort = activity.keyDispatchingTimedOut(reason, windowPid);
@@ -410,6 +411,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             requestRefreshConfiguration = dispatchPointerCaptureChanged(focusedWindow, false);
         }
         mFocusedWindow.set(newFocusedWindow);
+        mService.mH.sendMessage(PooledLambda.obtainMessage(mService::reportFocusChanged,
+                oldToken, newToken));
         return requestRefreshConfiguration;
     }
 

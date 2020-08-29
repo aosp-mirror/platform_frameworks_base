@@ -837,7 +837,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
                         proc.getThread(), r.appToken);
 
-                final DisplayContent dc = r.getDisplay().mDisplayContent;
+                final DisplayContent dc = r.mDisplayContent;
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global

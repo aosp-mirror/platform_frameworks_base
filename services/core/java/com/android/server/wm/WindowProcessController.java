@@ -729,15 +729,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
 
-        final DisplayContent display = activity.getDisplay();
-        if (display == null) {
+        if (!activity.isAttached()) {
             // No need to update if the activity hasn't attach to any display.
             return false;
         }
 
         boolean canUpdate = false;
         final DisplayContent topDisplay =
-                mPreQTopResumedActivity != null ? mPreQTopResumedActivity.getDisplay() : null;
+                (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isAttached())
+                        ? mPreQTopResumedActivity.mDisplayContent
+                        : null;
         // Update the topmost activity if current top activity is
         // - not on any display OR
         // - no longer visible OR
@@ -748,8 +749,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             canUpdate = true;
         }
 
+        final DisplayContent display = activity.mDisplayContent;
         // Update the topmost activity if the current top activity wasn't on top of the other one.
-        if (!canUpdate && topDisplay.mDisplayContent.compareTo(display.mDisplayContent) < 0) {
+        if (!canUpdate && topDisplay.compareTo(display) < 0) {
             canUpdate = true;
         }
 

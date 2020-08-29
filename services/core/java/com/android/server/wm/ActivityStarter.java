@@ -1731,7 +1731,7 @@ class ActivityStarter {
                         0 /* configChanges */, !PRESERVE_WINDOWS);
                 // Go ahead and tell window manager to execute app transition for this activity
                 // since the app transition will not be triggered through the resume channel.
-                mTargetStack.getDisplay().mDisplayContent.executeAppTransition();
+                mTargetStack.mDisplayContent.executeAppTransition();
             } else {
                 // If the target stack was not previously focusable (previous top running activity
                 // on that stack was not visible) then any prior calls to move the stack to the
@@ -2481,7 +2481,7 @@ class ActivityStarter {
         // to the front if the caller is not itself in the front.
         final boolean differentTopTask;
         if (mTargetStack.getDisplayArea() == mPreferredTaskDisplayArea) {
-            final Task focusStack = mTargetStack.getDisplay().getFocusedStack();
+            final Task focusStack = mTargetStack.mDisplayContent.getFocusedStack();
             final ActivityRecord curTop = (focusStack == null)
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
             final Task topTask = curTop != null ? curTop.getTask() : null;

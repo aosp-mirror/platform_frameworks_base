@@ -250,8 +250,11 @@ public final class FrameMetrics {
         Index.INTENDED_VSYNC, Index.FRAME_COMPLETED,
     };
 
+    /**
+     * @hide
+     */
     @UnsupportedAppUsage
-    /* package */ final long[] mTimingData;
+    public final long[] mTimingData;
 
     /**
      * Constructs a FrameMetrics object as a copy.
@@ -270,7 +273,7 @@ public final class FrameMetrics {
     /**
      * @hide
      */
-    FrameMetrics() {
+    public FrameMetrics() {
         mTimingData = new long[Index.FRAME_STATS_COUNT];
     }
 

@@ -2636,6 +2636,7 @@ public final class ProcessList {
                 mLruProcessServiceStart--;
             }
             mLruProcesses.remove(lrui);
+            mService.removeOomAdjTargetLocked(app, true);
         }
     }
 

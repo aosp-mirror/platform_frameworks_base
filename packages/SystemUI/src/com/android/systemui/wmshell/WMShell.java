@@ -27,8 +27,12 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.stackdivider.SplitScreen;
+import com.android.systemui.tracing.ProtoTracer;
+import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 
 import java.io.FileDescriptor;
@@ -42,19 +46,23 @@ import javax.inject.Inject;
  * Proxy in SysUiScope to delegate events to controllers in WM Shell library.
  */
 @SysUISingleton
-public final class WMShell extends SystemUI {
+public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTraceProto> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DisplayImeController mDisplayImeController;
     private final Optional<SplitScreen> mSplitScreenOptional;
+    private final ProtoTracer mProtoTracer;
 
     @Inject
     WMShell(Context context, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DisplayImeController displayImeController,
-            Optional<SplitScreen> splitScreenOptional) {
+            Optional<SplitScreen> splitScreenOptional,
+            ProtoTracer protoTracer) {
         super(context);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDisplayImeController = displayImeController;
         mSplitScreenOptional = splitScreenOptional;
+        mProtoTracer = protoTracer;
+        mProtoTracer.add(this);
     }
 
     @Override
@@ -111,6 +119,15 @@ public final class WMShell extends SystemUI {
                         splitScreen.onActivityLaunchOnSecondaryDisplayFailed();
                     }
                 });
+    }
+
+    @Override
+    public void writeToProto(SystemUiTraceProto proto) {
+        if (proto.wmShell == null) {
+            proto.wmShell = new WmShellTraceProto();
+        }
+        // Dump to WMShell proto here
+        // TODO: Figure out how we want to synchronize while dumping to proto
     }
 
     @Override

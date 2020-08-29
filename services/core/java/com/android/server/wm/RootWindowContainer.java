@@ -129,6 +129,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
@@ -162,7 +163,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -214,7 +214,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private int mTopFocusedDisplayId = INVALID_DISPLAY;
 
     // Map from the PID to the top most app which has a focused window of the process.
-    final HashMap<Integer, ActivityRecord> mTopFocusedAppByProcess = new HashMap<>();
+    final ArrayMap<Integer, ActivityRecord> mTopFocusedAppByProcess = new ArrayMap<>();
 
     // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
@@ -480,8 +480,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mTopFocusedDisplayId = topFocusedDisplayId;
             mWmService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
             mWmService.mPolicy.setTopFocusedDisplay(topFocusedDisplayId);
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "New topFocusedDisplayId=%d",
-                    topFocusedDisplayId);
+            ProtoLog.d(WM_DEBUG_FOCUS_LIGHT, "New topFocusedDisplayId=%d", topFocusedDisplayId);
         }
         return changed;
     }
@@ -2749,7 +2748,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         r.detachFromProcess();
-        r.getDisplay().mDisplayContent.prepareAppTransition(
+        r.mDisplayContent.prepareAppTransition(
                 TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         r.destroyIfPossible("handleAppCrashed");
     }

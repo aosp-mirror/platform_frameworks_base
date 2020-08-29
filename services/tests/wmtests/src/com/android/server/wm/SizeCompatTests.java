@@ -90,7 +90,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(1.5f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
 
         final Rect originalOverrideBounds = new Rect(mActivity.getBounds());
-        resizeDisplay(mStack.getDisplay(), 600, 1200);
+        resizeDisplay(mStack.mDisplayContent, 600, 1200);
         // The visible activity should recompute configuration according to the last parent bounds.
         mAtm.restartActivityProcessIfVisible(mActivity.appToken);
 
@@ -218,7 +218,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Rect currentBounds = mActivity.getWindowConfiguration().getBounds();
 
         // Change the size of current display.
-        resizeDisplay(mStack.getDisplay(), 1000, 2000);
+        resizeDisplay(mStack.mDisplayContent, 1000, 2000);
 
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
@@ -229,7 +229,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(mActivity.getBounds().top, currentBounds.top);
 
         // Change display size to a different orientation
-        resizeDisplay(mStack.getDisplay(), 2000, 1000);
+        resizeDisplay(mStack.mDisplayContent, 2000, 1000);
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
     }
@@ -412,7 +412,7 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testResetNonVisibleActivity() {
         setUpDisplaySizeWithApp(1000, 2500);
         prepareUnresizable(1.5f, SCREEN_ORIENTATION_UNSPECIFIED);
-        final DisplayContent display = mStack.getDisplay();
+        final DisplayContent display = mStack.mDisplayContent;
         // Resize the display so the activity is in size compatibility mode.
         resizeDisplay(display, 900, 1800);
 
@@ -464,7 +464,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 });
 
         // Resize the display so that the activity exercises size-compat mode.
-        resizeDisplay(mStack.getDisplay(), 1000, 2500);
+        resizeDisplay(mStack.mDisplayContent, 1000, 2500);
 
         // Expect the exact token when the activity is in size compatibility mode.
         assertEquals(1, compatTokens.size());
@@ -477,7 +477,7 @@ public class SizeCompatTests extends WindowTestsBase {
         activity.restartProcessIfVisible();
         // The full lifecycle isn't hooked up so manually set state to resumed
         activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
-        mStack.getDisplay().handleActivitySizeCompatModeIfNeeded(activity);
+        mStack.mDisplayContent.handleActivitySizeCompatModeIfNeeded(activity);
 
         // Expect null token when switching to non-size-compat mode activity.
         assertEquals(1, compatTokens.size());

@@ -33,6 +33,9 @@
       "name": "CtsContentTestCases",
       "options": [
         {
+          "include-filter": "android.content.pm.cts.ChecksumsTest"
+        },
+        {
           "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
         },
         {
