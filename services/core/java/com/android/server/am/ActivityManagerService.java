@@ -5762,9 +5762,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isAppBad(final String processName, final int uid) {
-        synchronized (this) {
-            return mAppErrors.isBadProcessLocked(processName, uid);
-        }
+        return mAppErrors.isBadProcess(processName, uid);
     }
 
     // NOTE: this is an internal method used by the OnShellCommand implementation only and should
