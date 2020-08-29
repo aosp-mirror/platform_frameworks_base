@@ -231,8 +231,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * The algorithm which calculates the properties for our children
      */
     private final StackScrollAlgorithm mStackScrollAlgorithm;
-
     private final AmbientState mAmbientState;
+
     private GroupMembershipManager mGroupMembershipManager;
     private GroupExpansionManager mGroupExpansionManager;
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -1009,6 +1009,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mAmbientState.isPulseExpanding();
     }
 
+    public int getSpeedBumpIndex() {
+        return mAmbientState.getSpeedBumpIndex();
+    }
+
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -1063,7 +1067,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    public void updateSpeedBumpIndex(int newIndex, boolean noAmbient) {
+    private void setSpeedBumpIndex(int newIndex, boolean noAmbient) {
         mAmbientState.setSpeedBumpIndex(newIndex);
         mNoAmbient = noAmbient;
     }
@@ -4992,6 +4996,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mController.updateShowEmptyShadeView();
             updateFooter();
         }
+
+        updateSpeedBumpIndex();
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5002,6 +5008,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mController.updateShowEmptyShadeView();
             updateFooter();
         }
+
+        updateSpeedBumpIndex();
     }
 
     public void addContainerViewAt(View v, int index) {
@@ -5011,6 +5019,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mController.updateShowEmptyShadeView();
             updateFooter();
         }
+
+        updateSpeedBumpIndex();
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -5237,6 +5247,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     protected void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
+        updateSpeedBumpIndex();
     }
 
     void onStatePostChange(boolean fromShadeLocked) {
@@ -5777,7 +5788,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
   }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void updateSpeedBumpIndex() {
+    private void updateSpeedBumpIndex() {
         int speedBumpIndex = 0;
         int currentIndex = 0;
         final int N = getChildCount();
@@ -5799,7 +5810,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
         boolean noAmbient = speedBumpIndex == N;
-        updateSpeedBumpIndex(speedBumpIndex, noAmbient);
+        setSpeedBumpIndex(speedBumpIndex, noAmbient);
     }
 
     /** Updates the indices of the boundaries between sections. */

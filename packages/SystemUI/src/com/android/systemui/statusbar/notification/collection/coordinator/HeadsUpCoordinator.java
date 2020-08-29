@@ -204,10 +204,8 @@ public class HeadsUpCoordinator implements Coordinator {
         public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
             NotificationEntry newHUN = mHeadsUpManager.getTopEntry();
             if (!Objects.equals(mCurrentHun, newHUN)) {
-                endNotifLifetimeExtension();
                 mCurrentHun = newHUN;
-                mNotifPromoter.invalidateList();
-                mNotifSectioner.invalidateList();
+                endNotifLifetimeExtension();
             }
             if (!isHeadsUp) {
                 mHeadsUpViewBinder.unbindHeadsUpView(entry);

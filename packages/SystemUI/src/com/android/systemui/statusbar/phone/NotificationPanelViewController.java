@@ -3069,7 +3069,6 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     public void updateNotificationViews(String reason) {
         mNotificationStackScrollLayoutController.updateSectionBoundaries(reason);
-        mNotificationStackScrollLayoutController.updateSpeedBumpIndex();
         mNotificationStackScrollLayoutController.updateFooter();
 
         mNotificationIconAreaController.updateNotificationIcons(createVisibleEntriesList());
