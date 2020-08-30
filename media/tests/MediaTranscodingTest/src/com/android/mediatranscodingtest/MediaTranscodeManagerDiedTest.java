@@ -231,7 +231,7 @@ public class MediaTranscodeManagerDiedTest
         job.setOnProgressUpdateListener(listenerExecutor,
                 new TranscodingJob.OnProgressUpdateListener() {
                     @Override
-                    public void onProgressUpdate(int newProgress) {
+                    public void onProgressUpdate(TranscodingJob job, int newProgress) {
                         if (newProgress > 0) {
                             jobStartedSemaphore.release();
                         }
