@@ -53,9 +53,9 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     }
 
     @Override
-    public void registerContentObserverForUser(String name, ContentObserver settingsObserver,
-            int userHandle) {
-        SettingsKey key = new SettingsKey(userHandle, name);
+    public void registerContentObserverForUser(Uri uri, boolean notifyDescendents,
+            ContentObserver settingsObserver, int userHandle) {
+        SettingsKey key = new SettingsKey(userHandle, uri.toString());
         mContentObservers.putIfAbsent(key, new ArrayList<>());
         List<ContentObserver> observers = mContentObservers.get(key);
         observers.add(settingsObserver);
@@ -86,7 +86,7 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
 
     @Override
     public String getStringForUser(String name, int userHandle) {
-        return mValues.get(new SettingsKey(userHandle, name));
+        return mValues.get(new SettingsKey(userHandle, getUriFor(name).toString()));
     }
 
     @Override
@@ -107,7 +107,7 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     @Override
     public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
             int userHandle, boolean overrideableByRestore) {
-        SettingsKey key = new SettingsKey(userHandle, name);
+        SettingsKey key = new SettingsKey(userHandle, getUriFor(name).toString());
         mValues.put(key, value);
 
         Uri uri = getUriFor(name);

@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -65,8 +66,14 @@ public class StatLogger {
     private long mNextTickTime = SystemClock.elapsedRealtime() + 1000;
 
     private final String[] mLabels;
+    private final String mStatsTag;
 
     public StatLogger(String[] eventLabels) {
+        this(null, eventLabels);
+    }
+
+    public StatLogger(String statsTag, String[] eventLabels) {
+        mStatsTag = statsTag;
         SIZE = eventLabels.length;
         mCountStats = new int[SIZE];
         mDurationStats = new long[SIZE];
@@ -135,7 +142,11 @@ public class StatLogger {
 
     public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
-            pw.println("Stats:");
+            if (!TextUtils.isEmpty(mStatsTag)) {
+                pw.println(mStatsTag + ":");
+            } else {
+                pw.println("Stats:");
+            }
             pw.increaseIndent();
             for (int i = 0; i < SIZE; i++) {
                 final int count = mCountStats[i];

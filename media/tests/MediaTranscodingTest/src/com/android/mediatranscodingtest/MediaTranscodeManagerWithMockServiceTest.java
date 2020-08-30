@@ -259,7 +259,7 @@ public class MediaTranscodeManagerWithMockServiceTest
         super.setUp();
         mTranscodingService = new MockTranscodingService();
         mContext = getInstrumentation().getContext();
-        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext, mTranscodingService);
+        mMediaTranscodeManager = mContext.getSystemService(MediaTranscodeManager.class);
         assertNotNull(mMediaTranscodeManager);
 
         // Setup source HEVC file uri.

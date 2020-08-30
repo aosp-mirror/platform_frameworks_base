@@ -890,7 +890,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .execute();
 
         // Ensure the activity is moved to secondary display.
-        assertEquals(secondaryDisplay, topActivity.getDisplay());
+        assertEquals(secondaryDisplay, topActivity.mDisplayContent);
     }
 
     /**

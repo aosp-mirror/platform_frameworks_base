@@ -698,7 +698,8 @@ public class ContentProviderHelper {
                     throw new NullPointerException("connection is null");
                 }
                 if (decProviderCountLocked(conn, null, null, stable)) {
-                    mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
+                    mService.updateOomAdjLocked(conn.provider.proc,
+                            OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
                 }
             }
         } finally {
@@ -734,7 +735,8 @@ public class ContentProviderHelper {
             ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp, userId);
             if (localCpr.hasExternalProcessHandles()) {
                 if (localCpr.removeExternalProcessHandleLocked(token)) {
-                    mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
+                    mService.updateOomAdjLocked(localCpr.proc,
+                            OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
                 } else {
                     Slog.e(TAG, "Attempt to remove content provider " + localCpr
                             + " with no external reference for token: " + token + ".");

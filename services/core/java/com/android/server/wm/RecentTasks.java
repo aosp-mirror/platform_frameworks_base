@@ -1346,11 +1346,8 @@ class RecentTasks {
         // singleTaskInstance is set on the VirtualDisplay managed by ActivityView
         // TODO(b/126185105): Find a different signal to use besides isSingleTaskInstance
         final Task rootTask = task.getRootTask();
-        if (rootTask != null) {
-            DisplayContent display = rootTask.getDisplay();
-            if (display != null && display.isSingleTaskInstance()) {
-                return false;
-            }
+        if (rootTask != null && rootTask.isSingleTaskInstance()) {
+            return false;
         }
 
         // If we're in lock task mode, ignore the root task

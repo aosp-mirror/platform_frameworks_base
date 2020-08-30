@@ -70,6 +70,7 @@
             android:maxLength="2"
             android:gravity="center"
             android:background="@drawable/tv_volume_dialog_circle"
+            android:fontFeatureSettings="tnum"
             android:textSize="@dimen/tv_volume_number_text_size"
             android:textColor="@color/accent_tint_color_selector"/>
     </LinearLayout>

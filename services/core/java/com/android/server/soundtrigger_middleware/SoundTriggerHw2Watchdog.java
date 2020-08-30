@@ -35,7 +35,8 @@ import java.util.TimerTask;
  * HAL whenever they expire.
  */
 public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
-    private static final long TIMEOUT_MS = 1000;
+    // TODO(b/166328980): Reduce this to 1000 as soon as HAL is fixed.
+    private static final long TIMEOUT_MS = 10000;
     private static final String TAG = "SoundTriggerHw2Watchdog";
 
     private final @NonNull

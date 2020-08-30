@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.InsetsState;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -97,6 +98,7 @@ public class SystemBarConfigs {
         populateMaps();
         readConfigs();
         checkEnabledBarsHaveUniqueBarTypes();
+        checkAllOverlappingBarsHaveDifferentZOrders();
         checkSystemBarEnabledForNotificationPanel();
         setInsetPaddingsForOverlappingCorners();
         sortSystemBarSidesByZOrder();
@@ -123,8 +125,18 @@ public class SystemBarConfigs {
     }
 
     protected void insetSystemBar(@SystemBarSide int side, CarNavigationBarView view) {
+        if (mSystemBarConfigMap.get(side) == null) return;
+
         int[] paddings = mSystemBarConfigMap.get(side).getPaddings();
         view.setPadding(paddings[2], paddings[0], paddings[3], paddings[1]);
+    }
+
+    protected void setInsetUpdater(@SystemBarSide int side, CarNavigationBarView view) {
+        view.setOnApplyWindowInsetsListener((v, insets) -> {
+            updateInsetPaddings(side, getSystemBarsVisibility(insets));
+            insetSystemBar(side, view);
+            return insets;
+        });
     }
 
     protected List<Integer> getSystemBarSidesByZOrder() {
@@ -132,7 +144,41 @@ public class SystemBarConfigs {
     }
 
     @VisibleForTesting
-    protected static int getHunZOrder() {
+    void updateInsetPaddings(@SystemBarSide int side,
+            Map<@SystemBarSide Integer, Boolean> barVisibilities) {
+        SystemBarConfig currentConfig = mSystemBarConfigMap.get(side);
+
+        if (currentConfig == null) return;
+
+        if (isHorizontalBar(side)) {
+            if (mLeftNavBarEnabled && currentConfig.getZOrder() < mSystemBarConfigMap.get(
+                    LEFT).getZOrder()) {
+                currentConfig.setPaddingBySide(LEFT,
+                        barVisibilities.get(LEFT) ? mSystemBarConfigMap.get(LEFT).getGirth() : 0);
+            }
+            if (mRightNavBarEnabled && currentConfig.getZOrder() < mSystemBarConfigMap.get(
+                    RIGHT).getZOrder()) {
+                currentConfig.setPaddingBySide(RIGHT,
+                        barVisibilities.get(RIGHT) ? mSystemBarConfigMap.get(RIGHT).getGirth() : 0);
+            }
+        }
+        if (isVerticalBar(side)) {
+            if (mTopNavBarEnabled && currentConfig.getZOrder() < mSystemBarConfigMap.get(
+                    TOP).getZOrder()) {
+                currentConfig.setPaddingBySide(TOP,
+                        barVisibilities.get(TOP) ? mSystemBarConfigMap.get(TOP).getGirth() : 0);
+            }
+            if (mBottomNavBarEnabled && currentConfig.getZOrder() < mSystemBarConfigMap.get(
+                    BOTTOM).getZOrder()) {
+                currentConfig.setPaddingBySide(BOTTOM,
+                        barVisibilities.get(BOTTOM) ? mSystemBarConfigMap.get(BOTTOM).getGirth()
+                                : 0);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    static int getHunZOrder() {
         return HUN_ZORDER;
     }
 
@@ -224,8 +270,14 @@ public class SystemBarConfigs {
         }
     }
 
-    private void checkSystemBarEnabledForNotificationPanel() throws RuntimeException {
+    private void checkAllOverlappingBarsHaveDifferentZOrders() {
+        checkOverlappingBarsHaveDifferentZOrders(TOP, LEFT);
+        checkOverlappingBarsHaveDifferentZOrders(TOP, RIGHT);
+        checkOverlappingBarsHaveDifferentZOrders(BOTTOM, LEFT);
+        checkOverlappingBarsHaveDifferentZOrders(BOTTOM, RIGHT);
+    }
 
+    private void checkSystemBarEnabledForNotificationPanel() throws RuntimeException {
         String notificationPanelMediatorName =
                 mResources.getString(R.string.config_notificationPanelViewMediator);
         if (notificationPanelMediatorName == null) {
@@ -253,43 +305,12 @@ public class SystemBarConfigs {
     }
 
     private void setInsetPaddingsForOverlappingCorners() {
-        setInsetPaddingForOverlappingCorner(TOP, LEFT);
-        setInsetPaddingForOverlappingCorner(TOP, RIGHT);
-        setInsetPaddingForOverlappingCorner(BOTTOM, LEFT);
-        setInsetPaddingForOverlappingCorner(BOTTOM, RIGHT);
-    }
-
-    private void setInsetPaddingForOverlappingCorner(@SystemBarSide int horizontalSide,
-            @SystemBarSide int verticalSide) {
-
-        if (isVerticalBar(horizontalSide) || isHorizontalBar(verticalSide)) {
-            Log.w(TAG, "configureBarPaddings: Returning immediately since the horizontal and "
-                    + "vertical sides were not provided correctly.");
-            return;
-        }
-
-        SystemBarConfig horizontalBarConfig = mSystemBarConfigMap.get(horizontalSide);
-        SystemBarConfig verticalBarConfig = mSystemBarConfigMap.get(verticalSide);
-
-        if (verticalBarConfig != null && horizontalBarConfig != null) {
-            int horizontalBarZOrder = horizontalBarConfig.getZOrder();
-            int horizontalBarGirth = horizontalBarConfig.getGirth();
-            int verticalBarZOrder = verticalBarConfig.getZOrder();
-            int verticalBarGirth = verticalBarConfig.getGirth();
-
-            if (horizontalBarZOrder > verticalBarZOrder) {
-                verticalBarConfig.setPaddingBySide(horizontalSide, horizontalBarGirth);
-            } else if (horizontalBarZOrder < verticalBarZOrder) {
-                horizontalBarConfig.setPaddingBySide(verticalSide, verticalBarGirth);
-            } else {
-                throw new RuntimeException(
-                        BAR_TITLE_MAP.get(horizontalSide) + " " + BAR_TITLE_MAP.get(verticalSide)
-                                + " have the same Z-Order, and so their placing order cannot be "
-                                + "determined. Determine which bar should be placed on top of the "
-                                + "other bar and change the Z-order in config.xml accordingly."
-                );
-            }
-        }
+        Map<@SystemBarSide Integer, Boolean> systemBarVisibilityOnInit =
+                getSystemBarsVisibilityOnInit();
+        updateInsetPaddings(TOP, systemBarVisibilityOnInit);
+        updateInsetPaddings(BOTTOM, systemBarVisibilityOnInit);
+        updateInsetPaddings(LEFT, systemBarVisibilityOnInit);
+        updateInsetPaddings(RIGHT, systemBarVisibilityOnInit);
     }
 
     private void sortSystemBarSidesByZOrder() {
@@ -305,6 +326,75 @@ public class SystemBarConfigs {
         systemBarsByZOrder.forEach(systemBarConfig -> {
             mSystemBarSidesByZOrder.add(systemBarConfig.getSide());
         });
+    }
+
+    @InsetsState.InternalInsetsType
+    private int getSystemBarTypeBySide(@SystemBarSide int side) {
+        return mSystemBarConfigMap.get(side) != null
+                ? mSystemBarConfigMap.get(side).getBarType() : null;
+    }
+
+    // On init, system bars are visible as long as they are enabled.
+    private Map<@SystemBarSide Integer, Boolean> getSystemBarsVisibilityOnInit() {
+        ArrayMap<@SystemBarSide Integer, Boolean> visibilityMap = new ArrayMap<>();
+        visibilityMap.put(TOP, mTopNavBarEnabled);
+        visibilityMap.put(BOTTOM, mBottomNavBarEnabled);
+        visibilityMap.put(LEFT, mLeftNavBarEnabled);
+        visibilityMap.put(RIGHT, mRightNavBarEnabled);
+        return visibilityMap;
+    }
+
+    private Map<@SystemBarSide Integer, Boolean> getSystemBarsVisibility(WindowInsets insets) {
+        ArrayMap<@SystemBarSide Integer, Boolean> visibilityMap = new ArrayMap<>();
+        if (mTopNavBarEnabled) {
+            visibilityMap.put(TOP, getSystemBarInsetVisibleBySide(TOP, insets));
+        }
+        if (mBottomNavBarEnabled) {
+            visibilityMap.put(BOTTOM, getSystemBarInsetVisibleBySide(BOTTOM, insets));
+        }
+        if (mLeftNavBarEnabled) {
+            visibilityMap.put(LEFT, getSystemBarInsetVisibleBySide(LEFT, insets));
+        }
+        if (mRightNavBarEnabled) {
+            visibilityMap.put(RIGHT, getSystemBarInsetVisibleBySide(RIGHT, insets));
+        }
+        return visibilityMap;
+    }
+
+    private boolean getSystemBarInsetVisibleBySide(@SystemBarSide int side, WindowInsets insets) {
+        if (mSystemBarConfigMap.get(side) == null) return false;
+
+        int internalInsetType = BAR_TYPE_MAP[getSystemBarTypeBySide(side)];
+        int publicInsetType = InsetsState.toPublicType(internalInsetType);
+
+        return insets.isVisible(publicInsetType);
+    }
+
+    private void checkOverlappingBarsHaveDifferentZOrders(@SystemBarSide int horizontalSide,
+            @SystemBarSide int verticalSide) {
+
+        if (isVerticalBar(horizontalSide) || isHorizontalBar(verticalSide)) {
+            Log.w(TAG, "configureBarPaddings: Returning immediately since the horizontal and "
+                    + "vertical sides were not provided correctly.");
+            return;
+        }
+
+        SystemBarConfig horizontalBarConfig = mSystemBarConfigMap.get(horizontalSide);
+        SystemBarConfig verticalBarConfig = mSystemBarConfigMap.get(verticalSide);
+
+        if (verticalBarConfig != null && horizontalBarConfig != null) {
+            int horizontalBarZOrder = horizontalBarConfig.getZOrder();
+            int verticalBarZOrder = verticalBarConfig.getZOrder();
+
+            if (horizontalBarZOrder == verticalBarZOrder) {
+                throw new RuntimeException(
+                        BAR_TITLE_MAP.get(horizontalSide) + " " + BAR_TITLE_MAP.get(verticalSide)
+                                + " have the same Z-Order, and so their placing order cannot be "
+                                + "determined. Determine which bar should be placed on top of the "
+                                + "other bar and change the Z-order in config.xml accordingly."
+                );
+            }
+        }
     }
 
     private static boolean isHorizontalBar(@SystemBarSide int side) {

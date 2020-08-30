@@ -2122,11 +2122,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task != null ? task.getRootTaskId() : INVALID_TASK_ID;
     }
 
-    DisplayContent getDisplay() {
-        final Task stack = getRootTask();
-        return stack != null ? stack.getDisplay() : null;
-    }
-
     @Override
     @Nullable
     TaskDisplayArea getDisplayArea() {
@@ -2386,7 +2381,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             }
         }
-        return (canReceiveKeys() || isAlwaysFocusable()) && getDisplay() != null;
+        // Check isAttached() because the method may be called when removing this activity from
+        // display, and WindowContainer#compareTo will throw exception if it doesn't have a parent
+        // when updating focused window from DisplayContent#findFocusedWindow.
+        return (canReceiveKeys() || isAlwaysFocusable()) && isAttached();
     }
 
     /**
@@ -2663,7 +2661,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private void prepareActivityHideTransitionAnimation(int transit) {
-        final DisplayContent dc = getDisplay().mDisplayContent;
+        final DisplayContent dc = mDisplayContent;
         dc.prepareAppTransition(transit, false);
         setVisibility(false);
         dc.executeAppTransition();
@@ -2708,7 +2706,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
 
             if (ensureVisibility) {
-                getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                mDisplayContent.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                         false /* preserveWindows */, true /* notifyClients */);
             }
         }
@@ -4652,7 +4650,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Check if the activity is on a sleeping display, and if it can turn it ON.
-        if (getDisplay().isSleeping()) {
+        if (mDisplayContent.isSleeping()) {
             final boolean canTurnScreenOn = !mSetToSleep || canTurnScreenOn()
                     || canShowWhenLocked() || containsDismissKeyguardWindow();
             if (!canTurnScreenOn) {
@@ -4931,12 +4929,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         r.setSavedState(null /* savedState */);
 
-        final DisplayContent display = r.getDisplay();
-        if (display != null) {
-            display.handleActivitySizeCompatModeIfNeeded(r);
-        }
-
-        r.getDisplayContent().mUnknownAppVisibilityController.notifyAppResumedFinished(r);
+        r.mDisplayContent.handleActivitySizeCompatModeIfNeeded(r);
+        r.mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(r);
     }
 
     /**
@@ -6834,7 +6828,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             onMergedOverrideConfigurationChanged();
         }
 
-        final DisplayContent display = getDisplay();
+        final DisplayContent display = mDisplayContent;
         if (display == null) {
             return;
         }
@@ -7259,7 +7253,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
                 lifecycleItem = ResumeActivityItem.obtain(
-                        getDisplay().mDisplayContent.isNextTransitionForward());
+                        mDisplayContent.isNextTransitionForward());
             } else {
                 lifecycleItem = PauseActivityItem.obtain();
             }
@@ -7584,11 +7578,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * otherwise.
      */
     boolean isFocusedActivityOnDisplay() {
-        final DisplayContent display = getDisplay();
-        if (display == null) {
-            return false;
-        }
-        return display.forAllTaskDisplayAreas(taskDisplayArea ->
+        return mDisplayContent.forAllTaskDisplayAreas(taskDisplayArea ->
                 taskDisplayArea.getFocusedActivity() == this);
     }
 

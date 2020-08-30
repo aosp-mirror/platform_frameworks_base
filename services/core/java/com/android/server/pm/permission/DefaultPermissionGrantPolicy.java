@@ -414,17 +414,14 @@ public final class DefaultPermissionGrantPolicy {
             if (pkg == null
                     || !doesPackageSupportRuntimePermissions(pkg)
                     || ArrayUtils.isEmpty(pkg.requestedPermissions)
-                    || !pkg.applicationInfo.isPrivilegedApp()) {
+                    || !pm.isGranted(Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                            pkg, UserHandle.of(userId))) {
                 continue;
             }
-            for (String permission : pkg.requestedPermissions) {
-                if (Manifest.permission.READ_PRIVILEGED_PHONE_STATE.equals(permission)) {
-                    grantRuntimePermissions(pm, pkg,
-                            Collections.singleton(Manifest.permission.READ_PHONE_STATE),
-                            true, // systemFixed
-                            userId);
-                }
-            }
+            grantRuntimePermissions(pm, pkg,
+                    Collections.singleton(Manifest.permission.READ_PHONE_STATE),
+                    true, // systemFixed
+                    userId);
         }
 
     }

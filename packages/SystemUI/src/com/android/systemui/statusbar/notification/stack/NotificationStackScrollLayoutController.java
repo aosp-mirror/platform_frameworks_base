@@ -1035,10 +1035,6 @@ public class NotificationStackScrollLayoutController {
         mView.updateSectionBoundaries(reason);
     }
 
-    public void updateSpeedBumpIndex() {
-        mView.updateSpeedBumpIndex();
-    }
-
     public void updateFooter() {
         mView.updateFooter();
     }

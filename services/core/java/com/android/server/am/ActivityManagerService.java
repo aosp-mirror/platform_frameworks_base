@@ -2103,17 +2103,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "meminfo", pw)) return;
                 PriorityDump.dump(mPriorityDumper, fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -2127,17 +2123,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "gfxinfo", pw)) return;
                 mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -2151,17 +2143,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "dbinfo", pw)) return;
                 mActivityManagerService.dumpDbInfo(fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -2207,9 +2195,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "cacheinfo", pw)) {
@@ -2218,9 +2204,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 mActivityManagerService.dumpBinderCacheContents(fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -5686,8 +5670,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "setProcessLimit()");
         synchronized (this) {
             mConstants.setOverrideMaxCachedProcesses(max);
+            trimApplicationsLocked(true, OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
         }
-        trimApplications(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
     }
 
     @Override
@@ -13995,7 +13979,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 r.resultAbort, false);
                         if (doNext) {
                             doTrim = true;
-                            r.queue.processNextBroadcast(false);
+                            r.queue.processNextBroadcastLocked(/* frommsg */ false,
+                                    /* skipOomAdj */ true);
                         }
                     }
 
@@ -14008,13 +13993,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         rl.receiver.asBinder().unlinkToDeath(rl, 0);
                     }
                 }
-            }
 
-            // If we actually concluded any broadcasts, we might now be able
-            // to trim the recipients' apps from our working set
-            if (doTrim) {
-                trimApplications(OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
-                return;
+                // If we actually concluded any broadcasts, we might now be able
+                // to trim the recipients' apps from our working set
+                if (doTrim) {
+                    trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
+                    return;
+                }
             }
 
         } finally {
@@ -15145,7 +15130,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     r.queue.processNextBroadcastLocked(/*fromMsg=*/ false, /*skipOomAdj=*/ true);
                 }
                 // updateOomAdjLocked() will be done here
-                trimApplicationsLocked(OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
+                trimApplicationsLocked(false, OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER);
             }
 
         } finally {
@@ -16155,6 +16140,32 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mOomAdjuster.updateOomAdjLocked(app, oomAdjAll, oomAdjReason);
     }
 
+    /**
+     * Enqueue the given process into a todo list, and the caller should
+     * call {@link #updateOomAdjPendingTargetsLocked} to kick off a pass of the oom adj update.
+     */
+    @GuardedBy("this")
+    void enqueueOomAdjTargetLocked(ProcessRecord app) {
+        mOomAdjuster.enqueueOomAdjTargetLocked(app);
+    }
+
+    /**
+     * Remove the given process into a todo list.
+     */
+    @GuardedBy("this")
+    void removeOomAdjTargetLocked(ProcessRecord app, boolean procDied) {
+        mOomAdjuster.removeOomAdjTargetLocked(app, procDied);
+    }
+
+    /**
+     * Kick off an oom adj update pass for the pending targets which are enqueued via
+     * {@link #enqueueOomAdjTargetLocked}.
+     */
+    @GuardedBy("this")
+    void updateOomAdjPendingTargetsLocked(String oomAdjReason) {
+        mOomAdjuster.updateOomAdjPendingTargetsLocked(oomAdjReason);
+    }
+
     static final class ProcStatsRunnable implements Runnable {
         private final ActivityManagerService mService;
         private final ProcessStatsService mProcessStats;
@@ -16563,16 +16574,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster.setUidTempWhitelistStateLocked(uid, onWhitelist);
     }
 
-    final void trimApplications(String oomAdjReason) {
+    private void trimApplications(boolean forceFullOomAdj, String oomAdjReason) {
         synchronized (this) {
-            trimApplicationsLocked(oomAdjReason);
+            trimApplicationsLocked(forceFullOomAdj, oomAdjReason);
         }
     }
 
     @GuardedBy("this")
-    final void trimApplicationsLocked(String oomAdjReason) {
+    private void trimApplicationsLocked(boolean forceFullOomAdj, String oomAdjReason) {
         // First remove any unused application processes whose package
         // has been removed.
+        boolean didSomething = false;
         for (int i = mProcessList.mRemovedProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mProcessList.mRemovedProcesses.get(i);
             if (!app.hasActivitiesOrRecentTasks()
@@ -16594,6 +16606,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Ignore exceptions.
                     }
                 }
+                didSomething = true;
                 cleanUpApplicationRecordLocked(app, false, true, -1, false /*replacingPid*/);
                 mProcessList.mRemovedProcesses.remove(i);
 
@@ -16606,7 +16619,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Now update the oom adj for all processes. Don't skip this, since other callers
         // might be depending on it.
-        updateOomAdjLocked(oomAdjReason);
+        if (didSomething || forceFullOomAdj) {
+            updateOomAdjLocked(oomAdjReason);
+        } else {
+            // Process any pending oomAdj targets, it'll be a no-op if nothing is pending.
+            updateOomAdjPendingTargetsLocked(oomAdjReason);
+        }
     }
 
     /** This method sends the specified signal to each of the persistent apps */
@@ -16800,14 +16818,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                Process.enableFreezer(false);
+                mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 final RemoteCallback intermediateCallback = new RemoteCallback(
                         new RemoteCallback.OnResultListener() {
                         @Override
                         public void onResult(Bundle result) {
                             finishCallback.sendResult(result);
-                            Process.enableFreezer(true);
+                            mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
                         }
                     }, null);
 
@@ -17411,7 +17429,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void trimApplications() {
-            ActivityManagerService.this.trimApplications(OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+            ActivityManagerService.this.trimApplications(true, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
         }
 
         public void killProcessesForRemovedTask(ArrayList<Object> procsToKill) {
@@ -18735,6 +18753,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(Manifest.permission.RESET_APP_ERRORS, "resetAppErrors");
         synchronized (this) {
             mAppErrors.resetStateLocked();
+        }
+    }
+
+    @Override
+    public boolean enableAppFreezer(boolean enable) {
+        int callerUid = Binder.getCallingUid();
+
+        // Only system can toggle the freezer state
+        if (callerUid == SYSTEM_UID) {
+            return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
+        } else {
+            throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");
         }
     }
 }

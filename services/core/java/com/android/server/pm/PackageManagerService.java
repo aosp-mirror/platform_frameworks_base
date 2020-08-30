@@ -14530,11 +14530,13 @@ public class PackageManagerService extends IPackageManager.Stub
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.pkg);
         }
 
-        // A restore should be requested at this point if (a) the install
-        // succeeded, (b) the operation is not an update.
+        // A restore should be performed at this point if (a) the install
+        // succeeded, (b) the operation is not an update, and (c) the new
+        // package has not opted out of backup participation.
         final boolean update = res.removedInfo != null
                 && res.removedInfo.removedPackage != null;
-        boolean doRestore = !update;
+        boolean allowBackup = res.pkg != null && res.pkg.isAllowBackup();
+        boolean doRestore = !update && allowBackup;
 
         // Set up the post-install work request bookkeeping.  This will be used
         // and cleaned up by the post-install event handling regardless of whether
@@ -21645,8 +21647,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         .getUriFor(Secure.INSTANT_APPS_ENABLED), false, co, UserHandle.USER_ALL);
         co.onChange(true);
 
-        mAppsFilter.onSystemReady();
-
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(
@@ -21795,6 +21795,9 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstallerService.restoreAndApplyStagedSessionIfNeeded();
 
         mExistingPackages = null;
+
+        // We'll do this last as it builds its cache while holding mLock via callback.
+        mAppsFilter.onSystemReady();
     }
 
     public void waitForAppDataPrepared() {
