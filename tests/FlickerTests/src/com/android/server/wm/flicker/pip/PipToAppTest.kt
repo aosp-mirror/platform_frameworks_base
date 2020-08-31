@@ -18,7 +18,7 @@ package com.android.server.wm.flicker.pip
 
 import android.view.Surface
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.LargeTest
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.closePipWindow
@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized
  * Test Pip launch.
  * To run this test: `atest FlickerTests:PipToAppTest`
  */
-@LargeTest
+@RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)

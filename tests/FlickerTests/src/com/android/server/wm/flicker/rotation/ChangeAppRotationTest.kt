@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.rotation
 
+import androidx.test.filters.RequiresDevice
 import android.view.Surface
-import androidx.test.filters.LargeTest
 import com.android.server.wm.flicker.NonRotationTestBase.Companion.SCREENSHOT_LAYER
 import com.android.server.wm.flicker.RotationTestBase
 import com.android.server.wm.flicker.StandardAppHelper
@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized
  * Cycle through supported app rotations.
  * To run this test: `atest FlickerTest:ChangeAppRotationTest`
  */
-@LargeTest
+@RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ChangeAppRotationTest(
