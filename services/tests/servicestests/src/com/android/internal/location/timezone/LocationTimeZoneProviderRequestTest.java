@@ -20,16 +20,20 @@ import static android.location.timezone.ParcelableTestSupport.assertRoundTripPar
 
 import org.junit.Test;
 
+import java.time.Duration;
+
 public class LocationTimeZoneProviderRequestTest {
 
     @Test
     public void testParcelable() {
         LocationTimeZoneProviderRequest.Builder builder =
                 new LocationTimeZoneProviderRequest.Builder()
-                        .setReportLocationTimeZone(true);
+                        .setReportLocationTimeZone(false);
         assertRoundTripParcelable(builder.build());
 
-        builder.setReportLocationTimeZone(false);
+        builder.setReportLocationTimeZone(true)
+                .setInitializationTimeoutMillis(Duration.ofMinutes(5).toMillis());
+
         assertRoundTripParcelable(builder.build());
     }
 }
