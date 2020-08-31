@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.view.Surface
-import androidx.test.filters.LargeTest
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.focusChanges
@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
  * Test warm launch app.
  * To run this test: `atest FlickerTests:OpenAppWarmTest`
  */
-@LargeTest
+@RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenAppWarmTest(

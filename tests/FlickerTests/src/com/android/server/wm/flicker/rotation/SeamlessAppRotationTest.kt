@@ -20,14 +20,13 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.view.Surface
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.LargeTest
+import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.RotationTestBase
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.helpers.stopPackage
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -48,7 +47,7 @@ import org.junit.runners.Parameterized
  * Cycle through supported app rotations using seamless rotations.
  * To run this test: `atest FlickerTests:SeamlessAppRotationTest`
  */
-@LargeTest
+@RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 147659548)

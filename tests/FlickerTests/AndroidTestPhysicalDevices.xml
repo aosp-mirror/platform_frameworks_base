@@ -27,6 +27,7 @@
     </target_preparer>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
         <option name="package" value="com.android.server.wm.flicker"/>
+        <option name="include-annotation" value="androidx.test.filters.RequiresDevice" />
         <option name="exclude-annotation" value="androidx.test.filters.FlakyTest" />
         <option name="shell-timeout" value="6600s" />
         <option name="test-timeout" value="6000s" />
