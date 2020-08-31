@@ -96,21 +96,19 @@ static bool validateFile(const char* filename) {
         return false;
 
     case FILETYPE_KEYLAYOUT: {
-        sp<KeyLayoutMap> map;
-        status_t status = KeyLayoutMap::load(filename, &map);
-        if (status) {
-            error("Error %d parsing key layout file.\n\n", status);
+        base::Result<std::shared_ptr<KeyLayoutMap>> ret = KeyLayoutMap::load(filename);
+        if (!ret) {
+            error("Error %s parsing key layout file.\n\n", ret.error().message().c_str());
             return false;
         }
         break;
     }
 
     case FILETYPE_KEYCHARACTERMAP: {
-        sp<KeyCharacterMap> map;
-        status_t status = KeyCharacterMap::load(filename,
-                KeyCharacterMap::FORMAT_ANY, &map);
-        if (status) {
-            error("Error %d parsing key character map file.\n\n", status);
+        base::Result<std::shared_ptr<KeyCharacterMap>> ret = KeyCharacterMap::load(filename,
+                KeyCharacterMap::FORMAT_ANY);
+        if (!ret) {
+            error("Error %s parsing key character map file.\n\n", ret.error().message().c_str());
             return false;
         }
         break;
