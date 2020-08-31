@@ -20,8 +20,13 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
 import android.provider.Settings;
+import android.util.MathUtils;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -31,7 +36,8 @@ import com.android.systemui.R;
 /**
  * Shows/hides a {@link android.widget.ImageView} on the screen and changes the values of
  * {@link Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE} when the UI is toggled.
- * The button UI would automatically be dismissed after displaying for a period of time.
+ * The button icon is movable by dragging. And the button UI would automatically be dismissed after
+ * displaying for a period of time.
  */
 class MagnificationModeSwitch {
 
@@ -41,6 +47,10 @@ class MagnificationModeSwitch {
     private final Context mContext;
     private final WindowManager mWindowManager;
     private final ImageView mImageView;
+    private final PointF mLastDown = new PointF();
+    private final PointF mLastDrag = new PointF();
+    private final int mTapTimeout = ViewConfiguration.getTapTimeout();
+    private final int mTouchSlop;
     private int mMagnificationMode = Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     private final WindowManager.LayoutParams mParams;
     private boolean mIsVisible = false;
@@ -56,13 +66,10 @@ class MagnificationModeSwitch {
                 Context.WINDOW_SERVICE);
         mParams = createLayoutParams();
         mImageView = imageView;
+        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         applyResourcesValues();
-        mImageView.setOnClickListener(
-                view -> {
-                    removeButton();
-                    toggleMagnificationMode();
-                });
         mImageView.setImageResource(getIconResId(mMagnificationMode));
+        mImageView.setOnTouchListener(this::onTouch);
     }
 
     private void applyResourcesValues() {
@@ -71,13 +78,59 @@ class MagnificationModeSwitch {
         mImageView.setPadding(padding, padding, padding, padding);
     }
 
+    private boolean onTouch(View v, MotionEvent event) {
+        if (!mIsVisible || mImageView == null) {
+            return false;
+        }
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mImageView.setAlpha(1.0f);
+                mImageView.animate().cancel();
+                mLastDown.set(event.getRawX(), event.getRawY());
+                mLastDrag.set(event.getRawX(), event.getRawY());
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                // Move the button position.
+                moveButton(event.getRawX() - mLastDrag.x,
+                        event.getRawY() - mLastDrag.y);
+                mLastDrag.set(event.getRawX(), event.getRawY());
+                return true;
+            case MotionEvent.ACTION_UP:
+                // Single tap to toggle magnification mode and the button position will be reset
+                // after the action is performed.
+                final float distance = MathUtils.dist(mLastDown.x, mLastDown.y,
+                        event.getRawX(), event.getRawY());
+                if ((event.getEventTime() - event.getDownTime()) <= mTapTimeout
+                        && distance <= mTouchSlop) {
+                    handleSingleTap();
+                } else {
+                    showButton(mMagnificationMode);
+                }
+                return true;
+            case MotionEvent.ACTION_CANCEL:
+                showButton(mMagnificationMode);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void moveButton(float offsetX, float offsetY) {
+        mParams.x -= offsetX;
+        mParams.y -= offsetY;
+        mWindowManager.updateViewLayout(mImageView, mParams);
+    }
+
     void removeButton() {
         if (!mIsVisible) {
             return;
         }
         mImageView.animate().cancel();
         mWindowManager.removeView(mImageView);
+        // Reset button status.
         mIsVisible = false;
+        mParams.x = 0;
+        mParams.y = 0;
     }
 
     void showButton(int mode) {
@@ -118,6 +171,11 @@ class MagnificationModeSwitch {
         mImageView.setImageResource(getIconResId(newMode));
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, newMode);
+    }
+
+    private void handleSingleTap() {
+        removeButton();
+        toggleMagnificationMode();
     }
 
     private static ImageView createView(Context context) {
