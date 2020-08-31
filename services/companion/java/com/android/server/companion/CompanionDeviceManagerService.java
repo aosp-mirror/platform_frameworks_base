@@ -391,12 +391,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                             .toString());
             long identity = Binder.clearCallingIdentity();
             try {
-                return PendingIntent.getActivity(getContext(),
+                return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
                                 userId, component, packageTitle),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
-                                | PendingIntent.FLAG_CANCEL_CURRENT);
+                                | PendingIntent.FLAG_CANCEL_CURRENT,
+                        null /* options */,
+                        new UserHandle(userId));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
