@@ -18,12 +18,12 @@ package com.android.systemui.car.hvac;
 
 import static android.car.VehicleAreaType.VEHICLE_AREA_TYPE_GLOBAL;
 import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_DISPLAY_UNITS;
+import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_SET;
 
 import android.car.Car;
 import android.car.VehicleUnit;
 import android.car.hardware.CarPropertyValue;
-import android.car.hardware.hvac.CarHvacManager;
-import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
+import android.car.hardware.property.CarPropertyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,10 +34,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -54,49 +52,64 @@ public class HvacController {
     private final CarServiceProvider mCarServiceProvider;
     private final Set<TemperatureView> mRegisteredViews = new HashSet<>();
 
-    private CarHvacManager mHvacManager;
-    private HashMap<HvacKey, List<TemperatureView>> mTempComponents = new HashMap<>();
+    private CarPropertyManager mCarPropertyManager;
+    private HashMap<Integer, List<TemperatureView>> mTempComponents = new HashMap<>();
 
-    /**
-     * Callback for getting changes from {@link CarHvacManager} and setting the UI elements to
-     * match.
-     */
-    private final CarHvacEventCallback mHardwareCallback = new CarHvacEventCallback() {
-        @Override
-        public void onChangeEvent(final CarPropertyValue val) {
-            try {
-                int areaId = val.getAreaId();
-                int propertyId = val.getPropertyId();
-                List<TemperatureView> temperatureViews = mTempComponents.get(
-                        new HvacKey(propertyId, areaId));
-                if (temperatureViews != null && !temperatureViews.isEmpty()) {
-                    float value = (float) val.getValue();
-                    if (DEBUG) {
-                        Log.d(TAG, "onChangeEvent: " + areaId + ":" + propertyId + ":" + value);
+    private final CarPropertyManager.CarPropertyEventCallback mHvacTemperatureSetCallback =
+            new CarPropertyManager.CarPropertyEventCallback() {
+                @Override
+                public void onChangeEvent(CarPropertyValue value) {
+                    try {
+                        int areaId = value.getAreaId();
+                        List<TemperatureView> temperatureViews = mTempComponents.get(areaId);
+                        if (temperatureViews != null && !temperatureViews.isEmpty()) {
+                            float newTemp = (float) value.getValue();
+                            if (DEBUG) {
+                                Log.d(TAG, "onChangeEvent: " + areaId + ":" + value);
+                            }
+                            for (TemperatureView view : temperatureViews) {
+                                view.setTemperatureView(newTemp);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed handling hvac change event", e);
                     }
-                    for (TemperatureView tempView : temperatureViews) {
-                        tempView.setTemp(value);
-                    }
-                } // else the data is not of interest
-            } catch (Exception e) {
-                // catch all so we don't take down the sysui if a new data type is
-                // introduced.
-                Log.e(TAG, "Failed handling hvac change event", e);
-            }
-        }
+                }
 
-        @Override
-        public void onErrorEvent(final int propertyId, final int zone) {
-            Log.d(TAG, "HVAC error event, propertyId: " + propertyId
-                    + " zone: " + zone);
-        }
-    };
+                @Override
+                public void onErrorEvent(int propId, int zone) {
+                    Log.d(TAG, "HVAC error event, propertyId: " + propId + " zone: " + zone);
+                }
+            };
+
+    private final CarPropertyManager.CarPropertyEventCallback mTemperatureUnitChangeCallback =
+            new CarPropertyManager.CarPropertyEventCallback() {
+                @Override
+                public void onChangeEvent(CarPropertyValue value) {
+                    if (!mRegisteredViews.isEmpty()) {
+                        for (TemperatureView view : mRegisteredViews) {
+                            view.setDisplayInFahrenheit(
+                                    value.getValue().equals(VehicleUnit.FAHRENHEIT));
+                        }
+                    }
+                }
+
+                @Override
+                public void onErrorEvent(int propId, int zone) {
+                    Log.d(TAG, "HVAC error event, propertyId: " + propId + " zone: " + zone);
+                }
+            };
 
     private final CarServiceProvider.CarServiceOnConnectedListener mCarServiceLifecycleListener =
             car -> {
                 try {
-                    mHvacManager = (CarHvacManager) car.getCarManager(Car.HVAC_SERVICE);
-                    mHvacManager.registerCallback(mHardwareCallback);
+                    mCarPropertyManager = (CarPropertyManager) car.getCarManager(
+                            Car.PROPERTY_SERVICE);
+                    mCarPropertyManager.registerCallback(mHvacTemperatureSetCallback,
+                            HVAC_TEMPERATURE_SET, CarPropertyManager.SENSOR_RATE_ONCHANGE);
+                    mCarPropertyManager.registerCallback(mTemperatureUnitChangeCallback,
+                            HVAC_TEMPERATURE_DISPLAY_UNITS,
+                            CarPropertyManager.SENSOR_RATE_ONCHANGE);
                     initComponents();
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to correctly connect to HVAC", e);
@@ -109,8 +122,7 @@ public class HvacController {
     }
 
     /**
-     * Create connection to the Car service. Note: call backs from the Car service
-     * ({@link CarHvacManager}) will happen on the same thread this method was called from.
+     * Create connection to the Car service.
      */
     public void connectToCarService() {
         mCarServiceProvider.addListener(mCarServiceLifecycleListener);
@@ -124,21 +136,18 @@ public class HvacController {
             return;
         }
 
-        HvacKey hvacKey = new HvacKey(temperatureView.getPropertyId(), temperatureView.getAreaId());
-        if (!mTempComponents.containsKey(hvacKey)) {
-            mTempComponents.put(hvacKey, new ArrayList<>());
+        int areaId = temperatureView.getAreaId();
+        if (!mTempComponents.containsKey(areaId)) {
+            mTempComponents.put(areaId, new ArrayList<>());
         }
-        mTempComponents.get(hvacKey).add(temperatureView);
+        mTempComponents.get(areaId).add(temperatureView);
         initComponent(temperatureView);
 
         mRegisteredViews.add(temperatureView);
     }
 
     private void initComponents() {
-        Iterator<Map.Entry<HvacKey, List<TemperatureView>>> iterator =
-                mTempComponents.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<HvacKey, List<TemperatureView>> next = iterator.next();
+        for (Map.Entry<Integer, List<TemperatureView>> next : mTempComponents.entrySet()) {
             List<TemperatureView> temperatureViews = next.getValue();
             for (TemperatureView view : temperatureViews) {
                 initComponent(view);
@@ -147,29 +156,29 @@ public class HvacController {
     }
 
     private void initComponent(TemperatureView view) {
-        int id = view.getPropertyId();
         int zone = view.getAreaId();
         if (DEBUG) {
-            Log.d(TAG, "initComponent: " + zone + ":" + id);
+            Log.d(TAG, "initComponent: " + zone);
         }
 
         try {
-            if (mHvacManager != null
-                    && mHvacManager.isPropertyAvailable(HVAC_TEMPERATURE_DISPLAY_UNITS,
-                            VEHICLE_AREA_TYPE_GLOBAL)) {
-                if (mHvacManager.getIntProperty(HVAC_TEMPERATURE_DISPLAY_UNITS,
+            if (mCarPropertyManager != null && mCarPropertyManager.isPropertyAvailable(
+                    HVAC_TEMPERATURE_DISPLAY_UNITS, VEHICLE_AREA_TYPE_GLOBAL)) {
+                if (mCarPropertyManager.getIntProperty(HVAC_TEMPERATURE_DISPLAY_UNITS,
                         VEHICLE_AREA_TYPE_GLOBAL) == VehicleUnit.FAHRENHEIT) {
                     view.setDisplayInFahrenheit(true);
                 }
-
             }
-            if (mHvacManager == null || !mHvacManager.isPropertyAvailable(id, zone)) {
-                view.setTemp(Float.NaN);
+            if (mCarPropertyManager == null || !mCarPropertyManager.isPropertyAvailable(
+                    HVAC_TEMPERATURE_SET, zone)) {
+                view.setTemperatureView(Float.NaN);
                 return;
             }
-            view.setTemp(mHvacManager.getFloatProperty(id, zone));
+            view.setTemperatureView(
+                    mCarPropertyManager.getFloatProperty(HVAC_TEMPERATURE_SET, zone));
+            view.setHvacController(this);
         } catch (Exception e) {
-            view.setTemp(Float.NaN);
+            view.setTemperatureView(Float.NaN);
             Log.e(TAG, "Failed to get value from hvac service", e);
         }
     }
@@ -199,30 +208,32 @@ public class HvacController {
     }
 
     /**
-     * Key for storing {@link TemperatureView}s in a hash map
+     * Set the temperature in Celsius of the specified zone
      */
-    private static class HvacKey {
-
-        int mPropertyId;
-        int mAreaId;
-
-        private HvacKey(int propertyId, int areaId) {
-            mPropertyId = propertyId;
-            mAreaId = areaId;
+    public void setTemperature(float tempC, int zone) {
+        if (mCarPropertyManager != null) {
+            // Internally, all temperatures are represented in floating point Celsius
+            mCarPropertyManager.setFloatProperty(HVAC_TEMPERATURE_SET, zone, tempC);
         }
+    }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            HvacKey hvacKey = (HvacKey) o;
-            return mPropertyId == hvacKey.mPropertyId
-                    && mAreaId == hvacKey.mAreaId;
-        }
+    /**
+     * Convert the given temperature in Celsius into Fahrenheit
+     *
+     * @param tempC - The temperature in Celsius
+     * @return Temperature in Fahrenheit.
+     */
+    public static float convertToFahrenheit(float tempC) {
+        return (tempC * 9f / 5f) + 32;
+    }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(mPropertyId, mAreaId);
-        }
+    /**
+     * Convert the given temperature in Fahrenheit to Celsius
+     *
+     * @param tempF - The temperature in Fahrenheit.
+     * @return Temperature in Celsius.
+     */
+    public static float convertToCelsius(float tempF) {
+        return (float) ((tempF - 32) * 0.55555555556);
     }
 }
