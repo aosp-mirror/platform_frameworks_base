@@ -253,19 +253,26 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Call when the views should be removed, ensure this is called to clean up ActivityView
-     * content.
+     * Cleanup expanded view for bubbles going into overflow.
      */
-    void cleanupViews() {
+    void cleanupExpandedView() {
         if (mExpandedView != null) {
             mExpandedView.cleanUpExpandedState();
             mExpandedView = null;
         }
-        mIconView = null;
         if (mIntent != null) {
             mIntent.unregisterCancelListener(mIntentCancelListener);
         }
         mIntentActive = false;
+    }
+
+    /**
+     * Call when the views should be removed, ensure this is called to clean up ActivityView
+     * content.
+     */
+    void cleanupViews() {
+        cleanupExpandedView();
+        mIconView = null;
     }
 
     void setPendingIntentCanceled() {
@@ -327,7 +334,6 @@ class Bubble implements BubbleViewProvider {
             return;
         }
         mInflationTask.cancel(true /* mayInterruptIfRunning */);
-        cleanupViews();
     }
 
     void setViewInfo(BubbleViewInfoTask.BubbleViewInfo info) {
