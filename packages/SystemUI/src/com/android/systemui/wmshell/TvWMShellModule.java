@@ -31,13 +31,13 @@ import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.pip.tv.PipController;
 import com.android.systemui.pip.tv.PipNotification;
 import com.android.systemui.pip.tv.dagger.TvPipComponent;
-import com.android.systemui.stackdivider.SplitScreen;
-import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.Optional;
 

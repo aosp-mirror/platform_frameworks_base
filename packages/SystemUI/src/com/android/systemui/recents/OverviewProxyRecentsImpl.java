@@ -38,8 +38,8 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
 

@@ -29,10 +29,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;

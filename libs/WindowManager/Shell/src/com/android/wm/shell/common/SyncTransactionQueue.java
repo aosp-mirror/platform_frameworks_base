@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.common;
 
+import android.annotation.NonNull;
 import android.os.Handler;
 import android.util.Slog;
 import android.view.SurfaceControl;
@@ -23,17 +24,13 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
-import androidx.annotation.NonNull;
-
-import com.android.wm.shell.common.TransactionPool;
-
 import java.util.ArrayList;
 
 /**
  * Helper for serializing sync-transactions and corresponding callbacks.
  */
-class SyncTransactionQueue {
-    private static final boolean DEBUG = SplitScreenController.DEBUG;
+public final class SyncTransactionQueue {
+    private static final boolean DEBUG = false;
     private static final String TAG = "SyncTransactionQueue";
 
     // Just a little longer than the sync-engine timeout of 5s
@@ -58,7 +55,7 @@ class SyncTransactionQueue {
         }
     };
 
-    SyncTransactionQueue(TransactionPool pool, Handler handler) {
+    public SyncTransactionQueue(TransactionPool pool, Handler handler) {
         mTransactionPool = pool;
         mHandler = handler;
     }
@@ -66,7 +63,7 @@ class SyncTransactionQueue {
     /**
      * Queues a sync transaction to be sent serially to WM.
      */
-    void queue(WindowContainerTransaction wct) {
+    public void queue(WindowContainerTransaction wct) {
         SyncCallback cb = new SyncCallback(wct);
         synchronized (mQueue) {
             if (DEBUG) Slog.d(TAG, "Queueing up " + wct);
@@ -82,7 +79,7 @@ class SyncTransactionQueue {
      * Otherwise just returns without queueing.
      * @return {@code true} if queued, {@code false} if not.
      */
-    boolean queueIfWaiting(WindowContainerTransaction wct) {
+    public boolean queueIfWaiting(WindowContainerTransaction wct) {
         synchronized (mQueue) {
             if (mQueue.isEmpty()) {
                 if (DEBUG) Slog.d(TAG, "Nothing in queue, so skip queueing up " + wct);
@@ -102,7 +99,7 @@ class SyncTransactionQueue {
      * Runs a runnable in sync with sync transactions (ie. when the current in-flight transaction
      * returns. If there are no transactions in-flight, runnable executes immediately.
      */
-    void runInSync(TransactionRunnable runnable) {
+    public void runInSync(TransactionRunnable runnable) {
         synchronized (mQueue) {
             if (DEBUG) Slog.d(TAG, "Run in sync. mInFlight=" + mInFlight);
             if (mInFlight != null) {
@@ -127,7 +124,9 @@ class SyncTransactionQueue {
         t.close();
     }
 
-    interface TransactionRunnable {
+    /** Task to run with transaction. */
+    public interface TransactionRunnable {
+        /** Runs with transaction. */
         void runWithTransaction(SurfaceControl.Transaction t);
     }
 
@@ -154,7 +153,7 @@ class SyncTransactionQueue {
 
         @Override
         public void onTransactionReady(int id,
-                @androidx.annotation.NonNull SurfaceControl.Transaction t) {
+                @NonNull SurfaceControl.Transaction t) {
             mHandler.post(() -> {
                 synchronized (mQueue) {
                     if (mId != id) {

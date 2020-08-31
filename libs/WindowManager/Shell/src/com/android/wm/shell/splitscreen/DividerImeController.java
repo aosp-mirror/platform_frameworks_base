@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
@@ -22,6 +22,7 @@ import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.Slog;
@@ -30,8 +31,6 @@ import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
-
-import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.TransactionPool;

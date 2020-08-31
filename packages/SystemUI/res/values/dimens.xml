@@ -954,12 +954,6 @@
     <dimen name="fab_elevation">12dp</dimen>
     <dimen name="fab_press_translation_z">9dp</dimen>
 
-    <!-- How high we lift the divider when touching -->
-    <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
-
-    <dimen name="docked_divider_handle_width">16dp</dimen>
-    <dimen name="docked_divider_handle_height">2dp</dimen>
-
     <dimen name="battery_detail_graph_space_top">27dp</dimen>
     <dimen name="battery_detail_graph_space_bottom">27dp</dimen>
 
