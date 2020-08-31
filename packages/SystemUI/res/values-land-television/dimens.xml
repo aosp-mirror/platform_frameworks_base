@@ -15,8 +15,9 @@
 -->
 
 <resources>
-  <!-- Width of volume bar -->
-  <dimen name="volume_dialog_row_width">252dp</dimen>
+  <!-- Height of volume bar -->
+  <dimen name="volume_dialog_row_height">200dp</dimen>
+  <dimen name="volume_dialog_panel_transparent_padding">17dp</dimen>
   <dimen name="tv_volume_dialog_bubble_size">36dp</dimen>
   <dimen name="tv_volume_dialog_corner_radius">40dp</dimen>
   <dimen name="tv_volume_dialog_row_padding">5dp</dimen>
