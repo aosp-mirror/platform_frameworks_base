@@ -233,7 +233,8 @@ public:
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual std::shared_ptr<PointerControllerInterface> obtainPointerController(int32_t deviceId);
     virtual void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices);
-    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier);
+    virtual std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
+            const InputDeviceIdentifier& identifier);
     virtual std::string getDeviceAlias(const InputDeviceIdentifier& identifier);
     virtual TouchAffineTransformation getTouchAffineTransformation(JNIEnv *env,
             jfloatArray matrixArr);
@@ -622,12 +623,12 @@ void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDevice
     checkAndClearExceptionFromCallback(env, "notifyInputDevicesChanged");
 }
 
-sp<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
+std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
         const InputDeviceIdentifier& identifier) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    sp<KeyCharacterMap> result;
+    std::shared_ptr<KeyCharacterMap> result;
     ScopedLocalRef<jstring> descriptor(env, env->NewStringUTF(identifier.descriptor.c_str()));
     ScopedLocalRef<jobject> identifierObj(env, env->NewObject(gInputDeviceIdentifierInfo.clazz,
             gInputDeviceIdentifierInfo.constructor, descriptor.get(),
@@ -642,8 +643,12 @@ sp<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
         ScopedUtfChars filenameChars(env, filenameObj.get());
         ScopedUtfChars contentsChars(env, contentsObj.get());
 
-        KeyCharacterMap::loadContents(filenameChars.c_str(),
-                contentsChars.c_str(), KeyCharacterMap::FORMAT_OVERLAY, &result);
+        base::Result<std::shared_ptr<KeyCharacterMap>> ret =
+                KeyCharacterMap::loadContents(filenameChars.c_str(), contentsChars.c_str(),
+                                              KeyCharacterMap::FORMAT_OVERLAY);
+        if (ret) {
+            result = *ret;
+        }
     }
     checkAndClearExceptionFromCallback(env, "getKeyboardLayoutOverlay");
     return result;

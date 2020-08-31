@@ -1,18 +1,18 @@
 /*
  * Copyright 2006, The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0 
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -47,9 +47,8 @@ static struct {
 
 class NativeKeyCharacterMap {
 public:
-    NativeKeyCharacterMap(int32_t deviceId, const sp<KeyCharacterMap>& map) :
-        mDeviceId(deviceId), mMap(map) {
-    }
+    NativeKeyCharacterMap(int32_t deviceId, std::shared_ptr<KeyCharacterMap> map)
+          : mDeviceId(deviceId), mMap(std::move(map)) {}
 
     ~NativeKeyCharacterMap() {
     }
@@ -58,26 +57,22 @@ public:
         return mDeviceId;
     }
 
-    inline const sp<KeyCharacterMap>& getMap() const {
-        return mMap;
-    }
+    inline const std::shared_ptr<KeyCharacterMap> getMap() const { return mMap; }
 
 private:
     int32_t mDeviceId;
-    sp<KeyCharacterMap> mMap;
+    std::shared_ptr<KeyCharacterMap> mMap;
 };
 
-
 jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
-        const sp<KeyCharacterMap>& kcm) {
-    NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId,
-            kcm.get() ? kcm : KeyCharacterMap::empty());
-    if (!map) {
-        return NULL;
+                                            const std::shared_ptr<KeyCharacterMap> kcm) {
+    NativeKeyCharacterMap* nativeMap = new NativeKeyCharacterMap(deviceId, kcm);
+    if (!nativeMap) {
+        return nullptr;
     }
 
     return env->NewObject(gKeyCharacterMapClassInfo.clazz, gKeyCharacterMapClassInfo.ctor,
-            reinterpret_cast<jlong>(map));
+                          reinterpret_cast<jlong>(nativeMap));
 }
 
 static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj) {
@@ -91,7 +86,7 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
         return 0;
     }
 
-    sp<KeyCharacterMap> kcm = KeyCharacterMap::readFromParcel(parcel);
+    std::shared_ptr<KeyCharacterMap> kcm = KeyCharacterMap::readFromParcel(parcel);
     if (!kcm.get()) {
         return 0;
     }
@@ -102,6 +97,9 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
 
 static void nativeWriteToParcel(JNIEnv* env, jobject clazz, jlong ptr, jobject parcelObj) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map->getMap()) {
+        return;
+    }
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel) {
         parcel->writeInt32(map->getDeviceId());
@@ -150,9 +148,8 @@ static jchar nativeGetMatch(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode,
         return 0;
     }
 
-    char16_t result = map->getMap()->getMatch(
-        keyCode, reinterpret_cast<char16_t*>(chars), size_t(numChars),
-        metaState);
+    char16_t result = map->getMap()->getMatch(keyCode, reinterpret_cast<char16_t*>(chars),
+                                              size_t(numChars), metaState);
 
     env->ReleasePrimitiveArrayCritical(charsArray, chars, JNI_ABORT);
     return result;
@@ -180,8 +177,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
 
     Vector<KeyEvent> events;
     jobjectArray result = NULL;
-    if (map->getMap()->getEvents(map->getDeviceId(),
-                                 reinterpret_cast<char16_t*>(chars),
+    if (map->getMap()->getEvents(map->getDeviceId(), reinterpret_cast<char16_t*>(chars),
                                  size_t(numChars), events)) {
         result = env->NewObjectArray(jsize(events.size()), gKeyEventClassInfo.clazz, NULL);
         if (result) {
