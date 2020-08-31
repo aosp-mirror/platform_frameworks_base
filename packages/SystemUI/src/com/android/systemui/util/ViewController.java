@@ -24,9 +24,11 @@ import android.view.View.OnAttachStateChangeListener;
  *
  * Implementations should handle setup and teardown related activities inside of
  * {@link #onViewAttached()} and {@link  #onViewDetached()}.
+ *
+ * @param <T> View class that this ViewController is for.
  */
-public abstract class ViewController {
-    private final View mView;
+public abstract class ViewController<T extends View> {
+    protected final T mView;
     private boolean mInited;
 
     private OnAttachStateChangeListener mOnAttachStateListener = new OnAttachStateChangeListener() {
@@ -41,7 +43,7 @@ public abstract class ViewController {
         }
     };
 
-    protected ViewController(View view) {
+    protected ViewController(T view) {
         mView = view;
     }
 

@@ -22,8 +22,7 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 
 /** Controller for a {@link KeyguardMessageAreaController}. */
-public class KeyguardMessageAreaController extends ViewController {
-    private final KeyguardMessageArea mView;
+public class KeyguardMessageAreaController extends ViewController<KeyguardMessageArea> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
 
@@ -32,7 +31,6 @@ public class KeyguardMessageAreaController extends ViewController {
             ConfigurationController configurationController) {
         super(view);
 
-        mView = view;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
     }

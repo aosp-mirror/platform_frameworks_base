@@ -21,16 +21,14 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 
 /** Controller for {@link KeyguardSecurityContainer} */
-public class KeyguardSecurityContainerController extends ViewController {
+public class KeyguardSecurityContainerController extends ViewController<KeyguardSecurityContainer> {
 
-    private final KeyguardSecurityContainer mView;
     private final KeyguardSecurityViewController.Factory mKeyguardSecurityViewControllerFactory;
 
     @Inject
     KeyguardSecurityContainerController(KeyguardSecurityContainer view,
             KeyguardSecurityViewController.Factory keyguardSecurityViewControllerFactory) {
         super(view);
-        mView = view;
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
     }
 

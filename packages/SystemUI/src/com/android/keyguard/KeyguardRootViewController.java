@@ -26,13 +26,10 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 /** Controller for a {@link KeyguardBouncer}'s Root view. */
 @KeyguardBouncerScope
-public class KeyguardRootViewController extends ViewController {
-    private final ViewGroup mView;
-
+public class KeyguardRootViewController extends ViewController<ViewGroup> {
     @Inject
     public KeyguardRootViewController(@RootView ViewGroup view) {
         super(view);
-        mView = view;
     }
 
     public ViewGroup getView() {

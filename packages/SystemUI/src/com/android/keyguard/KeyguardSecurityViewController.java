@@ -24,12 +24,13 @@ import javax.inject.Inject;
 
 
 /** Controller for a {@link KeyguardSecurityView}. */
-public class KeyguardSecurityViewController extends ViewController {
+public class KeyguardSecurityViewController extends ViewController<View> {
 
     private final KeyguardSecurityView mView;
 
     private KeyguardSecurityViewController(KeyguardSecurityView view) {
         super((View) view);
+        // KeyguardSecurityView isn't actually a View, so we need to track it ourselves.
         mView = view;
     }
 

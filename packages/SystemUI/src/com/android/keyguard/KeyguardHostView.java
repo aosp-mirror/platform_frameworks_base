@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.service.trust.TrustAgentService;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -36,7 +35,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
@@ -60,40 +58,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     private OnDismissAction mDismissAction;
     private Runnable mCancelAction;
 
-    private final KeyguardUpdateMonitorCallback mUpdateCallback =
-            new KeyguardUpdateMonitorCallback() {
-
-        @Override
-        public void onUserSwitchComplete(int userId) {
-            getSecurityContainer().showPrimarySecurityScreen(false /* turning off */);
-        }
-
-        @Override
-        public void onTrustGrantedWithFlags(int flags, int userId) {
-            if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
-            if (!isAttachedToWindow()) return;
-            boolean bouncerVisible = isVisibleToUser();
-            boolean initiatedByUser =
-                    (flags & TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER) != 0;
-            boolean dismissKeyguard =
-                    (flags & TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD) != 0;
-
-            if (initiatedByUser || dismissKeyguard) {
-                if (mViewMediatorCallback.isScreenOn() && (bouncerVisible || dismissKeyguard)) {
-                    if (!bouncerVisible) {
-                        // The trust agent dismissed the keyguard without the user proving
-                        // that they are present (by swiping up to show the bouncer). That's fine if
-                        // the user proved presence via some other way to the trust agent.
-                        Log.i(TAG, "TrustAgent dismissed Keyguard.");
-                    }
-                    dismiss(false /* authenticated */, userId,
-                            /* bypassSecondaryLockScreen */ false);
-                } else {
-                    mViewMediatorCallback.playTrustedSound();
-                }
-            }
-        }
-    };
 
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
@@ -111,7 +75,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateCallback);
     }
 
     @Override
