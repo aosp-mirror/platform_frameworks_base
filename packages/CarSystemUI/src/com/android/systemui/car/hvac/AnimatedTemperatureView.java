@@ -16,6 +16,8 @@
 
 package com.android.systemui.car.hvac;
 
+import static com.android.systemui.car.hvac.HvacController.convertToFahrenheit;
+
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -40,9 +42,7 @@ import com.android.systemui.R;
  * Simple text display of HVAC properties, It is designed to show mTemperature and is configured in
  * the XML.
  * XML properties:
- * hvacPropertyId - Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (16385)
- * hvacAreaId - Example: VehicleSeat.SEAT_ROW_1_LEFT (1)
- * hvacTempFormat - Example: "%.1f\u00B0" (1 decimal and the degree symbol)
+ * hvacAreaId - Example: VehicleAreaSeat.SEAT_ROW_1_LEFT (1)
  * hvacOrientaion = Example: left
  */
 public class AnimatedTemperatureView extends FrameLayout implements TemperatureView {
@@ -84,7 +84,6 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
     }
 
     private final int mAreaId;
-    private final int mPropertyId;
     private final int mPivotOffset;
     private final int mGravity;
     private final int mTextAppearanceRes;
@@ -100,12 +99,13 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
     private final TemperatureTextAnimator mTextAnimator;
     boolean mDisplayInFahrenheit = false;
 
+    private HvacController mHvacController;
+
     public AnimatedTemperatureView(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs,
                 R.styleable.AnimatedTemperatureView);
         mAreaId = typedArray.getInt(R.styleable.AnimatedTemperatureView_hvacAreaId, -1);
-        mPropertyId = typedArray.getInt(R.styleable.AnimatedTemperatureView_hvacPropertyId, -1);
         mPivotOffset =
                 typedArray.getDimensionPixelOffset(
                         R.styleable.AnimatedTemperatureView_hvacPivotOffset, 0);
@@ -115,11 +115,8 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
                 typedArray.getResourceId(R.styleable.AnimatedTemperatureView_android_textAppearance,
                         0);
         mMinEms = typedArray.getInteger(R.styleable.AnimatedTemperatureView_android_minEms, 0);
-        mMinValue = typedArray.getFloat(R.styleable.AnimatedTemperatureView_hvacMinValue,
-                Float.NaN);
-        mMaxValue = typedArray.getFloat(R.styleable.AnimatedTemperatureView_hvacMaxValue,
-                Float.NaN);
-
+        mMinValue = getResources().getFloat(R.dimen.hvac_min_value_celsius);
+        mMaxValue = getResources().getFloat(R.dimen.hvac_max_value_celsius);
 
         mPaddingRect =
                 new Rect(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
@@ -138,15 +135,10 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
 
         mBackgroundAnimator = new TemperatureBackgroundAnimator(this, background);
 
-
-        String format = typedArray.getString(R.styleable.AnimatedTemperatureView_hvacTempFormat);
-        format = (format == null) ? "%.1f\u00B0" : format;
-        CharSequence minText = typedArray.getString(
-                R.styleable.AnimatedTemperatureView_hvacMinText);
-        CharSequence maxText = typedArray.getString(
-                R.styleable.AnimatedTemperatureView_hvacMaxText);
-        mTextAnimator = new TemperatureTextAnimator(this, textSwitcher, format, mPivotOffset,
-                minText, maxText);
+        mTextAnimator = new TemperatureTextAnimator(this, textSwitcher,
+                getResources().getString(R.string.hvac_temperature_format), mPivotOffset,
+                getResources().getString(R.string.hvac_min_text),
+                getResources().getString(R.string.hvac_max_text));
 
         addView(background, ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
@@ -186,13 +178,18 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
         return textView;
     }
 
+    @Override
+    public void setHvacController(HvacController controller) {
+        mHvacController = controller;
+    }
+
     /**
      * Formats the float for display
      *
      * @param temp - The current temp or NaN
      */
     @Override
-    public void setTemp(float temp) {
+    public void setTemperatureView(float temp) {
         if (mDisplayInFahrenheit) {
             temp = convertToFahrenheit(temp);
         }
@@ -252,15 +249,7 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
     }
 
     /**
-     * @return propertiyId  Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (358614275)
-     */
-    @Override
-    public int getPropertyId() {
-        return mPropertyId;
-    }
-
-    /**
-     * @return hvac AreaId - Example: VehicleSeat.SEAT_ROW_1_LEFT (1)
+     * @return hvac AreaId - Example: VehicleAreaSeat.SEAT_ROW_1_LEFT (1)
      */
     @Override
     public int getAreaId() {
@@ -272,6 +261,5 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
         super.onDetachedFromWindow();
         mBackgroundAnimator.stopAnimations();
     }
-
 }
 

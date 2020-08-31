@@ -16,6 +16,8 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Format for HVAC temperature (No decimal and the degree symbol) -->
+    <string name="hvac_temperature_format" translatable="false">%.0f\u00B0</string>
     <!-- String to represent lowest setting of an HVAC system [CHAR LIMIT=10]-->
     <string name="hvac_min_text">Min</string>
     <!-- String to represent largest setting of an HVAC system [CHAR LIMIT=10]-->

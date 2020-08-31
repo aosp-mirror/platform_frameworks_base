@@ -20,23 +20,23 @@ import static android.car.VehicleAreaType.VEHICLE_AREA_TYPE_GLOBAL;
 import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_DISPLAY_UNITS;
 import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_SET;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
+import static com.android.systemui.car.hvac.HvacController.convertToFahrenheit;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.car.Car;
 import android.car.VehicleUnit;
 import android.car.hardware.property.CarPropertyManager;
+import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.CarSystemUiTest;
@@ -51,12 +51,14 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class HvacControllerTest extends SysuiTestCase {
-
-    private static final int AREA_ID = 1;
+public class TemperatureTextViewTest extends SysuiTestCase {
     private static final float TEMP = 72.0f;
-
+    private final String mFormat = getContext().getString(R.string.hvac_temperature_format);
     private HvacController mHvacController;
+    private TemperatureTextView mTextView;
+
+    @Mock
+    private Context mContext;
 
     @Mock
     private Car mCar;
@@ -72,72 +74,34 @@ public class HvacControllerTest extends SysuiTestCase {
         CarServiceProvider carServiceProvider = new CarServiceProvider(mContext, mCar);
         mHvacController = new HvacController(carServiceProvider);
         mHvacController.connectToCarService();
-    }
-
-    @Test
-    public void connectToCarService_registersCallback() {
-        verify(mCarPropertyManager).registerCallback(any(), eq(HVAC_TEMPERATURE_SET), anyFloat());
-        verify(mCarPropertyManager).registerCallback(any(), eq(HVAC_TEMPERATURE_DISPLAY_UNITS),
-                anyFloat());
+        mTextView = new TemperatureTextView(getContext(), /* attrs= */ null);
     }
 
     @Test
     public void addTemperatureViewToController_usingTemperatureView_registersView() {
-        TemperatureTextView v = setupMockTemperatureTextView(AREA_ID, TEMP);
-        mHvacController.addTemperatureViewToController(v);
+        when(mCarPropertyManager.isPropertyAvailable(eq(HVAC_TEMPERATURE_SET),
+                anyInt())).thenReturn(true);
+        when(mCarPropertyManager.getFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt())).thenReturn(
+                TEMP);
 
-        verify(v).setTemperatureView(TEMP);
-    }
+        mHvacController.addTemperatureViewToController(mTextView);
 
-    @Test
-    public void addTemperatureViewToController_usingSameTemperatureView_registersFirstView() {
-        TemperatureTextView v = setupMockTemperatureTextView(AREA_ID, TEMP);
-        mHvacController.addTemperatureViewToController(v);
-        verify(v).setTemperatureView(TEMP);
-        resetTemperatureView(v, AREA_ID);
-
-        mHvacController.addTemperatureViewToController(v);
-        verify(v, never()).setTemperatureView(TEMP);
-    }
-
-    @Test
-    public void addTemperatureViewToController_usingDifferentTemperatureView_registersBothViews() {
-        TemperatureTextView v1 = setupMockTemperatureTextView(AREA_ID, TEMP);
-        mHvacController.addTemperatureViewToController(v1);
-        verify(v1).setTemperatureView(TEMP);
-
-        TemperatureTextView v2 = setupMockTemperatureTextView(
-                AREA_ID + 1,
-                TEMP + 1);
-        mHvacController.addTemperatureViewToController(v2);
-        verify(v2).setTemperatureView(TEMP + 1);
+        assertEquals(mTextView.getText(), String.format(mFormat, TEMP));
     }
 
     @Test
     public void setTemperatureToFahrenheit_callsViewSetDisplayInFahrenheit() {
+        when(mCarPropertyManager.isPropertyAvailable(eq(HVAC_TEMPERATURE_SET),
+                anyInt())).thenReturn(true);
+        when(mCarPropertyManager.getFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt())).thenReturn(
+                TEMP);
         when(mCarPropertyManager.isPropertyAvailable(HVAC_TEMPERATURE_DISPLAY_UNITS,
                 VEHICLE_AREA_TYPE_GLOBAL)).thenReturn(true);
         when(mCarPropertyManager.getIntProperty(HVAC_TEMPERATURE_DISPLAY_UNITS,
                 VEHICLE_AREA_TYPE_GLOBAL)).thenReturn(VehicleUnit.FAHRENHEIT);
-        TemperatureTextView v = setupMockTemperatureTextView(AREA_ID, TEMP);
 
-        mHvacController.addTemperatureViewToController(v);
+        mHvacController.addTemperatureViewToController(mTextView);
 
-        verify(v).setDisplayInFahrenheit(true);
-        verify(v).setTemperatureView(TEMP);
-    }
-
-    private TemperatureTextView setupMockTemperatureTextView(int areaId, float value) {
-        TemperatureTextView v = mock(TemperatureTextView.class);
-        resetTemperatureView(v, areaId);
-        when(mCarPropertyManager.isPropertyAvailable(HVAC_TEMPERATURE_SET, areaId)).thenReturn(
-                true);
-        when(mCarPropertyManager.getFloatProperty(HVAC_TEMPERATURE_SET, areaId)).thenReturn(value);
-        return v;
-    }
-
-    private void resetTemperatureView(TemperatureTextView view, int areaId) {
-        reset(view);
-        when(view.getAreaId()).thenReturn(areaId);
+        assertEquals(mTextView.getText(), String.format(mFormat, convertToFahrenheit(TEMP)));
     }
 }
