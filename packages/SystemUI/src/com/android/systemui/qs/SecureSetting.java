@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -36,10 +35,6 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
     private int mObservedValue = DEFAULT;
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
-
-    protected SecureSetting(Context context, Handler handler, String settingName) {
-        this(context, handler, settingName, ActivityManager.getCurrentUser());
-    }
 
     public SecureSetting(Context context, Handler handler, String settingName, int userId) {
         super(handler);

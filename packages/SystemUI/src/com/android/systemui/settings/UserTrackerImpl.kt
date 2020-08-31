@@ -82,6 +82,12 @@ class UserTrackerImpl internal constructor(
     override val userContentResolver: ContentResolver
         get() = userContext.contentResolver
 
+    override val userInfo: UserInfo
+        get() {
+            val user = userId
+            return userProfiles.first { it.id == user }
+        }
+
     /**
      * Returns a [List<UserInfo>] of all profiles associated with the current user.
      *

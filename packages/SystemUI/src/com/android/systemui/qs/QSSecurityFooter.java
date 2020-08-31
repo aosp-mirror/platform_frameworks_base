@@ -15,7 +15,6 @@
  */
 package com.android.systemui.qs;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyEventLogger;
 import android.content.Context;
@@ -45,6 +44,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
 
@@ -61,8 +61,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private final SecurityController mSecurityController;
     private final ActivityStarter mActivityStarter;
     private final Handler mMainHandler;
-
-    private final UserManager mUm;
+    private final UserTracker mUserTracker;
 
     private AlertDialog mDialog;
     private QSTileHost mHost;
@@ -73,7 +72,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private int mFooterTextId;
     private int mFooterIconId;
 
-    public QSSecurityFooter(QSPanel qsPanel, Context context) {
+    public QSSecurityFooter(QSPanel qsPanel, Context context, UserTracker userTracker) {
         mRootView = LayoutInflater.from(context)
                 .inflate(R.layout.quick_settings_footer, qsPanel, false);
         mRootView.setOnClickListener(this);
@@ -85,7 +84,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
-        mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mUserTracker = userTracker;
     }
 
     public void setHostEnvironment(QSTileHost host) {
@@ -138,7 +137,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
     private void handleRefreshState() {
         final boolean isDeviceManaged = mSecurityController.isDeviceManaged();
-        final UserInfo currentUser = mUm.getUserInfo(ActivityManager.getCurrentUser());
+        final UserInfo currentUser = mUserTracker.getUserInfo();
         final boolean isDemoDevice = UserManager.isDeviceInDemoMode(mContext) && currentUser != null
                 && currentUser.isDemo();
         final boolean hasWorkProfile = mSecurityController.hasWorkProfile();
