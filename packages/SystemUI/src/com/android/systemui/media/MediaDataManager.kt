@@ -486,7 +486,10 @@ class MediaDataManager(
                 decoder, info, source -> decoder.isMutableRequired = true
             }
         } catch (e: IOException) {
-            e.printStackTrace()
+            Log.e(TAG, "Unable to load bitmap", e)
+            null
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unable to load bitmap", e)
             null
         }
     }
