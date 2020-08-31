@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.keyguard;
@@ -19,11 +19,12 @@ package com.android.keyguard;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.media.AudioManager;
+import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
@@ -39,41 +40,44 @@ import org.mockito.junit.MockitoRule;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class KeyguardHostViewTest extends SysuiTestCase {
+public class KeyguardHostViewControllerTest extends SysuiTestCase {
 
     @Mock
-    private KeyguardSecurityContainer mSecurityContainer;
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
-    private LockPatternUtils mLockPatternUtils;
+    private KeyguardHostView mKeyguardHostView;
+    @Mock
+    private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
+    @Mock
+    private AudioManager mAudioManager;
+    @Mock
+    private TelephonyManager mTelephonyManager;
+    @Mock
+    private ViewMediatorCallback mViewMediatorCallback;
+
     @Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
-    private KeyguardHostView mKeyguardHostView;
+    private KeyguardHostViewController mKeyguardHostViewController;
 
     @Before
     public void setup() {
-        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
-        mKeyguardHostView = new KeyguardHostView(getContext()) {
-            @Override
-            protected void onFinishInflate() {
-                mSecurityContainer = KeyguardHostViewTest.this.mSecurityContainer;
-                mLockPatternUtils = KeyguardHostViewTest.this.mLockPatternUtils;
-            }
-        };
-        mKeyguardHostView.onFinishInflate();
+        mKeyguardHostViewController = new KeyguardHostViewController(
+                mKeyguardHostView, mKeyguardUpdateMonitor, mKeyguardSecurityContainerController,
+                mAudioManager, mTelephonyManager, mViewMediatorCallback);
     }
 
     @Test
     public void testHasDismissActions() {
-        Assert.assertFalse("Action not set yet", mKeyguardHostView.hasDismissActions());
-        mKeyguardHostView.setOnDismissAction(mock(OnDismissAction.class),
+        Assert.assertFalse("Action not set yet", mKeyguardHostViewController.hasDismissActions());
+        mKeyguardHostViewController.setOnDismissAction(mock(OnDismissAction.class),
                 null /* cancelAction */);
-        Assert.assertTrue("Action should exist", mKeyguardHostView.hasDismissActions());
+        Assert.assertTrue("Action should exist", mKeyguardHostViewController.hasDismissActions());
     }
 
     @Test
     public void testOnStartingToHide() {
-        mKeyguardHostView.onStartingToHide();
-        verify(mSecurityContainer).onStartingToHide();
+        mKeyguardHostViewController.onStartingToHide();
+        verify(mKeyguardSecurityContainerController).onStartingToHide();
     }
 }

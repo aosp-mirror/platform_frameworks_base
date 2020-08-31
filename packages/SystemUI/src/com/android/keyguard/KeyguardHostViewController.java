@@ -16,21 +16,30 @@
 
 package com.android.keyguard;
 
+import android.app.ActivityManager;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.media.AudioManager;
+import android.os.SystemClock;
 import android.service.trust.TrustAgentService;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.util.ViewController;
+
+import java.io.File;
 
 import javax.inject.Inject;
 
@@ -38,17 +47,29 @@ import javax.inject.Inject;
 @KeyguardBouncerScope
 public class KeyguardHostViewController extends ViewController<KeyguardHostView> {
     private static final String TAG = "KeyguardViewBase";
+    public static final boolean DEBUG = KeyguardConstants.DEBUG;
+    // Whether the volume keys should be handled by keyguard. If true, then
+    // they will be handled here for specific media types such as music, otherwise
+    // the audio service will bring up the volume dialog.
+    private static final boolean KEYGUARD_MANAGES_VOLUME = false;
+
+    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
 
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardSecurityContainerController mKeyguardSecurityContainerController;
-    private final LockPatternUtils mLockPatternUtils;
+    private final TelephonyManager mTelephonyManager;
     private final ViewMediatorCallback mViewMediatorCallback;
+    private final AudioManager mAudioManager;
+
+    private ActivityStarter.OnDismissAction mDismissAction;
+    private Runnable mCancelAction;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onUserSwitchComplete(int userId) {
-                    mView.getSecurityContainer().showPrimarySecurityScreen(false /* turning off */);
+                    mKeyguardSecurityContainerController.showPrimarySecurityScreen(
+                            false /* turning off */);
                 }
 
                 @Override
@@ -70,7 +91,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
                                 //agent.
                                 Log.i(TAG, "TrustAgent dismissed Keyguard.");
                             }
-                            mView.dismiss(false /* authenticated */, userId,
+                            mSecurityCallback.dismiss(false /* authenticated */, userId,
                                     /* bypassSecondaryLockScreen */ false);
                         } else {
                             mViewMediatorCallback.playTrustedSound();
@@ -79,35 +100,102 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
                 }
             };
 
+    private final SecurityCallback mSecurityCallback = new SecurityCallback() {
+
+        @Override
+        public boolean dismiss(boolean authenticated, int targetUserId,
+                boolean bypassSecondaryLockScreen) {
+            return mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
+                    authenticated, targetUserId, bypassSecondaryLockScreen);
+        }
+
+        @Override
+        public void userActivity() {
+            mViewMediatorCallback.userActivity();
+        }
+
+        @Override
+        public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
+            mViewMediatorCallback.setNeedsInput(needsInput);
+        }
+
+        /**
+         * Authentication has happened and it's time to dismiss keyguard. This function
+         * should clean up and inform KeyguardViewMediator.
+         *
+         * @param strongAuth whether the user has authenticated with strong authentication like
+         *                   pattern, password or PIN but not by trust agents or fingerprint
+         * @param targetUserId a user that needs to be the foreground user at the dismissal
+         *                    completion.
+         */
+        @Override
+        public void finish(boolean strongAuth, int targetUserId) {
+            // If there's a pending runnable because the user interacted with a widget
+            // and we're leaving keyguard, then run it.
+            boolean deferKeyguardDone = false;
+            if (mDismissAction != null) {
+                deferKeyguardDone = mDismissAction.onDismiss();
+                mDismissAction = null;
+                mCancelAction = null;
+            }
+            if (mViewMediatorCallback != null) {
+                if (deferKeyguardDone) {
+                    mViewMediatorCallback.keyguardDonePending(strongAuth, targetUserId);
+                } else {
+                    mViewMediatorCallback.keyguardDone(strongAuth, targetUserId);
+                }
+            }
+        }
+
+        @Override
+        public void reset() {
+            mViewMediatorCallback.resetKeyguard();
+        }
+
+        @Override
+        public void onCancelClicked() {
+            mViewMediatorCallback.onCancelClicked();
+        }
+    };
+
+    private OnKeyListener mOnKeyListener = (v, keyCode, event) -> interceptMediaKey(event);
+
     @Inject
     public KeyguardHostViewController(KeyguardHostView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardSecurityContainerController keyguardSecurityContainerController,
-            LockPatternUtils lockPatternUtils,
+            AudioManager audioManager,
+            TelephonyManager telephonyManager,
             ViewMediatorCallback viewMediatorCallback) {
         super(view);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardSecurityContainerController = keyguardSecurityContainerController;
-        mLockPatternUtils = lockPatternUtils;
+        mAudioManager = audioManager;
+        mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
     }
 
     /** Initialize the Controller. */
     public void init() {
         super.init();
-        mView.setLockPatternUtils(mLockPatternUtils);
         mView.setViewMediatorCallback(mViewMediatorCallback);
+        // Update ViewMediator with the current input method requirements
+        mViewMediatorCallback.setNeedsInput(mKeyguardSecurityContainerController.needsInput());
         mKeyguardSecurityContainerController.init();
+        mKeyguardSecurityContainerController.setSecurityCallback(mSecurityCallback);
+        mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
     @Override
     protected void onViewAttached() {
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
+        mView.setOnKeyListener(mOnKeyListener);
     }
 
     @Override
     protected void onViewDetached() {
         mKeyguardUpdateMonitor.removeCallback(mUpdateCallback);
+        mView.setOnKeyListener(null);
     }
 
      /** Called before this view is being removed. */
@@ -116,37 +204,46 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public void resetSecurityContainer() {
-        mView.resetSecurityContainer();
+        mKeyguardSecurityContainerController.reset();
     }
 
-    public boolean dismiss(int activeUserId) {
-        return mView.dismiss(activeUserId);
+    /**
+     * Dismisses the keyguard by going to the next screen or making it gone.
+     * @param targetUserId a user that needs to be the foreground user at the dismissal completion.
+     * @return True if the keyguard is done.
+     */
+    public boolean dismiss(int targetUserId) {
+        return mSecurityCallback.dismiss(false, targetUserId, false);
     }
 
+    /**
+     * Called when the Keyguard is actively shown on the screen.
+     */
     public void onResume() {
-        mView.onResume();
+        if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
+        mKeyguardSecurityContainerController.onResume(KeyguardSecurityView.SCREEN_ON);
+        mView.requestFocus();
     }
 
     public CharSequence getAccessibilityTitleForCurrentMode() {
-        return mView.getAccessibilityTitleForCurrentMode();
+        return mKeyguardSecurityContainerController.getTitle();
     }
 
-    public void showErrorMessage(CharSequence customMessage) {
-        mView.showErrorMessage(customMessage);
-    }
-
+    /**
+     * Starts the animation when the Keyguard gets shown.
+     */
     public void appear(int statusBarHeight) {
         // We might still be collapsed and the view didn't have time to layout yet or still
         // be small, let's wait on the predraw to do the animation in that case.
         if (mView.getHeight() != 0 && mView.getHeight() != statusBarHeight) {
-            mView.startAppearAnimation();
+            mKeyguardSecurityContainerController.startAppearAnimation();
         } else {
             mView.getViewTreeObserver().addOnPreDrawListener(
                     new ViewTreeObserver.OnPreDrawListener() {
                         @Override
                         public boolean onPreDraw() {
                             mView.getViewTreeObserver().removeOnPreDrawListener(this);
-                            mView.startAppearAnimation();
+                            mKeyguardSecurityContainerController.startAppearAnimation();
                             return true;
                         }
                     });
@@ -154,32 +251,71 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         }
     }
 
+    /**
+     * Show a string explaining why the security view needs to be solved.
+     *
+     * @param reason a flag indicating which string should be shown, see
+     *               {@link KeyguardSecurityView#PROMPT_REASON_NONE},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}, and
+     *               {@link KeyguardSecurityView#PROMPT_REASON_PREPARE_FOR_UPDATE}.
+     */
     public void showPromptReason(int reason) {
-        mView.showPromptReason(reason);
+        mKeyguardSecurityContainerController.showPromptReason(reason);
     }
 
-    public void showMessage(String message, ColorStateList colorState) {
-        mView.showMessage(message, colorState);
+    public void showMessage(CharSequence message, ColorStateList colorState) {
+        mKeyguardSecurityContainerController.showMessage(message, colorState);
     }
 
+    public void showErrorMessage(CharSequence customMessage) {
+        showMessage(customMessage, Utils.getColorError(mView.getContext()));
+    }
+
+    /**
+     * Sets an action to run when keyguard finishes.
+     *
+     * @param action
+     */
     public void setOnDismissAction(ActivityStarter.OnDismissAction action, Runnable cancelAction) {
-        mView.setOnDismissAction(action, cancelAction);
+        if (mCancelAction != null) {
+            mCancelAction.run();
+            mCancelAction = null;
+        }
+        mDismissAction = action;
+        mCancelAction = cancelAction;
     }
 
     public void cancelDismissAction() {
-        mView.cancelDismissAction();
+        setOnDismissAction(null, null);
     }
 
-    public void startDisappearAnimation(Runnable runnable) {
-        mView.startDisappearAnimation(runnable);
+    public void startDisappearAnimation(Runnable finishRunnable) {
+        if (!mKeyguardSecurityContainerController.startDisappearAnimation(finishRunnable)
+                && finishRunnable != null) {
+            finishRunnable.run();
+        }
     }
 
+    /**
+     * Called when the Keyguard is not actively shown anymore on the screen.
+     */
     public void onPause() {
-        mView.onPause();
+        if (DEBUG) {
+            Log.d(TAG, String.format("screen off, instance %s at %s",
+                    Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
+        }
+        mKeyguardSecurityContainerController.showPrimarySecurityScreen(true);
+        mKeyguardSecurityContainerController.onPause();
+        mView.clearFocus();
     }
 
+    /**
+     * Called when the view needs to be shown.
+     */
     public void showPrimarySecurityScreen() {
-        mView.showPrimarySecurityScreen();
+        if (DEBUG) Log.d(TAG, "show()");
+        mKeyguardSecurityContainerController.showPrimarySecurityScreen(false);
     }
 
     public void setExpansion(float fraction) {
@@ -188,16 +324,19 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mView.setTranslationY(fraction * mView.getHeight());
     }
 
+    /**
+     * When bouncer was visible and is starting to become hidden.
+     */
     public void onStartingToHide() {
-        mView.onStartingToHide();
+        mKeyguardSecurityContainerController.onStartingToHide();
     }
 
     public boolean hasDismissActions() {
-        return mView.hasDismissActions();
+        return mDismissAction != null || mCancelAction != null;
     }
 
     public SecurityMode getCurrentSecurityMode() {
-        return mView.getCurrentSecurityMode();
+        return mKeyguardSecurityContainerController.getCurrentSecurityMode();
     }
 
     public int getTop() {
@@ -211,19 +350,110 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public boolean handleBackKey() {
-        return mView.handleBackKey();
+        if (mKeyguardSecurityContainerController.getCurrentSecuritySelection()
+                != SecurityMode.None) {
+            mKeyguardSecurityContainerController.dismiss(
+                    false, KeyguardUpdateMonitor.getCurrentUser());
+            return true;
+        }
+        return false;
     }
 
+    /**
+     * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
+     * some cases where we wish to disable it, notably when the menu button placement or technology
+     * is prone to false positives.
+     *
+     * @return true if the menu key should be enabled
+     */
     public boolean shouldEnableMenuKey() {
-        return mView.shouldEnableMenuKey();
+        final Resources res = mView.getResources();
+        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
+        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
+        return !configDisabled || isTestHarness || fileOverride;
     }
 
+    /**
+     * Allows the media keys to work when the keyguard is showing.
+     * The media keys should be of no interest to the actual keyguard view(s),
+     * so intercepting them here should not be of any harm.
+     * @param event The key event
+     * @return whether the event was consumed as a media key.
+     */
     public boolean interceptMediaKey(KeyEvent event) {
-        return mView.interceptMediaKey(event);
+        int keyCode = event.getKeyCode();
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    /* Suppress PLAY/PAUSE toggle when phone is ringing or
+                     * in-call to avoid music playback */
+                    if (mTelephonyManager != null &&
+                            mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+                        return true;  // suppress key event
+                    }
+                case KeyEvent.KEYCODE_MUTE:
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                case KeyEvent.KEYCODE_MEDIA_STOP:
+                case KeyEvent.KEYCODE_MEDIA_NEXT:
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                case KeyEvent.KEYCODE_MEDIA_RECORD:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
+                    handleMediaKeyEvent(event);
+                    return true;
+                }
+
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                case KeyEvent.KEYCODE_VOLUME_MUTE: {
+                    if (KEYGUARD_MANAGES_VOLUME) {
+                        // Volume buttons should only function for music (local or remote).
+                        // TODO: Actually handle MUTE.
+                        mAudioManager.adjustSuggestedStreamVolume(
+                                keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                        ? AudioManager.ADJUST_RAISE
+                                        : AudioManager.ADJUST_LOWER /* direction */,
+                                AudioManager.STREAM_MUSIC /* stream */, 0 /* flags */);
+                        // Don't execute default volume behavior
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MUTE:
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                case KeyEvent.KEYCODE_MEDIA_STOP:
+                case KeyEvent.KEYCODE_MEDIA_NEXT:
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                case KeyEvent.KEYCODE_MEDIA_RECORD:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
+                    handleMediaKeyEvent(event);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private void handleMediaKeyEvent(KeyEvent keyEvent) {
+        mAudioManager.dispatchMediaKeyEvent(keyEvent);
     }
 
     public void finish(boolean strongAuth, int currentUser) {
-        mView.finish(strongAuth, currentUser);
+        mSecurityCallback.finish(strongAuth, currentUser);
     }
 
 
