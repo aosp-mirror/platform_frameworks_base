@@ -47,6 +47,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
@@ -350,6 +351,16 @@ class MediaDataManager(
     }
 
     fun dismissMediaData(key: String, delay: Long) {
+        backgroundExecutor.execute {
+            mediaEntries[key]?.let { mediaData ->
+                if (mediaData.isLocalSession) {
+                    mediaData.token?.let {
+                        val mediaController = mediaControllerFactory.create(it)
+                        mediaController.transportControls.stop()
+                    }
+                }
+            }
+        }
         foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
     }
 
@@ -500,6 +511,7 @@ class MediaDataManager(
 
         val isLocalSession = mediaController.playbackInfo?.playbackType ==
             MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL ?: true
+        val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
 
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
@@ -509,7 +521,8 @@ class MediaDataManager(
                     smallIconDrawable, artist, song, artWorkIcon, actionIcons,
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
                     active, resumeAction = resumeAction, isLocalSession = isLocalSession,
-                    notificationKey = key, hasCheckedForResume = hasCheckedForResume))
+                    notificationKey = key, hasCheckedForResume = hasCheckedForResume,
+                    isPlaying = isPlaying, isClearable = sbn.isClearable()))
         }
     }
 
