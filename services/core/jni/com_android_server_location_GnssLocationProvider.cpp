@@ -928,7 +928,7 @@ Return<void> GnssCallback::gnssSetSystemInfoCb(const IGnssCallback_V2_0::GnssSys
  * GnssPsdsCallback class implements the callback methods for the IGnssPsds
  * interface.
  */
-class GnssPsdsCallback : public IGnssPsdsCallback {
+struct GnssPsdsCallback : public IGnssPsdsCallback {
     Return<void> downloadRequestCb() override;
     Return<void> downloadRequestCb_3_0(int32_t psdsType) override;
 };
@@ -2743,19 +2743,26 @@ static void android_location_GnssLocationProvider_inject_location(JNIEnv* /* env
 
 static jboolean android_location_GnssLocationProvider_supports_psds(
         JNIEnv* /* env */, jobject /* obj */) {
-    return (gnssXtraIface != nullptr) ? JNI_TRUE : JNI_FALSE;
+    return (gnssPsdsIface != nullptr || gnssXtraIface != nullptr) ? JNI_TRUE : JNI_FALSE;
 }
 
 static void android_location_GnssLocationProvider_inject_psds_data(JNIEnv* env, jobject /* obj */,
-        jbyteArray data, jint length) {
-    if (gnssXtraIface == nullptr) {
-        ALOGE("%s: IGnssXtra interface not available.", __func__);
+                                                                   jbyteArray data, jint length,
+                                                                   jint psdsType) {
+    if (gnssPsdsIface == nullptr && gnssXtraIface == nullptr) {
+        ALOGE("%s: IGnssPsds or IGnssXtra interface not available.", __func__);
         return;
     }
 
     jbyte* bytes = reinterpret_cast<jbyte *>(env->GetPrimitiveArrayCritical(data, 0));
-    auto result = gnssXtraIface->injectXtraData(std::string((const char*)bytes, length));
-    checkHidlReturn(result, "IGnssXtra injectXtraData() failed.");
+    if (gnssPsdsIface != nullptr) {
+        auto result = gnssPsdsIface->injectPsdsData_3_0(psdsType,
+                                                        std::string((const char*)bytes, length));
+        checkHidlReturn(result, "IGnssPsds injectPsdsData() failed.");
+    } else if (gnssXtraIface != nullptr) {
+        auto result = gnssXtraIface->injectXtraData(std::string((const char*)bytes, length));
+        checkHidlReturn(result, "IGnssXtra injectXtraData() failed.");
+    }
     env->ReleasePrimitiveArrayCritical(data, bytes, JNI_ABORT);
 }
 
@@ -3685,7 +3692,7 @@ static const JNINativeMethod sLocationProviderMethods[] = {
          reinterpret_cast<void*>(android_location_GnssLocationProvider_inject_location)},
         {"native_supports_psds", "()Z",
          reinterpret_cast<void*>(android_location_GnssLocationProvider_supports_psds)},
-        {"native_inject_psds_data", "([BI)V",
+        {"native_inject_psds_data", "([BII)V",
          reinterpret_cast<void*>(android_location_GnssLocationProvider_inject_psds_data)},
         {"native_agps_set_id", "(ILjava/lang/String;)V",
          reinterpret_cast<void*>(android_location_GnssLocationProvider_agps_set_id)},
