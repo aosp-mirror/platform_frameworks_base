@@ -62,9 +62,9 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.wm.shell.animation.FlingAnimationUtils;
+import com.android.wm.shell.animation.Interpolators;
 
 import java.util.function.Consumer;
 

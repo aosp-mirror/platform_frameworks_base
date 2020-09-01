@@ -28,8 +28,8 @@ import android.util.AttributeSet;
 import android.util.Property;
 import android.view.View;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.wm.shell.animation.Interpolators;
 
 /**
  * View for the handle in the docked stack divider.
