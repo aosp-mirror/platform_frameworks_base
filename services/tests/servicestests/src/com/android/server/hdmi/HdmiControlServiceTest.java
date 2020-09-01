@@ -63,7 +63,7 @@ import java.util.ArrayList;
 @RunWith(JUnit4.class)
 public class HdmiControlServiceTest {
 
-    private class HdmiCecLocalDeviceMyDevice extends HdmiCecLocalDevice {
+    private class HdmiCecLocalDeviceMyDevice extends HdmiCecLocalDeviceSource {
 
         private boolean mCanGoToStandby;
         private boolean mIsStandby;
@@ -403,6 +403,83 @@ public class HdmiControlServiceTest {
         assertThat(callback2.mCallbackReceived).isTrue();
         assertThat(callback1.mVolumeControlEnabled).isTrue();
         assertThat(callback2.mVolumeControlEnabled).isTrue();
+    }
+
+    @Test
+    public void setActiveSource_localDevice_playback() {
+        int physicalAddress = 0x1000;
+        mNativeWrapper.setPhysicalAddress(physicalAddress);
+
+        mHdmiControlService.setActiveSource(mMyPlaybackDevice.mAddress, physicalAddress,
+                "HdmiControlServiceTest");
+
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
+                mMyPlaybackDevice.mAddress);
+        assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(
+                physicalAddress);
+        assertThat(mMyPlaybackDevice.mIsActiveSource).isTrue();
+        assertThat(mMyAudioSystemDevice.mIsActiveSource).isFalse();
+    }
+
+    @Test
+    public void setActiveSource_localDevice_audio() {
+        int physicalAddress = 0x1000;
+        mNativeWrapper.setPhysicalAddress(physicalAddress);
+
+        mHdmiControlService.setActiveSource(mMyAudioSystemDevice.mAddress, physicalAddress,
+                "HdmiControlServiceTest");
+
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
+                mMyAudioSystemDevice.mAddress);
+        assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(
+                physicalAddress);
+        assertThat(mMyPlaybackDevice.mIsActiveSource).isFalse();
+        assertThat(mMyAudioSystemDevice.mIsActiveSource).isTrue();
+    }
+
+    @Test
+    public void setActiveSource_remoteDevice() {
+        int physicalAddress = 0x1000;
+        mNativeWrapper.setPhysicalAddress(physicalAddress);
+
+        mHdmiControlService.setActiveSource(Constants.ADDR_TV, 0x0000, "HdmiControlServiceTest");
+
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
+                Constants.ADDR_TV);
+        assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(0x000);
+        assertThat(mMyPlaybackDevice.mIsActiveSource).isFalse();
+        assertThat(mMyAudioSystemDevice.mIsActiveSource).isFalse();
+    }
+
+    @Test
+    public void setActiveSource_nonCecDevice() {
+        int physicalAddress = 0x1000;
+        mNativeWrapper.setPhysicalAddress(physicalAddress);
+
+        mHdmiControlService.setActiveSource(Constants.ADDR_INVALID, 0x1234,
+                "HdmiControlServiceTest");
+
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
+                Constants.ADDR_INVALID);
+        assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(0x1234);
+        assertThat(mMyPlaybackDevice.mIsActiveSource).isFalse();
+        assertThat(mMyAudioSystemDevice.mIsActiveSource).isFalse();
+    }
+
+    @Test
+    public void setActiveSource_unknown() {
+        int physicalAddress = 0x1000;
+        mNativeWrapper.setPhysicalAddress(physicalAddress);
+
+        mHdmiControlService.setActiveSource(Constants.ADDR_INVALID,
+                Constants.INVALID_PHYSICAL_ADDRESS, "HdmiControlServiceTest");
+
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
+                Constants.ADDR_INVALID);
+        assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(
+                Constants.INVALID_PHYSICAL_ADDRESS);
+        assertThat(mMyPlaybackDevice.mIsActiveSource).isFalse();
+        assertThat(mMyAudioSystemDevice.mIsActiveSource).isFalse();
     }
 
     private static class VolumeControlFeatureCallback extends

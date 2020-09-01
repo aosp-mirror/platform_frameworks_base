@@ -697,7 +697,8 @@ public class HdmiCecLocalDevicePlaybackTest {
     public void sendVolumeKeyEvent_toTv_activeSource() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiControlService.setSystemAudioActivated(false);
-        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress,
+                "HdmiCecLocalDevicePlaybackTest");
 
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
@@ -716,7 +717,8 @@ public class HdmiCecLocalDevicePlaybackTest {
     public void sendVolumeKeyEvent_toAudio_activeSource() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiControlService.setSystemAudioActivated(true);
-        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress,
+                "HdmiCecLocalDevicePlaybackTest");
 
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
@@ -735,7 +737,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     public void sendVolumeKeyEvent_toTv_inactiveSource() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiControlService.setSystemAudioActivated(false);
-        mHdmiControlService.setActiveSource(ADDR_TV, 0x0000);
+        mHdmiControlService.setActiveSource(ADDR_TV, 0x0000, "HdmiCecLocalDevicePlaybackTest");
 
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
@@ -754,7 +756,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     public void sendVolumeKeyEvent_toAudio_inactiveSource() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiControlService.setSystemAudioActivated(true);
-        mHdmiControlService.setActiveSource(ADDR_TV, 0x0000);
+        mHdmiControlService.setActiveSource(ADDR_TV, 0x0000, "HdmiCecLocalDevicePlaybackTest");
 
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
