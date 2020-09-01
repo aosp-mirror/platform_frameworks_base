@@ -23,18 +23,16 @@ import android.view.IWindowManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.pip.phone.PipController;
+import com.android.systemui.pip.tv.PipController;
+import com.android.systemui.pip.tv.PipNotification;
+import com.android.systemui.pip.tv.dagger.TvPipComponent;
 import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.stackdivider.SplitScreenController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -51,8 +49,8 @@ import dagger.Provides;
  * branches of SystemUI.
  */
 // TODO(b/162923491): Move most of these dependencies into WMSingleton scope.
-@Module(includes = WMShellBaseModule.class)
-public class WMShellModule {
+@Module(includes = WMShellBaseModule.class, subcomponents = {TvPipComponent.class})
+public class TvWMShellModule {
     @SysUISingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
@@ -65,20 +63,11 @@ public class WMShellModule {
     @Provides
     static Pip providePipController(Context context,
             BroadcastDispatcher broadcastDispatcher,
-            ConfigurationController configController,
-            DeviceConfigProxy deviceConfig,
-            DisplayController displayController,
-            FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState,
             PipBoundsHandler pipBoundsHandler,
-            PipSurfaceTransactionHelper surfaceTransactionHelper,
-            PipTaskOrganizer pipTaskOrganizer,
-            PipUiEventLogger pipUiEventLogger) {
-        return new PipController(context, broadcastDispatcher, configController, deviceConfig,
-                displayController, floatingContentCoordinator, sysUiState, pipBoundsHandler,
-                surfaceTransactionHelper,
-                pipTaskOrganizer,
-                pipUiEventLogger);
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            PipTaskOrganizer pipTaskOrganizer) {
+        return new PipController(context, broadcastDispatcher, pipBoundsHandler,
+                pipSurfaceTransactionHelper, pipTaskOrganizer);
     }
 
     @SysUISingleton
@@ -89,6 +78,14 @@ public class WMShellModule {
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer) {
         return new SplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer);
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipNotification providePipNotification(Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            PipController pipController) {
+        return new PipNotification(context, broadcastDispatcher, pipController);
     }
 
     @SysUISingleton
@@ -108,5 +105,4 @@ public class WMShellModule {
                 pipSurfaceTransactionHelper, splitScreenOptional, displayController,
                 pipUiEventLogger, shellTaskOrganizer);
     }
-
 }

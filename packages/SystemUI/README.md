@@ -115,10 +115,6 @@ Shows UI for keyboard shortcuts (triggered by keyboard shortcut).
 
 Shows the overlay controls when One handed is triggered.
 
-### [com.android.systemui.pip.PipUI](/packages/SystemUI/src/com/android/systemui/pip/PipUI.java)
-
-Shows the overlay controls when Pip is showing.
-
 ### [com.android.systemui.shortcut.ShortcutKeyDispatcher](/packages/SystemUI/src/com/android/systemui/shortcut/ShortcutKeyDispatcher.java)
 
 Dispatches shortcut to System UI components.
