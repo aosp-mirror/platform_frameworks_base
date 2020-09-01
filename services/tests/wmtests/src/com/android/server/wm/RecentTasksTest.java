@@ -28,6 +28,8 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -444,6 +446,31 @@ public class RecentTasksTest extends WindowTestsBase {
         assertThat(mCallbacksRecorder.mAdded).contains(task2);
         assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
         assertThat(mCallbacksRecorder.mRemoved).isEmpty();
+    }
+
+    @Test
+    public void testRemoveAffinityTask() {
+        // Add task to recents
+        final String taskAffinity = "affinity";
+        final int uid = 10123;
+        final Task task1 = createTaskBuilder(".Task1").setStack(mStack).build();
+        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        mRecentTasks.add(task1);
+
+        // Add another task to recents, and make sure the previous task was removed.
+        final Task task2 = createTaskBuilder(".Task2").setStack(mStack).build();
+        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        mRecentTasks.add(task2);
+        assertEquals(1, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
+
+        // Add another single-instance task to recents, and make sure no task is removed.
+        final Task task3 = createTaskBuilder(".Task3").setStack(mStack).build();
+        task3.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid,
+                LAUNCH_SINGLE_INSTANCE);
+        mRecentTasks.add(task3);
+        assertEquals(2, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
     }
 
     @Test
