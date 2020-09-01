@@ -145,13 +145,6 @@ public class ExpandableNotificationRowController implements NodeController {
                 mOnUserInteractionCallback
 
         );
-        mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
-            @Override
-            public void onStateChanged(int newState) {
-                mView.setOnKeyguard(newState == KEYGUARD);
-            }
-        });
-        mView.setOnKeyguard(mStatusBarStateController.getState() == KEYGUARD);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
             mView.setLongPressListener((v, x, y, item) -> {
@@ -172,14 +165,25 @@ public class ExpandableNotificationRowController implements NodeController {
                 mView.getEntry().setInitializationTime(mClock.elapsedRealtime());
                 mPluginManager.addPluginListener(mView,
                         NotificationMenuRowPlugin.class, false /* Allow multiple */);
+                mView.setOnKeyguard(mStatusBarStateController.getState() == KEYGUARD);
+                mStatusBarStateController.addCallback(mStatusBarStateListener);
             }
 
             @Override
             public void onViewDetachedFromWindow(View v) {
                 mPluginManager.removePluginListener(mView);
+                mStatusBarStateController.removeCallback(mStatusBarStateListener);
             }
         });
     }
+
+    private final StatusBarStateController.StateListener mStatusBarStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onStateChanged(int newState) {
+                    mView.setOnKeyguard(newState == KEYGUARD);
+                }
+            };
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
         mNotificationLogger.onExpansionChanged(key, userAction, expanded);
