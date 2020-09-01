@@ -418,6 +418,10 @@ public class MobileSignalController extends SignalController<
         return (mServiceState != null && mServiceState.isEmergencyOnly());
     }
 
+    public boolean isInService() {
+        return Utils.isInService(mServiceState);
+    }
+
     private boolean isRoaming() {
         // During a carrier change, roaming indications need to be supressed.
         if (isCarrierNetworkChangeActive()) {
