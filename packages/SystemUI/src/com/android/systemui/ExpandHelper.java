@@ -32,10 +32,10 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 
 public class ExpandHelper implements Gefingerpoken {
     public interface Callback {

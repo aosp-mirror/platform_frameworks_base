@@ -18,6 +18,7 @@ package com.android.systemui.wmshell;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.logging.UiEventLogger;
@@ -31,6 +32,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
@@ -104,4 +106,11 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();
+
+    @SysUISingleton
+    @Provides
+    static FlingAnimationUtils.Builder provideFlingAnimationUtilsBuilder(
+            DisplayMetrics displayMetrics) {
+        return new FlingAnimationUtils.Builder(displayMetrics);
+    }
 }

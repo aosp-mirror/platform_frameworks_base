@@ -40,8 +40,8 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarSystemUiTest;
-import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.tests.R;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
 import org.junit.Test;
