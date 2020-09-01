@@ -688,16 +688,24 @@ final class HdmiCecController {
     }
 
     void dump(final IndentingPrintWriter pw) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         for (int i = 0; i < mLocalDevices.size(); ++i) {
             pw.println("HdmiCecLocalDevice #" + mLocalDevices.keyAt(i) + ":");
             pw.increaseIndent();
             mLocalDevices.valueAt(i).dump(pw);
+
+            pw.println("Active Source history:");
+            pw.increaseIndent();
+            for (Dumpable activeSourceEvent : mLocalDevices.valueAt(i).getActiveSourceHistory()) {
+                activeSourceEvent.dump(pw, sdf);
+            }
+            pw.decreaseIndent();
             pw.decreaseIndent();
         }
 
         pw.println("CEC message history:");
         pw.increaseIndent();
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (Dumpable record : mMessageHistory) {
             record.dump(pw, sdf);
         }
@@ -917,7 +925,7 @@ final class HdmiCecController {
         }
     }
 
-    private abstract static class Dumpable {
+    public abstract static class Dumpable {
         protected final long mTime;
 
         Dumpable() {

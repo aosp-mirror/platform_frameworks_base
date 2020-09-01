@@ -288,13 +288,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (targetAddress == Constants.ADDR_INTERNAL) {
             handleSelectInternalSource();
             // Switching to internal source is always successful even when CEC control is disabled.
-            setActiveSource(targetAddress, mService.getPhysicalAddress());
+            setActiveSource(targetAddress, mService.getPhysicalAddress(),
+                    "HdmiCecLocalDeviceTv#deviceSelect()");
             setActivePath(mService.getPhysicalAddress());
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
         if (!mService.isControlEnabled()) {
-            setActiveSource(targetDevice);
+            setActiveSource(targetDevice, "HdmiCecLocalDeviceTv#deviceSelect()");
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
@@ -307,7 +308,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // Seq #18
         if (mService.isControlEnabled() && getActiveSource().logicalAddress != mAddress) {
-            updateActiveSource(mAddress, mService.getPhysicalAddress());
+            updateActiveSource(mAddress, mService.getPhysicalAddress(),
+                    "HdmiCecLocalDeviceTv#handleSelectInternalSource()");
             if (mSkipRoutingControl) {
                 mSkipRoutingControl = false;
                 return;
@@ -319,19 +321,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void updateActiveSource(int logicalAddress, int physicalAddress) {
+    void updateActiveSource(int logicalAddress, int physicalAddress, String caller) {
         assertRunOnServiceThread();
-        updateActiveSource(ActiveSource.of(logicalAddress, physicalAddress));
+        updateActiveSource(ActiveSource.of(logicalAddress, physicalAddress), caller);
     }
 
     @ServiceThreadOnly
-    void updateActiveSource(ActiveSource newActive) {
+    void updateActiveSource(ActiveSource newActive, String caller) {
         assertRunOnServiceThread();
         // Seq #14
         if (getActiveSource().equals(newActive)) {
             return;
         }
-        setActiveSource(newActive);
+        setActiveSource(newActive, caller);
         int logicalAddress = newActive.logicalAddress;
         if (getCecDeviceInfo(logicalAddress) != null && logicalAddress != mAddress) {
             if (mService.pathToPortId(newActive.physicalAddress) == getActivePortId()) {
