@@ -287,7 +287,9 @@ class EventDispatcher {
 
     /**
      * Sends down events to the view hierarchy for all pointers which are not already being
-     * delivered with original down location. i.e. pointers that are not yet injected.
+     * delivered with original down location. i.e. pointers that are not yet injected. The down time
+     * is also replaced by the original one.
+     *
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
@@ -296,7 +298,7 @@ class EventDispatcher {
         // Inject the injected pointers.
         int pointerIdBits = 0;
         final int pointerCount = prototype.getPointerCount();
-        final MotionEvent event = computeEventWithOriginalDown(prototype);
+        final MotionEvent event = computeInjectionDownEvent(prototype);
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
             // Do not send event for already delivered pointers.
@@ -313,7 +315,7 @@ class EventDispatcher {
         }
     }
 
-    private MotionEvent computeEventWithOriginalDown(MotionEvent prototype) {
+    private MotionEvent computeInjectionDownEvent(MotionEvent prototype) {
         final int pointerCount = prototype.getPointerCount();
         if (pointerCount != mState.getReceivedPointerTracker().getReceivedPointerDownCount()) {
             Slog.w(LOG_TAG, "The pointer count doesn't match the received count.");
@@ -336,7 +338,10 @@ class EventDispatcher {
         MotionEvent event =
                 MotionEvent.obtain(
                         prototype.getDownTime(),
-                        prototype.getEventTime(),
+                        // The event time is used for downTime while sending ACTION_DOWN. We adjust
+                        // it to avoid the motion velocity is too fast in the beginning after
+                        // Delegating.
+                        prototype.getDownTime(),
                         prototype.getAction(),
                         pointerCount,
                         properties,
