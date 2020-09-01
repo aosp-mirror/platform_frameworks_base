@@ -44,11 +44,11 @@ interface ISessionManager {
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
     boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
-            in MediaSession.Token sessionToken, in KeyEvent keyEvent);
+            in KeyEvent keyEvent, in MediaSession.Token sessionToken);
     void dispatchVolumeKeyEvent(String packageName, String opPackageName, boolean asSystemService,
             in KeyEvent keyEvent, int stream, boolean musicOnly);
     void dispatchVolumeKeyEventToSessionAsSystemService(String packageName, String opPackageName,
-            in MediaSession.Token sessionToken, in KeyEvent keyEvent);
+            in KeyEvent keyEvent, in MediaSession.Token sessionToken);
     void dispatchAdjustVolume(String packageName, String opPackageName, int suggestedStream,
             int delta, int flags);
     void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,
