@@ -132,6 +132,8 @@ a similar way.
 
     <!-- Use a dark theme for watches. -->
     <style name="Theme.DeviceDefault.System" />
+    <style name="Theme.DeviceDefault.System.Dialog" parent="Theme.DeviceDefault.Dialog" />
+    <style name="Theme.DeviceDefault.System.Dialog.Alert" parent="Theme.DeviceDefault.Dialog.Alert" />
 
     <!-- DeviceDefault style for input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.-->

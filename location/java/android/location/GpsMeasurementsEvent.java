@@ -30,8 +30,11 @@ import java.util.Collections;
  * A class implementing a container for data associated with a measurement event.
  * Events are delivered to registered instances of {@link Listener}.
  *
+ * @deprecated use {@link GnssMeasurementsEvent} instead.
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public class GpsMeasurementsEvent implements Parcelable {
 

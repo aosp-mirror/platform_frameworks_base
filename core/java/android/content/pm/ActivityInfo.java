@@ -245,6 +245,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public float minAspectRatio;
 
     /**
+     * Indicates that the activity works well with size changes like display changing size.
+     *
+     * @hide
+     */
+    public boolean supportsSizeChanges;
+
+    /**
      * Name of the VrListenerService component to run for this activity.
      * @see android.R.attr#enableVrMode
      * @hide
@@ -467,6 +474,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public static final int FLAG_TURN_SCREEN_ON = 0x1000000;
+
+    /**
+     * Bit in {@link #flags} indicating whether the display should preferably be switched to a
+     * minimal post processing mode.
+     * See {@link android.R.attr#preferMinimalPostProcessing}
+     */
+    public static final int FLAG_PREFER_MINIMAL_POST_PROCESSING = 0x2000000;
 
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
@@ -1006,6 +1020,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         colorMode = orig.colorMode;
         maxAspectRatio = orig.maxAspectRatio;
         minAspectRatio = orig.minAspectRatio;
+        supportsSizeChanges = orig.supportsSizeChanges;
     }
 
     /**
@@ -1181,6 +1196,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (minAspectRatio != 0) {
             pw.println(prefix + "minAspectRatio=" + minAspectRatio);
         }
+        if (supportsSizeChanges) {
+            pw.println(prefix + "supportsSizeChanges=true");
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1199,38 +1217,33 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(theme);
         dest.writeInt(launchMode);
         dest.writeInt(documentLaunchMode);
-        dest.writeString(permission);
-        dest.writeString(taskAffinity);
-        dest.writeString(targetActivity);
-        dest.writeString(launchToken);
+        dest.writeString8(permission);
+        dest.writeString8(taskAffinity);
+        dest.writeString8(targetActivity);
+        dest.writeString8(launchToken);
         dest.writeInt(flags);
         dest.writeInt(privateFlags);
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
         dest.writeInt(softInputMode);
         dest.writeInt(uiOptions);
-        dest.writeString(parentActivityName);
+        dest.writeString8(parentActivityName);
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
         dest.writeInt(lockTaskLaunchMode);
         if (windowLayout != null) {
             dest.writeInt(1);
-            dest.writeInt(windowLayout.width);
-            dest.writeFloat(windowLayout.widthFraction);
-            dest.writeInt(windowLayout.height);
-            dest.writeFloat(windowLayout.heightFraction);
-            dest.writeInt(windowLayout.gravity);
-            dest.writeInt(windowLayout.minWidth);
-            dest.writeInt(windowLayout.minHeight);
+            windowLayout.writeToParcel(dest);
         } else {
             dest.writeInt(0);
         }
         dest.writeInt(resizeMode);
-        dest.writeString(requestedVrComponent);
+        dest.writeString8(requestedVrComponent);
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
         dest.writeFloat(minAspectRatio);
+        dest.writeBoolean(supportsSizeChanges);
     }
 
     /**
@@ -1243,15 +1256,11 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         final boolean isTranslucent =
                 attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsTranslucent,
                         false);
-        final boolean isSwipeToDismiss = !attributes.hasValue(
-                com.android.internal.R.styleable.Window_windowIsTranslucent)
-                && attributes.getBoolean(
-                        com.android.internal.R.styleable.Window_windowSwipeToDismiss, false);
         final boolean isFloating =
                 attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsFloating,
                         false);
 
-        return isFloating || isTranslucent || isSwipeToDismiss;
+        return isFloating || isTranslucent;
     }
 
     /**
@@ -1330,17 +1339,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         theme = source.readInt();
         launchMode = source.readInt();
         documentLaunchMode = source.readInt();
-        permission = source.readString();
-        taskAffinity = source.readString();
-        targetActivity = source.readString();
-        launchToken = source.readString();
+        permission = source.readString8();
+        taskAffinity = source.readString8();
+        targetActivity = source.readString8();
+        launchToken = source.readString8();
         flags = source.readInt();
         privateFlags = source.readInt();
         screenOrientation = source.readInt();
         configChanges = source.readInt();
         softInputMode = source.readInt();
         uiOptions = source.readInt();
-        parentActivityName = source.readString();
+        parentActivityName = source.readString8();
         persistableMode = source.readInt();
         maxRecents = source.readInt();
         lockTaskLaunchMode = source.readInt();
@@ -1348,11 +1357,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             windowLayout = new WindowLayout(source);
         }
         resizeMode = source.readInt();
-        requestedVrComponent = source.readString();
+        requestedVrComponent = source.readString8();
         rotationAnimation = source.readInt();
         colorMode = source.readInt();
         maxAspectRatio = source.readFloat();
         minAspectRatio = source.readFloat();
+        supportsSizeChanges = source.readBoolean();
     }
 
     /**
@@ -1369,8 +1379,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
      */
     public static final class WindowLayout {
-        public WindowLayout(int width, float widthFraction, int height, float heightFraction, int gravity,
-                int minWidth, int minHeight) {
+        public WindowLayout(int width, float widthFraction, int height, float heightFraction,
+                int gravity, int minWidth, int minHeight) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
@@ -1380,7 +1390,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             this.minHeight = minHeight;
         }
 
-        WindowLayout(Parcel source) {
+        /** @hide */
+        public WindowLayout(Parcel source) {
             width = source.readInt();
             widthFraction = source.readFloat();
             height = source.readInt();
@@ -1388,6 +1399,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             gravity = source.readInt();
             minWidth = source.readInt();
             minHeight = source.readInt();
+            windowLayoutAffinity = source.readString8();
         }
 
         /**
@@ -1454,11 +1466,30 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         public final int minHeight;
 
         /**
+         * Affinity of window layout parameters. Activities with the same UID and window layout
+         * affinity will share the same window dimension record.
+         * @hide
+         */
+        public String windowLayoutAffinity;
+
+        /**
          * Returns if this {@link WindowLayout} has specified bounds.
          * @hide
          */
         public boolean hasSpecifiedSize() {
             return width >= 0 || height >= 0 || widthFraction >= 0 || heightFraction >= 0;
+        }
+
+        /** @hide */
+        public void writeToParcel(Parcel dest) {
+            dest.writeInt(width);
+            dest.writeFloat(widthFraction);
+            dest.writeInt(height);
+            dest.writeFloat(heightFraction);
+            dest.writeInt(gravity);
+            dest.writeInt(minWidth);
+            dest.writeInt(minHeight);
+            dest.writeString8(windowLayoutAffinity);
         }
     }
 }

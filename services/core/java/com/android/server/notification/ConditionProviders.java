@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -38,6 +39,9 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +55,6 @@ public class ConditionProviders extends ManagedServices {
     private final ArraySet<String> mSystemConditionProviderNames;
     private final ArraySet<SystemConditionProviderService> mSystemConditionProviders
             = new ArraySet<>();
-
     private Callback mCallback;
 
     public ConditionProviders(Context context, UserProfiles userProfiles, IPackageManager pm) {
@@ -73,11 +76,45 @@ public class ConditionProviders extends ManagedServices {
     public void addSystemProvider(SystemConditionProviderService service) {
         mSystemConditionProviders.add(service);
         service.attachBase(mContext);
-        registerService(service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
+        registerSystemService(
+                service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
     }
 
     public Iterable<SystemConditionProviderService> getSystemProviders() {
         return mSystemConditionProviders;
+    }
+
+    @Override
+    protected ArrayMap<Boolean, ArrayList<ComponentName>>
+            resetComponents(String packageName, int userId) {
+        resetPackage(packageName, userId);
+        ArrayMap<Boolean, ArrayList<ComponentName>> changes = new ArrayMap<>();
+        changes.put(true, new ArrayList<>(0));
+        changes.put(false, new ArrayList<>(0));
+        return changes;
+    }
+
+    /**
+     *  @return true if the passed package is enabled. false otherwise
+     */
+    boolean resetPackage(String packageName, int userId) {
+        boolean isAllowed = super.isPackageOrComponentAllowed(packageName, userId);
+        boolean isDefault = super.isDefaultComponentOrPackage(packageName);
+        if (!isAllowed && isDefault) {
+            setPackageOrComponentEnabled(packageName, userId, true, true);
+        }
+        if (isAllowed && !isDefault) {
+            setPackageOrComponentEnabled(packageName, userId, true, false);
+        }
+        return !isAllowed && isDefault;
+    }
+
+    @Override
+    void writeDefaults(XmlSerializer out) throws IOException {
+        synchronized (mDefaultsLock) {
+            String defaults = String.join(ENABLED_SERVICES_SEPARATOR, mDefaultPackages);
+            out.attribute(null, ATT_DEFAULTS, defaults);
+        }
     }
 
     @Override
@@ -155,6 +192,21 @@ public class ConditionProviders extends ManagedServices {
         }
         if (mCallback != null) {
             mCallback.onServiceAdded(info.component);
+        }
+    }
+
+    @Override
+    protected void loadDefaultsFromConfig() {
+        String defaultDndAccess = mContext.getResources().getString(
+                R.string.config_defaultDndAccessPackages);
+        if (defaultDndAccess != null) {
+            String[] dnds = defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < dnds.length; i++) {
+                if (TextUtils.isEmpty(dnds[i])) {
+                    continue;
+                }
+                addDefaultComponentOrPackage(dnds[i]);
+            }
         }
     }
 

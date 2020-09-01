@@ -16,34 +16,39 @@
 
 #include "GraphicsStatsService.h"
 
-#include "JankTracker.h"
-#include "protos/graphicsstats.pb.h"
-
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
-#include <log/log.h>
-
 #include <errno.h>
 #include <fcntl.h>
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <android/util/ProtoOutputStream.h>
+#include <stats_event.h>
+#include <statslog.h>
+
+#include "JankTracker.h"
+#include "protos/graphicsstats.pb.h"
+
 namespace android {
 namespace uirenderer {
 
 using namespace google::protobuf;
+using namespace uirenderer::protos;
 
 constexpr int32_t sCurrentFileVersion = 1;
 constexpr int32_t sHeaderSize = 4;
 static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong");
 
 constexpr int sHistogramSize = ProfileData::HistogramSize();
+constexpr int sGPUHistogramSize = ProfileData::GPUHistogramSize();
 
-static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto,
-                                      const std::string& package, int64_t versionCode,
-                                      int64_t startTime, int64_t endTime, const ProfileData* data);
+static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::string& package,
+                                      int64_t versionCode, int64_t startTime, int64_t endTime,
+                                      const ProfileData* data);
 static void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
@@ -166,6 +171,8 @@ bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::str
     }
     proto->set_package_name(package);
     proto->set_version_code(versionCode);
+    proto->set_pipeline(data->pipelineType() == RenderPipelineType::SkiaGL ?
+            GraphicsStatsProto_PipelineType_GL : GraphicsStatsProto_PipelineType_VULKAN);
     auto summary = proto->mutable_summary();
     summary->set_total_frames(summary->total_frames() + data->totalFrameCount());
     summary->set_janky_frames(summary->janky_frames() + data->jankFrameCount());
@@ -178,8 +185,8 @@ bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::str
     summary->set_slow_bitmap_upload_count(summary->slow_bitmap_upload_count() +
                                           data->jankTypeCount(kSlowSync));
     summary->set_slow_draw_count(summary->slow_draw_count() + data->jankTypeCount(kSlowRT));
-    summary->set_missed_deadline_count(summary->missed_deadline_count()
-            + data->jankTypeCount(kMissedDeadline));
+    summary->set_missed_deadline_count(summary->missed_deadline_count() +
+                                       data->jankTypeCount(kMissedDeadline));
 
     bool creatingHistogram = false;
     if (proto->histogram_size() == 0) {
@@ -211,6 +218,37 @@ bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::str
         bucket->set_frame_count(bucket->frame_count() + entry.frameCount);
         index++;
     });
+    if (hitMergeError) return false;
+    // fill in GPU frame time histogram
+    creatingHistogram = false;
+    if (proto->gpu_histogram_size() == 0) {
+        proto->mutable_gpu_histogram()->Reserve(sGPUHistogramSize);
+        creatingHistogram = true;
+    } else if (proto->gpu_histogram_size() != sGPUHistogramSize) {
+        ALOGE("GPU histogram size mismatch, proto is %d expected %d", proto->gpu_histogram_size(),
+              sGPUHistogramSize);
+        return false;
+    }
+    index = 0;
+    data->histogramGPUForEach([&](ProfileData::HistogramEntry entry) {
+        if (hitMergeError) return;
+
+        protos::GraphicsStatsHistogramBucketProto* bucket;
+        if (creatingHistogram) {
+            bucket = proto->add_gpu_histogram();
+            bucket->set_render_millis(entry.renderTimeMs);
+        } else {
+            bucket = proto->mutable_gpu_histogram(index);
+            if (bucket->render_millis() != static_cast<int32_t>(entry.renderTimeMs)) {
+                ALOGW("GPU frame time mistmatch %d vs. %u", bucket->render_millis(),
+                      entry.renderTimeMs);
+                hitMergeError = true;
+                return;
+            }
+        }
+        bucket->set_frame_count(bucket->frame_count() + entry.frameCount);
+        index++;
+    });
     return !hitMergeError;
 }
 
@@ -218,6 +256,22 @@ static int32_t findPercentile(protos::GraphicsStatsProto* proto, int percentile)
     int32_t pos = percentile * proto->summary().total_frames() / 100;
     int32_t remaining = proto->summary().total_frames() - pos;
     for (auto it = proto->histogram().rbegin(); it != proto->histogram().rend(); ++it) {
+        remaining -= it->frame_count();
+        if (remaining <= 0) {
+            return it->render_millis();
+        }
+    }
+    return 0;
+}
+
+static int32_t findGPUPercentile(protos::GraphicsStatsProto* proto, int percentile) {
+    uint32_t totalGPUFrameCount = 0;  // this is usually  proto->summary().total_frames() - 3.
+    for (auto it = proto->gpu_histogram().rbegin(); it != proto->gpu_histogram().rend(); ++it) {
+        totalGPUFrameCount += it->frame_count();
+    }
+    int32_t pos = percentile * totalGPUFrameCount / 100;
+    int32_t remaining = totalGPUFrameCount - pos;
+    for (auto it = proto->gpu_histogram().rbegin(); it != proto->gpu_histogram().rend(); ++it) {
         remaining -= it->frame_count();
         if (remaining <= 0) {
             return it->render_millis();
@@ -253,6 +307,14 @@ void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int fd) {
     dprintf(fd, "\nNumber Frame deadline missed: %d", summary.missed_deadline_count());
     dprintf(fd, "\nHISTOGRAM:");
     for (const auto& it : proto->histogram()) {
+        dprintf(fd, " %dms=%d", it.render_millis(), it.frame_count());
+    }
+    dprintf(fd, "\n50th gpu percentile: %dms", findGPUPercentile(proto, 50));
+    dprintf(fd, "\n90th gpu percentile: %dms", findGPUPercentile(proto, 90));
+    dprintf(fd, "\n95th gpu percentile: %dms", findGPUPercentile(proto, 95));
+    dprintf(fd, "\n99th gpu percentile: %dms", findGPUPercentile(proto, 99));
+    dprintf(fd, "\nGPU HISTOGRAM:");
+    for (const auto& it : proto->gpu_histogram()) {
         dprintf(fd, " %dms=%d", it.render_millis(), it.frame_count());
     }
     dprintf(fd, "\n");
@@ -309,16 +371,68 @@ void GraphicsStatsService::saveBuffer(const std::string& path, const std::string
 
 class GraphicsStatsService::Dump {
 public:
-    Dump(int outFd, DumpType type) : mFd(outFd), mType(type) {}
+    Dump(int outFd, DumpType type) : mFd(outFd), mType(type) {
+        if (mFd == -1 && mType == DumpType::Protobuf) {
+            mType = DumpType::ProtobufStatsd;
+        }
+    }
     int fd() { return mFd; }
     DumpType type() { return mType; }
     protos::GraphicsStatsServiceDumpProto& proto() { return mProto; }
+    void mergeStat(const protos::GraphicsStatsProto& stat);
+    void updateProto();
 
 private:
+    // use package name and app version for a key
+    typedef std::pair<std::string, int64_t> DumpKey;
+
+    std::map<DumpKey, protos::GraphicsStatsProto> mStats;
     int mFd;
     DumpType mType;
     protos::GraphicsStatsServiceDumpProto mProto;
 };
+
+void GraphicsStatsService::Dump::mergeStat(const protos::GraphicsStatsProto& stat) {
+    auto dumpKey = std::make_pair(stat.package_name(), stat.version_code());
+    auto findIt = mStats.find(dumpKey);
+    if (findIt == mStats.end()) {
+        mStats[dumpKey] = stat;
+    } else {
+        auto summary = findIt->second.mutable_summary();
+        summary->set_total_frames(summary->total_frames() + stat.summary().total_frames());
+        summary->set_janky_frames(summary->janky_frames() + stat.summary().janky_frames());
+        summary->set_missed_vsync_count(summary->missed_vsync_count() +
+                                        stat.summary().missed_vsync_count());
+        summary->set_high_input_latency_count(summary->high_input_latency_count() +
+                                              stat.summary().high_input_latency_count());
+        summary->set_slow_ui_thread_count(summary->slow_ui_thread_count() +
+                                          stat.summary().slow_ui_thread_count());
+        summary->set_slow_bitmap_upload_count(summary->slow_bitmap_upload_count() +
+                                              stat.summary().slow_bitmap_upload_count());
+        summary->set_slow_draw_count(summary->slow_draw_count() + stat.summary().slow_draw_count());
+        summary->set_missed_deadline_count(summary->missed_deadline_count() +
+                                           stat.summary().missed_deadline_count());
+        for (int bucketIndex = 0; bucketIndex < findIt->second.histogram_size(); bucketIndex++) {
+            auto bucket = findIt->second.mutable_histogram(bucketIndex);
+            bucket->set_frame_count(bucket->frame_count() +
+                                    stat.histogram(bucketIndex).frame_count());
+        }
+        for (int bucketIndex = 0; bucketIndex < findIt->second.gpu_histogram_size();
+             bucketIndex++) {
+            auto bucket = findIt->second.mutable_gpu_histogram(bucketIndex);
+            bucket->set_frame_count(bucket->frame_count() +
+                                    stat.gpu_histogram(bucketIndex).frame_count());
+        }
+        findIt->second.set_stats_start(std::min(findIt->second.stats_start(), stat.stats_start()));
+        findIt->second.set_stats_end(std::max(findIt->second.stats_end(), stat.stats_end()));
+    }
+}
+
+void GraphicsStatsService::Dump::updateProto() {
+    for (auto& stat : mStats) {
+        mProto.add_stats()->CopyFrom(stat.second);
+    }
+}
 
 GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType type) {
     return new Dump(outFd, type);
@@ -340,8 +454,9 @@ void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
               path.empty() ? "<empty>" : path.c_str(), data);
         return;
     }
-
-    if (dump->type() == DumpType::Protobuf) {
+    if (dump->type() == DumpType::ProtobufStatsd) {
+        dump->mergeStat(statsProto);
+    } else if (dump->type() == DumpType::Protobuf) {
         dump->proto().add_stats()->CopyFrom(statsProto);
     } else {
         dumpAsTextToFd(&statsProto, dump->fd());
@@ -353,7 +468,9 @@ void GraphicsStatsService::addToDump(Dump* dump, const std::string& path) {
     if (!parseFromFile(path, &statsProto)) {
         return;
     }
-    if (dump->type() == DumpType::Protobuf) {
+    if (dump->type() == DumpType::ProtobufStatsd) {
+        dump->mergeStat(statsProto);
+    } else if (dump->type() == DumpType::Protobuf) {
         dump->proto().add_stats()->CopyFrom(statsProto);
     } else {
         dumpAsTextToFd(&statsProto, dump->fd());
@@ -367,6 +484,83 @@ void GraphicsStatsService::finishDump(Dump* dump) {
     }
     delete dump;
 }
+
+using namespace google::protobuf;
+
+// Field ids taken from FrameTimingHistogram message in atoms.proto
+#define TIME_MILLIS_BUCKETS_FIELD_NUMBER 1
+#define FRAME_COUNTS_FIELD_NUMBER 2
+
+static void writeCpuHistogram(AStatsEvent* event,
+                              const uirenderer::protos::GraphicsStatsProto& stat) {
+    util::ProtoOutputStream proto;
+    for (int bucketIndex = 0; bucketIndex < stat.histogram_size(); bucketIndex++) {
+        auto& bucket = stat.histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT32 | android::util::FIELD_COUNT_REPEATED |
+                            TIME_MILLIS_BUCKETS_FIELD_NUMBER /* field id */,
+                    (int)bucket.render_millis());
+    }
+    for (int bucketIndex = 0; bucketIndex < stat.histogram_size(); bucketIndex++) {
+        auto& bucket = stat.histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT64 | android::util::FIELD_COUNT_REPEATED |
+                            FRAME_COUNTS_FIELD_NUMBER /* field id */,
+                    (long long)bucket.frame_count());
+    }
+    std::vector<uint8_t> outVector;
+    proto.serializeToVector(&outVector);
+    AStatsEvent_writeByteArray(event, outVector.data(), outVector.size());
+}
+
+static void writeGpuHistogram(AStatsEvent* event,
+                              const uirenderer::protos::GraphicsStatsProto& stat) {
+    util::ProtoOutputStream proto;
+    for (int bucketIndex = 0; bucketIndex < stat.gpu_histogram_size(); bucketIndex++) {
+        auto& bucket = stat.gpu_histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT32 | android::util::FIELD_COUNT_REPEATED |
+                            TIME_MILLIS_BUCKETS_FIELD_NUMBER /* field id */,
+                    (int)bucket.render_millis());
+    }
+    for (int bucketIndex = 0; bucketIndex < stat.gpu_histogram_size(); bucketIndex++) {
+        auto& bucket = stat.gpu_histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT64 | android::util::FIELD_COUNT_REPEATED |
+                            FRAME_COUNTS_FIELD_NUMBER /* field id */,
+                    (long long)bucket.frame_count());
+    }
+    std::vector<uint8_t> outVector;
+    proto.serializeToVector(&outVector);
+    AStatsEvent_writeByteArray(event, outVector.data(), outVector.size());
+}
+
+
+void GraphicsStatsService::finishDumpInMemory(Dump* dump, AStatsEventList* data,
+                                              bool lastFullDay) {
+    dump->updateProto();
+    auto& serviceDump = dump->proto();
+    for (int stat_index = 0; stat_index < serviceDump.stats_size(); stat_index++) {
+        auto& stat = serviceDump.stats(stat_index);
+        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+        AStatsEvent_setAtomId(event, android::util::GRAPHICS_STATS);
+        AStatsEvent_writeString(event, stat.package_name().c_str());
+        AStatsEvent_writeInt64(event, (int64_t)stat.version_code());
+        AStatsEvent_writeInt64(event, (int64_t)stat.stats_start());
+        AStatsEvent_writeInt64(event, (int64_t)stat.stats_end());
+        AStatsEvent_writeInt32(event, (int32_t)stat.pipeline());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().total_frames());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().missed_vsync_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().high_input_latency_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_ui_thread_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_bitmap_upload_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_draw_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().missed_deadline_count());
+        writeCpuHistogram(event, stat);
+        writeGpuHistogram(event, stat);
+        // TODO: fill in UI mainline module version, when the feature is available.
+        AStatsEvent_writeInt64(event, (int64_t)0);
+        AStatsEvent_writeBool(event, !lastFullDay);
+        AStatsEvent_build(event);
+    }
+}
+
 
 } /* namespace uirenderer */
 } /* namespace android */

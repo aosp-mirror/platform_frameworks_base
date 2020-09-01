@@ -23,15 +23,16 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Icon;
@@ -46,13 +47,11 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Description of a single dashboard tile that the user can select.
  */
-public class Tile implements Parcelable {
+public abstract class Tile implements Parcelable {
 
     private static final String TAG = "Tile";
 
@@ -63,28 +62,28 @@ public class Tile implements Parcelable {
 
     @VisibleForTesting
     long mLastUpdateTime;
-    private final String mActivityPackage;
-    private final String mActivityName;
+    private final String mComponentPackage;
+    private final String mComponentName;
     private final Intent mIntent;
 
-    private ActivityInfo mActivityInfo;
+    protected ComponentInfo mComponentInfo;
     private CharSequence mSummaryOverride;
     private Bundle mMetaData;
     private String mCategory;
 
-    public Tile(ActivityInfo activityInfo, String category) {
-        mActivityInfo = activityInfo;
-        mActivityPackage = mActivityInfo.packageName;
-        mActivityName = mActivityInfo.name;
-        mMetaData = activityInfo.metaData;
+    public Tile(ComponentInfo info, String category) {
+        mComponentInfo = info;
+        mComponentPackage = mComponentInfo.packageName;
+        mComponentName = mComponentInfo.name;
         mCategory = category;
-        mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
+        mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
     }
 
     Tile(Parcel in) {
-        mActivityPackage = in.readString();
-        mActivityName = in.readString();
-        mIntent = new Intent().setClassName(mActivityPackage, mActivityName);
+        final boolean isProviderTile = in.readBoolean();
+        mComponentPackage = in.readString();
+        mComponentName = in.readString();
+        mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
         final int number = in.readInt();
         for (int i = 0; i < number; i++) {
             userHandle.add(UserHandle.CREATOR.createFromParcel(in));
@@ -100,8 +99,9 @@ public class Tile implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mActivityPackage);
-        dest.writeString(mActivityName);
+        dest.writeBoolean(this instanceof ProviderTile);
+        dest.writeString(mComponentPackage);
+        dest.writeString(mComponentName);
         final int size = userHandle.size();
         dest.writeInt(size);
         for (int i = 0; i < size; i++) {
@@ -111,16 +111,28 @@ public class Tile implements Parcelable {
         dest.writeBundle(mMetaData);
     }
 
-    public int getId() {
-        return Objects.hash(mActivityPackage, mActivityName);
-    }
+    /**
+     * Unique ID of the tile
+     */
+    public abstract int getId();
 
-    public String getDescription() {
-        return mActivityPackage + "/" + mActivityName;
-    }
+    /**
+     * Human-readable description of the tile
+     */
+    public abstract String getDescription();
+
+    protected abstract ComponentInfo getComponentInfo(Context context);
+
+    protected abstract CharSequence getComponentLabel(Context context);
+
+    protected abstract int getComponentIcon(ComponentInfo info);
 
     public String getPackageName() {
-        return mActivityPackage;
+        return mComponentPackage;
+    }
+
+    public String getComponentName() {
+        return mComponentName;
     }
 
     /**
@@ -153,11 +165,18 @@ public class Tile implements Parcelable {
     }
 
     /**
-     * Check whether title has order.
+     * Check whether tile has order.
      */
     public boolean hasOrder() {
         return mMetaData.containsKey(META_DATA_KEY_ORDER)
                 && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
+    }
+
+    /**
+     * Check whether tile has a switch.
+     */
+    public boolean hasSwitch() {
+        return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_SWITCH_URI);
     }
 
     /**
@@ -168,10 +187,15 @@ public class Tile implements Parcelable {
         ensureMetadataNotStale(context);
         final PackageManager packageManager = context.getPackageManager();
         if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+            if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE_URI)) {
+                // If has as uri to provide dynamic title, skip loading here. UI will later load
+                // at tile binding time.
+                return null;
+            }
             if (mMetaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
                 try {
                     final Resources res =
-                            packageManager.getResourcesForApplication(mActivityPackage);
+                            packageManager.getResourcesForApplication(mComponentPackage);
                     title = res.getString(mMetaData.getInt(META_DATA_PREFERENCE_TITLE));
                 } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                     Log.w(TAG, "Couldn't find info", e);
@@ -180,14 +204,9 @@ public class Tile implements Parcelable {
                 title = mMetaData.getString(META_DATA_PREFERENCE_TITLE);
             }
         }
-        // Set the preference title to the activity's label if no
-        // meta-data is found
+        // Set the preference title by the component if no meta-data is found
         if (title == null) {
-            final ActivityInfo activityInfo = getActivityInfo(context);
-            if (activityInfo == null) {
-                return null;
-            }
-            title = activityInfo.loadLabel(packageManager);
+            title = getComponentLabel(context);
         }
         return title;
     }
@@ -211,13 +230,15 @@ public class Tile implements Parcelable {
         final PackageManager packageManager = context.getPackageManager();
         if (mMetaData != null) {
             if (mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
+                // If has as uri to provide dynamic summary, skip loading here. UI will later load
+                // at tile binding time.
                 return null;
             }
             if (mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
                 if (mMetaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
                     try {
                         final Resources res =
-                                packageManager.getResourcesForApplication(mActivityPackage);
+                                packageManager.getResourcesForApplication(mComponentPackage);
                         summary = res.getString(mMetaData.getInt(META_DATA_PREFERENCE_SUMMARY));
                     } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
                         Log.d(TAG, "Couldn't find info", e);
@@ -273,24 +294,24 @@ public class Tile implements Parcelable {
             return null;
         }
         ensureMetadataNotStale(context);
-        final ActivityInfo activityInfo = getActivityInfo(context);
-        if (activityInfo == null) {
-            Log.w(TAG, "Cannot find ActivityInfo for " + getDescription());
+        final ComponentInfo componentInfo = getComponentInfo(context);
+        if (componentInfo == null) {
+            Log.w(TAG, "Cannot find ComponentInfo for " + getDescription());
             return null;
         }
 
         int iconResId = mMetaData.getInt(META_DATA_PREFERENCE_ICON);
         // Set the icon
         if (iconResId == 0) {
-            // Only fallback to activityinfo.icon if metadata does not contain ICON_URI.
+            // Only fallback to componentInfo.icon if metadata does not contain ICON_URI.
             // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
             // level is too complex because we don't have a strong threading contract for this class
             if (!mMetaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                iconResId = activityInfo.icon;
+                iconResId = getComponentIcon(componentInfo);
             }
         }
         if (iconResId != 0) {
-            final Icon icon = Icon.createWithResource(activityInfo.packageName, iconResId);
+            final Icon icon = Icon.createWithResource(componentInfo.packageName, iconResId);
             if (isIconTintable(context)) {
                 final TypedArray a = context.obtainStyledAttributes(new int[]{
                         android.R.attr.colorControlNormal});
@@ -323,41 +344,27 @@ public class Tile implements Parcelable {
         final PackageManager pm = context.getApplicationContext().getPackageManager();
 
         try {
-            final long lastUpdateTime = pm.getPackageInfo(mActivityPackage,
+            final long lastUpdateTime = pm.getPackageInfo(mComponentPackage,
                     PackageManager.GET_META_DATA).lastUpdateTime;
             if (lastUpdateTime == mLastUpdateTime) {
                 // All good. Do nothing
                 return;
             }
             // App has been updated since we load metadata last time. Reload metadata.
-            mActivityInfo = null;
-            getActivityInfo(context);
+            mComponentInfo = null;
+            getComponentInfo(context);
             mLastUpdateTime = lastUpdateTime;
         } catch (PackageManager.NameNotFoundException e) {
             Log.d(TAG, "Can't find package, probably uninstalled.");
         }
     }
 
-    private ActivityInfo getActivityInfo(Context context) {
-        if (mActivityInfo == null) {
-            final PackageManager pm = context.getApplicationContext().getPackageManager();
-            final Intent intent = new Intent().setClassName(mActivityPackage, mActivityName);
-            final List<ResolveInfo> infoList =
-                    pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
-            if (infoList != null && !infoList.isEmpty()) {
-                mActivityInfo = infoList.get(0).activityInfo;
-                mMetaData = mActivityInfo.metaData;
-            } else {
-                Log.e(TAG, "Cannot find package info for "
-                        + intent.getComponent().flattenToString());
-            }
-        }
-        return mActivityInfo;
-    }
-
     public static final Creator<Tile> CREATOR = new Creator<Tile>() {
         public Tile createFromParcel(Parcel source) {
-            return new Tile(source);
+            final boolean isProviderTile = source.readBoolean();
+            // reset the Parcel pointer before delegating to the real constructor.
+            source.setDataPosition(0);
+            return isProviderTile ? new ProviderTile(source) : new ActivityTile(source);
         }
 
         public Tile[] newArray(int size) {
@@ -366,7 +373,7 @@ public class Tile implements Parcelable {
     };
 
     /**
-     * Check whether title is only have primary profile
+     * Check whether tile only has primary profile.
      */
     public boolean isPrimaryProfileOnly() {
         String profile = mMetaData != null

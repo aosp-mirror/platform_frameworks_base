@@ -19,7 +19,6 @@ package android.net.wifi.hotspot2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.net.wifi.WifiSsid;
 import android.os.Parcel;
@@ -56,7 +55,6 @@ public class OsuProviderTest {
     private static final String TEST_NAI = "test.access.com";
     private static final List<Integer> TEST_METHOD_LIST =
             Arrays.asList(OsuProvider.METHOD_SOAP_XML_SPP);
-    private static final Icon TEST_ICON = Icon.createWithData(new byte[10], 0, 10);
 
     /**
      * Verify parcel write and read consistency for the given {@link OsuProvider}.
@@ -82,7 +80,7 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyParcelWithEmptyProviderInfo() throws Exception {
-        verifyParcel(new OsuProvider(null, null, null, null, null, null, null));
+        verifyParcel(new OsuProvider((WifiSsid) null, null, null, null, null, null));
     }
 
     /**
@@ -93,7 +91,7 @@ public class OsuProviderTest {
     @Test
     public void verifyParcelWithFullProviderInfo() throws Exception {
         verifyParcel(new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAMES,
-                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON));
+                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST));
     }
 
     /**
@@ -102,7 +100,7 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyCopyConstructorWithNullSource() throws Exception {
-        OsuProvider expected = new OsuProvider(null, null, null, null, null, null, null);
+        OsuProvider expected = new OsuProvider((WifiSsid) null, null, null, null, null, null);
         assertEquals(expected, new OsuProvider(null));
     }
 
@@ -114,7 +112,7 @@ public class OsuProviderTest {
     @Test
     public void verifyCopyConstructorWithValidSource() throws Exception {
         OsuProvider source = new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAMES,
-                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON);
+                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST);
         assertEquals(source, new OsuProvider(source));
     }
 
@@ -126,7 +124,7 @@ public class OsuProviderTest {
     @Test
     public void verifyGetters() throws Exception {
         OsuProvider provider = new OsuProvider(TEST_SSID, TEST_FRIENDLY_NAMES,
-                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST, TEST_ICON);
+                TEST_SERVICE_DESCRIPTION, TEST_SERVER_URI, TEST_NAI, TEST_METHOD_LIST);
 
         assertTrue(TEST_SSID.equals(provider.getOsuSsid()));
         assertTrue(TEST_FRIENDLY_NAME.equals(provider.getFriendlyName()));
@@ -135,6 +133,5 @@ public class OsuProviderTest {
         assertTrue(TEST_SERVER_URI.equals(provider.getServerUri()));
         assertTrue(TEST_NAI.equals(provider.getNetworkAccessIdentifier()));
         assertTrue(TEST_METHOD_LIST.equals(provider.getMethodList()));
-        assertTrue(TEST_ICON.sameAs(provider.getIcon()));
     }
 }

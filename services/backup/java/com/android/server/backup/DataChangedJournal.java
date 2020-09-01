@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import android.annotation.Nullable;
+import android.util.Slog;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -36,6 +37,7 @@ import java.util.function.Consumer;
  * reboot.
  */
 public class DataChangedJournal {
+    private static final String TAG = "DataChangedJournal";
     private static final String FILE_NAME_PREFIX = "journal";
 
     /**
@@ -139,7 +141,12 @@ public class DataChangedJournal {
      */
     static ArrayList<DataChangedJournal> listJournals(File journalDirectory) {
         ArrayList<DataChangedJournal> journals = new ArrayList<>();
-        for (File file : journalDirectory.listFiles()) {
+        File[] journalFiles = journalDirectory.listFiles();
+        if (journalFiles == null) {
+            Slog.w(TAG, "Failed to read journal files");
+            return journals;
+        }
+        for (File file : journalFiles) {
             journals.add(new DataChangedJournal(file));
         }
         return journals;

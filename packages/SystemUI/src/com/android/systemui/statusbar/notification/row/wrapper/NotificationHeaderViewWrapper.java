@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.content.Context;
 import android.util.ArraySet;
@@ -26,10 +27,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
+import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.TransformableView;
@@ -53,12 +57,20 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     protected final ViewTransformationHelper mTransformationHelper;
 
     protected int mColor;
-    private ImageView mIcon;
 
+    private CachingIconView mIcon;
     private NotificationExpandButton mExpandButton;
     protected NotificationHeaderView mNotificationHeader;
     private TextView mHeaderText;
+    private TextView mAppNameText;
     private ImageView mWorkProfileImage;
+    private View mCameraIcon;
+    private View mMicIcon;
+    private View mOverlayIcon;
+    private View mAppOps;
+    private View mAudiblyAlertedIcon;
+    private FrameLayout mIconContainer;
+
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
     private boolean mShowExpandButtonAtEnd;
@@ -100,23 +112,60 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     protected void resolveHeaderViews() {
+        mIconContainer = mView.findViewById(com.android.internal.R.id.header_icon_container);
         mIcon = mView.findViewById(com.android.internal.R.id.icon);
         mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
+        mAppNameText = mView.findViewById(com.android.internal.R.id.app_name_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
-        mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
-        mColor = mNotificationHeader.getOriginalIconColor();
+        mCameraIcon = mView.findViewById(com.android.internal.R.id.camera);
+        mMicIcon = mView.findViewById(com.android.internal.R.id.mic);
+        mOverlayIcon = mView.findViewById(com.android.internal.R.id.overlay);
+        mAppOps = mView.findViewById(com.android.internal.R.id.app_ops);
+        mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
+            mColor = mNotificationHeader.getOriginalIconColor();
+        }
     }
 
     private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
-        mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
+        View.OnClickListener listener = row.getAppOpsOnClickListener();
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setAppOpsOnClickListener(listener);
+        }
+        if (mAppOps != null) {
+            mAppOps.setOnClickListener(listener);
+        }
+    }
+
+    /**
+     * Shows or hides 'app op in use' icons based on app usage.
+     */
+    @Override
+    public void showAppOpsIcons(ArraySet<Integer> appOps) {
+        if (appOps == null) {
+            return;
+        }
+        if (mOverlayIcon != null) {
+            mOverlayIcon.setVisibility(appOps.contains(AppOpsManager.OP_SYSTEM_ALERT_WINDOW)
+                    ? View.VISIBLE : View.GONE);
+        }
+        if (mCameraIcon != null) {
+            mCameraIcon.setVisibility(appOps.contains(AppOpsManager.OP_CAMERA)
+                    ? View.VISIBLE : View.GONE);
+        }
+        if (mMicIcon != null) {
+            mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
+                    ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
     public void onContentUpdated(ExpandableNotificationRow row) {
         super.onContentUpdated(row);
-        mIsLowPriority = row.isLowPriority();
+        mIsLowPriority = row.getEntry().isAmbient();
         mTransformLowPriorityTitle = !row.isChildInGroup() && !row.isSummaryWithChildren();
         ArraySet<View> previousViews = mTransformationHelper.getAllTransformingViews();
 
@@ -125,11 +174,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
-        Notification notification = row.getStatusBarNotification().getNotification();
+        Notification notification = row.getEntry().getSbn().getNotification();
         mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
-        // The work profile image is always the same lets just set the icon tag for it not to
-        // animate
-        mWorkProfileImage.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
@@ -139,6 +185,61 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             if (!currentViews.contains(view)) {
                 mTransformationHelper.resetTransformedView(view);
             }
+        }
+    }
+
+    public void applyConversationSkin() {
+        if (mAppNameText != null) {
+            mAppNameText.setTextAppearance(
+                    com.android.internal.R.style
+                            .TextAppearance_DeviceDefault_Notification_Conversation_AppName);
+            ViewGroup.MarginLayoutParams layoutParams =
+                    (ViewGroup.MarginLayoutParams) mAppNameText.getLayoutParams();
+            layoutParams.setMarginStart(0);
+        }
+        if (mIconContainer != null) {
+            ViewGroup.MarginLayoutParams layoutParams =
+                    (ViewGroup.MarginLayoutParams) mIconContainer.getLayoutParams();
+            layoutParams.width =
+                    mIconContainer.getContext().getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.conversation_content_start);
+            final int marginStart =
+                    mIconContainer.getContext().getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.notification_content_margin_start);
+            layoutParams.setMarginStart(marginStart * -1);
+        }
+        if (mIcon != null) {
+            ViewGroup.MarginLayoutParams layoutParams =
+                    (ViewGroup.MarginLayoutParams) mIcon.getLayoutParams();
+            layoutParams.setMarginEnd(0);
+        }
+    }
+
+    public void clearConversationSkin() {
+        if (mAppNameText != null) {
+            final int textAppearance = Utils.getThemeAttr(
+                    mAppNameText.getContext(),
+                    com.android.internal.R.attr.notificationHeaderTextAppearance,
+                    com.android.internal.R.style.TextAppearance_DeviceDefault_Notification_Info);
+            mAppNameText.setTextAppearance(textAppearance);
+            ViewGroup.MarginLayoutParams layoutParams =
+                    (ViewGroup.MarginLayoutParams) mAppNameText.getLayoutParams();
+            final int marginStart = mAppNameText.getContext().getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_header_app_name_margin_start);
+            layoutParams.setMarginStart(marginStart);
+        }
+        if (mIconContainer != null) {
+            ViewGroup.MarginLayoutParams layoutParams =
+                    (ViewGroup.MarginLayoutParams) mIconContainer.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            layoutParams.setMarginStart(0);
+        }
+        if (mIcon != null) {
+            ViewGroup.MarginLayoutParams layoutParams =
+                    (ViewGroup.MarginLayoutParams) mIcon.getLayoutParams();
+            final int marginEnd = mIcon.getContext().getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_header_icon_margin_end);
+            layoutParams.setMarginEnd(marginEnd);
         }
     }
 
@@ -161,7 +262,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         stack.push(mView);
         while (!stack.isEmpty()) {
             View child = stack.pop();
-            if (child instanceof ImageView) {
+            if (child instanceof ImageView
+                    // Skip the importance ring for conversations, disabled cropping is needed for
+                    // its animation
+                    && child.getId() != com.android.internal.R.id.conversation_icon_badge_ring) {
                 ((ImageView) child).setCropToPadding(true);
             } else if (child instanceof ViewGroup){
                 ViewGroup group = (ViewGroup) child;
@@ -174,22 +278,66 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
-        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
-        if (mIsLowPriority) {
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON,
+                mIcon);
+        mTransformationHelper.addViewTransformingToSimilar(mWorkProfileImage);
+        if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);
+        }
+        if (mCameraIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mCameraIcon);
+        }
+        if (mMicIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mMicIcon);
+        }
+        if (mOverlayIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mOverlayIcon);
+        }
+        if (mAudiblyAlertedIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mAudiblyAlertedIcon);
         }
     }
 
     @Override
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
-        mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        }
+    }
+
+    @Override
+    public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
+        if (mAudiblyAlertedIcon != null) {
+            mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
     public NotificationHeaderView getNotificationHeader() {
         return mNotificationHeader;
+    }
+
+    @Override
+    public View getExpandButton() {
+        return mExpandButton;
+    }
+
+    @Override
+    public int getOriginalIconColor() {
+        return mIcon.getOriginalIconColor();
+    }
+
+    @Override
+    public View getShelfTransformationTarget() {
+        return mIcon;
+    }
+
+    @Override
+    public void setShelfIconVisible(boolean visible) {
+        super.setShelfIconVisible(visible);
+        mIcon.setForceHidden(visible);
     }
 
     @Override

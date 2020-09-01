@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.frameworks.servicestests.install_intent_filters">
+
+<!--
+     This manifest declares an activity for testing intent filters.
+     The implementing class is an empty implementation.
+-->
+
+    <uses-feature
+        android:name="com.android.frameworks.servicestests.nonexistent" />
+    <uses-configuration
+        android:reqFiveWayNav="false" />
+
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.android.frameworks.coretests"
+        android:label="Frameworks Core Tests" />
+
+    <permission
+        android:label="test permission"
+        android:name="test_permission"
+        android:protectionLevel="normal" />
+
+    <application
+        android:hasCode="true">
+        <activity
+            android:name="com.android.frameworks.servicestests.TestActivity">
+            <intent-filter>
+                <action android:name="action1"/>
+                <data android:mimeGroup="mime_group_1"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

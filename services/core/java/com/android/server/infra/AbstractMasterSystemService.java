@@ -41,14 +41,15 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base class for {@link SystemService SystemServices} that support multi user.
@@ -185,6 +186,12 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     private SparseArray<String> mUpdatingPackageNames;
 
     /**
+     * Lazy-loadable reference to {@link UserManagerInternal}.
+     */
+    @Nullable
+    private UserManagerInternal mUm;
+
+    /**
      * Default constructor.
      *
      * <p>When using this constructor, the {@link AbstractPerUserSystemService} is removed from
@@ -253,9 +260,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         } else {
             mDisabledByUserRestriction = new SparseBooleanArray();
             // Hookup with UserManager to disable service when necessary.
-            final UserManager um = context.getSystemService(UserManager.class);
-            final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-            final List<UserInfo> users = um.getUsers();
+            final UserManagerInternal umi = getUserManagerInternal();
+            final List<UserInfo> users = getSupportedUsers();
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
                 final boolean disabled = umi.getUserRestriction(userId, disallowProperty);
@@ -367,7 +373,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 + durationMs + "ms");
         enforceCallingPermissionForManagement();
 
-        Preconditions.checkNotNull(componentName);
+        Objects.requireNonNull(componentName);
         final int maxDurationMs = getMaximumTemporaryServiceDurationMs();
         if (durationMs > maxDurationMs) {
             throw new IllegalArgumentException(
@@ -694,12 +700,42 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Gets a cached reference to {@link UserManagerInternal}.
+     */
+    @NonNull
+    protected UserManagerInternal getUserManagerInternal() {
+        if (mUm == null) {
+            if (verbose) Slog.v(mTag, "lazy-loading UserManagerInternal");
+            mUm = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUm;
+    }
+
+    /**
+     * Gets a list of all supported users (i.e., those that pass the
+     * {@link #isUserSupported(TargetUser)}check).
+     */
+    @NonNull
+    protected List<UserInfo> getSupportedUsers() {
+        final UserInfo[] allUsers = getUserManagerInternal().getUserInfos();
+        final int size = allUsers.length;
+        final List<UserInfo> supportedUsers = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            final UserInfo userInfo = allUsers[i];
+            if (isUserSupported(new TargetUser(userInfo))) {
+                supportedUsers.add(userInfo);
+            }
+        }
+        return supportedUsers;
+    }
+
+    /**
      * Asserts that the given package name is owned by the UID making this call.
      *
      * @throws SecurityException when it's not...
      */
     protected final void assertCalledByPackageOwner(@NonNull String packageName) {
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
         final int uid = Binder.getCallingUid();
         final String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
         if (packages != null) {
@@ -726,11 +762,11 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             if (mUpdatingPackageNames != null) {
                 pw.print("Packages being updated: "); pw.println(mUpdatingPackageNames);
             }
+            dumpSupportedUsers(pw, prefix);
             if (mServiceNameResolver != null) {
                 pw.print(prefix); pw.print("Name resolver: ");
                 mServiceNameResolver.dumpShort(pw); pw.println();
-                final UserManager um = getContext().getSystemService(UserManager.class);
-                final List<UserInfo> users = um.getUsers();
+                final List<UserInfo> users = getSupportedUsers();
                 for (int i = 0; i < users.size(); i++) {
                     final int userId = users.get(i).id;
                     pw.print(prefix2); pw.print(userId); pw.print(": ");
@@ -916,6 +952,35 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     }
                 }
                 onServicePackageRestartedLocked(userId);
+            }
+
+            @Override
+            public void onPackageModified(String packageName) {
+                if (verbose) Slog.v(mTag, "onPackageModified(): " + packageName);
+
+                final int userId = getChangingUserId();
+                final String serviceName = mServiceNameResolver.getDefaultServiceName(userId);
+                if (serviceName == null) {
+                    return;
+                }
+
+                final ComponentName serviceComponentName =
+                        ComponentName.unflattenFromString(serviceName);
+                if (serviceComponentName == null
+                        || !serviceComponentName.getPackageName().equals(packageName)) {
+                    return;
+                }
+
+                // The default service package has changed, update the cached if the service
+                // exists but no active component.
+                final S service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    final ComponentName componentName = service.getServiceComponentName();
+                    if (componentName == null) {
+                        if (verbose) Slog.v(mTag, "update cached");
+                        updateCachedServiceLocked(userId);
+                    }
+                }
             }
 
             private String getActiveServicePackageNameLocked() {

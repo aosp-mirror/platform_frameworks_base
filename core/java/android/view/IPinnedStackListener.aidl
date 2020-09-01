@@ -16,8 +16,10 @@
 
 package android.view;
 
+import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
+import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 
 /**
@@ -35,19 +37,9 @@ oneway interface IPinnedStackListener {
 
     /**
      * Called when the window manager has detected a change that would cause the movement bounds
-     * to be changed (ie. after configuration change, aspect ratio change, etc). It then provides
-     * the components that allow the listener to calculate the movement bounds itself. The
-     * {@param normalBounds} are also the default bounds that the PiP would be entered in its
-     * current state with the aspect ratio applied.  The {@param animatingBounds} are provided
-     * to indicate the current target bounds of the pinned stack (the final bounds if animating,
-     * the current bounds if not), which may be helpful in calculating dependent animation bounds.
-     *
-     * The {@param displayRotation} is provided so that the client can verify when making certain
-     * calls that it will not provide stale information based on an old display rotation (ie. if
-     * the WM has changed in the mean time but the client has not received onMovementBoundsChanged).
+     * to be changed (ie. after configuration change, aspect ratio change, etc).
      */
-    void onMovementBoundsChanged(in Rect insetBounds, in Rect normalBounds, in Rect animatingBounds,
-            boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation);
+    void onMovementBoundsChanged(boolean fromImeAdjustment);
 
     /**
      * Called when window manager decides to adjust the pinned stack bounds because of the IME, or
@@ -58,22 +50,34 @@ oneway interface IPinnedStackListener {
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight);
 
     /**
-     * Called when window manager decides to adjust the pinned stack bounds because of the shelf, or
-     * when the listener is first registered to allow the listener to synchronized its state with
-     * the controller.  This call will always be followed by a onMovementBoundsChanged() call
-     * with fromShelfAdjustment set to {@code true}.
-     */
-    void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight);
-
-    /**
-     * Called when window manager decides to adjust the minimized state, or when the listener
-     * is first registered to allow the listener to synchronized its state with the controller.
-     */
-    void onMinimizedStateChanged(boolean isMinimized);
-
-    /**
      * Called when the set of actions for the current PiP activity changes, or when the listener
      * is first registered to allow the listener to synchronized its state with the controller.
      */
     void onActionsChanged(in ParceledListSlice actions);
+
+    /**
+     * Called by the window manager to notify the listener that Activity (was or is in pinned mode)
+     * is hidden (either stopped or removed). This is generally used as a signal to reset saved
+     * reentry fraction and size.
+     * {@param componentName} represents the application component of PiP window.
+     */
+    void onActivityHidden(in ComponentName componentName);
+
+    /**
+     * Called when the window manager has detected change on DisplayInfo,  or
+     * when the listener is first registered to allow the listener to synchronized its state with
+     * the controller.
+     */
+    void onDisplayInfoChanged(in DisplayInfo displayInfo);
+
+    /**
+     * Called by the window manager at the beginning of a configuration update cascade
+     * since the metrics from these resources are used for bounds calculations.
+     */
+    void onConfigurationChanged();
+
+    /**
+     * Called by the window manager when the aspect ratio is reset.
+     */
+    void onAspectRatioChanged(float aspectRatio);
 }

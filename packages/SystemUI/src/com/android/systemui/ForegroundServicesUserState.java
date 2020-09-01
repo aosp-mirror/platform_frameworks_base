@@ -24,15 +24,17 @@ import java.util.Arrays;
 /**
  * Struct to track relevant packages and notifications for a userid's foreground services.
  */
-class ForegroundServicesUserState {
+public class ForegroundServicesUserState {
     // shelf life of foreground services before they go bad
     private static final long FG_SERVICE_GRACE_MILLIS = 5000;
 
     private String[] mRunning = null;
     private long mServiceStartTime = 0;
-    // package -> sufficiently important posted notification keys
+
+    // package -> sufficiently important posted notification keys that signal an app is
+    // running a foreground service
     private ArrayMap<String, ArraySet<String>> mImportantNotifications = new ArrayMap<>(1);
-    // package -> standard layout posted notification keys
+    // package -> standard layout posted notification keys that can display appOps
     private ArrayMap<String, ArraySet<String>> mStandardLayoutNotifications = new ArrayMap<>(1);
 
     // package -> app ops
@@ -110,6 +112,11 @@ class ForegroundServicesUserState {
         return found;
     }
 
+    /**
+     * System disclosures for foreground services are required if an app has a foreground service
+     * running AND the app hasn't posted its own notification signalling it is running a
+     * foreground service
+     */
     public boolean isDisclosureNeeded() {
         if (mRunning != null
                 && System.currentTimeMillis() - mServiceStartTime
@@ -129,12 +136,15 @@ class ForegroundServicesUserState {
         return mAppOps.get(pkg);
     }
 
-    public String getStandardLayoutKey(String pkg) {
+    /**
+     * Gets the notifications with standard layouts associated with this package
+     */
+    public ArraySet<String> getStandardLayoutKeys(String pkg) {
         final ArraySet<String> set = mStandardLayoutNotifications.get(pkg);
         if (set == null || set.size() == 0) {
             return null;
         }
-        return set.valueAt(0);
+        return set;
     }
 
     @Override

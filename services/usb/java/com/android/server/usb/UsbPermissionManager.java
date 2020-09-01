@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,230 +17,119 @@
 package com.android.server.usb;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.Binder;
-import android.os.Process;
 import android.os.UserHandle;
-import android.service.usb.UsbSettingsAccessoryPermissionProto;
-import android.service.usb.UsbSettingsDevicePermissionProto;
-import android.service.usb.UsbUserSettingsManagerProto;
+import android.os.UserManager;
+import android.service.usb.UsbSettingsManagerProto;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.dump.DualDumpOutputStream;
 
-import java.util.HashMap;
+import java.util.List;
 
-/**
- * UsbPermissionManager manages usb device or accessory access permissions.
- *
- * @hide
- */
 class UsbPermissionManager {
     private static final String LOG_TAG = UsbPermissionManager.class.getSimpleName();
+    private static final boolean DEBUG = false;
 
-    @GuardedBy("mLock")
-    /** Temporary mapping USB device name to list of UIDs with permissions for the device*/
-    private final HashMap<String, SparseBooleanArray> mDevicePermissionMap =
-            new HashMap<>();
-    @GuardedBy("mLock")
-    /** Temporary mapping UsbAccessory to list of UIDs with permissions for the accessory*/
-    private final HashMap<UsbAccessory, SparseBooleanArray> mAccessoryPermissionMap =
-            new HashMap<>();
+    /** Context to be used by this module */
+    private final @NonNull Context mContext;
 
-    private final UserHandle mUser;
-    private final boolean mDisablePermissionDialogs;
+    /** Map from user id to {@link UsbUserPermissionManager} for the user */
+    @GuardedBy("mPermissionsByUser")
+    private final SparseArray<UsbUserPermissionManager> mPermissionsByUser = new SparseArray<>();
 
-    private final Object mLock = new Object();
+    final UsbService mUsbService;
 
-    UsbPermissionManager(@NonNull Context context, @NonNull UserHandle user) {
-        mUser = user;
-        mDisablePermissionDialogs = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_disableUsbPermissionDialogs);
+    UsbPermissionManager(@NonNull Context context,
+            @NonNull UsbService usbService) {
+        mContext = context;
+        mUsbService = usbService;
     }
 
-    /**
-     * Removes access permissions of all packages for the USB accessory.
-     *
-     * @param accessory to remove permissions for
-     */
-    void removeAccessoryPermissions(@NonNull UsbAccessory accessory) {
-        synchronized (mLock) {
-            mAccessoryPermissionMap.remove(accessory);
+    @NonNull UsbUserPermissionManager getPermissionsForUser(@UserIdInt int userId) {
+        synchronized (mPermissionsByUser) {
+            UsbUserPermissionManager permissions = mPermissionsByUser.get(userId);
+            if (permissions == null) {
+                permissions = new UsbUserPermissionManager(mContext.createContextAsUser(
+                        UserHandle.of(userId), 0), mUsbService.getSettingsForUser(userId));
+                mPermissionsByUser.put(userId, permissions);
+            }
+            return permissions;
         }
     }
 
-    /**
-     * Removes access permissions of all packages for the USB device.
-     *
-     * @param device to remove permissions for
-     */
-    void removeDevicePermissions(@NonNull UsbDevice device) {
-        synchronized (mLock) {
-            mDevicePermissionMap.remove(device.getDeviceName());
+    @NonNull UsbUserPermissionManager getPermissionsForUser(@NonNull UserHandle user) {
+        return getPermissionsForUser(user.getIdentifier());
+    }
+
+    void remove(@NonNull UserHandle userToRemove) {
+        synchronized (mPermissionsByUser) {
+            mPermissionsByUser.remove(userToRemove.getIdentifier());
         }
     }
 
     /**
-     * Grants permission for USB device without showing system dialog for package with uid.
+     * Remove temporary access permission and broadcast that a device was removed.
      *
-     * @param device to grant permission for
-     * @param uid to grant permission for
+     * @param device The device that is removed
      */
-    void grantDevicePermission(@NonNull UsbDevice device, int uid) {
-        synchronized (mLock) {
-            String deviceName = device.getDeviceName();
-            SparseBooleanArray uidList = mDevicePermissionMap.get(deviceName);
-            if (uidList == null) {
-                uidList = new SparseBooleanArray(1);
-                mDevicePermissionMap.put(deviceName, uidList);
+    void usbDeviceRemoved(@NonNull UsbDevice device) {
+        synchronized (mPermissionsByUser) {
+            for (int i = 0; i < mPermissionsByUser.size(); i++) {
+                // clear temporary permissions for the device
+                mPermissionsByUser.valueAt(i).removeDevicePermissions(device);
             }
-            uidList.put(uid, true);
         }
+
+        Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+
+        if (DEBUG) {
+            Slog.d(LOG_TAG, "usbDeviceRemoved, sending " + intent);
+        }
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     /**
-     * Grants permission for USB accessory without showing system dialog for package with uid.
+     * Remove temporary access permission and broadcast that a accessory was removed.
      *
-     * @param accessory to grant permission for
-     * @param uid to grant permission for
+     * @param accessory The accessory that is removed
      */
-    void grantAccessoryPermission(@NonNull UsbAccessory accessory, int uid) {
-        synchronized (mLock) {
-            SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-            if (uidList == null) {
-                uidList = new SparseBooleanArray(1);
-                mAccessoryPermissionMap.put(accessory, uidList);
+    void usbAccessoryRemoved(@NonNull UsbAccessory accessory) {
+        synchronized (mPermissionsByUser) {
+            for (int i = 0; i < mPermissionsByUser.size(); i++) {
+                // clear temporary permissions for the accessory
+                mPermissionsByUser.valueAt(i).removeAccessoryPermissions(accessory);
             }
-            uidList.put(uid, true);
         }
+
+        Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    /**
-     * Returns true if package with uid has permission to access the device.
-     *
-     * @param device to check permission for
-     * @param uid to check permission for
-     * @return {@code true} if package with uid has permission
-     */
-    boolean hasPermission(@NonNull UsbDevice device, int uid) {
-        synchronized (mLock) {
-            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
-                return true;
+    void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        synchronized (mPermissionsByUser) {
+            List<UserInfo> users = userManager.getUsers();
+            int numUsers = users.size();
+            for (int i = 0; i < numUsers; i++) {
+                getPermissionsForUser(users.get(i).id).dump(dump, "user_permissions",
+                        UsbSettingsManagerProto.USER_SETTINGS);
             }
-            SparseBooleanArray uidList = mDevicePermissionMap.get(device.getDeviceName());
-            if (uidList == null) {
-                return false;
-            }
-            return uidList.get(uid);
         }
+        dump.end(token);
     }
 
-    /**
-     * Returns true if caller has permission to access the accessory.
-     *
-     * @param accessory to check permission for
-     * @param uid to check permission for
-     * @return {@code true} if caller has permssion
-     */
-    boolean hasPermission(@NonNull UsbAccessory accessory, int uid) {
-        synchronized (mLock) {
-            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
-                return true;
-            }
-            SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-            if (uidList == null) {
-                return false;
-            }
-            return uidList.get(uid);
-        }
-    }
-
-    /**
-     * Creates UI dialog to request permission for the given package to access the device
-     * or accessory.
-     *
-     * @param device The USB device attached
-     * @param accessory The USB accessory attached
-     * @param canBeDefault Whether the calling pacakge can set as default handler
-     * of the USB device or accessory
-     * @param packageName The package name of the calling package
-     * @param uid The uid of the calling package
-     * @param userContext The context to start the UI dialog
-     * @param pi PendingIntent for returning result
-     */
-    void requestPermissionDialog(@Nullable UsbDevice device,
-                                 @Nullable UsbAccessory accessory,
-                                 boolean canBeDefault,
-                                 @NonNull String packageName,
-                                 int uid,
-                                 @NonNull Context userContext,
-                                 @NonNull PendingIntent pi) {
-        long identity = Binder.clearCallingIdentity();
-        Intent intent = new Intent();
-        if (device != null) {
-            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        } else {
-            intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        }
-        intent.putExtra(Intent.EXTRA_INTENT, pi);
-        intent.putExtra(Intent.EXTRA_UID, uid);
-        intent.putExtra(UsbManager.EXTRA_CAN_BE_DEFAULT, canBeDefault);
-        intent.putExtra(UsbManager.EXTRA_PACKAGE, packageName);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.usb.UsbPermissionActivity");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        try {
-            userContext.startActivityAsUser(intent, mUser);
-        } catch (ActivityNotFoundException e) {
-            Slog.e(LOG_TAG, "unable to start UsbPermissionActivity");
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    void dump(@NonNull DualDumpOutputStream dump) {
-        synchronized (mLock) {
-            for (String deviceName : mDevicePermissionMap.keySet()) {
-                long devicePermissionToken = dump.start("device_permissions",
-                        UsbUserSettingsManagerProto.DEVICE_PERMISSIONS);
-
-                dump.write("device_name", UsbSettingsDevicePermissionProto.DEVICE_NAME, deviceName);
-
-                SparseBooleanArray uidList = mDevicePermissionMap.get(deviceName);
-                int count = uidList.size();
-                for (int i = 0; i < count; i++) {
-                    dump.write("uids", UsbSettingsDevicePermissionProto.UIDS, uidList.keyAt(i));
-                }
-
-                dump.end(devicePermissionToken);
-            }
-
-            for (UsbAccessory accessory : mAccessoryPermissionMap.keySet()) {
-                long accessoryPermissionToken = dump.start("accessory_permissions",
-                        UsbUserSettingsManagerProto.ACCESSORY_PERMISSIONS);
-
-                dump.write("accessory_description",
-                        UsbSettingsAccessoryPermissionProto.ACCESSORY_DESCRIPTION,
-                        accessory.getDescription());
-
-                SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-                int count = uidList.size();
-                for (int i = 0; i < count; i++) {
-                    dump.write("uids", UsbSettingsAccessoryPermissionProto.UIDS, uidList.keyAt(i));
-                }
-
-                dump.end(accessoryPermissionToken);
-            }
-        }
-    }
 }

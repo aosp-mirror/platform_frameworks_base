@@ -20,21 +20,8 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false" android:zAdjustment="top">
 
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/accelerate_quad"
-            android:startOffset="250"
-            android:duration="167"/>
-
     <translate android:fromYDelta="0" android:toYDelta="110%"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/fast_out_linear_in"
             android:duration="225"/>
-
-    <scale android:fromXScale="1.0" android:toXScale="1.0"
-            android:fromYScale="1.0" android:toYScale="1.0"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:pivotX="50%p" android:pivotY="50%p"
-            android:interpolator="@interpolator/fast_out_slow_in"
-            android:duration="225" />
 </set>

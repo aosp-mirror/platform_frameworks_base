@@ -48,7 +48,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
@@ -58,20 +57,25 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,21 +98,31 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private IStatusBarService mStatusBarService;
+    private NotificationClickNotifier mClickNotifier;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
     @Mock
     private RemoteInputController mRemoteInputController;
     @Mock
-    private ShadeController mShadeController;
+    private StatusBar mStatusBar;
     @Mock
-    private KeyguardMonitor mKeyguardMonitor;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private Handler mHandler;
     @Mock
     private BubbleController mBubbleController;
+    @Mock
+    private ShadeControllerImpl mShadeController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
+    @Mock
+    private NotifPipeline mNotifPipeline;
+    @Mock
+    private NotifCollection mNotifCollection;
 
     @Mock
     private ActivityIntentHelper mActivityIntentHelper;
@@ -117,9 +131,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private Intent mContentIntentInner;
     @Mock
-    private NotificationData mNotificationData;
-
     private NotificationActivityStarter mNotificationActivityStarter;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mNotificationRow;
@@ -134,43 +147,72 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         when(mContentIntent.isActivity()).thenReturn(true);
         when(mContentIntent.getCreatorUserHandle()).thenReturn(UserHandle.of(1));
         when(mContentIntent.getIntent()).thenReturn(mContentIntentInner);
 
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
 
         // Create standard notification with contentIntent
         mNotificationRow = mNotificationTestHelper.createRow();
-        StatusBarNotification sbn = mNotificationRow.getStatusBarNotification();
+        StatusBarNotification sbn = mNotificationRow.getEntry().getSbn();
         sbn.getNotification().contentIntent = mContentIntent;
         sbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
         // Create bubble notification row with contentIntent
         mBubbleNotificationRow = mNotificationTestHelper.createBubble();
-        StatusBarNotification bubbleSbn = mBubbleNotificationRow.getStatusBarNotification();
+        StatusBarNotification bubbleSbn = mBubbleNotificationRow.getEntry().getSbn();
         bubbleSbn.getNotification().contentIntent = mContentIntent;
         bubbleSbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
         mActiveNotifications = new ArrayList<>();
         mActiveNotifications.add(mNotificationRow.getEntry());
         mActiveNotifications.add(mBubbleNotificationRow.getEntry());
-        when(mNotificationData.getActiveNotifications()).thenReturn(mActiveNotifications);
+        when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
-        mNotificationActivityStarter = new StatusBarNotificationActivityStarter(getContext(),
-                mock(CommandQueue.class), mAssistManager, mock(NotificationPanelView.class),
-                mock(NotificationPresenter.class), mEntryManager, mock(HeadsUpManagerPhone.class),
-                mActivityStarter, mock(ActivityLaunchAnimator.class), mStatusBarService,
-                mock(StatusBarStateController.class), mock(KeyguardManager.class),
-                mock(IDreamManager.class), mRemoteInputManager,
-                mock(StatusBarRemoteInputCallback.class), mock(NotificationGroupManager.class),
-                mock(NotificationLockscreenUserManager.class), mShadeController, mKeyguardMonitor,
-                mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
-                mock(LockPatternUtils.class), mHandler, mHandler, mActivityIntentHelper,
-                mBubbleController);
+        mNotificationActivityStarter =
+                new StatusBarNotificationActivityStarter.Builder(
+                        getContext(),
+                        mock(CommandQueue.class),
+                        mHandler,
+                        mHandler,
+                        mUiBgExecutor,
+                        mEntryManager,
+                        mNotifPipeline,
+                        mNotifCollection,
+                        mock(HeadsUpManagerPhone.class),
+                        mActivityStarter,
+                        mClickNotifier,
+                        mock(StatusBarStateController.class),
+                        mStatusBarKeyguardViewManager,
+                        mock(KeyguardManager.class),
+                        mock(IDreamManager.class),
+                        mBubbleController,
+                        () -> mAssistManager,
+                        mRemoteInputManager,
+                        mock(NotificationGroupManager.class),
+                        mock(NotificationLockscreenUserManager.class),
+                        mShadeController,
+                        mKeyguardStateController,
+                        mock(NotificationInterruptStateProvider.class),
+                        mock(LockPatternUtils.class),
+                        mock(StatusBarRemoteInputCallback.class),
+                        mActivityIntentHelper,
+
+                        mFeatureFlags,
+                        mock(MetricsLogger.class),
+                        mock(StatusBarNotificationActivityStarterLogger.class))
+                .setStatusBar(mStatusBar)
+                .setNotificationPresenter(mock(NotificationPresenter.class))
+                .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
+                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
+                .build();
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
         doAnswer(mCallOnDismiss).when(mActivityStarter).dismissKeyguardThenExecute(
@@ -178,7 +220,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // set up addAfterKeyguardGoneRunnable to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))
-                .when(mShadeController).addAfterKeyguardGoneRunnable(any(Runnable.class));
+                .when(mStatusBarKeyguardViewManager)
+                .addAfterKeyguardGoneRunnable(any(Runnable.class));
 
         // set up addPostCollapseAction to synchronously invoke the Runnable arg
         doAnswer(answerVoid(Runnable::run))
@@ -196,12 +239,12 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     public void testOnNotificationClicked_keyGuardShowing()
             throws PendingIntent.CanceledException, RemoteException {
         // Given
-        StatusBarNotification sbn = mNotificationRow.getStatusBarNotification();
+        StatusBarNotification sbn = mNotificationRow.getEntry().getSbn();
         sbn.getNotification().contentIntent = mContentIntent;
         sbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
-        when(mShadeController.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBar.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(sbn, mNotificationRow);
@@ -220,7 +263,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         verify(mAssistManager).hideAssist();
 
-        verify(mStatusBarService).onNotificationClick(
+        verify(mClickNotifier).onNotificationClick(
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
         // Notification is removed due to FLAG_AUTO_CANCEL
@@ -230,7 +273,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnNotificationClicked_bubble_noContentIntent_noKeyGuard()
             throws RemoteException {
-        StatusBarNotification sbn = mBubbleNotificationRow.getStatusBarNotification();
+        StatusBarNotification sbn = mBubbleNotificationRow.getEntry().getSbn();
 
         // Given
         sbn.getNotification().contentIntent = null;
@@ -239,14 +282,14 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbleController).expandStackAndSelectBubble(eq(sbn.getKey()));
+        verify(mBubbleController).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
         // This is called regardless, and simply short circuits when there is nothing to do.
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mAssistManager).hideAssist();
 
-        verify(mStatusBarService).onNotificationClick(
+        verify(mClickNotifier).onNotificationClick(
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
@@ -259,24 +302,24 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnNotificationClicked_bubble_noContentIntent_keyGuardShowing()
             throws RemoteException {
-        StatusBarNotification sbn = mBubbleNotificationRow.getStatusBarNotification();
+        StatusBarNotification sbn = mBubbleNotificationRow.getEntry().getSbn();
 
         // Given
         sbn.getNotification().contentIntent = null;
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
-        when(mShadeController.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBar.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbleController).expandStackAndSelectBubble(eq(sbn.getKey()));
+        verify(mBubbleController).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mAssistManager).hideAssist();
 
-        verify(mStatusBarService).onNotificationClick(
+        verify(mClickNotifier).onNotificationClick(
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
@@ -289,24 +332,24 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnNotificationClicked_bubble_withContentIntent_keyGuardShowing()
             throws RemoteException {
-        StatusBarNotification sbn = mBubbleNotificationRow.getStatusBarNotification();
+        StatusBarNotification sbn = mBubbleNotificationRow.getEntry().getSbn();
 
         // Given
         sbn.getNotification().contentIntent = mContentIntent;
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
-        when(mShadeController.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBar.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
 
         // Then
-        verify(mBubbleController).expandStackAndSelectBubble(eq(sbn.getKey()));
+        verify(mBubbleController).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
         verify(mAssistManager).hideAssist();
 
-        verify(mStatusBarService).onNotificationClick(
+        verify(mClickNotifier).onNotificationClick(
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.

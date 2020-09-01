@@ -23,90 +23,142 @@
     android:id="@id/contentPanel">
 
     <LinearLayout
-        android:id="@+id/button_bar"
-        android:visibility="gone"
-        style="?attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_ignoreOffset="true"
-        android:layout_alwaysShow="true"
-        android:layout_hasNestedScrollIndicator="true"
-        android:background="?attr/colorBackgroundFloating"
-        android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:paddingStart="12dp"
+        android:layout_height="match_parent"
         android:weightSum="5"
-        android:paddingEnd="12dp"
+        android:layout_alwaysShow="true"
+        android:orientation="vertical"
+        android:background="?attr/colorBackgroundFloating"
         android:elevation="8dp">
 
-        <TextView
-            android:id="@+id/profile_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:textSize="40sp"
-            android:layout_weight="5"
-            android:layout_gravity = "left"
+        <LinearLayout
+            android:id="@+id/button_bar"
             android:visibility="gone"
-            android:textColor="?attr/colorAccent"
-            android:singleLine="true"/>
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+            style="?attr/buttonBarStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="56dp"
-            android:layout_gravity = "left"
-            android:layout_weight="3"
+            android:layout_ignoreOffset="true"
+            android:layout_alwaysShow="true"
+            android:layout_hasNestedScrollIndicator="true"
+            android:background="?attr/colorBackgroundFloating"
+            android:orientation="horizontal"
             android:paddingTop="8dp"
-            android:layout_below="@id/profile_button"
-            android:paddingBottom="8dp"/>
+            android:paddingStart="12dp"
+            android:weightSum="4"
+            android:paddingEnd="12dp"
+            android:elevation="8dp">
 
-        <Button
-            android:id="@+id/button_once"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:layout_gravity = "right"
-            android:text="@string/activity_resolver_use_once"
-            android:layout_weight="1"
-            android:onClick="onButtonClick"/>
+            <TextView
+                android:id="@+id/profile_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textSize="40sp"
+                android:layout_weight="4"
+                android:layout_gravity="left"
+                android:visibility="gone"
+                android:textColor="?attr/colorAccent"
+                android:singleLine="true"/>
 
-        <Button
-            android:id="@+id/button_always"
-            android:layout_marginLeft="10dp"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="3"
+                android:paddingTop="8dp"
+                android:layout_below="@id/profile_button"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:paddingBottom="8dp"/>
+
+            <Button
+                android:id="@+id/button_once"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:layout_gravity="right"
+                style="?attr/buttonBarButtonStyle"
+                android:text="@string/activity_resolver_use_once"
+                android:layout_weight="0.5"
+                android:onClick="onButtonClick"/>
+
+            <Button
+                android:id="@+id/button_always"
+                android:layout_marginLeft="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:layout_gravity="right"
+                style="?attr/buttonBarButtonStyle"
+                android:text="@string/activity_resolver_use_always"
+                android:layout_weight="0.5"
+                android:onClick="onButtonClick"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/stub"
+            android:visibility="gone"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="false"
-            android:layout_gravity = "right"
-            android:text="@string/activity_resolver_use_always"
-            android:layout_weight="1"
-            android:onClick="onButtonClick"/>
+            android:background="?attr/colorBackgroundFloating"/>
+
+        <TabHost
+            android:id="@+id/profile_tabhost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="?attr/colorBackgroundFloating">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+                </TabWidget>
+                <View
+                    android:id="@+id/resolver_tab_divider"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?attr/colorBackgroundFloating"
+                    android:foreground="?attr/dividerVertical"
+                    android:layout_marginBottom="8dp"/>
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <com.android.internal.app.ResolverViewPager
+                        android:id="@+id/profile_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
+
+        <View
+            android:layout_alwaysShow="true"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorBackgroundFloating"
+            android:foreground="?attr/dividerVertical"/>
+
+        <TextView android:id="@+id/empty"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:background="?attr/colorBackgroundFloating"
+                  android:elevation="8dp"
+                  android:layout_alwaysShow="true"
+                  android:text="@string/noApplications"
+                  android:padding="32dp"
+                  android:gravity="center"
+                  android:visibility="gone"/>
+
     </LinearLayout>
-
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="500dp"
-        android:id="@+id/resolver_list"
-        android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        android:background="?attr/colorBackgroundFloating"
-        android:elevation="8dp"
-        android:nestedScrollingEnabled="true"
-        android:scrollIndicators="top|bottom"/>
-
-    <TextView android:id="@+id/empty"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="?attr/colorBackgroundFloating"
-              android:elevation="8dp"
-              android:layout_alwaysShow="true"
-              android:text="@string/noApplications"
-              android:padding="32dp"
-              android:gravity="center"
-              android:visibility="gone"/>
 
 </com.android.internal.widget.ResolverDrawerLayout>

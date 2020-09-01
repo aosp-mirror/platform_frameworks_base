@@ -47,6 +47,7 @@ public class CornerHandleView extends View {
     private int mLightColor;
     private int mDarkColor;
     private Path mPath;
+    private boolean mRequiresInvalidate;
 
     public CornerHandleView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,6 +66,15 @@ public class CornerHandleView extends View {
         mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
 
         updatePath();
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
+        if (alpha > 0f && mRequiresInvalidate) {
+            mRequiresInvalidate = false;
+            invalidate();
+        }
     }
 
     private void updatePath() {
@@ -104,11 +114,17 @@ public class CornerHandleView extends View {
      * appropriately. Intention is to match the home handle color.
      */
     public void updateDarkness(float darkIntensity) {
-        mPaint.setColor((int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
-                mLightColor,
-                mDarkColor));
-        if (getVisibility() == VISIBLE) {
-            invalidate();
+        // Handle color is same as home handle color.
+        int color = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
+                mLightColor, mDarkColor);
+        if (mPaint.getColor() != color) {
+            mPaint.setColor(color);
+            if (getVisibility() == VISIBLE && getAlpha() > 0) {
+                invalidate();
+            } else {
+                // If we are currently invisible, then invalidate when we are next made visible
+                mRequiresInvalidate = true;
+            }
         }
     }
 

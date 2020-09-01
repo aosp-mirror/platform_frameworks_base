@@ -171,6 +171,6 @@ public class WifiAwareAgentNetworkSpecifierTest {
     WifiAwareNetworkSpecifier getMockNetworkSpecifier(int clientId) {
         return new WifiAwareNetworkSpecifier(WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_OOB,
                 WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR, clientId, 0, 0, new byte[6],
-                null, null, 10, 5, 0);
+                null, null, 10, 5);
     }
 }

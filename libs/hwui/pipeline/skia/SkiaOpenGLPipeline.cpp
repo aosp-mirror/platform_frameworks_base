@@ -18,6 +18,7 @@
 
 #include "DeferredLayerUpdater.h"
 #include "LayerDrawable.h"
+#include "LightingInfo.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "hwui/Bitmap.h"
@@ -99,7 +100,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
             mRenderThread.getGrContext(), backendRT, this->getSurfaceOrigin(), colorType,
             mSurfaceColorSpace, &props));
 
-    SkiaPipeline::updateLighting(lightGeometry, lightInfo);
+    LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
                 SkMatrix::I());
     layerUpdateQueue->clear();
@@ -156,31 +157,15 @@ void SkiaOpenGLPipeline::onStop() {
     }
 }
 
-static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
-    int query_value;
-    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
-    if (err != 0 || query_value < 0) {
-        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
-        return;
-    }
-    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
-
-    int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
-    native_window_set_buffer_count(window, bufferCount);
-}
-
-bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
-                                    ColorMode colorMode, uint32_t extraBuffers) {
+bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior) {
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
     }
 
-    setSurfaceColorProperties(colorMode);
-
     if (surface) {
         mRenderThread.requireGlContext();
-        auto newSurface = mEglManager.createSurface(surface, colorMode, mSurfaceColorSpace);
+        auto newSurface = mEglManager.createSurface(surface, mColorMode, mSurfaceColorSpace);
         if (!newSurface) {
             return false;
         }
@@ -190,7 +175,6 @@ bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
-        setBufferCount(surface, extraBuffers);
         return true;
     }
 

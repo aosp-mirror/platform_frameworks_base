@@ -20,7 +20,8 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.service.contentcapture.FlushMetrics;
-import android.util.StatsLog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.List;
 
@@ -35,8 +36,8 @@ public final class ContentCaptureMetricsLogger {
     /** @hide */
     public static void writeServiceEvent(int eventType, @NonNull String serviceName,
             @Nullable String targetPackage) {
-        StatsLog.write(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS, eventType, serviceName,
-                targetPackage);
+        FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS, eventType,
+                serviceName, targetPackage);
     }
 
     /** @hide */
@@ -79,16 +80,16 @@ public final class ContentCaptureMetricsLogger {
                 stringBuilder.append(activities.get(i).flattenToShortString());
             }
         }
-        StatsLog.write(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS,
-                StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_WHITELIST,
+        FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS,
+                FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_WHITELIST,
                 serviceName, stringBuilder.toString());
     }
 
     /** @hide */
     public static void writeSessionEvent(int sessionId, int event, int flags,
             @NonNull ComponentName service, @Nullable ComponentName app, boolean isChildSession) {
-        StatsLog.write(StatsLog.CONTENT_CAPTURE_SESSION_EVENTS, sessionId, event, flags,
-                ComponentName.flattenToShortString(service),
+        FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS, sessionId, event,
+                flags, ComponentName.flattenToShortString(service),
                 ComponentName.flattenToShortString(app), isChildSession);
     }
 
@@ -96,7 +97,7 @@ public final class ContentCaptureMetricsLogger {
     public static void writeSessionFlush(int sessionId, @NonNull ComponentName service,
             @Nullable ComponentName app, @NonNull FlushMetrics fm,
             @NonNull ContentCaptureOptions options, int flushReason) {
-        StatsLog.write(StatsLog.CONTENT_CAPTURE_FLUSHED, sessionId,
+        FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_FLUSHED, sessionId,
                 ComponentName.flattenToShortString(service),
                 ComponentName.flattenToShortString(app), fm.sessionStarted, fm.sessionFinished,
                 fm.viewAppearedCount, fm.viewDisappearedCount, fm.viewTextChangedCount,

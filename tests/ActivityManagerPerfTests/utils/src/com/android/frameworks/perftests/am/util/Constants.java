@@ -30,4 +30,33 @@ public class Constants {
 
     public static final String EXTRA_RECEIVER_CALLBACK = "receiver_callback_binder";
     public static final String EXTRA_LOOPER_IDLE_CALLBACK = "looper_idle_callback_binder";
+    public static final String EXTRA_SOURCE_PACKAGE = "source_package";
+    public static final String EXTRA_URI = "uri";
+    public static final String EXTRA_REQ_FINISH_ACTIVITY = "req_finish_activity";
+    public static final String EXTRA_SEQ = "seq";
+    public static final String EXTRA_ARG1 = "arg1";
+    public static final String EXTRA_ARG2 = "arg2";
+
+    public static final int RESULT_NO_ERROR = 0;
+    public static final int RESULT_ERROR = 1;
+    public static final String STUB_INIT_SERVICE_NAME = "com.android.stubs.am.InitService";
+
+    public static final int COMMAND_BIND_SERVICE = 1;
+    public static final int COMMAND_UNBIND_SERVICE = 2;
+    public static final int COMMAND_ACQUIRE_CONTENT_PROVIDER = 3;
+    public static final int COMMAND_RELEASE_CONTENT_PROVIDER = 4;
+    public static final int COMMAND_SEND_BROADCAST = 5;
+    public static final int COMMAND_START_ACTIVITY = 6;
+    public static final int COMMAND_STOP_ACTIVITY = 7;
+
+    public static final int MSG_DEFAULT = 0;
+    public static final int MSG_UNBIND_DONE = 1;
+
+    public static final int REPLY_PACKAGE_START_RESULT = 0;
+    public static final int REPLY_COMMAND_RESULT = 1;
+
+    public static final String STUB_ACTION_ACTIVITY =
+            "com.android.stubs.am.ACTION_START_TEST_ACTIVITY";
+    public static final String STUB_ACTION_BROADCAST =
+            "com.android.stubs.am.ACTION_BROADCAST_TEST";
 }

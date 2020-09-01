@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Point;
@@ -50,7 +51,7 @@ import org.junit.Test;
 @Presubmit
 public class WindowAnimationSpecTest {
     private final SurfaceControl mSurfaceControl = mock(SurfaceControl.class);
-    private final SurfaceControl.Transaction mTransaction = mock(SurfaceControl.Transaction.class);
+    private final SurfaceControl.Transaction mTransaction = spy(StubTransaction.class);
     private final Animation mAnimation = mock(Animation.class);
     private final Rect mStackBounds = new Rect(0, 0, 10, 10);
 

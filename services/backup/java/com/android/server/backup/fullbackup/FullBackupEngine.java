@@ -36,7 +36,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -47,6 +46,7 @@ import com.android.server.backup.utils.FullBackupUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * Core logic for performing one package's full backup, gathering the tarball from the application
@@ -201,7 +201,7 @@ public class FullBackupEngine {
         mOpToken = opToken;
         mTransportFlags = transportFlags;
         mAgentTimeoutParameters =
-                Preconditions.checkNotNull(
+                Objects.requireNonNull(
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
     }

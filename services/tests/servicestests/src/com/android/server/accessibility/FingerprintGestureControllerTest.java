@@ -31,6 +31,8 @@ import android.accessibilityservice.FingerprintGestureController;
 import android.accessibilityservice.FingerprintGestureController.FingerprintGestureCallback;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 
+import com.android.server.accessibility.test.MessageCapturingHandler;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

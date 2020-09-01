@@ -15,17 +15,21 @@
  */
 
 #include "SkiaRecordingCanvas.h"
-
+#include "hwui/Paint.h"
 #include <SkImagePriv.h>
 #include "CanvasTransform.h"
+#ifdef __ANDROID__ // Layoutlib does not support Layers
 #include "Layer.h"
 #include "LayerDrawable.h"
+#endif
 #include "NinePatchUtils.h"
 #include "RenderNode.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
 #include "pipeline/skia/GLFunctorDrawable.h"
 #include "pipeline/skia/VkFunctorDrawable.h"
 #include "pipeline/skia/VkInteropFunctorDrawable.h"
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -102,12 +106,15 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
 }
 
 void SkiaRecordingCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layerUpdater) {
+#ifdef __ANDROID__ // Layoutlib does not support Layers
     if (layerUpdater != nullptr) {
         // Create a ref-counted drawable, which is kept alive by sk_sp in SkLiteDL.
         sk_sp<SkDrawable> drawable(new LayerDrawable(layerUpdater));
         drawDrawable(drawable.get());
     }
+#endif
 }
+
 
 void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     // Record the child node. Drawable dtor will be invoked when mChildNodes deque is cleared.
@@ -125,8 +132,10 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     }
 }
 
+
 void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
                                              uirenderer::GlFunctorLifecycleListener* listener) {
+#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         functorDrawable = mDisplayList->allocateDrawable<VkInteropFunctorDrawable>(
@@ -137,9 +146,11 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
     }
     mDisplayList->mChildFunctors.push_back(functorDrawable);
     drawDrawable(functorDrawable);
+#endif
 }
 
 void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
+#ifdef __ANDROID__ // Layoutlib does not support GL, Vulcan etc.
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         functorDrawable = mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, asSkCanvas());
@@ -147,7 +158,8 @@ void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
         functorDrawable = mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, asSkCanvas());
     }
     mDisplayList->mChildFunctors.push_back(functorDrawable);
-    drawDrawable(functorDrawable);
+    mRecorder.drawWebView(functorDrawable);
+#endif
 }
 
 void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
@@ -185,9 +197,37 @@ SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint) {
     return filterPaint(std::move(paint));
 }
 
-void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
+static SkDrawLooper* get_looper(const Paint* paint) {
+    return paint ? paint->getLooper() : nullptr;
+}
+
+template <typename Proc>
+void applyLooper(SkDrawLooper* looper, const SkPaint& paint, Proc proc) {
+    if (looper) {
+        SkSTArenaAlloc<256> alloc;
+        SkDrawLooper::Context* ctx = looper->makeContext(&alloc);
+        if (ctx) {
+            SkDrawLooper::Context::Info info;
+            for (;;) {
+                SkPaint p = paint;
+                if (!ctx->next(&info, &p)) {
+                    break;
+                }
+                proc(info.fTranslate.fX, info.fTranslate.fY, p);
+            }
+        }
+    } else {
+        proc(0, 0, paint);
+    }
+}
+
+void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImage(image, left, top, filterBitmap(paint), bitmap.palette());
+
+    applyLooper(get_looper(paint), *filterBitmap(paint), [&](SkScalar x, SkScalar y, const SkPaint& p) {
+        mRecorder.drawImage(image, left + x, top + y, &p, bitmap.palette());
+    });
+
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
     // when this function ends.
@@ -196,12 +236,16 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, cons
     }
 }
 
-void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {
+void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) {
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
 
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImage(image, 0, 0, filterBitmap(paint), bitmap.palette());
+
+    applyLooper(get_looper(paint), *filterBitmap(paint), [&](SkScalar x, SkScalar y, const SkPaint& p) {
+        mRecorder.drawImage(image, x, y, &p, bitmap.palette());
+    });
+
     if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
@@ -209,13 +253,17 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, con
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
                                      float srcBottom, float dstLeft, float dstTop, float dstRight,
-                                     float dstBottom, const SkPaint* paint) {
+                                     float dstBottom, const Paint* paint) {
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImageRect(image, srcRect, dstRect, filterBitmap(paint),
-                            SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
+
+    applyLooper(get_looper(paint), *filterBitmap(paint), [&](SkScalar x, SkScalar y, const SkPaint& p) {
+        mRecorder.drawImageRect(image, srcRect, dstRect.makeOffset(x, y), &p,
+                                SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
+    });
+
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
         !dstRect.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
@@ -224,7 +272,7 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
 
 void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, float dstLeft,
                                         float dstTop, float dstRight, float dstBottom,
-                                        const SkPaint* paint) {
+                                        const Paint* paint) {
     SkCanvas::Lattice lattice;
     NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
@@ -252,8 +300,11 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
         filteredPaint.writeable().setFilterQuality(kLow_SkFilterQuality);
     }
     sk_sp<SkImage> image = bitmap.makeImage();
-    mRecorder.drawImageLattice(image, lattice, dst, filterBitmap(std::move(filteredPaint)),
-                               bitmap.palette());
+
+    applyLooper(get_looper(paint), *filterBitmap(paint), [&](SkScalar x, SkScalar y, const SkPaint& p) {
+        mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), &p, bitmap.palette());
+    });
+
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }

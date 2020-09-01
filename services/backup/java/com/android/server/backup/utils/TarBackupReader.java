@@ -775,17 +775,17 @@ public class TarBackupReader {
 
     private static void hexLog(byte[] block) {
         int offset = 0;
-        int todo = block.length;
+        int remaining = block.length;
         StringBuilder buf = new StringBuilder(64);
-        while (todo > 0) {
+        while (remaining > 0) {
             buf.append(String.format("%04x   ", offset));
-            int numThisLine = (todo > 16) ? 16 : todo;
+            int numThisLine = (remaining > 16) ? 16 : remaining;
             for (int i = 0; i < numThisLine; i++) {
                 buf.append(String.format("%02x ", block[offset + i]));
             }
             Slog.i("hexdump", buf.toString());
             buf.setLength(0);
-            todo -= numThisLine;
+            remaining -= numThisLine;
             offset += numThisLine;
         }
     }

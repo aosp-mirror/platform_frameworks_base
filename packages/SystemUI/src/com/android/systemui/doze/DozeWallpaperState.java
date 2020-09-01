@@ -18,12 +18,9 @@ package com.android.systemui.doze;
 
 import android.annotation.Nullable;
 import android.app.IWallpaperManager;
-import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -44,17 +41,10 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private final BiometricUnlockController mBiometricUnlockController;
     private boolean mIsAmbientMode;
 
-    public DozeWallpaperState(Context context,
-            BiometricUnlockController biometricUnlockController) {
-        this(IWallpaperManager.Stub.asInterface(
-                ServiceManager.getService(Context.WALLPAPER_SERVICE)),
-                biometricUnlockController,
-                DozeParameters.getInstance(context));
-    }
-
-    @VisibleForTesting
-    DozeWallpaperState(IWallpaperManager wallpaperManagerService,
-            BiometricUnlockController biometricUnlockController, DozeParameters parameters) {
+    public DozeWallpaperState(
+            IWallpaperManager wallpaperManagerService,
+            BiometricUnlockController biometricUnlockController,
+            DozeParameters parameters) {
         mWallpaperManagerService = wallpaperManagerService;
         mBiometricUnlockController = biometricUnlockController;
         mDozeParameters = parameters;
@@ -66,6 +56,7 @@ public class DozeWallpaperState implements DozeMachine.Part {
         switch (newState) {
             case DOZE:
             case DOZE_AOD:
+            case DOZE_AOD_DOCKED:
             case DOZE_AOD_PAUSING:
             case DOZE_AOD_PAUSED:
             case DOZE_REQUEST_PULSE:

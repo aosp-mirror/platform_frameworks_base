@@ -36,8 +36,7 @@ import com.android.systemui.statusbar.notification.TransformState;
 public class HybridNotificationView extends AlphaOptimizedLinearLayout
         implements TransformableView {
 
-    private ViewTransformationHelper mTransformationHelper;
-
+    protected final ViewTransformationHelper mTransformationHelper = new ViewTransformationHelper();
     protected TextView mTitleView;
     protected TextView mTextView;
 
@@ -69,9 +68,8 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mTitleView = (TextView) findViewById(R.id.notification_title);
-        mTextView = (TextView) findViewById(R.id.notification_text);
-        mTransformationHelper = new ViewTransformationHelper();
+        mTitleView = findViewById(R.id.notification_title);
+        mTextView = findViewById(R.id.notification_text);
         mTransformationHelper.setCustomTransformation(
                 new ViewTransformationHelper.CustomTransformation() {
                     @Override
@@ -94,7 +92,7 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
                         // We want to transform from the same y location as the title
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeIn(mTextView, transformationAmount);
+                        CrossFadeHelper.fadeIn(mTextView, transformationAmount, true /* remap */);
                         if (otherState != null) {
                             ownState.transformViewVerticalFrom(otherState, transformationAmount);
                             otherState.recycle();
@@ -106,11 +104,8 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
         mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TEXT, mTextView);
     }
 
-    public void bind(CharSequence title) {
-        bind(title, null);
-    }
-
-    public void bind(CharSequence title, CharSequence text) {
+    public void bind(@Nullable CharSequence title, @Nullable CharSequence text,
+            @Nullable View contentView) {
         mTitleView.setText(title);
         mTitleView.setVisibility(TextUtils.isEmpty(title) ? GONE : VISIBLE);
         if (TextUtils.isEmpty(text)) {

@@ -32,20 +32,27 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
+import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IDisplayWindowInsetsController;
+import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
+import android.view.IDisplayWindowRotationController;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
+import android.view.IScrollCaptureController;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
+import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
+import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
@@ -64,6 +71,22 @@ import android.view.SurfaceControl;
 interface IWindowManager
 {
     /**
+     * No overridden behavior is provided in terms of fixing rotation to user rotation. Use
+     * other flags to derive the default behavior, such as {@link WindowManagerService#mIsPc}
+     * and {@link WindowManagerService#mForceDesktopModeOnExternalDisplays}.
+     */
+    const int FIXED_TO_USER_ROTATION_DEFAULT = 0;
+    /**
+     * Don't fix display rotation to {@link DisplayRotation#mUserRotation} only. Always allow
+     * other factors to play a role in deciding display rotation.
+     */
+    const int FIXED_TO_USER_ROTATION_DISABLED = 1;
+    /**
+     * Only use {@link DisplayRotation#mUserRotation} as the display rotation.
+     */
+    const int FIXED_TO_USER_ROTATION_ENABLED = 2;
+
+    /**
      * ===== NOTICE =====
      * The first three methods must remain the first three methods. Scripts
      * and tools rely on their transaction number to work properly.
@@ -74,6 +97,8 @@ interface IWindowManager
     boolean isViewServerRunning();       // Transaction #3
 
     IWindowSession openSession(in IWindowSessionCallback callback);
+
+    boolean useBLAST();
 
     @UnsupportedAppUsage
     void getInitialDisplaySize(int displayId, out Point size);
@@ -88,13 +113,60 @@ interface IWindowManager
     void clearForcedDisplayDensityForUser(int displayId, int userId);
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
-    void setOverscan(int displayId, int left, int top, int right, int bottom);
-
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void setEventDispatching(boolean enabled);
+
+    /** @return {@code true} if this binder is a registered window token. */
+    boolean isWindowToken(in IBinder binder);
+    /**
+     * Adds window token for a given type.
+     *
+     * @param token Token to be registered.
+     * @param type Window type to be used with this token.
+     * @param options A bundle used to pass window-related options.
+     * @param displayId The ID of the display where this token should be added.
+     * @param packageName The name of package to request to add window token. Could be {@code null}
+     *                    if callers holds the MANAGE_APP_TOKENS permission.
+     * @return {@link WindowManagerGlobal#ADD_OKAY} if the addition was successful, an error code
+     *         otherwise.
+     */
+    int addWindowTokenWithOptions(IBinder token, int type, int displayId, in Bundle options,
+            String packageName);
     void addWindowToken(IBinder token, int type, int displayId);
+    /**
+     * Remove window token on a specific display.
+     *
+     * @param token Token to be removed
+     * @displayId The ID of the display where this token should be removed.
+     */
     void removeWindowToken(IBinder token, int displayId);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
+
+    /**
+     * Sets a singular remote controller of display rotations. There can only be one. The
+     * controller is called after the display has "frozen" for a rotation and display rotation will
+     * only continue once the controller has finished calculating associated configurations.
+     */
+    void setDisplayWindowRotationController(IDisplayWindowRotationController controller);
+
+    /**
+     * Adds a root container that a client shell can populate with its own windows (usually via
+     * WindowlessWindowManager).
+     *
+     * @param client an IWindow used for window-level communication (ime, finish draw, etc.).
+     * @param windowType used by WM to determine the z-order. This is the same as the window type
+     *                   used in {@link WindowManager.LayoutParams}.
+     * @return a SurfaceControl to add things to.
+     */
+    SurfaceControl addShellRoot(int displayId, IWindow client, int windowType);
+
+    /**
+     * Sets the window token sent to accessibility for a particular shell root. The
+     * displayId and windowType identify which shell-root to update.
+     *
+     * @param target The IWindow that accessibility service interfaces with.
+     */
+    void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
@@ -266,6 +338,11 @@ interface IWindowManager
     boolean isDisplayRotationFrozen(int displayId);
 
     /**
+    *  Sets if display rotation is fixed to user specified value for given displayId.
+    */
+    void setFixedToUserRotation(int displayId, int fixedToUserRotation);
+
+    /**
      * Screenshot the current wallpaper layer, including the whole screen.
      */
     Bitmap screenshotWallpaper();
@@ -306,6 +383,11 @@ interface IWindowManager
     oneway void statusBarVisibilityChanged(int displayId, int visibility);
 
     /**
+     * Called by System UI to notify Window Manager to hide transient bars.
+     */
+    oneway void hideTransientBars(int displayId);
+
+    /**
     * When set to {@code true} the system bars will always be shown. This is true even if an app
     * requests to be fullscreen by setting the system ui visibility flags. The
     * functionality was added for the automotive case as a way to guarantee required content stays
@@ -324,12 +406,6 @@ interface IWindowManager
      * Called by System UI to notify of changes to the visibility of PIP.
      */
     oneway void setPipVisibility(boolean visible);
-
-    /**
-     * Called by System UI to notify of changes to the visibility and height of the shelf.
-     */
-    @UnsupportedAppUsage
-    void setShelfHeight(boolean visible, int shelfHeight);
 
     /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
@@ -384,8 +460,7 @@ interface IWindowManager
     WindowContentFrameStats getWindowContentFrameStats(IBinder token);
 
     /**
-     * @return the dock side the current docked stack is at; must be one of the
-     *         WindowManagerGlobal.DOCKED_* values
+     * This is a no-op.
      */
     @UnsupportedAppUsage
     int getDockedStackSide();
@@ -397,25 +472,9 @@ interface IWindowManager
     void setDockedStackDividerTouchRegion(in Rect touchableRegion);
 
     /**
-     * Registers a listener that will be called when the dock divider changes its visibility or when
-     * the docked stack gets added/removed.
-     */
-    @UnsupportedAppUsage
-    void registerDockedStackListener(IDockedStackListener listener);
-
-    /**
      * Registers a listener that will be called when the pinned stack state changes.
      */
     void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
-
-    /**
-     * Updates the dim layer used while resizing.
-     *
-     * @param visible Whether the dim layer should be visible.
-     * @param targetWindowingMode The windowing mode of the stack the dim layer should be placed on.
-     * @param alpha The translucency of the dim layer, between 0 and 1.
-     */
-    void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha);
 
     /**
      * Requests Keyboard Shortcuts from the displayed window.
@@ -477,6 +536,16 @@ interface IWindowManager
     void unregisterDisplayFoldListener(IDisplayFoldListener listener);
 
     /**
+     * Registers an IDisplayContainerListener
+     */
+    void registerDisplayWindowListener(IDisplayWindowListener listener);
+
+    /**
+     * Unregisters an IDisplayContainerListener.
+     */
+    void unregisterDisplayWindowListener(IDisplayWindowListener listener);
+
+    /**
      * Starts a window trace.
      */
     void startWindowTrace();
@@ -490,12 +559,6 @@ interface IWindowManager
      * Returns true if window trace is enabled.
      */
     boolean isWindowTraceEnabled();
-
-    /**
-     * Requests that the WindowManager sends
-     * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
-     */
-    void requestUserActivityNotification();
 
     /**
      * Notify WindowManager that it should not override the info in DisplayManager for the specified
@@ -650,4 +713,63 @@ interface IWindowManager
      * Enables/disables SurfaceFlinger layer tracing.
      */
     void setLayerTracing(boolean enabled);
+
+    /**
+     * Mirrors a specified display. The root of the mirrored hierarchy will be stored in
+     * outSurfaceControl.
+     * Requires the ACCESS_SURFACE_FLINGER permission.
+     *
+     * @param displayId The id of the display to mirror
+     * @param outSurfaceControl The SurfaceControl for the root of the mirrored hierarchy.
+     *
+     * @return true if the display was successfully mirrored.
+     */
+    boolean mirrorDisplay(int displayId, out SurfaceControl outSurfaceControl);
+
+    /**
+     * When in multi-window mode, the provided displayWindowInsetsController will control insets
+     * animations.
+     */
+    void setDisplayWindowInsetsController(
+            int displayId, in IDisplayWindowInsetsController displayWindowInsetsController);
+
+    /**
+     * Called when a remote process modifies insets on a display window container.
+     */
+    void modifyDisplayWindowInsets(int displayId, in InsetsState state);
+
+    /**
+     * Called to get the expected window insets.
+     *
+     * @return {@code true} if system bars are always comsumed.
+     */
+    boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
+            out Rect outContentInsets, out Rect outStableInsets,
+            out DisplayCutout.ParcelableWrapper outDisplayCutout, out InsetsState outInsetsState);
+
+    /**
+     * Called to show global actions.
+     */
+    void showGlobalActions();
+
+    /**
+     * Sets layer tracing flags for SurfaceFlingerTrace. 
+     *
+     * @param flags see definition in SurfaceTracing.cpp
+     */
+    void setLayerTracingFlags(int flags);
+
+    /**
+     * Forwards a scroll capture request to the appropriate window, if available.
+     *
+     * @param displayId the id of the display to target
+     * @param behindClient token for a window, used to filter the search to windows behind it, or
+     *                     {@code null} to accept a window at any zOrder
+     * @param taskId specifies the id of a task the result must belong to, or -1 to ignore task ids
+     * @param controller the controller to receive results, a call to either
+     *      {@link IScrollCaptureController#onClientConnected} or
+     *      {@link IScrollCaptureController#onClientUnavailable}.
+     */
+    void requestScrollCapture(int displayId, IBinder behindClient, int taskId,
+            IScrollCaptureController controller);
 }

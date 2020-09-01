@@ -315,7 +315,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @hide
      * Class constructor with {@link AudioAttributes} and {@link AudioFormat}.
      * @param attributes a non-null {@link AudioAttributes} instance. Use
-     *     {@link AudioAttributes.Builder#setAudioSource(int)} for configuring the audio
+     *     {@link AudioAttributes.Builder#setCapturePreset(int)} for configuring the audio
      *     source for this instance.
      * @param format a non-null {@link AudioFormat} instance describing the format of the data
      *     that will be recorded through this AudioRecord. See {@link AudioFormat.Builder} for
@@ -527,6 +527,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         private AudioFormat mFormat;
         private int mBufferSizeInBytes;
         private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+        private int mPrivacySensitive = PRIVACY_SENSITIVE_DEFAULT;
+
+        private static final int PRIVACY_SENSITIVE_DEFAULT = -1;
+        private static final int PRIVACY_SENSITIVE_DISABLED = 0;
+        private static final int PRIVACY_SENSITIVE_ENABLED = 1;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -632,6 +637,36 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         }
 
         /**
+         * Indicates that this capture request is privacy sensitive and that
+         * any concurrent capture is not permitted.
+         * <p>
+         * The default is not privacy sensitive except when the audio source set with
+         * {@link #setAudioSource(int)} is {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION} or
+         * {@link MediaRecorder.AudioSource#CAMCORDER}.
+         * <p>
+         * Always takes precedence over default from audio source when set explicitly.
+         * <p>
+         * Using this API is only permitted when the audio source is one of:
+         * <ul>
+         * <li>{@link MediaRecorder.AudioSource#MIC}</li>
+         * <li>{@link MediaRecorder.AudioSource#CAMCORDER}</li>
+         * <li>{@link MediaRecorder.AudioSource#VOICE_RECOGNITION}</li>
+         * <li>{@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}</li>
+         * <li>{@link MediaRecorder.AudioSource#UNPROCESSED}</li>
+         * <li>{@link MediaRecorder.AudioSource#VOICE_PERFORMANCE}</li>
+         * </ul>
+         * Invoking {@link #build()} will throw an UnsupportedOperationException if this
+         * condition is not met.
+         * @param privacySensitive True if capture from this AudioRecord must be marked as privacy
+         * sensitive, false otherwise.
+         */
+        public @NonNull Builder setPrivacySensitive(boolean privacySensitive) {
+            mPrivacySensitive =
+                privacySensitive ? PRIVACY_SENSITIVE_ENABLED : PRIVACY_SENSITIVE_DISABLED;
+            return this;
+        }
+
+        /**
          * @hide
          * To be only used by system components.
          * @param sessionId ID of audio session the AudioRecord must be attached to, or
@@ -704,6 +739,27 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
                         .setInternalCapturePreset(MediaRecorder.AudioSource.DEFAULT)
                         .build();
             }
+
+            // If mPrivacySensitive is default, the privacy flag is already set
+            // according to audio source in audio attributes.
+            if (mPrivacySensitive != PRIVACY_SENSITIVE_DEFAULT) {
+                int source = mAttributes.getCapturePreset();
+                if (source == MediaRecorder.AudioSource.REMOTE_SUBMIX
+                        || source == MediaRecorder.AudioSource.RADIO_TUNER
+                        || source == MediaRecorder.AudioSource.VOICE_DOWNLINK
+                        || source == MediaRecorder.AudioSource.VOICE_UPLINK
+                        || source == MediaRecorder.AudioSource.VOICE_CALL
+                        || source == MediaRecorder.AudioSource.ECHO_REFERENCE) {
+                    throw new UnsupportedOperationException(
+                            "Cannot request private capture with source: " + source);
+                }
+
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                        .setInternalCapturePreset(source)
+                        .setPrivacySensitive(mPrivacySensitive == PRIVACY_SENSITIVE_ENABLED)
+                        .build();
+            }
+
             try {
                 // If the buffer size is not specified,
                 // use a single frame for the buffer size and let the
@@ -1060,6 +1116,17 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     public int getAudioSessionId() {
         return mSessionId;
+    }
+
+    /**
+     * Returns whether this AudioRecord is marked as privacy sensitive or not.
+     * <p>
+     * See {@link Builder#setPrivacySensitive(boolean)}
+     * <p>
+     * @return true if privacy sensitive, false otherwise
+     */
+    public boolean isPrivacySensitive() {
+        return (mAudioAttributes.getAllFlags() & AudioAttributes.FLAG_CAPTURE_PRIVATE) != 0;
     }
 
     //---------------------------------------------------------
@@ -1788,6 +1855,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @hide
      */
     public int getPortId() {
+        if (mNativeRecorderInJavaObj == 0) {
+            return 0;
+        }
         return native_getPortId();
     }
 

@@ -30,7 +30,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager.ResetOption;
 
@@ -552,7 +552,7 @@ public class EuiccManager {
 
     /**
      * List of OperationCode corresponding to {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}'s
-     * value, an integer. @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * value, an integer. @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      *
      * @hide
      */
@@ -575,44 +575,44 @@ public class EuiccManager {
 
     /**
      * Internal system error.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_SYSTEM = 1;
 
     /**
      * SIM slot error. Failed to switch slot, failed to access the physical slot etc.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_SIM_SLOT = 2;
 
     /**
      * eUICC card error.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_EUICC_CARD = 3;
 
     /**
      * Generic switching profile error
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_SWITCH = 4;
 
     /**
      * Download profile error.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_DOWNLOAD = 5;
 
     /**
      * Subscription's metadata error
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_METADATA = 6;
 
     /**
      * eUICC returned an error defined in GSMA (SGP.22 v2.2) while running one of the ES10x
      * functions.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_EUICC_GSMA = 7;
 
@@ -620,13 +620,13 @@ public class EuiccManager {
      * The exception of failing to execute an APDU command. It can be caused by an error
      * happening on opening the basic or logical channel, or the response of the APDU command is
      * not success (0x9000).
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_APDU = 8;
 
     /**
      * SMDX(SMDP/SMDS) error
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_SMDX = 9;
 
@@ -655,19 +655,19 @@ public class EuiccManager {
      * Thus the integer stored in {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} is
      * 0xA8B1051(176885841)
      *
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_SMDX_SUBJECT_REASON_CODE = 10;
 
     /**
      * HTTP error
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int OPERATION_HTTP = 11;
 
     /**
      * List of ErrorCode corresponding to {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -695,56 +695,56 @@ public class EuiccManager {
     /**
      * Operation such as downloading/switching to another profile failed due to device being
      * carrier locked.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_CARRIER_LOCKED = 10000;
 
     /**
      * The activation code(SGP.22 v2.2 section[4.1]) is invalid.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_INVALID_ACTIVATION_CODE = 10001;
 
     /**
      * The confirmation code(SGP.22 v2.2 section[4.7]) is invalid.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_INVALID_CONFIRMATION_CODE = 10002;
 
     /**
      * The profile's carrier is incompatible with the LPA.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_INCOMPATIBLE_CARRIER = 10003;
 
     /**
      * There is no more space available on the eUICC for new profiles.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_EUICC_INSUFFICIENT_MEMORY = 10004;
 
     /**
      * Timed out while waiting for an operation to complete. i.e restart, disable,
      * switch reset etc.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_TIME_OUT = 10005;
 
     /**
      * eUICC is missing or defective on the device.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_EUICC_MISSING = 10006;
 
     /**
      * The eUICC card(hardware) version is incompatible with the software
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_UNSUPPORTED_VERSION = 10007;
 
     /**
      * No SIM card is available in the device.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_SIM_MISSING = 10008;
 
@@ -754,52 +754,52 @@ public class EuiccManager {
      * 2. GSMA(.22 v2.2) Profile Install Result - installFailedDueToDataMismatch
      * 3. operation was interrupted
      * 4. SIMalliance error in PEStatus(SGP.22 v2.2 section 2.5.6.1)
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_INSTALL_PROFILE = 10009;
 
     /**
      * Failed to load profile onto eUICC due to Profile Poicly Rules.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_DISALLOWED_BY_PPR = 10010;
 
 
     /**
      * Address is missing e.g SMDS/SMDP address is missing.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_ADDRESS_MISSING = 10011;
 
     /**
      * Certificate needed for authentication is not valid or missing. E.g  SMDP/SMDS authentication
      * failed.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_CERTIFICATE_ERROR = 10012;
 
 
     /**
      * No profiles available.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_NO_PROFILES_AVAILABLE = 10013;
 
     /**
      * Failure to create a connection.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_CONNECTION_ERROR = 10014;
 
     /**
      * Response format is invalid. e.g SMDP/SMDS response contains invalid json, header or/and ASN1.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_INVALID_RESPONSE = 10015;
 
     /**
      * The operation is currently busy, try again later.
-     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE
+     * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_OPERATION_BUSY = 10016;
 
@@ -1412,6 +1412,10 @@ public class EuiccManager {
     }
 
     private static IEuiccController getIEuiccController() {
-        return IEuiccController.Stub.asInterface(ServiceManager.getService("econtroller"));
+        return IEuiccController.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getEuiccControllerService()
+                        .get());
     }
 }

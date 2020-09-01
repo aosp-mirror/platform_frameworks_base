@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qs_media_controls_options"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:padding="16dp"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:minWidth="48dp"
+        android:layout_gravity="start|bottom"
+        android:gravity="bottom"
+        android:id="@+id/remove"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:id="@+id/remove_icon"
+            android:layout_marginEnd="16dp"
+            android:tint="@color/media_primary_text"
+            android:src="@drawable/ic_clear"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/remove_text"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:singleLine="true"
+            android:textColor="@color/media_primary_text"
+            android:text="@string/controls_media_close_session" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:minWidth="48dp"
+        android:layout_gravity="end|bottom"
+        android:gravity="bottom"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:textColor="@android:color/white"
+        android:text="@string/cancel" />
+</LinearLayout>

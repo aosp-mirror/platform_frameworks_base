@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
+import android.util.Pair;
 import android.util.Printer;
 
 import dalvik.system.BlockGuard;
@@ -35,10 +36,15 @@ import dalvik.system.CloseGuard;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 /**
  * Represents a SQLite database connection.
@@ -123,8 +129,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             boolean enableTrace, boolean enableProfile, int lookasideSlotSize,
             int lookasideSlotCount);
     private static native void nativeClose(long connectionPtr);
-    private static native void nativeRegisterCustomFunction(long connectionPtr,
-            SQLiteCustomFunction function);
+    private static native void nativeRegisterCustomScalarFunction(long connectionPtr,
+            String name, UnaryOperator<String> function);
+    private static native void nativeRegisterCustomAggregateFunction(long connectionPtr,
+            String name, BinaryOperator<String> function);
     private static native void nativeRegisterLocalizedCollators(long connectionPtr, String locale);
     private static native long nativePrepareStatement(long connectionPtr, String sql);
     private static native void nativeFinalizeStatement(long connectionPtr, long statementPtr);
@@ -210,12 +218,38 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void open() {
+        final String file = mConfiguration.path;
         final int cookie = mRecentOperations.beginOperation("open", null, null);
         try {
-            mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
+            mConnectionPtr = nativeOpen(file, mConfiguration.openFlags,
                     mConfiguration.label,
                     NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
+        } catch (SQLiteCantOpenDatabaseException e) {
+            String message = String.format("Cannot open database '%s'", file);
+
+            try {
+                // Try to diagnose for common reasons. If something fails in here, that's fine;
+                // just swallow the exception.
+
+                final Path path = FileSystems.getDefault().getPath(file);
+                final Path dir = path.getParent();
+
+                if (!Files.isDirectory(dir)) {
+                    message += ": Directory " + dir + " doesn't exist";
+                } else if (!Files.exists(path)) {
+                    message += ": File " + path + " doesn't exist";
+                } else if (!Files.isReadable(path)) {
+                    message += ": File " + path + " is not readable";
+                } else if (Files.isDirectory(path)) {
+                    message += ": Path " + path + " is a directory";
+                } else {
+                    message += ": Unknown reason";
+                }
+            } catch (Throwable th) {
+                message += ": Unknown reason; cannot examine filesystem: " + th.getMessage();
+            }
+            throw new SQLiteCantOpenDatabaseException(message, e);
         } finally {
             mRecentOperations.endOperation(cookie);
         }
@@ -225,13 +259,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         setJournalSizeLimit();
         setAutoCheckpointInterval();
         setLocaleFromConfiguration();
-
-        // Register custom functions.
-        final int functionCount = mConfiguration.customFunctions.size();
-        for (int i = 0; i < functionCount; i++) {
-            SQLiteCustomFunction function = mConfiguration.customFunctions.get(i);
-            nativeRegisterCustomFunction(mConnectionPtr, function);
-        }
+        setCustomFunctionsFromConfiguration();
+        executePerConnectionSqlFromConfiguration(0);
     }
 
     private void dispose(boolean finalized) {
@@ -457,6 +486,37 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
+    private void setCustomFunctionsFromConfiguration() {
+        for (int i = 0; i < mConfiguration.customScalarFunctions.size(); i++) {
+            nativeRegisterCustomScalarFunction(mConnectionPtr,
+                    mConfiguration.customScalarFunctions.keyAt(i),
+                    mConfiguration.customScalarFunctions.valueAt(i));
+        }
+        for (int i = 0; i < mConfiguration.customAggregateFunctions.size(); i++) {
+            nativeRegisterCustomAggregateFunction(mConnectionPtr,
+                    mConfiguration.customAggregateFunctions.keyAt(i),
+                    mConfiguration.customAggregateFunctions.valueAt(i));
+        }
+    }
+
+    private void executePerConnectionSqlFromConfiguration(int startIndex) {
+        for (int i = startIndex; i < mConfiguration.perConnectionSql.size(); i++) {
+            final Pair<String, Object[]> statement = mConfiguration.perConnectionSql.get(i);
+            final int type = DatabaseUtils.getSqlStatementType(statement.first);
+            switch (type) {
+                case DatabaseUtils.STATEMENT_SELECT:
+                    executeForString(statement.first, statement.second, null);
+                    break;
+                case DatabaseUtils.STATEMENT_PRAGMA:
+                    execute(statement.first, statement.second, null);
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unsupported configuration statement: " + statement);
+            }
+        }
+    }
+
     private void checkDatabaseWiped() {
         if (!SQLiteGlobal.checkDbWipe()) {
             return;
@@ -491,15 +551,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     void reconfigure(SQLiteDatabaseConfiguration configuration) {
         mOnlyAllowReadOnlyOperations = false;
 
-        // Register custom functions.
-        final int functionCount = configuration.customFunctions.size();
-        for (int i = 0; i < functionCount; i++) {
-            SQLiteCustomFunction function = configuration.customFunctions.get(i);
-            if (!mConfiguration.customFunctions.contains(function)) {
-                nativeRegisterCustomFunction(mConnectionPtr, function);
-            }
-        }
-
         // Remember what changed.
         boolean foreignKeyModeChanged = configuration.foreignKeyConstraintsEnabled
                 != mConfiguration.foreignKeyConstraintsEnabled;
@@ -507,6 +558,13 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 & (SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING
                 | SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL)) != 0;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
+        boolean customScalarFunctionsChanged = !configuration.customScalarFunctions
+                .equals(mConfiguration.customScalarFunctions);
+        boolean customAggregateFunctionsChanged = !configuration.customAggregateFunctions
+                .equals(mConfiguration.customAggregateFunctions);
+        final int oldSize = mConfiguration.perConnectionSql.size();
+        final int newSize = configuration.perConnectionSql.size();
+        boolean perConnectionSqlChanged = newSize > oldSize;
 
         // Update configuration parameters.
         mConfiguration.updateParametersFrom(configuration);
@@ -514,19 +572,20 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // Update prepared statement cache size.
         mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
 
-        // Update foreign key mode.
         if (foreignKeyModeChanged) {
             setForeignKeyModeFromConfiguration();
         }
-
-        // Update WAL.
         if (walModeChanged) {
             setWalModeFromConfiguration();
         }
-
-        // Update locale.
         if (localeChanged) {
             setLocaleFromConfiguration();
+        }
+        if (customScalarFunctionsChanged || customAggregateFunctionsChanged) {
+            setCustomFunctionsFromConfiguration();
+        }
+        if (perConnectionSqlChanged) {
+            executePerConnectionSqlFromConfiguration(oldSize);
         }
     }
 

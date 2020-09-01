@@ -466,7 +466,7 @@ static jboolean nativePutString(JNIEnv* env, jclass clazz, jlong windowPtr,
         return false;
     }
 
-    LOG_WINDOW("%d,%d is TEXT with %u bytes", row, column, sizeIncludingNull);
+    LOG_WINDOW("%d,%d is TEXT with %zu bytes", row, column, sizeIncludingNull);
     return true;
 }
 
@@ -480,7 +480,7 @@ static jboolean nativePutLong(JNIEnv* env, jclass clazz, jlong windowPtr,
         return false;
     }
 
-    LOG_WINDOW("%d,%d is INTEGER 0x%016llx", row, column, value);
+    LOG_WINDOW("%d,%d is INTEGER %" PRId64, row, column, value);
     return true;
 }
 

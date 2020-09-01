@@ -24,8 +24,10 @@ import android.util.Xml;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.hdmi.Constants.AudioCodec;
 
+import com.android.server.hdmi.Constants.AbortReason;
+import com.android.server.hdmi.Constants.AudioCodec;
+import com.android.server.hdmi.Constants.FeatureOpcode;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -455,6 +457,28 @@ final class HdmiUtils {
             port >>= 4;
         }
         return port;
+    }
+
+    /**
+     * Parse the Feature Abort CEC message parameter into a [Feature Opcode].
+     *
+     * @param cmd the CEC message to parse
+     * @return the original opcode of the cec message that got aborted.
+     */
+    @FeatureOpcode
+    static int getAbortFeatureOpcode(HdmiCecMessage cmd) {
+        return cmd.getParams()[0] & 0xFF;
+    }
+
+    /**
+     * Parse the Feature Abort CEC message parameter into an [Abort Reason].
+     *
+     * @param cmd the CEC message to parse
+     * @return The reason to abort the feature.
+     */
+    @AbortReason
+    static int getAbortReason(HdmiCecMessage cmd) {
+        return cmd.getParams()[1];
     }
 
     public static class ShortAudioDescriptorXmlParser {

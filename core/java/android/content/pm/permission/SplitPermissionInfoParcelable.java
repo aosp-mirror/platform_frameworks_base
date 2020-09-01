@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.DataClass;
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Objects;
  * Parcelable version of {@link android.permission.PermissionManager.SplitPermissionInfo}
  * @hide
  */
+@DataClass(genEqualsHashCode = true)
 public class SplitPermissionInfoParcelable implements Parcelable {
 
     /**
@@ -61,7 +63,7 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     // DO NOT MODIFY!
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/SplitPermissionInfoParcelable.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/permission/SplitPermissionInfoParcelable.java
     //
     // CHECKSTYLE:OFF Generated code
 
@@ -75,16 +77,21 @@ public class SplitPermissionInfoParcelable implements Parcelable {
      * @param targetSdk
      *   The target API level when the permission was split.
      */
+    @DataClass.Generated.Member
     public SplitPermissionInfoParcelable(
             @NonNull String splitPermission,
             @NonNull List<String> newPermissions,
             @IntRange(from = 0) int targetSdk) {
         this.mSplitPermission = splitPermission;
-        Preconditions.checkNotNull(mSplitPermission);
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSplitPermission);
         this.mNewPermissions = newPermissions;
-        Preconditions.checkNotNull(mNewPermissions);
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mNewPermissions);
         this.mTargetSdk = targetSdk;
-        Preconditions.checkArgumentNonnegative(mTargetSdk);
+        com.android.internal.util.AnnotationValidations.validate(
+                IntRange.class, null, mTargetSdk,
+                "from", 0);
 
         onConstructed();
     }
@@ -92,6 +99,7 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     /**
      * The permission that is split.
      */
+    @DataClass.Generated.Member
     public @NonNull String getSplitPermission() {
         return mSplitPermission;
     }
@@ -99,6 +107,7 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     /**
      * The permissions that are added.
      */
+    @DataClass.Generated.Member
     public @NonNull List<String> getNewPermissions() {
         return mNewPermissions;
     }
@@ -106,11 +115,13 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     /**
      * The target API level when the permission was split.
      */
+    @DataClass.Generated.Member
     public @IntRange(from = 0) int getTargetSdk() {
         return mTargetSdk;
     }
 
     @Override
+    @DataClass.Generated.Member
     public boolean equals(Object o) {
         // You can override field equality logic by defining either of the methods like:
         // boolean fieldNameEquals(SplitPermissionInfoParcelable other) { ... }
@@ -128,6 +139,7 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     }
 
     @Override
+    @DataClass.Generated.Member
     public int hashCode() {
         // You can override field hashCode logic by defining methods like:
         // int fieldNameHashCode() { ... }
@@ -140,6 +152,7 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     }
 
     @Override
+    @DataClass.Generated.Member
     public void writeToParcel(Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
@@ -150,8 +163,10 @@ public class SplitPermissionInfoParcelable implements Parcelable {
     }
 
     @Override
+    @DataClass.Generated.Member
     public int describeContents() { return 0; }
 
+    @DataClass.Generated.Member
     public static final @NonNull Parcelable.Creator<SplitPermissionInfoParcelable> CREATOR
             = new Parcelable.Creator<SplitPermissionInfoParcelable>() {
         @Override
@@ -175,4 +190,13 @@ public class SplitPermissionInfoParcelable implements Parcelable {
                     targetSdk);
         }
     };
+
+    @DataClass.Generated(
+            time = 1567634390477L,
+            codegenVersion = "1.0.0",
+            sourceFile = "frameworks/base/core/java/android/content/pm/permission/SplitPermissionInfoParcelable.java",
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mSplitPermission\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mNewPermissions\nprivate final @android.annotation.IntRange(from=0L) int mTargetSdk\nprivate  void onConstructed()\nclass SplitPermissionInfoParcelable extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true)")
+    @Deprecated
+    private void __metadata() {}
+
 }

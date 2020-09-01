@@ -408,6 +408,7 @@ public interface ViewParent {
      *            or more of:
      *            <ul>
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
      *            <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
@@ -673,5 +674,19 @@ public interface ViewParent {
      * @hide
      */
     default void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
+    }
+
+    /**
+     * Unbuffered dispatch has been requested by a child of this view parent.
+     * This method is called by the View hierarchy to signal ancestors that a View needs to
+     * request unbuffered dispatch.
+     *
+     * @see View#requestUnbufferedDispatch(int)
+     * @hide
+     */
+    default void onDescendantUnbufferedRequested() {
+        if (getParent() != null) {
+            getParent().onDescendantUnbufferedRequested();
+        }
     }
 }

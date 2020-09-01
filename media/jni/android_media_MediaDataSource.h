@@ -19,7 +19,7 @@
 
 #include "jni.h"
 
-#include <media/IDataSource.h>
+#include <android/IDataSource.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <utils/Errors.h>
 #include <utils/Mutex.h>

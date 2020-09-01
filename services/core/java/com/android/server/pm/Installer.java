@@ -28,6 +28,7 @@ import android.os.IBinder.DeathRecipient;
 import android.os.IInstalld;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.storage.CrateMetadata;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
@@ -38,6 +39,7 @@ import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
 import java.io.FileDescriptor;
+import java.util.Arrays;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -70,6 +72,8 @@ public class Installer extends SystemService {
     public static final int DEXOPT_GENERATE_COMPACT_DEX = 1 << 11;
     /** Indicates that dexopt should generate an app image */
     public static final int DEXOPT_GENERATE_APP_IMAGE = 1 << 12;
+    /** Indicates that dexopt may be run with different performance / priority tuned for restore */
+    public static final int DEXOPT_FOR_RESTORE = 1 << 13; // TODO(b/135202722): remove
 
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
@@ -183,6 +187,30 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Batched version of createAppData for use with multiple packages.
+     */
+    public void createAppDataBatched(String[] uuids, String[] packageNames, int userId, int flags,
+            int[] appIds, String[] seInfos, int[] targetSdkVersions) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        final int batchSize = 256;
+        for (int i = 0; i < uuids.length; i += batchSize) {
+            int to = i + batchSize;
+            if (to > uuids.length) {
+                to = uuids.length;
+            }
+
+            try {
+                mInstalld.createAppDataBatched(Arrays.copyOfRange(uuids, i, to),
+                        Arrays.copyOfRange(packageNames, i, to), userId, flags,
+                        Arrays.copyOfRange(appIds, i, to), Arrays.copyOfRange(seInfos, i, to),
+                        Arrays.copyOfRange(targetSdkVersions, i, to));
+            } catch (Exception e) {
+                throw InstallerException.from(e);
+            }
+        }
+    }
+
     public void restoreconAppData(String uuid, String packageName, int userId, int flags, int appId,
             String seInfo) throws InstallerException {
         if (!checkBeforeRemote()) return;
@@ -233,12 +261,12 @@ public class Installer extends SystemService {
     }
 
     public void moveCompleteApp(String fromUuid, String toUuid, String packageName,
-            String dataAppName, int appId, String seInfo, int targetSdkVersion)
-            throws InstallerException {
+            int appId, String seInfo, int targetSdkVersion,
+            String fromCodePath) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, dataAppName, appId, seInfo,
-                    targetSdkVersion);
+            mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, appId, seInfo,
+                    targetSdkVersion, fromCodePath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -288,6 +316,43 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return new long[6];
         try {
             return mInstalld.getExternalSize(uuid, userId, flags, appIds);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * To get all of the CrateMetadata of the crates for the specified user app by the installd.
+     *
+     * @param uuid the UUID
+     * @param packageNames the application package names
+     * @param userId the user id
+     * @return the array of CrateMetadata
+     */
+    @Nullable
+    public CrateMetadata[] getAppCrates(@NonNull String uuid, @NonNull String[] packageNames,
+            @UserIdInt int userId) throws InstallerException {
+        if (!checkBeforeRemote()) return null;
+        try {
+            return mInstalld.getAppCrates(uuid, packageNames, userId);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * To retrieve all of the CrateMetadata of the crate for the specified user app by the installd.
+     *
+     * @param uuid the UUID
+     * @param userId the user id
+     * @return the array of CrateMetadata
+     */
+    @Nullable
+    public CrateMetadata[] getUserCrates(String uuid, @UserIdInt int userId)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return null;
+        try {
+            return mInstalld.getUserCrates(uuid, userId);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -349,28 +414,6 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.copySystemProfile(systemProfile, uid, packageName, profileName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void idmap(String targetApkPath, String overlayApkPath, int uid)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(targetApkPath);
-        BlockGuard.getVmPolicy().onPathAccess(overlayApkPath);
-        try {
-            mInstalld.idmap(targetApkPath, overlayApkPath, uid);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void removeIdmap(String overlayApkPath) throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(overlayApkPath);
-        try {
-            mInstalld.removeIdmap(overlayApkPath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -592,6 +635,30 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Bind mount private volume CE and DE mirror storage.
+     */
+    public void tryMountDataMirror(String volumeUuid) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.tryMountDataMirror(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Unmount private volume CE and DE mirror storage.
+     */
+    public void onPrivateVolumeRemoved(String volumeUuid) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.onPrivateVolumeRemoved(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
             String profileName, String codePath, String dexMetadataPath) throws InstallerException {
         if (!checkBeforeRemote()) return false;
@@ -677,6 +744,30 @@ public class Installer extends SystemService {
         try {
             mInstalld.destroyAppDataSnapshot(null, pkg, userId, ceSnapshotInode, snapshotId,
                     storageFlags);
+            return true;
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Deletes all snapshots of credential encrypted user data, where the snapshot id is not
+     * included in {@code retainSnapshotIds}.
+     *
+     * @param userId id of the user whose user data snapshots to delete.
+     * @param retainSnapshotIds ids of the snapshots that should not be deleted.
+     *
+     * @return {@code true} if the operation was successful, or {@code false} if a remote call
+     * shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to delete user data snapshot.
+     */
+    public boolean destroyCeSnapshotsNotSpecified(@UserIdInt int userId,
+            int[] retainSnapshotIds) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.destroyCeSnapshotsNotSpecified(null, userId, retainSnapshotIds);
             return true;
         } catch (Exception e) {
             throw InstallerException.from(e);

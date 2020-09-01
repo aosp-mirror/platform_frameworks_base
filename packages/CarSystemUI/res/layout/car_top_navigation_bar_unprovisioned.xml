@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.car.CarNavigationBarView
+<com.android.systemui.car.navigationbar.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/car_top_bar"
@@ -36,7 +36,7 @@
         android:layout_alignParentStart="true"
         >
 
-      <com.android.systemui.statusbar.car.CarNavigationButton
+      <com.android.systemui.car.navigationbar.CarNavigationButton
           android:id="@+id/hvacleft"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
@@ -45,7 +45,7 @@
           systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
           />
 
-      <com.android.systemui.statusbar.hvac.AnimatedTemperatureView
+      <com.android.systemui.car.hvac.AnimatedTemperatureView
           android:id="@+id/lefttext"
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
@@ -70,7 +70,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_centerInParent="true">
-      <com.android.systemui.statusbar.car.CarNavigationButton
+      <com.android.systemui.car.navigationbar.CarNavigationButton
           android:id="@+id/qs"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
@@ -114,7 +114,7 @@
         android:layout_alignParentEnd="true"
         >
 
-      <com.android.systemui.statusbar.car.CarNavigationButton
+      <com.android.systemui.car.navigationbar.CarNavigationButton
           android:id="@+id/hvacright"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
@@ -123,7 +123,7 @@
           systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
           />
 
-      <com.android.systemui.statusbar.hvac.AnimatedTemperatureView
+      <com.android.systemui.car.hvac.AnimatedTemperatureView
           android:id="@+id/righttext"
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
@@ -144,4 +144,4 @@
     </FrameLayout>
   </RelativeLayout>
 
-</com.android.systemui.statusbar.car.CarNavigationBarView>
+</com.android.systemui.car.navigationbar.CarNavigationBarView>

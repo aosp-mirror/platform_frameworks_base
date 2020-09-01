@@ -38,7 +38,7 @@ class VendorLock extends OemLock {
 
     static IOemLock getOemLockHalService() {
         try {
-            return IOemLock.getService();
+            return IOemLock.getService(/* retry */ true);
         } catch (NoSuchElementException e) {
             Slog.i(TAG, "OemLock HAL not present on device");
             return null;

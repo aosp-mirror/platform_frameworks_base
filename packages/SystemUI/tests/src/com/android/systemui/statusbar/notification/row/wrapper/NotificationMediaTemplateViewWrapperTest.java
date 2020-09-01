@@ -25,6 +25,7 @@ import android.app.Notification;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -38,8 +39,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,9 +65,12 @@ public class NotificationMediaTemplateViewWrapperTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
 
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+
+        // These tests are for regular media style notifications, not controls in quick settings
+        Settings.System.putInt(mContext.getContentResolver(), "qs_media_player", 0);
     }
 
     private void makeTestNotification(long duration, boolean allowSeeking) throws Exception {
@@ -94,7 +98,11 @@ public class NotificationMediaTemplateViewWrapperTest extends SysuiTestCase {
         mNotif = builder.build();
         assertTrue(mNotif.hasMediaSession());
 
-        mRow = new NotificationTestHelper(mContext).createRow(mNotif);
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mRow = helper.createRow(mNotif);
 
         RemoteViews views = new RemoteViews(mContext.getPackageName(),
                 com.android.internal.R.layout.notification_template_material_big_media);

@@ -34,6 +34,9 @@ message StatLoggerProto {
         optional string label = 2;
         optional int32 count = 3;
         optional int64 total_duration_micros = 4;
+        optional int32 max_calls_per_second = 5;
+        optional int64 max_duration_per_second_micros = 6;
+        optional int64 max_duration_stats_micros = 7;
     }
 
     repeated Event events = 1;

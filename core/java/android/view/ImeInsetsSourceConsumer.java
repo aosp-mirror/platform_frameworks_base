@@ -16,9 +16,12 @@
 
 package android.view;
 
-import static android.view.InsetsState.TYPE_IME;
+import static android.view.InsetsController.AnimationType;
+import static android.view.InsetsState.ITYPE_IME;
 
+import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.view.SurfaceControl.Transaction;
@@ -42,12 +45,17 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * editor {@link #mFocusedEditor} if {@link #isServedEditorRendered} is {@code true}.
      */
     private boolean mShowOnNextImeRender;
-    private boolean mHasWindowFocus;
+
+    /**
+     * Tracks whether we have an outstanding request from the IME to show, but weren't able to
+     * execute it because we didn't have control yet.
+     */
+    private boolean mIsRequestedVisibleAwaitingControl;
 
     public ImeInsetsSourceConsumer(
             InsetsState state, Supplier<Transaction> transactionSupplier,
             InsetsController controller) {
-        super(TYPE_IME, state, transactionSupplier, controller);
+        super(ITYPE_IME, state, transactionSupplier, controller);
     }
 
     public void onPreRendered(EditorInfo info) {
@@ -68,24 +76,31 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     public void applyImeVisibility(boolean setVisible) {
-        if (!mHasWindowFocus) {
-            // App window doesn't have focus, any visibility changes would be no-op.
-            return;
-        }
-
         mController.applyImeVisibility(setVisible);
     }
 
     @Override
     public void onWindowFocusGained() {
-        mHasWindowFocus = true;
+        super.onWindowFocusGained();
         getImm().registerImeConsumer(this);
     }
 
     @Override
     public void onWindowFocusLost() {
-        mHasWindowFocus = false;
+        super.onWindowFocusLost();
         getImm().unregisterImeConsumer(this);
+        mIsRequestedVisibleAwaitingControl = false;
+    }
+
+    @Override
+    void hide(boolean animationFinished, @AnimationType int animationType) {
+        super.hide();
+
+        if (animationFinished) {
+            // remove IME surface as IME has finished hide animation.
+            notifyHidden();
+            removeSurface();
+        }
     }
 
     /**
@@ -93,15 +108,23 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * @return @see {@link android.view.InsetsSourceConsumer.ShowResult}.
      */
     @Override
-    @ShowResult int requestShow(boolean fromIme) {
+    public @ShowResult int requestShow(boolean fromIme) {
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
-        if (fromIme) {
+
+        if (getControl() == null) {
+            // If control is null, schedule to show IME when control is available.
+            mIsRequestedVisibleAwaitingControl = true;
+        }
+        // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
+        // this code here means that we now got control, so we can start the animation immediately.
+        // If client window is trying to control IME and IME is already visible, it is immediate.
+        if (fromIme || mState.getSource(getType()).isVisible() && getControl() != null) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
-        return getImm().requestImeShow(null /* resultReceiver */)
-                ? ShowResult.SHOW_DELAYED : ShowResult.SHOW_FAILED;
+        return getImm().requestImeShow(mController.getHost().getWindowToken())
+                ? ShowResult.IME_SHOW_DELAYED : ShowResult.IME_SHOW_FAILED;
     }
 
     /**
@@ -109,7 +132,39 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      */
     @Override
     void notifyHidden() {
-        getImm().notifyImeHidden();
+        getImm().notifyImeHidden(mController.getHost().getWindowToken());
+    }
+
+    @Override
+    public void removeSurface() {
+        final IBinder window = mController.getHost().getWindowToken();
+        if (window != null) {
+            getImm().removeImeSurface(window);
+        }
+    }
+
+    @Override
+    public void setControl(@Nullable InsetsSourceControl control, int[] showTypes,
+            int[] hideTypes) {
+        super.setControl(control, showTypes, hideTypes);
+        if (control == null && !mIsRequestedVisibleAwaitingControl) {
+            hide();
+            removeSurface();
+        }
+    }
+
+    @Override
+    protected boolean isRequestedVisibleAwaitingControl() {
+        return mIsRequestedVisibleAwaitingControl || isRequestedVisible();
+    }
+
+    @Override
+    public void onPerceptible(boolean perceptible) {
+        super.onPerceptible(perceptible);
+        final IBinder window = mController.getHost().getWindowToken();
+        if (window != null) {
+            getImm().reportPerceptible(window, perceptible);
+        }
     }
 
     private boolean isFallbackOrEmptyEditor(EditorInfo info) {
@@ -173,6 +228,6 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     private InputMethodManager getImm() {
-        return mController.getViewRoot().mContext.getSystemService(InputMethodManager.class);
+        return mController.getHost().getInputMethodManager();
     }
 }

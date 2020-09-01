@@ -29,10 +29,8 @@
 #include "jni.h"
 #include "core_jni_helpers.h"
 
-#include <sys/time.h>
-#include <time.h>
-
 #include <utils/SystemClock.h>
+#include <utils/Timers.h>
 
 namespace android {
 
@@ -49,11 +47,7 @@ static_assert(std::is_same<decltype(elapsedRealtimeNano()), int64_t>::value,
  */
 static jlong android_os_SystemClock_currentThreadTimeMillis()
 {
-    struct timespec tm;
-
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tm);
-
-    return tm.tv_sec * 1000LL + tm.tv_nsec / 1000000;
+    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_THREAD));
 }
 
 /*
@@ -61,11 +55,7 @@ static jlong android_os_SystemClock_currentThreadTimeMillis()
  */
 static jlong android_os_SystemClock_currentThreadTimeMicro()
 {
-    struct timespec tm;
-
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tm);
-
-    return tm.tv_sec * 1000000LL + tm.tv_nsec / 1000;
+    return nanoseconds_to_microseconds(systemTime(SYSTEM_TIME_THREAD));
 }
 
 /*

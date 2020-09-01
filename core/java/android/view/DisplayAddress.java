@@ -41,6 +41,18 @@ public abstract class DisplayAddress implements Parcelable {
     }
 
     /**
+     * Creates an address for a physical display given its port and model.
+     *
+     * @param port A port in the range [0, 255] interpreted as signed.
+     * @param model A positive integer, or {@code null} if the model cannot be identified.
+     * @return The {@link Physical} address.
+     */
+    @NonNull
+    public static Physical fromPortAndModel(byte port, Long model) {
+        return new Physical(port, model);
+    }
+
+    /**
      * Creates an address for a network display given its MAC address.
      *
      * @param macAddress A MAC address in colon notation.
@@ -64,12 +76,23 @@ public abstract class DisplayAddress implements Parcelable {
     public static final class Physical extends DisplayAddress {
         private static final long UNKNOWN_MODEL = 0;
         private static final int MODEL_SHIFT = 8;
-        private static final int PORT_MASK = 0xFF;
 
         private final long mPhysicalDisplayId;
 
         /**
+         * Stable display ID combining port and model.
+         *
+         * @return An ID in the range [0, 2^64) interpreted as signed.
+         * @see SurfaceControl#getPhysicalDisplayIds
+         */
+        public long getPhysicalDisplayId() {
+            return mPhysicalDisplayId;
+        }
+
+        /**
          * Physical port to which the display is connected.
+         *
+         * @return A port in the range [0, 255] interpreted as signed.
          */
         public byte getPort() {
             return (byte) mPhysicalDisplayId;
@@ -78,7 +101,7 @@ public abstract class DisplayAddress implements Parcelable {
         /**
          * Model identifier unique across manufacturers.
          *
-         * @return The model ID, or {@code null} if the model cannot be identified.
+         * @return A positive integer, or {@code null} if the model cannot be identified.
          */
         @Nullable
         public Long getModel() {
@@ -95,7 +118,7 @@ public abstract class DisplayAddress implements Parcelable {
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder("{")
-                    .append("port=").append(getPort() & PORT_MASK);
+                    .append("port=").append(Byte.toUnsignedInt(getPort()));
 
             final Long model = getModel();
             if (model != null) {
@@ -117,6 +140,11 @@ public abstract class DisplayAddress implements Parcelable {
 
         private Physical(long physicalDisplayId) {
             mPhysicalDisplayId = physicalDisplayId;
+        }
+
+        private Physical(byte port, Long model) {
+            mPhysicalDisplayId = Byte.toUnsignedLong(port)
+                    | (model == null ? UNKNOWN_MODEL : (model << MODEL_SHIFT));
         }
 
         public static final @NonNull Parcelable.Creator<Physical> CREATOR =

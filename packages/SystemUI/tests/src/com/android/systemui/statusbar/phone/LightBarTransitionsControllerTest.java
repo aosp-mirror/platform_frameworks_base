@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,8 +27,10 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController.DarkIntensityApplier;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +50,10 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
-        mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier);
+        mDependency.injectMockDependency(KeyguardStateController.class);
+        mDependency.injectMockDependency(StatusBarStateController.class);
+        mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier,
+                new CommandQueue(mContext));
     }
 
     @Test

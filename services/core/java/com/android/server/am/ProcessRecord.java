@@ -27,11 +27,15 @@ import static com.android.server.am.ActivityManagerService.MY_PID;
 
 import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
+import android.app.ApplicationExitInfo;
+import android.app.ApplicationExitInfo.Reason;
+import android.app.ApplicationExitInfo.SubReason;
 import android.app.Dialog;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ProcessInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
@@ -52,7 +56,6 @@ import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -62,14 +65,18 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.Zygote;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.MemoryPressureUtil;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Full information about a particular process that
@@ -79,7 +86,8 @@ class ProcessRecord implements WindowProcessListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessRecord" : TAG_AM;
 
     private final ActivityManagerService mService; // where we came from
-    final ApplicationInfo info; // all about the first app in the process
+    volatile ApplicationInfo info; // all about the first app in the process
+    final ProcessInfo processInfo; // if non-null, process-specific manifest info
     final boolean isolated;     // true if this is a special isolated process
     final boolean appZygote;    // true if this is forked from the app zygote
     final int uid;              // uid of process; may be different from 'info' if isolated
@@ -151,9 +159,15 @@ class ProcessRecord implements WindowProcessListener {
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
     int verifiedAdj;            // The last adjustment that was verified as actually being set
+    int curCapability;          // Current capability flags of this process. For example,
+                                // PROCESS_CAPABILITY_FOREGROUND_LOCATION is one capability.
+    int setCapability;          // Last set capability flags.
     long lastCompactTime;       // The last time that this process was compacted
     int reqCompactAction;       // The most recent compaction action requested for this app.
     int lastCompactAction;      // The most recent compaction action performed for this app.
+    boolean frozen;             // True when the process is frozen.
+    long freezeUnfreezeTime;    // Last time the app was (un)frozen, 0 for never
+    boolean shouldNotFreeze;    // True if a process has a WPRI binding from an unfrozen process
     private int mCurSchedGroup; // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
@@ -230,23 +244,26 @@ class ProcessRecord implements WindowProcessListener {
     long lastTopTime;           // The last time the process was in the TOP state or greater.
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
-    boolean cached;             // Is this a cached process?
+    private volatile boolean mCached;    // Is this a cached process?
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
     int adjSourceProcState;     // Debugging: proc state of adjSource's process.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     Runnable crashHandler;      // Optional local handler to be invoked in the process crash.
+    boolean bindMountPending;   // True if Android/obb and Android/data need to be bind mount .
 
     // Cache of last retrieve memory info and uptime, to throttle how frequently
     // apps can requyest it.
     Debug.MemoryInfo lastMemInfo;
     long lastMemInfoTime;
 
+    // Controller for error dialogs
+    private final ErrorDialogController mDialogController = new ErrorDialogController();
     // Controller for driving the process state on the window manager side.
-    final private WindowProcessController mWindowProcessController;
+    private final WindowProcessController mWindowProcessController;
     // all ServiceRecord running in this process
-    final ArraySet<ServiceRecord> services = new ArraySet<>();
+    private final ArraySet<ServiceRecord> mServices = new ArraySet<>();
     // services that are currently executing code (need to remain foreground).
     final ArraySet<ServiceRecord> executingServices = new ArraySet<>();
     // All ConnectionRecord this process holds
@@ -269,16 +286,13 @@ class ProcessRecord implements WindowProcessListener {
     boolean execServicesFg;     // do we need to be executing services in the foreground?
     private boolean mPersistent;// always keep this application running?
     private boolean mCrashing;  // are we in the process of crashing?
-    Dialog crashDialog;         // dialog being displayed due to crash.
     boolean forceCrashReport;   // suppress normal auto-dismiss of crash dialog & report UI?
     private boolean mNotResponding; // does the app have a not responding dialog?
-    Dialog anrDialog;           // dialog being displayed due to app not resp.
     volatile boolean removed;   // Whether this process should be killed and removed from process
                                 // list. It is set when the package is force-stopped or the process
                                 // has crashed too many times.
     private boolean mDebugging; // was app launched for debugging?
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
-    Dialog waitDialog;          // current wait for debugger dialog
 
     String shortStringName;     // caching of toShortString() result.
     String stringName;          // caching of toString() result.
@@ -310,6 +324,34 @@ class ProcessRecord implements WindowProcessListener {
     // set of disabled compat changes for the process (all others are enabled)
     long[] mDisabledCompatChanges;
 
+    long mLastRss;               // Last computed memory rss.
+
+    // The precede instance of the process, which would exist when the previous process is killed
+    // but not fully dead yet; in this case, the new instance of the process should be held until
+    // this precede instance is fully dead.
+    volatile ProcessRecord mPrecedence;
+    // The succeeding instance of the process, which is going to be started after this process
+    // is killed successfully.
+    volatile ProcessRecord mSuccessor;
+
+    // Cached task info for OomAdjuster
+    private static final int VALUE_INVALID = -1;
+    private static final int VALUE_FALSE = 0;
+    private static final int VALUE_TRUE = 1;
+    private int mCachedHasActivities = VALUE_INVALID;
+    private int mCachedIsHeavyWeight = VALUE_INVALID;
+    private int mCachedHasVisibleActivities = VALUE_INVALID;
+    private int mCachedIsHomeProcess = VALUE_INVALID;
+    private int mCachedIsPreviousProcess = VALUE_INVALID;
+    private int mCachedHasRecentTasks = VALUE_INVALID;
+    private int mCachedIsReceivingBroadcast = VALUE_INVALID;
+    int mCachedAdj = ProcessList.INVALID_ADJ;
+    boolean mCachedForegroundActivities = false;
+    int mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+    int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+
+    boolean mReachable; // Whether or not this process is reachable from given process
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -335,6 +377,18 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
         pw.println("}");
+        if (processInfo != null) {
+            pw.print(prefix); pw.println("processInfo:");
+            if (processInfo.deniedPermissions != null) {
+                for (int i = 0; i < processInfo.deniedPermissions.size(); i++) {
+                    pw.print(prefix); pw.print("  deny: ");
+                    pw.println(processInfo.deniedPermissions.valueAt(i));
+                }
+            }
+            if (processInfo.gwpAsanMode != ApplicationInfo.GWP_ASAN_DEFAULT) {
+                pw.print(prefix); pw.println("  gwpAsanMode=" + processInfo.gwpAsanMode);
+            }
+        }
         pw.print(prefix); pw.print("mRequiredAbi="); pw.print(mRequiredAbi);
                 pw.print(" instructionSet="); pw.println(instructionSet);
         if (info.className != null) {
@@ -377,32 +431,24 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" nextPssTime=");
                 TimeUtils.formatDuration(nextPssTime, nowUptime, pw);
                 pw.println();
-        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
-                pw.print(" lruSeq="); pw.print(lruSeq);
-                pw.print(" lastPss="); DebugUtils.printSizeValue(pw, lastPss*1024);
-                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, lastSwapPss*1024);
-                pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss*1024);
-                pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw, lastCachedSwapPss*1024);
+        pw.print(prefix); pw.print("lastPss="); DebugUtils.printSizeValue(pw, lastPss * 1024);
+                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, lastSwapPss * 1024);
+                pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss * 1024);
+                pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw,
+                        lastCachedSwapPss * 1024);
+                pw.print(" lastRss="); DebugUtils.printSizeValue(pw, mLastRss * 1024);
                 pw.println();
         pw.print(prefix); pw.print("procStateMemTracker: ");
         procStateMemTracker.dumpLine(pw);
-        pw.print(prefix); pw.print("cached="); pw.print(cached);
-                pw.print(" empty="); pw.println(empty);
-        if (serviceb) {
-            pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
-                    pw.print(" serviceHighRam="); pw.println(serviceHighRam);
-        }
-        if (notCachedSinceIdle) {
-            pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(notCachedSinceIdle);
-                    pw.print(" initialIdlePss="); pw.println(initialIdlePss);
-        }
-        pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
+        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
+                pw.print(" lruSeq="); pw.println(lruSeq);
+        pw.print(prefix); pw.print("oom adj: max="); pw.print(maxAdj);
                 pw.print(" curRaw="); pw.print(mCurRawAdj);
                 pw.print(" setRaw="); pw.print(setRawAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
         pw.print(prefix); pw.print("lastCompactTime="); pw.print(lastCompactTime);
-                pw.print(" lastCompactAction="); pw.print(lastCompactAction);
+                pw.print(" lastCompactAction="); pw.println(lastCompactAction);
         pw.print(prefix); pw.print("mCurSchedGroup="); pw.print(mCurSchedGroup);
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
@@ -414,11 +460,26 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" lastStateTime=");
                 TimeUtils.formatDuration(lastStateTime, nowUptime, pw);
                 pw.println();
+        pw.print(prefix); pw.print("curCapability=");
+                ActivityManager.printCapabilitiesFull(pw, curCapability);
+                pw.print(" setCapability=");
+                ActivityManager.printCapabilitiesFull(pw, setCapability);
+                pw.println();
         if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
                     pw.print(" hasAboveClient="); pw.print(hasAboveClient);
                     pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
+        }
+        pw.print(prefix); pw.print("cached="); pw.print(mCached);
+                pw.print(" empty="); pw.println(empty);
+        if (serviceb) {
+            pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
+                    pw.print(" serviceHighRam="); pw.println(serviceHighRam);
+        }
+        if (notCachedSinceIdle) {
+            pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(notCachedSinceIdle);
+                    pw.print(" initialIdlePss="); pw.println(initialIdlePss);
         }
         if (connectionService != null || connectionGroup != 0) {
             pw.print(prefix); pw.print("connectionGroup="); pw.print(connectionGroup);
@@ -495,21 +556,21 @@ class ProcessRecord implements WindowProcessListener {
                     pw.print(" killedByAm="); pw.print(killedByAm);
                     pw.print(" waitingToKill="); pw.println(waitingToKill);
         }
-        if (mDebugging || mCrashing || crashDialog != null || mNotResponding
-                || anrDialog != null || bad) {
+        if (mDebugging || mCrashing || mDialogController.hasCrashDialogs() || mNotResponding
+                || mDialogController.hasAnrDialogs() || bad) {
             pw.print(prefix); pw.print("mDebugging="); pw.print(mDebugging);
-                    pw.print(" mCrashing="); pw.print(mCrashing);
-                    pw.print(" "); pw.print(crashDialog);
-                    pw.print(" mNotResponding="); pw.print(mNotResponding);
-                    pw.print(" " ); pw.print(anrDialog);
-                    pw.print(" bad="); pw.print(bad);
+            pw.print(" mCrashing=" + mCrashing);
+            pw.print(" " + mDialogController.mCrashDialogs);
+            pw.print(" mNotResponding=" + mNotResponding);
+            pw.print(" " + mDialogController.mAnrDialogs);
+            pw.print(" bad=" + bad);
 
-                    // mCrashing or mNotResponding is always set before errorReportReceiver
-                    if (errorReportReceiver != null) {
-                        pw.print(" errorReportReceiver=");
-                        pw.print(errorReportReceiver.flattenToShortString());
-                    }
-                    pw.println();
+            // mCrashing or mNotResponding is always set before errorReportReceiver
+            if (errorReportReceiver != null) {
+                pw.print(" errorReportReceiver=");
+                pw.print(errorReportReceiver.flattenToShortString());
+            }
+            pw.println();
         }
         if (whitelistManager) {
             pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
@@ -520,10 +581,10 @@ class ProcessRecord implements WindowProcessListener {
             pw.println(Arrays.toString(isolatedEntryPointArgs));
         }
         mWindowProcessController.dump(pw, prefix);
-        if (services.size() > 0) {
+        if (mServices.size() > 0) {
             pw.print(prefix); pw.println("Services:");
-            for (int i=0; i<services.size(); i++) {
-                pw.print(prefix); pw.print("  - "); pw.println(services.valueAt(i));
+            for (int i = 0; i < mServices.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(mServices.valueAt(i));
             }
         }
         if (executingServices.size() > 0) {
@@ -577,6 +638,21 @@ class ProcessRecord implements WindowProcessListener {
             int _uid) {
         mService = _service;
         info = _info;
+        ProcessInfo procInfo = null;
+        if (_service.mPackageManagerInt != null) {
+            ArrayMap<String, ProcessInfo> processes =
+                    _service.mPackageManagerInt.getProcessesForUid(_uid);
+            if (processes != null) {
+                procInfo = processes.get(_processName);
+                if (procInfo != null && procInfo.deniedPermissions == null
+                        && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT) {
+                    // If this process hasn't asked for permissions to be denied, or for a
+                    // non-default GwpAsan mode, then we don't care about it.
+                    procInfo = null;
+                }
+            }
+        }
+        processInfo = procInfo;
         isolated = _info.uid != _uid;
         appZygote = (UserHandle.getAppId(_uid) >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
                 && UserHandle.getAppId(_uid) <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
@@ -588,7 +664,7 @@ class ProcessRecord implements WindowProcessListener {
         curAdj = setAdj = verifiedAdj = ProcessList.INVALID_ADJ;
         mPersistent = false;
         removed = false;
-        lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
+        freezeUnfreezeTime = lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
         mWindowProcessController = new WindowProcessController(
                 mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
@@ -609,7 +685,7 @@ class ProcessRecord implements WindowProcessListener {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList.mPkgList);
                 for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                    StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
                             uid, processName, pkgList.keyAt(ipkg),
                             ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
                             pkgList.valueAt(ipkg).appVersion);
@@ -644,7 +720,7 @@ class ProcessRecord implements WindowProcessListener {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList.mPkgList);
                 for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                    StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
                             uid, processName, pkgList.keyAt(ipkg),
                             ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
                             pkgList.valueAt(ipkg).appVersion);
@@ -661,6 +737,72 @@ class ProcessRecord implements WindowProcessListener {
                 holder.state = null;
             }
         }
+    }
+
+    /**
+     * Records a service as running in the process. Note that this method does not actually start
+     * the service, but records the service as started for bookkeeping.
+     *
+     * @return true if the service was added, false otherwise.
+     */
+    boolean startService(ServiceRecord record) {
+        if (record == null) {
+            return false;
+        }
+        boolean added = mServices.add(record);
+        if (added && record.serviceInfo != null) {
+            mWindowProcessController.onServiceStarted(record.serviceInfo);
+        }
+        return added;
+    }
+
+    /**
+     * Records a service as stopped. Note that like {@link #startService(ServiceRecord)} this method
+     * does not actually stop the service, but records the service as stopped for bookkeeping.
+     *
+     * @return true if the service was removed, false otherwise.
+     */
+    boolean stopService(ServiceRecord record) {
+        return mServices.remove(record);
+    }
+
+    /**
+     * The same as calling {@link #stopService(ServiceRecord)} on all current running services.
+     */
+    void stopAllServices() {
+        mServices.clear();
+    }
+
+    /**
+     * Returns the number of services added with {@link #startService(ServiceRecord)} and not yet
+     * removed by a call to {@link #stopService(ServiceRecord)} or {@link #stopAllServices()}.
+     *
+     * @see #startService(ServiceRecord)
+     * @see #stopService(ServiceRecord)
+     */
+    int numberOfRunningServices() {
+        return mServices.size();
+    }
+
+    /**
+     * Returns the service at the specified {@code index}.
+     *
+     * @see #numberOfRunningServices()
+     */
+    ServiceRecord getRunningServiceAt(int index) {
+        return mServices.valueAt(index);
+    }
+
+    void setCached(boolean cached) {
+        if (mCached != cached) {
+            mCached = cached;
+            mWindowProcessController.onProcCachedStateChanged(cached);
+        }
+    }
+
+    @Override
+    public boolean isCached() {
+        return mCached;
     }
 
     boolean hasActivities() {
@@ -684,9 +826,9 @@ class ProcessRecord implements WindowProcessListener {
             return true;
         }
 
-        final int servicesSize = services.size();
+        final int servicesSize = mServices.size();
         for (int i = 0; i < servicesSize; i++) {
-            ServiceRecord r = services.valueAt(i);
+            ServiceRecord r = mServices.valueAt(i);
             if (r.isForeground) {
                 return true;
             }
@@ -751,7 +893,8 @@ class ProcessRecord implements WindowProcessListener {
                 } catch (RemoteException e) {
                     // If it's already dead our work is done. If it's wedged just kill it.
                     // We won't get the crash dialog or the error reporting.
-                    kill("scheduleCrash for '" + message + "' failed", true);
+                    kill("scheduleCrash for '" + message + "' failed",
+                            ApplicationExitInfo.REASON_CRASH, true);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -759,7 +902,11 @@ class ProcessRecord implements WindowProcessListener {
         }
     }
 
-    void kill(String reason, boolean noisy) {
+    void kill(String reason, @Reason int reasonCode, boolean noisy) {
+        kill(reason, reasonCode, ApplicationExitInfo.SUBREASON_UNKNOWN, noisy);
+    }
+
+    void kill(String reason, @Reason int reasonCode, @SubReason int subReason, boolean noisy) {
         if (!killedByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
             if (mService != null && (noisy || info.uid == mService.mCurOomAdjUid)) {
@@ -768,6 +915,7 @@ class ProcessRecord implements WindowProcessListener {
                         info.uid);
             }
             if (pid > 0) {
+                mService.mProcessList.noteAppKill(this, reasonCode, subReason, reason);
                 EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
                 Process.killProcessQuiet(pid);
                 ProcessList.killProcessGroup(uid, pid);
@@ -783,11 +931,11 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
-        writeToProto(proto, fieldId, -1);
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        dumpDebug(proto, fieldId, -1);
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId, int lruIndex) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, int lruIndex) {
         long token = proto.start(fieldId);
         proto.write(ProcessRecordProto.PID, pid);
         proto.write(ProcessRecordProto.PROCESS_NAME, processName);
@@ -916,7 +1064,7 @@ class ProcessRecord implements WindowProcessListener {
             setCurProcState(newState);
             setCurRawProcState(newState);
             for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
                         uid, processName, pkgList.keyAt(ipkg),
                         ActivityManager.processStateAmToProto(mRepProcState),
                         pkgList.valueAt(ipkg).appVersion);
@@ -934,7 +1082,7 @@ class ProcessRecord implements WindowProcessListener {
             baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
                     tracker.getMemFactorLocked(), now, pkgList.mPkgList);
             for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
                         uid, processName, pkgList.keyAt(ipkg),
                         ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
                         pkgList.valueAt(ipkg).appVersion);
@@ -1020,7 +1168,7 @@ class ProcessRecord implements WindowProcessListener {
     void setReportedProcState(int repProcState) {
         mRepProcState = repProcState;
         for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
-            StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
                     uid, processName, pkgList.keyAt(ipkg),
                     ActivityManager.processStateAmToProto(mRepProcState),
                     pkgList.valueAt(ipkg).appVersion);
@@ -1081,6 +1229,10 @@ class ProcessRecord implements WindowProcessListener {
     boolean hasLocationForegroundServices() {
         return mHasForegroundServices
                 && (mFgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
+    }
+
+    boolean hasLocationCapability() {
+        return (setCapability & ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0;
     }
 
     int getForegroundServiceTypes() {
@@ -1195,16 +1347,16 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     void updateBoundClientUids() {
-        if (services.isEmpty()) {
+        if (mServices.isEmpty()) {
             clearBoundClientUids();
             return;
         }
         // grab a set of clientUids of all connections of all services
         ArraySet<Integer> boundClientUids = new ArraySet<>();
-        final int K = services.size();
-        for (int j = 0; j < K; j++) {
+        final int serviceCount = mServices.size();
+        for (int j = 0; j < serviceCount; j++) {
             ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns =
-                    services.valueAt(j).getConnections();
+                    mServices.valueAt(j).getConnections();
             final int N = conns.size();
             for (int conni = 0; conni < N; conni++) {
                 ArrayList<ConnectionRecord> c = conns.valueAt(conni);
@@ -1304,7 +1456,7 @@ class ProcessRecord implements WindowProcessListener {
             }
             mService.mProcessList.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+                mService.updateOomAdjLocked(this, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
             }
         }
     }
@@ -1345,9 +1497,9 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public void appDied() {
+    public void appDied(String reason) {
         synchronized (mService) {
-            mService.appDiedLocked(this);
+            mService.appDiedLocked(this, reason);
         }
     }
 
@@ -1408,17 +1560,19 @@ class ProcessRecord implements WindowProcessListener {
 
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
             String parentShortComponentName, WindowProcessController parentProcess,
-            boolean aboveSystem, String annotation) {
+            boolean aboveSystem, String annotation, boolean onlyDumpSelf) {
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseArray<Boolean> lastPids = new SparseArray<>(20);
 
-        mWindowProcessController.appEarlyNotResponding(annotation, () -> kill("anr", true));
+        mWindowProcessController.appEarlyNotResponding(annotation, () -> kill("anr",
+                  ApplicationExitInfo.REASON_ANR, true));
 
         long anrTime = SystemClock.uptimeMillis();
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
         }
 
+        final boolean isSilentAnr;
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mService.mAtmInternal.isShuttingDown()) {
@@ -1449,8 +1603,9 @@ class ProcessRecord implements WindowProcessListener {
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
             firstPids.add(pid);
 
-            // Don't dump other PIDs if it's a background ANR
-            if (!isSilentAnr()) {
+            // Don't dump other PIDs if it's a background ANR or is requested to only dump self.
+            isSilentAnr = isSilentAnr();
+            if (!isSilentAnr && !onlyDumpSelf) {
                 int parentPid = pid;
                 if (parentProcess != null && parentProcess.getPid() > 0) {
                     parentPid = parentProcess.getPid();
@@ -1497,11 +1652,13 @@ class ProcessRecord implements WindowProcessListener {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
         }
 
+        StringBuilder report = new StringBuilder();
+        report.append(MemoryPressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
         // don't dump native PIDs for background ANRs unless it is the process of interest
         String[] nativeProcs = null;
-        if (isSilentAnr()) {
+        if (isSilentAnr || onlyDumpSelf) {
             for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
                 if (NATIVE_STACKS_OF_INTEREST[i].equals(processName)) {
                     nativeProcs = new String[] { processName };
@@ -1524,19 +1681,22 @@ class ProcessRecord implements WindowProcessListener {
 
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
+        StringWriter tracesFileException = new StringWriter();
+        // To hold the start and end offset to the ANR trace file respectively.
+        final long[] offsets = new long[2];
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
-                (isSilentAnr()) ? null : processCpuTracker, (isSilentAnr()) ? null : lastPids,
-                nativePids);
+                isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
+                nativePids, tracesFileException, offsets);
 
-        String cpuInfo = null;
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
             synchronized (mService.mProcessCpuTracker) {
-                cpuInfo = mService.mProcessCpuTracker.printCurrentState(anrTime);
+                report.append(mService.mProcessCpuTracker.printCurrentState(anrTime));
             }
             info.append(processCpuTracker.printCurrentLoad());
-            info.append(cpuInfo);
+            info.append(report);
         }
+        report.append(tracesFileException.getBuffer());
 
         info.append(processCpuTracker.printCurrentState(anrTime));
 
@@ -1544,26 +1704,32 @@ class ProcessRecord implements WindowProcessListener {
         if (tracesFile == null) {
             // There is no trace file, so dump (only) the alleged culprit's threads to the log
             Process.sendSignal(pid, Process.SIGNAL_QUIT);
+        } else if (offsets[1] > 0) {
+            // We've dumped into the trace file successfully
+            mService.mProcessList.mAppExitInfoTracker.scheduleLogAnrTrace(
+                    pid, uid, getPackageList(), tracesFile, offsets[0], offsets[1]);
         }
 
-        StatsLog.write(StatsLog.ANR_OCCURRED, uid, processName,
+        FrameworkStatsLog.write(FrameworkStatsLog.ANR_OCCURRED, uid, processName,
                 activityShortComponentName == null ? "unknown": activityShortComponentName,
                 annotation,
                 (this.info != null) ? (this.info.isInstantApp()
-                        ? StatsLog.ANROCCURRED__IS_INSTANT_APP__TRUE
-                        : StatsLog.ANROCCURRED__IS_INSTANT_APP__FALSE)
-                        : StatsLog.ANROCCURRED__IS_INSTANT_APP__UNAVAILABLE,
+                        ? FrameworkStatsLog.ANROCCURRED__IS_INSTANT_APP__TRUE
+                        : FrameworkStatsLog.ANROCCURRED__IS_INSTANT_APP__FALSE)
+                        : FrameworkStatsLog.ANROCCURRED__IS_INSTANT_APP__UNAVAILABLE,
                 isInterestingToUserLocked()
-                        ? StatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
-                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
+                        ? FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
+                        : FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
                 getProcessClassEnum(),
                 (this.info != null) ? this.info.packageName : "");
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
-                parentShortComponentName, parentPr, annotation, cpuInfo, tracesFile, null);
+                parentShortComponentName, parentPr, annotation, report.toString(), tracesFile,
+                null);
 
-        if (mWindowProcessController.appNotResponding(info.toString(), () -> kill("anr", true),
+        if (mWindowProcessController.appNotResponding(info.toString(), () -> kill("anr",
+                ApplicationExitInfo.REASON_ANR, true),
                 () -> {
                     synchronized (mService) {
                         mService.mServices.scheduleServiceTimeoutLocked(this);
@@ -1580,7 +1746,7 @@ class ProcessRecord implements WindowProcessListener {
             }
 
             if (isSilentAnr() && !isDebugging()) {
-                kill("bg anr", true);
+                kill("bg anr", ApplicationExitInfo.REASON_ANR, true);
                 return;
             }
 
@@ -1651,5 +1817,278 @@ class ProcessRecord implements WindowProcessListener {
     private boolean getShowBackground() {
         return Settings.Secure.getInt(mService.mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+    }
+
+    void resetCachedInfo() {
+        mCachedHasActivities = VALUE_INVALID;
+        mCachedIsHeavyWeight = VALUE_INVALID;
+        mCachedHasVisibleActivities = VALUE_INVALID;
+        mCachedIsHomeProcess = VALUE_INVALID;
+        mCachedIsPreviousProcess = VALUE_INVALID;
+        mCachedHasRecentTasks = VALUE_INVALID;
+        mCachedIsReceivingBroadcast = VALUE_INVALID;
+        mCachedAdj = ProcessList.INVALID_ADJ;
+        mCachedForegroundActivities = false;
+        mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+        mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+    }
+
+    boolean getCachedHasActivities() {
+        if (mCachedHasActivities == VALUE_INVALID) {
+            mCachedHasActivities = getWindowProcessController().hasActivities() ? VALUE_TRUE
+                    : VALUE_FALSE;
+        }
+        return mCachedHasActivities == VALUE_TRUE;
+    }
+
+    boolean getCachedIsHeavyWeight() {
+        if (mCachedIsHeavyWeight == VALUE_INVALID) {
+            mCachedIsHeavyWeight = mService.mAtmInternal.isHeavyWeightProcess(
+                    getWindowProcessController()) ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedIsHeavyWeight == VALUE_TRUE;
+    }
+
+    boolean getCachedHasVisibleActivities() {
+        if (mCachedHasVisibleActivities == VALUE_INVALID) {
+            mCachedHasVisibleActivities = getWindowProcessController().hasVisibleActivities()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedHasVisibleActivities == VALUE_TRUE;
+    }
+
+    boolean getCachedIsHomeProcess() {
+        if (mCachedIsHomeProcess == VALUE_INVALID) {
+            mCachedIsHomeProcess = getWindowProcessController().isHomeProcess()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedIsHomeProcess == VALUE_TRUE;
+    }
+
+    boolean getCachedIsPreviousProcess() {
+        if (mCachedIsPreviousProcess == VALUE_INVALID) {
+            mCachedIsPreviousProcess = getWindowProcessController().isPreviousProcess()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedIsPreviousProcess == VALUE_TRUE;
+    }
+
+    boolean getCachedHasRecentTasks() {
+        if (mCachedHasRecentTasks == VALUE_INVALID) {
+            mCachedHasRecentTasks = getWindowProcessController().hasRecentTasks()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedHasRecentTasks == VALUE_TRUE;
+    }
+
+    boolean getCachedIsReceivingBroadcast(ArraySet<BroadcastQueue> tmpQueue) {
+        if (mCachedIsReceivingBroadcast == VALUE_INVALID) {
+            tmpQueue.clear();
+            mCachedIsReceivingBroadcast = mService.isReceivingBroadcastLocked(this, tmpQueue)
+                    ? VALUE_TRUE : VALUE_FALSE;
+            if (mCachedIsReceivingBroadcast == VALUE_TRUE) {
+                mCachedSchedGroup = tmpQueue.contains(mService.mFgBroadcastQueue)
+                        ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
+            }
+        }
+        return mCachedIsReceivingBroadcast == VALUE_TRUE;
+    }
+
+    void computeOomAdjFromActivitiesIfNecessary(OomAdjuster.ComputeOomAdjWindowCallback callback,
+            int adj, boolean foregroundActivities, int procState, int schedGroup, int appUid,
+            int logUid, int processCurTop) {
+        if (mCachedAdj != ProcessList.INVALID_ADJ) {
+            return;
+        }
+        callback.initialize(this, adj, foregroundActivities, procState, schedGroup, appUid, logUid,
+                processCurTop);
+        final int minLayer = getWindowProcessController().computeOomAdjFromActivities(
+                ProcessList.VISIBLE_APP_LAYER_MAX, callback);
+
+        mCachedAdj = callback.adj;
+        mCachedForegroundActivities = callback.foregroundActivities;
+        mCachedProcState = callback.procState;
+        mCachedSchedGroup = callback.schedGroup;
+
+        if (mCachedAdj == ProcessList.VISIBLE_APP_ADJ) {
+            mCachedAdj += minLayer;
+        }
+    }
+
+    ErrorDialogController getDialogController() {
+        return mDialogController;
+    }
+
+    /** A controller to generate error dialogs in {@link ProcessRecord} */
+    class ErrorDialogController {
+        /** dialogs being displayed due to crash */
+        private List<AppErrorDialog> mCrashDialogs;
+        /** dialogs being displayed due to app not responding */
+        private List<AppNotRespondingDialog> mAnrDialogs;
+        /** dialogs displayed due to strict mode violation */
+        private List<StrictModeViolationDialog> mViolationDialogs;
+        /** current wait for debugger dialog */
+        private AppWaitingForDebuggerDialog mWaitDialog;
+
+        boolean hasCrashDialogs() {
+            return mCrashDialogs != null;
+        }
+
+        boolean hasAnrDialogs() {
+            return mAnrDialogs != null;
+        }
+
+        boolean hasViolationDialogs() {
+            return mViolationDialogs != null;
+        }
+
+        boolean hasDebugWaitingDialog() {
+            return mWaitDialog != null;
+        }
+
+        void clearAllErrorDialogs() {
+            clearCrashDialogs();
+            clearAnrDialogs();
+            clearViolationDialogs();
+            clearWaitingDialog();
+        }
+
+        void clearCrashDialogs() {
+            clearCrashDialogs(true /* needDismiss */);
+        }
+
+        void clearCrashDialogs(boolean needDismiss) {
+            if (mCrashDialogs == null) {
+                return;
+            }
+            if (needDismiss) {
+                forAllDialogs(mCrashDialogs, Dialog::dismiss);
+            }
+            mCrashDialogs = null;
+        }
+
+        void clearAnrDialogs() {
+            if (mAnrDialogs == null) {
+                return;
+            }
+            forAllDialogs(mAnrDialogs, Dialog::dismiss);
+            mAnrDialogs = null;
+        }
+
+        void clearViolationDialogs() {
+            if (mViolationDialogs == null) {
+                return;
+            }
+            forAllDialogs(mViolationDialogs, Dialog::dismiss);
+            mViolationDialogs = null;
+        }
+
+        void clearWaitingDialog() {
+            if (mWaitDialog == null) {
+                return;
+            }
+            mWaitDialog.dismiss();
+            mWaitDialog = null;
+        }
+
+        void forAllDialogs(List<? extends BaseErrorDialog> dialogs, Consumer<BaseErrorDialog> c) {
+            for (int i = dialogs.size() - 1; i >= 0; i--) {
+                c.accept(dialogs.get(i));
+            }
+        }
+
+        void showCrashDialogs(AppErrorDialog.Data data) {
+            List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
+            mCrashDialogs = new ArrayList<>();
+            for (int i = contexts.size() - 1; i >= 0; i--) {
+                final Context c = contexts.get(i);
+                mCrashDialogs.add(new AppErrorDialog(c, mService, data));
+            }
+            mService.mUiHandler.post(() -> {
+                List<AppErrorDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mCrashDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
+        }
+
+        void showAnrDialogs(AppNotRespondingDialog.Data data) {
+            List<Context> contexts = getDisplayContexts(isSilentAnr() /* lastUsedOnly */);
+            mAnrDialogs = new ArrayList<>();
+            for (int i = contexts.size() - 1; i >= 0; i--) {
+                final Context c = contexts.get(i);
+                mAnrDialogs.add(new AppNotRespondingDialog(mService, c, data));
+            }
+            mService.mUiHandler.post(() -> {
+                List<AppNotRespondingDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mAnrDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
+        }
+
+        void showViolationDialogs(AppErrorResult res) {
+            List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
+            mViolationDialogs = new ArrayList<>();
+            for (int i = contexts.size() - 1; i >= 0; i--) {
+                final Context c = contexts.get(i);
+                mViolationDialogs.add(
+                        new StrictModeViolationDialog(c, mService, res, ProcessRecord.this));
+            }
+            mService.mUiHandler.post(() -> {
+                List<StrictModeViolationDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mViolationDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
+        }
+
+        void showDebugWaitingDialogs() {
+            List<Context> contexts = getDisplayContexts(true /* lastUsedOnly */);
+            final Context c = contexts.get(0);
+            mWaitDialog = new AppWaitingForDebuggerDialog(mService, c, ProcessRecord.this);
+
+            mService.mUiHandler.post(() -> {
+                Dialog dialog;
+                synchronized (mService) {
+                    dialog = mWaitDialog;
+                }
+                if (dialog != null) {
+                    dialog.show();
+                }
+            });
+        }
+
+        /**
+         * Helper function to collect contexts from crashed app located displays
+         *
+         * @param lastUsedOnly Sets to {@code true} to indicate to only get last used context.
+         *                     Sets to {@code false} to collect contexts from crashed app located
+         *                     displays.
+         *
+         * @return display context list
+         */
+        private List<Context> getDisplayContexts(boolean lastUsedOnly) {
+            List<Context> displayContexts = new ArrayList<>();
+            if (!lastUsedOnly) {
+                mWindowProcessController.getDisplayContextsWithErrorDialogs(displayContexts);
+            }
+            // If there is no foreground window display, fallback to last used display.
+            if (displayContexts.isEmpty() || lastUsedOnly) {
+                displayContexts.add(mService.mWmInternal != null
+                        ? mService.mWmInternal.getTopFocusedDisplayUiContext()
+                        : mService.mUiContext);
+            }
+            return displayContexts;
+        }
     }
 }

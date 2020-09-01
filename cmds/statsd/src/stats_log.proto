@@ -41,6 +41,15 @@ message DimensionsValueTuple {
   repeated DimensionsValue dimensions_value = 1;
 }
 
+message StateValue {
+  optional int32 atom_id = 1;
+
+  oneof contents {
+    int64 group_id = 2;
+    int32 value = 3;
+  }
+}
+
 message EventMetricData {
   optional int64 elapsed_timestamp_nanos = 1;
 
@@ -66,13 +75,15 @@ message CountBucketInfo {
 message CountMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 2;
+  repeated StateValue slice_by_state = 6;
 
   repeated CountBucketInfo bucket_info = 3;
 
   repeated DimensionsValue dimension_leaf_values_in_what = 4;
 
-  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5 [deprecated = true];
 }
 
 message DurationBucketInfo {
@@ -92,13 +103,15 @@ message DurationBucketInfo {
 message DurationMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 2;
+  repeated StateValue slice_by_state = 6;
 
   repeated DurationBucketInfo bucket_info = 3;
 
   repeated DimensionsValue dimension_leaf_values_in_what = 4;
 
-  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5 [deprecated = true];
 }
 
 message ValueBucketInfo {
@@ -136,13 +149,15 @@ message ValueBucketInfo {
 message ValueMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 2;
+  repeated StateValue slice_by_state = 6;
 
   repeated ValueBucketInfo bucket_info = 3;
 
   repeated DimensionsValue dimension_leaf_values_in_what = 4;
 
-  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5 [deprecated = true];
 }
 
 message GaugeBucketInfo {
@@ -166,13 +181,16 @@ message GaugeBucketInfo {
 message GaugeMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 2;
+  // Currently unsupported
+  repeated StateValue slice_by_state = 6;
 
   repeated GaugeBucketInfo bucket_info = 3;
 
   repeated DimensionsValue dimension_leaf_values_in_what = 4;
 
-  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+  optional DimensionsValue dimensions_in_condition = 2 [deprecated = true];
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5 [deprecated = true];
 }
 
 message StatsLogReport {
@@ -180,11 +198,42 @@ message StatsLogReport {
 
   // Fields 2 and 3 are reserved.
 
+  // Keep this in sync with BucketDropReason enum in MetricProducer.h.
+  enum BucketDropReason {
+      // For ValueMetric, a bucket is dropped during a dump report request iff
+      // current bucket should be included, a pull is needed (pulled metric and
+      // condition is true), and we are under fast time constraints.
+      DUMP_REPORT_REQUESTED = 1;
+      EVENT_IN_WRONG_BUCKET = 2;
+      CONDITION_UNKNOWN = 3;
+      PULL_FAILED = 4;
+      PULL_DELAYED = 5;
+      DIMENSION_GUARDRAIL_REACHED = 6;
+      MULTIPLE_BUCKETS_SKIPPED = 7;
+      // Not an invalid bucket case, but the bucket is dropped.
+      BUCKET_TOO_SMALL = 8;
+      // Not an invalid bucket case, but the bucket is skipped.
+      NO_DATA = 9;
+  };
+
+  message DropEvent {
+      optional BucketDropReason drop_reason = 1;
+
+      optional int64 drop_time_millis = 2;
+  }
+
   message SkippedBuckets {
       optional int64 start_bucket_elapsed_nanos = 1;
+
       optional int64 end_bucket_elapsed_nanos = 2;
+
       optional int64 start_bucket_elapsed_millis = 3;
+
       optional int64 end_bucket_elapsed_millis = 4;
+
+      // The number of drop events is capped by StatsdStats::kMaxLoggedBucketDropEvents.
+      // The current maximum is 10 drop events.
+      repeated DropEvent drop_event = 5;
   }
 
   message EventMetricDataWrapper {
@@ -220,7 +269,7 @@ message StatsLogReport {
 
   optional DimensionsValue dimensions_path_in_what = 11;
 
-  optional DimensionsValue dimensions_path_in_condition = 12;
+  optional DimensionsValue dimensions_path_in_condition = 12 [deprecated = true];
 
   // DO NOT USE field 13.
 
@@ -363,7 +412,7 @@ message StatsdStatsReport {
         repeated ConditionStats condition_stats = 14;
         repeated MetricStats metric_stats = 15;
         repeated AlertStats alert_stats = 16;
-        repeated MetricStats metric_dimension_in_condition_stats = 17;
+        repeated MetricStats metric_dimension_in_condition_stats = 17 [deprecated = true];
         message Annotation {
             optional int64 field_int64 = 1;
             optional int32 field_int32 = 2;
@@ -378,6 +427,7 @@ message StatsdStatsReport {
     message AtomStats {
         optional int32 tag = 1;
         optional int32 count = 2;
+        optional int32 error_count = 3;
     }
 
     repeated AtomStats atom_stats = 7;
@@ -408,11 +458,20 @@ message StatsdStatsReport {
         optional int64 pull_timeout = 10;
         optional int64 pull_exceed_max_delay = 11;
         optional int64 pull_failed = 12;
-        optional int64 stats_companion_pull_failed = 13;
-        optional int64 stats_companion_pull_binder_transaction_failed = 14;
+        optional int64 stats_companion_pull_failed = 13 [deprecated = true];
+        optional int64 stats_companion_pull_binder_transaction_failed = 14 [deprecated = true];
         optional int64 empty_data = 15;
         optional int64 registered_count = 16;
         optional int64 unregistered_count = 17;
+        optional int32 atom_error_count = 18;
+        optional int64 binder_call_failed = 19;
+        optional int64 failed_uid_provider_not_found = 20;
+        optional int64 puller_not_found = 21;
+        message PullTimeoutMetadata {
+          optional int64 pull_timeout_uptime_millis = 1;
+          optional int64 pull_timeout_elapsed_millis = 2;
+        }
+        repeated PullTimeoutMetadata pull_atom_metadata = 22;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
 
@@ -483,7 +542,7 @@ message AlertTriggerDetails {
     message MetricValue {
         optional int64 metric_id = 1;
         optional DimensionsValue dimension_in_what = 2;
-        optional DimensionsValue dimension_in_condition = 3;
+        optional DimensionsValue dimension_in_condition = 3 [deprecated = true];
         optional int64 value = 4;
     }
     oneof value {

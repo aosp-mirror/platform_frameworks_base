@@ -16,7 +16,7 @@
 
 package com.android.server.accessibility;
 
-abstract class BaseEventStreamTransformation implements EventStreamTransformation {
+public abstract class BaseEventStreamTransformation implements EventStreamTransformation {
     private EventStreamTransformation mNext;
 
     @Override

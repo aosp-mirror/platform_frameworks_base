@@ -29,9 +29,8 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.util.Assert;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,9 +47,13 @@ public class NotificationViewWrapperTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         mView = mock(View.class);
-        mRow = new NotificationTestHelper(getContext()).createRow();
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mRow = helper.createRow();
         mNotificationViewWrapper = new TestableNotificationViewWrapper(mContext, mView, mRow);
     }
 

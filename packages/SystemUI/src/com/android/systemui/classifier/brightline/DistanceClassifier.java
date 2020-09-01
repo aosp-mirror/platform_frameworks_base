@@ -27,7 +27,10 @@ import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Ensure that the swipe + momentum covers a minimum distance.
@@ -35,10 +38,10 @@ import java.util.List;
 class DistanceClassifier extends FalsingClassifier {
 
     private static final float HORIZONTAL_FLING_THRESHOLD_DISTANCE_IN = 1;
-    private static final float VERTICAL_FLING_THRESHOLD_DISTANCE_IN = 1;
+    private static final float VERTICAL_FLING_THRESHOLD_DISTANCE_IN = 1.5f;
     private static final float HORIZONTAL_SWIPE_THRESHOLD_DISTANCE_IN = 3;
     private static final float VERTICAL_SWIPE_THRESHOLD_DISTANCE_IN = 3;
-    private static final float VELOCITY_TO_DISTANCE = 80f;
+    private static final float VELOCITY_TO_DISTANCE = 30f;
     private static final float SCREEN_FRACTION_MAX_DISTANCE = 0.8f;
 
     private final float mVerticalFlingThresholdPx;
@@ -50,35 +53,35 @@ class DistanceClassifier extends FalsingClassifier {
     private boolean mDistanceDirty;
     private DistanceVectors mCachedDistance;
 
-    DistanceClassifier(FalsingDataProvider dataProvider) {
+    DistanceClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 
-        mVelocityToDistanceMultiplier = DeviceConfig.getFloat(
+        mVelocityToDistanceMultiplier = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_VELOCITY_TO_DISTANCE,
                 VELOCITY_TO_DISTANCE);
 
-        float horizontalFlingThresholdIn = DeviceConfig.getFloat(
+        float horizontalFlingThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_FLING_THRESHOLD_IN,
                 HORIZONTAL_FLING_THRESHOLD_DISTANCE_IN);
 
-        float verticalFlingThresholdIn = DeviceConfig.getFloat(
+        float verticalFlingThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_VERTICAL_FLING_THRESHOLD_IN,
                 VERTICAL_FLING_THRESHOLD_DISTANCE_IN);
 
-        float horizontalSwipeThresholdIn = DeviceConfig.getFloat(
+        float horizontalSwipeThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_SWIPE_THRESHOLD_IN,
                 HORIZONTAL_SWIPE_THRESHOLD_DISTANCE_IN);
 
-        float verticalSwipeThresholdIn = DeviceConfig.getFloat(
+        float verticalSwipeThresholdIn = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_VERTICAL_SWIPE_THRESHOLD_IN,
                 VERTICAL_SWIPE_THRESHOLD_DISTANCE_IN);
 
-        float screenFractionMaxDistance = DeviceConfig.getFloat(
+        float screenFractionMaxDistance = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DISTANCE_SCREEN_FRACTION_MAX_DISTANCE,
                 SCREEN_FRACTION_MAX_DISTANCE);
@@ -142,13 +145,64 @@ class DistanceClassifier extends FalsingClassifier {
 
     @Override
     public boolean isFalseTouch() {
-        return !getDistances().getPassedFlingThreshold();
+        return !getPassedFlingThreshold();
+    }
+
+    @Override
+    String getReason() {
+        DistanceVectors distanceVectors = getDistances();
+
+        return String.format(
+                (Locale) null,
+                "{distanceVectors=%s, isHorizontal=%s, velocityToDistanceMultiplier=%f, "
+                        + "horizontalFlingThreshold=%f, verticalFlingThreshold=%f, "
+                        + "horizontalSwipeThreshold=%f, verticalSwipeThreshold=%s}",
+                distanceVectors,
+                isHorizontal(),
+                mVelocityToDistanceMultiplier,
+                mHorizontalFlingThresholdPx,
+                mVerticalFlingThresholdPx,
+                mHorizontalSwipeThresholdPx,
+                mVerticalSwipeThresholdPx);
     }
 
     boolean isLongSwipe() {
-        boolean longSwipe = getDistances().getPassedDistanceThreshold();
+        boolean longSwipe = getPassedDistanceThreshold();
         logDebug("Is longSwipe? " + longSwipe);
         return longSwipe;
+    }
+
+    private boolean getPassedDistanceThreshold() {
+        DistanceVectors distanceVectors = getDistances();
+        if (isHorizontal()) {
+            logDebug("Horizontal swipe distance: " + Math.abs(distanceVectors.mDx));
+            logDebug("Threshold: " + mHorizontalSwipeThresholdPx);
+
+            return Math.abs(distanceVectors.mDx) >= mHorizontalSwipeThresholdPx;
+        }
+
+        logDebug("Vertical swipe distance: " + Math.abs(distanceVectors.mDy));
+        logDebug("Threshold: " + mVerticalSwipeThresholdPx);
+        return Math.abs(distanceVectors.mDy) >= mVerticalSwipeThresholdPx;
+    }
+
+    private boolean getPassedFlingThreshold() {
+        DistanceVectors distanceVectors = getDistances();
+
+        float dX = distanceVectors.mDx + distanceVectors.mVx * mVelocityToDistanceMultiplier;
+        float dY = distanceVectors.mDy + distanceVectors.mVy * mVelocityToDistanceMultiplier;
+
+        if (isHorizontal()) {
+            logDebug("Horizontal swipe and fling distance: " + distanceVectors.mDx + ", "
+                    + distanceVectors.mVx * mVelocityToDistanceMultiplier);
+            logDebug("Threshold: " + mHorizontalFlingThresholdPx);
+            return Math.abs(dX) >= mHorizontalFlingThresholdPx;
+        }
+
+        logDebug("Vertical swipe and fling distance: " + distanceVectors.mDy + ", "
+                + distanceVectors.mVy * mVelocityToDistanceMultiplier);
+        logDebug("Threshold: " + mVerticalFlingThresholdPx);
+        return Math.abs(dY) >= mVerticalFlingThresholdPx;
     }
 
     private class DistanceVectors {
@@ -164,34 +218,9 @@ class DistanceClassifier extends FalsingClassifier {
             this.mVy = vY;
         }
 
-        boolean getPassedDistanceThreshold() {
-            if (isHorizontal()) {
-                logDebug("Horizontal swipe distance: " + Math.abs(mDx));
-                logDebug("Threshold: " + mHorizontalSwipeThresholdPx);
-
-                return Math.abs(mDx) >= mHorizontalSwipeThresholdPx;
-            }
-
-            logDebug("Vertical swipe distance: " + Math.abs(mDy));
-            logDebug("Threshold: " + mVerticalSwipeThresholdPx);
-            return Math.abs(mDy) >= mVerticalSwipeThresholdPx;
-        }
-
-        boolean getPassedFlingThreshold() {
-            float dX = this.mDx + this.mVx * mVelocityToDistanceMultiplier;
-            float dY = this.mDy + this.mVy * mVelocityToDistanceMultiplier;
-
-            if (isHorizontal()) {
-                logDebug("Horizontal swipe and fling distance: " + this.mDx + ", "
-                        + this.mVx * mVelocityToDistanceMultiplier);
-                logDebug("Threshold: " + mHorizontalFlingThresholdPx);
-                return Math.abs(dX) >= mHorizontalFlingThresholdPx;
-            }
-
-            logDebug("Vertical swipe and fling distance: " + this.mDy + ", "
-                    + this.mVy * mVelocityToDistanceMultiplier);
-            logDebug("Threshold: " + mVerticalFlingThresholdPx);
-            return Math.abs(dY) >= mVerticalFlingThresholdPx;
+        @Override
+        public String toString() {
+            return String.format((Locale) null, "{dx=%f, vx=%f, dy=%f, vy=%f}", mDx, mVx, mDy, mVy);
         }
     }
 }

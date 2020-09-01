@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -40,11 +41,13 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dropbox.DropBoxManagerServiceDumpProto;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -65,6 +68,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
@@ -84,6 +88,9 @@ public final class DropBoxManagerService extends SystemService {
     private static final int QUOTA_RESCAN_MILLIS = 5000;
 
     private static final boolean PROFILE_DUMP = false;
+
+    // Max number of bytes of a dropbox entry to write into protobuf.
+    private static final int PROTO_MAX_DATA_BYTES = 256 * 1024;
 
     // TODO: This implementation currently uses one file per entry, which is
     // inefficient for smallish entries -- consider using a single queue file
@@ -464,6 +471,14 @@ public final class DropBoxManagerService extends SystemService {
     }
 
     private boolean checkPermission(int callingUid, String callingPackage) {
+        // If callers have this permission, then we don't need to check
+        // USAGE_STATS, because they are part of the system and have agreed to
+        // check USAGE_STATS before passing the data along.
+        if (getContext().checkCallingPermission(android.Manifest.permission.PEEK_DROPBOX_DATA)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
         // Callers always need this permission
         getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_LOGS, TAG);
@@ -547,18 +562,22 @@ public final class DropBoxManagerService extends SystemService {
 
         StringBuilder out = new StringBuilder();
         boolean doPrint = false, doFile = false;
+        boolean dumpProto = false;
         ArrayList<String> searchArgs = new ArrayList<String>();
         for (int i = 0; args != null && i < args.length; i++) {
             if (args[i].equals("-p") || args[i].equals("--print")) {
                 doPrint = true;
             } else if (args[i].equals("-f") || args[i].equals("--file")) {
                 doFile = true;
+            } else if (args[i].equals("--proto")) {
+                dumpProto = true;
             } else if (args[i].equals("-h") || args[i].equals("--help")) {
                 pw.println("Dropbox (dropbox) dump options:");
                 pw.println("  [-h|--help] [-p|--print] [-f|--file] [timestamp]");
                 pw.println("    -h|--help: print this help");
                 pw.println("    -p|--print: print full contents of each entry");
                 pw.println("    -f|--file: print path of each entry's file");
+                pw.println("    --proto: dump data to proto");
                 pw.println("  [timestamp] optionally filters to only those entries.");
                 return;
             } else if (args[i].startsWith("-")) {
@@ -566,6 +585,11 @@ public final class DropBoxManagerService extends SystemService {
             } else {
                 searchArgs.add(args[i]);
             }
+        }
+
+        if (dumpProto) {
+            dumpProtoLocked(fd, searchArgs);
+            return;
         }
 
         out.append("Drop box contents: ").append(mAllFiles.contents.size()).append(" entries\n");
@@ -581,19 +605,15 @@ public final class DropBoxManagerService extends SystemService {
             out.append("\n");
         }
 
-        int numFound = 0, numArgs = searchArgs.size();
+        int numFound = 0;
         out.append("\n");
         for (EntryFile entry : mAllFiles.contents) {
-            String date = TimeMigrationUtils.formatMillisWithFixedFormat(entry.timestampMillis);
-            boolean match = true;
-            for (int i = 0; i < numArgs && match; i++) {
-                String arg = searchArgs.get(i);
-                match = (date.contains(arg) || arg.equals(entry.tag));
-            }
-            if (!match) continue;
+            if (!matchEntry(entry, searchArgs)) continue;
 
             numFound++;
             if (doPrint) out.append("========================================\n");
+
+            String date = TimeMigrationUtils.formatMillisWithFixedFormat(entry.timestampMillis);
             out.append(date).append(" ").append(entry.tag == null ? "(no tag)" : entry.tag);
 
             final File file = entry.getFile(mDropBoxDir);
@@ -677,6 +697,55 @@ public final class DropBoxManagerService extends SystemService {
 
         pw.write(out.toString());
         if (PROFILE_DUMP) Debug.stopMethodTracing();
+    }
+
+    private boolean matchEntry(EntryFile entry, ArrayList<String> searchArgs) {
+        String date = TimeMigrationUtils.formatMillisWithFixedFormat(entry.timestampMillis);
+        boolean match = true;
+        int numArgs = searchArgs.size();
+        for (int i = 0; i < numArgs && match; i++) {
+            String arg = searchArgs.get(i);
+            match = (date.contains(arg) || arg.equals(entry.tag));
+        }
+        return match;
+    }
+
+    private void dumpProtoLocked(FileDescriptor fd, ArrayList<String> searchArgs) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        for (EntryFile entry : mAllFiles.contents) {
+            if (!matchEntry(entry, searchArgs)) continue;
+
+            final File file = entry.getFile(mDropBoxDir);
+            if ((file == null) || ((entry.flags & DropBoxManager.IS_EMPTY) != 0)) {
+                continue;
+            }
+
+            final long bToken = proto.start(DropBoxManagerServiceDumpProto.ENTRIES);
+            proto.write(DropBoxManagerServiceDumpProto.Entry.TIME_MS, entry.timestampMillis);
+            try (
+                DropBoxManager.Entry dbe = new DropBoxManager.Entry(
+                        entry.tag, entry.timestampMillis, file, entry.flags);
+                InputStream is = dbe.getInputStream();
+            ) {
+                if (is != null) {
+                    byte[] buf = new byte[PROTO_MAX_DATA_BYTES];
+                    int readBytes = 0;
+                    int n = 0;
+                    while (n >= 0 && (readBytes += n) < PROTO_MAX_DATA_BYTES) {
+                        n = is.read(buf, readBytes, PROTO_MAX_DATA_BYTES - readBytes);
+                    }
+                    proto.write(DropBoxManagerServiceDumpProto.Entry.DATA,
+                            Arrays.copyOf(buf, readBytes));
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Can't read: " + file, e);
+            }
+
+            proto.end(bToken);
+        }
+
+        proto.flush();
     }
 
     ///////////////////////////////////////////////////////////////////////////

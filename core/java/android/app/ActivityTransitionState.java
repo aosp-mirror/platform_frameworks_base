@@ -197,7 +197,8 @@ class ActivityTransitionState {
         mHasExited = false;
         ArrayList<String> sharedElementNames = mEnterActivityOptions.getSharedElementNames();
         ResultReceiver resultReceiver = mEnterActivityOptions.getResultReceiver();
-        if (mEnterActivityOptions.isReturning()) {
+        final boolean isReturning = mEnterActivityOptions.isReturning();
+        if (isReturning) {
             restoreExitedViews();
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
         }
@@ -272,6 +273,10 @@ class ActivityTransitionState {
                             mEnterTransitionCoordinator.isWaitingForRemoteExit()) {
                         restoreExitedViews();
                         restoreReenteringViews();
+                    } else if (mEnterTransitionCoordinator.isReturning()) {
+                        mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
+                            mEnterTransitionCoordinator = null;
+                        });
                     }
                 }
             }, 1000);

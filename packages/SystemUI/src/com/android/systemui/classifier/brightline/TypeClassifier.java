@@ -58,4 +58,9 @@ public class TypeClassifier extends FalsingClassifier {
                 return true;
         }
     }
+
+    @Override
+    String getReason() {
+        return String.format("{vertical=%s, up=%s, right=%s}", isVertical(), isUp(), isRight());
+    }
 }

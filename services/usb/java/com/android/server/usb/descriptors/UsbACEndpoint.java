@@ -45,7 +45,6 @@ abstract class UsbACEndpoint extends UsbDescriptor {
     @Override
     public int parseRawDescriptors(ByteStream stream) {
         mSubtype = stream.getByte();
-
         return mLength;
     }
 
@@ -53,14 +52,24 @@ abstract class UsbACEndpoint extends UsbDescriptor {
                                                 int length, byte type) {
         UsbInterfaceDescriptor interfaceDesc = parser.getCurInterface();
         int subClass = interfaceDesc.getUsbSubclass();
+        // TODO shouldn't this switch on subtype?
         switch (subClass) {
             case AUDIO_AUDIOCONTROL:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "---> AUDIO_AUDIOCONTROL");
+                }
                 return new UsbACAudioControlEndpoint(length, type, subClass);
 
             case AUDIO_AUDIOSTREAMING:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "---> AUDIO_AUDIOSTREAMING");
+                }
                 return new UsbACAudioStreamEndpoint(length, type, subClass);
 
             case AUDIO_MIDISTREAMING:
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "---> AUDIO_MIDISTREAMING");
+                }
                 return new UsbACMidiEndpoint(length, type, subClass);
 
             default:

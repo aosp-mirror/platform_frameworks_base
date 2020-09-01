@@ -17,9 +17,13 @@
 package android.database.sqlite;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.util.ArrayMap;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 /**
@@ -87,10 +91,21 @@ public final class SQLiteDatabaseConfiguration {
     public boolean foreignKeyConstraintsEnabled;
 
     /**
-     * The custom functions to register.
+     * The custom scalar functions to register.
      */
-    public final ArrayList<SQLiteCustomFunction> customFunctions =
-            new ArrayList<SQLiteCustomFunction>();
+    public final ArrayMap<String, UnaryOperator<String>> customScalarFunctions
+            = new ArrayMap<>();
+
+    /**
+     * The custom aggregate functions to register.
+     */
+    public final ArrayMap<String, BinaryOperator<String>> customAggregateFunctions
+            = new ArrayMap<>();
+
+    /**
+     * The statements to execute to initialize each connection.
+     */
+    public final ArrayList<Pair<String, Object[]>> perConnectionSql = new ArrayList<>();
 
     /**
      * The size in bytes of each lookaside slot
@@ -181,8 +196,12 @@ public final class SQLiteDatabaseConfiguration {
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
         foreignKeyConstraintsEnabled = other.foreignKeyConstraintsEnabled;
-        customFunctions.clear();
-        customFunctions.addAll(other.customFunctions);
+        customScalarFunctions.clear();
+        customScalarFunctions.putAll(other.customScalarFunctions);
+        customAggregateFunctions.clear();
+        customAggregateFunctions.putAll(other.customAggregateFunctions);
+        perConnectionSql.clear();
+        perConnectionSql.addAll(other.perConnectionSql);
         lookasideSlotSize = other.lookasideSlotSize;
         lookasideSlotCount = other.lookasideSlotCount;
         idleConnectionTimeoutMs = other.idleConnectionTimeoutMs;

@@ -17,22 +17,24 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.PasswordComplexity;
+import android.app.admin.PasswordMetrics;
 import android.app.trust.ITrustManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -47,7 +49,11 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -88,12 +94,6 @@ public class KeyguardManager {
             "android.app.action.CONFIRM_FRP_CREDENTIAL";
 
     /**
-     * @hide
-     */
-    public static final String EXTRA_BIOMETRIC_PROMPT_BUNDLE =
-            "android.app.extra.BIOMETRIC_PROMPT_BUNDLE";
-
-    /**
      * A CharSequence dialog title to show to the user when used with a
      * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
      * @hide
@@ -125,13 +125,23 @@ public class KeyguardManager {
     public static final int RESULT_ALTERNATE = 1;
 
     /**
+     *
+     * If this is set, check device policy for allowed biometrics when the user is authenticating.
+     * This should only be used in the context of managed profiles.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
+
+
+    /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
      * if enrolled) for the current user of the device. The caller is expected to launch this
      * activity using {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
      * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
      *
      * @return the intent for launching the activity or null if no password is required.
-     * @deprecated see {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)}
+     * @deprecated see BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)
      */
     @Deprecated
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
@@ -168,6 +178,28 @@ public class KeyguardManager {
         // explicitly set the package for security
         intent.setPackage(getSettingsPackageForIntent(intent));
 
+        return intent;
+    }
+
+    /**
+     * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
+     * for the given user. The caller is expected to launch this activity using
+     * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
+     * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
+     *
+     * @param disallowBiometricsIfPolicyExists If true check if the Device Policy Manager has
+     * disabled biometrics on the device. If biometrics are disabled, fall back to PIN/pattern/pass.
+     *
+     * @return the intent for launching the activity or null if no password is required.
+     *
+     * @hide
+     */
+    public Intent createConfirmDeviceCredentialIntent(
+            CharSequence title, CharSequence description, int userId,
+            boolean disallowBiometricsIfPolicyExists) {
+        Intent intent = this.createConfirmDeviceCredentialIntent(title, description, userId);
+        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                disallowBiometricsIfPolicyExists);
         return intent;
     }
 
@@ -508,13 +540,6 @@ public class KeyguardManager {
         }
     }
 
-    /** @removed */
-    @Deprecated
-    public void dismissKeyguard(@NonNull Activity activity,
-            @Nullable KeyguardDismissCallback callback, @Nullable Handler handler) {
-        requestDismissKeyguard(activity, callback);
-    }
-
     /**
      * If the device is currently locked (see {@link #isKeyguardLocked()}, requests the Keyguard to
      * be dismissed.
@@ -636,5 +661,157 @@ public class KeyguardManager {
         } catch (RemoteException e) {
 
         }
+    }
+
+    private boolean checkInitialLockMethodUsage() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.SET_INITIAL_LOCK)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires SET_INITIAL_LOCK permission.");
+        }
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    * Determine if a given password is valid based off its lock type and expected complexity level.
+    *
+    * @param lockType - type of lock as specified in {@link LockTypes}
+    * @param password - password to validate; this has the same encoding
+    *        as the output of String#getBytes
+    * @param complexity - complexity level imposed by the requester
+    *        as defined in {@code DevicePolicyManager.PasswordComplexity}
+    * @return true if the password is valid, false otherwise
+    * @hide
+    */
+    @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
+    @SystemApi
+    public boolean isValidLockPasswordComplexity(@LockTypes int lockType, @NonNull byte[] password,
+            @PasswordComplexity int complexity) {
+        if (!checkInitialLockMethodUsage()) {
+            return false;
+        }
+        complexity = PasswordMetrics.sanitizeComplexityLevel(complexity);
+        // TODO: b/131755827 add devicePolicyManager support for Auto
+        DevicePolicyManager devicePolicyManager =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        PasswordMetrics adminMetrics =
+                devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
+        // Check if the password fits the mold of a pin or pattern.
+        boolean isPinOrPattern = lockType != LockTypes.PASSWORD;
+
+        return PasswordMetrics.validatePassword(
+                adminMetrics, complexity, isPinOrPattern, password).size() == 0;
+    }
+
+    /**
+    * Determine the minimum allowable length for a lock type for a given complexity level.
+    *
+    * @param isPin - whether this is a PIN-type password (only digits)
+    * @param complexity - complexity level imposed by the requester
+    *        as defined in {@code DevicePolicyManager.PasswordComplexity}
+    * @return minimum allowable password length
+    * @hide
+    */
+    @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
+    @SystemApi
+    public int getMinLockLength(boolean isPin, @PasswordComplexity int complexity) {
+        if (!checkInitialLockMethodUsage()) {
+            return -1;
+        }
+        complexity = PasswordMetrics.sanitizeComplexityLevel(complexity);
+        // TODO: b/131755827 add devicePolicyManager support for Auto
+        DevicePolicyManager devicePolicyManager =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        PasswordMetrics adminMetrics =
+                devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
+        PasswordMetrics minMetrics =
+                PasswordMetrics.applyComplexity(adminMetrics, isPin, complexity);
+        return minMetrics.length;
+    }
+
+    /**
+    * Set the lockscreen password after validating against its expected complexity level.
+    *
+    * @param lockType - type of lock as specified in {@link LockTypes}
+    * @param password - password to validate; this has the same encoding
+    *        as the output of String#getBytes
+    * @param complexity - complexity level imposed by the requester
+    *        as defined in {@code DevicePolicyManager.PasswordComplexity}
+    * @return true if the lock is successfully set, false otherwise
+    * @hide
+    */
+    @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
+    @SystemApi
+    public boolean setLock(@LockTypes int lockType, @NonNull byte[] password,
+            @PasswordComplexity int complexity) {
+        if (!checkInitialLockMethodUsage()) {
+            return false;
+        }
+
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
+        int userId = mContext.getUserId();
+        if (isDeviceSecure(userId)) {
+            Log.e(TAG, "Password already set, rejecting call to setLock");
+            return false;
+        }
+        if (!isValidLockPasswordComplexity(lockType, password, complexity)) {
+            Log.e(TAG, "Password is not valid, rejecting call to setLock");
+            return false;
+        }
+        boolean success = false;
+        try {
+            switch (lockType) {
+                case LockTypes.PASSWORD:
+                    CharSequence passwordStr = new String(password, Charset.forName("UTF-8"));
+                    lockPatternUtils.setLockCredential(
+                            LockscreenCredential.createPassword(passwordStr),
+                            /* savedPassword= */ LockscreenCredential.createNone(),
+                            userId);
+                    success = true;
+                    break;
+                case LockTypes.PIN:
+                    CharSequence pinStr = new String(password);
+                    lockPatternUtils.setLockCredential(
+                            LockscreenCredential.createPin(pinStr),
+                            /* savedPassword= */ LockscreenCredential.createNone(),
+                            userId);
+                    success = true;
+                    break;
+                case LockTypes.PATTERN:
+                    List<LockPatternView.Cell> pattern =
+                            LockPatternUtils.byteArrayToPattern(password);
+                    lockPatternUtils.setLockCredential(
+                            LockscreenCredential.createPattern(pattern),
+                            /* savedPassword= */ LockscreenCredential.createNone(),
+                            userId);
+                    pattern.clear();
+                    success = true;
+                    break;
+                default:
+                    Log.e(TAG, "Unknown lock type, returning a failure");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Save lock exception", e);
+            success = false;
+        } finally {
+            Arrays.fill(password, (byte) 0);
+        }
+        return success;
+    }
+
+    /**
+    * Available lock types
+    */
+    @IntDef({
+            LockTypes.PASSWORD,
+            LockTypes.PIN,
+            LockTypes.PATTERN
+    })
+    @interface LockTypes {
+        int PASSWORD = 0;
+        int PIN = 1;
+        int PATTERN = 2;
     }
 }

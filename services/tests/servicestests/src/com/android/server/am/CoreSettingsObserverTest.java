@@ -23,9 +23,11 @@ import static com.android.server.am.ActivityManagerService.Injector;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
@@ -39,6 +41,7 @@ import com.android.server.appop.AppOpsService;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -60,6 +63,8 @@ public class CoreSettingsObserverTest {
     private static final int TEST_INT = 111;
     private static final float TEST_FLOAT = 3.14f;
     private static final String TEST_STRING = "testString";
+
+    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
 
     private ActivityManagerService mAms;
     @Mock private Context mContext;
@@ -89,8 +94,10 @@ public class CoreSettingsObserverTest {
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mContext.getResources()).thenReturn(mock(Resources.class));
 
-        mAms = new ActivityManagerService(new TestInjector());
+        mAms = new ActivityManagerService(new TestInjector(mContext),
+                mServiceThreadRule.getThread());
         mCoreSettingsObserver = new CoreSettingsObserver(mAms);
     }
 
@@ -155,9 +162,9 @@ public class CoreSettingsObserverTest {
     }
 
     private class TestInjector extends Injector {
-        @Override
-        public Context getContext() {
-            return mContext;
+
+        TestInjector(Context context) {
+            super(context);
         }
 
         @Override
@@ -167,7 +174,7 @@ public class CoreSettingsObserverTest {
 
         @Override
         public Handler getUiHandler(ActivityManagerService service) {
-            return null;
+            return mServiceThreadRule.getThread().getThreadHandler();
         }
     }
 }

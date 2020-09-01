@@ -20,8 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:clickable="true"
-    android:background="@color/notification_guts_bg_color"
+    android:background="@color/notification_material_background_color"
     android:theme="@style/Theme.SystemUI">
 
     <RelativeLayout
@@ -55,6 +54,8 @@
             android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:minWidth="@dimen/min_clickable_item_size"
+            android:minHeight="@dimen/min_clickable_item_size"
             android:text="@string/snooze_undo"
             style="@style/TextAppearance.NotificationInfo.Button" />
     </RelativeLayout>

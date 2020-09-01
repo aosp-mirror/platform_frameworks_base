@@ -308,6 +308,9 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         if (spec.isStrongBoxBacked()) {
             flags |= KeyStore.FLAG_STRONGBOX;
         }
+        if (spec.isCriticalToDeviceEncryption()) {
+            flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
+        }
         String keyAliasInKeystore = Credentials.USER_PRIVATE_KEY + spec.getKeystoreAlias();
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         boolean success = false;

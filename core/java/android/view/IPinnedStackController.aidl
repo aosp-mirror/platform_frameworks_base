@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.graphics.Rect;
+
 /**
  * An interface to the PinnedStackController to update it of state changes, and to query
  * information based on the current state.
@@ -23,20 +25,6 @@ package android.view;
  * @hide
  */
 interface IPinnedStackController {
-
-    /**
-     * Notifies the controller that the PiP is currently minimized.
-     */
-    oneway void setIsMinimized(boolean isMinimized);
-
-    /**
-     * Notifies the controller of the current min edge size, this is needed to allow the system to
-     * properly calculate the aspect ratio of the expanded PIP.  The given {@param minEdgeSize} is
-     * always bounded to be larger than the default minEdgeSize, so the caller can call this method
-     * with 0 to reset to the default size.
-     */
-    oneway void setMinEdgeSize(int minEdgeSize);
-
     /**
      * @return what WM considers to be the current device rotation.
      */

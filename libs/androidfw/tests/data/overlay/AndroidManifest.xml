@@ -15,7 +15,9 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.test.basic">
-    <application>
-    </application>
+    package="com.android.test.overlay">
+    <overlay
+        android:targetPackage="com.android.test.basic"
+        android:targetName="OverlayableResources3"
+        android:resourcesMap="@xml/overlays"/>
 </manifest>

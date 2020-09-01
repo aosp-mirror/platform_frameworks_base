@@ -1,0 +1,34 @@
+android_test {
+    name: "CorePerfTests",
+
+    resource_dirs: ["res"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+        "src/android/os/ISomeService.aidl",
+    ],
+
+    static_libs: [
+        "androidx.appcompat_appcompat",
+        "androidx.test.rules",
+        "androidx.annotation_annotation",
+        "apct-perftests-overlay-apps",
+        "apct-perftests-resources-manager-apps",
+        "apct-perftests-utils",
+        "guava",
+    ],
+
+    libs: ["android.test.base"],
+
+    platform_apis: true,
+
+    jni_libs: ["libperftestscore_jni"],
+
+    // Use google-fonts/dancing-script for the performance metrics
+    // ANDROIDMK TRANSLATION ERROR: Only $(LOCAL_PATH)/.. values are allowed
+    // LOCAL_ASSET_DIR := $(TOP)/external/google-fonts/dancing-script
+
+    test_suites: ["device-tests"],
+    certificate: "platform",
+
+}

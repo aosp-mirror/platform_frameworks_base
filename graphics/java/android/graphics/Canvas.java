@@ -1162,6 +1162,7 @@ public class Canvas extends BaseCanvas {
      * @see #quickReject(float, float, float, float, EdgeType)
      * @see #quickReject(Path, EdgeType)
      * @see #quickReject(RectF, EdgeType)
+     * @deprecated quickReject no longer uses this.
      */
     public enum EdgeType {
 
@@ -1197,8 +1198,25 @@ public class Canvas extends BaseCanvas {
      *              non-antialiased ({@link Canvas.EdgeType#BW}).
      * @return      true if the rect (transformed by the canvas' matrix)
      *              does not intersect with the canvas' clip
+     * @deprecated The EdgeType is ignored. Use {@link #quickReject(RectF)} instead.
      */
+    @Deprecated
     public boolean quickReject(@NonNull RectF rect, @NonNull EdgeType type) {
+        return nQuickReject(mNativeCanvasWrapper,
+                rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    /**
+     * Return true if the specified rectangle, after being transformed by the
+     * current matrix, would lie completely outside of the current clip. Call
+     * this to check if an area you intend to draw into is clipped out (and
+     * therefore you can skip making the draw calls).
+     *
+     * @param rect  the rect to compare with the current clip
+     * @return      true if the rect (transformed by the canvas' matrix)
+     *              does not intersect with the canvas' clip
+     */
+    public boolean quickReject(@NonNull RectF rect) {
         return nQuickReject(mNativeCanvasWrapper,
                 rect.left, rect.top, rect.right, rect.bottom);
     }
@@ -1217,8 +1235,26 @@ public class Canvas extends BaseCanvas {
      *                    non-antialiased ({@link Canvas.EdgeType#BW}).
      * @return            true if the path (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
+     * @deprecated The EdgeType is ignored. Use {@link #quickReject(Path)} instead.
      */
+    @Deprecated
     public boolean quickReject(@NonNull Path path, @NonNull EdgeType type) {
+        return nQuickReject(mNativeCanvasWrapper, path.readOnlyNI());
+    }
+
+    /**
+     * Return true if the specified path, after being transformed by the
+     * current matrix, would lie completely outside of the current clip. Call
+     * this to check if an area you intend to draw into is clipped out (and
+     * therefore you can skip making the draw calls). Note: for speed it may
+     * return false even if the path itself might not intersect the clip
+     * (i.e. the bounds of the path intersects, but the path does not).
+     *
+     * @param path        The path to compare with the current clip
+     * @return            true if the path (transformed by the canvas' matrix)
+     *                    does not intersect with the canvas' clip
+     */
+    public boolean quickReject(@NonNull Path path) {
         return nQuickReject(mNativeCanvasWrapper, path.readOnlyNI());
     }
 
@@ -1241,9 +1277,33 @@ public class Canvas extends BaseCanvas {
      *                    non-antialiased ({@link Canvas.EdgeType#BW}).
      * @return            true if the rect (transformed by the canvas' matrix)
      *                    does not intersect with the canvas' clip
+     * @deprecated The EdgeType is ignored. Use {@link #quickReject(float, float, float, float)}
+     *             instead.
      */
+    @Deprecated
     public boolean quickReject(float left, float top, float right, float bottom,
             @NonNull EdgeType type) {
+        return nQuickReject(mNativeCanvasWrapper, left, top, right, bottom);
+    }
+
+    /**
+     * Return true if the specified rectangle, after being transformed by the
+     * current matrix, would lie completely outside of the current clip. Call
+     * this to check if an area you intend to draw into is clipped out (and
+     * therefore you can skip making the draw calls).
+     *
+     * @param left        The left side of the rectangle to compare with the
+     *                    current clip
+     * @param top         The top of the rectangle to compare with the current
+     *                    clip
+     * @param right       The right side of the rectangle to compare with the
+     *                    current clip
+     * @param bottom      The bottom of the rectangle to compare with the
+     *                    current clip
+     * @return            true if the rect (transformed by the canvas' matrix)
+     *                    does not intersect with the canvas' clip
+     */
+    public boolean quickReject(float left, float top, float right, float bottom) {
         return nQuickReject(mNativeCanvasWrapper, left, top, right, bottom);
     }
 

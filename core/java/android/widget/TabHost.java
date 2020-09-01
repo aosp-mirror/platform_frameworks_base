@@ -46,7 +46,11 @@ import java.util.List;
  * page. The individual elements are typically controlled using this container object, rather than
  * setting values on the child elements themselves.
  *
+ * @deprecated new applications should use fragment APIs instead of this class:
+ * Use <a href="{@docRoot}guide/navigation/navigation-swipe-view">TabLayout and ViewPager</a>
+ * instead.
  */
+@Deprecated
 public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchModeChangeListener {
 
     private static final int TABWIDGET_LOCATION_LEFT = 0;
@@ -55,13 +59,21 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
     private static final int TABWIDGET_LOCATION_BOTTOM = 3;
     private TabWidget mTabWidget;
     private FrameLayout mTabContent;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                    + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                    + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                    + "\">TabLayout and ViewPager</a>")
     private List<TabSpec> mTabSpecs = new ArrayList<TabSpec>(2);
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                    + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                    + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                    + "\">TabLayout and ViewPager</a>")
     protected int mCurrentTab = -1;
     private View mCurrentView = null;
     /**
@@ -69,7 +81,11 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
      * {@hide}
      */
     protected LocalActivityManager mLocalActivityManager = null;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                    + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                    + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                    + "\">TabLayout and ViewPager</a>")
     private OnTabChangeListener mOnTabChangeListener;
     private OnKeyListener mTabKeyListener;
 
@@ -510,9 +526,17 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
 
         private final @NonNull String mTag;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                        + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                        + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                        + "\">TabLayout and ViewPager</a>")
         private IndicatorStrategy mIndicatorStrategy;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                        + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                        + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                        + "\">TabLayout and ViewPager</a>")
         private ContentStrategy mContentStrategy;
 
         /**
@@ -775,7 +799,11 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             mIntent = intent;
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                        + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                        + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                        + "\">TabLayout and ViewPager</a>")
         public View getContentView() {
             if (mLocalActivityManager == null) {
                 throw new IllegalStateException("Did you forget to call 'public void setup(LocalActivityManager activityGroup)'?");
@@ -805,7 +833,11 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             return mLaunchedView;
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@code androidx.viewpager.widget.ViewPager} and "
+                        + "{@code com.google.android.material.tabs.TabLayout} instead.\n"
+                        + "See <a href=\"{@docRoot}guide/navigation/navigation-swipe-view"
+                        + "\">TabLayout and ViewPager</a>")
         public void tabClosed() {
             if (mLaunchedView != null) {
                 mLaunchedView.setVisibility(View.GONE);

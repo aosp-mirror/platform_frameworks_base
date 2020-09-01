@@ -284,11 +284,12 @@ public class CameraBinderTest extends AndroidTestCase {
             ICameraDeviceCallbacks dummyCallbacks = new DummyCameraDeviceCallbacks();
 
             String clientPackageName = getContext().getPackageName();
+            String clientAttributionTag = getContext().getAttributionTag();
 
             ICameraDeviceUser cameraUser =
                     mUtils.getCameraService().connectDevice(
                         dummyCallbacks, String.valueOf(cameraId),
-                        clientPackageName,
+                        clientPackageName, clientAttributionTag,
                         ICameraService.USE_CALLING_UID);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
@@ -308,6 +309,12 @@ public class CameraBinderTest extends AndroidTestCase {
                 throws RemoteException {
             Log.v(TAG, String.format("Camera %s has torch status changed to 0x%x",
                     cameraId, status));
+        }
+        @Override
+        public void onPhysicalCameraStatusChanged(int status, String cameraId,
+                String physicalCameraId) throws RemoteException {
+            Log.v(TAG, String.format("Camera %s : %s has status changed to 0x%x",
+                    cameraId, physicalCameraId, status));
         }
         @Override
         public void onCameraAccessPrioritiesChanged() {

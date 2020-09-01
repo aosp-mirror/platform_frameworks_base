@@ -18,7 +18,6 @@ package com.android.internal.statusbar;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Parcel;
 import android.os.UserHandle;
@@ -26,6 +25,8 @@ import android.util.ArrayMap;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.view.AppearanceRegion;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,18 +48,17 @@ public class RegisterStatusBarResultTest {
 
         final RegisterStatusBarResult original = new RegisterStatusBarResult(iconMap,
                 0x2 /* disabledFlags1 */,
-                0x4 /* systemUiVisibility */,
-                true /* menuVisible */,
+                0x4 /* appearance */,
+                new AppearanceRegion[0] /* appearanceRegions */,
                 0x8 /* imeWindowVis */,
                 0x10 /* imeBackDisposition */,
                 false /* showImeSwitcher */,
                 0x20 /* disabledFlags2 */,
-                0x40 /* fullscreenStackSysUiVisibility */,
-                0x80 /* dockedStackSysUiVisibility */,
                 new Binder() /* imeToken */,
-                new Rect(0x100, 0x200, 0x400, 0x800) /* fullscreenStackBounds */,
-                new Rect(0x1000, 0x2000, 0x4000, 0x8000) /* dockedStackBounds */,
-                true /* navbarColorManagedByIme */);
+                true /* navbarColorManagedByIme */,
+                true /* appFullscreen */,
+                true /* appImmersive */,
+                new int[0] /* transientBarTypes */);
 
         final RegisterStatusBarResult copy = clone(original);
 
@@ -68,20 +68,17 @@ public class RegisterStatusBarResultTest {
                 .isEqualTo(original.mIcons.get(dumyIconKey).user);
 
         assertThat(copy.mDisabledFlags1).isEqualTo(original.mDisabledFlags1);
-        assertThat(copy.mSystemUiVisibility).isEqualTo(original.mSystemUiVisibility);
-        assertThat(copy.mMenuVisible).isEqualTo(original.mMenuVisible);
+        assertThat(copy.mAppearance).isEqualTo(original.mAppearance);
+        assertThat(copy.mAppearanceRegions).isEqualTo(original.mAppearanceRegions);
         assertThat(copy.mImeWindowVis).isEqualTo(original.mImeWindowVis);
         assertThat(copy.mImeBackDisposition).isEqualTo(original.mImeBackDisposition);
         assertThat(copy.mShowImeSwitcher).isEqualTo(original.mShowImeSwitcher);
         assertThat(copy.mDisabledFlags2).isEqualTo(original.mDisabledFlags2);
-        assertThat(copy.mFullscreenStackSysUiVisibility)
-                .isEqualTo(original.mFullscreenStackSysUiVisibility);
-        assertThat(copy.mDockedStackSysUiVisibility)
-                .isEqualTo(original.mDockedStackSysUiVisibility);
         assertThat(copy.mImeToken).isSameAs(original.mImeToken);
-        assertThat(copy.mFullscreenStackBounds).isEqualTo(original.mFullscreenStackBounds);
-        assertThat(copy.mDockedStackBounds).isEqualTo(original.mDockedStackBounds);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
+        assertThat(copy.mAppFullscreen).isEqualTo(original.mAppFullscreen);
+        assertThat(copy.mAppImmersive).isEqualTo(original.mAppImmersive);
+        assertThat(copy.mTransientBarTypes).isEqualTo(original.mTransientBarTypes);
     }
 
     private RegisterStatusBarResult clone(RegisterStatusBarResult original) {

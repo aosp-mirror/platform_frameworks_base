@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -109,8 +110,8 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         mPinnedSliceManager.pin("pkg", FIRST_SPECS, mToken);
         TestableLooper.get(this).processAllMessages();
 
-        verify(mIContentProvider).call(anyString(), anyString(), eq(SliceProvider.METHOD_PIN),
-                eq(null), argThat(b -> {
+        verify(mIContentProvider).call(anyString(), nullable(String.class), anyString(),
+                eq(SliceProvider.METHOD_PIN), eq(null), argThat(b -> {
                     assertEquals(TEST_URI, b.getParcelable(SliceProvider.EXTRA_BIND_URI));
                     return true;
                 }));
@@ -167,8 +168,8 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         // Throw exception when trying to pin
         doAnswer(invocation -> {
             throw new Exception("Pin failed");
-        }).when(mIContentProvider).call(
-                anyString(), anyString(), anyString(), eq(null), any());
+        }).when(mIContentProvider).call(anyString(), nullable(String.class), anyString(),
+                anyString(), eq(null), any());
 
         TestableLooper.get(this).processAllMessages();
 
@@ -176,8 +177,8 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         mPinnedSliceManager.pin("pkg", FIRST_SPECS, mToken);
         TestableLooper.get(this).processAllMessages();
 
-        verify(mIContentProvider).call(anyString(), anyString(), eq(SliceProvider.METHOD_PIN),
-                eq(null), argThat(b -> {
+        verify(mIContentProvider).call(anyString(), nullable(String.class), anyString(),
+                eq(SliceProvider.METHOD_PIN), eq(null), argThat(b -> {
                     assertEquals(TEST_URI, b.getParcelable(SliceProvider.EXTRA_BIND_URI));
                     return true;
                 }));

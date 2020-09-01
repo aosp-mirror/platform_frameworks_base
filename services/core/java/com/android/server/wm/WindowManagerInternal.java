@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -30,6 +31,7 @@ import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.WindowInfo;
 
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -51,9 +53,13 @@ public abstract class WindowManagerInternal {
         /**
          * Called when the windows for accessibility changed.
          *
+         * @param forceSend Send the windows for accessibility even if they haven't changed.
+         * @param topFocusedDisplayId The display Id which has the top focused window.
+         * @param topFocusedWindowToken The window token of top focused window.
          * @param windows The windows for accessibility.
          */
-        public void onWindowsForAccessibilityChanged(List<WindowInfo> windows);
+        void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
+                IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
     }
 
     /**
@@ -112,6 +118,11 @@ public abstract class WindowManagerInternal {
          * @param transit transition type indicating what kind of transition got cancelled
          */
         public void onAppTransitionCancelledLocked(int transit) {}
+
+        /**
+         * Called when an app transition is timed out.
+         */
+        public void onAppTransitionTimeoutLocked() {}
 
         /**
          * Called when an app transition gets started
@@ -211,7 +222,7 @@ public abstract class WindowManagerInternal {
      *
      * @param displayId The logical display id.
      * @param callbacks The callbacks to invoke.
-     * @return {@code false} if display id is not valid.
+     * @return {@code false} if display id is not valid or an embedded display.
      */
     public abstract boolean setMagnificationCallbacks(int displayId,
             @Nullable MagnificationCallbacks callbacks);
@@ -261,11 +272,13 @@ public abstract class WindowManagerInternal {
 
     /**
      * Sets a callback for observing which windows are touchable for the purposes
-     * of accessibility.
+     * of accessibility on specified display.
      *
+     * @param displayId The logical display id.
      * @param callback The callback.
+     * @return {@code false} if display id is not valid.
      */
-    public abstract void setWindowsForAccessibilityCallback(
+    public abstract boolean setWindowsForAccessibilityCallback(int displayId,
             WindowsForAccessibilityCallback callback);
 
     /**
@@ -306,10 +319,15 @@ public abstract class WindowManagerInternal {
     public abstract void showGlobalActions();
 
     /**
-     * Invalidate all visible windows. Then report back on the callback once all windows have
-     * redrawn.
+     * Invalidate all visible windows on a given display, and report back on the callback when all
+     * windows have redrawn.
+     *
+     * @param callback reporting callback to be called when all windows have redrawn.
+     * @param timeout calls the callback anyway after the timeout.
+     * @param displayId waits for the windows on the given display, INVALID_DISPLAY to wait for all
+     *                  windows on all displays.
      */
-    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout);
+    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout, int displayId);
 
     /**
      * Overrides the display size.
@@ -416,9 +434,11 @@ public abstract class WindowManagerInternal {
     public abstract boolean isStackVisibleLw(int windowingMode);
 
     /**
-     * Requests the window manager to resend the windows for accessibility.
+     * Requests the window manager to resend the windows for accessibility on specified display.
+     *
+     * @param displayId Display ID to be computed its windows for accessibility
      */
-    public abstract void computeWindowsForAccessibility();
+    public abstract void computeWindowsForAccessibility(int displayId);
 
     /**
      * Called after virtual display Id is updated by
@@ -480,6 +500,11 @@ public abstract class WindowManagerInternal {
     public abstract int getTopFocusedDisplayId();
 
     /**
+     * @return The UI context of top focused display.
+     */
+    public abstract Context getTopFocusedDisplayUiContext();
+
+    /**
      * Checks if this display is configured and allowed to show system decorations.
      */
     public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
@@ -491,6 +516,21 @@ public abstract class WindowManagerInternal {
      * @return {@code true} if the display should show IME when an input field become focused on it.
      */
     public abstract boolean shouldShowIme(int displayId);
+
+    /**
+     * Show IME on imeTargetWindow once IME has finished layout.
+     *
+     * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     */
+    public abstract void showImePostLayout(IBinder imeTargetWindowToken);
+
+    /**
+     * Hide IME using imeTargetWindow when requested.
+     *
+     * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
+     * @param displayId the id of the display the IME is on.
+     */
+    public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
 
     /**
      * Tell window manager about a package that should not be running with high refresh rate
@@ -505,4 +545,56 @@ public abstract class WindowManagerInternal {
      */
     public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
 
+    /**
+     * Checks if this display is touchable.
+     */
+    public abstract boolean isTouchableDisplay(int displayId);
+
+    /**
+     * Returns the info associated with the input token used to determine if a key should be
+     * intercepted. This info can be accessed without holding the global wm lock.
+     */
+    public abstract @Nullable KeyInterceptionInfo
+            getKeyInterceptionInfoFromToken(IBinder inputToken);
+
+    /**
+     * Clears the snapshot cache of running activities so they show the splash-screen
+     * the next time the activities are opened.
+     */
+    public abstract void clearSnapshotCache();
+
+    /**
+     * Assigns accessibility ID a window surface as a layer metadata.
+     */
+    public abstract void setAccessibilityIdToSurfaceMetadata(
+            IBinder windowToken, int accessibilityWindowId);
+
+    /**
+     *
+     * Returns the window name associated to the given binder.
+     *
+     * @param binder The {@link IBinder} object
+     * @return The corresponding {@link WindowState#getName()}
+     */
+    public abstract String getWindowName(@NonNull IBinder binder);
+
+    /**
+     * Return the window name of IME Insets control target.
+     *
+     * @param displayId The ID of the display which input method is currently focused.
+     * @return The corresponding {@link WindowState#getName()}
+     */
+    public abstract @Nullable String getImeControlTargetNameForLogging(int displayId);
+
+    /**
+     * Return the current window name of the input method is on top of.
+     *
+     * Note that the concept of this window is only reparent the target window behind the input
+     * method window, it may different with the window which reported by
+     * {@code InputMethodManagerService#reportStartInput} which has input connection.
+     *
+     * @param displayId The ID of the display which input method is currently focused.
+     * @return The corresponding {@link WindowState#getName()}
+     */
+    public abstract @Nullable String getImeTargetNameForLogging(int displayId);
 }

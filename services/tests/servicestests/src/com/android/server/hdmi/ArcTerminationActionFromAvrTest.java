@@ -28,6 +28,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -114,6 +115,7 @@ public class ArcTerminationActionFromAvrTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void testSendMessage_notSuccess() {
         mSendCecCommandSuccess = false;
         mShouldDispatchReportArcTerminated = false;

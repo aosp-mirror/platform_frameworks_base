@@ -69,6 +69,17 @@ android_app {
     // Explicitly uncompress native libs rather than letting the build system doing it and destroy the
     // v2/v3 signature.
     use_embedded_native_libs: true,
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v2_unsigned_payload",
+        "com.android.apex.cts.shim.v3",
+    ],
+    min_sdk_version: "24",
 }
 
 //##########################################################
@@ -100,6 +111,24 @@ android_app {
 }
 
 //##########################################################
+// Variant: Non Privileged app upgrade which is malformed
+android_app {
+    name: "CtsShimTargetPSdk",
+    sdk_version: "current",
+    optimize: {
+        enabled: false,
+    },
+    dex_preopt: {
+        enabled: false,
+    },
+    manifest: "shim/AndroidManifestTargetPSdk.xml",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v2_apk_in_apex_sdk_target_p",
+    ],
+}
+
+//##########################################################
 // Variant: System app
 
 android_app {
@@ -114,4 +143,15 @@ android_app {
     },
 
     manifest: "shim/AndroidManifest.xml",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v2_unsigned_payload",
+        "com.android.apex.cts.shim.v3",
+    ],
+    min_sdk_version: "24",
 }

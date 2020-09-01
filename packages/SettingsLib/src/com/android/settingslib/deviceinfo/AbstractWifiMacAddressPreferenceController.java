@@ -44,7 +44,7 @@ public abstract class AbstractWifiMacAddressPreferenceController
 
     private static final String[] CONNECTIVITY_INTENTS = {
             ConnectivityManager.CONNECTIVITY_ACTION,
-            WifiManager.LINK_CONFIGURATION_CHANGED_ACTION,
+            WifiManager.ACTION_LINK_CONFIGURATION_CHANGED,
             WifiManager.NETWORK_STATE_CHANGED_ACTION,
     };
 
@@ -69,8 +69,10 @@ public abstract class AbstractWifiMacAddressPreferenceController
     @Override
     public void displayPreference(PreferenceScreen screen) {
         super.displayPreference(screen);
-        mWifiMacAddress = screen.findPreference(KEY_WIFI_MAC_ADDRESS);
-        updateConnectivity();
+        if (isAvailable()) {
+            mWifiMacAddress = screen.findPreference(KEY_WIFI_MAC_ADDRESS);
+            updateConnectivity();
+        }
     }
 
     @Override

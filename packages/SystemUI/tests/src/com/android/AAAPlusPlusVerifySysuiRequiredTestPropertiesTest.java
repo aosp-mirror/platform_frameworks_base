@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import android.content.pm.PackageManager;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 import android.util.Log;
@@ -117,25 +116,12 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
         filter.add(s -> s.startsWith("com.android.systemui")
                 || s.startsWith("com.android.keyguard"));
 
-
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
-            // If it's not automotive target, exclude automotive classes from the test.
-            excludeAutomotiveClasses(filter);
-        }
-
         try {
             return scanner.getClassPathEntries(filter);
         } catch (IOException e) {
             Log.e(TAG, "Failed to scan classes", e);
         }
         return Collections.emptyList();
-    }
-
-    private void excludeAutomotiveClasses(ChainedClassNameFilter filter) {
-        // Modifies the passed in filter.
-        filter.add(s -> !s.startsWith("com.android.systemui.statusbar.car."));
-        filter.add(s -> !s.startsWith("com.android.systemui.qs.car."));
-        filter.add(s -> !s.startsWith("com.android.systemui.car."));
     }
 
     private String getClsStr() {

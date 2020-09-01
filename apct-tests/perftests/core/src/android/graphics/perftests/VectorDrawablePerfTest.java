@@ -26,7 +26,7 @@ import android.graphics.drawable.VectorDrawable;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.BitmapUtils;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import androidx.test.rule.ActivityTestRule;
@@ -48,8 +48,8 @@ public class VectorDrawablePerfTest {
     private int[] mTestHeights = {512, 1024};
 
     @Rule
-    public ActivityTestRule<StubActivity> mActivityRule =
-            new ActivityTestRule(StubActivity.class);
+    public ActivityTestRule<PerfTestActivity> mActivityRule =
+            new ActivityTestRule<>(PerfTestActivity.class);
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();

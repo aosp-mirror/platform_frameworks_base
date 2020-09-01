@@ -832,6 +832,25 @@ public class UsbManager {
     }
 
     /**
+     * Resets the USB Gadget.
+     * <p>
+     * Performs USB data stack reset through USB Gadget HAL.
+     * It will force USB data connection reset. The connection will disconnect and reconnect.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public void resetUsbGadget() {
+        try {
+            mService.resetUsbGadget();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns a list of physical USB ports on the device.
      * <p>
      * This list is guaranteed to contain all dual-role USB Type C ports but it might

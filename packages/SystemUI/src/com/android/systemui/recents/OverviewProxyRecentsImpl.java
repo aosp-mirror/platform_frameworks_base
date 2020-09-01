@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
@@ -34,29 +35,45 @@ import android.widget.Toast;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
+
 /**
  * An implementation of the Recents interface which proxies to the OverviewProxyService.
  */
+@Singleton
 public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
+    @Nullable
+    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Optional<Divider> mDividerOptional;
 
-    private SysUiServiceProvider mSysUiServiceProvider;
     private Context mContext;
     private Handler mHandler;
     private TrustManager mTrustManager;
     private OverviewProxyService mOverviewProxyService;
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    @Inject
+    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy,
+            Optional<Divider> dividerOptional) {
+        mStatusBarLazy = statusBarLazy.orElse(null);
+        mDividerOptional = dividerOptional;
+    }
+
     @Override
-    public void onStart(Context context, SysUiServiceProvider sysUiServiceProvider) {
+    public void onStart(Context context) {
         mContext = context;
-        mSysUiServiceProvider = sysUiServiceProvider;
         mHandler = new Handler();
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
@@ -101,15 +118,15 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 try {
                     if (mOverviewProxyService.getProxy() != null) {
                         mOverviewProxyService.getProxy().onOverviewToggle();
+                        mOverviewProxyService.notifyToggleRecentApps();
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot send toggle recents through proxy service.", e);
                 }
             };
             // Preload only if device for current user is unlocked
-            final StatusBar statusBar = mSysUiServiceProvider.getComponent(StatusBar.class);
-            if (statusBar != null && statusBar.isKeyguardShowing()) {
-                statusBar.executeRunnableDismissingKeyguard(() -> {
+            if (mStatusBarLazy != null && mStatusBarLazy.get().isKeyguardShowing()) {
+                mStatusBarLazy.get().executeRunnableDismissingKeyguard(() -> {
                         // Flush trustmanager before checking device locked per user
                         mTrustManager.reportKeyguardShowingChanged();
                         mHandler.post(toggleRecents);
@@ -146,12 +163,12 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
             if (runningTask.supportsSplitScreenMultiWindow) {
                 if (ActivityManagerWrapper.getInstance().setTaskWindowingModeSplitScreenPrimary(
                         runningTask.id, stackCreateMode, initialBounds)) {
+                    mDividerOptional.ifPresent(Divider::onDockedTopTask);
+
                     // The overview service is handling split screen, so just skip the wait for the
                     // first draw and notify the divider to start animating now
-                    final Divider divider = mSysUiServiceProvider.getComponent(Divider.class);
-                    if (divider != null) {
-                        divider.onRecentsDrawn();
-                    }
+                    mDividerOptional.ifPresent(Divider::onRecentsDrawn);
+
                     return true;
                 }
             } else {

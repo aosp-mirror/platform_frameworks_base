@@ -20,16 +20,20 @@
 #include "StatsLogProcessor.h"
 
 #include <android-base/file.h>
+#include <cutils/multiuser.h>
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
+#include <frameworks/base/cmds/statsd/src/experiment_ids.pb.h>
 
 #include "android-base/stringprintf.h"
-#include "atoms_info.h"
 #include "external/StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
+#include "logd/LogEvent.h"
 #include "metrics/CountMetricProducer.h"
+#include "StatsService.h"
+#include "state/StateManager.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 #include "storage/StorageManager.h"
 
 using namespace android;
@@ -67,9 +71,14 @@ const int FIELD_ID_STRINGS = 9;
 // for ActiveConfigList
 const int FIELD_ID_ACTIVE_CONFIG_LIST_CONFIG = 1;
 
+// for permissions checks
+constexpr const char* kPermissionDump = "android.permission.DUMP";
+constexpr const char* kPermissionUsage = "android.permission.PACKAGE_USAGE_STATS";
+
 #define NS_PER_HOUR 3600 * NS_PER_SEC
 
 #define STATS_ACTIVE_METRIC_DIR "/data/misc/stats-active-metric"
+#define STATS_METADATA_DIR "/data/misc/stats-metadata"
 
 // Cool down period for writing data to disk to avoid overwriting files.
 #define WRITE_DATA_COOL_DOWN_SEC 5
@@ -92,6 +101,7 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
       mLargestTimestampSeen(0),
       mLastTimestampSeen(0) {
     mPullerManager->ForceClearPullerCache();
+    StateManager::getInstance().updateLogSources(uidMap);
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -128,38 +138,22 @@ void StatsLogProcessor::onPeriodicAlarmFired(
     }
 }
 
-void updateUid(Value* value, int hostUid) {
-    int uid = value->int_value;
-    if (uid != hostUid) {
-        value->setInt(hostUid);
-    }
-}
-
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    if (android::util::AtomsInfo::kAtomsWithAttributionChain.find(event->GetTagId()) !=
-        android::util::AtomsInfo::kAtomsWithAttributionChain.end()) {
-        for (auto& value : *(event->getMutableValues())) {
-            if (value.mField.getPosAtDepth(0) > kAttributionField) {
-                break;
-            }
-            if (isAttributionUidField(value)) {
-                const int hostUid = mUidMap->getHostUidOrSelf(value.mValue.int_value);
-                updateUid(&value.mValue, hostUid);
+    if (std::pair<int, int> indexRange; event->hasAttributionChain(&indexRange)) {
+        vector<FieldValue>* const fieldValues = event->getMutableValues();
+        for (int i = indexRange.first; i <= indexRange.second; i++) {
+            FieldValue& fieldValue = fieldValues->at(i);
+            if (isAttributionUidField(fieldValue)) {
+                const int hostUid = mUidMap->getHostUidOrSelf(fieldValue.mValue.int_value);
+                fieldValue.mValue.setInt(hostUid);
             }
         }
     } else {
-        auto it = android::util::AtomsInfo::kAtomsWithUidField.find(event->GetTagId());
-        if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
-            int uidField = it->second;  // uidField is the field number in proto,
-                                        // starting from 1
-            if (uidField > 0 && (int)event->getValues().size() >= uidField &&
-                (event->getValues())[uidField - 1].mValue.getType() == INT) {
-                Value& value = (*event->getMutableValues())[uidField - 1].mValue;
-                const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
-                updateUid(&value, hostUid);
-            } else {
-                ALOGE("Malformed log, uid not found. %s", event->ToString().c_str());
-            }
+        int uidFieldIndex = event->getUidFieldIndex();
+        if (uidFieldIndex != -1) {
+           Value& value = (*event->getMutableValues())[uidFieldIndex].mValue;
+           const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
+           value.setInt(hostUid);
         }
     }
 }
@@ -180,6 +174,200 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
     }
 }
 
+void StatsLogProcessor::onBinaryPushStateChangedEventLocked(LogEvent* event) {
+    pid_t pid = event->GetPid();
+    uid_t uid = event->GetUid();
+    if (!checkPermissionForIds(kPermissionDump, pid, uid) ||
+        !checkPermissionForIds(kPermissionUsage, pid, uid)) {
+        return;
+    }
+    // The Get* functions don't modify the status on success, they only write in
+    // failure statuses, so we can use one status variable for all calls then
+    // check if it is no longer NO_ERROR.
+    status_t err = NO_ERROR;
+    InstallTrainInfo trainInfo;
+    trainInfo.trainName = string(event->GetString(1 /*train name field id*/, &err));
+    trainInfo.trainVersionCode = event->GetLong(2 /*train version field id*/, &err);
+    trainInfo.requiresStaging = event->GetBool(3 /*requires staging field id*/, &err);
+    trainInfo.rollbackEnabled = event->GetBool(4 /*rollback enabled field id*/, &err);
+    trainInfo.requiresLowLatencyMonitor =
+            event->GetBool(5 /*requires low latency monitor field id*/, &err);
+    trainInfo.status = int32_t(event->GetLong(6 /*state field id*/, &err));
+    std::vector<uint8_t> trainExperimentIdBytes =
+            event->GetStorage(7 /*experiment ids field id*/, &err);
+    bool is_rollback = event->GetBool(10 /*is rollback field id*/, &err);
+
+    if (err != NO_ERROR) {
+        ALOGE("Failed to parse fields in binary push state changed log event");
+        return;
+    }
+    ExperimentIds trainExperimentIds;
+    if (!trainExperimentIds.ParseFromArray(trainExperimentIdBytes.data(),
+                                           trainExperimentIdBytes.size())) {
+        ALOGE("Failed to parse experimentids in binary push state changed.");
+        return;
+    }
+    trainInfo.experimentIds = {trainExperimentIds.experiment_id().begin(),
+                               trainExperimentIds.experiment_id().end()};
+
+    // Update the train info on disk and get any data the logevent is missing.
+    getAndUpdateTrainInfoOnDisk(is_rollback, &trainInfo);
+
+    std::vector<uint8_t> trainExperimentIdProto;
+    writeExperimentIdsToProto(trainInfo.experimentIds, &trainExperimentIdProto);
+    int32_t userId = multiuser_get_user_id(uid);
+
+    event->updateValue(2 /*train version field id*/, trainInfo.trainVersionCode, LONG);
+    event->updateValue(7 /*experiment ids field id*/, trainExperimentIdProto, STORAGE);
+    event->updateValue(8 /*user id field id*/, userId, INT);
+
+    // If this event is a rollback event, then the following bits in the event
+    // are invalid and we will need to update them with the values we pulled
+    // from disk.
+    if (is_rollback) {
+        int bit = trainInfo.requiresStaging ? 1 : 0;
+        event->updateValue(3 /*requires staging field id*/, bit, INT);
+        bit = trainInfo.rollbackEnabled ? 1 : 0;
+        event->updateValue(4 /*rollback enabled field id*/, bit, INT);
+        bit = trainInfo.requiresLowLatencyMonitor ? 1 : 0;
+        event->updateValue(5 /*requires low latency monitor field id*/, bit, INT);
+    }
+}
+
+void StatsLogProcessor::getAndUpdateTrainInfoOnDisk(bool is_rollback,
+                                                    InstallTrainInfo* trainInfo) {
+    // If the train name is empty, we don't know which train to attribute the
+    // event to, so return early.
+    if (trainInfo->trainName.empty()) {
+        return;
+    }
+    bool readTrainInfoSuccess = false;
+    InstallTrainInfo trainInfoOnDisk;
+    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfo->trainName, trainInfoOnDisk);
+
+    bool resetExperimentIds = false;
+    if (readTrainInfoSuccess) {
+        // Keep the old train version if we received an empty version.
+        if (trainInfo->trainVersionCode == -1) {
+            trainInfo->trainVersionCode = trainInfoOnDisk.trainVersionCode;
+        } else if (trainInfo->trainVersionCode != trainInfoOnDisk.trainVersionCode) {
+            // Reset experiment ids if we receive a new non-empty train version.
+            resetExperimentIds = true;
+        }
+
+        // Reset if we received a different experiment id.
+        if (!trainInfo->experimentIds.empty() &&
+            (trainInfoOnDisk.experimentIds.empty() ||
+             trainInfo->experimentIds.at(0) != trainInfoOnDisk.experimentIds[0])) {
+            resetExperimentIds = true;
+        }
+    }
+
+    // Find the right experiment IDs
+    if ((!resetExperimentIds || is_rollback) && readTrainInfoSuccess) {
+        trainInfo->experimentIds = trainInfoOnDisk.experimentIds;
+    }
+
+    if (!trainInfo->experimentIds.empty()) {
+        int64_t firstId = trainInfo->experimentIds.at(0);
+        auto& ids = trainInfo->experimentIds;
+        switch (trainInfo->status) {
+            case android::os::statsd::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
+                if (find(ids.begin(), ids.end(), firstId + 1) == ids.end()) {
+                    ids.push_back(firstId + 1);
+                }
+                break;
+            case android::os::statsd::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
+                if (find(ids.begin(), ids.end(), firstId + 2) == ids.end()) {
+                    ids.push_back(firstId + 2);
+                }
+                break;
+            case android::os::statsd::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
+                if (find(ids.begin(), ids.end(), firstId + 3) == ids.end()) {
+                    ids.push_back(firstId + 3);
+                }
+                break;
+        }
+    }
+
+    // If this event is a rollback event, the following fields are invalid and
+    // need to be replaced by the fields stored to disk.
+    if (is_rollback) {
+        trainInfo->requiresStaging = trainInfoOnDisk.requiresStaging;
+        trainInfo->rollbackEnabled = trainInfoOnDisk.rollbackEnabled;
+        trainInfo->requiresLowLatencyMonitor = trainInfoOnDisk.requiresLowLatencyMonitor;
+    }
+
+    StorageManager::writeTrainInfo(*trainInfo);
+}
+
+void StatsLogProcessor::onWatchdogRollbackOccurredLocked(LogEvent* event) {
+    pid_t pid = event->GetPid();
+    uid_t uid = event->GetUid();
+    if (!checkPermissionForIds(kPermissionDump, pid, uid) ||
+        !checkPermissionForIds(kPermissionUsage, pid, uid)) {
+        return;
+    }
+    // The Get* functions don't modify the status on success, they only write in
+    // failure statuses, so we can use one status variable for all calls then
+    // check if it is no longer NO_ERROR.
+    status_t err = NO_ERROR;
+    int32_t rollbackType = int32_t(event->GetInt(1 /*rollback type field id*/, &err));
+    string packageName = string(event->GetString(2 /*package name field id*/, &err));
+
+    if (err != NO_ERROR) {
+        ALOGE("Failed to parse fields in watchdog rollback occurred log event");
+        return;
+    }
+
+    vector<int64_t> experimentIds =
+        processWatchdogRollbackOccurred(rollbackType, packageName);
+    vector<uint8_t> experimentIdProto;
+    writeExperimentIdsToProto(experimentIds, &experimentIdProto);
+
+    event->updateValue(6 /*experiment ids field id*/, experimentIdProto, STORAGE);
+}
+
+vector<int64_t> StatsLogProcessor::processWatchdogRollbackOccurred(const int32_t rollbackTypeIn,
+                                                                    const string& packageNameIn) {
+    // If the package name is empty, we can't attribute it to any train, so
+    // return early.
+    if (packageNameIn.empty()) {
+      return vector<int64_t>();
+    }
+    bool readTrainInfoSuccess = false;
+    InstallTrainInfo trainInfoOnDisk;
+    // We use the package name of the event as the train name.
+    readTrainInfoSuccess = StorageManager::readTrainInfo(packageNameIn, trainInfoOnDisk);
+
+    if (!readTrainInfoSuccess) {
+        return vector<int64_t>();
+    }
+
+    if (trainInfoOnDisk.experimentIds.empty()) {
+        return vector<int64_t>();
+    }
+
+    int64_t firstId = trainInfoOnDisk.experimentIds[0];
+    auto& ids = trainInfoOnDisk.experimentIds;
+    switch (rollbackTypeIn) {
+      case android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
+            if (find(ids.begin(), ids.end(), firstId + 4) == ids.end()) {
+                ids.push_back(firstId + 4);
+            }
+            StorageManager::writeTrainInfo(trainInfoOnDisk);
+            break;
+      case android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
+            if (find(ids.begin(), ids.end(), firstId + 5) == ids.end()) {
+                ids.push_back(firstId + 5);
+            }
+            StorageManager::writeTrainInfo(trainInfoOnDisk);
+            break;
+    }
+
+    return trainInfoOnDisk.experimentIds;
+}
+
 void StatsLogProcessor::resetConfigs() {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     resetConfigsLocked(getElapsedRealtimeNs());
@@ -194,25 +382,50 @@ void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs) {
 }
 
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
+    OnLogEvent(event, getElapsedRealtimeNs());
+}
+
+void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+
+    // Tell StatsdStats about new event
+    const int64_t eventElapsedTimeNs = event->GetElapsedTimestampNs();
+    int atomId = event->GetTagId();
+    StatsdStats::getInstance().noteAtomLogged(atomId, eventElapsedTimeNs / NS_PER_SEC);
+    if (!event->isValid()) {
+        StatsdStats::getInstance().noteAtomError(atomId);
+        return;
+    }
+
+    // Hard-coded logic to update train info on disk and fill in any information
+    // this log event may be missing.
+    if (atomId == android::os::statsd::util::BINARY_PUSH_STATE_CHANGED) {
+        onBinaryPushStateChangedEventLocked(event);
+    }
+
+    // Hard-coded logic to update experiment ids on disk for certain rollback
+    // types and fill the rollback atom with experiment ids
+    if (atomId == android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED) {
+        onWatchdogRollbackOccurredLocked(event);
+    }
 
 #ifdef VERY_VERBOSE_PRINTING
     if (mPrintAllLogs) {
         ALOGI("%s", event->ToString().c_str());
     }
 #endif
-    const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
-
-    resetIfConfigTtlExpiredLocked(currentTimestampNs);
-
-    StatsdStats::getInstance().noteAtomLogged(
-        event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
+    resetIfConfigTtlExpiredLocked(eventElapsedTimeNs);
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
-    if (event->GetTagId() == android::util::ISOLATED_UID_CHANGED) {
+    if (atomId == android::os::statsd::util::ISOLATED_UID_CHANGED) {
         onIsolatedUidChangedEventLocked(*event);
+    } else {
+        // Map the isolated uid to host uid if necessary.
+        mapIsolatedUidToHostUidIfNecessaryLocked(event);
     }
+
+    StateManager::getInstance().onLogEvent(*event);
 
     if (mMetricsManagers.empty()) {
         return;
@@ -222,12 +435,6 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     if (curTimeSec - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
         mPullerManager->ClearPullerCacheIfNecessary(curTimeSec * NS_PER_SEC);
         mLastPullerCacheClearTimeSec = curTimeSec;
-    }
-
-
-    if (event->GetTagId() != android::util::ISOLATED_UID_CHANGED) {
-        // Map the isolated uid to host uid if necessary.
-        mapIsolatedUidToHostUidIfNecessaryLocked(event);
     }
 
     std::unordered_set<int> uidsWithActiveConfigsChanged;
@@ -256,15 +463,16 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
             uidsWithActiveConfigsChanged.insert(uid);
             StatsdStats::getInstance().noteActiveStatusChanged(pair.first, isCurActive);
         }
-        flushIfNecessaryLocked(event->GetElapsedTimestampNs(), pair.first, *(pair.second));
+        flushIfNecessaryLocked(pair.first, *(pair.second));
     }
 
+    // Don't use the event timestamp for the guardrail.
     for (int uid : uidsWithActiveConfigsChanged) {
         // Send broadcast so that receivers can pull data.
         auto lastBroadcastTime = mLastActivationBroadcastTimes.find(uid);
         if (lastBroadcastTime != mLastActivationBroadcastTimes.end()) {
-            if (currentTimestampNs - lastBroadcastTime->second <
-                    StatsdStats::kMinActivationBroadcastPeriodNs) {
+            if (elapsedRealtimeNs - lastBroadcastTime->second <
+                StatsdStats::kMinActivationBroadcastPeriodNs) {
                 StatsdStats::getInstance().noteActivationBroadcastGuardrailHit(uid);
                 VLOG("StatsD would've sent an activation broadcast but the rate limit stopped us.");
                 return;
@@ -274,13 +482,13 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         if (activeConfigs != activeConfigsPerUid.end()) {
             if (mSendActivationBroadcast(uid, activeConfigs->second)) {
                 VLOG("StatsD sent activation notice for uid %d", uid);
-                mLastActivationBroadcastTimes[uid] = currentTimestampNs;
+                mLastActivationBroadcastTimes[uid] = elapsedRealtimeNs;
             }
         } else {
             std::vector<int64_t> emptyActiveConfigs;
             if (mSendActivationBroadcast(uid, emptyActiveConfigs)) {
                 VLOG("StatsD sent EMPTY activation notice for uid %d", uid);
-                mLastActivationBroadcastTimes[uid] = currentTimestampNs;
+                mLastActivationBroadcastTimes[uid] = elapsedRealtimeNs;
             }
         }
     }
@@ -314,13 +522,16 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
             new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap, mPullerManager,
                                mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     if (newMetricsManager->isConfigValid()) {
+        newMetricsManager->init();
         mUidMap->OnConfigUpdated(key);
         newMetricsManager->refreshTtl(timestampNs);
         mMetricsManagers[key] = newMetricsManager;
         VLOG("StatsdConfig valid");
     } else {
         // If there is any error in the config, don't use it.
+        // Remove any existing config with the same key.
         ALOGE("StatsdConfig NOT valid");
+        mMetricsManagers.erase(key);
     }
 }
 
@@ -537,22 +748,23 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     }
 }
 
-void StatsLogProcessor::flushIfNecessaryLocked(
-    int64_t timestampNs, const ConfigKey& key, MetricsManager& metricsManager) {
+void StatsLogProcessor::flushIfNecessaryLocked(const ConfigKey& key,
+                                               MetricsManager& metricsManager) {
+    int64_t elapsedRealtimeNs = getElapsedRealtimeNs();
     auto lastCheckTime = mLastByteSizeTimes.find(key);
     if (lastCheckTime != mLastByteSizeTimes.end()) {
-        if (timestampNs - lastCheckTime->second < StatsdStats::kMinByteSizeCheckPeriodNs) {
+        if (elapsedRealtimeNs - lastCheckTime->second < StatsdStats::kMinByteSizeCheckPeriodNs) {
             return;
         }
     }
 
     // We suspect that the byteSize() computation is expensive, so we set a rate limit.
     size_t totalBytes = metricsManager.byteSize();
-    mLastByteSizeTimes[key] = timestampNs;
+    mLastByteSizeTimes[key] = elapsedRealtimeNs;
     bool requestDump = false;
-    if (totalBytes >
-        StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
-        metricsManager.dropData(timestampNs);
+    if (totalBytes > StatsdStats::kMaxMetricsBytesPerConfig) {
+        // Too late. We need to start clearing data.
+        metricsManager.dropData(elapsedRealtimeNs);
         StatsdStats::getInstance().noteDataDropped(key, totalBytes);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if ((totalBytes > StatsdStats::kBytesPerConfigTriggerGetData) ||
@@ -567,7 +779,8 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         // Send broadcast so that receivers can pull data.
         auto lastBroadcastTime = mLastBroadcastTimes.find(key);
         if (lastBroadcastTime != mLastBroadcastTimes.end()) {
-            if (timestampNs - lastBroadcastTime->second < StatsdStats::kMinBroadcastPeriodNs) {
+            if (elapsedRealtimeNs - lastBroadcastTime->second <
+                    StatsdStats::kMinBroadcastPeriodNs) {
                 VLOG("StatsD would've sent a broadcast but the rate limit stopped us.");
                 return;
             }
@@ -575,7 +788,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         if (mSendBroadcast(key)) {
             mOnDiskDataConfigs.erase(key);
             VLOG("StatsD triggered data fetch for %s", key.ToString().c_str());
-            mLastBroadcastTimes[key] = timestampNs;
+            mLastBroadcastTimes[key] = elapsedRealtimeNs;
             StatsdStats::getInstance().noteBroadcastSent(key);
         }
     }
@@ -625,6 +838,110 @@ void StatsLogProcessor::SaveActiveConfigsToDisk(int64_t currentTimeNs) {
         return;
     }
     proto.flush(fd.get());
+}
+
+void StatsLogProcessor::SaveMetadataToDisk(int64_t currentWallClockTimeNs,
+                                           int64_t systemElapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    // Do not write to disk if we already have in the last few seconds.
+    if (static_cast<unsigned long long> (systemElapsedTimeNs) <
+            mLastMetadataWriteNs + WRITE_DATA_COOL_DOWN_SEC * NS_PER_SEC) {
+        ALOGI("Statsd skipping writing metadata to disk. Already wrote data in last %d seconds",
+                WRITE_DATA_COOL_DOWN_SEC);
+        return;
+    }
+    mLastMetadataWriteNs = systemElapsedTimeNs;
+
+    metadata::StatsMetadataList metadataList;
+    WriteMetadataToProtoLocked(
+            currentWallClockTimeNs, systemElapsedTimeNs, &metadataList);
+
+    string file_name = StringPrintf("%s/metadata", STATS_METADATA_DIR);
+    StorageManager::deleteFile(file_name.c_str());
+
+    if (metadataList.stats_metadata_size() == 0) {
+        // Skip the write if we have nothing to write.
+        return;
+    }
+
+    std::string data;
+    metadataList.SerializeToString(&data);
+    StorageManager::writeFile(file_name.c_str(), data.c_str(), data.size());
+}
+
+void StatsLogProcessor::WriteMetadataToProto(int64_t currentWallClockTimeNs,
+                                             int64_t systemElapsedTimeNs,
+                                             metadata::StatsMetadataList* metadataList) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    WriteMetadataToProtoLocked(currentWallClockTimeNs, systemElapsedTimeNs, metadataList);
+}
+
+void StatsLogProcessor::WriteMetadataToProtoLocked(int64_t currentWallClockTimeNs,
+                                                   int64_t systemElapsedTimeNs,
+                                                   metadata::StatsMetadataList* metadataList) {
+    for (const auto& pair : mMetricsManagers) {
+        const sp<MetricsManager>& metricsManager = pair.second;
+        metadata::StatsMetadata* statsMetadata = metadataList->add_stats_metadata();
+        bool metadataWritten = metricsManager->writeMetadataToProto(currentWallClockTimeNs,
+                systemElapsedTimeNs, statsMetadata);
+        if (!metadataWritten) {
+            metadataList->mutable_stats_metadata()->RemoveLast();
+        }
+    }
+}
+
+void StatsLogProcessor::LoadMetadataFromDisk(int64_t currentWallClockTimeNs,
+                                             int64_t systemElapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    string file_name = StringPrintf("%s/metadata", STATS_METADATA_DIR);
+    int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
+    if (-1 == fd) {
+        VLOG("Attempt to read %s but failed", file_name.c_str());
+        StorageManager::deleteFile(file_name.c_str());
+        return;
+    }
+    string content;
+    if (!android::base::ReadFdToString(fd, &content)) {
+        ALOGE("Attempt to read %s but failed", file_name.c_str());
+        close(fd);
+        StorageManager::deleteFile(file_name.c_str());
+        return;
+    }
+
+    close(fd);
+
+    metadata::StatsMetadataList statsMetadataList;
+    if (!statsMetadataList.ParseFromString(content)) {
+        ALOGE("Attempt to read %s but failed; failed to metadata", file_name.c_str());
+        StorageManager::deleteFile(file_name.c_str());
+        return;
+    }
+    SetMetadataStateLocked(statsMetadataList, currentWallClockTimeNs, systemElapsedTimeNs);
+    StorageManager::deleteFile(file_name.c_str());
+}
+
+void StatsLogProcessor::SetMetadataState(const metadata::StatsMetadataList& statsMetadataList,
+                                         int64_t currentWallClockTimeNs,
+                                         int64_t systemElapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    SetMetadataStateLocked(statsMetadataList, currentWallClockTimeNs, systemElapsedTimeNs);
+}
+
+void StatsLogProcessor::SetMetadataStateLocked(
+        const metadata::StatsMetadataList& statsMetadataList,
+        int64_t currentWallClockTimeNs,
+        int64_t systemElapsedTimeNs) {
+    for (const metadata::StatsMetadata& metadata : statsMetadataList.stats_metadata()) {
+        ConfigKey key(metadata.config_key().uid(), metadata.config_key().config_id());
+        auto it = mMetricsManagers.find(key);
+        if (it == mMetricsManagers.end()) {
+            ALOGE("No config found for configKey %s", key.ToString().c_str());
+            continue;
+        }
+        VLOG("Setting metadata %s", key.ToString().c_str());
+        it->second->loadMetadata(metadata, currentWallClockTimeNs, systemElapsedTimeNs);
+    }
+    VLOG("Successfully loaded %d metadata.", statsMetadataList.stats_metadata_size());
 }
 
 void StatsLogProcessor::WriteActiveConfigsToProtoOutputStream(
@@ -736,8 +1053,9 @@ int64_t StatsLogProcessor::getLastReportTimeNs(const ConfigKey& key) {
 void StatsLogProcessor::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk,
                                          const int uid, const int64_t version) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGW("Received app upgrade");
-    for (auto it : mMetricsManagers) {
+    VLOG("Received app upgrade");
+    StateManager::getInstance().notifyAppChanged(apk, mUidMap);
+    for (const auto& it : mMetricsManagers) {
         it.second->notifyAppUpgrade(eventTimeNs, apk, uid, version);
     }
 }
@@ -745,17 +1063,27 @@ void StatsLogProcessor::notifyAppUpgrade(const int64_t& eventTimeNs, const strin
 void StatsLogProcessor::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
                                          const int uid) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGW("Received app removed");
-    for (auto it : mMetricsManagers) {
+    VLOG("Received app removed");
+    StateManager::getInstance().notifyAppChanged(apk, mUidMap);
+    for (const auto& it : mMetricsManagers) {
         it.second->notifyAppRemoved(eventTimeNs, apk, uid);
     }
 }
 
 void StatsLogProcessor::onUidMapReceived(const int64_t& eventTimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    ALOGW("Received uid map");
-    for (auto it : mMetricsManagers) {
+    VLOG("Received uid map");
+    StateManager::getInstance().updateLogSources(mUidMap);
+    for (const auto& it : mMetricsManagers) {
         it.second->onUidMapReceived(eventTimeNs);
+    }
+}
+
+void StatsLogProcessor::onStatsdInitCompleted(const int64_t& elapsedTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    VLOG("Received boot completed signal");
+    for (const auto& it : mMetricsManagers) {
+        it.second->onStatsdInitCompleted(elapsedTimeNs);
     }
 }
 

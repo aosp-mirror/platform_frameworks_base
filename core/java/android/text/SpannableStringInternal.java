@@ -40,9 +40,10 @@ import java.lang.reflect.Array;
 
         if (source instanceof Spanned) {
             if (source instanceof SpannableStringInternal) {
-                copySpans((SpannableStringInternal) source, start, end, ignoreNoCopySpan);
+                copySpansFromInternal(
+                        (SpannableStringInternal) source, start, end, ignoreNoCopySpan);
             } else {
-                copySpans((Spanned) source, start, end, ignoreNoCopySpan);
+                copySpansFromSpanned((Spanned) source, start, end, ignoreNoCopySpan);
             }
         }
     }
@@ -65,7 +66,7 @@ import java.lang.reflect.Array;
      * @param end End index in the source object.
      * @param ignoreNoCopySpan whether to copy NoCopySpans in the {@code source}
      */
-    private void copySpans(Spanned src, int start, int end, boolean ignoreNoCopySpan) {
+    private void copySpansFromSpanned(Spanned src, int start, int end, boolean ignoreNoCopySpan) {
         Object[] spans = src.getSpans(start, end, Object.class);
 
         for (int i = 0; i < spans.length; i++) {
@@ -94,7 +95,7 @@ import java.lang.reflect.Array;
      * @param end End index in the source object.
      * @param ignoreNoCopySpan copy NoCopySpan for backward compatible reasons.
      */
-    private void copySpans(SpannableStringInternal src, int start, int end,
+    private void copySpansFromInternal(SpannableStringInternal src, int start, int end,
             boolean ignoreNoCopySpan) {
         int count = 0;
         final int[] srcData = src.mSpanData;
@@ -555,12 +556,12 @@ import java.lang.reflect.Array;
      */
     @UnsupportedAppUsage
     private void copySpans(Spanned src, int start, int end) {
-        copySpans(src, start, end, false);
+        copySpansFromSpanned(src, start, end, false);
     }
 
     @UnsupportedAppUsage
     private void copySpans(SpannableStringInternal src, int start, int end) {
-        copySpans(src, start, end, false);
+        copySpansFromInternal(src, start, end, false);
     }
 
 

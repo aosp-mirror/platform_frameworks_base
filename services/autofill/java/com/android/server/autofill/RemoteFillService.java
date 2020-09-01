@@ -18,15 +18,15 @@ package com.android.server.autofill;
 
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 
-import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
-import android.os.IBinder;
+import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
@@ -39,19 +39,30 @@ import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
-import com.android.internal.infra.AbstractSinglePendingRequestRemoteService;
+import com.android.internal.infra.AbstractRemoteService;
+import com.android.internal.infra.ServiceConnector;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
-final class RemoteFillService
-        extends AbstractSinglePendingRequestRemoteService<RemoteFillService, IAutoFillService> {
+final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
+
+    private static final String TAG = "RemoteFillService";
 
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
     private final FillServiceCallbacks mCallbacks;
+    private final Object mLock = new Object();
+    private CompletableFuture<FillResponse> mPendingFillRequest;
+    private int mPendingFillRequestId = INVALID_REQUEST_ID;
+    private final ComponentName mComponentName;
 
-    public interface FillServiceCallbacks extends VultureCallback<RemoteFillService> {
+    public interface FillServiceCallbacks
+            extends AbstractRemoteService.VultureCallback<RemoteFillService> {
         void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
                 @NonNull String servicePackageName, int requestFlags);
         void onFillRequestFailure(int requestId, @Nullable CharSequence message);
@@ -65,38 +76,44 @@ final class RemoteFillService
 
     RemoteFillService(Context context, ComponentName componentName, int userId,
             FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed) {
-        super(context, AutofillService.SERVICE_INTERFACE, componentName, userId, callbacks,
-                context.getMainThreadHandler(), Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
-                | (bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0), sVerbose);
+        super(context, new Intent(AutofillService.SERVICE_INTERFACE).setComponent(componentName),
+                Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
+                        | (bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0),
+                userId, IAutoFillService.Stub::asInterface);
         mCallbacks = callbacks;
+        mComponentName = componentName;
     }
 
-    @Override // from AbstractRemoteService
-    protected void handleOnConnectedStateChanged(boolean state) {
-        if (mService == null) {
-            Slog.w(mTag, "onConnectedStateChanged(): null service");
+    @Override // from ServiceConnector.Impl
+    protected void onServiceConnectionStatusChanged(IAutoFillService service, boolean connected) {
+        try {
+            service.onConnectedStateChanged(connected);
+        } catch (Exception e) {
+            Slog.w(TAG, "Exception calling onConnectedStateChanged(" + connected + "): " + e);
+        }
+    }
+
+    private void dispatchCancellationSignal(@Nullable ICancellationSignal signal) {
+        if (signal == null) {
             return;
         }
         try {
-            mService.onConnectedStateChanged(state);
-        } catch (Exception e) {
-            Slog.w(mTag, "Exception calling onConnectedStateChanged(" + state + "): " + e);
+            signal.cancel();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error requesting a cancellation", e);
         }
     }
 
-    @Override // from AbstractRemoteService
-    protected IAutoFillService getServiceInterface(IBinder service) {
-        return IAutoFillService.Stub.asInterface(service);
-    }
-
-    @Override // from AbstractRemoteService
-    protected long getTimeoutIdleBindMillis() {
+    @Override // from ServiceConnector.Impl
+    protected long getAutoDisconnectTimeoutMs() {
         return TIMEOUT_IDLE_BIND_MILLIS;
     }
 
-    @Override // from AbstractRemoteService
-    protected long getRemoteRequestMillis() {
-        return TIMEOUT_REMOTE_REQUEST_MILLIS;
+    @Override // from ServiceConnector.Impl
+    public void addLast(Job<IAutoFillService, ?> iAutoFillServiceJob) {
+        // Only maintain single request at a time
+        cancelPendingJobs();
+        super.addLast(iAutoFillServiceJob);
     }
 
     /**
@@ -105,261 +122,109 @@ final class RemoteFillService
      * <p>This can be used when the request is unnecessary or will be superceeded by a request that
      * will soon be queued.
      *
-     * @return the future id of the canceled request, or {@link FillRequest#INVALID_REQUEST_ID} if
-     *          no {@link PendingFillRequest} was canceled.
+     * @return the id of the canceled request, or {@link FillRequest#INVALID_REQUEST_ID} if no
+     *         {@link FillRequest} was canceled.
      */
-    public CompletableFuture<Integer> cancelCurrentRequest() {
-        return CompletableFuture.supplyAsync(() -> {
-            if (isDestroyed()) {
-                return INVALID_REQUEST_ID;
-            }
-
-            BasePendingRequest<RemoteFillService, IAutoFillService> canceledRequest =
-                    handleCancelPendingRequest();
-            return canceledRequest instanceof PendingFillRequest
-                    ? ((PendingFillRequest) canceledRequest).mRequest.getId()
+    public int cancelCurrentRequest() {
+        synchronized (mLock) {
+            return mPendingFillRequest != null && mPendingFillRequest.cancel(false)
+                    ? mPendingFillRequestId
                     : INVALID_REQUEST_ID;
-        }, mHandler::post);
+        }
     }
 
     public void onFillRequest(@NonNull FillRequest request) {
-        scheduleRequest(new PendingFillRequest(request, this));
-    }
+        AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
+        AtomicReference<CompletableFuture<FillResponse>> futureRef = new AtomicReference<>();
 
-    public void onSaveRequest(@NonNull SaveRequest request) {
-        scheduleRequest(new PendingSaveRequest(request, this));
-    }
-
-    private boolean handleResponseCallbackCommon(
-            @NonNull PendingRequest<RemoteFillService, IAutoFillService> pendingRequest) {
-        if (isDestroyed()) return false;
-
-        if (mPendingRequest == pendingRequest) {
-            mPendingRequest = null;
-        }
-        return true;
-    }
-
-    private void dispatchOnFillRequestSuccess(@NonNull PendingFillRequest pendingRequest,
-            @Nullable FillResponse response, int requestFlags) {
-        mHandler.post(() -> {
-            if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestSuccess(pendingRequest.mRequest.getId(), response,
-                        mComponentName.getPackageName(), requestFlags);
+        CompletableFuture<FillResponse> connectThenFillRequest = postAsync(remoteService -> {
+            if (sVerbose) {
+                Slog.v(TAG, "calling onFillRequest() for id=" + request.getId());
             }
-        });
-    }
 
-    private void dispatchOnFillRequestFailure(@NonNull PendingFillRequest pendingRequest,
-            @Nullable CharSequence message) {
-        mHandler.post(() -> {
-            if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestFailure(pendingRequest.mRequest.getId(), message);
-            }
-        });
-    }
-
-    private void dispatchOnFillRequestTimeout(@NonNull PendingFillRequest pendingRequest) {
-        mHandler.post(() -> {
-            if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestTimeout(pendingRequest.mRequest.getId());
-            }
-        });
-    }
-
-    private void dispatchOnFillTimeout(@NonNull ICancellationSignal cancellationSignal) {
-        mHandler.post(() -> {
-            try {
-                cancellationSignal.cancel();
-            } catch (RemoteException e) {
-                Slog.w(mTag, "Error calling cancellation signal: " + e);
-            }
-        });
-    }
-
-    private void dispatchOnSaveRequestSuccess(PendingSaveRequest pendingRequest,
-            IntentSender intentSender) {
-        mHandler.post(() -> {
-            if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onSaveRequestSuccess(mComponentName.getPackageName(), intentSender);
-            }
-        });
-    }
-
-    private void dispatchOnSaveRequestFailure(PendingSaveRequest pendingRequest,
-            @Nullable CharSequence message) {
-        mHandler.post(() -> {
-            if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onSaveRequestFailure(message, mComponentName.getPackageName());
-            }
-        });
-    }
-
-    private static final class PendingFillRequest
-            extends PendingRequest<RemoteFillService, IAutoFillService> {
-        private final FillRequest mRequest;
-        private final IFillCallback mCallback;
-        private ICancellationSignal mCancellation;
-
-        public PendingFillRequest(FillRequest request, RemoteFillService service) {
-            super(service);
-            mRequest = request;
-
-            mCallback = new IFillCallback.Stub() {
+            CompletableFuture<FillResponse> fillRequest = new CompletableFuture<>();
+            remoteService.onFillRequest(request, new IFillCallback.Stub() {
                 @Override
                 public void onCancellable(ICancellationSignal cancellation) {
-                    synchronized (mLock) {
-                        final boolean cancelled;
-                        synchronized (mLock) {
-                            mCancellation = cancellation;
-                            cancelled = isCancelledLocked();
-                        }
-                        if (cancelled) {
-                            try {
-                                cancellation.cancel();
-                            } catch (RemoteException e) {
-                                Slog.e(mTag, "Error requesting a cancellation", e);
-                            }
-                        }
+                    CompletableFuture<FillResponse> future = futureRef.get();
+                    if (future != null && future.isCancelled()) {
+                        dispatchCancellationSignal(cancellation);
+                    } else {
+                        cancellationSink.set(cancellation);
                     }
                 }
 
                 @Override
                 public void onSuccess(FillResponse response) {
-                    if (!finish()) return;
-
-                    final RemoteFillService remoteService = getService();
-                    if (remoteService != null) {
-                        remoteService.dispatchOnFillRequestSuccess(PendingFillRequest.this,
-                                response, request.getFlags());
-                    }
+                    fillRequest.complete(response);
                 }
 
                 @Override
                 public void onFailure(int requestId, CharSequence message) {
-                    if (!finish()) return;
-
-                    final RemoteFillService remoteService = getService();
-                    if (remoteService != null) {
-                        remoteService.dispatchOnFillRequestFailure(PendingFillRequest.this,
-                                message);
-                    }
+                    fillRequest.completeExceptionally(
+                            new RuntimeException(String.valueOf(message)));
                 }
-            };
+            });
+            return fillRequest;
+        }).orTimeout(TIMEOUT_REMOTE_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
+        futureRef.set(connectThenFillRequest);
+
+        synchronized (mLock) {
+            mPendingFillRequest = connectThenFillRequest;
+            mPendingFillRequestId = request.getId();
         }
 
-        @Override
-        protected void onTimeout(RemoteFillService remoteService) {
-            // NOTE: Must make these 2 calls asynchronously, because the cancellation signal is
-            // handled by the service, which could block.
-            final ICancellationSignal cancellation;
+        connectThenFillRequest.whenComplete((res, err) -> Handler.getMain().post(() -> {
             synchronized (mLock) {
-                cancellation = mCancellation;
+                mPendingFillRequest = null;
+                mPendingFillRequestId = INVALID_REQUEST_ID;
             }
-            if (cancellation != null) {
-                remoteService.dispatchOnFillTimeout(cancellation);
-            }
-            remoteService.dispatchOnFillRequestTimeout(PendingFillRequest.this);
-        }
-
-        @Override
-        public void run() {
-            synchronized (mLock) {
-                if (isCancelledLocked()) {
-                    if (sDebug) Slog.d(mTag, "run() called after canceled: " + mRequest);
-                    return;
+            if (err == null) {
+                mCallbacks.onFillRequestSuccess(request.getId(), res,
+                        mComponentName.getPackageName(), request.getFlags());
+            } else {
+                Slog.e(TAG, "Error calling on fill request", err);
+                if (err instanceof TimeoutException) {
+                    dispatchCancellationSignal(cancellationSink.get());
+                    mCallbacks.onFillRequestTimeout(request.getId());
+                } else if (err instanceof CancellationException) {
+                    dispatchCancellationSignal(cancellationSink.get());
+                } else {
+                    mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
                 }
             }
-            final RemoteFillService remoteService = getService();
-            if (remoteService != null) {
-                if (sVerbose) Slog.v(mTag, "calling onFillRequest() for id=" + mRequest.getId());
-                try {
-                    remoteService.mService.onFillRequest(mRequest, mCallback);
-                } catch (RemoteException e) {
-                    Slog.e(mTag, "Error calling on fill request", e);
-
-                    remoteService.dispatchOnFillRequestFailure(PendingFillRequest.this, null);
-                }
-            }
-        }
-
-        @Override
-        public boolean cancel() {
-            if (!super.cancel()) return false;
-
-            final ICancellationSignal cancellation;
-            synchronized (mLock) {
-                cancellation = mCancellation;
-            }
-            if (cancellation != null) {
-                try {
-                    cancellation.cancel();
-                } catch (RemoteException e) {
-                    Slog.e(mTag, "Error cancelling a fill request", e);
-                }
-            }
-            return true;
-        }
+        }));
     }
 
-    private static final class PendingSaveRequest
-            extends PendingRequest<RemoteFillService, IAutoFillService> {
-        private final SaveRequest mRequest;
-        private final ISaveCallback mCallback;
+    public void onSaveRequest(@NonNull SaveRequest request) {
+        postAsync(service -> {
+            if (sVerbose) Slog.v(TAG, "calling onSaveRequest()");
 
-        public PendingSaveRequest(@NonNull SaveRequest request,
-                @NonNull RemoteFillService service) {
-            super(service);
-            mRequest = request;
-
-            mCallback = new ISaveCallback.Stub() {
+            CompletableFuture<IntentSender> save = new CompletableFuture<>();
+            service.onSaveRequest(request, new ISaveCallback.Stub() {
                 @Override
                 public void onSuccess(IntentSender intentSender) {
-                    if (!finish()) return;
-
-                    final RemoteFillService remoteService = getService();
-                    if (remoteService != null) {
-                        remoteService.dispatchOnSaveRequestSuccess(PendingSaveRequest.this,
-                                intentSender);
-                    }
+                    save.complete(intentSender);
                 }
 
                 @Override
                 public void onFailure(CharSequence message) {
-                    if (!finish()) return;
-
-                    final RemoteFillService remoteService = getService();
-                    if (remoteService != null) {
-                        remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this,
-                                message);
+                    save.completeExceptionally(new RuntimeException(String.valueOf(message)));
+                }
+            });
+            return save;
+        }).orTimeout(TIMEOUT_REMOTE_REQUEST_MILLIS, TimeUnit.MILLISECONDS)
+                .whenComplete((res, err) -> Handler.getMain().post(() -> {
+                    if (err == null) {
+                        mCallbacks.onSaveRequestSuccess(mComponentName.getPackageName(), res);
+                    } else {
+                        mCallbacks.onSaveRequestFailure(
+                                mComponentName.getPackageName(), err.getMessage());
                     }
-                }
-            };
-        }
+                }));
+    }
 
-        @Override
-        protected void onTimeout(RemoteFillService remoteService) {
-            remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this, null);
-        }
-
-        @Override
-        public void run() {
-            final RemoteFillService remoteService = getService();
-            if (remoteService != null) {
-                if (sVerbose) Slog.v(mTag, "calling onSaveRequest()");
-                try {
-                    remoteService.mService.onSaveRequest(mRequest, mCallback);
-                } catch (RemoteException e) {
-                    Slog.e(mTag, "Error calling on save request", e);
-
-                    remoteService.dispatchOnSaveRequestFailure(PendingSaveRequest.this, null);
-                }
-            }
-        }
-
-        @Override
-        public boolean isFinal() {
-            return true;
-        }
+    public void destroy() {
+        unbind();
     }
 }

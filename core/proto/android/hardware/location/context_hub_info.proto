@@ -1,0 +1,49 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.hardware.location;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+message ContextHubInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    // Context hub unique identifier
+    optional int32 id = 1;
+    // A name for the hub
+    optional string name = 2;
+    // A name for the vendor
+    optional string vendor = 3;
+    // Description of the tool chain
+    optional string toolchain = 4;
+    optional int32 platform_version = 5;
+    optional int32 static_sw_version = 6;
+    optional int32 toolchain_version = 7;
+    // The CHRE platform ID as defined in chre/version.h
+    optional int64 chre_platform_id = 8;
+    // Peak MIPS that this hub can deliver
+    optional float peak_mips = 9;
+    // Power draw in stopped state in milli watts
+    optional float stopped_power_draw_mw = 10;
+    // Power draw in sleep state in milli watts
+    optional float sleep_power_draw_mw = 11;
+    // Peak power draw in milli watts
+    optional float peak_power_draw_mw = 12;
+    // The maximum number of bytes that can be sent per message to the hub
+    optional int32 max_packet_length_bytes = 13;
+}

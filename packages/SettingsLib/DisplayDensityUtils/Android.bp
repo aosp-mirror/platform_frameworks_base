@@ -1,0 +1,7 @@
+android_library {
+    name: "SettingsLibDisplayDensityUtils",
+
+    srcs: ["src/**/*.java"],
+
+    min_sdk_version: "21",
+}

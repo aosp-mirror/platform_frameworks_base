@@ -16,6 +16,7 @@
 
 package com.android.server.lights;
 
+import android.annotation.Nullable;
 import android.hardware.light.V2_0.Type;
 
 public abstract class LightsManager {
@@ -30,7 +31,8 @@ public abstract class LightsManager {
     public static final int LIGHT_ID_COUNT = Type.COUNT;
 
     /**
-     * Returns the logical light with the given type.
+     * Returns the logical light with the given type, if it exists, or null.
      */
+    @Nullable
     public abstract LogicalLight getLight(int id);
 }

@@ -651,46 +651,13 @@ public:
     void getPaintFor(SkPaint* outPaint, const TreeProperties &props) const;
     BitmapPalette computePalette();
 
-    /**
-     * Draws VD into a GPU backed surface.
-     * This should always be called from RT and it works with Skia pipeline only.
-     */
-    void updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context);
-
     void setAntiAlias(bool aa) { mRootNode->setAntiAlias(aa); }
 
 private:
     class Cache {
     public:
         sk_sp<Bitmap> bitmap;  // used by HWUI pipeline and software
-        // TODO: use surface instead of bitmap when drawing in software canvas
         bool dirty = true;
-
-        // the rest of the code in Cache is used by Skia pipelines only
-
-        ~Cache() { clear(); }
-
-        /**
-         * Stores a weak pointer to the atlas and a key.
-         */
-        void setAtlas(sp<skiapipeline::VectorDrawableAtlas> atlas,
-                      skiapipeline::AtlasKey newAtlasKey);
-
-        /**
-         * Gets a surface and bounds from the atlas.
-         *
-         * @return nullptr if the altas has been deleted.
-         */
-        sk_sp<SkSurface> getSurface(SkRect* bounds);
-
-        /**
-         * Releases atlas key from the atlas, which makes it available for reuse.
-         */
-        void clear();
-
-    private:
-        wp<skiapipeline::VectorDrawableAtlas> mAtlas;
-        skiapipeline::AtlasKey mAtlasKey = INVALID_ATLAS_KEY;
     };
 
     bool allocateBitmapIfNeeded(Cache& cache, int width, int height);

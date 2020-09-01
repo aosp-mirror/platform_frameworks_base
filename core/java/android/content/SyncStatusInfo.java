@@ -20,6 +20,9 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.util.Pair;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -139,10 +142,10 @@ public class SyncStatusInfo implements Parcelable {
     public final long[] perSourceLastSuccessTimes = new long[SOURCE_COUNT];
     public final long[] perSourceLastFailureTimes = new long[SOURCE_COUNT];
 
-  // Warning: It is up to the external caller to ensure there are
-  // no race conditions when accessing this list
-  @UnsupportedAppUsage
-  private ArrayList<Long> periodicSyncTimes;
+    // Warning: It is up to the external caller to ensure there are
+    // no race conditions when accessing this list
+    @UnsupportedAppUsage
+    private ArrayList<Long> periodicSyncTimes;
 
     private final ArrayList<Long> mLastEventTimes = new ArrayList<>();
     private final ArrayList<String> mLastEvents = new ArrayList<>();
@@ -292,9 +295,28 @@ public class SyncStatusInfo implements Parcelable {
         }
     }
 
+    /**
+     * Copies all data from the given SyncStatusInfo object.
+     *
+     * @param other the SyncStatusInfo object to copy data from
+     */
     public SyncStatusInfo(SyncStatusInfo other) {
         authorityId = other.authorityId;
+        copyFrom(other);
+    }
 
+    /**
+     * Copies all data from the given SyncStatusInfo object except for its authority id.
+     *
+     * @param authorityId the new authority id
+     * @param other the SyncStatusInfo object to copy data from
+     */
+    public SyncStatusInfo(int authorityId, SyncStatusInfo other) {
+        this.authorityId = authorityId;
+        copyFrom(other);
+    }
+
+    private void copyFrom(SyncStatusInfo other) {
         other.totalStats.copyTo(totalStats);
         other.todayStats.copyTo(todayStats);
         other.yesterdayStats.copyTo(yesterdayStats);
@@ -323,6 +345,14 @@ public class SyncStatusInfo implements Parcelable {
         System.arraycopy(from, 0, to, 0, to.length);
     }
 
+    public int getPeriodicSyncTimesSize() {
+        return periodicSyncTimes == null ? 0 : periodicSyncTimes.size();
+    }
+
+    public void addPeriodicSyncTime(long time) {
+        periodicSyncTimes = ArrayUtils.add(periodicSyncTimes, time);
+    }
+
     @UnsupportedAppUsage
     public void setPeriodicSyncTime(int index, long when) {
         // The list is initialized lazily when scheduling occurs so we need to make sure
@@ -344,6 +374,24 @@ public class SyncStatusInfo implements Parcelable {
     public void removePeriodicSyncTime(int index) {
         if (periodicSyncTimes != null && index < periodicSyncTimes.size()) {
             periodicSyncTimes.remove(index);
+        }
+    }
+
+    /**
+     * Populates {@code mLastEventTimes} and {@code mLastEvents} with the given list. <br>
+     * <i>Note: This method is mainly used to repopulate the event info from disk and it will clear
+     * both {@code mLastEventTimes} and {@code mLastEvents} before populating.</i>
+     *
+     * @param lastEventInformation the list to populate with
+     */
+    public void populateLastEventsInformation(ArrayList<Pair<Long, String>> lastEventInformation) {
+        mLastEventTimes.clear();
+        mLastEvents.clear();
+        final int size = lastEventInformation.size();
+        for (int i = 0; i < size; i++) {
+            final Pair<Long, String> lastEventInfo = lastEventInformation.get(i);
+            mLastEventTimes.add(lastEventInfo.first);
+            mLastEvents.add(lastEventInfo.second);
         }
     }
 

@@ -17,7 +17,6 @@
 package android.view;
 
 import android.graphics.Rect;
-import android.os.IBinder;
 
 import com.android.internal.util.Preconditions;
 
@@ -64,14 +63,15 @@ public abstract class CompositionSamplingListener {
      * Registers a sampling listener.
      */
     public static void register(CompositionSamplingListener listener,
-            int displayId, IBinder stopLayer, Rect samplingArea) {
+            int displayId, SurfaceControl stopLayer, Rect samplingArea) {
         if (listener.mNativeListener == 0) {
             return;
         }
         Preconditions.checkArgument(displayId == Display.DEFAULT_DISPLAY,
                 "default display only for now");
-        nativeRegister(listener.mNativeListener, stopLayer, samplingArea.left, samplingArea.top,
-                samplingArea.right, samplingArea.bottom);
+        long nativeStopLayerObject = stopLayer != null ? stopLayer.mNativeObject : 0;
+        nativeRegister(listener.mNativeListener, nativeStopLayerObject, samplingArea.left,
+                samplingArea.top, samplingArea.right, samplingArea.bottom);
     }
 
     /**
@@ -96,7 +96,7 @@ public abstract class CompositionSamplingListener {
 
     private static native long nativeCreate(CompositionSamplingListener thiz);
     private static native void nativeDestroy(long ptr);
-    private static native void nativeRegister(long ptr, IBinder stopLayer,
+    private static native void nativeRegister(long ptr, long stopLayerObject,
             int samplingAreaLeft, int top, int right, int bottom);
     private static native void nativeUnregister(long ptr);
 }

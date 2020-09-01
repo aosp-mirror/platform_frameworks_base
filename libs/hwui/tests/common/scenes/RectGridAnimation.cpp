@@ -37,11 +37,11 @@ public:
             SkRegion region;
             for (int xOffset = 0; xOffset < 200; xOffset += 2) {
                 for (int yOffset = 0; yOffset < 200; yOffset += 2) {
-                    region.op(xOffset, yOffset, xOffset + 1, yOffset + 1, SkRegion::kUnion_Op);
+                    region.op({xOffset, yOffset, xOffset + 1, yOffset + 1}, SkRegion::kUnion_Op);
                 }
             }
 
-            SkPaint paint;
+            Paint paint;
             paint.setColor(0xff00ffff);
             canvas.drawRegion(region, paint);
         });

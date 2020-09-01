@@ -1,0 +1,389 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.pm;
+
+import static android.content.pm.UserInfo.FLAG_DEMO;
+import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
+import static android.content.pm.UserInfo.FLAG_FULL;
+import static android.content.pm.UserInfo.FLAG_GUEST;
+import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.content.pm.UserInfo.FLAG_PROFILE;
+import static android.content.pm.UserInfo.FLAG_RESTRICTED;
+import static android.content.pm.UserInfo.FLAG_SYSTEM;
+import static android.os.UserManager.USER_TYPE_FULL_DEMO;
+import static android.os.UserManager.USER_TYPE_FULL_GUEST;
+import static android.os.UserManager.USER_TYPE_FULL_RESTRICTED;
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
+
+import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
+
+import android.content.pm.UserInfo;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
+import android.os.Bundle;
+import android.os.UserManager;
+import android.util.ArrayMap;
+import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.function.Consumer;
+
+/**
+ * Class for creating all {@link UserTypeDetails} on the device.
+ *
+ * This class is responsible both for defining the AOSP use types, as well as reading in customized
+ * user types from {@link com.android.internal.R.xml#config_user_types}.
+ *
+ * Tests are located in UserManagerServiceUserTypeTest.java.
+ * @hide
+ */
+public final class UserTypeFactory {
+
+    private static final String LOG_TAG = "UserTypeFactory";
+
+    /** This is a utility class, so no instantiable constructor. */
+    private UserTypeFactory() {}
+
+    /**
+     * Obtains the user types (built-in and customized) for this device.
+     *
+     * @return mapping from the name of each user type to its {@link UserTypeDetails} object
+     */
+    public static ArrayMap<String, UserTypeDetails> getUserTypes() {
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(USER_TYPE_PROFILE_MANAGED, getDefaultTypeProfileManaged());
+        builders.put(USER_TYPE_FULL_SYSTEM, getDefaultTypeFullSystem());
+        builders.put(USER_TYPE_FULL_SECONDARY, getDefaultTypeFullSecondary());
+        builders.put(USER_TYPE_FULL_GUEST, getDefaultTypeFullGuest());
+        builders.put(USER_TYPE_FULL_DEMO, getDefaultTypeFullDemo());
+        builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
+        builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
+
+        try (XmlResourceParser parser =
+                     Resources.getSystem().getXml(com.android.internal.R.xml.config_user_types)) {
+            customizeBuilders(builders, parser);
+        }
+
+        final ArrayMap<String, UserTypeDetails> types = new ArrayMap<>(builders.size());
+        for (int i = 0; i < builders.size(); i++) {
+            types.put(builders.keyAt(i), builders.valueAt(i).createUserTypeDetails());
+        }
+        return types;
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_MANAGED}
+     * configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeProfileManaged() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_MANAGED)
+                .setBaseType(FLAG_PROFILE)
+                .setDefaultUserInfoPropertyFlags(FLAG_MANAGED_PROFILE)
+                .setMaxAllowedPerParent(1)
+                .setLabel(0)
+                .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
+                .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
+                .setBadgeLabels(
+                        com.android.internal.R.string.managed_profile_label_badge,
+                        com.android.internal.R.string.managed_profile_label_badge_2,
+                        com.android.internal.R.string.managed_profile_label_badge_3)
+                .setBadgeColors(
+                        com.android.internal.R.color.profile_badge_1,
+                        com.android.internal.R.color.profile_badge_2,
+                        com.android.internal.R.color.profile_badge_3)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.profile_badge_1_dark,
+                        com.android.internal.R.color.profile_badge_2_dark,
+                        com.android.internal.R.color.profile_badge_3_dark)
+                .setDefaultRestrictions(null);
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_FULL_SECONDARY}
+     * configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeFullSecondary() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_FULL_SECONDARY)
+                .setBaseType(FLAG_FULL)
+                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS)
+                .setDefaultRestrictions(getDefaultSecondaryUserRestrictions());
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_FULL_GUEST} configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeFullGuest() {
+        final boolean ephemeralGuests = Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+        final int flags = FLAG_GUEST | (ephemeralGuests ? FLAG_EPHEMERAL : 0);
+
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_FULL_GUEST)
+                .setBaseType(FLAG_FULL)
+                .setDefaultUserInfoPropertyFlags(flags)
+                .setMaxAllowed(1)
+                .setDefaultRestrictions(getDefaultGuestUserRestrictions());
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_FULL_DEMO} configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeFullDemo() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_FULL_DEMO)
+                .setBaseType(FLAG_FULL)
+                .setDefaultUserInfoPropertyFlags(FLAG_DEMO)
+                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS)
+                .setDefaultRestrictions(null);
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_FULL_RESTRICTED}
+     * configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeFullRestricted() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_FULL_RESTRICTED)
+                .setBaseType(FLAG_FULL)
+                .setDefaultUserInfoPropertyFlags(FLAG_RESTRICTED)
+                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS)
+                // NB: UserManagerService.createRestrictedProfile() applies hardcoded restrictions.
+                .setDefaultRestrictions(null);
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_FULL_SYSTEM} configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeFullSystem() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_FULL_SYSTEM)
+                .setBaseType(FLAG_SYSTEM | FLAG_FULL);
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_SYSTEM_HEADLESS}
+     * configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeSystemHeadless() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_SYSTEM_HEADLESS)
+                .setBaseType(FLAG_SYSTEM);
+    }
+
+    private static Bundle getDefaultSecondaryUserRestrictions() {
+        final Bundle restrictions = new Bundle();
+        restrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
+        restrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+        return restrictions;
+    }
+
+    private static Bundle getDefaultGuestUserRestrictions() {
+        // Guest inherits the secondary user's restrictions, plus has some extra ones.
+        final Bundle restrictions = getDefaultSecondaryUserRestrictions();
+        restrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
+        restrictions.putBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
+        return restrictions;
+    }
+
+    /**
+     * Reads the given xml parser to obtain device user-type customization, and updates the given
+     * map of {@link UserTypeDetails.Builder}s accordingly.
+     * <p>
+     * The xml file can specify the attributes according to the set... methods below.
+     */
+    @VisibleForTesting
+    static void customizeBuilders(ArrayMap<String, UserTypeDetails.Builder> builders,
+            XmlResourceParser parser) {
+        try {
+            XmlUtils.beginDocument(parser, "user-types");
+            for (XmlUtils.nextElement(parser);
+                    parser.getEventType() != XmlResourceParser.END_DOCUMENT;
+                    XmlUtils.nextElement(parser)) {
+                final boolean isProfile;
+                final String elementName = parser.getName();
+                if ("profile-type".equals(elementName)) {
+                    isProfile = true;
+                } else if ("full-type".equals(elementName)) {
+                    isProfile = false;
+                } else {
+                    Slog.w(LOG_TAG, "Skipping unknown element " + elementName + " in "
+                                + parser.getPositionDescription());
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                }
+
+                String typeName = parser.getAttributeValue(null, "name");
+                if (typeName == null) {
+                    Slog.w(LOG_TAG, "Skipping user type with no name in "
+                            + parser.getPositionDescription());
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                }
+                typeName.intern();
+
+                UserTypeDetails.Builder builder;
+                if (typeName.startsWith("android.")) {
+                    // typeName refers to a AOSP-defined type which we are modifying.
+                    Slog.i(LOG_TAG, "Customizing user type " + typeName);
+                    builder = builders.get(typeName);
+                    if (builder == null) {
+                        throw new IllegalArgumentException("Illegal custom user type name "
+                                + typeName + ": Non-AOSP user types cannot start with 'android.'");
+                    }
+                    final boolean isValid =
+                            (isProfile && builder.getBaseType() == UserInfo.FLAG_PROFILE)
+                            || (!isProfile && builder.getBaseType() == UserInfo.FLAG_FULL);
+                    if (!isValid) {
+                        throw new IllegalArgumentException("Wrong base type to customize user type "
+                                + "(" + typeName + "), which is type "
+                                + UserInfo.flagsToString(builder.getBaseType()));
+                    }
+                } else if (isProfile) {
+                    // typeName refers to a new OEM-defined profile type which we are defining.
+                    Slog.i(LOG_TAG, "Creating custom user type " + typeName);
+                    builder = new UserTypeDetails.Builder();
+                    builder.setName(typeName);
+                    builder.setBaseType(FLAG_PROFILE);
+                    builders.put(typeName, builder);
+                } else {
+                    throw new IllegalArgumentException("Creation of non-profile user type "
+                            + "(" + typeName + ") is not currently supported.");
+                }
+
+                // Process the attributes (other than name).
+                if (isProfile) {
+                    setIntAttribute(parser, "max-allowed-per-parent",
+                            builder::setMaxAllowedPerParent);
+                    setResAttribute(parser, "icon-badge", builder::setIconBadge);
+                    setResAttribute(parser, "badge-plain", builder::setBadgePlain);
+                    setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
+                }
+
+                // Process child elements.
+                final int depth = parser.getDepth();
+                while (XmlUtils.nextElementWithin(parser, depth)) {
+                    final String childName = parser.getName();
+                    if ("default-restrictions".equals(childName)) {
+                        final Bundle restrictions = UserRestrictionsUtils.readRestrictions(parser);
+                        builder.setDefaultRestrictions(restrictions);
+                    } else if (isProfile && "badge-labels".equals(childName)) {
+                        setResAttributeArray(parser, builder::setBadgeLabels);
+                    } else if (isProfile && "badge-colors".equals(childName)) {
+                        setResAttributeArray(parser, builder::setBadgeColors);
+                    } else if (isProfile && "badge-colors-dark".equals(childName)) {
+                        setResAttributeArray(parser, builder::setDarkThemeBadgeColors);
+                    } else {
+                        Slog.w(LOG_TAG, "Unrecognized tag " + childName + " in "
+                                + parser.getPositionDescription());
+                    }
+                }
+            }
+        } catch (XmlPullParserException | IOException e) {
+            Slog.w(LOG_TAG, "Cannot read user type configuration file.", e);
+        }
+    }
+
+    /**
+     * If the given attribute exists, gets the int stored in it and performs the given fcn using it.
+     * The stored value must be an int or NumberFormatException will be thrown.
+     *
+     * @param parser xml parser from which to read the attribute
+     * @param attributeName name of the attribute
+     * @param fcn one-int-argument function,
+     *            like {@link UserTypeDetails.Builder#setMaxAllowedPerParent(int)}
+     */
+    private static void setIntAttribute(XmlResourceParser parser, String attributeName,
+            Consumer<Integer> fcn) {
+        final String intValue = parser.getAttributeValue(null, attributeName);
+        if (intValue == null) {
+            return;
+        }
+        try {
+            fcn.accept(Integer.parseInt(intValue));
+        } catch (NumberFormatException e) {
+            Slog.e(LOG_TAG, "Cannot parse value of '" + intValue + "' for " + attributeName
+                    + " in " + parser.getPositionDescription(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * If the given attribute exists, gets the resId stored in it (or 0 if it is not a valid resId)
+     * and performs the given fcn using it.
+     *
+     * @param parser xml parser from which to read the attribute
+     * @param attributeName name of the attribute
+     * @param fcn one-argument function, like {@link UserTypeDetails.Builder#setIconBadge(int)}
+     */
+    private static void setResAttribute(XmlResourceParser parser, String attributeName,
+            Consumer<Integer> fcn) {
+        if (parser.getAttributeValue(null, attributeName) == null) {
+            // Attribute is not present, i.e. use the default value.
+            return;
+        }
+        final int resId = parser.getAttributeResourceValue(null, attributeName, Resources.ID_NULL);
+        fcn.accept(resId);
+    }
+
+    /**
+     * Gets the resIds stored in "item" elements (in their "res" attribute) at the current depth.
+     * Then performs the given fcn using the int[] array of these resIds.
+     * <p>
+     * Each xml element is expected to be of the form {@code <item res="someResValue" />}.
+     *
+     * @param parser xml parser from which to read the elements and their attributes
+     * @param fcn function, like {@link UserTypeDetails.Builder#setBadgeColors(int...)}
+     */
+    private static void setResAttributeArray(XmlResourceParser parser, Consumer<int[]> fcn)
+            throws IOException, XmlPullParserException {
+
+        ArrayList<Integer> resList = new ArrayList<>();
+        final int depth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            final String elementName = parser.getName();
+            if (!"item".equals(elementName)) {
+                Slog.w(LOG_TAG, "Skipping unknown child element " + elementName + " in "
+                        + parser.getPositionDescription());
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+            }
+            final int resId = parser.getAttributeResourceValue(null, "res", -1);
+            if (resId == -1) {
+                continue;
+            }
+            resList.add(resId);
+        }
+
+        int[] result = new int[resList.size()];
+        for (int i = 0; i < resList.size(); i++) {
+            result[i] = resList.get(i);
+        }
+        fcn.accept(result);
+    }
+}

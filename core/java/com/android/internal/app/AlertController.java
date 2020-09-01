@@ -286,6 +286,7 @@ public class AlertController {
         if (mTitleView != null) {
             mTitleView.setText(title);
         }
+        mWindow.setTitle(title);
     }
 
     /**
@@ -556,6 +557,13 @@ public class AlertController {
         final boolean hasButtonPanel = buttonPanel != null
                 && buttonPanel.getVisibility() != View.GONE;
 
+        if (!parentPanel.isInTouchMode()) {
+            final View content = hasCustomPanel ? customPanel : contentPanel;
+            if (!requestFocusForContent(content)) {
+                requestFocusForDefaultButton();
+            }
+        }
+
         // Only display the text spacer if we don't have buttons.
         if (!hasButtonPanel) {
             if (contentPanel != null) {
@@ -619,6 +627,29 @@ public class AlertController {
         setBackground(a, topPanel, contentPanel, customPanel, buttonPanel,
                 hasTopPanel, hasCustomPanel, hasButtonPanel);
         a.recycle();
+    }
+
+    private boolean requestFocusForContent(View content) {
+        if (content != null && content.requestFocus()) {
+            return true;
+        }
+
+        if (mListView != null) {
+            mListView.setSelection(0);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void requestFocusForDefaultButton() {
+        if (mButtonPositive.getVisibility() == View.VISIBLE) {
+            mButtonPositive.requestFocus();
+        } else if (mButtonNegative.getVisibility() == View.VISIBLE) {
+            mButtonNegative.requestFocus();
+        } else if (mButtonNeutral.getVisibility() == View.VISIBLE) {
+            mButtonNeutral.requestFocus();
+        }
     }
 
     private void setupCustomContent(ViewGroup customPanel) {

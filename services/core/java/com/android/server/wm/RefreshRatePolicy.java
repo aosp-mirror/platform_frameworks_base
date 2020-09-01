@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+
 import android.util.ArraySet;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
@@ -29,6 +32,27 @@ class RefreshRatePolicy {
     private final ArraySet<String> mNonHighRefreshRatePackages = new ArraySet<>();
     private final HighRefreshRateBlacklist mHighRefreshRateBlacklist;
     private final WindowManagerService mWmService;
+
+    /**
+     * The following constants represent priority of the window. SF uses this information when
+     * deciding which window has a priority when deciding about the refresh rate of the screen.
+     * Priority 0 is considered the highest priority. -1 means that the priority is unset.
+     */
+    static final int LAYER_PRIORITY_UNSET = -1;
+    /** Windows that are in focus and voted for the preferred mode ID have the highest priority. */
+    static final int LAYER_PRIORITY_FOCUSED_WITH_MODE = 0;
+    /**
+     * This is a default priority for all windows that are in focus, but have not requested a
+     * specific mode ID.
+     */
+    static final int LAYER_PRIORITY_FOCUSED_WITHOUT_MODE = 1;
+    /**
+     * Windows that are not in focus, but voted for a specific mode ID should be
+     * acknowledged by SF. For example, there are two applications in a split screen.
+     * One voted for a given mode ID, and the second one doesn't care. Even though the
+     * second one might be in focus, we can honor the mode ID of the first one.
+     */
+    static final int LAYER_PRIORITY_NOT_FOCUSED_WITH_MODE = 2;
 
     RefreshRatePolicy(WindowManagerService wmService, DisplayInfo displayInfo,
             HighRefreshRateBlacklist blacklist) {
@@ -67,7 +91,7 @@ class RefreshRatePolicy {
 
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimating()) {
+        if (w.isAnimating(TRANSITION | PARENTS)) {
             return 0;
         }
 
@@ -88,5 +112,29 @@ class RefreshRatePolicy {
             return mLowRefreshRateId;
         }
         return 0;
+    }
+
+    /**
+     * Calculate the priority based on whether the window is in focus and whether the application
+     * voted for a specific refresh rate.
+     *
+     * TODO(b/144307188): This is a very basic algorithm version. Explore other signals that might
+     * be useful in edge cases when we are deciding which layer should get priority when deciding
+     * about the refresh rate.
+     */
+    int calculatePriority(WindowState w) {
+        boolean isFocused = w.isFocused();
+        int preferredModeId = getPreferredModeId(w);
+
+        if (!isFocused && preferredModeId > 0) {
+            return LAYER_PRIORITY_NOT_FOCUSED_WITH_MODE;
+        }
+        if (isFocused && preferredModeId == 0) {
+            return LAYER_PRIORITY_FOCUSED_WITHOUT_MODE;
+        }
+        if (isFocused && preferredModeId > 0) {
+            return LAYER_PRIORITY_FOCUSED_WITH_MODE;
+        }
+        return LAYER_PRIORITY_UNSET;
     }
 }

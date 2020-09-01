@@ -28,8 +28,10 @@ public class ProcessTest extends TestCase {
         assertEquals(Process.BLUETOOTH_UID, Process.getUidForName("bluetooth"));
         assertEquals(Process.FIRST_APPLICATION_UID, Process.getUidForName("u0_a0"));
         assertEquals(UserHandle.getUid(1, Process.SYSTEM_UID), Process.getUidForName("u1_system"));
-        assertEquals(UserHandle.getUid(2, Process.FIRST_ISOLATED_UID),
+        assertEquals(UserHandle.getUid(2, Process.FIRST_APP_ZYGOTE_ISOLATED_UID),
                 Process.getUidForName("u2_i0"));
+        assertEquals(UserHandle.getUid(2, Process.FIRST_ISOLATED_UID),
+                Process.getUidForName("u2_i9000"));
         assertEquals(UserHandle.getUid(3, Process.FIRST_APPLICATION_UID + 100),
                 Process.getUidForName("u3_a100"));
     }

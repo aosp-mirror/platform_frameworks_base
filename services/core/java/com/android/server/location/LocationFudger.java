@@ -16,290 +16,172 @@
 
 package com.android.server.location;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.security.SecureRandom;
-import android.content.Context;
-import android.database.ContentObserver;
+import android.annotation.Nullable;
 import android.location.Location;
-import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.Settings;
-import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.security.SecureRandom;
+import java.time.Clock;
+import java.util.Random;
 
 /**
- * Contains the logic to obfuscate (fudge) locations for coarse applications.
- *
- * <p>The goal is just to prevent applications with only
- * the coarse location permission from receiving a fine location.
+ * Contains the logic to obfuscate (fudge) locations for coarse applications. The goal is just to
+ * prevent applications with only the coarse location permission from receiving a fine location.
  */
 public class LocationFudger {
-    private static final boolean D = false;
-    private static final String TAG = "LocationFudge";
 
-    /**
-     * Default coarse accuracy in meters.
-     */
-    private static final float DEFAULT_ACCURACY_IN_METERS = 2000.0f;
+    // minimum accuracy a coarsened location can have
+    private static final float MIN_ACCURACY_M = 200.0f;
 
-    /**
-     * Minimum coarse accuracy in meters.
-     */
-    private static final float MINIMUM_ACCURACY_IN_METERS = 200.0f;
+    // how often random offsets are updated
+    @VisibleForTesting
+    static final long OFFSET_UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
-    /**
-     * Secure settings key for coarse accuracy.
-     */
-    private static final String COARSE_ACCURACY_CONFIG_NAME = "locationCoarseAccuracy";
-
-    /**
-     * This is the fastest interval that applications can receive coarse
-     * locations.
-     */
-    public static final long FASTEST_INTERVAL_MS = 10 * 60 * 1000;  // 10 minutes
-
-    /**
-     * The duration until we change the random offset.
-     */
-    private static final long CHANGE_INTERVAL_MS = 60 * 60 * 1000;  // 1 hour
-
-    /**
-     * The percentage that we change the random offset at every interval.
-     *
-     * <p>0.0 indicates the random offset doesn't change. 1.0
-     * indicates the random offset is completely replaced every interval.
-     */
+    // the percentage that we change the random offset at every interval. 0.0 indicates the random
+    // offset doesn't change. 1.0 indicates the random offset is completely replaced every interval
     private static final double CHANGE_PER_INTERVAL = 0.03;  // 3% change
 
-    // Pre-calculated weights used to move the random offset.
-    //
-    // The goal is to iterate on the previous offset, but keep
-    // the resulting standard deviation the same. The variance of
-    // two gaussian distributions summed together is equal to the
-    // sum of the variance of each distribution. So some quick
-    // algebra results in the following sqrt calculation to
-    // weigh in a new offset while keeping the final standard
-    // deviation unchanged.
+    // weights used to move the random offset. the goal is to iterate on the previous offset, but
+    // keep the resulting standard deviation the same. the variance of two gaussian distributions
+    // summed together is equal to the sum of the variance of each distribution. so some quick
+    // algebra results in the following sqrt calculation to weight in a new offset while keeping the
+    // final standard deviation unchanged.
     private static final double NEW_WEIGHT = CHANGE_PER_INTERVAL;
-    private static final double PREVIOUS_WEIGHT = Math.sqrt(1 - NEW_WEIGHT * NEW_WEIGHT);
+    private static final double OLD_WEIGHT = Math.sqrt(1 - NEW_WEIGHT * NEW_WEIGHT);
+
+    // this number actually varies because the earth is not round, but 111,000 meters is considered
+    // generally acceptable
+    private static final int APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR = 111_000;
+
+    // we pick a value 1 meter away from 90.0 degrees in order to keep cosine(MAX_LATITUDE) to a
+    // non-zero value, so that we avoid divide by zero errors
+    private static final double MAX_LATITUDE =
+            90.0 - (1.0 / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR);
+
+    private final float mAccuracyM;
+    private final Clock mClock;
+    private final Random mRandom;
+
+    @GuardedBy("this")
+    private double mLatitudeOffsetM;
+    @GuardedBy("this")
+    private double mLongitudeOffsetM;
+    @GuardedBy("this")
+    private long mNextUpdateRealtimeMs;
+
+    @GuardedBy("this")
+    @Nullable private Location mCachedFineLocation;
+    @GuardedBy("this")
+    @Nullable private Location mCachedCoarseLocation;
+
+    public LocationFudger(float accuracyM) {
+        this(accuracyM, SystemClock.elapsedRealtimeClock(), new SecureRandom());
+    }
+
+    @VisibleForTesting
+    LocationFudger(float accuracyM, Clock clock, Random random) {
+        mClock = clock;
+        mRandom = random;
+        mAccuracyM = Math.max(accuracyM, MIN_ACCURACY_M);
+
+        resetOffsets();
+    }
 
     /**
-     * This number actually varies because the earth is not round, but
-     * 111,000 meters is considered generally acceptable.
+     * Resets the random offsets completely.
      */
-    private static final int APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR = 111000;
+    public void resetOffsets() {
+        mLatitudeOffsetM = nextRandomOffset();
+        mLongitudeOffsetM = nextRandomOffset();
+        mNextUpdateRealtimeMs = mClock.millis() + OFFSET_UPDATE_INTERVAL_MS;
+    }
 
     /**
-     * Maximum latitude.
+     * Create a coarse location using two technique, random offsets and snap-to-grid.
      *
-     * <p>We pick a value 1 meter away from 90.0 degrees in order
-     * to keep cosine(MAX_LATITUDE) to a non-zero value, so that we avoid
-     * divide by zero fails.
+     * First we add a random offset to mitigate against detecting grid transitions. Without a random
+     * offset it is possible to detect a user's position quite accurately when they cross a grid
+     * boundary. The random offset changes very slowly over time, to mitigate against taking many
+     * location samples and averaging them out. Second we snap-to-grid (quantize). This has the nice
+     * property of producing stable results, and mitigating against taking many samples to average
+     * out a random offset.
      */
-    private static final double MAX_LATITUDE = 90.0 -
-            (1.0 / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR);
-
-    private final Object mLock = new Object();
-    private final SecureRandom mRandom = new SecureRandom();
-
-    /**
-     * Used to monitor coarse accuracy secure setting for changes.
-     */
-    private final ContentObserver mSettingsObserver;
-
-    /**
-     * Used to resolve coarse accuracy setting.
-     */
-    private final Context mContext;
-
-    // all fields below protected by mLock
-    private double mOffsetLatitudeMeters;
-    private double mOffsetLongitudeMeters;
-    private long mNextInterval;
-
-    /**
-     * Best location accuracy allowed for coarse applications.
-     * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
-     */
-    private float mAccuracyInMeters;
-
-    /**
-     * The distance between grids for snap-to-grid. See {@link #createCoarse}.
-     * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
-     */
-    private double mGridSizeInMeters;
-
-    /**
-     * Standard deviation of the (normally distributed) random offset applied
-     * to coarse locations. It does not need to be as large as
-     * {@link #COARSE_ACCURACY_METERS} because snap-to-grid is the primary obfuscation
-     * method. See further details in the implementation.
-     * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
-     */
-    private double mStandardDeviationInMeters;
-
-    public LocationFudger(Context context, Handler handler) {
-        mContext = context;
-        mSettingsObserver = new ContentObserver(handler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                setAccuracyInMeters(loadCoarseAccuracy());
+    public Location createCoarse(Location fine) {
+        synchronized (this) {
+            if (fine == mCachedFineLocation) {
+                return new Location(mCachedCoarseLocation);
             }
-        };
-        mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
-                COARSE_ACCURACY_CONFIG_NAME), false, mSettingsObserver);
-
-        float accuracy = loadCoarseAccuracy();
-        synchronized (mLock) {
-            setAccuracyInMetersLocked(accuracy);
-            mOffsetLatitudeMeters = nextOffsetLocked();
-            mOffsetLongitudeMeters = nextOffsetLocked();
-            mNextInterval = SystemClock.elapsedRealtime() + CHANGE_INTERVAL_MS;
         }
-    }
 
-    /**
-     * Get the cached coarse location, or generate a new one and cache it.
-     */
-    public Location getOrCreate(Location location) {
-        synchronized (mLock) {
-            Location coarse = location.getExtraLocation(Location.EXTRA_COARSE_LOCATION);
-            if (coarse == null) {
-                return addCoarseLocationExtraLocked(location);
-            }
-            if (coarse.getAccuracy() < mAccuracyInMeters) {
-                return addCoarseLocationExtraLocked(location);
-            }
-            return coarse;
-        }
-    }
+        // update the offsets in use
+        updateOffsets();
 
-    private Location addCoarseLocationExtraLocked(Location location) {
-        Location coarse = createCoarseLocked(location);
-        location.setExtraLocation(Location.EXTRA_COARSE_LOCATION, coarse);
-        return coarse;
-    }
-
-    /**
-     * Create a coarse location.
-     *
-     * <p>Two techniques are used: random offsets and snap-to-grid.
-     *
-     * <p>First we add a random offset. This mitigates against detecting
-     * grid transitions. Without a random offset it is possible to detect
-     * a users position very accurately when they cross a grid boundary.
-     * The random offset changes very slowly over time, to mitigate against
-     * taking many location samples and averaging them out.
-     *
-     * <p>Second we snap-to-grid (quantize). This has the nice property of
-     * producing stable results, and mitigating against taking many samples
-     * to average out a random offset.
-     */
-    private Location createCoarseLocked(Location fine) {
         Location coarse = new Location(fine);
 
-        // clean all the optional information off the location, because
-        // this can leak detailed location information
+        // clear any fields that could leak more detailed location information
         coarse.removeBearing();
         coarse.removeSpeed();
         coarse.removeAltitude();
         coarse.setExtras(null);
 
-        double lat = coarse.getLatitude();
-        double lon = coarse.getLongitude();
+        double latitude = wrapLatitude(coarse.getLatitude());
+        double longitude = wrapLongitude(coarse.getLongitude());
 
-        // wrap
-        lat = wrapLatitude(lat);
-        lon = wrapLongitude(lon);
+        // add offsets - update longitude first using the non-offset latitude
+        longitude += wrapLongitude(metersToDegreesLongitude(mLongitudeOffsetM, latitude));
+        latitude += wrapLatitude(metersToDegreesLatitude(mLatitudeOffsetM));
 
-        // Step 1) apply a random offset
+        // quantize location by snapping to a grid. this is the primary means of obfuscation. it
+        // gives nice consistent results and is very effective at hiding the true location (as long
+        // as you are not sitting on a grid boundary, which the random offsets mitigate).
         //
-        // The goal of the random offset is to prevent the application
-        // from determining that the device is on a grid boundary
-        // when it crosses from one grid to the next.
-        //
-        // We apply the offset even if the location already claims to be
-        // inaccurate, because it may be more accurate than claimed.
-        updateRandomOffsetLocked();
-        // perform lon first whilst lat is still within bounds
-        lon += metersToDegreesLongitude(mOffsetLongitudeMeters, lat);
-        lat += metersToDegreesLatitude(mOffsetLatitudeMeters);
-        if (D) Log.d(TAG, String.format("applied offset of %.0f, %.0f (meters)",
-                mOffsetLongitudeMeters, mOffsetLatitudeMeters));
+        // note that we quantize the latitude first, since the longitude quantization depends on the
+        // latitude value and so leaks information about the latitude
+        double latGranularity = metersToDegreesLatitude(mAccuracyM);
+        latitude = wrapLatitude(Math.round(latitude / latGranularity) * latGranularity);
+        double lonGranularity = metersToDegreesLongitude(mAccuracyM, latitude);
+        longitude = wrapLongitude(Math.round(longitude / lonGranularity) * lonGranularity);
 
-        // wrap
-        lat = wrapLatitude(lat);
-        lon = wrapLongitude(lon);
+        coarse.setLatitude(latitude);
+        coarse.setLongitude(longitude);
+        coarse.setAccuracy(Math.max(mAccuracyM, coarse.getAccuracy()));
 
-        // Step 2) Snap-to-grid (quantize)
-        //
-        // This is the primary means of obfuscation. It gives nice consistent
-        // results and is very effective at hiding the true location
-        // (as long as you are not sitting on a grid boundary, which
-        // step 1 mitigates).
-        //
-        // Note we quantize the latitude first, since the longitude
-        // quantization depends on the latitude value and so leaks information
-        // about the latitude
-        double latGranularity = metersToDegreesLatitude(mGridSizeInMeters);
-        lat = Math.round(lat / latGranularity) * latGranularity;
-        double lonGranularity = metersToDegreesLongitude(mGridSizeInMeters, lat);
-        lon = Math.round(lon / lonGranularity) * lonGranularity;
+        synchronized (this) {
+            mCachedFineLocation = fine;
+            mCachedCoarseLocation = coarse;
+        }
 
-        // wrap again
-        lat = wrapLatitude(lat);
-        lon = wrapLongitude(lon);
-
-        // apply
-        coarse.setLatitude(lat);
-        coarse.setLongitude(lon);
-        coarse.setAccuracy(Math.max(mAccuracyInMeters, coarse.getAccuracy()));
-
-        if (D) Log.d(TAG, "fudged " + fine + " to " + coarse);
-        return coarse;
+        return new Location(mCachedCoarseLocation);
     }
 
     /**
-     * Update the random offset over time.
+     * Update the random offsets over time.
      *
-     * <p>If the random offset was new for every location
-     * fix then an application can more easily average location results
-     * over time,
-     * especially when the location is near a grid boundary. On the
-     * other hand if the random offset is constant then if an application
-     * found a way to reverse engineer the offset they would be able
-     * to detect location at grid boundaries very accurately. So
-     * we choose a random offset and then very slowly move it, to
-     * make both approaches very hard.
-     *
-     * <p>The random offset does not need to be large, because snap-to-grid
-     * is the primary obfuscation mechanism. It just needs to be large
-     * enough to stop information leakage as we cross grid boundaries.
+     * If the random offset was reset for every location fix then an application could more easily
+     * average location results over time, especially when the location is near a grid boundary. On
+     * the other hand if the random offset is constant then if an application finds a way to reverse
+     * engineer the offset they would be able to detect location at grid boundaries very accurately.
+     * So we choose a random offset and then very slowly move it, to make both approaches very hard.
+     * The random offset does not need to be large, because snap-to-grid is the primary obfuscation
+     * mechanism. It just needs to be large enough to stop information leakage as we cross grid
+     * boundaries.
      */
-    private void updateRandomOffsetLocked() {
-        long now = SystemClock.elapsedRealtime();
-        if (now < mNextInterval) {
+    private synchronized void updateOffsets() {
+        long now = mClock.millis();
+        if (now < mNextUpdateRealtimeMs) {
             return;
         }
 
-        if (D) Log.d(TAG, String.format("old offset: %.0f, %.0f (meters)",
-                mOffsetLongitudeMeters, mOffsetLatitudeMeters));
-
-        // ok, need to update the random offset
-        mNextInterval = now + CHANGE_INTERVAL_MS;
-
-        mOffsetLatitudeMeters *= PREVIOUS_WEIGHT;
-        mOffsetLatitudeMeters += NEW_WEIGHT * nextOffsetLocked();
-        mOffsetLongitudeMeters *= PREVIOUS_WEIGHT;
-        mOffsetLongitudeMeters += NEW_WEIGHT * nextOffsetLocked();
-
-        if (D) Log.d(TAG, String.format("new offset: %.0f, %.0f (meters)",
-                mOffsetLongitudeMeters, mOffsetLatitudeMeters));
+        mLatitudeOffsetM = (OLD_WEIGHT * mLatitudeOffsetM) + (NEW_WEIGHT * nextRandomOffset());
+        mLongitudeOffsetM = (OLD_WEIGHT * mLongitudeOffsetM) + (NEW_WEIGHT * nextRandomOffset());
+        mNextUpdateRealtimeMs = now + OFFSET_UPDATE_INTERVAL_MS;
     }
 
-    private double nextOffsetLocked() {
-        return mRandom.nextGaussian() * mStandardDeviationInMeters;
+    private double nextRandomOffset() {
+        return mRandom.nextGaussian() * (mAccuracyM / 4.0);
     }
 
     private static double wrapLatitude(double lat) {
@@ -327,56 +209,8 @@ public class LocationFudger {
         return distance / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR;
     }
 
-    /**
-     * Requires latitude since longitudinal distances change with distance from equator.
-     */
+    // requires latitude since longitudinal distances change with distance from equator.
     private static double metersToDegreesLongitude(double distance, double lat) {
         return distance / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR / Math.cos(Math.toRadians(lat));
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(String.format("offset: %.0f, %.0f (meters)", mOffsetLongitudeMeters,
-                mOffsetLatitudeMeters));
-    }
-
-    /**
-     * This is the main control: call this to set the best location accuracy
-     * allowed for coarse applications and all derived values.
-     */
-    private void setAccuracyInMetersLocked(float accuracyInMeters) {
-        mAccuracyInMeters = Math.max(accuracyInMeters, MINIMUM_ACCURACY_IN_METERS);
-        if (D) {
-            Log.d(TAG, "setAccuracyInMetersLocked: new accuracy = " + mAccuracyInMeters);
-        }
-        mGridSizeInMeters = mAccuracyInMeters;
-        mStandardDeviationInMeters = mGridSizeInMeters / 4.0;
-    }
-
-    /**
-     * Same as setAccuracyInMetersLocked without the pre-lock requirement.
-     */
-    private void setAccuracyInMeters(float accuracyInMeters) {
-        synchronized (mLock) {
-            setAccuracyInMetersLocked(accuracyInMeters);
-        }
-    }
-
-    /**
-     * Loads the coarse accuracy value from secure settings.
-     */
-    private float loadCoarseAccuracy() {
-        String newSetting = Settings.Secure.getString(mContext.getContentResolver(),
-                COARSE_ACCURACY_CONFIG_NAME);
-        if (D) {
-            Log.d(TAG, "loadCoarseAccuracy: newSetting = \"" + newSetting + "\"");
-        }
-        if (newSetting == null) {
-            return DEFAULT_ACCURACY_IN_METERS;
-        }
-        try {
-            return Float.parseFloat(newSetting);
-        } catch (NumberFormatException e) {
-            return DEFAULT_ACCURACY_IN_METERS;
-        }
     }
 }

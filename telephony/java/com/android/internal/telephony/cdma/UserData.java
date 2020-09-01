@@ -24,10 +24,6 @@ import com.android.internal.util.HexDump;
 
 public class UserData {
 
-    @UnsupportedAppUsage
-    public UserData() {
-    }
-
     /**
      * User data encoding types.
      * (See 3GPP2 C.R1001-F, v1.0, table 9.1-1)
@@ -105,6 +101,10 @@ public class UserData {
         }
         charToAscii.put('\n', ASCII_NL_INDEX);
         charToAscii.put('\r', ASCII_CR_INDEX);
+    }
+
+    @UnsupportedAppUsage
+    public UserData() {
     }
 
     /*

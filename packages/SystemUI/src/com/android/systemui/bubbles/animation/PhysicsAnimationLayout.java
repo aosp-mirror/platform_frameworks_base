@@ -356,6 +356,9 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
     /** Immediately re-orders the view to the given index. */
     public void reorderView(View view, int index) {
+        if (view == null) {
+            return;
+        }
         final int oldIndex = indexOfChild(view);
 
         super.removeView(view);
@@ -438,7 +441,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         // Cancel physics animations on the view.
         for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
-            getAnimationFromView(property, view).cancel();
+            final DynamicAnimation animationFromView = getAnimationFromView(property, view);
+            if (animationFromView != null) {
+                animationFromView.cancel();
+            }
         }
     }
 
@@ -496,13 +502,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
      * Retrieves the animation of the given property from the view at the given index via the view
      * tag system.
      */
-    private SpringAnimation getAnimationAtIndex(
+    @Nullable private SpringAnimation getAnimationAtIndex(
             DynamicAnimation.ViewProperty property, int index) {
         return getAnimationFromView(property, getChildAt(index));
     }
 
     /** Retrieves the animation of the given property from the view via the view tag system. */
-    private SpringAnimation getAnimationFromView(
+    @Nullable private SpringAnimation getAnimationFromView(
             DynamicAnimation.ViewProperty property, View view) {
         return (SpringAnimation) view.getTag(getTagIdForProperty(property));
     }
@@ -533,8 +539,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             final float offset = mController.getOffsetForChainedPropertyAnimation(property);
             if (nextAnimInChain < getChildCount()) {
-                getAnimationAtIndex(property, nextAnimInChain)
-                        .animateToFinalPosition(value + offset);
+                final SpringAnimation nextAnim = getAnimationAtIndex(property, nextAnimInChain);
+                if (nextAnim != null) {
+                    nextAnim.animateToFinalPosition(value + offset);
+                }
             }
         });
 
@@ -755,20 +763,37 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * or {@link #position}, ultimately animating the view's position to the final point on the
          * given path.
          *
-         * Any provided end listeners will be called when the physics-based animations kicked off by
-         * the moving target have completed - not when the target animation completes.
+         * @param pathAnimEndActions End actions to run after the animator that moves the target
+         *                           along the path ends. The views following the target may still
+         *                           be moving.
          */
         public PhysicsPropertyAnimator followAnimatedTargetAlongPath(
                 Path path,
                 int targetAnimDuration,
                 TimeInterpolator targetAnimInterpolator,
-                Runnable... endActions) {
+                Runnable... pathAnimEndActions) {
+            if (mPathAnimator != null) {
+                mPathAnimator.cancel();
+            }
+
             mPathAnimator = ObjectAnimator.ofFloat(
                     this, mCurrentPointOnPathXProperty, mCurrentPointOnPathYProperty, path);
+
+            if (pathAnimEndActions != null) {
+                mPathAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        for (Runnable action : pathAnimEndActions) {
+                            if (action != null) {
+                                action.run();
+                            }
+                        }
+                    }
+                });
+            }
+
             mPathAnimator.setDuration(targetAnimDuration);
             mPathAnimator.setInterpolator(targetAnimInterpolator);
-
-            mPositionEndActions = endActions;
 
             // Remove translation related values since we're going to ignore them and follow the
             // path instead.
@@ -961,6 +986,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
             if (view != null) {
                 final SpringAnimation animation =
                         (SpringAnimation) view.getTag(getTagIdForProperty(property));
+
+                // If the animation is null, the view was probably removed from the layout before
+                // the animation started.
+                if (animation == null) {
+                    return;
+                }
+
                 if (afterCallbacks != null) {
                     animation.addEndListener(new OneTimeEndListener() {
                         @Override
@@ -1010,6 +1042,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
             if (view != null) {
                 final SpringAnimation animation =
                         (SpringAnimation) view.getTag(getTagIdForProperty(property));
+
+                if (animation == null) {
+                    return;
+                }
+
                 final SpringForce animationSpring = animation.getSpring();
 
                 if (animationSpring == null) {
@@ -1106,10 +1143,5 @@ public class PhysicsAnimationLayout extends FrameLayout {
         private void setAssociatedController(PhysicsAnimationController controller) {
             mAssociatedController = controller;
         }
-    }
-
-    @Override
-    protected boolean canReceivePointerEvents() {
-        return false;
     }
 }

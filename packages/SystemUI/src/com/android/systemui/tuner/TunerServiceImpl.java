@@ -15,8 +15,6 @@
  */
 package com.android.systemui.tuner;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,18 +32,20 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.util.leak.LeakDetector;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 
@@ -62,14 +62,16 @@ public class TunerServiceImpl extends TunerService {
     // shouldn't be reset with tuner settings.
     private static final String[] RESET_BLACKLIST = new String[] {
             QSTileHost.TILES_SETTING,
-            Settings.Secure.DOZE_ALWAYS_ON
+            Settings.Secure.DOZE_ALWAYS_ON,
+            Settings.Secure.MEDIA_CONTROLS_RESUME
     };
 
     private final Observer mObserver = new Observer();
     // Map of Uris we listen on to their settings keys.
     private final ArrayMap<Uri, String> mListeningUris = new ArrayMap<>();
     // Map of settings keys to the listener.
-    private final HashMap<String, Set<Tunable>> mTunableLookup = new HashMap<>();
+    private final ConcurrentHashMap<String, Set<Tunable>> mTunableLookup =
+            new ConcurrentHashMap<>();
     // Set of all tunables, used for leak detection.
     private final HashSet<Tunable> mTunables = LeakDetector.ENABLED ? new HashSet<>() : null;
     private final Context mContext;
@@ -82,8 +84,8 @@ public class TunerServiceImpl extends TunerService {
     /**
      */
     @Inject
-    public TunerServiceImpl(Context context, @Named(MAIN_HANDLER_NAME) Handler mainHandler,
-            LeakDetector leakDetector) {
+    public TunerServiceImpl(Context context, @Main Handler mainHandler,
+            LeakDetector leakDetector, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mLeakDetector = leakDetector;
@@ -96,7 +98,7 @@ public class TunerServiceImpl extends TunerService {
         }
 
         mCurrentUser = ActivityManager.getCurrentUser();
-        mUserTracker = new CurrentUserTracker(mContext) {
+        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
                 mCurrentUser = newUserId;
@@ -117,7 +119,7 @@ public class TunerServiceImpl extends TunerService {
             String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
             if (blacklistStr != null) {
                 ArraySet<String> iconBlacklist =
-                        StatusBarIconController.getIconBlacklist(blacklistStr);
+                        StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
 
                 iconBlacklist.add("rotate");
                 iconBlacklist.add("headset");
@@ -189,7 +191,8 @@ public class TunerServiceImpl extends TunerService {
             mContentResolver.registerContentObserver(uri, false, mObserver, mCurrentUser);
         }
         // Send the first state.
-        String value = Settings.Secure.getStringForUser(mContentResolver, key, mCurrentUser);
+        String value = DejankUtils.whitelistIpcs(() -> Settings.Secure
+                .getStringForUser(mContentResolver, key, mCurrentUser));
         tunable.onTuningChanged(key, value);
     }
 
@@ -261,10 +264,14 @@ public class TunerServiceImpl extends TunerService {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
+        public void onChange(boolean selfChange, java.util.Collection<Uri> uris,
+                int flags, int userId) {
             if (userId == ActivityManager.getCurrentUser()) {
-                reloadSetting(uri);
+                for (Uri u : uris) {
+                    reloadSetting(u);
+                }
             }
         }
+
     }
 }

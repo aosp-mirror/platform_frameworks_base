@@ -34,9 +34,9 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.Injector;
-import static com.android.server.am.ActivityManagerService.NETWORK_STATE_BLOCK;
-import static com.android.server.am.ActivityManagerService.NETWORK_STATE_NO_CHANGE;
-import static com.android.server.am.ActivityManagerService.NETWORK_STATE_UNBLOCK;
+import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
+import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
+import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,6 +45,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -54,9 +56,11 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -70,13 +74,16 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.appop.AppOpsService;
+import com.android.server.LocalServices;
 import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
+import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -114,6 +121,20 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_ACTIVE
     };
 
+    private static PackageManagerInternal sPackageManagerInternal;
+
+    @BeforeClass
+    public static void setUpOnce() {
+        sPackageManagerInternal = mock(PackageManagerInternal.class);
+        doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
+                .getSystemUiServiceComponent();
+        // Remove stale instance of PackageManagerInternal if there is any
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
+    }
+
+    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+
     private Context mContext = getInstrumentation().getTargetContext();
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
@@ -130,8 +151,8 @@ public class ActivityManagerServiceTest {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
         mHandler = new TestHandler(mHandlerThread.getLooper());
-        mInjector = new TestInjector();
-        mAms = new ActivityManagerService(mInjector);
+        mInjector = new TestInjector(mContext);
+        mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
         mAms.mWaitForNetworkTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
@@ -255,8 +276,11 @@ public class ActivityManagerServiceTest {
         uidRec.hasInternetPermission = true;
         mAms.mProcessList.mActiveUids.put(uid, uidRec);
 
-        final ProcessRecord appRec = new ProcessRecord(mAms, new ApplicationInfo(), TAG, uid);
-        appRec.thread = Mockito.mock(IApplicationThread.class);
+        ApplicationInfo info = new ApplicationInfo();
+        info.packageName = "";
+
+        final ProcessRecord appRec = new ProcessRecord(mAms, info, TAG, uid);
+        appRec.thread = mock(IApplicationThread.class);
         mAms.mProcessList.mLruProcesses.add(appRec);
 
         return uidRec;
@@ -271,7 +295,7 @@ public class ActivityManagerServiceTest {
 
         uidRec.setProcState = prevState;
         uidRec.setCurProcState(curState);
-        mAms.incrementProcStateSeqAndNotifyAppsLocked();
+        mAms.mProcessList.incrementProcStateSeqAndNotifyAppsLocked(mAms.mProcessList.mActiveUids);
 
         // @SuppressWarnings("GuardedBy")
         assertEquals(expectedGlobalCounter, mAms.mProcessList.mProcStateSeqCounter);
@@ -437,42 +461,42 @@ public class ActivityManagerServiceTest {
         uidRec.setCurProcState(PROCESS_STATE_RECEIVER);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Foreground to foreground
         uidRec.setProcState = PROCESS_STATE_FOREGROUND_SERVICE;
         uidRec.setCurProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_CACHED_ACTIVITY;
         uidRec.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_NONEXISTENT;
         uidRec.setCurProcState(PROCESS_STATE_CACHED_ACTIVITY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Background to foreground
         uidRec.setProcState = PROCESS_STATE_SERVICE;
         uidRec.setCurProcState(PROCESS_STATE_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_BLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Foreground to background
         uidRec.setProcState = PROCESS_STATE_TOP;
         uidRec.setCurProcState(PROCESS_STATE_LAST_ACTIVITY);
         expectedBlockState = NETWORK_STATE_UNBLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
     }
 
     /**
@@ -481,8 +505,8 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUids_dispatchNeededChanges() throws RemoteException {
-        when(mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null))
-                .thenReturn(AppOpsManager.MODE_ALLOWED);
+        when(mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null,
+                null, false, null, false)).thenReturn(AppOpsManager.MODE_ALLOWED);
 
         final int[] changesToObserve = {
             ActivityManager.UID_OBSERVER_PROCSTATE,
@@ -494,7 +518,7 @@ public class ActivityManagerServiceTest {
         };
         final IUidObserver[] observers = new IUidObserver.Stub[changesToObserve.length];
         for (int i = 0; i < observers.length; ++i) {
-            observers[i] = Mockito.mock(IUidObserver.Stub.class);
+            observers[i] = mock(IUidObserver.Stub.class);
             when(observers[i].asBinder()).thenReturn((IBinder) observers[i]);
             mAms.registerUidObserver(observers[i], changesToObserve[i] /* which */,
                     ActivityManager.PROCESS_STATE_UNKNOWN /* cutpoint */, null /* caller */);
@@ -579,7 +603,8 @@ public class ActivityManagerServiceTest {
                 verifyObserverReceivedChanges(observerToTest, changesToVerify, changeItems,
                         (observer, changeItem) -> {
                             verify(observer).onUidStateChanged(changeItem.uid,
-                                    changeItem.processState, changeItem.procStateSeq);
+                                    changeItem.processState, changeItem.procStateSeq,
+                                    ActivityManager.PROCESS_CAPABILITY_NONE);
                         });
             }
             // Verify there are no other callbacks for this observer.
@@ -606,7 +631,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_procStateCutpoint() throws RemoteException {
-        final IUidObserver observer = Mockito.mock(IUidObserver.Stub.class);
+        final IUidObserver observer = mock(IUidObserver.Stub.class);
 
         when(observer.asBinder()).thenReturn((IBinder) observer);
         mAms.registerUidObserver(observer, ActivityManager.UID_OBSERVER_PROCSTATE /* which */,
@@ -627,7 +652,8 @@ public class ActivityManagerServiceTest {
         // First process state message is always delivered regardless of whether the process state
         // change is above or below the cutpoint (PROCESS_STATE_SERVICE).
         verify(observer).onUidStateChanged(TEST_UID,
-                changeItem.processState, changeItem.procStateSeq);
+                changeItem.processState, changeItem.procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_RECEIVER;
@@ -644,7 +670,8 @@ public class ActivityManagerServiceTest {
         // the current process state change is above cutpoint, so callback will be invoked with the
         // current process state change.
         verify(observer).onUidStateChanged(TEST_UID,
-                changeItem.processState, changeItem.procStateSeq);
+                changeItem.processState, changeItem.procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         verifyNoMoreInteractions(observer);
 
         changeItem.processState = ActivityManager.PROCESS_STATE_TOP;
@@ -661,7 +688,8 @@ public class ActivityManagerServiceTest {
         // the current process state change is below cutpoint, so callback will be invoked with the
         // current process state change.
         verify(observer).onUidStateChanged(TEST_UID,
-                changeItem.processState, changeItem.procStateSeq);
+                changeItem.processState, changeItem.procStateSeq,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
         verifyNoMoreInteractions(observer);
     }
 
@@ -697,7 +725,7 @@ public class ActivityManagerServiceTest {
         assertEquals("No observers registered, so validateUids should be empty",
                 0, mAms.mValidateUids.size());
 
-        final IUidObserver observer = Mockito.mock(IUidObserver.Stub.class);
+        final IUidObserver observer = mock(IUidObserver.Stub.class);
         when(observer.asBinder()).thenReturn((IBinder) observer);
         mAms.registerUidObserver(observer, 0, 0, null);
         // Verify that when observers are registered, then validateUids is correctly updated.
@@ -928,9 +956,8 @@ public class ActivityManagerServiceTest {
     private class TestInjector extends Injector {
         private boolean mRestricted = true;
 
-        @Override
-        public Context getContext() {
-            return mContext;
+        TestInjector(Context context) {
+            super(context);
         }
 
         @Override

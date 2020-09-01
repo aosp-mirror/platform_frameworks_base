@@ -63,7 +63,7 @@ public class UidDetailProvider {
     }
 
     public UidDetailProvider(Context context) {
-        mContext = context.getApplicationContext();
+        mContext = context;
         mUidDetailCache = new SparseArray<UidDetail>();
     }
 

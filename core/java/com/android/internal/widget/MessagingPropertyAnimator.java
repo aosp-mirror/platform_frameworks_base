@@ -32,7 +32,7 @@ import com.android.internal.R;
  */
 public class MessagingPropertyAnimator implements View.OnLayoutChangeListener {
     private static final long APPEAR_ANIMATION_LENGTH = 210;
-    private static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
+    public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
     private static final int TAG_TOP_ANIMATOR = R.id.tag_top_animator;
     private static final int TAG_TOP = R.id.tag_top_override;

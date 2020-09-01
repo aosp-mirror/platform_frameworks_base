@@ -28,7 +28,6 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.text.format.Time;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
@@ -39,9 +38,14 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A renderer class that manages the GL state, and can draw a frame into a set of output
@@ -62,6 +66,9 @@ public class SurfaceTextureRenderer {
     private static final int FLIP_TYPE_HORIZONTAL = 1;
     private static final int FLIP_TYPE_VERTICAL = 2;
     private static final int FLIP_TYPE_BOTH = FLIP_TYPE_HORIZONTAL | FLIP_TYPE_VERTICAL;
+
+    private static final DateTimeFormatter LOG_NAME_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss", Locale.ROOT);
 
     private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
     private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
@@ -624,9 +631,7 @@ public class SurfaceTextureRenderer {
         path.append(File.separator);
         path.append("durations_");
 
-        Time now = new Time();
-        now.setToNow();
-        path.append(now.format2445());
+        path.append(formatTimestamp(System.currentTimeMillis()));
         path.append("_S");
         for (EGLSurfaceHolder surface : mSurfaces) {
             path.append(String.format("_%d_%d", surface.width, surface.height));
@@ -637,6 +642,15 @@ public class SurfaceTextureRenderer {
         }
         path.append(".txt");
         mPerfMeasurer.dumpPerformanceData(path.toString());
+    }
+
+    private static String formatTimestamp(long timeMillis) {
+        // This is a replacement for {@link Time#format2445()} that doesn't suffer from Y2038
+        // issues.
+        Instant instant = Instant.ofEpochMilli(timeMillis);
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zoneId);
+        return LOG_NAME_TIME_FORMATTER.format(localDateTime);
     }
 
     private void setupGlTiming() {

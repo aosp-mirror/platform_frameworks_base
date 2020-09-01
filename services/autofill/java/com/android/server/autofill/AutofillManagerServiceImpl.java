@@ -57,6 +57,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
+import android.service.autofill.InlineSuggestionRenderService;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.UserData;
 import android.util.ArrayMap;
@@ -66,7 +67,6 @@ import android.util.LocalLog;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -79,15 +79,17 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
+import com.android.server.autofill.AutofillManagerService.DisabledInfoCache;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
  * app's {@link IAutoFillService} implementation.
@@ -117,18 +119,9 @@ final class AutofillManagerServiceImpl
     private final LocalLog mWtfHistory;
     private final FieldClassificationStrategy mFieldClassificationStrategy;
 
-    /**
-     * Apps disabled by the service; key is package name, value is when they will be enabled again.
-     */
     @GuardedBy("mLock")
-    private ArrayMap<String, Long> mDisabledApps;
-
-    /**
-     * Activities disabled by the service; key is component name, value is when they will be enabled
-     * again.
-     */
-    @GuardedBy("mLock")
-    private ArrayMap<ComponentName, Long> mDisabledActivities;
+    @Nullable
+    private RemoteInlineSuggestionRenderService mRemoteInlineSuggestionRenderService;
 
     /**
      * Data used for field classification.
@@ -151,6 +144,13 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     private FillEventHistory mEventHistory;
 
+    /**
+     * The last inline augmented autofill selection. Note that we don't log the selection from the
+     * dropdown UI since the service owns the UI in that case.
+     */
+    @GuardedBy("mLock")
+    private FillEventHistory mAugmentedAutofillEventHistory;
+
     /** Shared instance, doesn't need to be logged */
     private final AutofillCompatState mAutofillCompatState;
 
@@ -168,10 +168,16 @@ final class AutofillManagerServiceImpl
     @Nullable
     private ServiceInfo mRemoteAugmentedAutofillServiceInfo;
 
+    private final InputMethodManagerInternal mInputMethodManagerInternal;
+
+    private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
+
+    private final DisabledInfoCache mDisabledInfoCache;
+
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState,
-            boolean disabled) {
+            boolean disabled, DisabledInfoCache disableCache) {
         super(master, lock, userId);
 
         mUiLatencyHistory = uiLatencyHistory;
@@ -179,8 +185,21 @@ final class AutofillManagerServiceImpl
         mUi = ui;
         mFieldClassificationStrategy = new FieldClassificationStrategy(getContext(), userId);
         mAutofillCompatState = autofillCompatState;
-
+        mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
+        mContentCaptureManagerInternal = LocalServices.getService(
+                ContentCaptureManagerInternal.class);
+        mDisabledInfoCache = disableCache;
         updateLocked(disabled);
+    }
+
+    boolean sendActivityAssistDataToContentCapture(@NonNull IBinder activityToken,
+            @NonNull Bundle data) {
+        if (mContentCaptureManagerInternal != null) {
+            mContentCaptureManagerInternal.sendActivityAssistData(getUserId(), activityToken, data);
+            return true;
+        }
+
+        return false;
     }
 
     @GuardedBy("mLock")
@@ -208,6 +227,8 @@ final class AutofillManagerServiceImpl
             sendStateToClients(/* resetClient= */ false);
         }
         updateRemoteAugmentedAutofillService();
+        updateRemoteInlineSuggestionRenderServiceLocked();
+
         return enabledChanged;
     }
 
@@ -239,7 +260,7 @@ final class AutofillManagerServiceImpl
         if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
 
         // Check if it's enabled for augmented autofill
-        if (isAugmentedAutofillServiceAvailableLocked()
+        if (componentName != null && isAugmentedAutofillServiceAvailableLocked()
                 && isWhitelistedForAugmentedAutofillLocked(componentName)) {
             return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
         }
@@ -493,7 +514,7 @@ final class AutofillManagerServiceImpl
                 sessionId, taskId, uid, activityToken, appCallbackToken, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
                 componentName, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
-                flags);
+                flags, mInputMethodManagerInternal);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -690,12 +711,25 @@ final class AutofillManagerServiceImpl
         }
     }
 
+    void setLastAugmentedAutofillResponse(int sessionId) {
+        synchronized (mLock) {
+            mAugmentedAutofillEventHistory = new FillEventHistory(sessionId, /* clientState= */
+                    null);
+        }
+    }
+
     /**
      * Resets the last fill selection.
      */
     void resetLastResponse() {
         synchronized (mLock) {
             mEventHistory = null;
+        }
+    }
+
+    void resetLastAugmentedAutofillResponse() {
+        synchronized (mLock) {
+            mAugmentedAutofillEventHistory = null;
         }
     }
 
@@ -765,6 +799,58 @@ final class AutofillManagerServiceImpl
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
                                 null, null, null, null, null, null, null));
             }
+        }
+    }
+
+    /**
+     * Updates the last fill response when a dataset is shown.
+     */
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (isValidEventLocked("logDatasetShown", sessionId)) {
+                mEventHistory.addEvent(
+                        new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
+                                null, null, null, null, null));
+            }
+        }
+    }
+
+    void logAugmentedAutofillAuthenticationSelected(int sessionId, @Nullable String selectedDataset,
+            @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillEventHistory == null
+                    || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
+                return;
+            }
+            mAugmentedAutofillEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
+                            clientState, null, null, null, null, null, null, null, null));
+        }
+    }
+
+    void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
+            @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillEventHistory == null
+                    || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
+                return;
+            }
+            mAugmentedAutofillEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASET_SELECTED, suggestionId, clientState, null, null,
+                            null, null, null, null, null, null));
+        }
+    }
+
+    void logAugmentedAutofillShown(int sessionId, @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillEventHistory == null
+                    || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
+                return;
+            }
+            mAugmentedAutofillEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
+                            null, null, null, null, null));
+
         }
     }
 
@@ -851,14 +937,18 @@ final class AutofillManagerServiceImpl
      * Gets the fill event history.
      *
      * @param callingUid The calling uid
-     *
-     * @return The history or {@code null} if there is none.
+     * @return The history for the autofill or the augmented autofill events depending on the {@code
+     * callingUid}, or {@code null} if there is none.
      */
     FillEventHistory getFillEventHistory(int callingUid) {
         synchronized (mLock) {
             if (mEventHistory != null
                     && isCalledByServiceLocked("getFillEventHistory", callingUid)) {
                 return mEventHistory;
+            }
+            if (mAugmentedAutofillEventHistory != null && isCalledByAugmentedAutofillServiceLocked(
+                    "getFillEventHistory", callingUid)) {
+                return mAugmentedAutofillEventHistory;
             }
         }
         return null;
@@ -953,47 +1043,11 @@ final class AutofillManagerServiceImpl
         } else {
             pw.println(compatPkgs);
         }
+        pw.print(prefix); pw.print("Inline Suggestions Enabled: ");
+        pw.println(isInlineSuggestionsEnabled());
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
-        pw.print(prefix); pw.print("Disabled apps: ");
-
-        if (mDisabledApps == null) {
-            pw.println("N/A");
-        } else {
-            final int size = mDisabledApps.size();
-            pw.println(size);
-            final StringBuilder builder = new StringBuilder();
-            final long now = SystemClock.elapsedRealtime();
-            for (int i = 0; i < size; i++) {
-                final String packageName = mDisabledApps.keyAt(i);
-                final long expiration = mDisabledApps.valueAt(i);
-                 builder.append(prefix).append(prefix)
-                     .append(i).append(". ").append(packageName).append(": ");
-                 TimeUtils.formatDuration((expiration - now), builder);
-                 builder.append('\n');
-             }
-             pw.println(builder);
-        }
-
-        pw.print(prefix); pw.print("Disabled activities: ");
-
-        if (mDisabledActivities == null) {
-            pw.println("N/A");
-        } else {
-            final int size = mDisabledActivities.size();
-            pw.println(size);
-            final StringBuilder builder = new StringBuilder();
-            final long now = SystemClock.elapsedRealtime();
-            for (int i = 0; i < size; i++) {
-                final ComponentName component = mDisabledActivities.keyAt(i);
-                final long expiration = mDisabledActivities.valueAt(i);
-                 builder.append(prefix).append(prefix)
-                     .append(i).append(". ").append(component).append(": ");
-                 TimeUtils.formatDuration((expiration - now), builder);
-                 builder.append('\n');
-             }
-             pw.println(builder);
-        }
+        mDisabledInfoCache.dump(mUserId, prefix, pw);
 
         final int size = mSessions.size();
         if (size == 0) {
@@ -1103,6 +1157,14 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    boolean isInlineSuggestionsEnabled() {
+        if (mInfo != null) {
+            return mInfo.isInlineSuggestionsEnabled();
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
     @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceLocked() {
         if (mRemoteAugmentedAutofillService == null) {
             final String serviceName = mMaster.mAugmentedAutofillResolver.getServiceName(mUserId);
@@ -1123,20 +1185,54 @@ final class AutofillManagerServiceImpl
                 Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): " + componentName);
             }
 
-            mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
-                    componentName, mUserId, new RemoteAugmentedAutofillServiceCallbacks() {
+            final RemoteAugmentedAutofillServiceCallbacks callbacks =
+                    new RemoteAugmentedAutofillServiceCallbacks() {
+                        @Override
+                        public void resetLastResponse() {
+                            AutofillManagerServiceImpl.this.resetLastAugmentedAutofillResponse();
+                        }
+
+                        @Override
+                        public void setLastResponse(int sessionId) {
+                            AutofillManagerServiceImpl.this.setLastAugmentedAutofillResponse(
+                                    sessionId);
+                        }
+
+                        @Override
+                        public void logAugmentedAutofillShown(int sessionId, Bundle clientState) {
+                            AutofillManagerServiceImpl.this.logAugmentedAutofillShown(sessionId,
+                                    clientState);
+                        }
+
+                        @Override
+                        public void logAugmentedAutofillSelected(int sessionId,
+                                String suggestionId, Bundle clientState) {
+                            AutofillManagerServiceImpl.this.logAugmentedAutofillSelected(sessionId,
+                                    suggestionId, clientState);
+                        }
+
+                        @Override
+                        public void logAugmentedAutofillAuthenticationSelected(int sessionId,
+                                String suggestionId, Bundle clientState) {
+                            AutofillManagerServiceImpl.this
+                                    .logAugmentedAutofillAuthenticationSelected(
+                                            sessionId, suggestionId, clientState);
+                        }
+
                         @Override
                         public void onServiceDied(@NonNull RemoteAugmentedAutofillService service) {
                             Slog.w(TAG, "remote augmented autofill service died");
                             final RemoteAugmentedAutofillService remoteService =
                                     mRemoteAugmentedAutofillService;
                             if (remoteService != null) {
-                                remoteService.destroy();
+                                remoteService.unbind();
                             }
                             mRemoteAugmentedAutofillService = null;
                         }
-                    }, mMaster.isInstantServiceAllowed(), mMaster.verbose,
-                    mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
+                    };
+            mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
+                    componentName, mUserId, callbacks, mMaster.isInstantServiceAllowed(),
+                    mMaster.verbose, mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
                     mMaster.mAugmentedServiceRequestTimeoutMs);
         }
 
@@ -1155,7 +1251,7 @@ final class AutofillManagerServiceImpl
                             + "destroying old remote service");
                 }
                 destroySessionsForAugmentedAutofillOnlyLocked();
-                mRemoteAugmentedAutofillService.destroy();
+                mRemoteAugmentedAutofillService.unbind();
                 mRemoteAugmentedAutofillService = null;
                 mRemoteAugmentedAutofillServiceInfo = null;
                 resetAugmentedAutofillWhitelistLocked();
@@ -1357,15 +1453,13 @@ final class AutofillManagerServiceImpl
     void disableAutofillForApp(@NonNull String packageName, long duration, int sessionId,
             boolean compatMode) {
         synchronized (mLock) {
-            if (mDisabledApps == null) {
-                mDisabledApps = new ArrayMap<>(1);
-            }
             long expiration = SystemClock.elapsedRealtime() + duration;
             // Protect it against overflow
             if (expiration < 0) {
                 expiration = Long.MAX_VALUE;
             }
-            mDisabledApps.put(packageName, expiration);
+            mDisabledInfoCache.addDisabledAppLocked(mUserId, packageName, expiration);
+
             int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
             mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_APP,
                     packageName, getServicePackageName(), sessionId, compatMode)
@@ -1379,15 +1473,12 @@ final class AutofillManagerServiceImpl
     void disableAutofillForActivity(@NonNull ComponentName componentName, long duration,
             int sessionId, boolean compatMode) {
         synchronized (mLock) {
-            if (mDisabledActivities == null) {
-                mDisabledActivities = new ArrayMap<>(1);
-            }
             long expiration = SystemClock.elapsedRealtime() + duration;
             // Protect it against overflow
             if (expiration < 0) {
                 expiration = Long.MAX_VALUE;
             }
-            mDisabledActivities.put(componentName, expiration);
+            mDisabledInfoCache.addDisabledActivityLocked(mUserId, componentName, expiration);
             final int intDuration = duration > Integer.MAX_VALUE
                     ? Integer.MAX_VALUE
                     : (int) duration;
@@ -1410,39 +1501,7 @@ final class AutofillManagerServiceImpl
      */
     @GuardedBy("mLock")
     private boolean isAutofillDisabledLocked(@NonNull ComponentName componentName) {
-        // Check activities first.
-        long elapsedTime = 0;
-        if (mDisabledActivities != null) {
-            elapsedTime = SystemClock.elapsedRealtime();
-            final Long expiration = mDisabledActivities.get(componentName);
-            if (expiration != null) {
-                if (expiration >= elapsedTime) return true;
-                // Restriction expired - clean it up.
-                if (sVerbose) {
-                    Slog.v(TAG, "Removing " + componentName.toShortString()
-                        + " from disabled list");
-                }
-                mDisabledActivities.remove(componentName);
-            }
-        }
-
-        // Then check apps.
-        final String packageName = componentName.getPackageName();
-        if (mDisabledApps == null) return false;
-
-        final Long expiration = mDisabledApps.get(packageName);
-        if (expiration == null) return false;
-
-        if (elapsedTime == 0) {
-            elapsedTime = SystemClock.elapsedRealtime();
-        }
-
-        if (expiration >= elapsedTime) return true;
-
-        // Restriction expired - clean it up.
-        if (sVerbose)  Slog.v(TAG, "Removing " + packageName + " from disabled list");
-        mDisabledApps.remove(packageName);
-        return false;
+        return mDisabledInfoCache.isAutofillDisabledLocked(mUserId, componentName);
     }
 
     // Called by AutofillManager, checks UID.
@@ -1483,6 +1542,57 @@ final class AutofillManagerServiceImpl
             }
         }
         return mFieldClassificationStrategy.getDefaultAlgorithm();
+    }
+
+    private void updateRemoteInlineSuggestionRenderServiceLocked() {
+        if (mRemoteInlineSuggestionRenderService != null) {
+            if (sVerbose) {
+                Slog.v(TAG, "updateRemoteInlineSuggestionRenderService(): "
+                        + "destroying old remote service");
+            }
+            mRemoteInlineSuggestionRenderService = null;
+        }
+
+        mRemoteInlineSuggestionRenderService = getRemoteInlineSuggestionRenderServiceLocked();
+    }
+
+    @Nullable RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderServiceLocked() {
+        if (mRemoteInlineSuggestionRenderService == null) {
+            final ComponentName componentName = RemoteInlineSuggestionRenderService
+                .getServiceComponentName(getContext(), mUserId);
+            if (componentName == null) {
+                Slog.w(TAG, "No valid component found for InlineSuggestionRenderService");
+                return null;
+            }
+
+            mRemoteInlineSuggestionRenderService = new RemoteInlineSuggestionRenderService(
+                    getContext(), componentName, InlineSuggestionRenderService.SERVICE_INTERFACE,
+                    mUserId, new InlineSuggestionRenderCallbacksImpl(),
+                    mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+        }
+
+        return mRemoteInlineSuggestionRenderService;
+    }
+
+    private class InlineSuggestionRenderCallbacksImpl implements
+            RemoteInlineSuggestionRenderService.InlineSuggestionRenderCallbacks {
+
+        @Override // from InlineSuggestionRenderCallbacksImpl
+        public void onServiceDied(@NonNull RemoteInlineSuggestionRenderService service) {
+            // Don't do anything; eventually the system will bind to it again...
+            Slog.w(TAG, "remote service died: " + service);
+            mRemoteInlineSuggestionRenderService = null;
+        }
+    }
+
+    void onSwitchInputMethod() {
+        synchronized (mLock) {
+            final int sessionCount = mSessions.size();
+            for (int i = 0; i < sessionCount; i++) {
+                final Session session = mSessions.valueAt(i);
+                session.onSwitchInputMethodLocked();
+            }
+        }
     }
 
     @Override

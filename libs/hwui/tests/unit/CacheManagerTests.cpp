@@ -33,7 +33,8 @@ static size_t getCacheUsage(GrContext* grContext) {
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
-    DisplayInfo displayInfo = DeviceInfo::get()->displayInfo();
+    int32_t width = DeviceInfo::get()->getWidth();
+    int32_t height = DeviceInfo::get()->getHeight();
     GrContext* grContext = renderThread.getGrContext();
     ASSERT_TRUE(grContext != nullptr);
 
@@ -42,7 +43,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     std::vector<sk_sp<SkSurface>> surfaces;
 
     while (getCacheUsage(grContext) <= renderThread.cacheManager().getBackgroundCacheSize()) {
-        SkImageInfo info = SkImageInfo::MakeA8(displayInfo.w, displayInfo.h);
+        SkImageInfo info = SkImageInfo::MakeA8(width, height);
         sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, SkBudgeted::kYes, info);
         surface->getCanvas()->drawColor(SK_AlphaTRANSPARENT);
 
@@ -52,8 +53,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
     }
 
     // create an image and pin it so that we have something with a unique key in the cache
-    sk_sp<Bitmap> bitmap =
-            Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(displayInfo.w, displayInfo.h));
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(width, height));
     sk_sp<SkImage> image = bitmap->makeImage();
     ASSERT_TRUE(SkImage_pinAsTexture(image.get(), grContext));
 

@@ -34,6 +34,7 @@ static struct {
     jclass clazz;
 
     jfieldID displayId;
+    jfieldID isActive;
     jfieldID orientation;
     jfieldID logicalFrame;
     jfieldID physicalFrame;
@@ -59,6 +60,7 @@ status_t android_hardware_display_DisplayViewport_toNative(JNIEnv* env, jobject 
     static const jmethodID byteValue = env->GetMethodID(byteClass, "byteValue", "()B");
 
     viewport->displayId = env->GetIntField(viewportObj, gDisplayViewportClassInfo.displayId);
+    viewport->isActive = env->GetBooleanField(viewportObj, gDisplayViewportClassInfo.isActive);
     viewport->orientation = env->GetIntField(viewportObj, gDisplayViewportClassInfo.orientation);
     viewport->deviceWidth = env->GetIntField(viewportObj, gDisplayViewportClassInfo.deviceWidth);
     viewport->deviceHeight = env->GetIntField(viewportObj, gDisplayViewportClassInfo.deviceHeight);
@@ -103,6 +105,9 @@ int register_android_hardware_display_DisplayViewport(JNIEnv* env) {
 
     gDisplayViewportClassInfo.displayId = GetFieldIDOrDie(env,
             gDisplayViewportClassInfo.clazz, "displayId", "I");
+
+    gDisplayViewportClassInfo.isActive =
+            GetFieldIDOrDie(env, gDisplayViewportClassInfo.clazz, "isActive", "Z");
 
     gDisplayViewportClassInfo.orientation = GetFieldIDOrDie(env,
             gDisplayViewportClassInfo.clazz, "orientation", "I");

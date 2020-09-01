@@ -16,10 +16,10 @@
 
 package com.android.systemui.screenshot;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.view.WindowManager;
 
 import com.android.systemui.R;
 
@@ -32,9 +32,9 @@ public class ScreenshotServiceErrorReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
         // Show a message that we've failed to save the image to disk
-        NotificationManager nm = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-        GlobalScreenshot.notifyScreenshotError(context, nm,
-                R.string.screenshot_failed_to_save_unknown_text);
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        ScreenshotNotificationsController controller =
+                new ScreenshotNotificationsController(context, wm);
+        controller.notifyScreenshotError(R.string.screenshot_failed_to_save_unknown_text);
     }
 }

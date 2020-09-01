@@ -28,14 +28,11 @@
 
 #include <android-base/file.h>
 #include <android-base/strings.h>
-#include <binder/IPCThreadState.h>
-#include <binder/IServiceManager.h>
-#include <binder/PermissionController.h>
 #include <cutils/multiuser.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <frameworks/base/cmds/statsd/src/uid_data.pb.h>
 #include <private/android_filesystem_config.h>
-#include <statslog.h>
+#include <statslog_statsd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
@@ -48,79 +45,44 @@ using android::base::StringPrintf;
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_MESSAGE;
 
+using Status = ::ndk::ScopedAStatus;
+
 namespace android {
 namespace os {
 namespace statsd {
 
 constexpr const char* kPermissionDump = "android.permission.DUMP";
-constexpr const char* kPermissionUsage = "android.permission.PACKAGE_USAGE_STATS";
 
-constexpr const char* kOpUsage = "android:get_usage_stats";
+constexpr const char* kPermissionRegisterPullAtom = "android.permission.REGISTER_STATS_PULL_ATOM";
 
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 // for StatsDataDumpProto
 const int FIELD_ID_REPORTS_LIST = 1;
 
-static binder::Status ok() {
-    return binder::Status::ok();
-}
-
-static binder::Status exception(uint32_t code, const std::string& msg) {
+static Status exception(int32_t code, const std::string& msg) {
     ALOGE("%s (%d)", msg.c_str(), code);
-    return binder::Status::fromExceptionCode(code, String8(msg.c_str()));
+    return Status::fromExceptionCodeWithMessage(code, msg.c_str());
 }
 
-binder::Status checkUid(uid_t expectedUid) {
-    uid_t uid = IPCThreadState::self()->getCallingUid();
+static bool checkPermission(const char* permission) {
+    pid_t pid = AIBinder_getCallingPid();
+    uid_t uid = AIBinder_getCallingUid();
+    return checkPermissionForIds(permission, pid, uid);
+}
+
+Status checkUid(uid_t expectedUid) {
+    uid_t uid = AIBinder_getCallingUid();
     if (uid == expectedUid || uid == AID_ROOT) {
-        return ok();
+        return Status::ok();
     } else {
-        return exception(binder::Status::EX_SECURITY,
-                StringPrintf("UID %d is not expected UID %d", uid, expectedUid));
-    }
-}
-
-binder::Status checkDumpAndUsageStats(const String16& packageName) {
-    pid_t pid = IPCThreadState::self()->getCallingPid();
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-
-    // Root, system, and shell always have access
-    if (uid == AID_ROOT || uid == AID_SYSTEM || uid == AID_SHELL) {
-        return ok();
-    }
-
-    // Caller must be granted these permissions
-    if (!checkCallingPermission(String16(kPermissionDump))) {
-        return exception(binder::Status::EX_SECURITY,
-                StringPrintf("UID %d / PID %d lacks permission %s", uid, pid, kPermissionDump));
-    }
-    if (!checkCallingPermission(String16(kPermissionUsage))) {
-        return exception(binder::Status::EX_SECURITY,
-                StringPrintf("UID %d / PID %d lacks permission %s", uid, pid, kPermissionUsage));
-    }
-
-    // Caller must also have usage stats op granted
-    PermissionController pc;
-    switch (pc.noteOp(String16(kOpUsage), uid, packageName)) {
-        case PermissionController::MODE_ALLOWED:
-        case PermissionController::MODE_DEFAULT:
-            return ok();
-        default:
-            return exception(binder::Status::EX_SECURITY,
-                    StringPrintf("UID %d / PID %d lacks app-op %s", uid, pid, kOpUsage));
+        return exception(EX_SECURITY,
+                         StringPrintf("UID %d is not expected UID %d", uid, expectedUid));
     }
 }
 
 #define ENFORCE_UID(uid) {                                        \
-    binder::Status status = checkUid((uid));                      \
-    if (!status.isOk()) {                                         \
-        return status;                                            \
-    }                                                             \
-}
-
-#define ENFORCE_DUMP_AND_USAGE_STATS(packageName) {               \
-    binder::Status status = checkDumpAndUsageStats(packageName);  \
+    Status status = checkUid((uid));                              \
     if (!status.isOk()) {                                         \
         return status;                                            \
     }                                                             \
@@ -129,13 +91,13 @@ binder::Status checkDumpAndUsageStats(const String16& packageName) {
 StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQueue> queue)
     : mAnomalyAlarmMonitor(new AlarmMonitor(
               MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
-              [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
+              [](const shared_ptr<IStatsCompanionService>& sc, int64_t timeMillis) {
                   if (sc != nullptr) {
                       sc->setAnomalyAlarm(timeMillis);
                       StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
                   }
               },
-              [](const sp<IStatsCompanionService>& sc) {
+              [](const shared_ptr<IStatsCompanionService>& sc) {
                   if (sc != nullptr) {
                       sc->cancelAnomalyAlarm();
                       StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
@@ -143,19 +105,23 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
               })),
       mPeriodicAlarmMonitor(new AlarmMonitor(
               MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
-              [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
+              [](const shared_ptr<IStatsCompanionService>& sc, int64_t timeMillis) {
                   if (sc != nullptr) {
                       sc->setAlarmForSubscriberTriggering(timeMillis);
                       StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
                   }
               },
-              [](const sp<IStatsCompanionService>& sc) {
+              [](const shared_ptr<IStatsCompanionService>& sc) {
                   if (sc != nullptr) {
                       sc->cancelAlarmForSubscriberTriggering();
                       StatsdStats::getInstance().noteRegisteredPeriodicAlarmChanged();
                   }
               })),
-      mEventQueue(queue) {
+      mEventQueue(queue),
+      mBootCompleteTrigger({kBootCompleteTag, kUidMapReceivedTag, kAllPullersRegisteredTag},
+                           [this]() { mProcessor->onStatsdInitCompleted(getElapsedRealtimeNs()); }),
+      mStatsCompanionServiceDeathRecipient(
+              AIBinder_DeathRecipient_new(StatsService::statsCompanionServiceDied)) {
     mUidMap = UidMap::getInstance();
     mPullerManager = new StatsPullerManager();
     StatsPuller::SetUidMap(mUidMap);
@@ -164,33 +130,30 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
             mUidMap, mPullerManager, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
             getElapsedRealtimeNs(),
             [this](const ConfigKey& key) {
-                sp<IStatsCompanionService> sc = getStatsCompanionService();
-                auto receiver = mConfigManager->GetConfigReceiver(key);
-                if (sc == nullptr) {
-                    VLOG("Could not find StatsCompanionService");
+                shared_ptr<IPendingIntentRef> receiver = mConfigManager->GetConfigReceiver(key);
+                if (receiver == nullptr) {
+                    VLOG("Could not find a broadcast receiver for %s", key.ToString().c_str());
                     return false;
-                } else if (receiver == nullptr) {
-                    VLOG("Statscompanion could not find a broadcast receiver for %s",
-                         key.ToString().c_str());
-                    return false;
-                } else {
-                    sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+                } else if (receiver->sendDataBroadcast(
+                           mProcessor->getLastReportTimeNs(key)).isOk()) {
                     return true;
+                } else {
+                    VLOG("Failed to send a broadcast for receiver %s", key.ToString().c_str());
+                    return false;
                 }
             },
             [this](const int& uid, const vector<int64_t>& activeConfigs) {
-                auto receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
-                sp<IStatsCompanionService> sc = getStatsCompanionService();
-                if (sc == nullptr) {
-                    VLOG("Could not access statsCompanion");
-                    return false;
-                } else if (receiver == nullptr) {
+                shared_ptr<IPendingIntentRef> receiver =
+                    mConfigManager->GetActiveConfigsChangedReceiver(uid);
+                if (receiver == nullptr) {
                     VLOG("Could not find receiver for uid %d", uid);
                     return false;
-                } else {
-                    sc->sendActiveConfigsChangedBroadcast(receiver, activeConfigs);
+                } else if (receiver->sendActiveConfigsChangedBroadcast(activeConfigs).isOk()) {
                     VLOG("StatsService::active configs broadcast succeeded for uid %d" , uid);
                     return true;
+                } else {
+                    VLOG("StatsService::active configs broadcast failed for uid %d" , uid);
+                    return false;
                 }
             });
 
@@ -241,36 +204,6 @@ void StatsService::init_build_type_callback(void* cookie, const char* /*name*/, 
 }
 
 /**
- * Implement our own because the default binder implementation isn't
- * properly handling SHELL_COMMAND_TRANSACTION.
- */
-status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* reply,
-                                  uint32_t flags) {
-    switch (code) {
-        case SHELL_COMMAND_TRANSACTION: {
-            int in = data.readFileDescriptor();
-            int out = data.readFileDescriptor();
-            int err = data.readFileDescriptor();
-            int argc = data.readInt32();
-            Vector<String8> args;
-            for (int i = 0; i < argc && data.dataAvail() > 0; i++) {
-                args.add(String8(data.readString16()));
-            }
-            sp<IShellCallback> shellCallback = IShellCallback::asInterface(data.readStrongBinder());
-            sp<IResultReceiver> resultReceiver =
-                    IResultReceiver::asInterface(data.readStrongBinder());
-
-            err = command(in, out, err, args, resultReceiver);
-            if (resultReceiver != nullptr) {
-                resultReceiver->send(err);
-            }
-            return NO_ERROR;
-        }
-        default: { return BnStatsManager::onTransact(code, data, reply, flags); }
-    }
-}
-
-/**
  * Write data from statsd.
  * Format for statsdStats:  adb shell dumpsys stats --metadata [-v] [--proto]
  * Format for data report:  adb shell dumpsys stats [anything other than --metadata] [--proto]
@@ -279,20 +212,21 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
  *     (bugreports call "adb shell dumpsys stats --dump-priority NORMAL -a --proto")
  * TODO: Come up with a more robust method of enacting <serviceutils/PriorityDumper.h>.
  */
-status_t StatsService::dump(int fd, const Vector<String16>& args) {
-    if (!checkCallingPermission(String16(kPermissionDump))) {
+status_t StatsService::dump(int fd, const char** args, uint32_t numArgs) {
+    if (!checkPermission(kPermissionDump)) {
         return PERMISSION_DENIED;
     }
-    int lastArg = args.size() - 1;
+
+    int lastArg = numArgs - 1;
     bool asProto = false;
-    if (lastArg >= 0 && !args[lastArg].compare(String16("--proto"))) { // last argument
+    if (lastArg >= 0 && string(args[lastArg]) == "--proto") { // last argument
         asProto = true;
         lastArg--;
     }
-    if (args.size() > 0 && !args[0].compare(String16("--metadata"))) { // first argument
+    if (numArgs > 0 && string(args[0]) == "--metadata") { // first argument
         // Request is to dump statsd stats.
         bool verbose = false;
-        if (lastArg >= 0 && !args[lastArg].compare(String16("-v"))) {
+        if (lastArg >= 0 && string(args[lastArg]) == "-v") {
             verbose = true;
             lastArg--;
         }
@@ -333,8 +267,11 @@ void StatsService::dumpIncidentSection(int out) {
     for (const ConfigKey& configKey : mConfigManager->GetAllConfigKeys()) {
         uint64_t reportsListToken =
                 proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS_LIST);
+        // Don't include the current bucket to avoid skipping buckets.
+        // If we need to include the current bucket later, consider changing to NO_TIME_CONSTRAINTS
+        // or other alternatives to avoid skipping buckets for pulled metrics.
         mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
-                                 true /* includeCurrentBucket */, false /* erase_data */,
+                                 false /* includeCurrentBucket */, false /* erase_data */,
                                  ADB_DUMP,
                                  FAST,
                                  &proto);
@@ -347,67 +284,74 @@ void StatsService::dumpIncidentSection(int out) {
 /**
  * Implementation of the adb shell cmd stats command.
  */
-status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
-                               sp<IResultReceiver> resultReceiver) {
-    uid_t uid = IPCThreadState::self()->getCallingUid();
+status_t StatsService::handleShellCommand(int in, int out, int err, const char** argv,
+                                          uint32_t argc) {
+    uid_t uid = AIBinder_getCallingUid();
     if (uid != AID_ROOT && uid != AID_SHELL) {
         return PERMISSION_DENIED;
     }
 
-    const int argCount = args.size();
-    if (argCount >= 1) {
+    Vector<String8> utf8Args;
+    utf8Args.setCapacity(argc);
+    for (uint32_t i = 0; i < argc; i++) {
+        utf8Args.push(String8(argv[i]));
+    }
+
+    if (argc >= 1) {
         // adb shell cmd stats config ...
-        if (!args[0].compare(String8("config"))) {
-            return cmd_config(in, out, err, args);
+        if (!utf8Args[0].compare(String8("config"))) {
+            return cmd_config(in, out, err, utf8Args);
         }
 
-        if (!args[0].compare(String8("print-uid-map"))) {
-            return cmd_print_uid_map(out, args);
+        if (!utf8Args[0].compare(String8("print-uid-map"))) {
+            return cmd_print_uid_map(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("dump-report"))) {
-            return cmd_dump_report(out, args);
+        if (!utf8Args[0].compare(String8("dump-report"))) {
+            return cmd_dump_report(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("pull-source")) && args.size() > 1) {
-            return cmd_print_pulled_metrics(out, args);
+        if (!utf8Args[0].compare(String8("pull-source")) && argc > 1) {
+            return cmd_print_pulled_metrics(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("send-broadcast"))) {
-            return cmd_trigger_broadcast(out, args);
+        if (!utf8Args[0].compare(String8("send-broadcast"))) {
+            return cmd_trigger_broadcast(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("print-stats"))) {
-            return cmd_print_stats(out, args);
+        if (!utf8Args[0].compare(String8("print-stats"))) {
+            return cmd_print_stats(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("meminfo"))) {
+        if (!utf8Args[0].compare(String8("meminfo"))) {
             return cmd_dump_memory_info(out);
         }
 
-        if (!args[0].compare(String8("write-to-disk"))) {
+        if (!utf8Args[0].compare(String8("write-to-disk"))) {
             return cmd_write_data_to_disk(out);
         }
 
-        if (!args[0].compare(String8("log-app-breadcrumb"))) {
-            return cmd_log_app_breadcrumb(out, args);
+        if (!utf8Args[0].compare(String8("log-app-breadcrumb"))) {
+            return cmd_log_app_breadcrumb(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("log-binary-push"))) {
-            return cmd_log_binary_push(out, args);
+        if (!utf8Args[0].compare(String8("log-binary-push"))) {
+            return cmd_log_binary_push(out, utf8Args);
         }
 
-        if (!args[0].compare(String8("clear-puller-cache"))) {
+        if (!utf8Args[0].compare(String8("clear-puller-cache"))) {
             return cmd_clear_puller_cache(out);
         }
 
-        if (!args[0].compare(String8("print-logs"))) {
-            return cmd_print_logs(out, args);
+        if (!utf8Args[0].compare(String8("print-logs"))) {
+            return cmd_print_logs(out, utf8Args);
         }
-        if (!args[0].compare(String8("send-active-configs"))) {
-            return cmd_trigger_active_config_broadcast(out, args);
+
+        if (!utf8Args[0].compare(String8("send-active-configs"))) {
+            return cmd_trigger_active_config_broadcast(out, utf8Args);
         }
-        if (!args[0].compare(String8("data-subscribe"))) {
+
+        if (!utf8Args[0].compare(String8("data-subscribe"))) {
             {
                 std::lock_guard<std::mutex> lock(mShellSubscriberMutex);
                 if (mShellSubscriber == nullptr) {
@@ -415,14 +359,10 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
                 }
             }
             int timeoutSec = -1;
-            if (argCount >= 2) {
-                timeoutSec = atoi(args[1].c_str());
+            if (argc >= 2) {
+                timeoutSec = atoi(utf8Args[1].c_str());
             }
-            if (resultReceiver == nullptr) {
-                ALOGI("Null resultReceiver given, no subscription will be started");
-                return UNEXPECTED_NULL;
-            }
-            mShellSubscriber->startNewSubscription(in, out, resultReceiver, timeoutSec);
+            mShellSubscriber->startNewSubscription(in, out, timeoutSec);
             return NO_ERROR;
         }
     }
@@ -452,9 +392,11 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  PKG           Optional package name to print the uids of the package\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
-    dprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
+    dprintf(out, "usage: adb shell cmd stats pull-source ATOM_TAG [PACKAGE] \n");
     dprintf(out, "\n");
-    dprintf(out, "  Prints the output of a pulled metrics source (int indicates source)\n");
+    dprintf(out, "  Prints the output of a pulled atom\n");
+    dprintf(out, "  UID           The atom to pull\n");
+    dprintf(out, "  PACKAGE       The package to pull from. Default is AID_SYSTEM\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats write-to-disk \n");
@@ -552,7 +494,7 @@ status_t StatsService::cmd_trigger_broadcast(int out, Vector<String8>& args) {
     const int argCount = args.size();
     if (argCount == 2) {
         // Automatically pick the UID
-        uid = IPCThreadState::self()->getCallingUid();
+        uid = AIBinder_getCallingUid();
         name.assign(args[1].c_str(), args[1].size());
         good = true;
     } else if (argCount == 3) {
@@ -568,18 +510,17 @@ status_t StatsService::cmd_trigger_broadcast(int out, Vector<String8>& args) {
         return UNKNOWN_ERROR;
     }
     ConfigKey key(uid, StrToInt64(name));
-    auto receiver = mConfigManager->GetConfigReceiver(key);
-    sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc == nullptr) {
-        VLOG("Could not access statsCompanion");
-    } else if (receiver == nullptr) {
-        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str())
-    } else {
-        sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+    shared_ptr<IPendingIntentRef> receiver = mConfigManager->GetConfigReceiver(key);
+    if (receiver == nullptr) {
+        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str());
+        return UNKNOWN_ERROR;
+    } else if (receiver->sendDataBroadcast(mProcessor->getLastReportTimeNs(key)).isOk()) {
         VLOG("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
              args[2].c_str());
+    } else {
+        VLOG("StatsService::trigger broadcast failed to %s, %s", args[1].c_str(), args[2].c_str());
+        return UNKNOWN_ERROR;
     }
-
     return NO_ERROR;
 }
 
@@ -589,7 +530,7 @@ status_t StatsService::cmd_trigger_active_config_broadcast(int out, Vector<Strin
     vector<int64_t> configIds;
     if (argCount == 1) {
         // Automatically pick the uid and send a broadcast that has no active configs.
-        uid = IPCThreadState::self()->getCallingUid();
+        uid = AIBinder_getCallingUid();
         mProcessor->GetActiveConfigs(uid, configIds);
     } else {
         int curArg = 1;
@@ -603,7 +544,7 @@ status_t StatsService::cmd_trigger_active_config_broadcast(int out, Vector<Strin
             }
             curArg++;
         } else {
-            uid = IPCThreadState::self()->getCallingUid();
+            uid = AIBinder_getCallingUid();
         }
         if (curArg == argCount || args[curArg] != "--configs") {
             VLOG("Reached end of args, or specify configs not set. Sending actual active configs,");
@@ -623,15 +564,15 @@ status_t StatsService::cmd_trigger_active_config_broadcast(int out, Vector<Strin
             }
         }
     }
-    auto receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
-    sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc == nullptr) {
-        VLOG("Could not access statsCompanion");
-    } else if (receiver == nullptr) {
+    shared_ptr<IPendingIntentRef> receiver = mConfigManager->GetActiveConfigsChangedReceiver(uid);
+    if (receiver == nullptr) {
         VLOG("Could not find receiver for uid %d", uid);
-    } else {
-        sc->sendActiveConfigsChangedBroadcast(receiver, configIds);
+        return UNKNOWN_ERROR;
+    } else if (receiver->sendActiveConfigsChangedBroadcast(configIds).isOk()) {
         VLOG("StatsService::trigger active configs changed broadcast succeeded for uid %d" , uid);
+    } else {
+        VLOG("StatsService::trigger active configs changed broadcast failed for uid %d", uid);
+        return UNKNOWN_ERROR;
     }
     return NO_ERROR;
 }
@@ -646,7 +587,7 @@ status_t StatsService::cmd_config(int in, int out, int err, Vector<String8>& arg
 
             if (argCount == 3) {
                 // Automatically pick the UID
-                uid = IPCThreadState::self()->getCallingUid();
+                uid = AIBinder_getCallingUid();
                 name.assign(args[2].c_str(), args[2].size());
                 good = true;
             } else if (argCount == 4) {
@@ -729,7 +670,7 @@ status_t StatsService::cmd_dump_report(int out, const Vector<String8>& args) {
         }
         if (argCount == 2) {
             // Automatically pick the UID
-            uid = IPCThreadState::self()->getCallingUid();
+            uid = AIBinder_getCallingUid();
             name.assign(args[1].c_str(), args[1].size());
             good = true;
         } else if (argCount == 3) {
@@ -821,7 +762,7 @@ status_t StatsService::cmd_log_app_breadcrumb(int out, const Vector<String8>& ar
     const int argCount = args.size();
     if (argCount == 3) {
         // Automatically pick the UID
-        uid = IPCThreadState::self()->getCallingUid();
+        uid = AIBinder_getCallingUid();
         label = atoi(args[1].c_str());
         state = atoi(args[2].c_str());
         good = true;
@@ -837,7 +778,8 @@ status_t StatsService::cmd_log_app_breadcrumb(int out, const Vector<String8>& ar
     }
     if (good) {
         dprintf(out, "Logging AppBreadcrumbReported(%d, %d, %d) to statslog.\n", uid, label, state);
-        android::util::stats_write(android::util::APP_BREADCRUMB_REPORTED, uid, label, state);
+        android::os::statsd::util::stats_write(
+                android::os::statsd::util::APP_BREADCRUMB_REPORTED, uid, label, state);
     } else {
         print_cmd_help(out);
         return UNKNOWN_ERROR;
@@ -852,18 +794,8 @@ status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args)
         dprintf(out, "Incorrect number of argument supplied\n");
         return UNKNOWN_ERROR;
     }
-    android::String16 trainName = android::String16(args[1].c_str());
+    string trainName = string(args[1].c_str());
     int64_t trainVersion = strtoll(args[2].c_str(), nullptr, 10);
-    int options = 0;
-    if (args[3] == "1") {
-        options = options | IStatsManager::FLAG_REQUIRE_STAGING;
-    }
-    if (args[4] == "1") {
-        options = options | IStatsManager::FLAG_ROLLBACK_ENABLED;
-    }
-    if (args[5] == "1") {
-        options = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
-    }
     int32_t state = atoi(args[6].c_str());
     vector<int64_t> experimentIds;
     if (argCount == 8) {
@@ -874,14 +806,30 @@ status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args)
         }
     }
     dprintf(out, "Logging BinaryPushStateChanged\n");
-    sendBinaryPushStateChangedAtom(trainName, trainVersion, options, state, experimentIds);
+    vector<uint8_t> experimentIdBytes;
+    writeExperimentIdsToProto(experimentIds, &experimentIdBytes);
+    LogEvent event(trainName, trainVersion, args[3], args[4], args[5], state, experimentIdBytes, 0);
+    mProcessor->OnLogEvent(&event);
     return NO_ERROR;
 }
 
 status_t StatsService::cmd_print_pulled_metrics(int out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
-    vector<shared_ptr<LogEvent> > stats;
-    if (mPullerManager->Pull(s, &stats)) {
+    vector<int32_t> uids;
+    if (args.size() > 2) {
+        string package = string(args[2].c_str());
+        auto it = UidMap::sAidToUidMapping.find(package);
+        if (it != UidMap::sAidToUidMapping.end()) {
+            uids.push_back(it->second);
+        } else {
+            set<int32_t> uids_set = mUidMap->getAppUid(package);
+            uids.insert(uids.end(), uids_set.begin(), uids_set.end());
+        }
+    } else {
+        uids.push_back(AID_SYSTEM);
+    }
+    vector<shared_ptr<LogEvent>> stats;
+    if (mPullerManager->Pull(s, uids, getElapsedRealtimeNs(), &stats)) {
         for (const auto& it : stats) {
             dprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
         }
@@ -905,10 +853,9 @@ status_t StatsService::cmd_dump_memory_info(int out) {
 }
 
 status_t StatsService::cmd_clear_puller_cache(int out) {
-    IPCThreadState* ipc = IPCThreadState::self();
     VLOG("StatsService::cmd_clear_puller_cache with Pid %i, Uid %i",
-            ipc->getCallingPid(), ipc->getCallingUid());
-    if (checkCallingPermission(String16(kPermissionDump))) {
+            AIBinder_getCallingPid(), AIBinder_getCallingUid());
+    if (checkPermission(kPermissionDump)) {
         int cleared = mPullerManager->ForceClearPullerCache();
         dprintf(out, "Puller removed %d cached data!\n", cleared);
         return NO_ERROR;
@@ -918,10 +865,9 @@ status_t StatsService::cmd_clear_puller_cache(int out) {
 }
 
 status_t StatsService::cmd_print_logs(int out, const Vector<String8>& args) {
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::cmd_print_logs with Pid %i, Uid %i", ipc->getCallingPid(),
-         ipc->getCallingUid());
-    if (checkCallingPermission(String16(kPermissionDump))) {
+    VLOG("StatsService::cmd_print_logs with Pid %i, Uid %i", AIBinder_getCallingPid(),
+         AIBinder_getCallingUid());
+    if (checkPermission(kPermissionDump)) {
         bool enabled = true;
         if (args.size() >= 2) {
             enabled = atoi(args[1].c_str()) != 0;
@@ -952,24 +898,24 @@ bool StatsService::getUidFromString(const char* s, int32_t& uid) {
     }
     uid = goodUid;
 
-    int32_t callingUid = IPCThreadState::self()->getCallingUid();
+    int32_t callingUid = AIBinder_getCallingUid();
     return mEngBuild // UserDebug/EngBuild are allowed to impersonate uids.
             || (callingUid == goodUid) // Anyone can 'impersonate' themselves.
             || (callingUid == AID_ROOT && goodUid == AID_SHELL); // ROOT can impersonate SHELL.
 }
 
-Status StatsService::informAllUidData(const ParcelFileDescriptor& fd) {
+Status StatsService::informAllUidData(const ScopedFileDescriptor& fd) {
     ENFORCE_UID(AID_SYSTEM);
     // Read stream into buffer.
     string buffer;
     if (!android::base::ReadFdToString(fd.get(), &buffer)) {
-        return exception(Status::EX_ILLEGAL_ARGUMENT, "Failed to read all data from the pipe.");
+        return exception(EX_ILLEGAL_ARGUMENT, "Failed to read all data from the pipe.");
     }
 
     // Parse buffer.
     UidData uidData;
     if (!uidData.ParseFromString(buffer)) {
-        return exception(Status::EX_ILLEGAL_ARGUMENT, "Error parsing proto stream for UidData.");
+        return exception(EX_ILLEGAL_ARGUMENT, "Error parsing proto stream for UidData.");
     }
 
     vector<String16> versionStrings;
@@ -1000,24 +946,31 @@ Status StatsService::informAllUidData(const ParcelFileDescriptor& fd) {
                        packageNames,
                        installers);
 
+    mBootCompleteTrigger.markComplete(kUidMapReceivedTag);
     VLOG("StatsService::informAllUidData UidData proto parsed successfully.");
     return Status::ok();
 }
 
-Status StatsService::informOnePackage(const String16& app, int32_t uid, int64_t version,
-                                      const String16& version_string, const String16& installer) {
+Status StatsService::informOnePackage(const string& app, int32_t uid, int64_t version,
+                                      const string& versionString, const string& installer) {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::informOnePackage was called");
-    mUidMap->updateApp(getElapsedRealtimeNs(), app, uid, version, version_string, installer);
+    String16 utf16App = String16(app.c_str());
+    String16 utf16VersionString = String16(versionString.c_str());
+    String16 utf16Installer = String16(installer.c_str());
+
+    mUidMap->updateApp(getElapsedRealtimeNs(), utf16App, uid, version, utf16VersionString,
+                       utf16Installer);
     return Status::ok();
 }
 
-Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
+Status StatsService::informOnePackageRemoved(const string& app, int32_t uid) {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::informOnePackageRemoved was called");
-    mUidMap->removeApp(getElapsedRealtimeNs(), app, uid);
+    String16 utf16App = String16(app.c_str());
+    mUidMap->removeApp(getElapsedRealtimeNs(), utf16App, uid);
     mConfigManager->RemoveConfigs(uid);
     return Status::ok();
 }
@@ -1077,11 +1030,12 @@ Status StatsService::informDeviceShutdown() {
     VLOG("StatsService::informDeviceShutdown");
     mProcessor->WriteDataToDisk(DEVICE_SHUTDOWN, FAST);
     mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
+    mProcessor->SaveMetadataToDisk(getWallClockNs(), getElapsedRealtimeNs());
     return Status::ok();
 }
 
 void StatsService::sayHiToStatsCompanion() {
-    sp<IStatsCompanionService> statsCompanion = getStatsCompanionService();
+    shared_ptr<IStatsCompanionService> statsCompanion = getStatsCompanionService();
     if (statsCompanion != nullptr) {
         VLOG("Telling statsCompanion that statsd is ready");
         statsCompanion->statsdReady();
@@ -1094,24 +1048,32 @@ Status StatsService::statsCompanionReady() {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::statsCompanionReady was called");
-    sp<IStatsCompanionService> statsCompanion = getStatsCompanionService();
+    shared_ptr<IStatsCompanionService> statsCompanion = getStatsCompanionService();
     if (statsCompanion == nullptr) {
-        return Status::fromExceptionCode(
-                Status::EX_NULL_POINTER,
-                "statscompanion unavailable despite it contacting statsd!");
+        return exception(EX_NULL_POINTER,
+                         "StatsCompanion unavailable despite it contacting statsd.");
     }
     VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
-    IInterface::asBinder(statsCompanion)->linkToDeath(this);
+    AIBinder_linkToDeath(statsCompanion->asBinder().get(),
+                         mStatsCompanionServiceDeathRecipient.get(), this);
     mPullerManager->SetStatsCompanionService(statsCompanion);
     mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
     mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
-    SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
+    return Status::ok();
+}
+
+Status StatsService::bootCompleted() {
+    ENFORCE_UID(AID_SYSTEM);
+
+    VLOG("StatsService::bootCompleted was called");
+    mBootCompleteTrigger.markComplete(kBootCompleteTag);
     return Status::ok();
 }
 
 void StatsService::Startup() {
     mConfigManager->Startup();
     mProcessor->LoadActiveConfigsFromDisk();
+    mProcessor->LoadMetadataFromDisk(getWallClockNs(), getElapsedRealtimeNs());
 }
 
 void StatsService::Terminate() {
@@ -1119,6 +1081,7 @@ void StatsService::Terminate() {
     if (mProcessor != nullptr) {
         mProcessor->WriteDataToDisk(TERMINATION_SIGNAL_RECEIVED, FAST);
         mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
+        mProcessor->SaveMetadataToDisk(getWallClockNs(), getElapsedRealtimeNs());
     }
 }
 
@@ -1130,12 +1093,11 @@ void StatsService::OnLogEvent(LogEvent* event) {
     }
 }
 
-Status StatsService::getData(int64_t key, const String16& packageName, vector<uint8_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::getData(int64_t key, const int32_t callingUid, vector<uint8_t>* output) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
-    ConfigKey configKey(ipc->getCallingUid(), key);
+    VLOG("StatsService::getData with Uid %i", callingUid);
+    ConfigKey configKey(callingUid, key);
     // The dump latency does not matter here since we do not include the current bucket, we do not
     // need to pull any new data anyhow.
     mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(), false /* include_current_bucket*/,
@@ -1143,27 +1105,21 @@ Status StatsService::getData(int64_t key, const String16& packageName, vector<ui
     return Status::ok();
 }
 
-Status StatsService::getMetadata(const String16& packageName, vector<uint8_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::getMetadata(vector<uint8_t>* output) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    VLOG("StatsService::getMetadata with Pid %i, Uid %i", ipc->getCallingPid(),
-         ipc->getCallingUid());
     StatsdStats::getInstance().dumpStats(output, false); // Don't reset the counters.
     return Status::ok();
 }
 
 Status StatsService::addConfiguration(int64_t key, const vector <uint8_t>& config,
-                                      const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                      const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (addConfigurationChecked(ipc->getCallingUid(), key, config)) {
+    if (addConfigurationChecked(callingUid, key, config)) {
         return Status::ok();
     } else {
-        ALOGE("Could not parse malformatted StatsdConfig");
-        return Status::fromExceptionCode(binder::Status::EX_ILLEGAL_ARGUMENT,
-                                         "config does not correspond to a StatsdConfig proto");
+        return exception(EX_ILLEGAL_ARGUMENT, "Could not parse malformatted StatsdConfig.");
     }
 }
 
@@ -1179,23 +1135,21 @@ bool StatsService::addConfigurationChecked(int uid, int64_t key, const vector<ui
     return true;
 }
 
-Status StatsService::removeDataFetchOperation(int64_t key, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
+Status StatsService::removeDataFetchOperation(int64_t key,
+                                              const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
+    ConfigKey configKey(callingUid, key);
     mConfigManager->RemoveConfigReceiver(configKey);
     return Status::ok();
 }
 
 Status StatsService::setDataFetchOperation(int64_t key,
-                                           const sp<android::IBinder>& intentSender,
-                                           const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                           const shared_ptr<IPendingIntentRef>& pir,
+                                           const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
-    mConfigManager->SetConfigReceiver(configKey, intentSender);
+    ConfigKey configKey(callingUid, key);
+    mConfigManager->SetConfigReceiver(configKey, pir);
     if (StorageManager::hasConfigMetricsReport(configKey)) {
         VLOG("StatsService::setDataFetchOperation marking configKey %s to dump reports on disk",
              configKey.ToString().c_str());
@@ -1204,301 +1158,170 @@ Status StatsService::setDataFetchOperation(int64_t key,
     return Status::ok();
 }
 
-Status StatsService::setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
-                                                      const String16& packageName,
+Status StatsService::setActiveConfigsChangedOperation(const shared_ptr<IPendingIntentRef>& pir,
+                                                      const int32_t callingUid,
                                                       vector<int64_t>* output) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    int uid = ipc->getCallingUid();
-    mConfigManager->SetActiveConfigsChangedReceiver(uid, intentSender);
+    mConfigManager->SetActiveConfigsChangedReceiver(callingUid, pir);
     if (output != nullptr) {
-        mProcessor->GetActiveConfigs(uid, *output);
+        mProcessor->GetActiveConfigs(callingUid, *output);
     } else {
         ALOGW("StatsService::setActiveConfigsChanged output was nullptr");
     }
     return Status::ok();
 }
 
-Status StatsService::removeActiveConfigsChangedOperation(const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::removeActiveConfigsChangedOperation(const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    mConfigManager->RemoveActiveConfigsChangedReceiver(ipc->getCallingUid());
+    mConfigManager->RemoveActiveConfigsChangedReceiver(callingUid);
     return Status::ok();
 }
 
-Status StatsService::removeConfiguration(int64_t key, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+Status StatsService::removeConfiguration(int64_t key, const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), key);
+    ConfigKey configKey(callingUid, key);
     mConfigManager->RemoveConfig(configKey);
-    SubscriberReporter::getInstance().removeConfig(configKey);
     return Status::ok();
 }
 
 Status StatsService::setBroadcastSubscriber(int64_t configId,
                                             int64_t subscriberId,
-                                            const sp<android::IBinder>& intentSender,
-                                            const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                            const shared_ptr<IPendingIntentRef>& pir,
+                                            const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::setBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), configId);
+    ConfigKey configKey(callingUid, configId);
     SubscriberReporter::getInstance()
-            .setBroadcastSubscriber(configKey, subscriberId, intentSender);
+            .setBroadcastSubscriber(configKey, subscriberId, pir);
     return Status::ok();
 }
 
 Status StatsService::unsetBroadcastSubscriber(int64_t configId,
                                               int64_t subscriberId,
-                                              const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
+                                              const int32_t callingUid) {
+    ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::unsetBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), configId);
+    ConfigKey configKey(callingUid, configId);
     SubscriberReporter::getInstance()
             .unsetBroadcastSubscriber(configKey, subscriberId);
     return Status::ok();
 }
 
-Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
-    // Permission check not necessary as it's meant for applications to write to
-    // statsd.
-    android::util::stats_write(util::APP_BREADCRUMB_REPORTED,
-                               IPCThreadState::self()->getCallingUid(), label,
-                               state);
+Status StatsService::allPullersFromBootRegistered() {
+    ENFORCE_UID(AID_SYSTEM);
+
+    VLOG("StatsService::allPullersFromBootRegistered was called");
+    mBootCompleteTrigger.markComplete(kAllPullersRegisteredTag);
     return Status::ok();
 }
 
-Status StatsService::registerPullerCallback(int32_t atomTag,
-        const sp<android::os::IStatsPullerCallback>& pullerCallback,
-        const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    VLOG("StatsService::registerPullerCallback called.");
-    mPullerManager->RegisterPullerCallback(atomTag, pullerCallback);
+Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownMillis,
+                                              int64_t timeoutMillis,
+                                              const std::vector<int32_t>& additiveFields,
+                                              const shared_ptr<IPullAtomCallback>& pullerCallback) {
+    ENFORCE_UID(AID_SYSTEM);
+    VLOG("StatsService::registerPullAtomCallback called.");
+    mPullerManager->RegisterPullAtomCallback(uid, atomTag, MillisToNano(coolDownMillis),
+                                             MillisToNano(timeoutMillis), additiveFields,
+                                             pullerCallback);
     return Status::ok();
 }
 
-Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& packageName) {
-    ENFORCE_DUMP_AND_USAGE_STATS(packageName);
-
-    VLOG("StatsService::unregisterPullerCallback called.");
-    mPullerManager->UnregisterPullerCallback(atomTag);
+Status StatsService::registerNativePullAtomCallback(
+        int32_t atomTag, int64_t coolDownMillis, int64_t timeoutMillis,
+        const std::vector<int32_t>& additiveFields,
+        const shared_ptr<IPullAtomCallback>& pullerCallback) {
+    if (!checkPermission(kPermissionRegisterPullAtom)) {
+        return exception(
+                EX_SECURITY,
+                StringPrintf("Uid %d does not have the %s permission when registering atom %d",
+                             AIBinder_getCallingUid(), kPermissionRegisterPullAtom, atomTag));
+    }
+    VLOG("StatsService::registerNativePullAtomCallback called.");
+    int32_t uid = AIBinder_getCallingUid();
+    mPullerManager->RegisterPullAtomCallback(uid, atomTag, MillisToNano(coolDownMillis),
+                                             MillisToNano(timeoutMillis), additiveFields,
+                                             pullerCallback);
     return Status::ok();
 }
 
-Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainNameIn,
-                                                    const int64_t trainVersionCodeIn,
-                                                    const int options,
-                                                    const int32_t state,
-                                                    const std::vector<int64_t>& experimentIdsIn) {
-    // Note: We skip the usage stats op check here since we do not have a package name.
-    // This is ok since we are overloading the usage_stats permission.
-    // This method only sends data, it does not receive it.
-    pid_t pid = IPCThreadState::self()->getCallingPid();
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-    // Root, system, and shell always have access
-    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
-        // Caller must be granted these permissions
-        if (!checkCallingPermission(String16(kPermissionDump))) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionDump));
-        }
-        if (!checkCallingPermission(String16(kPermissionUsage))) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionUsage));
-        }
-    }
-
-    bool readTrainInfoSuccess = false;
-    InstallTrainInfo trainInfoOnDisk;
-    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
-
-    bool resetExperimentIds = false;
-    int64_t trainVersionCode = trainVersionCodeIn;
-    std::string trainNameUtf8 = std::string(String8(trainNameIn).string());
-    if (readTrainInfoSuccess) {
-        // Keep the old train version if we received an empty version.
-        if (trainVersionCodeIn == -1) {
-            trainVersionCode = trainInfoOnDisk.trainVersionCode;
-        } else if (trainVersionCodeIn != trainInfoOnDisk.trainVersionCode) {
-        // Reset experiment ids if we receive a new non-empty train version.
-            resetExperimentIds = true;
-        }
-
-        // Keep the old train name if we received an empty train name.
-        if (trainNameUtf8.size() == 0) {
-            trainNameUtf8 = trainInfoOnDisk.trainName;
-        } else if (trainNameUtf8 != trainInfoOnDisk.trainName) {
-            // Reset experiment ids if we received a new valid train name.
-            resetExperimentIds = true;
-        }
-
-        // Reset if we received a different experiment id.
-        if (!experimentIdsIn.empty() &&
-                (trainInfoOnDisk.experimentIds.empty() ||
-                 experimentIdsIn[0] != trainInfoOnDisk.experimentIds[0])) {
-            resetExperimentIds = true;
-        }
-    }
-
-    // Find the right experiment IDs
-    std::vector<int64_t> experimentIds;
-    if (resetExperimentIds || !readTrainInfoSuccess) {
-        experimentIds = experimentIdsIn;
-    } else {
-        experimentIds = trainInfoOnDisk.experimentIds;
-    }
-
-    if (!experimentIds.empty()) {
-        int64_t firstId = experimentIds[0];
-        switch (state) {
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
-                experimentIds.push_back(firstId + 1);
-                break;
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
-                experimentIds.push_back(firstId + 2);
-                break;
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
-                experimentIds.push_back(firstId + 3);
-                break;
-        }
-    }
-
-    // Flatten the experiment IDs to proto
-    vector<uint8_t> experimentIdsProtoBuffer;
-    writeExperimentIdsToProto(experimentIds, &experimentIdsProtoBuffer);
-    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
-
-    userid_t userId = multiuser_get_user_id(uid);
-    bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
-    bool rollbackEnabled = options & IStatsManager::FLAG_ROLLBACK_ENABLED;
-    bool requiresLowLatencyMonitor = options & IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
-    LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
-                   requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
-    mProcessor->OnLogEvent(&event);
+Status StatsService::unregisterPullAtomCallback(int32_t uid, int32_t atomTag) {
+    ENFORCE_UID(AID_SYSTEM);
+    VLOG("StatsService::unregisterPullAtomCallback called.");
+    mPullerManager->UnregisterPullAtomCallback(uid, atomTag);
     return Status::ok();
 }
 
-Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackTypeIn,
-                                                      const android::String16& packageNameIn,
-                                                      const int64_t packageVersionCodeIn,
-                                                      const int32_t rollbackReasonIn,
-                                                      const android::String16&
-                                                       failingPackageNameIn) {
-    // Note: We skip the usage stats op check here since we do not have a package name.
-    // This is ok since we are overloading the usage_stats permission.
-    // This method only sends data, it does not receive it.
-    pid_t pid = IPCThreadState::self()->getCallingPid();
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-    // Root, system, and shell always have access
-    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
-        // Caller must be granted these permissions
-        if (!checkCallingPermission(String16(kPermissionDump))) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionDump));
-        }
-        if (!checkCallingPermission(String16(kPermissionUsage))) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionUsage));
-        }
+Status StatsService::unregisterNativePullAtomCallback(int32_t atomTag) {
+    if (!checkPermission(kPermissionRegisterPullAtom)) {
+        return exception(
+                EX_SECURITY,
+                StringPrintf("Uid %d does not have the %s permission when unregistering atom %d",
+                             AIBinder_getCallingUid(), kPermissionRegisterPullAtom, atomTag));
     }
-
-    android::util::stats_write(android::util::WATCHDOG_ROLLBACK_OCCURRED,
-            rollbackTypeIn, String8(packageNameIn).string(), packageVersionCodeIn,
-            rollbackReasonIn, String8(failingPackageNameIn).string());
-
-    // Fast return to save disk read.
-    if (rollbackTypeIn != android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS
-            && rollbackTypeIn !=
-                    android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE) {
-        return Status::ok();
-    }
-
-    bool readTrainInfoSuccess = false;
-    InstallTrainInfo trainInfoOnDisk;
-    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
-
-    if (!readTrainInfoSuccess) {
-        return Status::ok();
-    }
-    std::vector<int64_t> experimentIds = trainInfoOnDisk.experimentIds;
-    if (experimentIds.empty()) {
-        return Status::ok();
-    }
-    switch (rollbackTypeIn) {
-        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
-            experimentIds.push_back(experimentIds[0] + 4);
-            break;
-        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
-            experimentIds.push_back(experimentIds[0] + 5);
-            break;
-    }
-    StorageManager::writeTrainInfo(trainInfoOnDisk.trainVersionCode, trainInfoOnDisk.trainName,
-            trainInfoOnDisk.status, experimentIds);
+    VLOG("StatsService::unregisterNativePullAtomCallback called.");
+    int32_t uid = AIBinder_getCallingUid();
+    mPullerManager->UnregisterPullAtomCallback(uid, atomTag);
     return Status::ok();
 }
 
 Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experimentIdsOut) {
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-
-    // Caller must be granted these permissions
-    if (!checkCallingPermission(String16(kPermissionDump))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
-    }
-    if (!checkCallingPermission(String16(kPermissionUsage))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
-    }
+    ENFORCE_UID(AID_SYSTEM);
     // TODO: add verifier permission
 
+    experimentIdsOut->clear();
     // Read the latest train info
-    InstallTrainInfo trainInfo;
-    if (!StorageManager::readTrainInfo(trainInfo)) {
+    vector<InstallTrainInfo> trainInfoList = StorageManager::readAllTrainInfo();
+    if (trainInfoList.empty()) {
         // No train info means no experiment IDs, return an empty list
-        experimentIdsOut->clear();
         return Status::ok();
     }
 
     // Copy the experiment IDs to the out vector
-    experimentIdsOut->assign(trainInfo.experimentIds.begin(), trainInfo.experimentIds.end());
+    for (InstallTrainInfo& trainInfo : trainInfoList) {
+        experimentIdsOut->insert(experimentIdsOut->end(),
+                                 trainInfo.experimentIds.begin(),
+                                 trainInfo.experimentIds.end());
+    }
     return Status::ok();
 }
 
-void StatsService::binderDied(const wp <IBinder>& who) {
+void StatsService::statsCompanionServiceDied(void* cookie) {
+    auto thiz = static_cast<StatsService*>(cookie);
+    thiz->statsCompanionServiceDiedImpl();
+}
+
+void StatsService::statsCompanionServiceDiedImpl() {
     ALOGW("statscompanion service died");
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());
     if (mProcessor != nullptr) {
         ALOGW("Reset statsd upon system server restarts.");
         int64_t systemServerRestartNs = getElapsedRealtimeNs();
-        ProtoOutputStream proto;
+        ProtoOutputStream activeConfigsProto;
         mProcessor->WriteActiveConfigsToProtoOutputStream(systemServerRestartNs,
-                STATSCOMPANION_DIED, &proto);
-
+                STATSCOMPANION_DIED, &activeConfigsProto);
+        metadata::StatsMetadataList metadataList;
+        mProcessor->WriteMetadataToProto(getWallClockNs(),
+                systemServerRestartNs, &metadataList);
         mProcessor->WriteDataToDisk(STATSCOMPANION_DIED, FAST);
         mProcessor->resetConfigs();
 
         std::string serializedActiveConfigs;
-        if (proto.serializeToString(&serializedActiveConfigs)) {
+        if (activeConfigsProto.serializeToString(&serializedActiveConfigs)) {
             ActiveConfigList activeConfigs;
             if (activeConfigs.ParseFromString(serializedActiveConfigs)) {
                 mProcessor->SetConfigsActiveState(activeConfigs, systemServerRestartNs);
             }
         }
+        mProcessor->SetMetadataState(metadataList, getWallClockNs(), systemServerRestartNs);
     }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
-    SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
     mPullerManager->SetStatsCompanionService(nullptr);
 }
 

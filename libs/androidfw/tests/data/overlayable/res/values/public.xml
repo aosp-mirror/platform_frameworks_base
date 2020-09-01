@@ -20,4 +20,21 @@
     <public type="string" name="overlayable2" id="0x7f010002" />
     <public type="string" name="overlayable3" id="0x7f010003" />
     <public type="string" name="overlayable4" id="0x7f010004" />
+    <public type="string" name="overlayable5" id="0x7f010005" />
+    <public type="string" name="overlayable6" id="0x7f010006" />
+    <public type="string" name="overlayable7" id="0x7f010007" />
+    <public type="string" name="overlayable8" id="0x7f010008" />
+    <public type="string" name="overlayable9" id="0x7f010009" />
+    <public type="string" name="overlayable10" id="0x7f01000a" />
+    <public type="string" name="overlayable11" id="0x7f01000b" />
+
+    <public type="attr" name="max_lines" id="0x7f020000" />
+
+    <public type="bool" name="config_bool" id="0x7f030000" />
+
+    <public type="id" name="hello_view" id="0x7f040000" />
+
+    <public type="integer" name="config_int" id="0x7f050000" />
+
+    <public type="layout" name="hello_view" id="0x7f060000" />
 </resources>

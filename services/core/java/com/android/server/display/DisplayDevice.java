@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -36,6 +37,7 @@ abstract class DisplayDevice {
     private final DisplayAdapter mDisplayAdapter;
     private final IBinder mDisplayToken;
     private final String mUniqueId;
+    private DisplayDeviceConfig mDisplayDeviceConfig;
 
     // The display device does not manage these properties itself, they are set by
     // the display manager service.  The display device shouldn't really be looking at these.
@@ -67,6 +69,16 @@ abstract class DisplayDevice {
         return mDisplayAdapter;
     }
 
+    /*
+     * Gets the DisplayDeviceConfig for this DisplayDevice.
+     * Returns null for this device but is overridden in LocalDisplayDevice.
+     *
+     * @return The DisplayDeviceConfig.
+     */
+    public DisplayDeviceConfig getDisplayDeviceConfig() {
+        return mDisplayDeviceConfig;
+    }
+
     /**
      * Gets the Surface Flinger display token for this display.
      *
@@ -75,6 +87,13 @@ abstract class DisplayDevice {
      */
     public final IBinder getDisplayTokenLocked() {
         return mDisplayToken;
+    }
+
+    /**
+     * Gets the id of the display to mirror.
+     */
+    public int getDisplayIdToMirrorLocked() {
+        return Display.DEFAULT_DISPLAY;
     }
 
     /**
@@ -129,28 +148,45 @@ abstract class DisplayDevice {
      * Sets the display state, if supported.
      *
      * @param state The new display state.
-     * @param brightness The new display brightness.
+     * @param brightnessState The new display brightnessState.
      * @return A runnable containing work to be deferred until after we have
      * exited the critical section, or null if none.
      */
-    public Runnable requestDisplayStateLocked(int state, int brightness) {
+    public Runnable requestDisplayStateLocked(int state, float brightnessState) {
         return null;
     }
 
     /**
-     * Sets the display modes the system is allowed to switch between, roughly ordered by
-     * preference.
+     * Sets the display mode specs.
      *
      * Not all display devices will automatically switch between modes, so it's important that the
-     * most-desired modes are at the beginning of the allowed array.
+     * default modeId is set correctly.
      */
-    public void setAllowedDisplayModesLocked(int[] modes) {
-    }
+    public void setDesiredDisplayModeSpecsLocked(
+            DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {}
 
     /**
      * Sets the requested color mode.
      */
     public void setRequestedColorModeLocked(int colorMode) {
+    }
+
+    /**
+     * Sends the Auto Low Latency Mode (ALLM) signal over HDMI, or requests an internal display to
+     * switch to a low-latency mode.
+     *
+     * @param on Whether to set ALLM on or off.
+     */
+    public void setAutoLowLatencyModeLocked(boolean on) {
+    }
+
+    /**
+     * Sends a ContentType=Game signal over HDMI, or requests an internal display to switch to a
+     * game mode (generally lower latency).
+     *
+     * @param on Whether to send a ContentType=Game signal or not
+     */
+    public void setGameContentTypeLocked(boolean on) {
     }
 
     public void onOverlayChangedLocked() {

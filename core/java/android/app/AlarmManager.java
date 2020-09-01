@@ -31,7 +31,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -39,6 +38,8 @@ import com.android.i18n.timezone.ZoneInfoDb;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -221,25 +222,11 @@ public class AlarmManager {
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
-
-            synchronized (AlarmManager.class) {
-                if (sWrappers != null) {
-                    sWrappers.remove(mListener);
-                }
-            }
         }
 
         @Override
         public void doAlarm(IAlarmCompleteListener alarmManager) {
             mCompletion = alarmManager;
-
-            // Remove this listener from the wrapper cache first; the server side
-            // already considers it gone
-            synchronized (AlarmManager.class) {
-                if (sWrappers != null) {
-                    sWrappers.remove(mListener);
-                }
-            }
 
             mHandler.post(this);
         }
@@ -262,9 +249,14 @@ public class AlarmManager {
         }
     }
 
-    // Tracking of the OnAlarmListener -> wrapper mapping, for cancel() support.
-    // Access is synchronized on the AlarmManager class object.
-    private static ArrayMap<OnAlarmListener, ListenerWrapper> sWrappers;
+    /**
+     * Tracking of the OnAlarmListener -> ListenerWrapper mapping, for cancel() support.
+     * An entry is guaranteed to stay in this map as long as its ListenerWrapper is held by the
+     * server.
+     *
+     * <p>Access is synchronized on the AlarmManager class object.
+     */
+    private static WeakHashMap<OnAlarmListener, WeakReference<ListenerWrapper>> sWrappers;
 
     /**
      * package private on purpose
@@ -681,14 +673,17 @@ public class AlarmManager {
         if (listener != null) {
             synchronized (AlarmManager.class) {
                 if (sWrappers == null) {
-                    sWrappers = new ArrayMap<OnAlarmListener, ListenerWrapper>();
+                    sWrappers = new WeakHashMap<>();
                 }
 
-                recipientWrapper = sWrappers.get(listener);
+                final WeakReference<ListenerWrapper> weakRef = sWrappers.get(listener);
+                if (weakRef != null) {
+                    recipientWrapper = weakRef.get();
+                }
                 // no existing wrapper => build a new one
                 if (recipientWrapper == null) {
                     recipientWrapper = new ListenerWrapper(listener);
-                    sWrappers.put(listener, recipientWrapper);
+                    sWrappers.put(listener, new WeakReference<>(recipientWrapper));
                 }
             }
 
@@ -947,7 +942,10 @@ public class AlarmManager {
         ListenerWrapper wrapper = null;
         synchronized (AlarmManager.class) {
             if (sWrappers != null) {
-                wrapper = sWrappers.get(listener);
+                final WeakReference<ListenerWrapper> weakRef = sWrappers.get(listener);
+                if (weakRef != null) {
+                    wrapper = weakRef.get();
+                }
             }
         }
 
@@ -1142,11 +1140,11 @@ public class AlarmManager {
         };
 
         /** @hide */
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(AlarmClockInfoProto.TRIGGER_TIME_MS, mTriggerTime);
             if (mShowIntent != null) {
-                mShowIntent.writeToProto(proto, AlarmClockInfoProto.SHOW_INTENT);
+                mShowIntent.dumpDebug(proto, AlarmClockInfoProto.SHOW_INTENT);
             }
             proto.end(token);
         }

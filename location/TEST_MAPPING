@@ -1,0 +1,13 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsLocationFineTestCases"
+    },
+    {
+      "name": "CtsLocationCoarseTestCases"
+    },
+    {
+      "name": "CtsLocationNoneTestCases"
+    }
+  ]
+}

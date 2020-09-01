@@ -3,5 +3,20 @@
     {
       "path": "cts/tests/tests/widget"
     }
+  ],
+  "presubmit": [
+    {
+      "name": "CtsToastTestCases",
+      "file_patterns": ["Toast\\.java"]
+    },
+    {
+      "name": "CtsWindowManagerDeviceTestCases",
+      "options": [
+        {
+          "include-filter": "android.server.wm.ToastWindowTest"
+        }
+      ],
+      "file_patterns": ["Toast\\.java"]
+    }
   ]
 }

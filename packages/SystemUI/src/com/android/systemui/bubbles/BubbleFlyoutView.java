@@ -31,12 +31,15 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -56,7 +59,7 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mFlyoutSpaceFromBubble;
     private final int mPointerSize;
     private final int mBubbleSize;
-    private final int mBubbleIconBitmapSize;
+    private final int mBubbleBitmapSize;
     private final float mBubbleIconTopPadding;
 
     private final int mFlyoutElevation;
@@ -65,7 +68,9 @@ public class BubbleFlyoutView extends FrameLayout {
     private final float mCornerRadius;
 
     private final ViewGroup mFlyoutTextContainer;
-    private final TextView mFlyoutText;
+    private final ImageView mSenderAvatar;
+    private final TextView mSenderText;
+    private final TextView mMessageText;
 
     /** Values related to the 'new' dot which we use to figure out where to collapse the flyout. */
     private final float mNewDotRadius;
@@ -142,7 +147,9 @@ public class BubbleFlyoutView extends FrameLayout {
         LayoutInflater.from(context).inflate(R.layout.bubble_flyout, this, true);
 
         mFlyoutTextContainer = findViewById(R.id.bubble_flyout_text_container);
-        mFlyoutText = mFlyoutTextContainer.findViewById(R.id.bubble_flyout_text);
+        mSenderText = findViewById(R.id.bubble_flyout_name);
+        mSenderAvatar = findViewById(R.id.bubble_flyout_avatar);
+        mMessageText = mFlyoutTextContainer.findViewById(R.id.bubble_flyout_text);
 
         final Resources res = getResources();
         mFlyoutPadding = res.getDimensionPixelSize(R.dimen.bubble_flyout_padding_x);
@@ -150,13 +157,13 @@ public class BubbleFlyoutView extends FrameLayout {
         mPointerSize = res.getDimensionPixelSize(R.dimen.bubble_flyout_pointer_size);
 
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
-        mBubbleIconTopPadding  = (mBubbleSize - mBubbleIconBitmapSize) / 2f;
+        mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mBubbleIconTopPadding  = (mBubbleSize - mBubbleBitmapSize) / 2f;
 
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
 
-        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleIconBitmapSize;
+        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleBitmapSize;
         mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
         mNewDotSize = mNewDotRadius * 2f;
 
@@ -179,6 +186,9 @@ public class BubbleFlyoutView extends FrameLayout {
                 BubbleFlyoutView.this.getOutline(outline);
             }
         });
+
+        // Use locale direction so the text is aligned correctly.
+        setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
 
         mBgPaint.setColor(mFloatingBackgroundColor);
 
@@ -204,9 +214,39 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** Configures the flyout, collapsed into to dot form. */
     void setupFlyoutStartingAsDot(
-            CharSequence updateMessage, PointF stackPos, float parentWidth,
-            boolean arrowPointingLeft, int dotColor, @Nullable Runnable onLayoutComplete,
-            @Nullable Runnable onHide, float[] dotCenter) {
+            Bubble.FlyoutMessage flyoutMessage,
+            PointF stackPos,
+            float parentWidth,
+            boolean arrowPointingLeft,
+            int dotColor,
+            @Nullable Runnable onLayoutComplete,
+            @Nullable Runnable onHide,
+            float[] dotCenter,
+            boolean hideDot) {
+
+        final Drawable senderAvatar = flyoutMessage.senderAvatar;
+        if (senderAvatar != null && flyoutMessage.isGroupChat) {
+            mSenderAvatar.setVisibility(VISIBLE);
+            mSenderAvatar.setImageDrawable(senderAvatar);
+        } else {
+            mSenderAvatar.setVisibility(GONE);
+            mSenderAvatar.setTranslationX(0);
+            mMessageText.setTranslationX(0);
+            mSenderText.setTranslationX(0);
+        }
+
+        final int maxTextViewWidth =
+                (int) (parentWidth * FLYOUT_MAX_WIDTH_PERCENT) - mFlyoutPadding * 2;
+
+        // Name visibility
+        if (!TextUtils.isEmpty(flyoutMessage.senderName)) {
+            mSenderText.setMaxWidth(maxTextViewWidth);
+            mSenderText.setText(flyoutMessage.senderName);
+            mSenderText.setVisibility(VISIBLE);
+        } else {
+            mSenderText.setVisibility(GONE);
+        }
+
         mArrowPointingLeft = arrowPointingLeft;
         mDotColor = dotColor;
         mOnHide = onHide;
@@ -217,15 +257,14 @@ public class BubbleFlyoutView extends FrameLayout {
         // Set the flyout TextView's max width in terms of percent, and then subtract out the
         // padding so that the entire flyout view will be the desired width (rather than the
         // TextView being the desired width + extra padding).
-        mFlyoutText.setMaxWidth(
-                (int) (parentWidth * FLYOUT_MAX_WIDTH_PERCENT) - mFlyoutPadding * 2);
-        mFlyoutText.setText(updateMessage);
+        mMessageText.setMaxWidth(maxTextViewWidth);
+        mMessageText.setText(flyoutMessage.message);
 
         // Wait for the TextView to lay out so we know its line count.
         post(() -> {
             float restingTranslationY;
             // Multi line flyouts get top-aligned to the bubble.
-            if (mFlyoutText.getLineCount() > 1) {
+            if (mMessageText.getLineCount() > 1) {
                 restingTranslationY = stackPos.y + mBubbleIconTopPadding;
             } else {
                 // Single line flyouts are vertically centered with respect to the bubble.
@@ -242,12 +281,14 @@ public class BubbleFlyoutView extends FrameLayout {
 
             // Calculate the difference in size between the flyout and the 'dot' so that we can
             // transform into the dot later.
-            mFlyoutToDotWidthDelta = getWidth() - mNewDotSize;
-            mFlyoutToDotHeightDelta = getHeight() - mNewDotSize;
+            final float newDotSize = hideDot ? 0f : mNewDotSize;
+            mFlyoutToDotWidthDelta = getWidth() - newDotSize;
+            mFlyoutToDotHeightDelta = getHeight() - newDotSize;
 
             // Calculate the translation values needed to be in the correct 'new dot' position.
-            final float dotPositionX = stackPos.x + mDotCenter[0] - (mOriginalDotSize / 2f);
-            final float dotPositionY = stackPos.y + mDotCenter[1] - (mOriginalDotSize / 2f);
+            final float adjustmentForScaleAway = hideDot ? 0f : (mOriginalDotSize / 2f);
+            final float dotPositionX = stackPos.x + mDotCenter[0] - adjustmentForScaleAway;
+            final float dotPositionY = stackPos.y + mDotCenter[1] - adjustmentForScaleAway;
 
             final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
             final float distanceFromLayoutTopToDotCenterY = restingTranslationY - dotPositionY;
@@ -287,11 +328,20 @@ public class BubbleFlyoutView extends FrameLayout {
         mPercentStillFlyout = (1f - mPercentTransitionedToDot);
 
         // Move and fade out the text.
-        mFlyoutText.setTranslationX(
-                (mArrowPointingLeft ? -getWidth() : getWidth()) * mPercentTransitionedToDot);
-        mFlyoutText.setAlpha(clampPercentage(
+        final float translationX = mPercentTransitionedToDot
+                * (mArrowPointingLeft ? -getWidth() : getWidth());
+        final float alpha = clampPercentage(
                 (mPercentStillFlyout - (1f - BubbleStackView.FLYOUT_DRAG_PERCENT_DISMISS))
-                        / BubbleStackView.FLYOUT_DRAG_PERCENT_DISMISS));
+                        / BubbleStackView.FLYOUT_DRAG_PERCENT_DISMISS);
+
+        mMessageText.setTranslationX(translationX);
+        mMessageText.setAlpha(alpha);
+
+        mSenderText.setTranslationX(translationX);
+        mSenderText.setAlpha(alpha);
+
+        mSenderAvatar.setTranslationX(translationX);
+        mSenderAvatar.setAlpha(alpha);
 
         // Reduce the elevation towards that of the topmost bubble.
         setTranslationZ(
@@ -319,8 +369,7 @@ public class BubbleFlyoutView extends FrameLayout {
         // percentage.
         final float width = getWidth() - (mFlyoutToDotWidthDelta * mPercentTransitionedToDot);
         final float height = getHeight() - (mFlyoutToDotHeightDelta * mPercentTransitionedToDot);
-        final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
-                + mCornerRadius * (1 - mPercentTransitionedToDot);
+        final float interpolatedRadius = getInterpolatedRadius();
 
         // Translate the flyout background towards the collapsed 'dot' state.
         mBgTranslationX = mTranslationXWhenDot * mPercentTransitionedToDot;
@@ -387,11 +436,10 @@ public class BubbleFlyoutView extends FrameLayout {
         if (!mTriangleOutline.isEmpty()) {
             // Draw the rect into the outline as a path so we can merge the triangle path into it.
             final Path rectPath = new Path();
-            final float interpolatedRadius = mNewDotRadius * mPercentTransitionedToDot
-                    + mCornerRadius * (1 - mPercentTransitionedToDot);
+            final float interpolatedRadius = getInterpolatedRadius();
             rectPath.addRoundRect(mBgRect, interpolatedRadius,
                     interpolatedRadius, Path.Direction.CW);
-            outline.setConvexPath(rectPath);
+            outline.setPath(rectPath);
 
             // Get rid of the triangle path once it has disappeared behind the flyout.
             if (mPercentStillFlyout > 0.5f) {
@@ -419,5 +467,10 @@ public class BubbleFlyoutView extends FrameLayout {
 
             outline.mPath.transform(outlineMatrix);
         }
+    }
+
+    private float getInterpolatedRadius() {
+        return mNewDotRadius * mPercentTransitionedToDot
+                + mCornerRadius * (1 - mPercentTransitionedToDot);
     }
 }

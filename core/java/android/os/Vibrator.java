@@ -16,10 +16,14 @@
 
 package android.os;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -28,6 +32,8 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 /**
  * Class that operates the vibrator on the device.
@@ -41,37 +47,73 @@ public abstract class Vibrator {
 
     /**
      * Vibration intensity: no vibrations.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_OFF = 0;
 
     /**
      * Vibration intensity: low.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_LOW = 1;
 
     /**
      * Vibration intensity: medium.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_MEDIUM = 2;
 
     /**
      * Vibration intensity: high.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_HIGH = 3;
 
+    /**
+     * Vibration effect support: unknown
+     *
+     * The hardware doesn't report it's supported effects, so we can't determine whether the
+     * effect is supported or not.
+     */
+    public static final int VIBRATION_EFFECT_SUPPORT_UNKNOWN = 0;
+
+    /**
+     * Vibration effect support: supported
+     *
+     * This effect is supported by the underlying hardware.
+     */
+    public static final int VIBRATION_EFFECT_SUPPORT_YES = 1;
+
+    /**
+     * Vibration effect support: unsupported
+     *
+     * This effect is <b>not</b> supported by the underlying hardware.
+     */
+    public static final int VIBRATION_EFFECT_SUPPORT_NO = 2;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "VIBRATION_INTENSITY_" }, value = {
-        VIBRATION_INTENSITY_OFF,
-        VIBRATION_INTENSITY_LOW,
-        VIBRATION_INTENSITY_MEDIUM,
-        VIBRATION_INTENSITY_HIGH
+    @IntDef(prefix = {"VIBRATION_EFFECT_SUPPORT_"}, value = {
+            VIBRATION_EFFECT_SUPPORT_UNKNOWN,
+            VIBRATION_EFFECT_SUPPORT_YES,
+            VIBRATION_EFFECT_SUPPORT_NO,
     })
-    public @interface VibrationIntensity{}
+    public @interface VibrationEffectSupport {}
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"VIBRATION_INTENSITY_"}, value = {
+            VIBRATION_INTENSITY_OFF,
+            VIBRATION_INTENSITY_LOW,
+            VIBRATION_INTENSITY_MEDIUM,
+            VIBRATION_INTENSITY_HIGH
+    })
+    public @interface VibrationIntensity {
+    }
 
     private final String mPackageName;
     // The default vibration intensity level for haptic feedback.
@@ -117,6 +159,7 @@ public abstract class Vibrator {
 
     /**
      * Get the default vibration intensity for haptic feedback.
+     *
      * @hide
      */
     public int getDefaultHapticFeedbackIntensity() {
@@ -125,13 +168,16 @@ public abstract class Vibrator {
 
     /**
      * Get the default vibration intensity for notifications.
+     *
      * @hide
      */
     public int getDefaultNotificationVibrationIntensity() {
         return mDefaultNotificationVibrationIntensity;
     }
 
-    /** Get the default vibration intensity for ringtones.
+    /**
+     * Get the default vibration intensity for ringtones.
+     *
      * @hide
      */
     public int getDefaultRingVibrationIntensity() {
@@ -156,11 +202,12 @@ public abstract class Vibrator {
      * Configure an always-on haptics effect.
      *
      * @param alwaysOnId The board-specific always-on ID to configure.
-     * @param effect Vibration effect to assign to always-on id. Passing null will disable it.
+     * @param effect     Vibration effect to assign to always-on id. Passing null will disable it.
      * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *        vibrations associated with incoming calls. May only be null when effect is null.
+     *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *                   vibrations associated with incoming calls. May only be null when effect is
+     *                   null.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
@@ -183,7 +230,6 @@ public abstract class Vibrator {
      * Vibrate constantly for the specified period of time.
      *
      * @param milliseconds The number of milliseconds to vibrate.
-     *
      * @deprecated Use {@link #vibrate(VibrationEffect)} instead.
      */
     @Deprecated
@@ -196,11 +242,10 @@ public abstract class Vibrator {
      * Vibrate constantly for the specified period of time.
      *
      * @param milliseconds The number of milliseconds to vibrate.
-     * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *        vibrations associated with incoming calls.
-     *
+     * @param attributes   {@link AudioAttributes} corresponding to the vibration. For example,
+     *                     specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *                     {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *                     vibrations associated with incoming calls.
      * @deprecated Use {@link #vibrate(VibrationEffect, AudioAttributes)} instead.
      */
     @Deprecated
@@ -231,9 +276,8 @@ public abstract class Vibrator {
      * </p>
      *
      * @param pattern an array of longs of times for which to turn the vibrator on or off.
-     * @param repeat the index into pattern at which to repeat, or -1 if
-     *        you don't want to repeat.
-     *
+     * @param repeat  the index into pattern at which to repeat, or -1 if
+     *                you don't want to repeat.
      * @deprecated Use {@link #vibrate(VibrationEffect)} instead.
      */
     @Deprecated
@@ -256,14 +300,13 @@ public abstract class Vibrator {
      * to start the repeat, or -1 to disable repeating.
      * </p>
      *
-     * @param pattern an array of longs of times for which to turn the vibrator on or off.
-     * @param repeat the index into pattern at which to repeat, or -1 if
-     *        you don't want to repeat.
+     * @param pattern    an array of longs of times for which to turn the vibrator on or off.
+     * @param repeat     the index into pattern at which to repeat, or -1 if
+     *                   you don't want to repeat.
      * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *        vibrations associated with incoming calls.
-     *
+     *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *                   vibrations associated with incoming calls.
      * @deprecated Use {@link #vibrate(VibrationEffect, AudioAttributes)} instead.
      */
     @Deprecated
@@ -295,8 +338,9 @@ public abstract class Vibrator {
     }
 
     /**
-     * Like {@link #vibrate(int, String, VibrationEffect, AudioAttributes)}, but allows the
+     * Like {@link #vibrate(VibrationEffect, AudioAttributes)}, but allows the
      * caller to specify the vibration is owned by someone else and set reason for vibration.
+     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
@@ -304,8 +348,175 @@ public abstract class Vibrator {
             String reason, AudioAttributes attributes);
 
     /**
+     * Query whether the vibrator supports the given effects.
+     *
+     * Not all hardware reports its effect capabilities, so the system may not necessarily know
+     * whether an effect is supported or not.
+     *
+     * The returned array will be the same length as the query array and the value at a given index
+     * will contain {@link #VIBRATION_EFFECT_SUPPORT_YES} if the effect at that same index in the
+     * querying array is supported, {@link #VIBRATION_EFFECT_SUPPORT_NO} if it isn't supported, or
+     * {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN} if the system can't determine whether it's
+     * supported or not.
+     *
+     * @param effectIds Which effects to query for.
+     * @return An array containing the systems current knowledge about whether the given effects
+     * are supported or not.
+     */
+    @NonNull
+    @VibrationEffectSupport
+    public int[] areEffectsSupported(
+            @NonNull @VibrationEffect.EffectType int... effectIds) {
+        final int[] support = new int[effectIds.length];
+        Arrays.fill(support, VIBRATION_EFFECT_SUPPORT_NO);
+        return support;
+    }
+
+    /**
+     * Query whether the vibrator supports all of the given effects.
+     *
+     * Not all hardware reports its effect capabilities, so the system may not necessarily know
+     * whether an effect is supported or not.
+     *
+     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_YES}, all effects in the query are
+     * supported by the hardware.
+     *
+     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_NO}, at least one of the effects in the
+     * query is not supported.
+     *
+     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN}, the system doesn't know whether
+     * all of the effects are supported. It may support any or all of the queried effects,
+     * but there's no way to programmatically know whether a {@link #vibrate} call will successfully
+     * cause a vibration. It's guaranteed, however, that none of the queried effects are
+     * definitively unsupported by the hardware.
+     *
+     * @param effectIds Which effects to query for.
+     * @return Whether all of the effects are supported.
+     */
+    @VibrationEffectSupport
+    public final int areAllEffectsSupported(
+            @NonNull @VibrationEffect.EffectType int... effectIds) {
+        int support = VIBRATION_EFFECT_SUPPORT_YES;
+        for (int supported : areEffectsSupported(effectIds)) {
+            if (supported == VIBRATION_EFFECT_SUPPORT_NO) {
+                return VIBRATION_EFFECT_SUPPORT_NO;
+            } else if (supported == VIBRATION_EFFECT_SUPPORT_UNKNOWN) {
+                support = VIBRATION_EFFECT_SUPPORT_UNKNOWN;
+            }
+        }
+        return support;
+    }
+
+
+    /**
+     * Query whether the vibrator supports the given primitives.
+     *
+     * The returned array will be the same length as the query array and the value at a given index
+     * will contain whether the effect at that same index in the querying array is supported or
+     * not.
+     *
+     * @param primitiveIds Which primitives to query for.
+     * @return Whether the primitives are supported.
+     */
+    @NonNull
+    public boolean[] arePrimitivesSupported(
+            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+        return new boolean[primitiveIds.length];
+    }
+
+    /**
+     * Query whether the vibrator supports all of the given primitives.
+     *
+     * @param primitiveIds Which primitives to query for.
+     * @return Whether primitives effects are supported.
+     */
+    public final boolean areAllPrimitivesSupported(
+            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+        for (boolean supported : arePrimitivesSupported(primitiveIds)) {
+            if (!supported) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Turn the vibrator off.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void cancel();
+
+    /**
+     * Check whether the vibrator is vibrating.
+     *
+     * @return True if the hardware is vibrating, otherwise false.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public boolean isVibrating() {
+        return false;
+    }
+
+    /**
+    * Listener for when the vibrator state has changed.
+    *
+    * @see #addVibratorStateListener
+    * @see #removeVibratorStateListener
+    * @hide
+    */
+    @SystemApi
+    @TestApi
+    public interface OnVibratorStateChangedListener  {
+        /**
+         * Called when the vibrator state has changed.
+         *
+         * @param isVibrating If true, the vibrator has started vibrating. If false,
+         *                    it's stopped vibrating.
+         */
+        void onVibratorStateChanged(boolean isVibrating);
+    }
+
+    /**
+     * Adds a listener for vibrator state changes. Callbacks will be executed on the main thread.
+     * If the listener was previously added and not removed, this call will be ignored.
+     *
+     * @param listener listener to be added
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+    }
+
+    /**
+     * Adds a listener for vibrator state change. If the listener was previously added and not
+     * removed, this call will be ignored.
+     *
+     * @param listener listener to be added
+     * @param executor executor of listener
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public void addVibratorStateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnVibratorStateChangedListener listener) {
+    }
+
+    /**
+     * Removes the listener for vibrator state changes. If the listener was not previously
+     * registered, this call will do nothing.
+     *
+     * @param listener listener to be removed
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+    }
 }

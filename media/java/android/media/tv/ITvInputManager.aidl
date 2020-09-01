@@ -60,6 +60,7 @@ interface ITvInputManager {
     void createSession(in ITvInputClient client, in String inputId, boolean isRecordingSession,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
+    int getClientPid(in String sessionId);
 
     void setMainSession(in IBinder sessionToken, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
@@ -88,13 +89,13 @@ interface ITvInputManager {
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
     // For the recording session
-    void startRecording(in IBinder sessionToken, in Uri programUri, int userId);
+    void startRecording(in IBinder sessionToken, in Uri programUri, in Bundle params, int userId);
     void stopRecording(in IBinder sessionToken, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
     ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
-            in TvInputInfo info, int userId);
+            in TvInputInfo info, int userId, String tvInputSessionId, int priorityHint);
     void releaseTvInputHardware(int deviceId, in ITvInputHardware hardware, int userId);
 
     // For TV input capturing
@@ -110,4 +111,8 @@ interface ITvInputManager {
     // For preview channels and programs
     void sendTvInputNotifyIntent(in Intent intent, int userId);
     void requestChannelBrowsable(in Uri channelUri, int userId);
+
+    // For CTS purpose only. Add/remove a TvInputHardware device
+    void addHardwareDevice(in int deviceId);
+    void removeHardwareDevice(in int deviceId);
 }

@@ -117,11 +117,6 @@ public class ImageTransformState extends TransformState {
     }
 
     @Override
-    protected boolean transformScale(TransformState otherState) {
-        return sameAs(otherState);
-    }
-
-    @Override
     public void recycle() {
         super.recycle();
         if (getClass() == ImageTransformState.class) {

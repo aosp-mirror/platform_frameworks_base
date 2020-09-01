@@ -20,13 +20,17 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ALWAYS_ON_TOP;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+import static android.view.Surface.ROTATION_270;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,6 +48,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class to for {@link android.app.WindowConfiguration}.
@@ -53,6 +58,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowConfigurationTests extends WindowTestsBase {
     private Rect mParentBounds;
 
@@ -217,5 +223,32 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
         config.setActivityType(ACTIVITY_TYPE_STANDARD);
         assertTrue(config.hasWindowDecorCaption());
+    }
+
+    @Test
+    public void testMaskedSetTo() {
+        final WindowConfiguration config = new WindowConfiguration();
+        final WindowConfiguration other = new WindowConfiguration();
+        other.setBounds(new Rect(10, 10, 100, 100));
+        other.setRotation(ROTATION_270);
+        config.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        config.setBounds(null);
+
+        // no change
+        config.setTo(other, 0);
+        assertTrue(config.getBounds().isEmpty());
+        assertEquals(ROTATION_UNDEFINED, config.getRotation());
+        assertEquals(WINDOWING_MODE_FULLSCREEN, config.getWindowingMode());
+
+        final int justBoundsAndRotation = WINDOW_CONFIG_BOUNDS | WINDOW_CONFIG_ROTATION;
+        config.setTo(other, justBoundsAndRotation);
+        assertEquals(other.getBounds(), config.getBounds());
+        assertEquals(other.getRotation(), config.getRotation());
+        assertEquals(WINDOWING_MODE_FULLSCREEN, config.getWindowingMode());
+
+        // unsets as well
+        final int justWindowingMode = WINDOW_CONFIG_WINDOWING_MODE;
+        config.setTo(other, justWindowingMode);
+        assertEquals(WINDOWING_MODE_UNDEFINED, config.getWindowingMode());
     }
 }

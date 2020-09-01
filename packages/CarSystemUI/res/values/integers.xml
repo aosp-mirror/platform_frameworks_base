@@ -16,5 +16,19 @@
 -->
 
 <resources>
-    <integer name="user_fullscreen_switcher_num_col">2</integer>
+    <!-- Full screen user switcher column number -->
+    <integer name="user_fullscreen_switcher_num_col">3</integer>
+
+    <!--Percentage of the screen height, from the bottom, that a notification panel being
+    partially closed at will result in it remaining open if released-->
+    <integer name="notification_settle_open_percentage">20</integer>
+    <!--Percentage of the screen height, from the bottom, that a notification panel being peeked
+    at will result in remaining closed the panel if released-->
+    <integer name="notification_settle_close_percentage">80</integer>
+
+    <!-- Timeout values in milliseconds for displaying volume dialog-->
+    <integer name="car_volume_dialog_display_normal_timeout">3000</integer>
+    <integer name="car_volume_dialog_display_hovering_timeout">16000</integer>
+    <integer name="car_volume_dialog_display_expanded_normal_timeout">6000</integer>
+    <integer name="car_volume_dialog_display_expanded_hovering_timeout">32000</integer>
 </resources>

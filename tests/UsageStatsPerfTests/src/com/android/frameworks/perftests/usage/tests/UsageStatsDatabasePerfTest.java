@@ -30,6 +30,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.usage.IntervalStats;
+import com.android.server.usage.PackagesTokenData;
 import com.android.server.usage.UsageStatsDatabase;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
@@ -79,6 +80,7 @@ public class UsageStatsDatabasePerfTest {
         sContext = InstrumentationRegistry.getTargetContext();
         mTestDir = new File(sContext.getFilesDir(), "UsageStatsDatabasePerfTest");
         sUsageStatsDatabase = new UsageStatsDatabase(mTestDir);
+        sUsageStatsDatabase.readMappingsLocked();
         sUsageStatsDatabase.init(1);
     }
 
@@ -140,6 +142,37 @@ public class UsageStatsDatabasePerfTest {
         }
     }
 
+    private void runObfuscateStatsTest(int packageCount, int eventsPerPackage) {
+        final ManualBenchmarkState benchmarkState = mPerfManualStatusReporter.getBenchmarkState();
+        IntervalStats intervalStats = new IntervalStats();
+        populateIntervalStats(intervalStats, packageCount, eventsPerPackage);
+        long elapsedTimeNs = 0;
+        while (benchmarkState.keepRunning(elapsedTimeNs)) {
+            final long startTime = SystemClock.elapsedRealtimeNanos();
+            PackagesTokenData packagesTokenData = new PackagesTokenData();
+            intervalStats.obfuscateData(packagesTokenData);
+            final long endTime = SystemClock.elapsedRealtimeNanos();
+            elapsedTimeNs = endTime - startTime;
+            clearUsageStatsFiles();
+        }
+    }
+
+    private void runDeobfuscateStatsTest(int packageCount, int eventsPerPackage) {
+        final ManualBenchmarkState benchmarkState = mPerfManualStatusReporter.getBenchmarkState();
+        IntervalStats intervalStats = new IntervalStats();
+        populateIntervalStats(intervalStats, packageCount, eventsPerPackage);
+        long elapsedTimeNs = 0;
+        while (benchmarkState.keepRunning(elapsedTimeNs)) {
+            PackagesTokenData packagesTokenData = new PackagesTokenData();
+            intervalStats.obfuscateData(packagesTokenData);
+            final long startTime = SystemClock.elapsedRealtimeNanos();
+            intervalStats.deobfuscateData(packagesTokenData);
+            final long endTime = SystemClock.elapsedRealtimeNanos();
+            elapsedTimeNs = endTime - startTime;
+            clearUsageStatsFiles();
+        }
+    }
+
     @Test
     public void testQueryUsageStats_FewPkgsLightUse() throws IOException {
         runQueryUsageStatsTest(FEW_PKGS, LIGHT_USE);
@@ -148,6 +181,16 @@ public class UsageStatsDatabasePerfTest {
     @Test
     public void testPutUsageStats_FewPkgsLightUse() throws IOException {
         runPutUsageStatsTest(FEW_PKGS, LIGHT_USE);
+    }
+
+    @Test
+    public void testObfuscateStats_FewPkgsLightUse() {
+        runObfuscateStatsTest(FEW_PKGS, LIGHT_USE);
+    }
+
+    @Test
+    public void testDeobfuscateStats_FewPkgsLightUse() {
+        runDeobfuscateStatsTest(FEW_PKGS, LIGHT_USE);
     }
 
     @Test
@@ -161,6 +204,16 @@ public class UsageStatsDatabasePerfTest {
     }
 
     @Test
+    public void testObfuscateStats_FewPkgsHeavyUse() {
+        runObfuscateStatsTest(FEW_PKGS, HEAVY_USE);
+    }
+
+    @Test
+    public void testDeobfuscateStats_FewPkgsHeavyUse() {
+        runDeobfuscateStatsTest(FEW_PKGS, HEAVY_USE);
+    }
+
+    @Test
     public void testQueryUsageStats_ManyPkgsLightUse() throws IOException {
         runQueryUsageStatsTest(MANY_PKGS, LIGHT_USE);
     }
@@ -171,6 +224,16 @@ public class UsageStatsDatabasePerfTest {
     }
 
     @Test
+    public void testObfuscateStats_ManyPkgsLightUse() {
+        runObfuscateStatsTest(MANY_PKGS, LIGHT_USE);
+    }
+
+    @Test
+    public void testDeobfuscateStats_ManyPkgsLightUse() {
+        runDeobfuscateStatsTest(MANY_PKGS, LIGHT_USE);
+    }
+
+    @Test
     public void testQueryUsageStats_ManyPkgsHeavyUse() throws IOException {
         runQueryUsageStatsTest(MANY_PKGS, HEAVY_USE);
     }
@@ -178,5 +241,15 @@ public class UsageStatsDatabasePerfTest {
     @Test
     public void testPutUsageStats_ManyPkgsHeavyUse() throws IOException {
         runPutUsageStatsTest(MANY_PKGS, HEAVY_USE);
+    }
+
+    @Test
+    public void testObfuscateStats_ManyPkgsHeavyUse() {
+        runObfuscateStatsTest(MANY_PKGS, HEAVY_USE);
+    }
+
+    @Test
+    public void testDeobfuscateStats_ManyPkgsHeavyUse() {
+        runDeobfuscateStatsTest(MANY_PKGS, HEAVY_USE);
     }
 }

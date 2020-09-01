@@ -270,7 +270,7 @@ static jint
 android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jstring type, jstring uuid, jint priority, jint sessionId,
         jint deviceType, jstring deviceAddress,
-        jintArray jId, jobjectArray javadesc, jstring opPackageName)
+        jintArray jId, jobjectArray javadesc, jstring opPackageName, jboolean probe)
 {
     ALOGV("android_media_AudioEffect_native_setup");
     AudioEffectJniStorage* lpJniStorage = NULL;
@@ -350,7 +350,8 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
                        &lpJniStorage->mCallbackData,
                        (audio_session_t) sessionId,
                        AUDIO_IO_HANDLE_NONE,
-                       device);
+                       device,
+                       probe);
     lStatus = AudioEffectJni::translateNativeErrorToJava(lpAudioEffect->initCheck());
     if (lStatus != AUDIOEFFECT_SUCCESS && lStatus != AUDIOEFFECT_ERROR_ALREADY_EXISTS) {
         ALOGE("AudioEffect initCheck failed %d", lStatus);
@@ -387,7 +388,13 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     env->SetObjectArrayElement(javadesc, 0, jdesc);
     env->DeleteLocalRef(jdesc);
 
-    setAudioEffect(env, thiz, lpAudioEffect);
+    // In probe mode, release the native object and clear our strong reference
+    // to force all method calls from JAVA to be rejected.
+    if (probe) {
+        setAudioEffect(env, thiz, 0);
+    } else {
+        setAudioEffect(env, thiz, lpAudioEffect);
+    }
 
     env->SetLongField(thiz, fields.fidJniData, (jlong)lpJniStorage);
 
@@ -766,7 +773,7 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
 // Dalvik VM type signatures
 static const JNINativeMethod gMethods[] = {
     {"native_init",          "()V",      (void *)android_media_AudioEffect_native_init},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;IIILjava/lang/String;[I[Ljava/lang/Object;Ljava/lang/String;)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;IIILjava/lang/String;[I[Ljava/lang/Object;Ljava/lang/String;Z)I",
                                          (void *)android_media_AudioEffect_native_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioEffect_native_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioEffect_native_release},

@@ -302,13 +302,15 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void showAutoSaverSuggestionNotification() {
+        final CharSequence message = mContext.getString(R.string.auto_saver_text);
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.HINTS)
                         .setSmallIcon(R.drawable.ic_power_saver)
                         .setWhen(0)
                         .setShowWhen(false)
                         .setContentTitle(mContext.getString(R.string.auto_saver_title))
-                        .setContentText(mContext.getString(R.string.auto_saver_text));
+                        .setStyle(new Notification.BigTextStyle().bigText(message))
+                        .setContentText(message);
         nb.setContentIntent(pendingBroadcast(ACTION_ENABLE_AUTO_SAVER));
         nb.setDeleteIntent(pendingBroadcast(ACTION_DISMISS_AUTO_SAVER_SUGGESTION));
         nb.addAction(0,
@@ -476,7 +478,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 });
         d.setOnDismissListener(dialogInterface -> {
             mUsbHighTempDialog = null;
-            Events.writeEvent(mContext, Events.EVENT_DISMISS_USB_OVERHEAT_ALARM,
+            Events.writeEvent(Events.EVENT_DISMISS_USB_OVERHEAT_ALARM,
                     Events.DISMISS_REASON_USB_OVERHEAD_ALARM_CHANGED,
                     mKeyguard.isKeyguardLocked());
         });
@@ -485,7 +487,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.show();
         mUsbHighTempDialog = d;
 
-        Events.writeEvent(mContext, Events.EVENT_SHOW_USB_OVERHEAT_ALARM,
+        Events.writeEvent(Events.EVENT_SHOW_USB_OVERHEAT_ALARM,
                 Events.SHOW_REASON_USB_OVERHEAD_ALARM_CHANGED,
                 mKeyguard.isKeyguardLocked());
     }
@@ -585,10 +587,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                 resolver,
                                 Global.LOW_POWER_MODE_TRIGGER_LEVEL,
                                 batterySaverTriggerLevel);
-                        Secure.putInt(
+                        Secure.putIntForUser(
                                 resolver,
                                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
-                                1);
+                                1, UserHandle.USER_CURRENT);
                     });
         } else {
             d.setTitle(R.string.battery_saver_confirmation_title);

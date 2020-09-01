@@ -21,16 +21,13 @@ cc_binary_host {
     name: "stats-log-api-gen",
     srcs: [
         "Collation.cpp",
-        "atoms_info_writer.cpp",
         "java_writer.cpp",
         "java_writer_q.cpp",
         "main.cpp",
         "native_writer.cpp",
-        "native_writer_q.cpp",
         "utils.cpp",
     ],
     cflags: [
-        "-DSTATS_SCHEMA_LEGACY",
         "-Wall",
         "-Werror",
     ],
@@ -122,6 +119,13 @@ cc_library {
         "liblog",
         "libcutils",
     ],
-    static_libs: ["libstatssocket"],
+    target: {
+        android: {
+            shared_libs: ["libstatssocket"],
+        },
+        host: {
+            static_libs: ["libstatssocket"],
+        },
+    },
 }
 

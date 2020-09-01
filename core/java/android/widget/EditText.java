@@ -24,7 +24,6 @@ import android.text.TextUtils;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 /*
  * This is supposed to be a *very* thin veneer over TextView.
@@ -178,14 +177,5 @@ public class EditText extends TextView {
     @Override
     protected boolean supportsAutoSizeText() {
         return false;
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        if (isEnabled()) {
-            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT);
-        }
     }
 }

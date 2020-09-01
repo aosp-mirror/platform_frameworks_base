@@ -39,12 +39,12 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private boolean mTouchingHeadsUpView;
     private boolean mTrackingHeadsUp;
     private boolean mCollapseSnoozes;
-    private NotificationPanelView mPanel;
+    private NotificationPanelViewController mPanel;
     private ExpandableNotificationRow mPickedChild;
 
     public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
             Callback callback,
-            NotificationPanelView notificationPanelView) {
+            NotificationPanelViewController notificationPanelView) {
         mHeadsUpManager = headsUpManager;
         mCallback = callback;
         mPanel = notificationPanelView;
@@ -77,9 +77,12 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 ExpandableView child = mCallback.getChildAtRawPosition(x, y);
                 mTouchingHeadsUpView = false;
                 if (child instanceof ExpandableNotificationRow) {
-                    mPickedChild = (ExpandableNotificationRow) child;
+                    ExpandableNotificationRow pickedChild = (ExpandableNotificationRow) child;
                     mTouchingHeadsUpView = !mCallback.isExpanded()
-                            && mPickedChild.isHeadsUp() && mPickedChild.isPinned();
+                            && pickedChild.isHeadsUp() && pickedChild.isPinned();
+                    if (mTouchingHeadsUpView) {
+                        mPickedChild = pickedChild;
+                    }
                 } else if (child == null && !mCallback.isExpanded()) {
                     // We might touch above the visible heads up child, but then we still would
                     // like to capture it.
@@ -130,7 +133,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 if (mPickedChild != null && mTouchingHeadsUpView) {
                     // We may swallow this click if the heads up just came in.
                     if (mHeadsUpManager.shouldSwallowClick(
-                            mPickedChild.getStatusBarNotification().getKey())) {
+                            mPickedChild.getEntry().getSbn().getKey())) {
                         endMotion();
                         return true;
                     }

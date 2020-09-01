@@ -16,6 +16,15 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
+import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
+import static android.service.notification.DNDModeProto.ROOT_CONFIG;
+
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
+import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
+
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.Notification;
@@ -62,6 +71,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -98,6 +108,7 @@ public class ZenModeHelper {
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
     @VisibleForTesting protected final NotificationManager mNotificationManager;
+    private final SysUiStatsEvent.BuilderFactory mStatsEventBuilderFactory;
     @VisibleForTesting protected ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
@@ -125,7 +136,8 @@ public class ZenModeHelper {
 
     private String[] mPriorityOnlyDndExemptPackages;
 
-    public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
+    public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders,
+            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory) {
         mContext = context;
         mHandler = new H(looper);
         addCallback(mMetrics);
@@ -136,12 +148,14 @@ public class ZenModeHelper {
         updateDefaultAutomaticRuleNames();
         mConfig = mDefaultConfig.copy();
         mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
+        mConsolidatedPolicy = mConfig.toNotificationPolicy();
 
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
         mFiltering = new ZenModeFiltering(mContext);
         mConditions = new ZenModeConditions(this, conditionProviders);
         mServiceConfig = conditionProviders.getConfig();
+        mStatsEventBuilderFactory = statsEventBuilderFactory;
     }
 
     public Looper getLooper() {
@@ -351,6 +365,12 @@ public class ZenModeHelper {
                             "Cannot update rules not owned by your condition provider");
                 }
             }
+            if (rule.enabled != automaticZenRule.isEnabled()) {
+                dispatchOnAutomaticRuleStatusChanged(mConfig.user, rule.pkg, ruleId,
+                        automaticZenRule.isEnabled()
+                                ? AUTOMATIC_RULE_STATUS_ENABLED : AUTOMATIC_RULE_STATUS_DISABLED);
+            }
+
             populateZenRule(automaticZenRule, rule, false);
             return setConfigLocked(newConfig, reason, rule.component, true);
         }
@@ -370,6 +390,8 @@ public class ZenModeHelper {
                 throw new SecurityException(
                         "Cannot delete rules not owned by your condition provider");
             }
+            dispatchOnAutomaticRuleStatusChanged(
+                    mConfig.user, rule.pkg, id, AUTOMATIC_RULE_STATUS_REMOVED);
             return setConfigLocked(newConfig, reason, null, true);
         }
     }
@@ -615,23 +637,25 @@ public class ZenModeHelper {
         proto.write(ZenModeProto.ZEN_MODE, mZenMode);
         synchronized (mConfig) {
             if (mConfig.manualRule != null) {
-                mConfig.manualRule.writeToProto(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
+                mConfig.manualRule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
             }
             for (ZenRule rule : mConfig.automaticRules.values()) {
                 if (rule.enabled && rule.condition.state == Condition.STATE_TRUE
                         && !rule.snoozing) {
-                    rule.writeToProto(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
+                    rule.dumpDebug(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
                 }
             }
-            mConfig.toNotificationPolicy().writeToProto(proto, ZenModeProto.POLICY);
+            mConfig.toNotificationPolicy().dumpDebug(proto, ZenModeProto.POLICY);
             proto.write(ZenModeProto.SUPPRESSED_EFFECTS, mSuppressedEffects);
         }
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mZenMode=");
+        pw.print(prefix);
+        pw.print("mZenMode=");
         pw.println(Global.zenModeToString(mZenMode));
-        pw.print("mConsolidatedPolicy=" + mConsolidatedPolicy.toString());
+        pw.print(prefix);
+        pw.println("mConsolidatedPolicy=" + mConsolidatedPolicy.toString());
         final int N = mConfigs.size();
         for (int i = 0; i < N; i++) {
             dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
@@ -653,13 +677,17 @@ public class ZenModeHelper {
             return;
         }
         pw.printf("allow(alarms=%b,media=%b,system=%b,calls=%b,callsFrom=%s,repeatCallers=%b,"
-                + "messages=%b,messagesFrom=%s,events=%b,reminders=%b)\n",
+                + "messages=%b,messagesFrom=%s,conversations=%b,conversationsFrom=%s,"
+                        + "events=%b,reminders=%b)\n",
                 config.allowAlarms, config.allowMedia, config.allowSystem,
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
+                config.allowConversations,
+                ZenPolicy.conversationTypeToString(config.allowConversationsFrom),
                 config.allowEvents, config.allowReminders);
-        pw.printf(" disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
+        pw.print(prefix);
+        pw.printf("  disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();
@@ -802,9 +830,6 @@ public class ZenModeHelper {
      * @return a copy of the zen mode consolidated policy
      */
     public Policy getConsolidatedNotificationPolicy() {
-        if (mConsolidatedPolicy == null) {
-            return null;
-        }
         return mConsolidatedPolicy.copy();
     }
 
@@ -993,21 +1018,23 @@ public class ZenModeHelper {
 
     @VisibleForTesting
     protected void applyRestrictions() {
+        final boolean zenOn = mZenMode != Global.ZEN_MODE_OFF;
         final boolean zenPriorityOnly = mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean zenSilence = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean zenAlarmsOnly = mZenMode == Global.ZEN_MODE_ALARMS;
-        final boolean allowCalls = mConsolidatedPolicy.allowCalls();
+        final boolean allowCalls = mConsolidatedPolicy.allowCalls()
+                && mConsolidatedPolicy.allowCallsFrom() == PRIORITY_SENDERS_ANY;
         final boolean allowRepeatCallers = mConsolidatedPolicy.allowRepeatCallers();
         final boolean allowSystem = mConsolidatedPolicy.allowSystem();
         final boolean allowMedia = mConsolidatedPolicy.allowMedia();
         final boolean allowAlarms = mConsolidatedPolicy.allowAlarms();
 
         // notification restrictions
-        final boolean muteNotifications =
-                (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
+        final boolean muteNotifications = zenOn
+                || (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
         // call restrictions
         final boolean muteCalls = zenAlarmsOnly
-                || (zenPriorityOnly && !allowCalls && !allowRepeatCallers)
+                || (zenPriorityOnly && !(allowCalls || allowRepeatCallers))
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_CALLS) != 0;
         // alarm restrictions
         final boolean muteAlarms = zenPriorityOnly && !allowAlarms;
@@ -1119,6 +1146,13 @@ public class ZenModeHelper {
         }
     }
 
+    private void dispatchOnAutomaticRuleStatusChanged(int userId, String pkg, String id,
+            int status) {
+        for (Callback callback : mCallbacks) {
+            callback.onAutomaticRuleStatusChanged(userId, pkg, id, status);
+        }
+    }
+
     private ZenModeConfig readDefaultConfig(Resources resources) {
         XmlResourceParser parser = null;
         try {
@@ -1144,6 +1178,72 @@ public class ZenModeHelper {
         }
     }
 
+    /**
+     * Generate pulled atoms about do not disturb configurations.
+     */
+    public void pullRules(List<StatsEvent> events) {
+        synchronized (mConfig) {
+            final int numConfigs = mConfigs.size();
+            int id = 0;
+            for (int i = 0; i < numConfigs; i++) {
+                final int user = mConfigs.keyAt(i);
+                final ZenModeConfig config = mConfigs.valueAt(i);
+                SysUiStatsEvent.Builder data = mStatsEventBuilderFactory.newBuilder()
+                        .setAtomId(DND_MODE_RULE)
+                        .writeInt(user)
+                        .writeBoolean(config.manualRule != null) // enabled
+                        .writeBoolean(config.areChannelsBypassingDnd)
+                        .writeInt(ROOT_CONFIG)
+                        .writeString("") // name, empty for root config
+                        .writeInt(Process.SYSTEM_UID) // system owns root config
+                        .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
+                        .writeByteArray(config.toZenPolicy().toProto());
+                events.add(data.build());
+                if (config.manualRule != null && config.manualRule.enabler != null) {
+                    ruleToProto(user, config.manualRule, events);
+                }
+                for (ZenRule rule : config.automaticRules.values()) {
+                    ruleToProto(user, rule, events);
+                }
+            }
+        }
+    }
+
+    private void ruleToProto(int user, ZenRule rule, List<StatsEvent> events) {
+        // Make the ID safe.
+        String id = rule.id == null ? "" : rule.id;
+        if (!ZenModeConfig.DEFAULT_RULE_IDS.contains(id)) {
+            id = "";
+        }
+
+        // Look for packages and enablers, enablers get priority.
+        String pkg = rule.pkg == null ? "" : rule.pkg;
+        if (rule.enabler != null) {
+            pkg = rule.enabler;
+            id = ZenModeConfig.MANUAL_RULE_ID;
+        }
+
+        // TODO: fetch the uid from the package manager
+        int uid = "android".equals(pkg) ? Process.SYSTEM_UID : 0;
+
+        SysUiStatsEvent.Builder data;
+        data = mStatsEventBuilderFactory.newBuilder()
+                .setAtomId(DND_MODE_RULE)
+                .writeInt(user)
+                .writeBoolean(rule.enabled)
+                .writeBoolean(false) // channels_bypassing unused for rules
+                .writeInt(rule.zenMode)
+                .writeString(id)
+                .writeInt(uid)
+                .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
+        byte[] policyProto = new byte[]{};
+        if (rule.zenPolicy != null) {
+            policyProto = rule.zenPolicy.toProto();
+        }
+        data.writeByteArray(policyProto);
+        events.add(data.build());
+    }
+
     @VisibleForTesting
     protected final class RingerModeDelegate implements AudioManagerInternal.RingerModeDelegate {
         @Override
@@ -1160,7 +1260,7 @@ public class ZenModeHelper {
 
             if (mZenMode == Global.ZEN_MODE_OFF
                     || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                    && !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig))) {
+                    && !ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(mConfig))) {
                 // in priority only with ringer not muted, save ringer mode changes
                 // in dnd off, save ringer mode changes
                 setPreviousRingerModeSetting(ringerModeNew);
@@ -1181,7 +1281,7 @@ public class ZenModeHelper {
                             && (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
                             || mZenMode == Global.ZEN_MODE_ALARMS
                             || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                            && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(
+                            && ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(
                             mConfig)))) {
                         newZen = Global.ZEN_MODE_OFF;
                     } else if (mZenMode != Global.ZEN_MODE_OFF) {
@@ -1245,28 +1345,23 @@ public class ZenModeHelper {
 
         @Override
         public int getRingerModeAffectedStreams(int streams) {
-            // ringtone and notification streams are always affected by ringer mode
-            // system stream is affected by ringer mode when not in priority-only
+            // ringtone, notification and system streams are always affected by ringer mode
+            // zen muting is handled in AudioService.java's mZenModeAffectedStreams
             streams |= (1 << AudioSystem.STREAM_RING) |
                     (1 << AudioSystem.STREAM_NOTIFICATION) |
                     (1 << AudioSystem.STREAM_SYSTEM);
 
             if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                // alarm and music streams affected by ringer mode when in total silence
+                // alarm and music and streams affected by ringer mode (cannot be adjusted) when in
+                // total silence
                 streams |= (1 << AudioSystem.STREAM_ALARM) |
-                        (1 << AudioSystem.STREAM_MUSIC);
+                        (1 << AudioSystem.STREAM_MUSIC) |
+                        (1 << AudioSystem.STREAM_ASSISTANT);
             } else {
                 streams &= ~((1 << AudioSystem.STREAM_ALARM) |
-                        (1 << AudioSystem.STREAM_MUSIC));
-            }
-
-            if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                    && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)) {
-                // system stream is not affected by ringer mode in priority only when the ringer
-                // is zen muted (all other notification categories are muted)
-                streams &= ~(1 << AudioSystem.STREAM_SYSTEM);
-            } else {
-                streams |= (1 << AudioSystem.STREAM_SYSTEM);
+                        (1 << AudioSystem.STREAM_MUSIC) |
+                        (1 << AudioSystem.STREAM_ASSISTANT)
+                );
             }
             return streams;
         }
@@ -1348,7 +1443,7 @@ public class ZenModeHelper {
                 .setContentTitle(mContext.getResources().getString(title))
                 .setContentText(mContext.getResources().getString(content))
                 .setContentIntent(PendingIntent.getActivity(mContext, 0, onboardingIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT))
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .setAutoCancel(true)
                 .setLocalOnly(true)
                 .addExtras(extras)
@@ -1508,5 +1603,6 @@ public class ZenModeHelper {
         void onZenModeChanged() {}
         void onPolicyChanged() {}
         void onConsolidatedPolicyChanged() {}
+        void onAutomaticRuleStatusChanged(int userId, String pkg, String id, int status) {}
     }
 }

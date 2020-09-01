@@ -37,8 +37,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.IccCardConstants.State;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 /**
@@ -63,10 +62,10 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
-        public void onSimStateChanged(int subId, int slotId, State simState) {
+        public void onSimStateChanged(int subId, int slotId, int simState) {
             if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
             switch(simState) {
-                case READY: {
+                case TelephonyManager.SIM_STATE_READY: {
                     mRemainingAttempts = -1;
                     resetState();
                     break;
@@ -101,7 +100,12 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     private void setLockedSimMessage() {
         boolean isEsimLocked = KeyguardEsimArea.isEsimLocked(mContext, mSubId);
-        int count = TelephonyManager.getDefault().getSimCount();
+        int count = 1;
+        TelephonyManager telephonyManager =
+            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager != null) {
+            count = telephonyManager.getActiveModemCount();
+        }
         Resources rez = getResources();
         String msg;
         TypedArray array = mContext.obtainStyledAttributes(new int[] { R.attr.wallpaperTextColor });
@@ -110,8 +114,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         if (count < 2) {
             msg = rez.getString(R.string.kg_sim_pin_instructions);
         } else {
-            SubscriptionInfo info = KeyguardUpdateMonitor.getInstance(mContext).
-                    getSubscriptionInfoForSubId(mSubId);
+            SubscriptionInfo info = Dependency.get(KeyguardUpdateMonitor.class)
+                    .getSubscriptionInfoForSubId(mSubId);
             CharSequence displayName = info != null ? info.getDisplayName() : ""; // don't crash
             msg = rez.getString(R.string.kg_sim_pin_instructions_multi, displayName);
             if (info != null) {
@@ -148,8 +152,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     private void handleSubInfoChangeIfNeeded() {
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
-        int subId = monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED);
+        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
+        int subId = monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED);
         if (subId != mSubId && SubscriptionManager.isValidSubscriptionId(subId)) {
             mSubId = subId;
             mShowDefaultMessage = true;
@@ -221,7 +225,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateMonitorCallback);
         resetState();
     }
 
@@ -232,7 +236,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             mSimUnlockProgressDialog.dismiss();
             mSimUnlockProgressDialog = null;
         }
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mUpdateMonitorCallback);
     }
 
     /**
@@ -339,7 +343,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                     /* announce */
                                     result.getType() != PinResult.PIN_RESULT_TYPE_SUCCESS);
                             if (result.getType() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
-                                KeyguardUpdateMonitor.getInstance(getContext())
+                                Dependency.get(KeyguardUpdateMonitor.class)
                                         .reportSimUnlocked(mSubId);
                                 mRemainingAttempts = -1;
                                 mShowDefaultMessage = true;

@@ -37,7 +37,8 @@ public final class Light implements Parcelable {
     /**
      * Creates a new light with the given data.
      *
-     * @hide */
+     * @hide
+     */
     public Light(int id, int ordinal, int type) {
         mId = id;
         mOrdinal = ordinal;
@@ -76,8 +77,24 @@ public final class Light implements Parcelable {
                 }
             };
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Light) {
+            Light light = (Light) obj;
+            return mId == light.mId && mOrdinal == light.mOrdinal && mType == light.mType;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mId;
+    }
+
     /**
      * Returns the id of the light.
+     *
+     * <p>This is an opaque value used as a unique identifier for the light.
      */
     public int getId() {
         return mId;
@@ -86,11 +103,9 @@ public final class Light implements Parcelable {
     /**
      * Returns the ordinal of the light.
      *
-     * <p>This represents the physical order of the lights on the device. The exact values are
-     * device-dependent, but for example, if there are lights in a row, sorting the Light objects
-     * by ordinal should match the order in which they appear on the device. If the device has
-     * 4 lights, the ordinals could be [1, 2, 3, 4] or [0, 10, 20, 30] or any other values that
-     * have the same sort order.
+     * <p>This is a sort key that represents the physical order of lights on the device with the
+     * same type. In the case of multiple lights arranged in a line, for example, the ordinals
+     * could be [1, 2, 3, 4], or [0, 10, 20, 30], or any other values that have the same sort order.
      */
     public int getOrdinal() {
         return mOrdinal;

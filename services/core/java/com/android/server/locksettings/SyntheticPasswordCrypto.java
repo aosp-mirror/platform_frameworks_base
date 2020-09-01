@@ -18,6 +18,7 @@ package com.android.server.locksettings;
 
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.util.Slog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,6 +44,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class SyntheticPasswordCrypto {
+    private static final String TAG = "SyntheticPasswordCrypto";
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final int DEFAULT_TAG_LENGTH_BITS = 128;
     private static final int AES_KEY_LENGTH = 32; // 256-bit AES key
@@ -80,12 +82,12 @@ public class SyntheticPasswordCrypto {
         byte[] ciphertext = cipher.doFinal(blob);
         byte[] iv = cipher.getIV();
         if (iv.length != PROFILE_KEY_IV_SIZE) {
-            throw new RuntimeException("Invalid iv length: " + iv.length);
+            throw new IllegalArgumentException("Invalid iv length: " + iv.length);
         }
         final GCMParameterSpec spec = cipher.getParameters().getParameterSpec(
                 GCMParameterSpec.class);
         if (spec.getTLen() != DEFAULT_TAG_LENGTH_BITS) {
-            throw new RuntimeException("Invalid tag length: " + spec.getTLen());
+            throw new IllegalArgumentException("Invalid tag length: " + spec.getTLen());
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         outputStream.write(iv);
@@ -102,7 +104,7 @@ public class SyntheticPasswordCrypto {
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                 | IllegalBlockSizeException | BadPaddingException | IOException
                 | InvalidParameterSpecException e) {
-            e.printStackTrace();
+            Slog.e(TAG, "Failed to encrypt", e);
             return null;
         }
     }
@@ -116,7 +118,7 @@ public class SyntheticPasswordCrypto {
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                 | IllegalBlockSizeException | BadPaddingException
                 | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
+            Slog.e(TAG, "Failed to decrypt", e);
             return null;
         }
     }
@@ -127,11 +129,14 @@ public class SyntheticPasswordCrypto {
             keyStore.load(null);
 
             SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            if (decryptionKey == null) {
+                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            }
             byte[] intermediate = decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, blob);
             return decrypt(decryptionKey, intermediate);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to decrypt blob", e);
+            Slog.e(TAG, "Failed to decrypt V1 blob", e);
+            throw new IllegalStateException("Failed to decrypt blob", e);
         }
     }
 
@@ -141,6 +146,9 @@ public class SyntheticPasswordCrypto {
             keyStore.load(null);
 
             SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            if (decryptionKey == null) {
+                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            }
             byte[] intermediate = decrypt(decryptionKey, blob);
             return decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
@@ -148,8 +156,8 @@ public class SyntheticPasswordCrypto {
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
                 | InvalidKeyException | UnrecoverableKeyException
                 | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to decrypt blob", e);
+            Slog.e(TAG, "Failed to decrypt blob", e);
+            throw new IllegalStateException("Failed to decrypt blob", e);
         }
     }
 
@@ -180,8 +188,8 @@ public class SyntheticPasswordCrypto {
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
                 | InvalidKeyException
                 | InvalidParameterSpecException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to encrypt blob", e);
+            Slog.e(TAG, "Failed to create blob", e);
+            throw new IllegalStateException("Failed to encrypt blob", e);
         }
     }
 
@@ -191,9 +199,10 @@ public class SyntheticPasswordCrypto {
             keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
             keyStore.deleteEntry(keyAlias);
+            Slog.i(TAG, "SP key deleted: " + keyAlias);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                 | IOException e) {
-            e.printStackTrace();
+            Slog.e(TAG, "Failed to destroy blob", e);
         }
     }
 
@@ -202,7 +211,7 @@ public class SyntheticPasswordCrypto {
             final int PADDING_LENGTH = 128;
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
             if (personalisation.length > PADDING_LENGTH) {
-                throw new RuntimeException("Personalisation too long");
+                throw new IllegalArgumentException("Personalisation too long");
             }
             // Personalize the hash
             // Pad it to the block size of the hash function
@@ -213,7 +222,7 @@ public class SyntheticPasswordCrypto {
             }
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("NoSuchAlgorithmException for SHA-512", e);
+            throw new IllegalStateException("NoSuchAlgorithmException for SHA-512", e);
         }
     }
 }

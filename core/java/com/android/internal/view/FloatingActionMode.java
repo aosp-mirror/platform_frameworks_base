@@ -29,15 +29,14 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.WindowManager;
 
 import android.widget.PopupWindow;
 import com.android.internal.R;
-import com.android.internal.util.Preconditions;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.FloatingToolbar;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class FloatingActionMode extends ActionMode {
 
@@ -84,8 +83,8 @@ public final class FloatingActionMode extends ActionMode {
     public FloatingActionMode(
             Context context, ActionMode.Callback2 callback,
             View originatingView, FloatingToolbar floatingToolbar) {
-        mContext = Preconditions.checkNotNull(context);
-        mCallback = Preconditions.checkNotNull(callback);
+        mContext = Objects.requireNonNull(context);
+        mCallback = Objects.requireNonNull(callback);
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(
                 MenuItem.SHOW_AS_ACTION_IF_ROOM);
         setType(ActionMode.TYPE_FLOATING);
@@ -107,14 +106,14 @@ public final class FloatingActionMode extends ActionMode {
         mViewRectOnScreen = new Rect();
         mPreviousViewRectOnScreen = new Rect();
         mScreenRect = new Rect();
-        mOriginatingView = Preconditions.checkNotNull(originatingView);
+        mOriginatingView = Objects.requireNonNull(originatingView);
         mOriginatingView.getLocationOnScreen(mViewPositionOnScreen);
         // Allow the content rect to overshoot a little bit beyond the
         // bottom view bound if necessary.
         mBottomAllowance = context.getResources()
                 .getDimensionPixelSize(R.dimen.content_rect_bottom_clip_allowance);
         mDisplaySize = new Point();
-        setFloatingToolbar(Preconditions.checkNotNull(floatingToolbar));
+        setFloatingToolbar(Objects.requireNonNull(floatingToolbar));
     }
 
     private void setFloatingToolbar(FloatingToolbar floatingToolbar) {
@@ -211,8 +210,7 @@ public final class FloatingActionMode extends ActionMode {
     }
 
     private boolean isContentRectWithinBounds() {
-        mContext.getSystemService(WindowManager.class)
-            .getDefaultDisplay().getRealSize(mDisplaySize);
+        mContext.getDisplayNoVerify().getRealSize(mDisplaySize);
         mScreenRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
 
         return intersectsClosed(mContentRectOnScreen, mScreenRect)
@@ -328,7 +326,7 @@ public final class FloatingActionMode extends ActionMode {
         private long mLastShowTime;
 
         public FloatingToolbarVisibilityHelper(FloatingToolbar toolbar) {
-            mToolbar = Preconditions.checkNotNull(toolbar);
+            mToolbar = Objects.requireNonNull(toolbar);
         }
 
         public void activate() {

@@ -19,10 +19,13 @@ package android.hardware.camera2;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.camera2.CameraOfflineSession;
+import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallback;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.os.Handler;
 import android.view.Surface;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -851,6 +854,97 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      */
     public void updateOutputConfiguration(OutputConfiguration config)
         throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * Switch the current capture session and a given set of registered camera surfaces
+     * to offline processing mode.
+     *
+     * <p>Offline processing mode and the corresponding {@link CameraOfflineSession} differ from
+     * a regular online camera capture session in several ways. Successful offline switches will
+     * close the currently active camera capture session. Camera clients are also allowed
+     * to call {@link CameraDevice#close} while offline processing of selected capture
+     * requests is still in progress. Such side effects free device close is only possible
+     * when the offline session moves to the ready state. Once this happens, closing the camera
+     * device will not affect the pending offline requests and they must complete as normal.</p>
+     *
+     * <p>Offline processing mode switches may need several hundred milliseconds to complete
+     * as the underlying camera implementation must abort all currently active repeating requests
+     * as well as all other pending requests not specified by the client. Additionally the switch
+     * will be blocked until all requests that continue processing within the offline session
+     * acquire their initial input frame from camera sensor. The call to {@link #switchToOffline}
+     * itself is not blocking and will only trigger the offline switch sequence. Clients will
+     * be notified via {@link CameraOfflineSessionCallback#onReady} once the entire sequence is
+     * complete.</p>
+     *
+     * <p>Please note that after a successful call to this method the currently active capture
+     * session will no longer be valid and clients will begin receiving capture
+     * callbacks with a corresponding {@link CameraOfflineSession} passed as a session
+     * argument.</p>
+     *
+     * @param offlineSurfaces Client-specified collection of input/output camera registered surfaces
+     *                        that need to be switched to offline mode along with their pending
+     *                        capture requests. Do note that not all camera registered
+     *                        surfaces can be switched to offline mode. Offline processing
+     *                        support for individual surfaces can be queried using
+     *                        {@link #supportsOfflineProcessing}. Additionally offline mode
+     *                        switches are not available for shared surfaces
+     *                        {@link OutputConfiguration#enableSurfaceSharing} and surfaces
+     *                        as part of a surface group.
+     *
+     * @param executor The executor which will be used for invoking the offline callback listener.
+     *
+     * @param listener The callback object to notify for offline session events.
+     *
+     * @return camera offline session which in case of successful offline switch will move in ready
+     *         state after clients receive {@link CameraOfflineSessionCallback#onReady}. In case the
+     *         offline switch was not successful clients will receive respective
+     *         {@link CameraOfflineSessionCallback#onSwitchFailed} notification.
+     *
+     * @throws IllegalArgumentException if an attempt was made to pass a {@link Surface} that was
+     *                                  not registered with this capture session or a shared
+     *                                  surface {@link OutputConfiguration#enableSurfaceSharing} or
+     *                                  surface as part of a surface group. The current capture
+     *                                  session will remain valid and active in case of this
+     *                                  exception.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     *
+     * @see CameraOfflineSession
+     * @see CameraOfflineSessionCallback
+     * @see #supportsOfflineProcessing
+     */
+    @Nullable
+    public CameraOfflineSession switchToOffline(@NonNull Collection<Surface> offlineSurfaces,
+            @NonNull Executor executor, @NonNull CameraOfflineSessionCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * <p>Query whether a given Surface is able to support offline mode. </p>
+     *
+     * <p>Surfaces that support offline mode can be passed as arguments to {@link #switchToOffline}.
+     * </p>
+     *
+     * @param surface An input/output surface that was used to create this session or the result of
+     *                {@link #getInputSurface}.
+     *
+     * @return {@code true} if the surface can support offline mode and can be passed as argument to
+     *         {@link #switchToOffline}. {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if an attempt was made to pass a {@link Surface} that was
+     *                                  not registered with this capture session.
+     * @throws UnsupportedOperationException if an attempt was made to call this method using
+     *                                       unsupported camera capture session like
+     *                                       {@link CameraConstrainedHighSpeedCaptureSession} or
+     *                                       {@link CameraOfflineSession}.
+     *
+     * @see #switchToOffline
+     */
+    public boolean supportsOfflineProcessing(@NonNull Surface surface) {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

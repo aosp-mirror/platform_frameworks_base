@@ -21,7 +21,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
@@ -29,6 +28,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 
 import java.lang.annotation.Retention;
@@ -51,7 +51,6 @@ public class SoftInputWindow extends Dialog {
     final int mWindowType;
     final int mGravity;
     final boolean mTakesFocus;
-    final boolean mAutomotiveHideNavBarForKeyboard;
     private final Rect mBounds = new Rect();
 
     @Retention(SOURCE)
@@ -96,6 +95,13 @@ public class SoftInputWindow extends Dialog {
                 lp.token = token;
                 getWindow().setAttributes(lp);
                 updateWindowState(SoftInputWindowState.TOKEN_SET);
+
+                // As soon as we have a token, make sure the window is added (but not shown) by
+                // setting visibility to INVISIBLE and calling show() on Dialog. Note that
+                // WindowInsetsController.OnControllableInsetsChangedListener relies on the window
+                // being added to function.
+                getWindow().getDecorView().setVisibility(View.INVISIBLE);
+                show();
                 return;
             case SoftInputWindowState.TOKEN_SET:
             case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
@@ -136,8 +142,6 @@ public class SoftInputWindow extends Dialog {
         mWindowType = windowType;
         mGravity = gravity;
         mTakesFocus = takesFocus;
-        mAutomotiveHideNavBarForKeyboard = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
         initDockWindow();
     }
 
@@ -251,11 +255,6 @@ public class SoftInputWindow extends Dialog {
             windowModFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
 
-        if (isAutomotive() && mAutomotiveHideNavBarForKeyboard) {
-            windowSetFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-            windowModFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-        }
-
         getWindow().setFlags(windowSetFlags, windowModFlags);
     }
 
@@ -345,10 +344,6 @@ public class SoftInputWindow extends Dialog {
             }
         }
         mWindowState = newState;
-    }
-
-    private boolean isAutomotive() {
-        return getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     private static String stateToString(@SoftInputWindowState int state) {

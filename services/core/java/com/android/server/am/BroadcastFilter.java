@@ -27,6 +27,7 @@ final class BroadcastFilter extends IntentFilter {
     // Back-pointer to the list this filter is in.
     final ReceiverList receiverList;
     final String packageName;
+    final String featureId;
     final String requiredPermission;
     final int owningUid;
     final int owningUserId;
@@ -34,11 +35,12 @@ final class BroadcastFilter extends IntentFilter {
     final boolean visibleToInstantApp;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
-            String _packageName, String _requiredPermission, int _owningUid, int _userId,
+            String _packageName, String _featureId, String _requiredPermission, int _owningUid, int _userId,
             boolean _instantApp, boolean _visibleToInstantApp) {
         super(_filter);
         receiverList = _receiverList;
         packageName = _packageName;
+        featureId = _featureId;
         requiredPermission = _requiredPermission;
         owningUid = _owningUid;
         owningUserId = _userId;
@@ -46,9 +48,9 @@ final class BroadcastFilter extends IntentFilter {
         visibleToInstantApp = _visibleToInstantApp;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        super.writeToProto(proto, BroadcastFilterProto.INTENT_FILTER);
+        super.dumpDebug(proto, BroadcastFilterProto.INTENT_FILTER);
         if (requiredPermission != null) {
             proto.write(BroadcastFilterProto.REQUIRED_PERMISSION, requiredPermission);
         }

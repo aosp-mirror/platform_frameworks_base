@@ -16,6 +16,7 @@
 
 #include "RecordingCanvas.h"
 
+#include "pipeline/skia/FunctorDrawable.h"
 #include "VectorDrawable.h"
 
 #include "SkAndroidFrameworkUtils.h"
@@ -129,6 +130,12 @@ struct SaveBehind final : Op {
     }
 };
 
+struct Concat44 final : Op {
+    static const auto kType = Type::Concat44;
+    Concat44(const SkScalar m[16]) { memcpy(colMajor, m, sizeof(colMajor)); }
+    SkScalar colMajor[16];
+    void draw(SkCanvas* c, const SkMatrix&) const { c->experimental_concat44(colMajor); }
+};
 struct Concat final : Op {
     static const auto kType = Type::Concat;
     Concat(const SkMatrix& matrix) : matrix(matrix) {}
@@ -142,6 +149,12 @@ struct SetMatrix final : Op {
     void draw(SkCanvas* c, const SkMatrix& original) const {
         c->setMatrix(SkMatrix::Concat(original, matrix));
     }
+};
+struct Scale final : Op {
+    static const auto kType = Type::Scale;
+    Scale(SkScalar sx, SkScalar sy) : sx(sx), sy(sy) {}
+    SkScalar sx, sy;
+    void draw(SkCanvas* c, const SkMatrix&) const { c->scale(sx, sy); }
 };
 struct Translate final : Op {
     static const auto kType = Type::Translate;
@@ -274,7 +287,12 @@ struct DrawDrawable final : Op {
     }
     sk_sp<SkDrawable> drawable;
     SkMatrix matrix = SkMatrix::I();
-    void draw(SkCanvas* c, const SkMatrix&) const { c->drawDrawable(drawable.get(), &matrix); }
+    // It is important that we call drawable->draw(c) here instead of c->drawDrawable(drawable).
+    // Drawables are mutable and in cases, like RenderNodeDrawable, are not expected to produce the
+    // same content if retained outside the duration of the frame. Therefore we resolve
+    // them now and do not allow the canvas to take a reference to the drawable and potentially
+    // keep it alive for longer than the frames duration (e.g. SKP serialization).
+    void draw(SkCanvas* c, const SkMatrix&) const { drawable->draw(c, &matrix); }
 };
 struct DrawPicture final : Op {
     static const auto kType = Type::DrawPicture;
@@ -491,6 +509,16 @@ struct DrawVectorDrawable final : Op {
     SkPaint paint;
     BitmapPalette palette;
 };
+struct DrawWebView final : Op {
+    static const auto kType = Type::DrawWebView;
+    DrawWebView(skiapipeline::FunctorDrawable* drawable) : drawable(sk_ref_sp(drawable)) {}
+    sk_sp<skiapipeline::FunctorDrawable> drawable;
+    // We can't invoke SkDrawable::draw directly, because VkFunctorDrawable expects
+    // SkDrawable::onSnapGpuDrawHandler callback instead of SkDrawable::onDraw.
+    // SkCanvas::drawDrawable/SkGpuDevice::drawDrawable has the logic to invoke
+    // onSnapGpuDrawHandler.
+    void draw(SkCanvas* c, const SkMatrix&) const { c->drawDrawable(drawable.get()); }
+};
 }
 
 template <typename T, typename... Args>
@@ -546,11 +574,17 @@ void DisplayListData::saveBehind(const SkRect* subset) {
     this->push<SaveBehind>(0, subset);
 }
 
+void DisplayListData::concat44(const SkScalar colMajor[16]) {
+    this->push<Concat44>(0, colMajor);
+}
 void DisplayListData::concat(const SkMatrix& matrix) {
     this->push<Concat>(0, matrix);
 }
 void DisplayListData::setMatrix(const SkMatrix& matrix) {
     this->push<SetMatrix>(0, matrix);
+}
+void DisplayListData::scale(SkScalar sx, SkScalar sy) {
+    this->push<Scale>(0, sx, sy);
 }
 void DisplayListData::translate(SkScalar dx, SkScalar dy) {
     this->push<Translate>(0, dx, dy);
@@ -674,6 +708,9 @@ void DisplayListData::drawShadowRec(const SkPath& path, const SkDrawShadowRec& r
 }
 void DisplayListData::drawVectorDrawable(VectorDrawableRoot* tree) {
     this->push<DrawVectorDrawable>(0, tree);
+}
+void DisplayListData::drawWebView(skiapipeline::FunctorDrawable* drawable) {
+    this->push<DrawWebView>(0, drawable);
 }
 
 typedef void (*draw_fn)(const void*, SkCanvas*, const SkMatrix&);
@@ -804,11 +841,17 @@ bool RecordingCanvas::onDoSaveBehind(const SkRect* subset) {
     return false;
 }
 
+void RecordingCanvas::didConcat44(const SkScalar colMajor[16]) {
+    fDL->concat44(colMajor);
+}
 void RecordingCanvas::didConcat(const SkMatrix& matrix) {
     fDL->concat(matrix);
 }
 void RecordingCanvas::didSetMatrix(const SkMatrix& matrix) {
     fDL->setMatrix(matrix);
+}
+void RecordingCanvas::didScale(SkScalar sx, SkScalar sy) {
+    fDL->scale(sx, sy);
 }
 void RecordingCanvas::didTranslate(SkScalar dx, SkScalar dy) {
     fDL->translate(dx, dy);
@@ -979,6 +1022,10 @@ void RecordingCanvas::onDrawShadowRec(const SkPath& path, const SkDrawShadowRec&
 
 void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     fDL->drawVectorDrawable(tree);
+}
+
+void RecordingCanvas::drawWebView(skiapipeline::FunctorDrawable* drawable) {
+    fDL->drawWebView(drawable);
 }
 
 }  // namespace uirenderer

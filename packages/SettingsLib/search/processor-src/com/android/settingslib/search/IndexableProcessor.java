@@ -21,7 +21,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
@@ -73,10 +72,12 @@ public class IndexableProcessor extends AbstractProcessor {
         }
         mRanOnce = true;
 
+        final ClassName searchIndexableData = ClassName.get(PACKAGE, "SearchIndexableData");
+
         final FieldSpec providers = FieldSpec.builder(
                 ParameterizedTypeName.get(
                         ClassName.get(Set.class),
-                        TypeName.get(Class.class)),
+                        searchIndexableData),
                 "mProviders",
                 Modifier.PRIVATE, Modifier.FINAL)
                 .initializer("new $T()", HashSet.class)
@@ -84,7 +85,7 @@ public class IndexableProcessor extends AbstractProcessor {
 
         final MethodSpec addIndex = MethodSpec.methodBuilder("addIndex")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(Class.class), "indexClass")
+                .addParameter(searchIndexableData, "indexClass")
                 .addCode("$N.add(indexClass);\n", providers)
                 .build();
 
@@ -113,19 +114,25 @@ public class IndexableProcessor extends AbstractProcessor {
                     SearchIndexable searchIndexable = element.getAnnotation(SearchIndexable.class);
 
                     int forTarget = searchIndexable.forTarget();
+                    MethodSpec.Builder builder = baseConstructorBuilder;
+
                     if (forTarget == SearchIndexable.ALL) {
-                        baseConstructorBuilder.addCode("$N($L.class);\n", addIndex, className);
+                        builder = baseConstructorBuilder;
                     } else if ((forTarget & SearchIndexable.MOBILE) != 0) {
-                        mobileConstructorBuilder.addCode("$N($L.class);\n", addIndex, className);
+                        builder = mobileConstructorBuilder;
                     } else if ((forTarget & SearchIndexable.TV) != 0) {
-                        tvConstructorBuilder.addCode("$N($L.class);\n", addIndex, className);
+                        builder = tvConstructorBuilder;
                     } else if ((forTarget & SearchIndexable.WEAR) != 0) {
-                        wearConstructorBuilder.addCode("$N($L.class);\n", addIndex, className);
+                        builder = wearConstructorBuilder;
                     } else if ((forTarget & SearchIndexable.AUTO) != 0) {
-                        autoConstructorBuilder.addCode("$N($L.class);\n", addIndex, className);
+                        builder = autoConstructorBuilder;
                     } else if ((forTarget & SearchIndexable.ARC) != 0) {
-                        arcConstructorBuilder.addCode("$N($L.class);\n", addIndex, className);
+                        builder = arcConstructorBuilder;
                     }
+                    builder.addCode(
+                            "$N(new SearchIndexableData($L.class, $L"
+                                    + ".SEARCH_INDEX_DATA_PROVIDER));\n",
+                            addIndex, className, className);
                 } else {
                     throw new IllegalStateException("Null classname from " + element);
                 }
@@ -137,13 +144,13 @@ public class IndexableProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(
                         ClassName.get(Collection.class),
-                        TypeName.get(Class.class)))
+                        searchIndexableData))
                 .addCode("return $N;\n", providers)
                 .build();
 
         final TypeSpec baseClass = TypeSpec.classBuilder(CLASS_BASE)
                 .addModifiers(Modifier.PUBLIC)
-                .addSuperinterface(ClassName.get(SearchIndexableResources.class))
+                .addSuperinterface(ClassName.get(PACKAGE, "SearchIndexableResources"))
                 .addField(providers)
                 .addMethod(baseConstructorBuilder.build())
                 .addMethod(addIndex)

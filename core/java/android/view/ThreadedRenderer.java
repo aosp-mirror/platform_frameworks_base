@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 import android.view.animation.AnimationUtils;
@@ -229,7 +230,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
         sTrimForeground = true;
     }
 
-    private static Boolean sSupportsOpenGL;
 
     /**
      * Indicates whether threaded rendering is available under any form for
@@ -239,24 +239,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
      *         false otherwise
      */
     public static boolean isAvailable() {
-        if (sSupportsOpenGL != null) {
-            return sSupportsOpenGL.booleanValue();
-        }
-        if (SystemProperties.getInt("ro.kernel.qemu", 0) == 0) {
-            // Device is not an emulator.
-            sSupportsOpenGL = true;
-            return true;
-        }
-        int qemu_gles = SystemProperties.getInt("qemu.gles", -1);
-        if (qemu_gles == -1) {
-            // In this case, the value of the qemu.gles property is not ready
-            // because the SurfaceFlinger service may not start at this point.
-            return false;
-        }
-        // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
-        // enabled, 0 otherwise. On old emulator versions it will be undefined.
-        sSupportsOpenGL = qemu_gles > 0;
-        return sSupportsOpenGL.booleanValue();
+        return true;
     }
 
     /**
@@ -287,9 +270,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
     // Insets between the drawing surface and rendered content. These are
     // applied as translation when updating the root render node.
     private int mInsetTop, mInsetLeft;
-
-    // Whether the surface has insets. Used to protect opacity.
-    private boolean mHasInsets;
 
     // Light properties specified by the theme.
     private final float mLightY;
@@ -480,7 +460,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
 
         if (surfaceInsets != null && (surfaceInsets.left != 0 || surfaceInsets.right != 0
                 || surfaceInsets.top != 0 || surfaceInsets.bottom != 0)) {
-            mHasInsets = true;
             mInsetLeft = surfaceInsets.left;
             mInsetTop = surfaceInsets.top;
             mSurfaceWidth = width + mInsetLeft + surfaceInsets.right;
@@ -489,7 +468,6 @@ public final class ThreadedRenderer extends HardwareRenderer {
             // If the surface has insets, it can't be opaque.
             setOpaque(false);
         } else {
-            mHasInsets = false;
             mInsetLeft = 0;
             mInsetTop = 0;
             mSurfaceWidth = width;
@@ -679,11 +657,11 @@ public final class ThreadedRenderer extends HardwareRenderer {
 
         int syncResult = syncAndDrawFrame(choreographer.mFrameInfo);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
-            setEnabled(false);
-            attachInfo.mViewRootImpl.mSurface.release();
-            // Invalidate since we failed to draw. This should fetch a Surface
-            // if it is still needed or do nothing if we are no longer drawing
-            attachInfo.mViewRootImpl.invalidate();
+            Log.w("OpenGLRenderer", "Surface lost, forcing relayout");
+            // We lost our surface. For a relayout next frame which should give us a new
+            // surface from WindowManager, which hopefully will work.
+            attachInfo.mViewRootImpl.mForceNextWindowRelayout = true;
+            attachInfo.mViewRootImpl.requestLayout();
         }
         if ((syncResult & SYNC_REDRAW_REQUESTED) != 0) {
             attachInfo.mViewRootImpl.invalidate();

@@ -105,14 +105,13 @@ public class SmsMessage extends SmsMessageBase {
 
     private static final int INVALID_VALIDITY_PERIOD = -1;
 
-    @UnsupportedAppUsage
-    public SmsMessage() {
-    }
-
     public static class SubmitPdu extends SubmitPduBase {
         @UnsupportedAppUsage
-        public SubmitPdu() {
-        }
+        public SubmitPdu() {}
+    }
+
+    @UnsupportedAppUsage
+    public SmsMessage() {
     }
 
     /**

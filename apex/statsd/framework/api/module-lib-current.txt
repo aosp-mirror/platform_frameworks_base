@@ -1,0 +1,10 @@
+// Signature format: 2.0
+package android.os {
+
+  public class StatsFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
+  }
+
+}
+

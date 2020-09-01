@@ -24,6 +24,9 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -38,7 +41,6 @@ import com.android.settingslib.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -56,6 +58,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     // Some Hearing Aids (especially the 2nd device) needs more time to do service discovery
     private static final long MAX_HEARING_AIDS_DELAY_FOR_AUTO_CONNECT = 15000;
     private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
+    private static final long MAX_MEDIA_PROFILE_CONNECT_DELAY = 60000;
 
     private final Context mContext;
     private final BluetoothAdapter mLocalAdapter;
@@ -67,10 +70,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     short mRssi;
     // mProfiles and mRemovedProfiles does not do swap() between main and sub device. It is
     // because current sub device is only for HearingAid and its profile is the same.
-    private final List<LocalBluetoothProfile> mProfiles = new ArrayList<>();
+    private final Collection<LocalBluetoothProfile> mProfiles = new CopyOnWriteArrayList<>();
 
     // List of profiles that were previously in mProfiles, but have been removed
-    private final List<LocalBluetoothProfile> mRemovedProfiles = new ArrayList<>();
+    private final Collection<LocalBluetoothProfile> mRemovedProfiles = new CopyOnWriteArrayList<>();
 
     // Device supports PANU but not NAP: remove PanProfile after device disconnects from NAP
     private boolean mLocalNapRoleConnected;
@@ -91,8 +94,34 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsActiveDeviceA2dp = false;
     private boolean mIsActiveDeviceHeadset = false;
     private boolean mIsActiveDeviceHearingAid = false;
+    // Media profile connect state
+    private boolean mIsA2dpProfileConnectedFail = false;
+    private boolean mIsHeadsetProfileConnectedFail = false;
+    private boolean mIsHearingAidProfileConnectedFail = false;
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case BluetoothProfile.A2DP:
+                    mIsA2dpProfileConnectedFail = true;
+                    break;
+                case BluetoothProfile.HEADSET:
+                    mIsHeadsetProfileConnectedFail = true;
+                    break;
+                case BluetoothProfile.HEARING_AID:
+                    mIsHearingAidProfileConnectedFail = true;
+                    break;
+                default:
+                    Log.w(TAG, "handleMessage(): unknown message : " + msg.what);
+                    break;
+            }
+            Log.w(TAG, "Connect to profile : " + msg.what + " timeout, show error message !");
+            refresh();
+        }
+    };
 
     CachedBluetoothDevice(Context context, LocalBluetoothProfileManager profileManager,
             BluetoothDevice device) {
@@ -134,6 +163,35 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         synchronized (mProfileLock) {
+            if (profile instanceof A2dpProfile || profile instanceof HeadsetProfile
+                    || profile instanceof HearingAidProfile) {
+                setProfileConnectedStatus(profile.getProfileId(), false);
+                switch (newProfileState) {
+                    case BluetoothProfile.STATE_CONNECTED:
+                        mHandler.removeMessages(profile.getProfileId());
+                        break;
+                    case BluetoothProfile.STATE_CONNECTING:
+                        mHandler.sendEmptyMessageDelayed(profile.getProfileId(),
+                                MAX_MEDIA_PROFILE_CONNECT_DELAY);
+                        break;
+                    case BluetoothProfile.STATE_DISCONNECTING:
+                        if (mHandler.hasMessages(profile.getProfileId())) {
+                            mHandler.removeMessages(profile.getProfileId());
+                        }
+                        break;
+                    case BluetoothProfile.STATE_DISCONNECTED:
+                        if (mHandler.hasMessages(profile.getProfileId())) {
+                            mHandler.removeMessages(profile.getProfileId());
+                            setProfileConnectedStatus(profile.getProfileId(), true);
+                        }
+                        break;
+                    default:
+                        Log.w(TAG, "onProfileStateChanged(): unknown profile state : "
+                                + newProfileState);
+                        break;
+                }
+            }
+
             if (newProfileState == BluetoothProfile.STATE_CONNECTED) {
                 if (profile instanceof MapProfile) {
                     profile.setEnabled(mDevice, true);
@@ -161,6 +219,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         fetchActiveDevices();
+    }
+
+    @VisibleForTesting
+    void setProfileConnectedStatus(int profileId, boolean isFailed) {
+        switch (profileId) {
+            case BluetoothProfile.A2DP:
+                mIsA2dpProfileConnectedFail = isFailed;
+                break;
+            case BluetoothProfile.HEADSET:
+                mIsHeadsetProfileConnectedFail = isFailed;
+                break;
+            case BluetoothProfile.HEARING_AID:
+                mIsHearingAidProfileConnectedFail = isFailed;
+                break;
+            default:
+                Log.w(TAG, "setProfileConnectedStatus(): unknown profile id : " + profileId);
+                break;
+        }
     }
 
     public void disconnect() {
@@ -639,10 +715,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public List<LocalBluetoothProfile> getProfiles() {
-        return Collections.unmodifiableList(mProfiles);
-    }
-
-    public List<LocalBluetoothProfile> getProfileListCopy() {
         return new ArrayList<>(mProfiles);
     }
 
@@ -660,7 +732,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public List<LocalBluetoothProfile> getRemovedProfiles() {
-        return mRemovedProfiles;
+        return new ArrayList<>(mRemovedProfiles);
     }
 
     public void registerCallback(Callback callback) {
@@ -828,6 +900,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         int leftBattery = -1;
         int rightBattery = -1;
 
+        if (isProfileConnectedFail() && isConnected()) {
+            return mContext.getString(R.string.profile_connect_timeout_subtext);
+        }
+
         synchronized (mProfileLock) {
             for (LocalBluetoothProfile profile : getProfiles()) {
                 int connectionStatus = getProfileConnectionState(profile);
@@ -925,6 +1001,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private boolean isTwsBatteryAvailable(int leftBattery, int rightBattery) {
         return leftBattery >= 0 && rightBattery >= 0;
+    }
+
+    private boolean isProfileConnectedFail() {
+        return mIsA2dpProfileConnectedFail || mIsHearingAidProfileConnectedFail
+                || mIsHeadsetProfileConnectedFail;
     }
 
     /**

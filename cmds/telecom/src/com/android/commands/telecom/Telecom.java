@@ -46,6 +46,10 @@ public final class Telecom extends BaseCommand {
      * @param args The command-line arguments
      */
     public static void main(String[] args) {
+        // Initialize the telephony module.
+        // TODO: Do it in zygote and RuntimeInit. b/148897549
+        ActivityThread.initializeMainlineModules();
+
       (new Telecom()).run(args);
     }
 

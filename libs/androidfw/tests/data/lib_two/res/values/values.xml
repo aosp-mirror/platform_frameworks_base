@@ -18,14 +18,17 @@
     <public type="attr" name="attr3" id="0x00010000" />
     <attr name="attr3" format="integer" />
 
-    <public type="string" name="LibraryString" id="0x00020000" />
+    <public type="integer" name="bar" id="0x00020000" />
+    <integer name="bar">1337</integer>
+
+    <public type="string" name="LibraryString" id="0x00030000" />
     <string name="LibraryString">Hi from library two</string>
 
-    <public type="string" name="foo" id="0x00020001" />
+    <public type="string" name="foo" id="0x00030001" />
     <string name="foo">Foo from lib_two</string>
 
-    <public type="style" name="Theme" id="0x02030000" />
+    <public type="style" name="Theme" id="0x00040000" />
     <style name="Theme">
-        <item name="com.android.lib_two:attr3">800</item>
+        <item name="com.android.lib_two:attr3">@integer/bar</item>
     </style>
 </resources>

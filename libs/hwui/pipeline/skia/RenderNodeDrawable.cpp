@@ -18,7 +18,6 @@
 #include <SkPaintFilterCanvas.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
-#include "SkiaPipeline.h"
 #include "utils/TraceUtils.h"
 
 #include <optional>
@@ -42,7 +41,7 @@ RenderNodeDrawable::~RenderNodeDrawable() {
 
 void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
                                                      const SkiaDisplayList& displayList,
-                                                     int nestLevel) {
+                                                     int nestLevel) const {
     LOG_ALWAYS_FATAL_IF(0 == nestLevel && !displayList.mProjectionReceiver);
     for (auto& child : displayList.mChildNodes) {
         const RenderProperties& childProperties = child.getNodeProperties();
@@ -133,7 +132,7 @@ private:
     RenderNode& mNode;
 };
 
-void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
+void RenderNodeDrawable::forceDraw(SkCanvas* canvas) const {
     RenderNode* renderNode = mRenderNode.get();
     MarkDraw _marker{*canvas, *renderNode};
 
@@ -187,17 +186,13 @@ public:
     AlphaFilterCanvas(SkCanvas* canvas, float alpha) : SkPaintFilterCanvas(canvas), mAlpha(alpha) {}
 
 protected:
-    bool onFilter(SkTCopyOnFirstWrite<SkPaint>* paint, Type t) const override {
-        std::optional<SkPaint> defaultPaint;
-        if (!*paint) {
-            paint->init(defaultPaint.emplace());
-        }
-        paint->writable()->setAlpha((uint8_t)(*paint)->getAlpha() * mAlpha);
+    bool onFilter(SkPaint& paint) const override {
+        paint.setAlpha((uint8_t)paint.getAlpha() * mAlpha);
         return true;
     }
     void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
         // We unroll the drawable using "this" canvas, so that draw calls contained inside will
-        // get their alpha applied. THe default SkPaintFilterCanvas::onDrawDrawable does not unroll.
+        // get their alpha applied. The default SkPaintFilterCanvas::onDrawDrawable does not unroll.
         drawable->draw(this, matrix);
     }
 
@@ -235,7 +230,14 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             // we need to restrict the portion of the surface drawn to the size of the renderNode.
             SkASSERT(renderNode->getLayerSurface()->width() >= bounds.width());
             SkASSERT(renderNode->getLayerSurface()->height() >= bounds.height());
-            canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot().get(), bounds,
+
+            // If SKP recording is active save an annotation that indicates this drawImageRect
+            // could also be rendered with the commands saved at ID associated with this node.
+            if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
+                canvas->drawAnnotation(bounds, String8::format(
+                    "SurfaceID|%" PRId64, renderNode->uniqueId()).c_str(), nullptr);
+            }
+            canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot(), bounds,
                                   bounds, &paint);
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {

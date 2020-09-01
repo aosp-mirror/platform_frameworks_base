@@ -1,14 +1,4 @@
 // Signature format: 2.0
-package android.annotation {
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.FIELD}) public @interface NonNull {
-  }
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.FIELD}) public @interface Nullable {
-  }
-
-}
-
 package android.net {
 
   public final class TetheringConstants {
@@ -59,6 +49,34 @@ package android.os {
     method public default int getStability();
     field public static final int PARCELABLE_STABILITY_LOCAL = 0; // 0x0
     field public static final int PARCELABLE_STABILITY_VINTF = 1; // 0x1
+  }
+
+  public class StatsFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
+  }
+
+  public class StatsServiceManager {
+    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
+    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
+    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsdServiceRegisterer();
+  }
+
+  public static class StatsServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public StatsServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class StatsServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
+  }
+
+}
+
+package android.util {
+
+  public final class Log {
+    method public static int logToRadioBuffer(int, @Nullable String, @Nullable String);
   }
 
 }

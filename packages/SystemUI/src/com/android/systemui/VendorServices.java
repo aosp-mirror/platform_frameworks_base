@@ -16,10 +16,16 @@
 
 package com.android.systemui;
 
+import android.content.Context;
+
 /**
  * Placeholder for any vendor-specific services.
  */
 public class VendorServices extends SystemUI {
+
+    public VendorServices(Context context) {
+        super(context);
+    }
 
     @Override
     public void start() {

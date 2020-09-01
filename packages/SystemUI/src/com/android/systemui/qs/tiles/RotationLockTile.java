@@ -16,9 +16,9 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
@@ -51,9 +51,6 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
         return new BooleanState();
     }
 
-    public void handleSetListening(boolean listening) {
-    }
-
     @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
@@ -84,11 +81,11 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
     }
 
     public static boolean isCurrentOrientationLockPortrait(RotationLockController controller,
-            Context context) {
+            Resources resources) {
         int lockOrientation = controller.getRotationLockOrientation();
         if (lockOrientation == Configuration.ORIENTATION_UNDEFINED) {
             // Freely rotating device; use current rotation
-            return context.getResources().getConfiguration().orientation
+            return resources.getConfiguration().orientation
                     != Configuration.ORIENTATION_LANDSCAPE;
         } else {
             return lockOrientation != Configuration.ORIENTATION_LANDSCAPE;

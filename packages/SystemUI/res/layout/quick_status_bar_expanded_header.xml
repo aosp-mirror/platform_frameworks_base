@@ -20,7 +20,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/header"
     android:layout_width="match_parent"
-    android:layout_height="@*android:dimen/quick_qs_total_height"
+    android:layout_height="wrap_content"
     android:layout_gravity="@integer/notification_panel_layout_gravity"
     android:background="@android:color/transparent"
     android:baselineAligned="false"
@@ -32,6 +32,7 @@
     android:paddingStart="0dp"
     android:elevation="4dp" >
 
+    <!-- The clock -->
     <include layout="@layout/quick_status_bar_header_system_icons" />
 
     <!-- Status icons within the panel itself (and not in the top-most status bar) -->
@@ -43,25 +44,15 @@
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/quick_qs_status_icons"
-        android:layout_marginStart="@dimen/qs_header_tile_margin_horizontal"
-        android:layout_marginEnd="@dimen/qs_header_tile_margin_horizontal"
         android:accessibilityTraversalAfter="@+id/date_time_group"
         android:accessibilityTraversalBefore="@id/expand_indicator"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
+        android:paddingBottom="10dp"
         android:importantForAccessibility="yes" />
-
-    <com.android.systemui.statusbar.AlphaOptimizedImageView
-        android:id="@+id/qs_detail_header_progress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:alpha="0"
-        android:background="@color/qs_detail_progress_track"
-        android:src="@drawable/indeterminate_anim"/>
 
     <TextView
         android:id="@+id/header_debug_info"

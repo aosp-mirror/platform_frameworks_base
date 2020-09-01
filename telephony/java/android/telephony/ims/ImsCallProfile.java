@@ -300,6 +300,14 @@ public final class ImsCallProfile implements Parcelable {
                                   "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
 
     /**
+     * CallDisconnectCause: Specify call disconnect cause. This extra should be a code
+     * corresponding to ImsReasonInfo and should only be populated in the case that the
+     * call has already been missed
+     */
+    public static final String EXTRA_CALL_DISCONNECT_CAUSE =
+                                 "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
+
+    /**
      * Extra key which the RIL can use to indicate the radio technology used for a call.
      * Valid values are:
      * {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE},
@@ -337,6 +345,14 @@ public final class ImsCallProfile implements Parcelable {
      */
     @Deprecated
     public static final String EXTRA_CALL_RAT_TYPE_ALT = "callRadioTech";
+
+    /**
+     * String extra property containing forwarded numbers associated with the current connection
+     * for an IMS call. The value is string array, and it can include multiple numbers, and
+     * the array values are expected E164 (e.g. +1 (650) 253-0000) format.
+     */
+    public static final String EXTRA_FORWARDED_NUMBER =
+            "android.telephony.ims.extra.FORWARDED_NUMBER";
 
     /** @hide */
     public int mServiceType;
@@ -638,7 +654,7 @@ public final class ImsCallProfile implements Parcelable {
         return "{ serviceType=" + mServiceType
                 + ", callType=" + mCallType
                 + ", restrictCause=" + mRestrictCause
-                + ", mediaProfile=" + mMediaProfile.toString()
+                + ", mediaProfile=" + (mMediaProfile != null ? mMediaProfile.toString() : "null")
                 + ", emergencyServiceCategories=" + mEmergencyServiceCategories
                 + ", emergencyUrns=" + mEmergencyUrns
                 + ", emergencyCallRouting=" + mEmergencyCallRouting

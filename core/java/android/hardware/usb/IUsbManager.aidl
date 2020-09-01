@@ -24,6 +24,7 @@ import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 
 /** @hide */
 interface IUsbManager
@@ -53,6 +54,26 @@ interface IUsbManager
      * (or clears it if the package name is null)
      */
     void setAccessoryPackage(in UsbAccessory accessory, String packageName, int userId);
+
+    /* Adds packages to the set of "denied and don't ask again" launch preferences for a device */
+    void addDevicePackagesToPreferenceDenied(in UsbDevice device, in String[] packageNames, in UserHandle user);
+
+    /* Adds packages to the set of "denied and don't ask again" launch preferences for an accessory */
+    void addAccessoryPackagesToPreferenceDenied(in UsbAccessory accessory, in String[] packageNames, in UserHandle user);
+
+    /* Removes packages from the set of "denied and don't ask again" launch preferences for a device */
+    void removeDevicePackagesFromPreferenceDenied(in UsbDevice device, in String[] packageNames, in UserHandle user);
+
+    /* Removes packages from the set of "denied and don't ask again" launch preferences for an accessory */
+    void removeAccessoryPackagesFromPreferenceDenied(in UsbAccessory device, in String[] packageNames, in UserHandle user);
+
+    /* Sets the persistent permission granted state for USB device
+     */
+    void setDevicePersistentPermission(in UsbDevice device, int uid, in UserHandle user, boolean shouldBeGranted);
+
+    /* Sets the persistent permission granted state for USB accessory
+     */
+    void setAccessoryPersistentPermission(in UsbAccessory accessory, int uid, in UserHandle user, boolean shouldBeGranted);
 
     /* Returns true if the caller has permission to access the device. */
     boolean hasDevicePermission(in UsbDevice device, String packageName);
@@ -104,6 +125,9 @@ interface IUsbManager
 
     /* Gets the current screen unlocked functions. */
     long getScreenUnlockedFunctions();
+
+    /* Resets the USB gadget. */
+    void resetUsbGadget();
 
     /* Get the functionfs control handle for the given function. Usb
      * descriptors will already be written, and the handle will be

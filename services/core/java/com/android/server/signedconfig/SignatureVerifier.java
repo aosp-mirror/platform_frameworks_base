@@ -18,7 +18,8 @@ package com.android.server.signedconfig;
 
 import android.os.Build;
 import android.util.Slog;
-import android.util.StatsLog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -96,7 +97,8 @@ public class SignatureVerifier {
         try {
             signature = Base64.getDecoder().decode(base64Signature);
         } catch (IllegalArgumentException e) {
-            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_SIGNATURE;
+            mEvent.status =
+                    FrameworkStatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_SIGNATURE;
             Slog.e(TAG, "Failed to base64 decode signature");
             return false;
         }
@@ -108,7 +110,8 @@ public class SignatureVerifier {
                 if (DBG) Slog.w(TAG, "Trying to verify signature using debug key");
                 if (verifyWithPublicKey(mDebugKey, data, signature)) {
                     Slog.i(TAG, "Verified config using debug key");
-                    mEvent.verifiedWith = StatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__DEBUG;
+                    mEvent.verifiedWith =
+                            FrameworkStatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__DEBUG;
                     return true;
                 } else {
                     if (DBG) Slog.i(TAG, "Config verification failed using debug key");
@@ -120,16 +123,19 @@ public class SignatureVerifier {
         if (mProdKey ==  null) {
             Slog.e(TAG, "No prod key; construction failed?");
             mEvent.status =
-                    StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED_PROD_KEY_ABSENT;
+                    FrameworkStatsLog
+                            .SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED_PROD_KEY_ABSENT;
             return false;
         }
         if (verifyWithPublicKey(mProdKey, data, signature)) {
             Slog.i(TAG, "Verified config using production key");
-            mEvent.verifiedWith = StatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__PRODUCTION;
+            mEvent.verifiedWith =
+                    FrameworkStatsLog.SIGNED_CONFIG_REPORTED__VERIFIED_WITH__PRODUCTION;
             return true;
         } else {
             if (DBG) Slog.i(TAG, "Verification failed using production key");
-            mEvent.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED;
+            mEvent.status =
+                    FrameworkStatsLog.SIGNED_CONFIG_REPORTED__STATUS__SIGNATURE_CHECK_FAILED;
             return false;
         }
     }

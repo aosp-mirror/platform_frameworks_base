@@ -43,6 +43,9 @@ public class ConfigurableTexts {
 
     public int add(final TextView text, final int labelResId) {
         if (text == null) return 0;
+        if (mTexts.containsKey(text)) {
+            return mTexts.get(text);
+        }
         final Resources res = mContext.getResources();
         final float fontScale = res.getConfiguration().fontScale;
         final float density = res.getDisplayMetrics().density;
@@ -61,6 +64,11 @@ public class ConfigurableTexts {
         });
         mTextLabels.put(text, labelResId);
         return sp;
+    }
+
+    public void remove(final TextView text) {
+        mTexts.remove(text);
+        mTextLabels.remove(text);
     }
 
     public void update() {

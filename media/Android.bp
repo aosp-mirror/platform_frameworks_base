@@ -1,121 +1,65 @@
-java_library {
-    name: "updatable-media",
-
+aidl_interface {
+    name: "audio_common-aidl",
+    unstable: true,
+    local_include_dir: "java",
     srcs: [
-        ":updatable-media-srcs",
+        "java/android/media/audio/common/AudioChannelMask.aidl",
+        "java/android/media/audio/common/AudioConfig.aidl",
+        "java/android/media/audio/common/AudioFormat.aidl",
+        "java/android/media/audio/common/AudioOffloadInfo.aidl",
+        "java/android/media/audio/common/AudioStreamType.aidl",
+        "java/android/media/audio/common/AudioUsage.aidl",
     ],
-
-    aidl: {
-        export_include_dirs: [
-            "apex/java",
-        ],
-
-        // It would be great if we don't need to add include_dirs for public
-        // parcelable classes. Find a better way.
-        include_dirs: [
-            // To refer:
-            // android.os.Bundle
-            // android.os.ResultReceiver
-            "frameworks/base/core/java",
-        ],
+    backend:
+    {
+        cpp: {
+            enabled: true,
+        },
+        java: {
+            // Already generated as part of the entire media java library.
+            enabled: false,
+        },
     },
-
-    permitted_packages: [
-        "android.media",
-    ],
-
-    installable: true,
-
-    // TODO: build against stable API surface. Use core_platform for now to avoid
-    // link-check failure with exoplayer building against "current".
-    sdk_version: "core_platform",
-    min_sdk_version: "29",
-    libs: [
-        // The order matters. android_system_* library should come later.
-        "framework_media_annotation",
-        "android_system_stubs_current",
-    ],
-
-    plugins: ["java_api_finder"],
 }
 
-filegroup {
-    name: "updatable-media-srcs",
+aidl_interface {
+    name: "soundtrigger_middleware-aidl",
+    unstable: true,
+    local_include_dir: "java",
     srcs: [
-        ":mediasession2-srcs",
+        "java/android/media/soundtrigger_middleware/ConfidenceLevel.aidl",
+        "java/android/media/soundtrigger_middleware/ISoundTriggerCallback.aidl",
+        "java/android/media/soundtrigger_middleware/ISoundTriggerMiddlewareService.aidl",
+        "java/android/media/soundtrigger_middleware/ISoundTriggerModule.aidl",
+        "java/android/media/soundtrigger_middleware/ModelParameter.aidl",
+        "java/android/media/soundtrigger_middleware/ModelParameterRange.aidl",
+        "java/android/media/soundtrigger_middleware/Phrase.aidl",
+        "java/android/media/soundtrigger_middleware/PhraseRecognitionEvent.aidl",
+        "java/android/media/soundtrigger_middleware/PhraseRecognitionExtra.aidl",
+        "java/android/media/soundtrigger_middleware/PhraseSoundModel.aidl",
+        "java/android/media/soundtrigger_middleware/RecognitionConfig.aidl",
+        "java/android/media/soundtrigger_middleware/RecognitionEvent.aidl",
+        "java/android/media/soundtrigger_middleware/RecognitionMode.aidl",
+        "java/android/media/soundtrigger_middleware/RecognitionStatus.aidl",
+        "java/android/media/soundtrigger_middleware/SoundModel.aidl",
+        "java/android/media/soundtrigger_middleware/SoundModelType.aidl",
+        "java/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
+        "java/android/media/soundtrigger_middleware/SoundTriggerModuleProperties.aidl",
+        "java/android/media/soundtrigger_middleware/Status.aidl",
     ],
-}
-
-filegroup {
-    name: "mediasession2-srcs",
-    srcs: [
-        "apex/java/android/media/Controller2Link.java",
-        "apex/java/android/media/IMediaController2.aidl",
-        "apex/java/android/media/IMediaSession2.aidl",
-        "apex/java/android/media/IMediaSession2Service.aidl",
-        "apex/java/android/media/MediaConstants.java",
-        "apex/java/android/media/MediaController2.java",
-        "apex/java/android/media/MediaSession2.java",
-        "apex/java/android/media/MediaSession2Service.java",
-        "apex/java/android/media/Session2Command.java",
-        "apex/java/android/media/Session2CommandGroup.java",
-        "apex/java/android/media/Session2Link.java",
-        "apex/java/android/media/Session2Token.java",
-    ],
-    path: "apex/java",
-}
-
-metalava_updatable_media_args = " --error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--hide HiddenTypedefConstant "
-
-droidstubs {
-    name: "updatable-media-stubs-srcs-public",
-    srcs: [
-        ":updatable-media-srcs",
-        ":framework-media-annotation-srcs",
-    ],
-    args: metalava_updatable_media_args,
-    aidl: {
-        // TODO(b/135922046) remove this
-        include_dirs: ["frameworks/base/core/java"],
+    backend:
+    {
+        cpp: {
+            enabled: true,
+        },
+        java: {
+            // Already generated as part of the entire media java library.
+            enabled: false,
+        },
+        ndk: {
+            // Not currently needed, and disabled because of b/146172425
+            enabled: false,
+        },
     },
-    sdk_version: "module_current",
-}
-
-droidstubs {
-    name: "updatable-media-stubs-srcs-system",
-    srcs: [
-        ":updatable-media-srcs",
-        ":framework-media-annotation-srcs",
-    ],
-    args: metalava_updatable_media_args +
-        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) ",
-    aidl: {
-        // TODO(b/135922046) remove this
-        include_dirs: ["frameworks/base/core/java"],
-    },
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "updatable_media_stubs.public",
-    srcs: [":updatable-media-stubs-srcs-public"],
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "updatable_media_stubs",
-    srcs: [":updatable-media-stubs-srcs-system"],
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "framework_media_annotation",
-    srcs: [":framework-media-annotation-srcs"],
-    installable: false,
-    sdk_version: "core_current",
+    imports: [ "audio_common-aidl" ],
 }

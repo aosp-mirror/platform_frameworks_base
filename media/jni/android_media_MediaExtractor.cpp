@@ -913,7 +913,7 @@ android_media_MediaExtractor_native_getMetrics(JNIEnv * env, jobject thiz)
     }
 
     // build and return the Bundle
-    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
+    std::unique_ptr<mediametrics::Item> item(mediametrics::Item::create());
     item->readFromParcel(reply);
     jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 

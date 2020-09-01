@@ -39,19 +39,10 @@ public class DisplayFrames {
     public final int mDisplayId;
 
     /**
-     * The current size of the screen; really; extends into the overscan area of the screen and
-     * doesn't account for any system elements like the status bar.
-     */
-    public final Rect mOverscan = new Rect();
-
-    /**
      * The current visible size of the screen; really; (ir)regardless of whether the status bar can
      * be hidden but not extending into the overscan area.
      */
     public final Rect mUnrestricted = new Rect();
-
-    /** Like mOverscan*, but allowed to move into the overscan region where appropriate. */
-    public final Rect mRestrictedOverscan = new Rect();
 
     /**
      * The current size of the screen; these may be different than (0,0)-(dw,dh) if the status bar
@@ -109,8 +100,6 @@ public class DisplayFrames {
      */
     public final Rect mDisplayCutoutSafe = new Rect();
 
-    private final Rect mDisplayInfoOverscan = new Rect();
-    private final Rect mRotatedDisplayInfoOverscan = new Rect();
     public int mDisplayWidth;
     public int mDisplayHeight;
 
@@ -125,43 +114,13 @@ public class DisplayFrames {
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
         mRotation = info.rotation;
-        mDisplayInfoOverscan.set(
-                info.overscanLeft, info.overscanTop, info.overscanRight, info.overscanBottom);
         mDisplayInfoCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
     }
 
     public void onBeginLayout() {
-        switch (mRotation) {
-            case ROTATION_90:
-                mRotatedDisplayInfoOverscan.left = mDisplayInfoOverscan.top;
-                mRotatedDisplayInfoOverscan.top = mDisplayInfoOverscan.right;
-                mRotatedDisplayInfoOverscan.right = mDisplayInfoOverscan.bottom;
-                mRotatedDisplayInfoOverscan.bottom = mDisplayInfoOverscan.left;
-                break;
-            case ROTATION_180:
-                mRotatedDisplayInfoOverscan.left = mDisplayInfoOverscan.right;
-                mRotatedDisplayInfoOverscan.top = mDisplayInfoOverscan.bottom;
-                mRotatedDisplayInfoOverscan.right = mDisplayInfoOverscan.left;
-                mRotatedDisplayInfoOverscan.bottom = mDisplayInfoOverscan.top;
-                break;
-            case ROTATION_270:
-                mRotatedDisplayInfoOverscan.left = mDisplayInfoOverscan.bottom;
-                mRotatedDisplayInfoOverscan.top = mDisplayInfoOverscan.left;
-                mRotatedDisplayInfoOverscan.right = mDisplayInfoOverscan.top;
-                mRotatedDisplayInfoOverscan.bottom = mDisplayInfoOverscan.right;
-                break;
-            default:
-                mRotatedDisplayInfoOverscan.set(mDisplayInfoOverscan);
-                break;
-        }
-
-        mRestrictedOverscan.set(0, 0, mDisplayWidth, mDisplayHeight);
-        mOverscan.set(mRestrictedOverscan);
-        mSystem.set(mRestrictedOverscan);
-        mUnrestricted.set(mRotatedDisplayInfoOverscan);
-        mUnrestricted.right = mDisplayWidth - mUnrestricted.right;
-        mUnrestricted.bottom = mDisplayHeight - mUnrestricted.bottom;
+        mUnrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
         mRestricted.set(mUnrestricted);
+        mSystem.set(mUnrestricted);
         mDock.set(mUnrestricted);
         mContent.set(mUnrestricted);
         mVoiceContent.set(mUnrestricted);
@@ -175,16 +134,16 @@ public class DisplayFrames {
         if (!mDisplayCutout.getDisplayCutout().isEmpty()) {
             final DisplayCutout c = mDisplayCutout.getDisplayCutout();
             if (c.getSafeInsetLeft() > 0) {
-                mDisplayCutoutSafe.left = mRestrictedOverscan.left + c.getSafeInsetLeft();
+                mDisplayCutoutSafe.left = mUnrestricted.left + c.getSafeInsetLeft();
             }
             if (c.getSafeInsetTop() > 0) {
-                mDisplayCutoutSafe.top = mRestrictedOverscan.top + c.getSafeInsetTop();
+                mDisplayCutoutSafe.top = mUnrestricted.top + c.getSafeInsetTop();
             }
             if (c.getSafeInsetRight() > 0) {
-                mDisplayCutoutSafe.right = mRestrictedOverscan.right - c.getSafeInsetRight();
+                mDisplayCutoutSafe.right = mUnrestricted.right - c.getSafeInsetRight();
             }
             if (c.getSafeInsetBottom() > 0) {
-                mDisplayCutoutSafe.bottom = mRestrictedOverscan.bottom - c.getSafeInsetBottom();
+                mDisplayCutoutSafe.bottom = mUnrestricted.bottom - c.getSafeInsetBottom();
             }
         }
     }
@@ -193,9 +152,9 @@ public class DisplayFrames {
         return mDock.bottom - mCurrent.bottom;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mStable.writeToProto(proto, STABLE_BOUNDS);
+        mStable.dumpDebug(proto, STABLE_BOUNDS);
         proto.end(token);
     }
 
@@ -210,12 +169,8 @@ public class DisplayFrames {
         dumpFrame(mSystem, "mSystem", myPrefix, pw);
         dumpFrame(mContent, "mContent", myPrefix, pw);
         dumpFrame(mVoiceContent, "mVoiceContent", myPrefix, pw);
-        dumpFrame(mOverscan, "mOverscan", myPrefix, pw);
-        dumpFrame(mRestrictedOverscan, "mRestrictedOverscan", myPrefix, pw);
         dumpFrame(mRestricted, "mRestricted", myPrefix, pw);
         dumpFrame(mUnrestricted, "mUnrestricted", myPrefix, pw);
-        dumpFrame(mDisplayInfoOverscan, "mDisplayInfoOverscan", myPrefix, pw);
-        dumpFrame(mRotatedDisplayInfoOverscan, "mRotatedDisplayInfoOverscan", myPrefix, pw);
         pw.println(myPrefix + "mDisplayCutout=" + mDisplayCutout);
     }
 

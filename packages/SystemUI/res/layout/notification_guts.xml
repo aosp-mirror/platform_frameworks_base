@@ -19,8 +19,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
     android:id="@+id/notification_guts"
     android:visibility="gone"
-    android:clickable="true"
     android:gravity="top|start"
     android:theme="@*android:style/Theme.DeviceDefault.Light"/>

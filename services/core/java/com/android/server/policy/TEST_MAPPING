@@ -36,6 +36,9 @@
         },
         {
           "include-filter": "android.permission2.cts.RestrictedStoragePermissionSharedUidTest"
+        },
+        {
+          "include-filter": "android.permission2.cts.RestrictedStoragePermissionTest"
         }
       ]
     },
@@ -47,6 +50,14 @@
         },
         {
           "include-filter": "android.permission.cts.BackgroundPermissionsTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsBackupTestCases",
+      "options": [
+        {
+          "include-filter": "android.backup.cts.PermissionTest"
         }
       ]
     }

@@ -16,6 +16,7 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,16 +37,27 @@ import java.util.regex.Pattern;
  */
 public class WifiP2pGroup implements Parcelable {
 
-    /** The temporary network id.
-     * {@hide} */
-    @UnsupportedAppUsage
-    public static final int TEMPORARY_NET_ID = -1;
+    /**
+     * The temporary network id.
+     * @see #getNetworkId()
+     */
+    public static final int NETWORK_ID_TEMPORARY = -1;
 
-    /** The persistent network id.
+    /**
+     * The temporary network id.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static final int TEMPORARY_NET_ID = NETWORK_ID_TEMPORARY;
+
+    /**
+     * The persistent network id.
      * If a matching persistent profile is found, use it.
      * Otherwise, create a new persistent profile.
-     * {@hide} */
-    public static final int PERSISTENT_NET_ID = -2;
+     * @see #getNetworkId()
+     */
+    public static final int NETWORK_ID_PERSISTENT = -2;
 
     /** The network name */
     private String mNetworkName;
@@ -64,7 +76,7 @@ public class WifiP2pGroup implements Parcelable {
 
     private String mInterface;
 
-    /** The network id in the wpa_supplicant */
+    /** The network ID in wpa_supplicant */
     private int mNetId;
 
     /** The frequency (in MHz) used by this group */
@@ -126,13 +138,13 @@ public class WifiP2pGroup implements Parcelable {
             mPassphrase = match.group(4);
             mOwner = new WifiP2pDevice(match.group(5));
             if (match.group(6) != null) {
-                mNetId = PERSISTENT_NET_ID;
+                mNetId = NETWORK_ID_PERSISTENT;
             } else {
-                mNetId = TEMPORARY_NET_ID;
+                mNetId = NETWORK_ID_TEMPORARY;
             }
         } else if (tokens[0].equals("P2P-INVITATION-RECEIVED")) {
             String sa = null;
-            mNetId = PERSISTENT_NET_ID;
+            mNetId = NETWORK_ID_PERSISTENT;
             for (String token : tokens) {
                 String[] nameValue = token.split("=");
                 if (nameValue.length != 2) continue;
@@ -225,10 +237,13 @@ public class WifiP2pGroup implements Parcelable {
         return mClients.size() == 0;
     }
 
-    /** @hide Returns {@code true} if the device is part of the group */
-    public boolean contains(WifiP2pDevice device) {
-        if (mOwner.equals(device) || mClients.contains(device)) return true;
-        return false;
+    /**
+     * Returns {@code true} if the device is part of the group, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean contains(@Nullable WifiP2pDevice device) {
+        return mOwner.equals(device) || mClients.contains(device);
     }
 
     /** Get the list of clients currently part of the p2p group */
@@ -261,8 +276,7 @@ public class WifiP2pGroup implements Parcelable {
         return mInterface;
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /** The network ID of the P2P group in wpa_supplicant. */
     public int getNetworkId() {
         return mNetId;
     }

@@ -19,6 +19,8 @@ package android.service.notification;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -179,6 +181,22 @@ public class StatusBarNotificationTest {
         final LogMaker logMaker = getNotification(PKG, builder).getLogMaker();
         assertEquals("android.app.Notification$MessagingStyle".hashCode(),
                 logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_STYLE));
+    }
+
+    @Test
+    public void testIsAppGroup() {
+        StatusBarNotification sbn = getNotification(PKG, GROUP_ID_1, CHANNEL_ID);
+        assertTrue(sbn.isAppGroup());
+
+        sbn = getNotification(PKG, null, CHANNEL_ID);
+        assertFalse(sbn.isAppGroup());
+
+        Notification.Builder nb = getNotificationBuilder(null, CHANNEL_ID)
+                .setSortKey("something");
+
+        sbn = getNotification(PKG, nb);
+        assertTrue(sbn.isAppGroup());
+
     }
 
     private StatusBarNotification getNotification(String pkg, String group, String channelId) {

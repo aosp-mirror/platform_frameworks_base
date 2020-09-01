@@ -38,6 +38,7 @@ import java.util.Arrays;
 public class HwParcel {
     private static final String TAG = "HwParcel";
 
+    /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
         STATUS_SUCCESS,
     })

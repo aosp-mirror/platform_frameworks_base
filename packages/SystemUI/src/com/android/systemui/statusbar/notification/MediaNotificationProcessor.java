@@ -152,7 +152,13 @@ public class MediaNotificationProcessor {
         }
     }
 
-    private int selectForegroundColor(int backgroundColor, Palette palette) {
+    /**
+     * Select a foreground color depending on whether the background color is dark or light
+     * @param backgroundColor Background color to coordinate with
+     * @param palette Artwork palette, should be obtained from {@link generateArtworkPaletteBuilder}
+     * @return foreground color
+     */
+    public static int selectForegroundColor(int backgroundColor, Palette palette) {
         if (ContrastColorUtil.isColorLight(backgroundColor)) {
             return selectForegroundColorForSwatches(palette.getDarkVibrantSwatch(),
                     palette.getVibrantSwatch(),
@@ -170,7 +176,7 @@ public class MediaNotificationProcessor {
         }
     }
 
-    private int selectForegroundColorForSwatches(Palette.Swatch moreVibrant,
+    private static int selectForegroundColorForSwatches(Palette.Swatch moreVibrant,
             Palette.Swatch vibrant, Palette.Swatch moreMutedSwatch, Palette.Swatch mutedSwatch,
             Palette.Swatch dominantSwatch, int fallbackColor) {
         Palette.Swatch coloredCandidate = selectVibrantCandidate(moreVibrant, vibrant);
@@ -194,7 +200,7 @@ public class MediaNotificationProcessor {
         }
     }
 
-    private Palette.Swatch selectMutedCandidate(Palette.Swatch first,
+    private static Palette.Swatch selectMutedCandidate(Palette.Swatch first,
             Palette.Swatch second) {
         boolean firstValid = hasEnoughPopulation(first);
         boolean secondValid = hasEnoughPopulation(second);
@@ -215,7 +221,8 @@ public class MediaNotificationProcessor {
         return null;
     }
 
-    private Palette.Swatch selectVibrantCandidate(Palette.Swatch first, Palette.Swatch second) {
+    private static Palette.Swatch selectVibrantCandidate(Palette.Swatch first,
+            Palette.Swatch second) {
         boolean firstValid = hasEnoughPopulation(first);
         boolean secondValid = hasEnoughPopulation(second);
         if (firstValid && secondValid) {
@@ -235,7 +242,7 @@ public class MediaNotificationProcessor {
         return null;
     }
 
-    private boolean hasEnoughPopulation(Palette.Swatch swatch) {
+    private static boolean hasEnoughPopulation(Palette.Swatch swatch) {
         // We want a fraction that is at least 1% of the image
         return swatch != null
                 && (swatch.getPopulation() / (float) RESIZE_BITMAP_AREA > MINIMUM_IMAGE_FRACTION);
@@ -257,7 +264,7 @@ public class MediaNotificationProcessor {
      * @param palette Artwork palette, should be obtained from {@link generateArtworkPaletteBuilder}
      * @return Swatch that should be used as the background of the media notification.
      */
-    private static Palette.Swatch findBackgroundSwatch(Palette palette) {
+    public static Palette.Swatch findBackgroundSwatch(Palette palette) {
         // by default we use the dominant palette
         Palette.Swatch dominantSwatch = palette.getDominantSwatch();
         if (dominantSwatch == null) {
@@ -301,7 +308,7 @@ public class MediaNotificationProcessor {
      * @param artwork Media artwork
      * @return Builder that generates the {@link Palette} for the media artwork.
      */
-    private static Palette.Builder generateArtworkPaletteBuilder(Bitmap artwork) {
+    public static Palette.Builder generateArtworkPaletteBuilder(Bitmap artwork) {
         // for the background we only take the left side of the image to ensure
         // a smooth transition
         return Palette.from(artwork)

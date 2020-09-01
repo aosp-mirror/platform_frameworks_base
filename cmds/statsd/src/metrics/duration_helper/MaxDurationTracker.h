@@ -30,15 +30,13 @@ class MaxDurationTracker : public DurationTracker {
 public:
     MaxDurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
                        sp<ConditionWizard> wizard, int conditionIndex,
-                       const std::vector<Matcher>& dimensionInCondition, bool nesting,
+                       bool nesting,
                        int64_t currentBucketStartNs, int64_t currentBucketNum,
                        int64_t startTimeNs, int64_t bucketSizeNs, bool conditionSliced,
                        bool fullLink,
                        const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
 
     MaxDurationTracker(const MaxDurationTracker& tracker) = default;
-
-    unique_ptr<DurationTracker> clone(const int64_t eventTime) override;
 
     void noteStart(const HashableDimensionKey& key, bool condition, const int64_t eventTime,
                    const ConditionKey& conditionKey) override;
@@ -56,9 +54,18 @@ public:
     void onSlicedConditionMayChange(bool overallCondition, const int64_t timestamp) override;
     void onConditionChanged(bool condition, const int64_t timestamp) override;
 
+    void onStateChanged(const int64_t timestamp, const int32_t atomId,
+                        const FieldValue& newState) override;
+
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const int64_t currentTimestamp) const override;
     void dumpStates(FILE* out, bool verbose) const override;
+
+    int64_t getCurrentStateKeyDuration() const override;
+
+    int64_t getCurrentStateKeyFullBucketDuration() const override;
+
+    void updateCurrentStateKey(const int32_t atomId, const FieldValue& newState);
 
 private:
     // Returns true if at least one of the mInfos is started.

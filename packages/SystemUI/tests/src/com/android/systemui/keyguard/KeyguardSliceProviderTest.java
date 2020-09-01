@@ -51,9 +51,11 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,21 +87,28 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Mock
     private SettableWakeLock mMediaWakeLock;
     @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
     private DozeParameters mDozeParameters;
+    @Mock
+    private NextAlarmController mNextAlarmController;
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
+        mProvider.setContextAvailableCallback(context -> { });
         mProvider.attachInfo(getContext(), null);
-        mProvider.initDependencies(mNotificationMediaManager, mStatusBarStateController,
-                mKeyguardBypassController, mDozeParameters);
+        reset(mContentResolver);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
+    }
+
+    @After
+    public void tearDown() {
+        mProvider.onDestroy();
     }
 
     @Test
@@ -122,7 +131,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         MediaMetadata metadata = mock(MediaMetadata.class);
         when(metadata.getText(any())).thenReturn("metadata");
         mProvider.onDozingChanged(true);
-        mProvider.onMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
+        mProvider.onPrimaryMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
         mProvider.onBindSlice(mProvider.getUri());
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_ARTIST));
@@ -135,7 +144,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         when(metadata.getText(any())).thenReturn("metadata");
         when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
-        mProvider.onMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
+        mProvider.onPrimaryMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
         mProvider.onBindSlice(mProvider.getUri());
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_ARTIST));
@@ -201,7 +210,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mProvider.onStateChanged(StatusBarState.KEYGUARD);
         mProvider.onDozingChanged(true);
         reset(mContentResolver);
-        mProvider.onMetadataOrStateChanged(mock(MediaMetadata.class), PlaybackState.STATE_PLAYING);
+        mProvider.onPrimaryMetadataOrStateChanged(mock(MediaMetadata.class),
+                PlaybackState.STATE_PLAYING);
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
 
         // Hides after waking up
@@ -213,7 +223,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Test
     public void onDozingChanged_updatesSliceIfMedia() {
         mProvider.onStateChanged(StatusBarState.KEYGUARD);
-        mProvider.onMetadataOrStateChanged(mock(MediaMetadata.class), PlaybackState.STATE_PLAYING);
+        mProvider.onPrimaryMetadataOrStateChanged(mock(MediaMetadata.class),
+                PlaybackState.STATE_PLAYING);
         reset(mContentResolver);
         // Show media when dozing
         mProvider.onDozingChanged(true);
@@ -248,13 +259,16 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         }
 
         @Override
-        public boolean onCreateSliceProvider() {
-            super.onCreateSliceProvider();
+        protected void inject() {
             mAlarmManager = KeyguardSliceProviderTest.this.mAlarmManager;
             mContentResolver = KeyguardSliceProviderTest.this.mContentResolver;
             mZenModeController = KeyguardSliceProviderTest.this.mZenModeController;
             mMediaWakeLock = KeyguardSliceProviderTest.this.mMediaWakeLock;
-            return true;
+            mDozeParameters = KeyguardSliceProviderTest.this.mDozeParameters;
+            mNextAlarmController = KeyguardSliceProviderTest.this.mNextAlarmController;
+            mStatusBarStateController = KeyguardSliceProviderTest.this.mStatusBarStateController;
+            mKeyguardBypassController = KeyguardSliceProviderTest.this.mKeyguardBypassController;
+            mMediaManager = KeyguardSliceProviderTest.this.mNotificationMediaManager;
         }
 
         @Override
@@ -266,11 +280,6 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         void cleanDateFormatLocked() {
             super.cleanDateFormatLocked();
             mCleanDateFormatInvokations++;
-        }
-
-        @Override
-        public KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
-            return mKeyguardUpdateMonitor;
         }
 
         @Override

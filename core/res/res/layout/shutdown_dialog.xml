@@ -32,6 +32,19 @@
         android:layout_height="32sp"
         android:text="@string/shutdown_progress"
         android:textDirection="locale"
+        android:textSize="18sp"
+        android:textAppearance="?attr/textAppearanceMedium"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone"
+        android:fontFamily="@string/config_headlineFontFamily"/>
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="32sp"
+        android:text="@string/shutdown_progress"
+        android:textDirection="locale"
         android:textSize="24sp"
         android:textAppearance="?attr/textAppearanceLarge"
         android:gravity="center"

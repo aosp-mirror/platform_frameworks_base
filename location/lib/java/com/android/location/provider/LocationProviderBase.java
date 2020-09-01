@@ -92,7 +92,7 @@ public abstract class LocationProviderBase {
     // write locked on mBinder, read lock is optional depending on atomicity requirements
     @Nullable private volatile ILocationProviderManager mManager;
     private volatile ProviderProperties mProperties;
-    private volatile boolean mEnabled;
+    private volatile boolean mAllowed;
     private final ArrayList<String> mAdditionalProviderPackages;
 
     public LocationProviderBase(String tag, ProviderPropertiesUnbundled properties) {
@@ -104,7 +104,7 @@ public abstract class LocationProviderBase {
 
         mManager = null;
         mProperties = properties.getProviderProperties();
-        mEnabled = true;
+        mAllowed = true;
         mAdditionalProviderPackages = new ArrayList<>(0);
     }
 
@@ -113,35 +113,44 @@ public abstract class LocationProviderBase {
     }
 
     /**
-     * Sets whether this provider is currently enabled or not. Note that this is specific to the
-     * provider only, and is not related to global location settings. This is a hint to the Location
-     * Manager that this provider will generally be unable to fulfill incoming requests. This
-     * provider may still receive callbacks to onSetRequest while not enabled, and must decide
-     * whether to attempt to satisfy those requests or not.
-     *
-     * Some guidelines: providers should set their own enabled/disabled status based only on state
-     * "owned" by that provider. For instance, providers should not take into account the state of
-     * the location master setting when setting themselves enabled or disabled, as this state is not
-     * owned by a particular provider. If a provider requires some additional user consent that is
-     * particular to the provider, this should be use to set the enabled/disabled state. If the
-     * provider proxies to another provider, the child provider's enabled/disabled state should be
-     * taken into account in the parent's enabled/disabled state. For most providers, it is expected
-     * that they will be always enabled.
+     * @deprecated Use {@link #setAllowed(boolean)} instead.
      */
+    @Deprecated
     @RequiresApi(VERSION_CODES.Q)
     public void setEnabled(boolean enabled) {
+        setAllowed(enabled);
+    }
+
+    /**
+     * Sets whether this provider is currently allowed or not. Note that this is specific to the
+     * provider only, and is not related to global location settings. This is a hint to the Location
+     * Manager that this provider will generally be unable to fulfill incoming requests. This
+     * provider may still receive callbacks to onSetRequest while not allowed, and must decide
+     * whether to attempt to satisfy those requests or not.
+     *
+     * <p>Some guidelines: providers should set their own allowed/disallowed status based only on
+     * state "owned" by that provider. For instance, providers should not take into account the
+     * state of the location master setting when setting themselves allowed or disallowed, as this
+     * state is not owned by a particular provider. If a provider requires some additional user
+     * consent that is particular to the provider, this should be use to set the allowed/disallowed
+     * state. If the provider proxies to another provider, the child provider's allowed/disallowed
+     * state should be taken into account in the parent's allowed state. For most providers, it is
+     * expected that they will be always allowed.
+     */
+    @RequiresApi(VERSION_CODES.R)
+    public void setAllowed(boolean allowed) {
         synchronized (mBinder) {
-            if (mEnabled == enabled) {
+            if (mAllowed == allowed) {
                 return;
             }
 
-            mEnabled = enabled;
+            mAllowed = allowed;
         }
 
         ILocationProviderManager manager = mManager;
         if (manager != null) {
             try {
-                manager.onSetEnabled(mEnabled);
+                manager.onSetAllowed(mAllowed);
             } catch (RemoteException | RuntimeException e) {
                 Log.w(mTag, e);
             }
@@ -193,12 +202,20 @@ public abstract class LocationProviderBase {
     }
 
     /**
-     * Returns true if this provider has been set as enabled. This will be true unless explicitly
-     * set otherwise.
+     * @deprecated Use {@link #isAllowed()} instead.
      */
+    @Deprecated
     @RequiresApi(VERSION_CODES.Q)
     public boolean isEnabled() {
-        return mEnabled;
+        return isAllowed();
+    }
+
+    /**
+     * Returns true if this provider is allowed. Providers start as allowed on construction.
+     */
+    @RequiresApi(VERSION_CODES.R)
+    public boolean isAllowed() {
+        return mAllowed;
     }
 
     /**
@@ -207,6 +224,19 @@ public abstract class LocationProviderBase {
     public void reportLocation(Location location) {
         ILocationProviderManager manager = mManager;
         if (manager != null) {
+            // remove deprecated extras to save on serialization
+            Bundle extras = location.getExtras();
+            if (extras != null && (extras.containsKey("noGPSLocation")
+                    || extras.containsKey("coarseLocation"))) {
+                location = new Location(location);
+                extras = location.getExtras();
+                extras.remove("noGPSLocation");
+                extras.remove("coarseLocation");
+                if (extras.isEmpty()) {
+                    location.setExtras(null);
+                }
+            }
+
             try {
                 manager.onReportLocation(location);
             } catch (RemoteException | RuntimeException e) {
@@ -256,17 +286,6 @@ public abstract class LocationProviderBase {
     /**
      * This method will no longer be invoked.
      *
-     * Returns a information on the status of this provider.
-     * <p>{@link android.location.LocationProvider#OUT_OF_SERVICE} is returned if the provider is
-     * out of service, and this is not expected to change in the near
-     * future; {@link android.location.LocationProvider#TEMPORARILY_UNAVAILABLE} is returned if
-     * the provider is temporarily unavailable but is expected to be
-     * available shortly; and {@link android.location.LocationProvider#AVAILABLE} is returned
-     * if the provider is currently available.
-     *
-     * <p>If extras is non-null, additional status information may be
-     * added to it in the form of provider-specific key/value pairs.
-     *
      * @deprecated This callback will be never be invoked on Android Q and above. This method should
      * only be implemented in location providers that need to support SDKs below Android Q. This
      * method may be removed in the future.
@@ -278,15 +297,6 @@ public abstract class LocationProviderBase {
 
     /**
      * This method will no longer be invoked.
-     *
-     * Returns the time at which the status was last updated. It is the
-     * responsibility of the provider to appropriately set this value using
-     * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
-     * there is a status update that it wishes to broadcast to all its
-     * listeners. The provider should be careful not to broadcast
-     * the same status again.
-     *
-     * @return time of last status update in millis since last reboot
      *
      * @deprecated This callback will be never be invoked on Android Q and above. This method should
      * only be implemented in location providers that need to support SDKs below Android Q. This
@@ -315,7 +325,7 @@ public abstract class LocationProviderBase {
                         manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
                     }
                     manager.onSetProperties(mProperties);
-                    manager.onSetEnabled(mEnabled);
+                    manager.onSetAllowed(mAllowed);
                 } catch (RemoteException e) {
                     Log.w(mTag, e);
                 }
@@ -329,16 +339,6 @@ public abstract class LocationProviderBase {
         @Override
         public void setRequest(ProviderRequest request, WorkSource ws) {
             onSetRequest(new ProviderRequestUnbundled(request), ws);
-        }
-
-        @Override
-        public int getStatus(Bundle extras) {
-            return onGetStatus(extras);
-        }
-
-        @Override
-        public long getStatusUpdateTime() {
-            return onGetStatusUpdateTime();
         }
 
         @Override

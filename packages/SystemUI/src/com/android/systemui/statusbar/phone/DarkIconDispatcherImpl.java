@@ -26,6 +26,7 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.CommandQueue;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -51,11 +52,11 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
     /**
      */
     @Inject
-    public DarkIconDispatcherImpl(Context context) {
+    public DarkIconDispatcherImpl(Context context, CommandQueue commandQueue) {
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
 
-        mTransitionsController = new LightBarTransitionsController(context, this);
+        mTransitionsController = new LightBarTransitionsController(context, this, commandQueue);
     }
 
     public LightBarTransitionsController getTransitionsController() {

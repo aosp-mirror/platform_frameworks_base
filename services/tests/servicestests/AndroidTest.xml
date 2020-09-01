@@ -23,6 +23,7 @@
         <option name="test-file-name" value="JobTestApp.apk" />
         <option name="test-file-name" value="ConnTestApp.apk" />
         <option name="test-file-name" value="SuspendTestApp.apk" />
+        <option name="test-file-name" value="SimpleServiceTestApp.apk" />
     </target_preparer>
 
     <option name="test-tag" value="FrameworksServicesTests" />

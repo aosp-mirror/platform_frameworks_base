@@ -16,21 +16,36 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
+import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for RootWindowContainer.
@@ -40,6 +55,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RootWindowContainerTests extends WindowTestsBase {
 
     private static final int FAKE_CALLING_UID = 667;
@@ -81,28 +97,77 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testIsAnyNonToastWindowVisibleForUid_aFewNonToastButNoneVisible() {
-        final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar", FAKE_CALLING_UID);
+        final WindowState statusBar =
+                createWindow(null, TYPE_STATUS_BAR, "statusBar", FAKE_CALLING_UID);
+        final WindowState notificationShade = createWindow(null, TYPE_NOTIFICATION_SHADE,
+                "notificationShade", FAKE_CALLING_UID);
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app", FAKE_CALLING_UID);
 
-        assertFalse(topBar.isVisibleNow());
+        assertFalse(statusBar.isVisibleNow());
+        assertFalse(notificationShade.isVisibleNow());
         assertFalse(app.isVisibleNow());
         assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
     }
 
     @Test
     public void testUpdateDefaultDisplayWindowingModeOnSettingsRetrieved() {
-        synchronized (mWm.mGlobalLock) {
-            assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                    mWm.getDefaultDisplayContentLocked().getWindowingMode());
+        assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
+                mWm.getDefaultDisplayContentLocked().getWindowingMode());
 
-            mWm.mIsPc = true;
-            mWm.mSupportsFreeformWindowManagement = true;
+        mWm.mIsPc = true;
+        mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
-            mWm.mRoot.onSettingsRetrieved();
+        mWm.mRoot.onSettingsRetrieved();
 
-            assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
-                    mWm.getDefaultDisplayContentLocked().getWindowingMode());
-        }
+        assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
+                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+    }
+
+    /**
+     * This test ensures that an existing single instance activity with alias name can be found by
+     * the same activity info. So {@link ActivityStarter#getReusableTask} won't miss it that leads
+     * to create an unexpected new instance.
+     */
+    @Test
+    public void testFindActivityByTargetComponent() {
+        final ComponentName aliasComponent = ComponentName.createRelative(
+                ActivityTestsBase.DEFAULT_COMPONENT_PACKAGE_NAME, ".AliasActivity");
+        final ComponentName targetComponent = ComponentName.createRelative(
+                aliasComponent.getPackageName(), ".TargetActivity");
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setComponent(aliasComponent)
+                .setTargetActivity(targetComponent.getClassName())
+                .setLaunchMode(ActivityInfo.LAUNCH_SINGLE_INSTANCE)
+                .setCreateTask(true)
+                .build();
+
+        assertEquals(activity, mWm.mRoot.findActivity(activity.intent, activity.info,
+                false /* compareIntentFilters */));
+    }
+
+    @Test
+    public void testAllPausedActivitiesComplete() {
+        DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
+        TaskDisplayArea taskDisplayArea = displayContent.getTaskDisplayAreaAt(0);
+        ActivityStack stack = taskDisplayArea.getStackAt(0);
+        ActivityRecord activity = createActivityRecord(displayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        stack.mPausingActivity = activity;
+
+        activity.setState(PAUSING, "test PAUSING");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isFalse();
+
+        activity.setState(PAUSED, "test PAUSED");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+
+        activity.setState(STOPPED, "test STOPPED");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+
+        activity.setState(STOPPING, "test STOPPING");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+
+        activity.setState(FINISHING, "test FINISHING");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
     }
 }
 

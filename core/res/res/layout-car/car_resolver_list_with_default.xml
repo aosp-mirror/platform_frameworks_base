@@ -40,12 +40,12 @@
 
             <ImageView
                 android:id="@+id/icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_gravity="start|top"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginTop="10dp"
                 android:src="@drawable/resolver_icon_placeholder"
                 android:scaleType="fitCenter"/>
 
@@ -55,7 +55,7 @@
                 android:layout_weight="1"
                 android:layout_height="?attr/listPreferredItemHeight"
                 android:layout_marginStart="16dp"
-                android:textAppearance="?attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceLarge"
                 android:gravity="start|center_vertical"
                 android:paddingEnd="16dp"/>
 
@@ -120,7 +120,7 @@
                 android:layout_width="wrap_content"
                 android:layout_gravity="start"
                 android:maxLines="2"
-                style="?attr/buttonBarNegativeButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 android:layout_height="wrap_content"
                 android:enabled="false"
@@ -133,29 +133,64 @@
                 android:layout_gravity="end"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
-                style="?attr/buttonBarPositiveButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="@string/activity_resolver_use_always"
                 android:onClick="onButtonClick"/>
         </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/stub"
+            android:layout_alwaysShow="true"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorBackgroundFloating"/>
+
+        <TabHost
+            android:layout_alwaysShow="true"
+            android:id="@+id/profile_tabhost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="?attr/colorBackgroundFloating">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+                </TabWidget>
+                <View
+                    android:id="@+id/resolver_tab_divider"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?attr/colorBackgroundFloating"
+                    android:foreground="?attr/dividerVertical"
+                    android:layout_marginBottom="8dp"/>
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <com.android.internal.app.ResolverViewPager
+                        android:id="@+id/profile_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                    </com.android.internal.app.ResolverViewPager>
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="?attr/dividerVertical"/>
-
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/resolver_list"
-            android:layout_weight="4"
-            android:clipToPadding="false"
-            android:scrollbarStyle="outsideOverlay"
-            android:background="?attr/colorBackgroundFloating"
-            android:elevation="8dp"
-            android:nestedScrollingEnabled="true"
-            android:divider="@null"/>
     </LinearLayout>
 
 </com.android.internal.widget.ResolverDrawerLayout>

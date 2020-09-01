@@ -39,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -194,8 +195,8 @@ abstract class AbstractCrossUserContentResolverTest {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            if (mExpectedUri.equals(uri) && mExpectedUserId == userId) {
+        public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
+            if (uris.contains(mExpectedUri) && mExpectedUserId == userId) {
                 mLatch.countDown();
             }
         }

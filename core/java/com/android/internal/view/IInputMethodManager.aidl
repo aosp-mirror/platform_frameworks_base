@@ -41,9 +41,9 @@ interface IInputMethodManager {
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
 
-    boolean showSoftInput(in IInputMethodClient client, int flags,
+    boolean showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver);
-    boolean hideSoftInput(in IInputMethodClient client, int flags,
+    boolean hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
@@ -71,4 +71,10 @@ interface IInputMethodManager {
 
     void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues);
+
+    oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
+    /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
+    void removeImeSurface();
+    /** Remove the IME surface. Requires passing the currently focused window. */
+    void removeImeSurfaceFromWindow(in IBinder windowToken);
 }

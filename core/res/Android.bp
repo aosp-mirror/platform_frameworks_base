@@ -38,6 +38,12 @@ android_app {
     // Create package-export.apk, which other packages can use to get
     // PRODUCT-agnostic resource data like IDs and type definitions.
     export_package_resources: true,
+
+    dist: {
+        targets: [
+            "simulated_device_launcher",
+        ],
+    },
 }
 
 java_genrule {
@@ -54,4 +60,23 @@ filegroup {
         "assets/**/*",
         "res/**/*",
     ],
+}
+
+// Generate a text file containing a list of permissions that non-system apps
+// are allowed to obtain.
+genrule {
+  name: "permission-list-normal",
+  out: ["permission-list-normal.txt"],
+  srcs: ["AndroidManifest.xml"],
+  cmd: "cat $(in) " +
+       // xmllint has trouble accessing attributes under the android namespace.
+       // Strip these prefixes prior to processing with xmllint.
+       " | sed -r 's/android:(name|protectionLevel)/\\1/g' " +
+       " | $(location xmllint) /dev/stdin --xpath " +
+       " '//permission[not(contains(@protectionLevel, \"signature\"))]/@name'" +
+       // The result of xmllint is name="value" pairs. Format these to just the
+       // permission name, one per-line.
+       " | sed -r 's/\\s*name=\\s*//g' | tr -d '\"'" +
+       " > $(out)",
+  tools: ["xmllint"]
 }

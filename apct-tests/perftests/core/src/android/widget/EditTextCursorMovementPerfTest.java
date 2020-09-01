@@ -18,7 +18,7 @@ package android.widget;
 
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 import android.text.Selection;
 import android.view.KeyEvent;
 import android.view.View.MeasureSpec;
@@ -74,7 +74,8 @@ public class EditTextCursorMovementPerfTest {
     }
 
     @Rule
-    public ActivityTestRule<StubActivity> mActivityRule = new ActivityTestRule(StubActivity.class);
+    public ActivityTestRule<PerfTestActivity> mActivityRule =
+            new ActivityTestRule<>(PerfTestActivity.class);
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();

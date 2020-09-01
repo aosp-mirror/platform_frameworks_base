@@ -219,6 +219,9 @@ public class PhoneStateListener {
     /**
      * Listen for changes to observed cell info.
      *
+     * Listening to this event requires the {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission.
+     *
      * @see #onCellInfoChanged
      */
     public static final int LISTEN_CELL_INFO = 0x00000400;
@@ -340,6 +343,10 @@ public class PhoneStateListener {
     /**
      *  Listen for display info changed event.
      *
+     *  Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     *  READ_PHONE_STATE} or that the calling app has carrier privileges (see
+     *  {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      *  @see #onDisplayInfoChanged
      */
     public static final int LISTEN_DISPLAY_INFO_CHANGED = 0x00100000;
@@ -454,23 +461,29 @@ public class PhoneStateListener {
      * domain. This indication does not necessarily indicate a change of service state, which should
      * be tracked via {@link #LISTEN_SERVICE_STATE}.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
+     * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
+     * of whether the calling app has carrier privileges.
      *
      * @see #onRegistrationFailed
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_REGISTRATION_FAILURE = 0x40000000;
 
     /**
      * Listen for Barring Information for the current registered / camped cell.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
+     * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
+     * of whether the calling app has carrier privileges.
      *
      * @see #onBarringInfoChanged
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_BARRING_INFO = 0x80000000;
 
     /*
@@ -564,6 +577,11 @@ public class PhoneStateListener {
      * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * The instance of {@link ServiceState} passed as an argument here will have various levels of
+     * location information stripped from it depending on the location permissions that your app
+     * holds. Only apps holding the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission will
+     * receive all the information in {@link ServiceState}.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE
@@ -1078,7 +1096,7 @@ public class PhoneStateListener {
      *        TS 24.301 9.9.4.4. Integer.MAX_VALUE if this value is unused.
      */
     public void onRegistrationFailed(@NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
-            @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode) {
+            int domain, int causeCode, int additionalCauseCode) {
         // default implementation empty
     }
 
@@ -1379,7 +1397,7 @@ public class PhoneStateListener {
         }
 
         public void onRegistrationFailed(@NonNull CellIdentity cellIdentity,
-                @NonNull String chosenPlmn, @NetworkRegistrationInfo.Domain int domain,
+                @NonNull String chosenPlmn, int domain,
                 int causeCode, int additionalCauseCode) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;

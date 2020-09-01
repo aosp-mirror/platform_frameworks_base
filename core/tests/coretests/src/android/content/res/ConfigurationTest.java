@@ -16,6 +16,18 @@
 
 package android.content.res;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
+import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+import static android.view.Surface.ROTATION_90;
+
 import android.content.Context;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
@@ -84,7 +96,7 @@ public class ConfigurationTest extends TestCase {
                 .setExtension('u', "nu-latn").build();
         Configuration write = new Configuration();
         write.setLocales(new LocaleList(arabic, urdu, urduExtension));
-        writeToProto(proto, write);
+        dumpDebug(proto, write);
         assertTrue("Failed to write configs to proto.", proto.exists());
 
         final Configuration read = new Configuration();
@@ -104,13 +116,54 @@ public class ConfigurationTest extends TestCase {
                 read.getLocales().indexOf(urduExtension) != -1);
     }
 
-    private void writeToProto(File f, Configuration config) throws Exception {
+    @Test
+    public void testMaskedSet() {
+        Configuration config = new Configuration();
+        Configuration other = new Configuration();
+        config.smallestScreenWidthDp = 100;
+        config.orientation = ORIENTATION_LANDSCAPE;
+        config.windowConfiguration.setRotation(ROTATION_90);
+        other.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        other.orientation = ORIENTATION_PORTRAIT;
+
+        // no change
+        config.setTo(other, 0, 0);
+        assertEquals(100, config.smallestScreenWidthDp);
+        assertEquals(ORIENTATION_LANDSCAPE, config.orientation);
+        assertEquals(ROTATION_90, config.windowConfiguration.getRotation());
+
+        final int justOrientationAndWindowConfig = CONFIG_ORIENTATION | CONFIG_WINDOW_CONFIGURATION;
+        config.setTo(other, justOrientationAndWindowConfig, WINDOW_CONFIG_WINDOWING_MODE);
+        assertEquals(100, config.smallestScreenWidthDp);
+        assertEquals(other.orientation, config.orientation);
+        assertEquals(other.windowConfiguration.getWindowingMode(),
+                config.windowConfiguration.getWindowingMode());
+        assertEquals(ROTATION_90, config.windowConfiguration.getRotation());
+
+        // unset
+        final int justSmallestSwAndWindowConfig =
+                CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_WINDOW_CONFIGURATION;
+        config.setTo(other, justSmallestSwAndWindowConfig, WINDOW_CONFIG_ROTATION);
+        assertEquals(ROTATION_UNDEFINED, config.windowConfiguration.getRotation());
+        assertEquals(SMALLEST_SCREEN_WIDTH_DP_UNDEFINED, config.smallestScreenWidthDp);
+    }
+
+    @Test
+    public void testNightModeHelper() {
+        Configuration config = new Configuration();
+        config.uiMode = Configuration.UI_MODE_NIGHT_YES;
+        assertTrue(config.isNightModeActive());
+        config.uiMode = Configuration.UI_MODE_NIGHT_NO;
+        assertFalse(config.isNightModeActive());
+    }
+
+    private void dumpDebug(File f, Configuration config) throws Exception {
         final AtomicFile af = new AtomicFile(f);
         FileOutputStream fos = af.startWrite();
         try {
             final ProtoOutputStream protoOut = new ProtoOutputStream(fos);
             final long token = protoOut.start(IntervalStatsProto.CONFIGURATIONS);
-            config.writeToProto(protoOut, IntervalStatsProto.Configuration.CONFIG, false, false);
+            config.dumpDebug(protoOut, IntervalStatsProto.Configuration.CONFIG, false, false);
             protoOut.end(token);
             protoOut.flush();
             af.finishWrite(fos);
@@ -124,9 +177,9 @@ public class ConfigurationTest extends TestCase {
         final AtomicFile afRead = new AtomicFile(f);
         try (FileInputStream in = afRead.openRead()) {
             final ProtoInputStream protoIn = new ProtoInputStream(in);
-            if (protoIn.isNextField(IntervalStatsProto.CONFIGURATIONS)) {
+            if (protoIn.nextField(IntervalStatsProto.CONFIGURATIONS)) {
                 final long token = protoIn.start(IntervalStatsProto.CONFIGURATIONS);
-                if (protoIn.isNextField(IntervalStatsProto.Configuration.CONFIG)) {
+                if (protoIn.nextField(IntervalStatsProto.Configuration.CONFIG)) {
                     config.readFromProto(protoIn, IntervalStatsProto.Configuration.CONFIG);
                     protoIn.end(token);
                 }

@@ -50,9 +50,9 @@ import java.io.InputStreamReader;
 /** @hide */
 public final class Zygote {
     /*
-     * Bit values for "runtimeFlags" argument.  The definitions are duplicated
-     * in the native code.
-     */
+    * Bit values for "runtimeFlags" argument.  The definitions are duplicated
+    * in the native code.
+    */
 
     /** enable debugging over JDWP */
     public static final int DEBUG_ENABLE_JDWP   = 1;
@@ -88,7 +88,7 @@ public final class Zygote {
      * Bit shift for use with {@link #API_ENFORCEMENT_POLICY_MASK}.
      *
      * (flags & API_ENFORCEMENT_POLICY_MASK) >> API_ENFORCEMENT_POLICY_SHIFT gives
-     * @ApplicationInfo.ApiEnforcementPolicy values.
+     * {@link ApplicationInfo.HiddenApiEnforcementPolicy} values.
      */
     public static final int API_ENFORCEMENT_POLICY_SHIFT =
             Integer.numberOfTrailingZeros(API_ENFORCEMENT_POLICY_MASK);
@@ -141,6 +141,33 @@ public final class Zygote {
      */
     public static final int MEMORY_TAG_LEVEL_SYNC = 3 << 19;
 
+    /**
+     * A two-bit field for GWP-ASan level of this process. See the possible values below.
+     */
+    public static final int GWP_ASAN_LEVEL_MASK = (1 << 21) | (1 << 22);
+
+    /**
+     * Disable GWP-ASan in this process.
+     * GWP-ASan is a low-overhead memory bug detector using guard pages on a small
+     * subset of heap allocations.
+     */
+    public static final int GWP_ASAN_LEVEL_NEVER = 0 << 21;
+
+    /**
+     * Enable GWP-ASan in this process with a small sampling rate.
+     * With approx. 1% chance GWP-ASan will be activated and apply its protection
+     * to a small subset of heap allocations.
+     * Otherwise (~99% chance) this process is unaffected.
+     */
+    public static final int GWP_ASAN_LEVEL_LOTTERY = 1 << 21;
+
+    /**
+     * Always enable GWP-ASan in this process.
+     * GWP-ASan is activated unconditionally (but still, only a small subset of
+     * allocations is protected).
+     */
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
@@ -162,11 +189,31 @@ public final class Zygote {
     /** Read-write external storage should be mounted instead of package sandbox */
     public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
 
+    /** The lower file system should be bind mounted directly on external storage */
+    public static final int MOUNT_EXTERNAL_PASS_THROUGH = IVold.REMOUNT_MODE_PASS_THROUGH;
+
+    /** Use the regular scoped storage filesystem, but Android/ should be writable.
+     * Used to support the applications hosting DownloadManager and the MTP server.
+     */
+    public static final int MOUNT_EXTERNAL_ANDROID_WRITABLE = IVold.REMOUNT_MODE_ANDROID_WRITABLE;
+
     /** Number of bytes sent to the Zygote over USAP pipes or the pool event FD */
-    public static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
+    static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
 
     /** Make the new process have top application priority. */
     public static final String START_AS_TOP_APP_ARG = "--is-top-app";
+
+    /** List of packages with the same uid, and its app data info: volume uuid and inode. */
+    public static final String PKG_DATA_INFO_MAP = "--pkg-data-info-map";
+
+    /** List of whitelisted packages and its app data info: volume uuid and inode. */
+    public static final String WHITELISTED_DATA_INFO_MAP = "--whitelisted-data-info-map";
+
+    /** Bind mount app storage dirs to lower fs not via fuse */
+    public static final String BIND_MOUNT_APP_STORAGE_DIRS = "--bind-mount-storage-dirs";
+
+    /** Bind mount app storage dirs to lower fs not via fuse */
+    public static final String BIND_MOUNT_APP_DATA_DIRS = "--bind-mount-data-dirs";
 
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
@@ -216,7 +263,7 @@ public final class Zygote {
     private static final int PRIORITY_MAX = -20;
 
     /** a prototype instance for a future List.toArray() */
-    protected static final int[][] INT_ARRAY_2D = new int[0][0];
+    static final int[][] INT_ARRAY_2D = new int[0][0];
 
     /**
      * @hide for internal use only.
@@ -278,19 +325,27 @@ public final class Zygote {
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      * @param isTopApp true if the process is for top (high priority) application.
+     * @param pkgDataInfoList A list that stores related packages and its app data
+     * info: volume uuid and inode.
+     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for whitelisted apps.
+     * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
+     * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
      *
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
+    static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            boolean isTopApp) {
+            boolean isTopApp, String[] pkgDataInfoList, String[] whitelistedDataInfoList,
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs) {
         ZygoteHooks.preFork();
 
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp);
+                fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp,
+                pkgDataInfoList, whitelistedDataInfoList, bindMountAppDataDirs,
+                bindMountAppStorageDirs);
         if (pid == 0) {
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -311,7 +366,9 @@ public final class Zygote {
     private static native int nativeForkAndSpecialize(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
-            String appDataDir, boolean isTopApp);
+            String appDataDir, boolean isTopApp, String[] pkgDataInfoList,
+            String[] whitelistedDataInfoList, boolean bindMountAppDataDirs,
+            boolean bindMountAppStorageDirs);
 
     /**
      * Specialize an unspecialized app process.  The current VM must have been started
@@ -334,12 +391,23 @@ public final class Zygote {
      * @param instructionSet null-ok  The instruction set to use.
      * @param appDataDir null-ok  The data directory of the app.
      * @param isTopApp  True if the process is for top (high priority) application.
+     * @param pkgDataInfoList A list that stores related packages and its app data
+     * volume uuid and CE dir inode. For example, pkgDataInfoList = [app_a_pkg_name,
+     * app_a_data_volume_uuid, app_a_ce_inode, app_b_pkg_name, app_b_data_volume_uuid,
+     * app_b_ce_inode, ...];
+     * @param whitelistedDataInfoList Like pkgDataInfoList, but it's for whitelisted apps.
+     * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
+     * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
      */
-    public static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
+    private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp) {
+            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
+            String[] pkgDataInfoList, String[] whitelistedDataInfoList,
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs) {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
-                niceName, startChildZygote, instructionSet, appDataDir, isTopApp);
+                niceName, startChildZygote, instructionSet, appDataDir, isTopApp,
+                pkgDataInfoList, whitelistedDataInfoList,
+                bindMountAppDataDirs, bindMountAppStorageDirs);
 
         // Note that this event ends at the end of handleChildProc.
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -358,7 +426,9 @@ public final class Zygote {
 
     private static native void nativeSpecializeAppProcess(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp);
+            boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
+            String[] pkgDataInfoList, String[] whitelistedDataInfoList,
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs);
 
     /**
      * Called to do any initialization before starting an application.
@@ -388,7 +458,7 @@ public final class Zygote {
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
-    public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
+    static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
         ZygoteHooks.preFork();
 
@@ -417,7 +487,7 @@ public final class Zygote {
      *
      * @param appInfo ApplicationInfo of the application
      */
-    protected static void allowAppFilesAcrossFork(ApplicationInfo appInfo) {
+    static void allowAppFilesAcrossFork(ApplicationInfo appInfo) {
         for (String path : appInfo.getAllApkPaths()) {
             Zygote.nativeAllowFileAcrossFork(path);
         }
@@ -463,7 +533,7 @@ public final class Zygote {
                 defaultValue);
     }
 
-    protected static void emptyUsapPool() {
+    static void emptyUsapPool() {
         nativeEmptyUsapPool();
     }
 
@@ -475,7 +545,7 @@ public final class Zygote {
      * Note that Device Config is not available without an application so SystemProperties is used
      * instead.
      *
-     * @see SystemProperties.getBoolean
+     * @see SystemProperties#getBoolean
      *
      * TODO (chriswailes): Cache the system property location in native code and then write a JNI
      *                     function to fetch it.
@@ -563,7 +633,7 @@ public final class Zygote {
      * @return A runnable oject representing the new application.
      */
     private static Runnable usapMain(LocalServerSocket usapPoolSocket,
-            FileDescriptor writePipe) {
+                                     FileDescriptor writePipe) {
         final int pid = Process.myPid();
         Process.setArgV0(Process.is64Bit() ? "usap64" : "usap32");
 
@@ -618,6 +688,7 @@ public final class Zygote {
         try {
             // SIGTERM is blocked on loop exit.  This prevents a USAP that is specializing from
             // being killed during a pool flush.
+
             setAppProcessName(args, "USAP");
 
             applyUidSecurityPolicy(args, peerCredentials);
@@ -679,16 +750,18 @@ public final class Zygote {
             }
 
             specializeAppProcess(args.mUid, args.mGid, args.mGids,
-                    args.mRuntimeFlags, rlimits, args.mMountExternal,
-                    args.mSeInfo, args.mNiceName, args.mStartChildZygote,
-                    args.mInstructionSet, args.mAppDataDir, args.mIsTopApp);
+                                 args.mRuntimeFlags, rlimits, args.mMountExternal,
+                                 args.mSeInfo, args.mNiceName, args.mStartChildZygote,
+                                 args.mInstructionSet, args.mAppDataDir, args.mIsTopApp,
+                                 args.mPkgDataInfoList, args.mWhitelistedDataInfoList,
+                                 args.mBindMountAppDataDirs, args.mBindMountAppStorageDirs);
 
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
-                    args.mDisabledCompatChanges,
-                    args.mRemainingArgs,
-                    null /* classLoader */);
+                                         args.mDisabledCompatChanges,
+                                         args.mRemainingArgs,
+                                         null /* classLoader */);
         } finally {
             // Unblock SIGTERM to restore the process to default behavior.
             unblockSigTerm();
@@ -756,15 +829,15 @@ public final class Zygote {
             throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--invoke-with");
         } else if (args.mPermittedCapabilities != 0 || args.mEffectiveCapabilities != 0) {
             throw new ZygoteSecurityException("Client may not specify capabilities: "
-                    + "permitted=0x" + Long.toHexString(args.mPermittedCapabilities)
-                    + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
+                + "permitted=0x" + Long.toHexString(args.mPermittedCapabilities)
+                + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
         }
     }
 
     /**
      * @return  Raw file descriptors for the read-end of USAP reporting pipes.
      */
-    protected static int[] getUsapPipeFDs() {
+    static int[] getUsapPipeFDs() {
         return nativeGetUsapPipeFDs();
     }
 
@@ -776,7 +849,7 @@ public final class Zygote {
      * @param usapPID  Process ID of the entry to remove
      * @return True if the entry was removed; false if it doesn't exist
      */
-    protected static boolean removeUsapTableEntry(int usapPID) {
+    static boolean removeUsapTableEntry(int usapPID) {
         return nativeRemoveUsapTableEntry(usapPID);
     }
 
@@ -789,9 +862,10 @@ public final class Zygote {
      *
      * @param args non-null; zygote spawner arguments
      * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
+     * @throws ZygoteSecurityException Indicates a security issue when applying the UID based
+     *  security policies
      */
-    protected static void applyUidSecurityPolicy(ZygoteArguments args, Credentials peer)
+    static void applyUidSecurityPolicy(ZygoteArguments args, Credentials peer)
             throws ZygoteSecurityException {
 
         if (peer.getUid() == Process.SYSTEM_UID) {
@@ -803,7 +877,7 @@ public final class Zygote {
             if (uidRestricted && args.mUidSpecified && (args.mUid < Process.SYSTEM_UID)) {
                 throw new ZygoteSecurityException(
                         "System UID may not launch process with UID < "
-                                + Process.SYSTEM_UID);
+                        + Process.SYSTEM_UID);
             }
         }
 
@@ -827,7 +901,7 @@ public final class Zygote {
      *
      * @param args non-null; zygote spawner args
      */
-    protected static void applyDebuggerSystemProperty(ZygoteArguments args) {
+    static void applyDebuggerSystemProperty(ZygoteArguments args) {
         if (RoSystemProperties.DEBUGGABLE) {
             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
         }
@@ -844,18 +918,38 @@ public final class Zygote {
      *
      * @param args non-null; zygote spawner arguments
      * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
+     * @throws ZygoteSecurityException Thrown when `--invoke-with` is specified for a non-debuggable
+     *  application.
      */
-    protected static void applyInvokeWithSecurityPolicy(ZygoteArguments args, Credentials peer)
+    static void applyInvokeWithSecurityPolicy(ZygoteArguments args, Credentials peer)
             throws ZygoteSecurityException {
         int peerUid = peer.getUid();
 
         if (args.mInvokeWith != null && peerUid != 0
                 && (args.mRuntimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
             throw new ZygoteSecurityException("Peer is permitted to specify an "
-                    + "explicit invoke-with wrapper command only for debuggable "
-                    + "applications.");
+                + "explicit invoke-with wrapper command only for debuggable "
+                + "applications.");
         }
+    }
+
+    /**
+     * Gets the wrap property if set.
+     *
+     * @param appName the application name to check
+     * @return value of wrap property or null if property not set or
+     * null if app_name is null or null if app_name is empty
+     */
+    public static String getWrapProperty(String appName) {
+        if (appName == null || appName.isEmpty()) {
+            return null;
+        }
+
+        String propertyValue = SystemProperties.get("wrap." + appName);
+        if (propertyValue != null && !propertyValue.isEmpty()) {
+            return propertyValue;
+        }
+        return null;
     }
 
     /**
@@ -863,13 +957,9 @@ public final class Zygote {
      *
      * @param args non-null; zygote args
      */
-    protected static void applyInvokeWithSystemProperty(ZygoteArguments args) {
-        if (args.mInvokeWith == null && args.mNiceName != null) {
-            String property = "wrap." + args.mNiceName;
-            args.mInvokeWith = SystemProperties.get(property);
-            if (args.mInvokeWith != null && args.mInvokeWith.length() == 0) {
-                args.mInvokeWith = null;
-            }
+    static void applyInvokeWithSystemProperty(ZygoteArguments args) {
+        if (args.mInvokeWith == null) {
+            args.mInvokeWith = getWrapProperty(args.mNiceName);
         }
     }
 
@@ -937,15 +1027,19 @@ public final class Zygote {
             return new LocalServerSocket(fd);
         } catch (IOException ex) {
             throw new RuntimeException(
-                    "Error building socket from file descriptor: " + fileDesc, ex);
+                "Error building socket from file descriptor: " + fileDesc, ex);
         }
     }
 
+    // This function is called from native code in com_android_internal_os_Zygote.cpp
+    @SuppressWarnings("unused")
     private static void callPostForkSystemServerHooks(int runtimeFlags) {
         // SystemServer specific post fork hooks run before child post fork hooks.
         ZygoteHooks.postForkSystemServer(runtimeFlags);
     }
 
+    // This function is called from native code in com_android_internal_os_Zygote.cpp
+    @SuppressWarnings("unused")
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             boolean isZygote, String instructionSet) {
         ZygoteHooks.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
@@ -958,7 +1052,7 @@ public final class Zygote {
      *
      * @param command The shell command to execute.
      */
-    public static void execShell(String command) {
+    static void execShell(String command) {
         String[] args = { "/system/bin/sh", "-c", command };
         try {
             Os.execv(args[0], args);
@@ -976,7 +1070,7 @@ public final class Zygote {
      * @param args An array of argument strings to be quoted and appended to the command.
      * @see #execShell(String)
      */
-    public static void appendQuotedShellArgs(StringBuilder command, String[] args) {
+    static void appendQuotedShellArgs(StringBuilder command, String[] args) {
         for (String arg : args) {
             command.append(" '").append(arg.replace("'", "'\\''")).append("'");
         }

@@ -449,6 +449,7 @@ public class ShortcutParser {
                 iconResId,
                 null, // icon res name
                 null, // bitmap path
+                null, // icon Url
                 disabledReason,
                 null /* persons */,
                 null /* locusId */);

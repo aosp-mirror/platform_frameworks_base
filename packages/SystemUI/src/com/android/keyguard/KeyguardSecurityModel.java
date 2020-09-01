@@ -15,13 +15,20 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class KeyguardSecurityModel {
 
     /**
@@ -43,6 +50,7 @@ public class KeyguardSecurityModel {
 
     private LockPatternUtils mLockPatternUtils;
 
+    @Inject
     KeyguardSecurityModel(Context context) {
         mContext = context;
         mLockPatternUtils = new LockPatternUtils(context);
@@ -54,20 +62,21 @@ public class KeyguardSecurityModel {
         mLockPatternUtils = utils;
     }
 
-    SecurityMode getSecurityMode(int userId) {
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+    public SecurityMode getSecurityMode(int userId) {
+        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
 
         if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED))) {
+                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PUK_REQUIRED))) {
             return SecurityMode.SimPuk;
         }
 
         if (SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED))) {
+                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
             return SecurityMode.SimPin;
         }
 
-        final int security = mLockPatternUtils.getActivePasswordQuality(userId);
+        final int security = whitelistIpcs(() ->
+                mLockPatternUtils.getActivePasswordQuality(userId));
         switch (security) {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

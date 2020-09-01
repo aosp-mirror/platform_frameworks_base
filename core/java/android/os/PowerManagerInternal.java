@@ -102,9 +102,9 @@ public abstract class PowerManagerInternal {
      *
      * This method must only be called by the window manager.
      *
-     * @param brightness The overridden brightness, or -1 to disable the override.
+     * @param brightness The overridden brightness, or Float.NaN to disable the override.
      */
-    public abstract void setScreenBrightnessOverrideFromWindowManager(int brightness);
+    public abstract void setScreenBrightnessOverrideFromWindowManager(float brightness);
 
     /**
      * Used by the window manager to override the user activity timeout based on the
@@ -200,6 +200,119 @@ public abstract class PowerManagerInternal {
      * PowerHint defined in android/hardware/power/<version 1.0 & up>/IPower.h
      */
     public abstract void powerHint(int hintId, int data);
+
+    /**
+     * Boost: It is sent when user interacting with the device, for example,
+     * touchscreen events are incoming.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Boost.aidl
+     */
+    public static final int BOOST_INTERACTION = 0;
+
+    /**
+     * Boost: It indicates that the framework is likely to provide a new display
+     * frame soon. This implies that the device should ensure that the display
+     * processing path is powered up and ready to receive that update.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Boost.aidl
+     */
+    public static final int BOOST_DISPLAY_UPDATE_IMMINENT = 1;
+
+    /**
+     * SetPowerBoost() indicates the device may need to boost some resources, as
+     * the load is likely to increase before the kernel governors can react.
+     * Depending on the boost, it may be appropriate to raise the frequencies of
+     * CPU, GPU, memory subsystem, or stop CPU from going into deep sleep state.
+     *
+     * @param boost Boost which is to be set with a timeout.
+     * @param durationMs The expected duration of the user's interaction, if
+     *        known, or 0 if the expected duration is unknown.
+     *        a negative value indicates canceling previous boost.
+     *        A given platform can choose to boost some time based on durationMs,
+     *        and may also pick an appropriate timeout for 0 case.
+     */
+    public abstract void setPowerBoost(int boost, int durationMs);
+
+    /**
+     * Mode: It indicates that the device is to allow wake up when the screen
+     * is tapped twice.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_DOUBLE_TAP_TO_WAKE = 0;
+
+    /**
+     * Mode: It indicates Low power mode is activated or not. Low power mode
+     * is intended to save battery at the cost of performance.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_LOW_POWER = 1;
+
+    /**
+     * Mode: It indicates Sustained Performance mode is activated or not.
+     * Sustained performance mode is intended to provide a consistent level of
+     * performance for a prolonged amount of time.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_SUSTAINED_PERFORMANCE = 2;
+
+    /**
+     * Mode: It sets the device to a fixed performance level which can be sustained
+     * under normal indoor conditions for at least 10 minutes.
+     * Fixed performance mode puts both upper and lower bounds on performance such
+     * that any workload run while in a fixed performance mode should complete in
+     * a repeatable amount of time.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_FIXED_PERFORMANCE = 3;
+
+    /**
+     * Mode: It indicates VR Mode is activated or not. VR mode is intended to
+     * provide minimum guarantee for performance for the amount of time the device
+     * can sustain it.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_VR = 4;
+
+    /**
+     * Mode: It indicates that an application has been launched.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_LAUNCH = 5;
+
+    /**
+     * Mode: It indicates that the device is about to enter a period of expensive
+     * rendering.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_EXPENSIVE_RENDERING = 6;
+
+    /**
+     * Mode: It indicates that the device is about entering/leaving interactive
+     * state or on-interactive state.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_INTERACTIVE = 7;
+
+    /**
+     * Mode: It indicates the device is in device idle, externally known as doze.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_DEVICE_IDLE = 8;
+
+    /**
+     * Mode: It indicates that display is either off or still on but is optimized
+     * for low power.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_DISPLAY_INACTIVE = 9;
+
+    /**
+     * SetPowerMode() is called to enable/disable specific hint mode, which
+     * may result in adjustment of power/performance parameters of the
+     * cpufreq governor and other controls on device side.
+     *
+     * @param mode Mode which is to be enable/disable.
+     * @param enabled true to enable, false to disable the mode.
+     */
+    public abstract void setPowerMode(int mode, boolean enabled);
 
     /** Returns whether there hasn't been a user activity event for the given number of ms. */
     public abstract boolean wasDeviceIdleFor(long ms);

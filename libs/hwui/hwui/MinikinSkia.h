@@ -20,6 +20,8 @@
 #include <SkRefCnt.h>
 #include <cutils/compiler.h>
 #include <minikin/MinikinFont.h>
+#include <string>
+#include <string_view>
 
 class SkFont;
 class SkTypeface;

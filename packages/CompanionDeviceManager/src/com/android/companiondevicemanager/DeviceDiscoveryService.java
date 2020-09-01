@@ -24,6 +24,7 @@ import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static com.android.internal.util.CollectionUtils.size;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -36,12 +37,12 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
 import android.companion.BluetoothLeDeviceFilter;
 import android.companion.DeviceFilter;
 import android.companion.ICompanionDeviceDiscoveryService;
-import android.companion.ICompanionDeviceDiscoveryServiceCallback;
 import android.companion.IFindDeviceCallback;
 import android.companion.WifiDeviceFilter;
 import android.content.BroadcastReceiver;
@@ -62,6 +63,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
@@ -96,7 +98,7 @@ public class DeviceDiscoveryService extends Service {
     DevicesAdapter mDevicesAdapter;
     IFindDeviceCallback mFindCallback;
 
-    ICompanionDeviceDiscoveryServiceCallback mServiceCallback;
+    AndroidFuture<Association> mServiceCallback;
     boolean mIsScanning = false;
     @Nullable DeviceChooserActivity mActivity = null;
 
@@ -106,7 +108,7 @@ public class DeviceDiscoveryService extends Service {
         public void startDiscovery(AssociationRequest request,
                 String callingPackage,
                 IFindDeviceCallback findCallback,
-                ICompanionDeviceDiscoveryServiceCallback serviceCallback) {
+                AndroidFuture serviceCallback) {
             if (DEBUG) {
                 Log.i(LOG_TAG,
                         "startDiscovery() called with: filter = [" + request
@@ -115,7 +117,8 @@ public class DeviceDiscoveryService extends Service {
             }
             mFindCallback = findCallback;
             mServiceCallback = serviceCallback;
-            DeviceDiscoveryService.this.startDiscovery(request);
+            Handler.getMain().sendMessage(obtainMessage(
+                    DeviceDiscoveryService::startDiscovery, DeviceDiscoveryService.this, request));
         }
     };
 
@@ -145,6 +148,7 @@ public class DeviceDiscoveryService extends Service {
         sInstance = this;
     }
 
+    @MainThread
     private void startDiscovery(AssociationRequest request) {
         if (!request.equals(mRequest)) {
             mRequest = request;
@@ -211,12 +215,13 @@ public class DeviceDiscoveryService extends Service {
         return !isEmpty(mediumSpecificFilters) || isEmpty(mFilters);
     }
 
+    @MainThread
     private void reset() {
         if (DEBUG) Log.i(LOG_TAG, "reset()");
         stopScan();
         mDevicesFound.clear();
         mSelectedDevice = null;
-        notifyDataSetChanged();
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -260,16 +265,17 @@ public class DeviceDiscoveryService extends Service {
 
         if (DEBUG) Log.i(LOG_TAG, "Found device " + device);
 
+        Handler.getMain().sendMessage(obtainMessage(
+                DeviceDiscoveryService::onDeviceFoundMainThread, this, device));
+    }
+
+    @MainThread
+    void onDeviceFoundMainThread(@NonNull DeviceFilterPair device) {
         if (mDevicesFound.isEmpty()) {
             onReadyToShowUI();
         }
         mDevicesFound.add(device);
-        notifyDataSetChanged();
-    }
-
-    private void notifyDataSetChanged() {
-        Handler.getMain().sendMessage(obtainMessage(
-                DevicesAdapter::notifyDataSetChanged, mDevicesAdapter));
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     //TODO also, on timeout -> call onFailure
@@ -286,29 +292,24 @@ public class DeviceDiscoveryService extends Service {
     }
 
     private void onDeviceLost(@Nullable DeviceFilterPair device) {
-        mDevicesFound.remove(device);
-        notifyDataSetChanged();
         if (DEBUG) Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
+        Handler.getMain().sendMessage(obtainMessage(
+                DeviceDiscoveryService::onDeviceLostMainThread, this, device));
+    }
+
+    @MainThread
+    void onDeviceLostMainThread(@Nullable DeviceFilterPair device) {
+        mDevicesFound.remove(device);
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     void onDeviceSelected(String callingPackage, String deviceAddress) {
-        try {
-            mServiceCallback.onDeviceSelected(
-                    //TODO is this the right userId?
-                    callingPackage, getUserId(), deviceAddress);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to record association: "
-                    + callingPackage + " <-> " + deviceAddress);
-        }
+        mServiceCallback.complete(new Association(getUserId(), deviceAddress, callingPackage));
     }
 
     void onCancel() {
         if (DEBUG) Log.i(LOG_TAG, "onCancel()");
-        try {
-            mServiceCallback.onDeviceSelectionCancel();
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
+        mServiceCallback.cancel(true);
     }
 
     class DevicesAdapter extends ArrayAdapter<DeviceFilterPair> {

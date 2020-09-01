@@ -21,11 +21,11 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.UserBackupManagerService;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +45,7 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
         this.backupManagerService = backupManagerService;
         mLatch = new CountDownLatch(1);
         mCurrentOpToken = currentOpToken;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
     }

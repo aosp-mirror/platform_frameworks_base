@@ -18,19 +18,22 @@
 #include <sstream>
 #include <string>
 
+#include "R.h"
 #include "TestHelpers.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/Idmap.h"
+#include "androidfw/ResourceTypes.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "idmap2/Idmap.h"
-#include "idmap2/Policies.h"
 #include "idmap2/PrettyPrintVisitor.h"
 
 using ::testing::NotNull;
 
 using android::ApkAssets;
-using android::idmap2::PolicyBitmask;
+
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {
 
@@ -43,9 +46,8 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
+                                          /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap);
 
   std::stringstream stream;
@@ -54,7 +56,8 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
 
   ASSERT_NE(stream.str().find("target apk path  : "), std::string::npos);
   ASSERT_NE(stream.str().find("overlay apk path : "), std::string::npos);
-  ASSERT_NE(stream.str().find("0x7f010000 -> 0x7f010000 integer/int1\n"), std::string::npos);
+  ASSERT_NE(stream.str().find(R::target::integer::literal::int1 + " -> 0x7f010000 integer/int1\n"),
+            std::string::npos);
 }
 
 TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitorWithoutAccessToApks) {

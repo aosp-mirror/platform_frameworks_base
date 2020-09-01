@@ -37,6 +37,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.permission.IPermissionManager;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -47,6 +48,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
@@ -61,12 +64,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
      * Overrides {@link #Owners} for dependency injection.
      */
     public static class OwnersTestable extends Owners {
-        public static final String LEGACY_FILE = "legacy.xml";
 
         public OwnersTestable(MockSystemServices services) {
             super(services.userManager, services.userManagerInternal,
                     services.packageManagerInternal, services.activityTaskManagerInternal,
-                    new MockInjector(services));
+                    services.activityManagerInternal, new MockInjector(services));
         }
 
         static class MockInjector extends Injector {
@@ -121,6 +123,9 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         // Key is a pair of uri and userId
         private final Map<Pair<Uri, Integer>, ContentObserver> mContentObservers = new ArrayMap<>();
+
+        // Used as an override when set to nonzero.
+        private long mCurrentTimeMillis = 0;
 
         public MockInjector(MockSystemServices services, DpmMockContext context) {
             super(context);
@@ -199,13 +204,28 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        IPermissionManager getIPermissionManager() {
+            return services.ipermissionManager;
+        }
+
+        @Override
         IBackupManager getIBackupManager() {
             return services.ibackupManager;
         }
 
         @Override
+        LockSettingsInternal getLockSettingsInternal() {
+            return services.lockSettingsInternal;
+        }
+
+        @Override
         IAudioService getIAudioService() {
             return services.iaudioService;
+        }
+
+        @Override
+        PersistentDataBlockManagerInternal getPersistentDataBlockManagerInternal() {
+            return services.persistentDataBlockManagerInternal;
         }
 
         @Override
@@ -339,6 +359,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        PendingIntent pendingIntentGetBroadcast(Context context, int requestCode,
+                Intent intent, int flags) {
+            return null;
+        }
+
+        @Override
         void registerContentObserver(Uri uri, boolean notifyForDescendents,
                 ContentObserver observer, int userHandle) {
             mContentObservers.put(new Pair<Uri, Integer>(uri, userHandle), observer);
@@ -447,5 +473,19 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         public void runCryptoSelfTest() {}
+
+        @Override
+        public String[] getPersonalAppsForSuspension(int userId) {
+            return new String[]{};
+        }
+
+        public void setSystemCurrentTimeMillis(long value) {
+            mCurrentTimeMillis = value;
+        }
+
+        @Override
+        public long systemCurrentTimeMillis() {
+            return mCurrentTimeMillis != 0 ? mCurrentTimeMillis : System.currentTimeMillis();
+        }
     }
 }

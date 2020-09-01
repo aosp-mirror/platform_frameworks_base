@@ -16,59 +16,253 @@
 
 package com.android.systemui.stackdivider;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.content.Context;
 import android.content.res.Configuration;
-import android.os.RemoteException;
-import android.util.Log;
-import android.view.IDockedStackListener;
+import android.graphics.Rect;
+import android.os.Handler;
+import android.provider.Settings;
+import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManagerGlobal;
+import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
+import android.window.WindowOrganizer;
 
+import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.TransactionPool;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.wm.DisplayChangeController;
+import com.android.systemui.wm.DisplayController;
+import com.android.systemui.wm.DisplayImeController;
+import com.android.systemui.wm.DisplayLayout;
+import com.android.systemui.wm.SystemWindows;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Controls the docked stack divider.
  */
-public class Divider extends SystemUI implements DividerView.DividerCallbacks {
+@Singleton
+public class Divider extends SystemUI implements DividerView.DividerCallbacks,
+        DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "Divider";
+
+    static final boolean DEBUG = false;
+
+    static final int DEFAULT_APP_TRANSITION_DURATION = 336;
+
+    private final Optional<Lazy<Recents>> mRecentsOptionalLazy;
 
     private DividerWindowManager mWindowManager;
     private DividerView mView;
     private final DividerState mDividerState = new DividerState();
-    private DockDividerVisibilityListener mDockDividerVisibilityListener;
     private boolean mVisible = false;
     private boolean mMinimized = false;
     private boolean mAdjustedForIme = false;
     private boolean mHomeStackResizable = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
+    private SystemWindows mSystemWindows;
+    private DisplayController mDisplayController;
+    private DisplayImeController mImeController;
+    final TransactionPool mTransactionPool;
 
-    @Override
-    public void start() {
-        mWindowManager = new DividerWindowManager(mContext);
-        update(mContext.getResources().getConfiguration());
-        putComponent(Divider.class, this);
-        mDockDividerVisibilityListener = new DockDividerVisibilityListener();
-        try {
-            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(
-                    mDockDividerVisibilityListener);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to register docked stack listener", e);
+    // Keeps track of real-time split geometry including snap positions and ime adjustments
+    private SplitDisplayLayout mSplitLayout;
+
+    // Transient: this contains the layout calculated for a new rotation requested by WM. This is
+    // kept around so that we can wait for a matching configuration change and then use the exact
+    // layout that we sent back to WM.
+    private SplitDisplayLayout mRotateSplitLayout;
+
+    private Handler mHandler;
+    private KeyguardStateController mKeyguardStateController;
+
+    private WindowManagerProxy mWindowManagerProxy;
+
+    private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
+            new ArrayList<>();
+
+    private SplitScreenTaskOrganizer mSplits = new SplitScreenTaskOrganizer(this);
+
+    private DisplayChangeController.OnDisplayChangingListener mRotationController =
+            (display, fromRotation, toRotation, wct) -> {
+                if (!mSplits.isSplitScreenSupported() || mWindowManagerProxy == null) {
+                    return;
+                }
+                WindowContainerTransaction t = new WindowContainerTransaction();
+                DisplayLayout displayLayout =
+                        new DisplayLayout(mDisplayController.getDisplayLayout(display));
+                SplitDisplayLayout sdl = new SplitDisplayLayout(mContext, displayLayout, mSplits);
+                sdl.rotateTo(toRotation);
+                mRotateSplitLayout = sdl;
+                final int position = isDividerVisible()
+                        ? (mMinimized ? mView.mSnapTargetBeforeMinimized.position
+                                : mView.getCurrentPosition())
+                        // snap resets to middle target when not in split-mode
+                        : sdl.getSnapAlgorithm().getMiddleTarget().position;
+                DividerSnapAlgorithm snap = sdl.getSnapAlgorithm();
+                final DividerSnapAlgorithm.SnapTarget target =
+                        snap.calculateNonDismissingSnapTarget(position);
+                sdl.resizeSplits(target.position, t);
+
+                if (isSplitActive() && mHomeStackResizable) {
+                    WindowManagerProxy.applyHomeTasksMinimized(sdl, mSplits.mSecondary.token, t);
+                }
+                if (mWindowManagerProxy.queueSyncTransactionIfWaiting(t)) {
+                    // Because sync transactions are serialized, its possible for an "older"
+                    // bounds-change to get applied after a screen rotation. In that case, we
+                    // want to actually defer on that rather than apply immediately. Of course,
+                    // this means that the bounds may not change until after the rotation so
+                    // the user might see some artifacts. This should be rare.
+                    Slog.w(TAG, "Screen rotated while other operations were pending, this may"
+                            + " result in some graphical artifacts.");
+                } else {
+                    wct.merge(t, true /* transfer */);
+                }
+            };
+
+    private final DividerImeController mImePositionProcessor;
+
+    private TaskStackChangeListener mActivityRestartListener = new TaskStackChangeListener() {
+        @Override
+        public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+            if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY || !mSplits.isSplitScreenSupported()) {
+                return;
+            }
+
+            if (isMinimized()) {
+                onUndockingTask();
+            }
         }
-        mForcedResizableController = new ForcedResizableInfoActivityController(mContext);
+    };
+
+    public Divider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy,
+            DisplayController displayController, SystemWindows systemWindows,
+            DisplayImeController imeController, Handler handler,
+            KeyguardStateController keyguardStateController, TransactionPool transactionPool) {
+        super(context);
+        mDisplayController = displayController;
+        mSystemWindows = systemWindows;
+        mImeController = imeController;
+        mHandler = handler;
+        mKeyguardStateController = keyguardStateController;
+        mRecentsOptionalLazy = recentsOptionalLazy;
+        mForcedResizableController = new ForcedResizableInfoActivityController(context, this);
+        mTransactionPool = transactionPool;
+        mWindowManagerProxy = new WindowManagerProxy(mTransactionPool, mHandler);
+        mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler);
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        update(newConfig);
+    public void start() {
+        mWindowManager = new DividerWindowManager(mSystemWindows);
+        mDisplayController.addDisplayWindowListener(this);
+        // Hide the divider when keyguard is showing. Even though keyguard/statusbar is above
+        // everything, it is actually transparent except for notifications, so we still need to
+        // hide any surfaces that are below it.
+        // TODO(b/148906453): Figure out keyguard dismiss animation for divider view.
+        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onUnlockedChanged() {
+
+            }
+
+            @Override
+            public void onKeyguardShowingChanged() {
+                if (!isSplitActive() || mView == null) {
+                    return;
+                }
+                mView.setHidden(mKeyguardStateController.isShowing());
+                if (!mKeyguardStateController.isShowing()) {
+                    mImePositionProcessor.updateAdjustForIme();
+                }
+            }
+
+            @Override
+            public void onKeyguardFadingAwayChanged() {
+
+            }
+        });
+        // Don't initialize the divider or anything until we get the default display.
+    }
+
+    @Override
+    public void onDisplayAdded(int displayId) {
+        if (displayId != DEFAULT_DISPLAY) {
+            return;
+        }
+        mSplitLayout = new SplitDisplayLayout(mDisplayController.getDisplayContext(displayId),
+                mDisplayController.getDisplayLayout(displayId), mSplits);
+        mImeController.addPositionProcessor(mImePositionProcessor);
+        mDisplayController.addDisplayChangingController(mRotationController);
+        if (!ActivityTaskManager.supportsSplitScreenMultiWindow(mContext)) {
+            removeDivider();
+            return;
+        }
+        try {
+            mSplits.init();
+            // Set starting tile bounds based on middle target
+            final WindowContainerTransaction tct = new WindowContainerTransaction();
+            int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
+            mSplitLayout.resizeSplits(midPos, tct);
+            WindowOrganizer.applyTransaction(tct);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to register docked stack listener", e);
+            removeDivider();
+            return;
+        }
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mActivityRestartListener);
+    }
+
+    @Override
+    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        if (displayId != DEFAULT_DISPLAY || !mSplits.isSplitScreenSupported()) {
+            return;
+        }
+        mSplitLayout = new SplitDisplayLayout(mDisplayController.getDisplayContext(displayId),
+                mDisplayController.getDisplayLayout(displayId), mSplits);
+        if (mRotateSplitLayout == null) {
+            int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
+            final WindowContainerTransaction tct = new WindowContainerTransaction();
+            mSplitLayout.resizeSplits(midPos, tct);
+            WindowOrganizer.applyTransaction(tct);
+        } else if (mSplitLayout.mDisplayLayout.rotation()
+                        == mRotateSplitLayout.mDisplayLayout.rotation()) {
+            mSplitLayout.mPrimary = new Rect(mRotateSplitLayout.mPrimary);
+            mSplitLayout.mSecondary = new Rect(mRotateSplitLayout.mSecondary);
+            mRotateSplitLayout = null;
+        }
+        if (isSplitActive()) {
+            update(newConfig);
+        }
+    }
+
+    Handler getHandler() {
+        return mHandler;
     }
 
     public DividerView getView() {
@@ -83,18 +277,37 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
         return mHomeStackResizable;
     }
 
+    /** {@code true} if this is visible */
+    public boolean isDividerVisible() {
+        return mView != null && mView.getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * This indicates that at-least one of the splits has content. This differs from
+     * isDividerVisible because the divider is only visible once *everything* is in split mode
+     * while this only cares if some things are (eg. while entering/exiting as well).
+     */
+    private boolean isSplitActive() {
+        return mSplits.mPrimary != null && mSplits.mSecondary != null
+                && (mSplits.mPrimary.topActivityType != ACTIVITY_TYPE_UNDEFINED
+                        || mSplits.mSecondary.topActivityType != ACTIVITY_TYPE_UNDEFINED);
+    }
+
     private void addDivider(Configuration configuration) {
+        Context dctx = mDisplayController.getDisplayContext(mContext.getDisplayId());
         mView = (DividerView)
-                LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
-        mView.injectDependencies(mWindowManager, mDividerState, this);
+                LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
+        DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
+        mView.injectDependencies(mWindowManager, mDividerState, this, mSplits, mSplitLayout,
+                mImePositionProcessor, mWindowManagerProxy);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
-        mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
-        final int size = mContext.getResources().getDimensionPixelSize(
+        mView.setMinimizedDockStack(mMinimized, mHomeStackResizable, null /* transaction */);
+        final int size = dctx.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
-        final int width = landscape ? size : MATCH_PARENT;
-        final int height = landscape ? MATCH_PARENT : size;
-        mWindowManager.add(mView, width, height);
+        final int width = landscape ? size : displayLayout.width();
+        final int height = landscape ? displayLayout.height() : size;
+        mWindowManager.add(mView, width, height, mContext.getDisplayId());
     }
 
     private void removeDivider() {
@@ -105,65 +318,128 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
     }
 
     private void update(Configuration configuration) {
+        final boolean isDividerHidden = mView != null && mKeyguardStateController.isShowing();
+
         removeDivider();
         addDivider(configuration);
+
         if (mMinimized) {
-            mView.setMinimizedDockStack(true, mHomeStackResizable);
+            mView.setMinimizedDockStack(true, mHomeStackResizable, null /* transaction */);
             updateTouchable();
         }
+        mView.setHidden(isDividerHidden);
+    }
+
+    void onTaskVanished() {
+        mHandler.post(this::removeDivider);
     }
 
     private void updateVisibility(final boolean visible) {
-        mView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mVisible != visible) {
-                    mVisible = visible;
-                    mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        if (DEBUG) Slog.d(TAG, "Updating visibility " + mVisible + "->" + visible);
+        if (mVisible != visible) {
+            mVisible = visible;
+            mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
 
-                    // Update state because animations won't finish.
-                    mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
-                }
+            if (visible) {
+                mView.enterSplitMode(mHomeStackResizable);
+                // Update state because animations won't finish.
+                mWindowManagerProxy.runInSync(
+                        t -> mView.setMinimizedDockStack(mMinimized, mHomeStackResizable, t));
+
+            } else {
+                mView.exitSplitMode();
+                mWindowManagerProxy.runInSync(
+                        t -> mView.setMinimizedDockStack(false, mHomeStackResizable, t));
             }
+            // Notify existence listeners
+            synchronized (mDockedStackExistsListeners) {
+                mDockedStackExistsListeners.removeIf(wf -> {
+                    Consumer<Boolean> l = wf.get();
+                    if (l != null) l.accept(visible);
+                    return l == null;
+                });
+            }
+        }
+    }
+
+    /** Switch to minimized state if appropriate */
+    public void setMinimized(final boolean minimized) {
+        if (DEBUG) Slog.d(TAG, "posting ext setMinimized " + minimized + " vis:" + mVisible);
+        mHandler.post(() -> {
+            if (DEBUG) Slog.d(TAG, "run posted ext setMinimized " + minimized + " vis:" + mVisible);
+            if (!mVisible) {
+                return;
+            }
+            setHomeMinimized(minimized, mHomeStackResizable);
         });
     }
 
-    private void updateMinimizedDockedStack(final boolean minimized, final long animDuration,
-            final boolean isHomeStackResizable) {
-        mView.post(new Runnable() {
-            @Override
-            public void run() {
-                mHomeStackResizable = isHomeStackResizable;
-                if (mMinimized != minimized) {
-                    mMinimized = minimized;
-                    updateTouchable();
-                    if (animDuration > 0) {
-                        mView.setMinimizedDockStack(minimized, animDuration, isHomeStackResizable);
-                    } else {
-                        mView.setMinimizedDockStack(minimized, isHomeStackResizable);
-                    }
-                }
+    private void setHomeMinimized(final boolean minimized, boolean homeStackResizable) {
+        if (DEBUG) {
+            Slog.d(TAG, "setHomeMinimized  min:" + mMinimized + "->" + minimized + " hrsz:"
+                    + mHomeStackResizable + "->" + homeStackResizable
+                    + " split:" + isDividerVisible());
+        }
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        final boolean minimizedChanged = mMinimized != minimized;
+        // Update minimized state
+        if (minimizedChanged) {
+            mMinimized = minimized;
+        }
+        // Always set this because we could be entering split when mMinimized is already true
+        wct.setFocusable(mSplits.mPrimary.token, !mMinimized);
+        boolean onlyFocusable = true;
+
+        // Update home-stack resizability
+        final boolean homeResizableChanged = mHomeStackResizable != homeStackResizable;
+        if (homeResizableChanged) {
+            mHomeStackResizable = homeStackResizable;
+            if (isDividerVisible()) {
+                WindowManagerProxy.applyHomeTasksMinimized(
+                        mSplitLayout, mSplits.mSecondary.token, wct);
+                onlyFocusable = false;
             }
-        });
+        }
+
+        // Sync state to DividerView if it exists.
+        if (mView != null) {
+            final int displayId = mView.getDisplay() != null
+                    ? mView.getDisplay().getDisplayId() : DEFAULT_DISPLAY;
+            // pause ime here (before updateMinimizedDockedStack)
+            if (mMinimized) {
+                mImePositionProcessor.pause(displayId);
+            }
+            if (minimizedChanged || homeResizableChanged) {
+                // This conflicts with IME adjustment, so only call it when things change.
+                mView.setMinimizedDockStack(minimized, getAnimDuration(), homeStackResizable);
+            }
+            if (!mMinimized) {
+                // afterwards so it can end any animations started in view
+                mImePositionProcessor.resume(displayId);
+            }
+        }
+        updateTouchable();
+        if (onlyFocusable) {
+            // If we are only setting focusability, a sync transaction isn't necessary (in fact it
+            // can interrupt other animations), so see if it can be submitted on pending instead.
+            if (!mSplits.mDivider.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
+                WindowOrganizer.applyTransaction(wct);
+            }
+        } else {
+            mWindowManagerProxy.applySyncTransaction(wct);
+        }
     }
 
-    private void notifyDockedStackExistsChanged(final boolean exists) {
-        mView.post(new Runnable() {
-            @Override
-            public void run() {
-                mForcedResizableController.notifyDockedStackExistsChanged(exists);
-            }
-        });
+    void setAdjustedForIme(boolean adjustedForIme) {
+        if (mAdjustedForIme == adjustedForIme) {
+            return;
+        }
+        mAdjustedForIme = adjustedForIme;
+        updateTouchable();
     }
 
     private void updateTouchable() {
-        mWindowManager.setTouchable((mHomeStackResizable || !mMinimized) && !mAdjustedForIme);
-    }
-
-    public void onRecentsActivityStarting() {
-        if (mView != null) {
-            mView.onRecentsActivityStarting();
-        }
+        mWindowManager.setTouchable(!mAdjustedForIme);
     }
 
     /**
@@ -197,6 +473,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
     }
 
     public void onAppTransitionFinished() {
+        if (mView == null) {
+            return;
+        }
         mForcedResizableController.onAppTransitionFinished();
     }
 
@@ -212,10 +491,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
 
     @Override
     public void growRecents() {
-        Recents recents = getComponent(Recents.class);
-        if (recents != null) {
-            recents.growRecents();
-        }
+        mRecentsOptionalLazy.ifPresent(recentsLazy -> recentsLazy.get().growRecents());
     }
 
     @Override
@@ -225,46 +501,74 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
         pw.print("  mAdjustedForIme="); pw.println(mAdjustedForIme);
     }
 
-    class DockDividerVisibilityListener extends IDockedStackListener.Stub {
+    long getAnimDuration() {
+        float transitionScale = Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE,
+                mContext.getResources().getFloat(
+                        com.android.internal.R.dimen
+                                .config_appTransitionAnimationDurationScaleDefault));
+        final long transitionDuration = DEFAULT_APP_TRANSITION_DURATION;
+        return (long) (transitionDuration * transitionScale);
+    }
 
-        @Override
-        public void onDividerVisibilityChanged(boolean visible) throws RemoteException {
-            updateVisibility(visible);
+    /** Register a listener that gets called whenever the existence of the divider changes */
+    public void registerInSplitScreenListener(Consumer<Boolean> listener) {
+        listener.accept(isDividerVisible());
+        synchronized (mDockedStackExistsListeners) {
+            mDockedStackExistsListeners.add(new WeakReference<>(listener));
         }
+    }
 
-        @Override
-        public void onDockedStackExistsChanged(boolean exists) throws RemoteException {
-            notifyDockedStackExistsChanged(exists);
-        }
+    void startEnterSplit() {
+        update(mDisplayController.getDisplayContext(
+                mContext.getDisplayId()).getResources().getConfiguration());
+        // Set resizable directly here because applyEnterSplit already resizes home stack.
+        mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
+    }
 
-        @Override
-        public void onDockedStackMinimizedChanged(boolean minimized, long animDuration,
-                boolean isHomeStackResizable) throws RemoteException {
-            mHomeStackResizable = isHomeStackResizable;
-            updateMinimizedDockedStack(minimized, animDuration, isHomeStackResizable);
-        }
+    void startDismissSplit() {
+        mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, true /* dismissOrMaximize */);
+        updateVisibility(false /* visible */);
+        mMinimized = false;
+        removeDivider();
+        mImePositionProcessor.reset();
+    }
 
-        @Override
-        public void onAdjustedForImeChanged(boolean adjustedForIme, long animDuration)
-                throws RemoteException {
-            mView.post(() -> {
-                if (mAdjustedForIme != adjustedForIme) {
-                    mAdjustedForIme = adjustedForIme;
-                    updateTouchable();
-                    if (!mMinimized) {
-                        if (animDuration > 0) {
-                            mView.setAdjustedForIme(adjustedForIme, animDuration);
-                        } else {
-                            mView.setAdjustedForIme(adjustedForIme);
-                        }
-                    }
-                }
-            });
+    void ensureMinimizedSplit() {
+        setHomeMinimized(true /* minimized */, mHomeStackResizable);
+        if (mView != null && !isDividerVisible()) {
+            // Wasn't in split-mode yet, so enter now.
+            if (DEBUG) {
+                Slog.d(TAG, " entering split mode with minimized=true");
+            }
+            updateVisibility(true /* visible */);
         }
+    }
 
-        @Override
-        public void onDockSideChanged(final int newDockSide) throws RemoteException {
-            mView.post(() -> mView.notifyDockSideChanged(newDockSide));
+    void ensureNormalSplit() {
+        setHomeMinimized(false /* minimized */, mHomeStackResizable);
+        if (mView != null && !isDividerVisible()) {
+            // Wasn't in split-mode, so enter now.
+            if (DEBUG) {
+                Slog.d(TAG, " enter split mode unminimized ");
+            }
+            updateVisibility(true /* visible */);
         }
+    }
+
+    SplitDisplayLayout getSplitLayout() {
+        return mSplitLayout;
+    }
+
+    WindowManagerProxy getWmProxy() {
+        return mWindowManagerProxy;
+    }
+
+    /** @return the container token for the secondary split root task. */
+    public WindowContainerToken getSecondaryRoot() {
+        if (mSplits == null || mSplits.mSecondary == null) {
+            return null;
+        }
+        return mSplits.mSecondary.token;
     }
 }

@@ -17,14 +17,14 @@
 */
 -->
 
+
 <com.android.systemui.statusbar.phone.NotificationPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notification_panel"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent" >
-
+    android:background="@android:color/transparent">
     <FrameLayout
         android:id="@+id/big_clock_container"
         android:layout_width="match_parent"
@@ -66,6 +66,8 @@
         <include layout="@layout/ambient_indication"
             android:id="@+id/ambient_indication_container" />
 
+        <include layout="@layout/photo_preview_overlay" />
+
         <ViewStub
             android:id="@+id/keyguard_user_switcher"
             android:layout="@layout/keyguard_user_switcher"
@@ -98,4 +100,5 @@
         android:visibility="invisible"
         android:background="@drawable/qs_navbar_scrim" />
 
+    <include layout="@layout/status_bar_expanded_plugin_frame"/>
 </com.android.systemui.statusbar.phone.NotificationPanelView>

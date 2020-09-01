@@ -31,4 +31,8 @@
     <string name="pip_close">Close PIP</string>
     <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
     <string name="pip_fullscreen">Full screen</string>
+
+    <!-- Title and subtitle for AudioRecordingIndicator -->
+    <string name="mic_active">Microphone Active</string>
+    <string name="app_accessed_mic">%1$s accessed your microphone</string>
 </resources>

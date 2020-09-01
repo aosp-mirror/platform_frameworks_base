@@ -85,11 +85,11 @@ public class HidlMemory implements Closeable {
     }
 
     /**
-     * Disowns the underlying handle and returns it. This object becomes invalid.
+     * Disowns the underlying handle and returns it. The underlying handle becomes null.
      *
      * @return The underlying handle.
      */
-    @NonNull
+    @Nullable
     public NativeHandle releaseHandle() {
         NativeHandle handle = mHandle;
         mHandle = null;

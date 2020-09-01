@@ -1,5 +1,7 @@
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.widget.AdaptiveOutlineDrawable.AdaptiveOutlineIconType.TYPE_ADVANCED;
+
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -7,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -132,41 +136,13 @@ public class BluetoothUtils {
      */
     public static Pair<Drawable, String> getBtRainbowDrawableWithDescription(Context context,
             CachedBluetoothDevice cachedDevice) {
-        final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
-                context, cachedDevice);
-        final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
-        final boolean untetheredHeadset = getBooleanMetaData(
-                bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET);
-        final int iconSize = context.getResources().getDimensionPixelSize(
-                R.dimen.bt_nearby_icon_size);
         final Resources resources = context.getResources();
+        final Pair<Drawable, String> pair = BluetoothUtils.getBtDrawableWithDescription(context,
+                cachedDevice);
 
-        // Deal with untethered headset
-        if (untetheredHeadset) {
-            final Uri iconUri = getUriMetaData(bluetoothDevice,
-                    BluetoothDevice.METADATA_MAIN_ICON);
-            if (iconUri != null) {
-                try {
-                    context.getContentResolver().takePersistableUriPermission(iconUri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                } catch (SecurityException e) {
-                    Log.e(TAG, "Failed to take persistable permission for: " + iconUri);
-                }
-                try {
-                    final Bitmap bitmap = MediaStore.Images.Media.getBitmap(
-                            context.getContentResolver(), iconUri);
-                    if (bitmap != null) {
-                        final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
-                                iconSize, false);
-                        bitmap.recycle();
-                        final AdaptiveOutlineDrawable drawable = new AdaptiveOutlineDrawable(
-                                resources, resizedBitmap);
-                        return new Pair<>(drawable, pair.second);
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Failed to get drawable for: " + iconUri, e);
-                }
-            }
+        if (pair.first instanceof BitmapDrawable) {
+            return new Pair<>(new AdaptiveOutlineDrawable(
+                    resources, ((BitmapDrawable) pair.first).getBitmap()), pair.second);
         }
 
         return new Pair<>(buildBtRainbowDrawable(context,
@@ -191,6 +167,92 @@ public class BluetoothUtils {
         ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
 
         return adaptiveIcon;
+    }
+
+    /**
+     * Get bluetooth icon with description
+     */
+    public static Pair<Drawable, String> getBtDrawableWithDescription(Context context,
+            CachedBluetoothDevice cachedDevice) {
+        final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
+                context, cachedDevice);
+        final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
+        final boolean untetheredHeadset = getBooleanMetaData(
+                bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET);
+        final int iconSize = context.getResources().getDimensionPixelSize(
+                R.dimen.bt_nearby_icon_size);
+        final Resources resources = context.getResources();
+
+        // Deal with untethered headset
+        if (untetheredHeadset) {
+            final Uri iconUri = getUriMetaData(bluetoothDevice,
+                    BluetoothDevice.METADATA_MAIN_ICON);
+            if (iconUri != null) {
+                try {
+                    context.getContentResolver().takePersistableUriPermission(iconUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    Log.e(TAG, "Failed to take persistable permission for: " + iconUri, e);
+                }
+                try {
+                    final Bitmap bitmap = MediaStore.Images.Media.getBitmap(
+                            context.getContentResolver(), iconUri);
+                    if (bitmap != null) {
+                        final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
+                                iconSize, false);
+                        bitmap.recycle();
+                        return new Pair<>(new BitmapDrawable(resources,
+                                resizedBitmap), pair.second);
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to get drawable for: " + iconUri, e);
+                } catch (SecurityException e) {
+                    Log.e(TAG, "Failed to get permission for: " + iconUri, e);
+                }
+            }
+        }
+
+        return new Pair<>(pair.first, pair.second);
+    }
+
+    /**
+     * Build device icon with advanced outline
+     */
+    public static Drawable buildAdvancedDrawable(Context context, Drawable drawable) {
+        final int iconSize = context.getResources().getDimensionPixelSize(
+                R.dimen.advanced_icon_size);
+        final Resources resources = context.getResources();
+
+        Bitmap bitmap = null;
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            final int width = drawable.getIntrinsicWidth();
+            final int height = drawable.getIntrinsicHeight();
+            bitmap = createBitmap(drawable,
+                    width > 0 ? width : 1,
+                    height > 0 ? height : 1);
+        }
+
+        if (bitmap != null) {
+            final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
+                    iconSize, false);
+            bitmap.recycle();
+            return new AdaptiveOutlineDrawable(resources, resizedBitmap, TYPE_ADVANCED);
+        }
+
+        return drawable;
+    }
+
+    /**
+     * Creates a drawable with specified width and height.
+     */
+    public static Bitmap createBitmap(Drawable drawable, int width, int height) {
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     /**

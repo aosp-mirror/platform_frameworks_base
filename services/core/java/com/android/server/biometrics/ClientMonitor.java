@@ -233,6 +233,10 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     @Override
     public void binderDied() {
+        binderDiedInternal(true /* clearListener */);
+    }
+
+    void binderDiedInternal(boolean clearListener) {
         if (isAlreadyDone()) {
             Slog.w(getLogTag(), "Binder died but client is finished, ignoring");
             return;
@@ -241,7 +245,9 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
         Slog.e(getLogTag(), "Binder died, cancelling client");
         stop(false /* initiatedByClient */);
         mToken = null;
-        mListener = null;
+        if (clearListener) {
+            mListener = null;
+        }
     }
 
     @Override

@@ -228,13 +228,13 @@ public class WorkSourceTest extends TestCase {
         WorkSource ws = new WorkSource();
         ws.set(10);
         assertEquals(1, ws.size());
-        assertEquals(10, ws.get(0));
+        assertEquals(10, ws.getUid(0));
 
         WorkSource ws2 = new WorkSource();
         ws2.set(20, "foo");
         assertEquals(1, ws2.size());
-        assertEquals(20, ws2.get(0));
-        assertEquals("foo", ws2.getName(0));
+        assertEquals(20, ws2.getUid(0));
+        assertEquals("foo", ws2.getPackageName(0));
     }
 
     public void testDiffChains_noChanges() {
@@ -410,8 +410,8 @@ public class WorkSourceTest extends TestCase {
         assertTrue(ws2.remove(ws1));
 
         assertEquals(0, ws1.size());
-        assertEquals(50, ws1.get(0));
-        assertEquals("foo", ws1.getName(0));
+        assertEquals(50, ws1.getUid(0));
+        assertEquals("foo", ws1.getPackageName(0));
     }
 
     public void testTransferWorkChains() {

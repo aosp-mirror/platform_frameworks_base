@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -119,14 +118,14 @@ public final class ConfigUpdate {
     /**
     * Update the emergency number database into the devices.
     * <p>Extra: {@link #EXTRA_VERSION} the numeric version of the database.
-    * <p>Extra: {@link #EXTRA_REQUIRED_HASH} the hash of the database.
+    * <p>Extra: {@link #EXTRA_REQUIRED_HASH} hash of the database, which is encoded by base-16
+     * SHA512.
     * <p>Input: {@link android.content.Intent#getData} the URI to download emergency number
     * database.
     *
     * @hide
     */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_CONFIG)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB =
             "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
@@ -141,7 +140,7 @@ public final class ConfigUpdate {
     public static final String EXTRA_VERSION = "android.os.extra.VERSION";
 
     /**
-     * A string to indicate the hash of the data.
+     * Hash of the database, which is encoded by base-16 SHA512.
      *
      * @hide
      */

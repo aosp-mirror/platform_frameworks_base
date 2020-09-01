@@ -79,6 +79,7 @@ public class NotificationSnooze extends LinearLayout
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
 
+    private View mSnoozeView;
     private TextView mSelectedOptionText;
     private TextView mUndoButton;
     private ImageView mExpandButton;
@@ -122,7 +123,8 @@ public class NotificationSnooze extends LinearLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mCollapsedHeight = getResources().getDimensionPixelSize(R.dimen.snooze_snackbar_min_height);
-        findViewById(R.id.notification_snooze).setOnClickListener(this);
+        mSnoozeView = findViewById(R.id.notification_snooze);
+        mSnoozeView.setOnClickListener(this);
         mSelectedOptionText = (TextView) findViewById(R.id.snooze_option_default);
         mUndoButton = (TextView) findViewById(R.id.undo);
         mUndoButton.setOnClickListener(this);
@@ -144,16 +146,6 @@ public class NotificationSnooze extends LinearLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         logOptionSelection(MetricsEvent.NOTIFICATION_SNOOZE_CLICKED, mDefaultOption);
-    }
-
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        if (mGutsContainer != null && mGutsContainer.isExposed()) {
-            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                event.getText().add(mSelectedOptionText.getText());
-            }
-        }
     }
 
     @Override
@@ -341,9 +333,19 @@ public class NotificationSnooze extends LinearLayout
         mSelectedOptionText.setText(option.getConfirmation());
         showSnoozeOptions(false);
         hideSelectedOption();
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         if (userAction) {
+            mSnoozeView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
             logOptionSelection(MetricsEvent.NOTIFICATION_SELECT_SNOOZE, option);
+        }
+    }
+
+    @Override
+    public boolean requestAccessibilityFocus() {
+        if (mExpanded) {
+            return super.requestAccessibilityFocus();
+        } else {
+            mSnoozeView.requestAccessibilityFocus();
+            return false;
         }
     }
 
@@ -378,16 +380,8 @@ public class NotificationSnooze extends LinearLayout
 
     private void undoSnooze(View v) {
         mSelectedOption = null;
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
         showSnoozeOptions(false);
-        mGutsContainer.closeControls(x, y, false /* save */, false /* force */);
+        mGutsContainer.closeControls(v, false);
     }
 
     @Override
@@ -438,6 +432,11 @@ public class NotificationSnooze extends LinearLayout
     @Override
     public boolean shouldBeSaved() {
         return true;
+    }
+
+    @Override
+    public boolean needsFalsingProtection() {
+        return false;
     }
 
     public class NotificationSnoozeOption implements SnoozeOption {

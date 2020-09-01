@@ -13,12 +13,14 @@
 // limitations under the License.
 
 #include "src/anomaly/AnomalyTracker.h"
-#include "../metrics/metrics_test_helper.h"
 
 #include <gtest/gtest.h>
 #include <math.h>
 #include <stdio.h>
+
 #include <vector>
+
+#include "tests/statsd_test_util.h"
 
 using namespace testing;
 using android::sp;
@@ -147,7 +149,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     std::shared_ptr<DimToValMap> bucket6 = MockBucket({{keyA, 2}});
 
     // Start time with no events.
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0u);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0u);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, -1LL);
 
     // Event from bucket #0 occurs.
@@ -158,7 +160,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
 
     // Adds past bucket #0
     anomalyTracker.addPastBucket(bucket0, 0);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3u);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3u);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
@@ -172,7 +174,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
 
     // Adds past bucket #0 again. The sum does not change.
     anomalyTracker.addPastBucket(bucket0, 0);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3u);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3u);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
@@ -185,7 +187,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     // Adds past bucket #1.
     anomalyTracker.addPastBucket(bucket1, 1);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 1L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
@@ -199,7 +201,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     // Adds past bucket #1 again. Nothing changes.
     anomalyTracker.addPastBucket(bucket1, 1);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 1L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
@@ -212,7 +214,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     // Adds past bucket #2.
     anomalyTracker.addPastBucket(bucket2, 2);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 2L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 1LL);
 
@@ -225,7 +227,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     // Adds bucket #3.
     anomalyTracker.addPastBucket(bucket3, 3L);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 3L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 1LL);
 
@@ -238,7 +240,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     // Adds bucket #4.
     anomalyTracker.addPastBucket(bucket4, 4);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 4L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 5LL);
 
@@ -251,7 +253,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     // Adds bucket #5.
     anomalyTracker.addPastBucket(bucket5, 5);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 5L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 5LL);
 
@@ -292,7 +294,7 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     int64_t eventTimestamp6 = bucketSizeNs * 27 + 3;
 
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, -1LL);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 9, bucket9, {}, {keyA, keyB, keyC, keyD}));
     detectAndDeclareAnomalies(anomalyTracker, 9, bucket9, eventTimestamp1);
     checkRefractoryTimes(anomalyTracker, eventTimestamp1, refractoryPeriodSec,
@@ -301,15 +303,15 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     // Add past bucket #9
     anomalyTracker.addPastBucket(bucket9, 9);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 9L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 3UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyA), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 2LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 16, bucket16, {keyB}, {keyA, keyC, keyD}));
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 15L);
     detectAndDeclareAnomalies(anomalyTracker, 16, bucket16, eventTimestamp2);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 15L);
     checkRefractoryTimes(anomalyTracker, eventTimestamp2, refractoryPeriodSec,
             {{keyA, -1}, {keyB, eventTimestamp2}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
@@ -317,27 +319,27 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     // Add past bucket #16
     anomalyTracker.addPastBucket(bucket16, 16);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 16L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 4LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 18, bucket18, {keyB}, {keyA, keyC, keyD}));
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 4LL);
     // Within refractory period.
     detectAndDeclareAnomalies(anomalyTracker, 18, bucket18, eventTimestamp3);
     checkRefractoryTimes(anomalyTracker, eventTimestamp3, refractoryPeriodSec,
             {{keyA, -1}, {keyB, eventTimestamp2}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 4LL);
 
     // Add past bucket #18
     anomalyTracker.addPastBucket(bucket18, 18);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 18L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 20, bucket20, {keyB}, {keyA, keyC, keyD}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 19L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     detectAndDeclareAnomalies(anomalyTracker, 20, bucket20, eventTimestamp4);
@@ -347,11 +349,11 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     // Add bucket #18 again. Nothing changes.
     anomalyTracker.addPastBucket(bucket18, 18);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 19L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 20, bucket20, {keyB}, {keyA, keyC, keyD}));
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 1LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     detectAndDeclareAnomalies(anomalyTracker, 20, bucket20, eventTimestamp4 + 1);
@@ -362,12 +364,12 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     // Add past bucket #20
     anomalyTracker.addPastBucket(bucket20, 20);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 20L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 2UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyB), 3LL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyC), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 25, bucket25, {}, {keyA, keyB, keyC, keyD}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 24L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     detectAndDeclareAnomalies(anomalyTracker, 25, bucket25, eventTimestamp5);
     checkRefractoryTimes(anomalyTracker, eventTimestamp5, refractoryPeriodSec,
             {{keyA, -1}, {keyB, eventTimestamp4}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
@@ -375,14 +377,14 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     // Add past bucket #25
     anomalyTracker.addPastBucket(bucket25, 25);
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 25L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 1UL);
     EXPECT_EQ(anomalyTracker.getSumOverPastBuckets(keyD), 1LL);
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 28, bucket28, {},
             {keyA, keyB, keyC, keyD, keyE}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 27L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     detectAndDeclareAnomalies(anomalyTracker, 28, bucket28, eventTimestamp6);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     checkRefractoryTimes(anomalyTracker, eventTimestamp6, refractoryPeriodSec,
             {{keyA, -1}, {keyB, -1}, {keyC, -1}, {keyD, -1}, {keyE, -1}});
 
@@ -391,9 +393,9 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     EXPECT_TRUE(detectAnomaliesPass(anomalyTracker, 28, bucket28, {keyE},
             {keyA, keyB, keyC, keyD}));
     EXPECT_EQ(anomalyTracker.mMostRecentBucketNum, 27L);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     detectAndDeclareAnomalies(anomalyTracker, 28, bucket28, eventTimestamp6 + 7);
-    EXPECT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
+    ASSERT_EQ(anomalyTracker.mSumOverPastBuckets.size(), 0UL);
     checkRefractoryTimes(anomalyTracker, eventTimestamp6, refractoryPeriodSec,
             {{keyA, -1}, {keyB, -1}, {keyC, -1}, {keyD, -1}, {keyE, eventTimestamp6 + 7}});
 }

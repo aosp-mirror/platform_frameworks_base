@@ -32,9 +32,9 @@ import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
@@ -47,6 +47,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
+import android.os.incremental.IncrementalManager;
+import android.os.incremental.V4Signature;
+import android.os.incremental.V4Signature.HashingInfo;
 import android.service.pm.PackageServiceDumpProto;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -59,9 +63,12 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionsState;
 
 import dalvik.system.VMRuntime;
 
@@ -78,6 +85,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -99,6 +107,9 @@ import java.util.zip.GZIPInputStream;
 public class PackageManagerServiceUtils {
     private final static long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
+    public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
+            pkgSetting -> pkgSetting.pkg == null;
+
     private static ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
         List<ResolveInfo> ris = null;
         try {
@@ -118,40 +129,43 @@ public class PackageManagerServiceUtils {
     // Sort a list of apps by their last usage, most recently used apps first. The order of
     // packages without usage data is undefined (but they will be sorted after the packages
     // that do have usage data).
-    public static void sortPackagesByUsageDate(List<PackageParser.Package> pkgs,
+    public static void sortPackagesByUsageDate(List<PackageSetting> pkgSettings,
             PackageManagerService packageManagerService) {
         if (!packageManagerService.isHistoricalPackageUsageAvailable()) {
             return;
         }
 
-        Collections.sort(pkgs, (pkg1, pkg2) ->
-                Long.compare(pkg2.getLatestForegroundPackageUseTimeInMills(),
-                        pkg1.getLatestForegroundPackageUseTimeInMills()));
+        Collections.sort(pkgSettings, (pkgSetting1, pkgSetting2) ->
+                Long.compare(
+                        pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills(),
+                        pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills())
+        );
     }
 
     // Apply the given {@code filter} to all packages in {@code packages}. If tested positive, the
     // package will be removed from {@code packages} and added to {@code result} with its
     // dependencies. If usage data is available, the positive packages will be sorted by usage
     // data (with {@code sortTemp} as temporary storage).
-    private static void applyPackageFilter(Predicate<PackageParser.Package> filter,
-            Collection<PackageParser.Package> result,
-            Collection<PackageParser.Package> packages,
-            @NonNull List<PackageParser.Package> sortTemp,
+    private static void applyPackageFilter(
+            Predicate<PackageSetting> filter,
+            Collection<PackageSetting> result,
+            Collection<PackageSetting> packages,
+            @NonNull List<PackageSetting> sortTemp,
             PackageManagerService packageManagerService) {
-        for (PackageParser.Package pkg : packages) {
-            if (filter.test(pkg)) {
-                sortTemp.add(pkg);
+        for (PackageSetting pkgSetting : packages) {
+            if (filter.test(pkgSetting)) {
+                sortTemp.add(pkgSetting);
             }
         }
 
         sortPackagesByUsageDate(sortTemp, packageManagerService);
         packages.removeAll(sortTemp);
 
-        for (PackageParser.Package pkg : sortTemp) {
-            result.add(pkg);
+        for (PackageSetting pkgSetting : sortTemp) {
+            result.add(pkgSetting);
 
-            Collection<PackageParser.Package> deps =
-                    packageManagerService.findSharedNonSystemLibraries(pkg);
+            List<PackageSetting> deps =
+                    packageManagerService.findSharedNonSystemLibraries(pkgSetting);
             if (!deps.isEmpty()) {
                 deps.removeAll(result);
                 result.addAll(deps);
@@ -164,73 +178,79 @@ public class PackageManagerServiceUtils {
 
     // Sort apps by importance for dexopt ordering. Important apps are given
     // more priority in case the device runs out of space.
-    public static List<PackageParser.Package> getPackagesForDexopt(
-            Collection<PackageParser.Package> packages,
+    public static List<PackageSetting> getPackagesForDexopt(
+            Collection<PackageSetting> packages,
             PackageManagerService packageManagerService) {
         return getPackagesForDexopt(packages, packageManagerService, DEBUG_DEXOPT);
     }
 
-    public static List<PackageParser.Package> getPackagesForDexopt(
-            Collection<PackageParser.Package> packages,
+    public static List<PackageSetting> getPackagesForDexopt(
+            Collection<PackageSetting> pkgSettings,
             PackageManagerService packageManagerService,
             boolean debug) {
-        ArrayList<PackageParser.Package> remainingPkgs = new ArrayList<>(packages);
-        LinkedList<PackageParser.Package> result = new LinkedList<>();
-        ArrayList<PackageParser.Package> sortTemp = new ArrayList<>(remainingPkgs.size());
+        List<PackageSetting> result = new LinkedList<>();
+        ArrayList<PackageSetting> remainingPkgSettings = new ArrayList<>(pkgSettings);
+
+        // First, remove all settings without available packages
+        remainingPkgSettings.removeIf(REMOVE_IF_NULL_PKG);
+
+        ArrayList<PackageSetting> sortTemp = new ArrayList<>(remainingPkgSettings.size());
 
         // Give priority to core apps.
-        applyPackageFilter((pkg) -> pkg.coreApp, result, remainingPkgs, sortTemp,
+        applyPackageFilter(pkgSetting -> pkgSetting.pkg.isCoreApp(), result, remainingPkgSettings, sortTemp,
                 packageManagerService);
 
         // Give priority to system apps that listen for pre boot complete.
         Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         final ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        applyPackageFilter((pkg) -> pkgNames.contains(pkg.packageName), result, remainingPkgs,
-                sortTemp, packageManagerService);
+        applyPackageFilter(pkgSetting -> pkgNames.contains(pkgSetting.name), result,
+                remainingPkgSettings, sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
         DexManager dexManager = packageManagerService.getDexManager();
-        applyPackageFilter((pkg) ->
-                dexManager.getPackageUseInfoOrDefault(pkg.packageName)
+        applyPackageFilter(pkgSetting ->
+                dexManager.getPackageUseInfoOrDefault(pkgSetting.name)
                         .isAnyCodePathUsedByOtherApps(),
-                result, remainingPkgs, sortTemp, packageManagerService);
+                result, remainingPkgSettings, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
-        Predicate<PackageParser.Package> remainingPredicate;
-        if (!remainingPkgs.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
+        Predicate<PackageSetting> remainingPredicate;
+        if (!remainingPkgSettings.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
             if (debug) {
                 Log.i(TAG, "Looking at historical package use");
             }
             // Get the package that was used last.
-            PackageParser.Package lastUsed = Collections.max(remainingPkgs, (pkg1, pkg2) ->
-                    Long.compare(pkg1.getLatestForegroundPackageUseTimeInMills(),
-                            pkg2.getLatestForegroundPackageUseTimeInMills()));
+            PackageSetting lastUsed = Collections.max(remainingPkgSettings,
+                    (pkgSetting1, pkgSetting2) -> Long.compare(
+                            pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills(),
+                            pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills()));
             if (debug) {
-                Log.i(TAG, "Taking package " + lastUsed.packageName + " as reference in time use");
+                Log.i(TAG, "Taking package " + lastUsed.name
+                        + " as reference in time use");
             }
-            long estimatedPreviousSystemUseTime =
-                    lastUsed.getLatestForegroundPackageUseTimeInMills();
+            long estimatedPreviousSystemUseTime = lastUsed.getPkgState()
+                    .getLatestForegroundPackageUseTimeInMills();
             // Be defensive if for some reason package usage has bogus data.
             if (estimatedPreviousSystemUseTime != 0) {
                 final long cutoffTime = estimatedPreviousSystemUseTime - SEVEN_DAYS_IN_MILLISECONDS;
-                remainingPredicate =
-                        (pkg) -> pkg.getLatestForegroundPackageUseTimeInMills() >= cutoffTime;
+                remainingPredicate = pkgSetting -> pkgSetting.getPkgState()
+                        .getLatestForegroundPackageUseTimeInMills() >= cutoffTime;
             } else {
                 // No meaningful historical info. Take all.
-                remainingPredicate = (pkg) -> true;
+                remainingPredicate = pkgSetting -> true;
             }
-            sortPackagesByUsageDate(remainingPkgs, packageManagerService);
+            sortPackagesByUsageDate(remainingPkgSettings, packageManagerService);
         } else {
             // No historical info. Take all.
-            remainingPredicate = (pkg) -> true;
+            remainingPredicate = pkgSetting -> true;
         }
-        applyPackageFilter(remainingPredicate, result, remainingPkgs, sortTemp,
+        applyPackageFilter(remainingPredicate, result, remainingPkgSettings, sortTemp,
                 packageManagerService);
 
         if (debug) {
             Log.i(TAG, "Packages to be dexopted: " + packagesToString(result));
-            Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgs));
+            Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgSettings));
         }
 
         return result;
@@ -283,13 +303,13 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    public static String packagesToString(Collection<PackageParser.Package> c) {
+    public static String packagesToString(List<PackageSetting> pkgSettings) {
         StringBuilder sb = new StringBuilder();
-        for (PackageParser.Package pkg : c) {
+        for (int index = 0; index < pkgSettings.size(); index++) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(pkg.packageName);
+            sb.append(pkgSettings.get(index).name);
         }
         return sb.toString();
     }
@@ -307,16 +327,16 @@ public class PackageManagerServiceUtils {
         return false;
     }
 
-    public static long getLastModifiedTime(PackageParser.Package pkg) {
-        final File srcFile = new File(pkg.codePath);
+    public static long getLastModifiedTime(AndroidPackage pkg) {
+        final File srcFile = new File(pkg.getCodePath());
         if (!srcFile.isDirectory()) {
             return srcFile.lastModified();
         }
-        final File baseFile = new File(pkg.baseCodePath);
+        final File baseFile = new File(pkg.getBaseCodePath());
         long maxModifiedTime = baseFile.lastModified();
-        if (pkg.splitCodePaths != null) {
-            for (int i = pkg.splitCodePaths.length - 1; i >=0; --i) {
-                final File splitFile = new File(pkg.splitCodePaths[i]);
+        if (pkg.getSplitCodePaths() != null) {
+            for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
+                final File splitFile = new File(pkg.getSplitCodePaths()[i]);
                 maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
             }
         }
@@ -374,10 +394,12 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    public static void enforceShellRestriction(String restriction, int callingUid, int userHandle) {
+    /** Enforces that if the caller is shell, it does not have the provided user restriction. */
+    public static void enforceShellRestriction(
+            UserManagerInternal userManager, String restriction, int callingUid, int userHandle) {
         if (callingUid == Process.SHELL_UID) {
             if (userHandle >= 0
-                    && PackageManagerService.sUserManager.hasUserRestriction(
+                    && userManager.hasUserRestriction(
                             restriction, userHandle)) {
                 throw new SecurityException("Shell does not have permission to access user "
                         + userHandle);
@@ -385,6 +407,17 @@ public class PackageManagerServiceUtils {
                 Slog.e(PackageManagerService.TAG, "Unable to check shell permission for user "
                         + userHandle + "\n\t" + Debug.getCallers(3));
             }
+        }
+    }
+
+    /**
+     * Enforces that the caller must be either the system process or the phone process.
+     * If not, throws a {@link SecurityException}.
+     */
+    public static void enforceSystemOrPhoneCaller(String methodName, int callingUid) {
+        if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "Cannot call " + methodName + " from UID " + callingUid);
         }
     }
 
@@ -523,23 +556,16 @@ public class PackageManagerServiceUtils {
      */
     private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting) {
-        try {
-            PackageParser.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */);
-            if (pkgSetting.signatures.mSigningDetails.checkCapability(
-                    disabledPkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
-                    || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
-                            pkgSetting.signatures.mSigningDetails,
-                            PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
-                return true;
-            } else {
-                logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
-                        pkgSetting.name);
-                return false;
-            }
-        } catch (PackageParserException e) {
-            logCriticalInfo(Log.ERROR, "Failed to collect cert for " + pkgSetting.name + ": " +
-                    e.getMessage());
+        if (pkgSetting.signatures.mSigningDetails.checkCapability(
+                disabledPkgSetting.signatures.mSigningDetails,
+                PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
+                pkgSetting.signatures.mSigningDetails,
+                PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
+            return true;
+        } else {
+            logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
+                    pkgSetting.name);
             return false;
         }
     }
@@ -558,17 +584,19 @@ public class PackageManagerServiceUtils {
 
     /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
-        return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_ENABLED;
+        return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
+                || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
+                        == FSVERITY_ENABLED;
     }
 
     static boolean isLegacyApkVerityEnabled() {
         return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_LEGACY;
     }
 
-    /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
-    static boolean isApkVerificationForced(@Nullable PackageSetting disabledPs) {
-        return disabledPs != null && disabledPs.isPrivileged() && (
-                isApkVerityEnabled() || isLegacyApkVerityEnabled());
+    /** Returns true to force apk verification if the package is considered privileged. */
+    static boolean isApkVerificationForced(@Nullable PackageSetting ps) {
+        // TODO(b/154310064): re-enable.
+        return false;
     }
 
     /**
@@ -583,7 +611,6 @@ public class PackageManagerServiceUtils {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
         if (pkgSetting.signatures.mSigningDetails.signatures != null) {
-
             // Already existing package. Make sure signatures match
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.signatures.mSigningDetails,
@@ -620,8 +647,8 @@ public class PackageManagerServiceUtils {
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.sharedUser != null
-                && pkgSetting.sharedUser.signatures.mSigningDetails
+        if (pkgSetting.getSharedUser() != null
+                && pkgSetting.getSharedUser().signatures.mSigningDetails
                         != PackageParser.SigningDetails.UNKNOWN) {
 
             // Already existing package. Make sure signatures match.  In case of signing certificate
@@ -631,24 +658,31 @@ public class PackageManagerServiceUtils {
             // with being sharedUser with the existing signing cert.
             boolean match =
                     parsedSignatures.checkCapability(
-                            pkgSetting.sharedUser.signatures.mSigningDetails,
+                            pkgSetting.getSharedUser().signatures.mSigningDetails,
                             PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)
-                    || pkgSetting.sharedUser.signatures.mSigningDetails.checkCapability(
+                    || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
                             parsedSignatures,
                             PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
+            // Special case: if the sharedUserId capability check failed it could be due to this
+            // being the only package in the sharedUserId so far and the lineage being updated to
+            // deny the sharedUserId capability of the previous key in the lineage.
+            if (!match && pkgSetting.getSharedUser().packages.size() == 1
+                    && pkgSetting.getSharedUser().packages.valueAt(0).name.equals(packageName)) {
+                match = true;
+            }
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
-                        packageName, pkgSetting.sharedUser.signatures, parsedSignatures);
+                        packageName, pkgSetting.getSharedUser().signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match =
                         matchSignaturesRecover(packageName,
-                                pkgSetting.sharedUser.signatures.mSigningDetails,
+                                pkgSetting.getSharedUser().signatures.mSigningDetails,
                                 parsedSignatures,
                                 PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)
                         || matchSignaturesRecover(packageName,
                                 parsedSignatures,
-                                pkgSetting.sharedUser.signatures.mSigningDetails,
+                                pkgSetting.getSharedUser().signatures.mSigningDetails,
                                 PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
                 compatMatch |= match;
             }
@@ -656,7 +690,43 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName
                         + " has no signatures that match those in shared user "
-                        + pkgSetting.sharedUser.name + "; ignoring!");
+                        + pkgSetting.getSharedUser().name + "; ignoring!");
+            }
+            // It is possible that this package contains a lineage that blocks sharedUserId access
+            // to an already installed package in the sharedUserId signed with a previous key.
+            // Iterate over all of the packages in the sharedUserId and ensure any that are signed
+            // with a key in this package's lineage have the SHARED_USER_ID capability granted.
+            if (parsedSignatures.hasPastSigningCertificates()) {
+                for (PackageSetting shUidPkgSetting : pkgSetting.getSharedUser().packages) {
+                    // if the current package in the sharedUserId is the package being updated then
+                    // skip this check as the update may revoke the sharedUserId capability from
+                    // the key with which this app was previously signed.
+                    if (packageName.equals(shUidPkgSetting.name)) {
+                        continue;
+                    }
+                    PackageParser.SigningDetails shUidSigningDetails =
+                            shUidPkgSetting.getSigningDetails();
+                    // The capability check only needs to be performed against the package if it is
+                    // signed with a key that is in the lineage of the package being installed.
+                    if (parsedSignatures.hasAncestor(shUidSigningDetails)) {
+                        if (!parsedSignatures.checkCapability(shUidSigningDetails,
+                                PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)) {
+                            throw new PackageManagerException(
+                                    INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                                    "Package " + packageName
+                                            + " revoked the sharedUserId capability from the "
+                                            + "signing key used to sign " + shUidPkgSetting.name);
+                        }
+                    }
+                }
+            }
+            // If the lineage of this package diverges from the lineage of the sharedUserId then
+            // do not allow the installation to proceed.
+            if (!parsedSignatures.hasCommonAncestor(
+                    pkgSetting.getSharedUser().signatures.mSigningDetails)) {
+                throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                        "Package " + packageName + " has a signing lineage "
+                                + "that diverges from the lineage of the sharedUserId");
             }
         }
         return compatMatch;
@@ -774,6 +844,7 @@ public class PackageManagerServiceUtils {
         ret.verifiers = pkg.verifiers;
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.multiArch;
+        ret.debuggable = pkg.debuggable;
 
         return ret;
     }
@@ -800,11 +871,11 @@ public class PackageManagerServiceUtils {
      * Checks whenever downgrade of an app is permitted.
      *
      * @param installFlags flags of the current install.
-     * @param applicationFlags flags of the currently installed version of the app.
+     * @param isAppDebuggable if the currently installed version of the app is debuggable.
      * @return {@code true} if downgrade is permitted according to the {@code installFlags} and
      *         {@code applicationFlags}.
      */
-    public static boolean isDowngradePermitted(int installFlags, int applicationFlags) {
+    public static boolean isDowngradePermitted(int installFlags, boolean isAppDebuggable) {
         // If installed, the package will get access to data left on the device by its
         // predecessor. As a security measure, this is permitted only if this is not a
         // version downgrade or if the predecessor package is marked as debuggable and
@@ -826,9 +897,7 @@ public class PackageManagerServiceUtils {
         if (!downgradeRequested) {
             return false;
         }
-        final boolean isDebuggable =
-                Build.IS_DEBUGGABLE || ((applicationFlags
-                        & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        final boolean isDebuggable = Build.IS_DEBUGGABLE || isAppDebuggable;
         if (isDebuggable) {
             return true;
         }
@@ -884,5 +953,103 @@ public class PackageManagerServiceUtils {
         } finally {
             IoUtils.closeQuietly(source);
         }
+    }
+
+    /**
+     * Returns the {@link PermissionsState} for the given package. If the {@link PermissionsState}
+     * could not be found, {@code null} will be returned.
+     */
+    public static PermissionsState getPermissionsState(
+            PackageManagerInternal packageManagerInternal, AndroidPackage pkg) {
+        final PackageSetting packageSetting = packageManagerInternal.getPackageSetting(
+                pkg.getPackageName());
+        if (packageSetting == null) {
+            return null;
+        }
+        return packageSetting.getPermissionsState();
+    }
+
+    /**
+     * Recursively create target directory
+     */
+    public static void makeDirRecursive(File targetDir, int mode) throws ErrnoException {
+        final Path targetDirPath = targetDir.toPath();
+        final int directoriesCount = targetDirPath.getNameCount();
+        File currentDir;
+        for (int i = 1; i <= directoriesCount; i++) {
+            currentDir = targetDirPath.subpath(0, i).toFile();
+            if (currentDir.exists()) {
+                continue;
+            }
+            Os.mkdir(currentDir.getAbsolutePath(), mode);
+            Os.chmod(currentDir.getAbsolutePath(), mode);
+        }
+    }
+
+    /**
+     * Returns a string that's compatible with the verification root hash extra.
+     * @see PackageManager#EXTRA_VERIFICATION_ROOT_HASH
+     */
+    @NonNull
+    public static String buildVerificationRootHashString(@NonNull String baseFilename,
+            @Nullable String[] splitFilenameArray) {
+        final StringBuilder sb = new StringBuilder();
+        final String baseFilePath =
+                baseFilename.substring(baseFilename.lastIndexOf(File.separator) + 1);
+        sb.append(baseFilePath).append(":");
+        final byte[] baseRootHash = getRootHash(baseFilename);
+        if (baseRootHash == null) {
+            sb.append("0");
+        } else {
+            sb.append(HexDump.toHexString(baseRootHash));
+        }
+        if (splitFilenameArray == null || splitFilenameArray.length == 0) {
+            return sb.toString();
+        }
+
+        for (int i = splitFilenameArray.length - 1; i >= 0; i--) {
+            final String splitFilename = splitFilenameArray[i];
+            final String splitFilePath =
+                    splitFilename.substring(splitFilename.lastIndexOf(File.separator) + 1);
+            final byte[] splitRootHash = getRootHash(splitFilename);
+            sb.append(";").append(splitFilePath).append(":");
+            if (splitRootHash == null) {
+                sb.append("0");
+            } else {
+                sb.append(HexDump.toHexString(splitRootHash));
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Returns the root has for the given file.
+     * <p>Otherwise, returns {@code null} if the root hash could not be found or calculated.
+     * <p>NOTE: This currently only works on files stored on the incremental file system. The
+     * eventual goal is that this hash [among others] can be retrieved for any file.
+     */
+    @Nullable
+    private static byte[] getRootHash(String filename) {
+        try {
+            final byte[] baseFileSignature =
+                    IncrementalManager.unsafeGetFileSignature(filename);
+            if (baseFileSignature == null) {
+                throw new IOException("File signature not present");
+            }
+            final V4Signature signature =
+                    V4Signature.readFrom(baseFileSignature);
+            if (signature.hashingInfo == null) {
+                throw new IOException("Hashing info not present");
+            }
+            final HashingInfo hashInfo =
+                    HashingInfo.fromByteArray(signature.hashingInfo);
+            if (ArrayUtils.isEmpty(hashInfo.rawRootHash)) {
+                throw new IOException("Root has not present");
+            }
+            return hashInfo.rawRootHash;
+        } catch (IOException ignore) {
+            Slog.e(TAG, "ERROR: could not load root hash from incremental install");
+        }
+        return null;
     }
 }

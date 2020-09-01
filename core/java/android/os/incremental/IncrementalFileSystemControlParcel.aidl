@@ -22,7 +22,7 @@ package android.os.incremental;
  * @hide
  */
 parcelable IncrementalFileSystemControlParcel {
-    @nullable ParcelFileDescriptor cmd;
-    @nullable ParcelFileDescriptor pendingReads;
-    @nullable ParcelFileDescriptor log;
+    ParcelFileDescriptor cmd;
+    ParcelFileDescriptor pendingReads;
+    ParcelFileDescriptor log;
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<overlay>
+    <item target="drawable/drawable" value="@drawable/drawable"/>
+    <item target="layout/layout" value="@layout/layout"/>
+    <item target="raw/lorem_ipsum" value="@raw/lorem_ipsum"/>
+    <item target="xml/integer" value="@xml/integer"/>
+    <item target="string/str" value="@string/str"/>
+    <item target="string/str2" value="single"/>
+
+    <item target="integer/matrix_100100" value="@integer/matrix_100100"/>
+    <item target="integer/matrix_100101" value="@integer/matrix_100101"/>
+    <item target="integer/matrix_100110" value="@integer/matrix_100110"/>
+    <item target="integer/matrix_100110" value="@integer/matrix_100110"/>
+    <item target="integer/matrix_100111" value="@integer/matrix_100111"/>
+    <item target="integer/matrix_101000" value="@integer/matrix_101000"/>
+    <item target="integer/matrix_101001" value="@integer/matrix_101001"/>
+    <item target="integer/matrix_101010" value="@integer/matrix_101010"/>
+    <item target="integer/matrix_101011" value="@integer/matrix_101011"/>
+    <item target="integer/matrix_101100" value="@integer/matrix_101100"/>
+    <item target="integer/matrix_101101" value="@integer/matrix_101101"/>
+    <item target="integer/matrix_101110" value="@integer/matrix_101110"/>
+    <item target="integer/matrix_101111" value="@integer/matrix_101111"/>
+    <item target="integer/matrix_110100" value="@integer/matrix_110100"/>
+    <item target="integer/matrix_110101" value="@integer/matrix_110101"/>
+    <item target="integer/matrix_110110" value="@integer/matrix_110110"/>
+    <item target="integer/matrix_110111" value="@integer/matrix_110111"/>
+    <item target="integer/matrix_111000" value="@integer/matrix_111000"/>
+    <item target="integer/matrix_111001" value="@integer/matrix_111001"/>
+    <item target="integer/matrix_111010" value="@integer/matrix_111010"/>
+    <item target="integer/matrix_111011" value="@integer/matrix_111011"/>
+    <item target="integer/matrix_111100" value="@integer/matrix_111100"/>
+    <item target="integer/matrix_111101" value="@integer/matrix_111101"/>
+    <item target="integer/matrix_111110" value="@integer/matrix_111110"/>
+    <item target="integer/matrix_111111" value="@integer/matrix_111111"/>
+
+    <item target="bool/usually_false" value="true"/>
+
+    <item target="array/fibonacci" value="@array/fibonacci"/>
+
+    <item target="attr/customAttribute" value="@attr/customAttribute"/>
+    <item target="id/view_1" value="@id/view_1"/>
+    <item target="id/view_2" value="@id/view_2"/>
+    <item target="id/view_3" value="@id/view_3"/>
+</overlay>
+
+

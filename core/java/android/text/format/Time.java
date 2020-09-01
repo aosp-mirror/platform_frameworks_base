@@ -936,9 +936,12 @@ public class Time {
     }
 
     /**
-     * Returns true if the day of the given time is the epoch on the Julian Calendar
-     * (January 1, 1970 on the Gregorian calendar).
-     *
+     * Returns true if the instant of the supplied time would be for the
+     * Gregorian calendar date January 1, 1970 <em>for a user observing UTC
+     * </em>, i.e. the timezone of the time object is ignored.
+     * <p>
+     * See {@link #getJulianDay(long, long)} for how to determine the Julian day
+     * for the timezone of the time object.
      * <p>
      * This method can return an incorrect answer when the date / time fields have
      * been set to a local time that contradicts the available timezone information.
@@ -948,31 +951,39 @@ public class Time {
      */
     public static boolean isEpoch(Time time) {
         long millis = time.toMillis(true);
-        return getJulianDay(millis, 0) == EPOCH_JULIAN_DAY;
+        return getJulianDay(millis, 0 /* UTC offset */) == EPOCH_JULIAN_DAY;
     }
 
     /**
      * Computes the Julian day number for a point in time in a particular
-     * timezone. The Julian day for a given date is the same for every
-     * timezone. For example, the Julian day for July 1, 2008 is 2454649.
+     * timezone. The Julian day for a given calendar date is the same for
+     * every timezone. For example, the Julian day for July 1, 2008 is
+     * 2454649.
      *
      * <p>Callers must pass the time in UTC millisecond (as can be returned
      * by {@link #toMillis(boolean)} or {@link #normalize(boolean)})
-     * and the offset from UTC of the timezone in seconds (as might be in
-     * {@link #gmtoff}).
+     * and the offset from UTC of the timezone in seconds at that time (as
+     * might be in {@link #gmtoff}).
      *
      * <p>The Julian day is useful for testing if two events occur on the
      * same calendar date and for determining the relative time of an event
      * from the present ("yesterday", "3 days ago", etc.).
      *
      * @param millis the time in UTC milliseconds
-     * @param gmtoff the offset from UTC in seconds
+     * @param gmtoffSeconds the offset from UTC in seconds
      * @return the Julian day
+     * @deprecated Use {@link java.time.temporal.JulianFields#JULIAN_DAY} instead.
      */
-    public static int getJulianDay(long millis, long gmtoff) {
-        long offsetMillis = gmtoff * 1000;
-        long julianDay = (millis + offsetMillis) / DateUtils.DAY_IN_MILLIS;
-        return (int) julianDay + EPOCH_JULIAN_DAY;
+    @Deprecated
+    public static int getJulianDay(long millis, long gmtoffSeconds) {
+        long offsetMillis = gmtoffSeconds * 1000;
+        long adjustedMillis = millis + offsetMillis;
+        long julianDay = adjustedMillis / DateUtils.DAY_IN_MILLIS;
+        // Negative adjustedMillis values must round towards Integer.MIN_VALUE.
+        if (adjustedMillis < 0 && adjustedMillis % DateUtils.DAY_IN_MILLIS != 0) {
+            julianDay--;
+        }
+        return (int) (julianDay + EPOCH_JULIAN_DAY);
     }
 
     /**

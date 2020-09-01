@@ -16,17 +16,22 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a single operation to be performed as part of a batch of operations.
@@ -45,20 +50,23 @@ public class ContentProviderOperation implements Parcelable {
     public final static int TYPE_DELETE = 3;
     /** @hide exposed for unit tests */
     public final static int TYPE_ASSERT = 4;
+    /** @hide exposed for unit tests */
+    public final static int TYPE_CALL = 5;
 
     @UnsupportedAppUsage
     private final int mType;
     @UnsupportedAppUsage
     private final Uri mUri;
+    private final String mMethod;
+    private final String mArg;
+    private final ArrayMap<String, Object> mValues;
+    private final ArrayMap<String, Object> mExtras;
     @UnsupportedAppUsage
     private final String mSelection;
-    private final String[] mSelectionArgs;
-    private final ContentValues mValues;
+    private final SparseArray<Object> mSelectionArgs;
     private final Integer mExpectedCount;
-    private final ContentValues mValuesBackReferences;
-    private final Map<Integer, Integer> mSelectionArgsBackReferences;
     private final boolean mYieldAllowed;
-    private final boolean mFailureAllowed;
+    private final boolean mExceptionAllowed;
 
     private final static String TAG = "ContentProviderOperation";
 
@@ -69,124 +77,130 @@ public class ContentProviderOperation implements Parcelable {
     private ContentProviderOperation(Builder builder) {
         mType = builder.mType;
         mUri = builder.mUri;
+        mMethod = builder.mMethod;
+        mArg = builder.mArg;
         mValues = builder.mValues;
+        mExtras = builder.mExtras;
         mSelection = builder.mSelection;
         mSelectionArgs = builder.mSelectionArgs;
         mExpectedCount = builder.mExpectedCount;
-        mSelectionArgsBackReferences = builder.mSelectionArgsBackReferences;
-        mValuesBackReferences = builder.mValuesBackReferences;
         mYieldAllowed = builder.mYieldAllowed;
-        mFailureAllowed = builder.mFailureAllowed;
+        mExceptionAllowed = builder.mExceptionAllowed;
     }
 
     private ContentProviderOperation(Parcel source) {
         mType = source.readInt();
         mUri = Uri.CREATOR.createFromParcel(source);
-        mValues = source.readInt() != 0 ? ContentValues.CREATOR.createFromParcel(source) : null;
-        mSelection = source.readInt() != 0 ? source.readString() : null;
-        mSelectionArgs = source.readInt() != 0 ? source.readStringArray() : null;
-        mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
-        mValuesBackReferences = source.readInt() != 0
-                ? ContentValues.CREATOR.createFromParcel(source)
-                : null;
-        mSelectionArgsBackReferences = source.readInt() != 0
-                ? new HashMap<Integer, Integer>()
-                : null;
-        if (mSelectionArgsBackReferences != null) {
-            final int count = source.readInt();
-            for (int i = 0; i < count; i++) {
-                mSelectionArgsBackReferences.put(source.readInt(), source.readInt());
-            }
+        mMethod = source.readInt() != 0 ? source.readString8() : null;
+        mArg = source.readInt() != 0 ? source.readString8() : null;
+        final int valuesSize = source.readInt();
+        if (valuesSize != -1) {
+            mValues = new ArrayMap<>(valuesSize);
+            source.readArrayMap(mValues, null);
+        } else {
+            mValues = null;
         }
+        final int extrasSize = source.readInt();
+        if (extrasSize != -1) {
+            mExtras = new ArrayMap<>(extrasSize);
+            source.readArrayMap(mExtras, null);
+        } else {
+            mExtras = null;
+        }
+        mSelection = source.readInt() != 0 ? source.readString8() : null;
+        mSelectionArgs = source.readSparseArray(null);
+        mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
         mYieldAllowed = source.readInt() != 0;
-        mFailureAllowed = source.readInt() != 0;
+        mExceptionAllowed = source.readInt() != 0;
     }
 
     /** @hide */
     public ContentProviderOperation(ContentProviderOperation cpo, Uri withUri) {
         mType = cpo.mType;
         mUri = withUri;
+        mMethod = cpo.mMethod;
+        mArg = cpo.mArg;
         mValues = cpo.mValues;
+        mExtras = cpo.mExtras;
         mSelection = cpo.mSelection;
         mSelectionArgs = cpo.mSelectionArgs;
         mExpectedCount = cpo.mExpectedCount;
-        mSelectionArgsBackReferences = cpo.mSelectionArgsBackReferences;
-        mValuesBackReferences = cpo.mValuesBackReferences;
         mYieldAllowed = cpo.mYieldAllowed;
-        mFailureAllowed = cpo.mFailureAllowed;
+        mExceptionAllowed = cpo.mExceptionAllowed;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
         Uri.writeToParcel(dest, mUri);
-        if (mValues != null) {
+        if (mMethod != null) {
             dest.writeInt(1);
-            mValues.writeToParcel(dest, 0);
+            dest.writeString8(mMethod);
         } else {
             dest.writeInt(0);
+        }
+        if (mArg != null) {
+            dest.writeInt(1);
+            dest.writeString8(mArg);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mValues != null) {
+            dest.writeInt(mValues.size());
+            dest.writeArrayMap(mValues);
+        } else {
+            dest.writeInt(-1);
+        }
+        if (mExtras != null) {
+            dest.writeInt(mExtras.size());
+            dest.writeArrayMap(mExtras);
+        } else {
+            dest.writeInt(-1);
         }
         if (mSelection != null) {
             dest.writeInt(1);
-            dest.writeString(mSelection);
+            dest.writeString8(mSelection);
         } else {
             dest.writeInt(0);
         }
-        if (mSelectionArgs != null) {
-            dest.writeInt(1);
-            dest.writeStringArray(mSelectionArgs);
-        } else {
-            dest.writeInt(0);
-        }
+        dest.writeSparseArray(mSelectionArgs);
         if (mExpectedCount != null) {
             dest.writeInt(1);
             dest.writeInt(mExpectedCount);
         } else {
             dest.writeInt(0);
         }
-        if (mValuesBackReferences != null) {
-            dest.writeInt(1);
-            mValuesBackReferences.writeToParcel(dest, 0);
-        } else {
-            dest.writeInt(0);
-        }
-        if (mSelectionArgsBackReferences != null) {
-            dest.writeInt(1);
-            dest.writeInt(mSelectionArgsBackReferences.size());
-            for (Map.Entry<Integer, Integer> entry : mSelectionArgsBackReferences.entrySet()) {
-                dest.writeInt(entry.getKey());
-                dest.writeInt(entry.getValue());
-            }
-        } else {
-            dest.writeInt(0);
-        }
         dest.writeInt(mYieldAllowed ? 1 : 0);
-        dest.writeInt(mFailureAllowed ? 1 : 0);
+        dest.writeInt(mExceptionAllowed ? 1 : 0);
     }
 
     /**
-     * Create a {@link Builder} suitable for building an insert {@link ContentProviderOperation}.
-     * @param uri The {@link Uri} that is the target of the insert.
-     * @return a {@link Builder}
+     * Create a {@link Builder} suitable for building an operation that will
+     * invoke {@link ContentProvider#insert}.
+     *
+     * @param uri The {@link Uri} that is the target of the operation.
      */
-    public static Builder newInsert(Uri uri) {
+    public static @NonNull Builder newInsert(@NonNull Uri uri) {
         return new Builder(TYPE_INSERT, uri);
     }
 
     /**
-     * Create a {@link Builder} suitable for building an update {@link ContentProviderOperation}.
-     * @param uri The {@link Uri} that is the target of the update.
-     * @return a {@link Builder}
+     * Create a {@link Builder} suitable for building an operation that will
+     * invoke {@link ContentProvider#update}.
+     *
+     * @param uri The {@link Uri} that is the target of the operation.
      */
-    public static Builder newUpdate(Uri uri) {
+    public static @NonNull Builder newUpdate(@NonNull Uri uri) {
         return new Builder(TYPE_UPDATE, uri);
     }
 
     /**
-     * Create a {@link Builder} suitable for building a delete {@link ContentProviderOperation}.
-     * @param uri The {@link Uri} that is the target of the delete.
-     * @return a {@link Builder}
+     * Create a {@link Builder} suitable for building an operation that will
+     * invoke {@link ContentProvider#delete}.
+     *
+     * @param uri The {@link Uri} that is the target of the operation.
      */
-    public static Builder newDelete(Uri uri) {
+    public static @NonNull Builder newDelete(@NonNull Uri uri) {
         return new Builder(TYPE_DELETE, uri);
     }
 
@@ -195,14 +209,25 @@ public class ContentProviderOperation implements Parcelable {
      * {@link ContentProviderOperation} to assert a set of values as provided
      * through {@link Builder#withValues(ContentValues)}.
      */
-    public static Builder newAssertQuery(Uri uri) {
+    public static @NonNull Builder newAssertQuery(@NonNull Uri uri) {
         return new Builder(TYPE_ASSERT, uri);
+    }
+
+    /**
+     * Create a {@link Builder} suitable for building an operation that will
+     * invoke {@link ContentProvider#call}.
+     *
+     * @param uri The {@link Uri} that is the target of the operation.
+     */
+    public static @NonNull Builder newCall(@NonNull Uri uri, @Nullable String method,
+            @Nullable String arg) {
+        return new Builder(TYPE_CALL, uri, method, arg);
     }
 
     /**
      * Gets the Uri for the target of the operation.
      */
-    public Uri getUri() {
+    public @NonNull Uri getUri() {
         return mUri;
     }
 
@@ -216,9 +241,13 @@ public class ContentProviderOperation implements Parcelable {
         return mYieldAllowed;
     }
 
-    /** {@hide} */
-    public boolean isFailureAllowed() {
-        return mFailureAllowed;
+    /**
+     * Returns true if this operation allows subsequent operations to continue
+     * even if this operation throws an exception. When true, any encountered
+     * exception is returned via {@link ContentProviderResult#exception}.
+     */
+    public boolean isExceptionAllowed() {
+        return mExceptionAllowed;
     }
 
     /** @hide exposed for unit tests */
@@ -228,7 +257,8 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /**
-     * Returns true if the operation represents an insertion.
+     * Returns true if the operation represents a {@link ContentProvider#insert}
+     * operation.
      *
      * @see #newInsert
      */
@@ -237,7 +267,8 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /**
-     * Returns true if the operation represents a deletion.
+     * Returns true if the operation represents a {@link ContentProvider#delete}
+     * operation.
      *
      * @see #newDelete
      */
@@ -246,7 +277,8 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /**
-     * Returns true if the operation represents an update.
+     * Returns true if the operation represents a {@link ContentProvider#update}
+     * operation.
      *
      * @see #newUpdate
      */
@@ -261,6 +293,16 @@ public class ContentProviderOperation implements Parcelable {
      */
     public boolean isAssertQuery() {
         return mType == TYPE_ASSERT;
+    }
+
+    /**
+     * Returns true if the operation represents a {@link ContentProvider#call}
+     * operation.
+     *
+     * @see #newCall
+     */
+    public boolean isCall() {
+        return mType == TYPE_CALL;
     }
 
     /**
@@ -297,13 +339,14 @@ public class ContentProviderOperation implements Parcelable {
      * @throws OperationApplicationException thrown if either the insert fails or
      * if the number of rows affected didn't match the expected count
      */
-    public ContentProviderResult apply(ContentProvider provider, ContentProviderResult[] backRefs,
-            int numBackRefs) throws OperationApplicationException {
-        if (mFailureAllowed) {
+    public @NonNull ContentProviderResult apply(@NonNull ContentProvider provider,
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs)
+            throws OperationApplicationException {
+        if (mExceptionAllowed) {
             try {
                 return applyInternal(provider, backRefs, numBackRefs);
             } catch (Exception e) {
-                return new ContentProviderResult(e.getMessage());
+                return new ContentProviderResult(e);
             }
         } else {
             return applyInternal(provider, backRefs, numBackRefs);
@@ -313,25 +356,39 @@ public class ContentProviderOperation implements Parcelable {
     private ContentProviderResult applyInternal(ContentProvider provider,
             ContentProviderResult[] backRefs, int numBackRefs)
             throws OperationApplicationException {
-        ContentValues values = resolveValueBackReferences(backRefs, numBackRefs);
-        String[] selectionArgs =
-                resolveSelectionArgsBackReferences(backRefs, numBackRefs);
+        final ContentValues values = resolveValueBackReferences(backRefs, numBackRefs);
+
+        // If the creator requested explicit selection or selectionArgs, it
+        // should take precedence over similar values they defined in extras
+        Bundle extras = resolveExtrasBackReferences(backRefs, numBackRefs);
+        if (mSelection != null) {
+            extras = (extras != null) ? extras : new Bundle();
+            extras.putString(ContentResolver.QUERY_ARG_SQL_SELECTION, mSelection);
+        }
+        if (mSelectionArgs != null) {
+            extras = (extras != null) ? extras : new Bundle();
+            extras.putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS,
+                    resolveSelectionArgsBackReferences(backRefs, numBackRefs));
+        }
 
         if (mType == TYPE_INSERT) {
-            final Uri newUri = provider.insert(mUri, values);
+            final Uri newUri = provider.insert(mUri, values, extras);
             if (newUri != null) {
                 return new ContentProviderResult(newUri);
             } else {
                 throw new OperationApplicationException(
                         "Insert into " + mUri + " returned no result");
             }
+        } else if (mType == TYPE_CALL) {
+            final Bundle res = provider.call(mUri.getAuthority(), mMethod, mArg, extras);
+            return new ContentProviderResult(res);
         }
 
         final int numRows;
         if (mType == TYPE_DELETE) {
-            numRows = provider.delete(mUri, mSelection, selectionArgs);
+            numRows = provider.delete(mUri, extras);
         } else if (mType == TYPE_UPDATE) {
-            numRows = provider.update(mUri, values, mSelection, selectionArgs);
+            numRows = provider.update(mUri, values, extras);
         } else if (mType == TYPE_ASSERT) {
             // Assert that all rows match expected values
             String[] projection =  null;
@@ -343,7 +400,7 @@ public class ContentProviderOperation implements Parcelable {
                 }
                 projection = projectionList.toArray(new String[projectionList.size()]);
             }
-            final Cursor cursor = provider.query(mUri, projection, mSelection, selectionArgs, null);
+            final Cursor cursor = provider.query(mUri, projection, extras, null);
             try {
                 numRows = cursor.getCount();
                 if (projection != null) {
@@ -376,123 +433,217 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /**
-     * The ContentValues back references are represented as a ContentValues object where the
-     * key refers to a column and the value is an index of the back reference whose
-     * valued should be associated with the column.
-     * <p>
-     * This is intended to be a private method but it is exposed for
-     * unit testing purposes
-     * @param backRefs an array of previous results
-     * @param numBackRefs the number of valid previous results in backRefs
-     * @return the ContentValues that should be used in this operation application after
-     * expansion of back references. This can be called if either mValues or mValuesBackReferences
-     * is null
+     * Return the values for this operation after resolving any requested
+     * back-references using the given results.
+     *
+     * @param backRefs the results to use when resolving any back-references
+     * @param numBackRefs the number of results which are valid
      */
-    public ContentValues resolveValueBackReferences(
-            ContentProviderResult[] backRefs, int numBackRefs) {
-        if (mValuesBackReferences == null) {
-            return mValues;
-        }
-        final ContentValues values;
-        if (mValues == null) {
-            values = new ContentValues();
-        } else {
-            values = new ContentValues(mValues);
-        }
-        for (Map.Entry<String, Object> entry : mValuesBackReferences.valueSet()) {
-            String key = entry.getKey();
-            Integer backRefIndex = mValuesBackReferences.getAsInteger(key);
-            if (backRefIndex == null) {
-                Log.e(TAG, this.toString());
-                throw new IllegalArgumentException("values backref " + key + " is not an integer");
+    public @Nullable ContentValues resolveValueBackReferences(
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs) {
+        if (mValues != null) {
+            final ContentValues values = new ContentValues();
+            for (int i = 0; i < mValues.size(); i++) {
+                final Object value = mValues.valueAt(i);
+                final Object resolved;
+                if (value instanceof BackReference) {
+                    resolved = ((BackReference) value).resolve(backRefs, numBackRefs);
+                } else {
+                    resolved = value;
+                }
+                values.putObject(mValues.keyAt(i), resolved);
             }
-            values.put(key, backRefToValue(backRefs, numBackRefs, backRefIndex));
+            return values;
+        } else {
+            return null;
         }
-        return values;
     }
 
     /**
-     * The Selection Arguments back references are represented as a Map of Integer->Integer where
-     * the key is an index into the selection argument array (see {@link Builder#withSelection})
-     * and the value is the index of the previous result that should be used for that selection
-     * argument array slot.
-     * <p>
-     * This is intended to be a private method but it is exposed for
-     * unit testing purposes
-     * @param backRefs an array of previous results
-     * @param numBackRefs the number of valid previous results in backRefs
-     * @return the ContentValues that should be used in this operation application after
-     * expansion of back references. This can be called if either mValues or mValuesBackReferences
-     * is null
+     * Return the extras for this operation after resolving any requested
+     * back-references using the given results.
+     *
+     * @param backRefs the results to use when resolving any back-references
+     * @param numBackRefs the number of results which are valid
      */
-    public String[] resolveSelectionArgsBackReferences(
-            ContentProviderResult[] backRefs, int numBackRefs) {
-        if (mSelectionArgsBackReferences == null) {
-            return mSelectionArgs;
+    public @Nullable Bundle resolveExtrasBackReferences(
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs) {
+        if (mExtras != null) {
+            final Bundle extras = new Bundle();
+            for (int i = 0; i < mExtras.size(); i++) {
+                final Object value = mExtras.valueAt(i);
+                final Object resolved;
+                if (value instanceof BackReference) {
+                    resolved = ((BackReference) value).resolve(backRefs, numBackRefs);
+                } else {
+                    resolved = value;
+                }
+                extras.putObject(mExtras.keyAt(i), resolved);
+            }
+            return extras;
+        } else {
+            return null;
         }
-        String[] newArgs = new String[mSelectionArgs.length];
-        System.arraycopy(mSelectionArgs, 0, newArgs, 0, mSelectionArgs.length);
-        for (Map.Entry<Integer, Integer> selectionArgBackRef
-                : mSelectionArgsBackReferences.entrySet()) {
-            final Integer selectionArgIndex = selectionArgBackRef.getKey();
-            final int backRefIndex = selectionArgBackRef.getValue();
-            newArgs[selectionArgIndex] =
-                    String.valueOf(backRefToValue(backRefs, numBackRefs, backRefIndex));
+    }
+
+    /**
+     * Return the selection arguments for this operation after resolving any
+     * requested back-references using the given results.
+     *
+     * @param backRefs the results to use when resolving any back-references
+     * @param numBackRefs the number of results which are valid
+     */
+    public @Nullable String[] resolveSelectionArgsBackReferences(
+            @NonNull ContentProviderResult[] backRefs, int numBackRefs) {
+        if (mSelectionArgs != null) {
+            int max = -1;
+            for (int i = 0; i < mSelectionArgs.size(); i++) {
+                max = Math.max(max, mSelectionArgs.keyAt(i));
+            }
+
+            final String[] selectionArgs = new String[max + 1];
+            for (int i = 0; i < mSelectionArgs.size(); i++) {
+                final Object value = mSelectionArgs.valueAt(i);
+                final Object resolved;
+                if (value instanceof BackReference) {
+                    resolved = ((BackReference) value).resolve(backRefs, numBackRefs);
+                } else {
+                    resolved = value;
+                }
+                selectionArgs[mSelectionArgs.keyAt(i)] = String.valueOf(resolved);
+            }
+            return selectionArgs;
+        } else {
+            return null;
         }
-        return newArgs;
+    }
+
+    /** {@hide} */
+    public static String typeToString(int type) {
+        switch (type) {
+            case TYPE_INSERT: return "insert";
+            case TYPE_UPDATE: return "update";
+            case TYPE_DELETE: return "delete";
+            case TYPE_ASSERT: return "assert";
+            case TYPE_CALL: return "call";
+            default: return Integer.toString(type);
+        }
     }
 
     @Override
     public String toString() {
-        return "mType: " + mType + ", mUri: " + mUri +
-                ", mSelection: " + mSelection +
-                ", mExpectedCount: " + mExpectedCount +
-                ", mYieldAllowed: " + mYieldAllowed +
-                ", mValues: " + mValues +
-                ", mValuesBackReferences: " + mValuesBackReferences +
-                ", mSelectionArgsBackReferences: " + mSelectionArgsBackReferences;
+        final StringBuilder sb = new StringBuilder("ContentProviderOperation(");
+        sb.append("type=" + typeToString(mType) + " ");
+        if (mUri != null) {
+            sb.append("uri=" + mUri + " ");
+        }
+        if (mValues != null) {
+            sb.append("values=" + mValues + " ");
+        }
+        if (mSelection != null) {
+            sb.append("selection=" + mSelection + " ");
+        }
+        if (mSelectionArgs != null) {
+            sb.append("selectionArgs=" + mSelectionArgs + " ");
+        }
+        if (mExpectedCount != null) {
+            sb.append("expectedCount=" + mExpectedCount + " ");
+        }
+        if (mYieldAllowed) {
+            sb.append("yieldAllowed ");
+        }
+        if (mExceptionAllowed) {
+            sb.append("exceptionAllowed ");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        return sb.toString();
     }
 
-    /**
-     * Return the string representation of the requested back reference.
-     * @param backRefs an array of results
-     * @param numBackRefs the number of items in the backRefs array that are valid
-     * @param backRefIndex which backRef to be used
-     * @throws ArrayIndexOutOfBoundsException thrown if the backRefIndex is larger than
-     * the numBackRefs
-     * @return the string representation of the requested back reference.
-     */
-    private long backRefToValue(ContentProviderResult[] backRefs, int numBackRefs,
-            Integer backRefIndex) {
-        if (backRefIndex >= numBackRefs) {
-            Log.e(TAG, this.toString());
-            throw new ArrayIndexOutOfBoundsException("asked for back ref " + backRefIndex
-                    + " but there are only " + numBackRefs + " back refs");
-        }
-        ContentProviderResult backRef = backRefs[backRefIndex];
-        long backRefValue;
-        if (backRef.uri != null) {
-            backRefValue = ContentUris.parseId(backRef.uri);
-        } else {
-            backRefValue = backRef.count;
-        }
-        return backRefValue;
-    }
-
+    @Override
     public int describeContents() {
         return 0;
     }
 
     public static final @android.annotation.NonNull Creator<ContentProviderOperation> CREATOR =
             new Creator<ContentProviderOperation>() {
+        @Override
         public ContentProviderOperation createFromParcel(Parcel source) {
             return new ContentProviderOperation(source);
         }
 
+        @Override
         public ContentProviderOperation[] newArray(int size) {
             return new ContentProviderOperation[size];
         }
     };
+
+    /** {@hide} */
+    public static class BackReference implements Parcelable {
+        private final int fromIndex;
+        private final String fromKey;
+
+        private BackReference(int fromIndex, String fromKey) {
+            this.fromIndex = fromIndex;
+            this.fromKey = fromKey;
+        }
+
+        public BackReference(Parcel src) {
+            this.fromIndex = src.readInt();
+            if (src.readInt() != 0) {
+                this.fromKey = src.readString8();
+            } else {
+                this.fromKey = null;
+            }
+        }
+
+        public Object resolve(ContentProviderResult[] backRefs, int numBackRefs) {
+            if (fromIndex >= numBackRefs) {
+                Log.e(TAG, this.toString());
+                throw new ArrayIndexOutOfBoundsException("asked for back ref " + fromIndex
+                        + " but there are only " + numBackRefs + " back refs");
+            }
+            ContentProviderResult backRef = backRefs[fromIndex];
+            Object backRefValue;
+            if (backRef.extras != null) {
+                backRefValue = backRef.extras.get(fromKey);
+            } else if (backRef.uri != null) {
+                backRefValue = ContentUris.parseId(backRef.uri);
+            } else {
+                backRefValue = (long) backRef.count;
+            }
+            return backRefValue;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(fromIndex);
+            if (fromKey != null) {
+                dest.writeInt(1);
+                dest.writeString8(fromKey);
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final @android.annotation.NonNull Creator<BackReference> CREATOR =
+                new Creator<BackReference>() {
+            @Override
+            public BackReference createFromParcel(Parcel source) {
+                return new BackReference(source);
+            }
+
+            @Override
+            public BackReference[] newArray(int size) {
+                return new BackReference[size];
+            }
+        };
+    }
 
     /**
      * Used to add parameters to a {@link ContentProviderOperation}. The {@link Builder} is
@@ -507,35 +658,36 @@ public class ContentProviderOperation implements Parcelable {
     public static class Builder {
         private final int mType;
         private final Uri mUri;
+        private final String mMethod;
+        private final String mArg;
+        private ArrayMap<String, Object> mValues;
+        private ArrayMap<String, Object> mExtras;
         private String mSelection;
-        private String[] mSelectionArgs;
-        private ContentValues mValues;
+        private SparseArray<Object> mSelectionArgs;
         private Integer mExpectedCount;
-        private ContentValues mValuesBackReferences;
-        private Map<Integer, Integer> mSelectionArgsBackReferences;
         private boolean mYieldAllowed;
-        private boolean mFailureAllowed;
+        private boolean mExceptionAllowed;
 
-        /** Create a {@link Builder} of a given type. The uri must not be null. */
         private Builder(int type, Uri uri) {
-            if (uri == null) {
-                throw new IllegalArgumentException("uri must not be null");
-            }
+            this(type, uri, null, null);
+        }
+
+        private Builder(int type, Uri uri, String method, String arg) {
             mType = type;
-            mUri = uri;
+            mUri = Objects.requireNonNull(uri);
+            mMethod = method;
+            mArg = arg;
         }
 
         /** Create a ContentProviderOperation from this {@link Builder}. */
-        public ContentProviderOperation build() {
+        public @NonNull ContentProviderOperation build() {
             if (mType == TYPE_UPDATE) {
-                if ((mValues == null || mValues.isEmpty())
-                      && (mValuesBackReferences == null || mValuesBackReferences.isEmpty())) {
+                if ((mValues == null || mValues.isEmpty())) {
                     throw new IllegalArgumentException("Empty values");
                 }
             }
             if (mType == TYPE_ASSERT) {
                 if ((mValues == null || mValues.isEmpty())
-                      && (mValuesBackReferences == null || mValuesBackReferences.isEmpty())
                         && (mExpectedCount == null)) {
                     throw new IllegalArgumentException("Empty values");
                 }
@@ -543,142 +695,264 @@ public class ContentProviderOperation implements Parcelable {
             return new ContentProviderOperation(this);
         }
 
-        /**
-         * Add a {@link ContentValues} of back references. The key is the name of the column
-         * and the value is an integer that is the index of the previous result whose
-         * value should be used for the column. The value is added as a {@link String}.
-         * A column value from the back references takes precedence over a value specified in
-         * {@link #withValues}.
-         * This can only be used with builders of type insert, update, or assert.
-         * @return this builder, to allow for chaining.
-         */
-        public Builder withValueBackReferences(ContentValues backReferences) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
-                throw new IllegalArgumentException(
-                        "only inserts, updates, and asserts can have value back-references");
-            }
-            mValuesBackReferences = backReferences;
-            return this;
-        }
-
-        /**
-         * Add a ContentValues back reference.
-         * A column value from the back references takes precedence over a value specified in
-         * {@link #withValues}.
-         * This can only be used with builders of type insert, update, or assert.
-         * @return this builder, to allow for chaining.
-         */
-        public Builder withValueBackReference(String key, int previousResult) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
-                throw new IllegalArgumentException(
-                        "only inserts, updates, and asserts can have value back-references");
-            }
-            if (mValuesBackReferences == null) {
-                mValuesBackReferences = new ContentValues();
-            }
-            mValuesBackReferences.put(key, previousResult);
-            return this;
-        }
-
-        /**
-         * Add a back references as a selection arg. Any value at that index of the selection arg
-         * that was specified by {@link #withSelection} will be overwritten.
-         * This can only be used with builders of type update, delete, or assert.
-         * @return this builder, to allow for chaining.
-         */
-        public Builder withSelectionBackReference(int selectionArgIndex, int previousResult) {
-            if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
-                throw new IllegalArgumentException("only updates, deletes, and asserts "
-                        + "can have selection back-references");
-            }
-            if (mSelectionArgsBackReferences == null) {
-                mSelectionArgsBackReferences = new HashMap<Integer, Integer>();
-            }
-            mSelectionArgsBackReferences.put(selectionArgIndex, previousResult);
-            return this;
-        }
-
-        /**
-         * The ContentValues to use. This may be null. These values may be overwritten by
-         * the corresponding value specified by {@link #withValueBackReference} or by
-         * future calls to {@link #withValues} or {@link #withValue}.
-         * This can only be used with builders of type insert, update, or assert.
-         * @return this builder, to allow for chaining.
-         */
-        public Builder withValues(ContentValues values) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
-                throw new IllegalArgumentException(
-                        "only inserts, updates, and asserts can have values");
-            }
+        private void ensureValues() {
             if (mValues == null) {
-                mValues = new ContentValues();
+                mValues = new ArrayMap<>();
             }
-            mValues.putAll(values);
+        }
+
+        private void ensureExtras() {
+            if (mExtras == null) {
+                mExtras = new ArrayMap<>();
+            }
+        }
+
+        private void ensureSelectionArgs() {
+            if (mSelectionArgs == null) {
+                mSelectionArgs = new SparseArray<>();
+            }
+        }
+
+        private void setValue(@NonNull String key, @NonNull Object value) {
+            ensureValues();
+            final boolean oldReference = mValues.get(key) instanceof BackReference;
+            final boolean newReference = value instanceof BackReference;
+            if (!oldReference || newReference) {
+                mValues.put(key, value);
+            }
+        }
+
+        private void setExtra(@NonNull String key, @NonNull Object value) {
+            ensureExtras();
+            final boolean oldReference = mExtras.get(key) instanceof BackReference;
+            final boolean newReference = value instanceof BackReference;
+            if (!oldReference || newReference) {
+                mExtras.put(key, value);
+            }
+        }
+
+        private void setSelectionArg(int index, @NonNull Object value) {
+            ensureSelectionArgs();
+            final boolean oldReference = mSelectionArgs.get(index) instanceof BackReference;
+            final boolean newReference = value instanceof BackReference;
+            if (!oldReference || newReference) {
+                mSelectionArgs.put(index, value);
+            }
+        }
+
+        /**
+         * Configure the values to use for this operation. This method will
+         * replace any previously defined values for the contained keys, but it
+         * will not replace any back-reference requests.
+         * <p>
+         * Any value may be dynamically overwritten using the result of a
+         * previous operation by using methods such as
+         * {@link #withValueBackReference(String, int)}.
+         */
+        public @NonNull Builder withValues(@NonNull ContentValues values) {
+            assertValuesAllowed();
+            ensureValues();
+            final ArrayMap<String, Object> rawValues = values.getValues();
+            for (int i = 0; i < rawValues.size(); i++) {
+                setValue(rawValues.keyAt(i), rawValues.valueAt(i));
+            }
             return this;
         }
 
         /**
-         * A value to insert or update. This value may be overwritten by
-         * the corresponding value specified by {@link #withValueBackReference}.
-         * This can only be used with builders of type insert, update, or assert.
-         * @param key the name of this value
-         * @param value the value itself. the type must be acceptable for insertion by
-         * {@link ContentValues#put}
-         * @return this builder, to allow for chaining.
+         * Configure the given value to use for this operation. This method will
+         * replace any previously defined value for this key.
+         *
+         * @param key the key indicating which value to configure
          */
-        public Builder withValue(String key, Object value) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
-                throw new IllegalArgumentException("only inserts and updates can have values");
-            }
-            if (mValues == null) {
-                mValues = new ContentValues();
-            }
-            if (value == null) {
-                mValues.putNull(key);
-            } else if (value instanceof String) {
-                mValues.put(key, (String) value);
-            } else if (value instanceof Byte) {
-                mValues.put(key, (Byte) value);
-            } else if (value instanceof Short) {
-                mValues.put(key, (Short) value);
-            } else if (value instanceof Integer) {
-                mValues.put(key, (Integer) value);
-            } else if (value instanceof Long) {
-                mValues.put(key, (Long) value);
-            } else if (value instanceof Float) {
-                mValues.put(key, (Float) value);
-            } else if (value instanceof Double) {
-                mValues.put(key, (Double) value);
-            } else if (value instanceof Boolean) {
-                mValues.put(key, (Boolean) value);
-            } else if (value instanceof byte[]) {
-                mValues.put(key, (byte[]) value);
-            } else {
+        public @NonNull Builder withValue(@NonNull String key, @Nullable Object value) {
+            assertValuesAllowed();
+            if (!ContentValues.isSupportedValue(value)) {
                 throw new IllegalArgumentException("bad value type: " + value.getClass().getName());
             }
+            setValue(key, value);
             return this;
         }
 
         /**
-         * The selection and arguments to use. An occurrence of '?' in the selection will be
-         * replaced with the corresponding occurrence of the selection argument. Any of the
-         * selection arguments may be overwritten by a selection argument back reference as
-         * specified by {@link #withSelectionBackReference}.
-         * This can only be used with builders of type update, delete, or assert.
-         * @return this builder, to allow for chaining.
+         * Configure the given values to be dynamically overwritten using the
+         * result of a previous operation. This method will replace any
+         * previously defined values for these keys.
+         *
+         * @param backReferences set of values where the key indicates which
+         *            value to configure and the value the index indicating
+         *            which historical {@link ContentProviderResult} should
+         *            overwrite the value
          */
-        public Builder withSelection(String selection, String[] selectionArgs) {
-            if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
-                throw new IllegalArgumentException(
-                        "only updates, deletes, and asserts can have selections");
+        public @NonNull Builder withValueBackReferences(@NonNull ContentValues backReferences) {
+            assertValuesAllowed();
+            final ArrayMap<String, Object> rawValues = backReferences.getValues();
+            for (int i = 0; i < rawValues.size(); i++) {
+                setValue(rawValues.keyAt(i),
+                        new BackReference((int) rawValues.valueAt(i), null));
             }
+            return this;
+        }
+
+        /**
+         * Configure the given value to be dynamically overwritten using the
+         * result of a previous operation. This method will replace any
+         * previously defined value for this key.
+         *
+         * @param key the key indicating which value to configure
+         * @param fromIndex the index indicating which historical
+         *            {@link ContentProviderResult} should overwrite the value
+         */
+        public @NonNull Builder withValueBackReference(@NonNull String key, int fromIndex) {
+            assertValuesAllowed();
+            setValue(key, new BackReference(fromIndex, null));
+            return this;
+        }
+
+        /**
+         * Configure the given value to be dynamically overwritten using the
+         * result of a previous operation. This method will replace any
+         * previously defined value for this key.
+         *
+         * @param key the key indicating which value to configure
+         * @param fromIndex the index indicating which historical
+         *            {@link ContentProviderResult} should overwrite the value
+         * @param fromKey the key of indicating which
+         *            {@link ContentProviderResult#extras} value should
+         *            overwrite the value
+         */
+        public @NonNull Builder withValueBackReference(@NonNull String key, int fromIndex,
+                @NonNull String fromKey) {
+            assertValuesAllowed();
+            setValue(key, new BackReference(fromIndex, fromKey));
+            return this;
+        }
+
+        /**
+         * Configure the extras to use for this operation. This method will
+         * replace any previously defined values for the contained keys, but it
+         * will not replace any back-reference requests.
+         * <p>
+         * Any value may be dynamically overwritten using the result of a
+         * previous operation by using methods such as
+         * {@link #withExtraBackReference(String, int)}.
+         */
+        public @NonNull Builder withExtras(@NonNull Bundle extras) {
+            assertExtrasAllowed();
+            ensureExtras();
+            for (String key : extras.keySet()) {
+                setExtra(key, extras.get(key));
+            }
+            return this;
+        }
+
+        /**
+         * Configure the given extra to use for this operation. This method will
+         * replace any previously defined extras for this key.
+         *
+         * @param key the key indicating which extra to configure
+         */
+        public @NonNull Builder withExtra(@NonNull String key, @Nullable Object value) {
+            assertExtrasAllowed();
+            setExtra(key, value);
+            return this;
+        }
+
+        /**
+         * Configure the given extra to be dynamically overwritten using the
+         * result of a previous operation. This method will replace any
+         * previously defined extras for this key.
+         *
+         * @param key the key indicating which extra to configure
+         * @param fromIndex the index indicating which historical
+         *            {@link ContentProviderResult} should overwrite the extra
+         */
+        public @NonNull Builder withExtraBackReference(@NonNull String key, int fromIndex) {
+            assertExtrasAllowed();
+            setExtra(key, new BackReference(fromIndex, null));
+            return this;
+        }
+
+        /**
+         * Configure the given extra to be dynamically overwritten using the
+         * result of a previous operation. This method will replace any
+         * previously defined extras for this key.
+         *
+         * @param key the key indicating which extra to configure
+         * @param fromIndex the index indicating which historical
+         *            {@link ContentProviderResult} should overwrite the extra
+         * @param fromKey the key of indicating which
+         *            {@link ContentProviderResult#extras} value should
+         *            overwrite the extra
+         */
+        public @NonNull Builder withExtraBackReference(@NonNull String key, int fromIndex,
+                @NonNull String fromKey) {
+            assertExtrasAllowed();
+            setExtra(key, new BackReference(fromIndex, fromKey));
+            return this;
+        }
+
+        /**
+         * Configure the selection and selection arguments to use for this
+         * operation. This method will replace any previously defined selection
+         * and selection arguments, but it will not replace any back-reference
+         * requests.
+         * <p>
+         * An occurrence of {@code ?} in the selection will be replaced with the
+         * corresponding selection argument when the operation is executed.
+         * <p>
+         * Any selection argument may be dynamically overwritten using the
+         * result of a previous operation by using methods such as
+         * {@link #withSelectionBackReference(int, int)}.
+         */
+        public @NonNull Builder withSelection(@Nullable String selection,
+                @Nullable String[] selectionArgs) {
+            assertSelectionAllowed();
             mSelection = selection;
-            if (selectionArgs == null) {
-                mSelectionArgs = null;
-            } else {
-                mSelectionArgs = new String[selectionArgs.length];
-                System.arraycopy(selectionArgs, 0, mSelectionArgs, 0, selectionArgs.length);
+            if (selectionArgs != null) {
+                ensureSelectionArgs();
+                for (int i = 0; i < selectionArgs.length; i++) {
+                    setSelectionArg(i, selectionArgs[i]);
+                }
             }
+            return this;
+        }
+
+        /**
+         * Configure the given selection argument to be dynamically overwritten
+         * using the result of a previous operation. This method will replace
+         * any previously defined selection argument at this index.
+         *
+         * @param index the index indicating which selection argument to
+         *            configure
+         * @param fromIndex the index indicating which historical
+         *            {@link ContentProviderResult} should overwrite the
+         *            selection argument
+         */
+        public @NonNull Builder withSelectionBackReference(int index, int fromIndex) {
+            assertSelectionAllowed();
+            setSelectionArg(index, new BackReference(fromIndex, null));
+            return this;
+        }
+
+        /**
+         * Configure the given selection argument to be dynamically overwritten
+         * using the result of a previous operation. This method will replace
+         * any previously defined selection argument at this index.
+         *
+         * @param index the index indicating which selection argument to
+         *            configure
+         * @param fromIndex the index indicating which historical
+         *            {@link ContentProviderResult} should overwrite the
+         *            selection argument
+         * @param fromKey the key of indicating which
+         *            {@link ContentProviderResult#extras} value should
+         *            overwrite the selection argument
+         */
+        public @NonNull Builder withSelectionBackReference(int index, int fromIndex,
+                @NonNull String fromKey) {
+            assertSelectionAllowed();
+            setSelectionArg(index, new BackReference(fromIndex, fromKey));
             return this;
         }
 
@@ -688,7 +962,7 @@ public class ContentProviderOperation implements Parcelable {
          * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
-        public Builder withExpectedCount(int count) {
+        public @NonNull Builder withExpectedCount(int count) {
             if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
                         "only updates, deletes, and asserts can have expected counts");
@@ -703,15 +977,63 @@ public class ContentProviderOperation implements Parcelable {
          * @return this builder, to allow for chaining.
          * @see android.database.sqlite.SQLiteDatabase#yieldIfContendedSafely()
          */
-        public Builder withYieldAllowed(boolean yieldAllowed) {
+        public @NonNull Builder withYieldAllowed(boolean yieldAllowed) {
             mYieldAllowed = yieldAllowed;
             return this;
         }
 
-        /** {@hide} */
-        public Builder withFailureAllowed(boolean failureAllowed) {
-            mFailureAllowed = failureAllowed;
+        /**
+         * If set to true, this operation allows subsequent operations to
+         * continue even if this operation throws an exception. When true, any
+         * encountered exception is returned via
+         * {@link ContentProviderResult#exception}.
+         */
+        public @NonNull Builder withExceptionAllowed(boolean exceptionAllowed) {
+            mExceptionAllowed = exceptionAllowed;
             return this;
+        }
+
+        /** {@hide} */
+        public @NonNull Builder withFailureAllowed(boolean failureAllowed) {
+            return withExceptionAllowed(failureAllowed);
+        }
+
+        private void assertValuesAllowed() {
+            switch (mType) {
+                case TYPE_INSERT:
+                case TYPE_UPDATE:
+                case TYPE_ASSERT:
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Values not supported for " + typeToString(mType));
+            }
+        }
+
+        private void assertSelectionAllowed() {
+            switch (mType) {
+                case TYPE_UPDATE:
+                case TYPE_DELETE:
+                case TYPE_ASSERT:
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Selection not supported for " + typeToString(mType));
+            }
+        }
+
+        private void assertExtrasAllowed() {
+            switch (mType) {
+                case TYPE_INSERT:
+                case TYPE_UPDATE:
+                case TYPE_DELETE:
+                case TYPE_ASSERT:
+                case TYPE_CALL:
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Extras not supported for " + typeToString(mType));
+            }
         }
     }
 }

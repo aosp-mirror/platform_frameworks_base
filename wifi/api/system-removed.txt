@@ -1,0 +1,16 @@
+// Signature format: 2.0
+package android.net.wifi {
+
+  @Deprecated public class BatchedScanResult implements android.os.Parcelable {
+    ctor public BatchedScanResult();
+    ctor public BatchedScanResult(android.net.wifi.BatchedScanResult);
+    field public final java.util.List<android.net.wifi.ScanResult> scanResults;
+    field public boolean truncated;
+  }
+
+  public final class ScanResult implements android.os.Parcelable {
+    field public boolean untrusted;
+  }
+
+}
+

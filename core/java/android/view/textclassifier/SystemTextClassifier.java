@@ -18,7 +18,6 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.os.Bundle;
@@ -33,39 +32,50 @@ import android.service.textclassifier.TextClassifierService;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Proxy to the system's default TextClassifier.
+ * proxy to the request to TextClassifierService via the TextClassificationManagerService.
+ *
  * @hide
  */
 @VisibleForTesting(visibility = Visibility.PACKAGE)
 public final class SystemTextClassifier implements TextClassifier {
 
-    private static final String LOG_TAG = "SystemTextClassifier";
+    private static final String LOG_TAG = TextClassifier.LOG_TAG;
 
     private final ITextClassifierService mManagerService;
     private final TextClassificationConstants mSettings;
     private final TextClassifier mFallback;
-    private final String mPackageName;
-    // NOTE: Always set this before sending a request to the manager service otherwise the manager
-    // service will throw a remote exception.
-    @UserIdInt
-    private final int mUserId;
     private TextClassificationSessionId mSessionId;
+    // NOTE: Always set this before sending a request to the manager service otherwise the
+    // manager service will throw a remote exception.
+    @NonNull
+    private final SystemTextClassifierMetadata mSystemTcMetadata;
 
-    public SystemTextClassifier(Context context, TextClassificationConstants settings)
-                throws ServiceManager.ServiceNotFoundException {
+    /**
+     * Constructor of {@link SystemTextClassifier}
+     *
+     * @param context the context of the request.
+     * @param settings TextClassifier specific settings.
+     * @param useDefault whether to use the default text classifier to handle this request
+     */
+    public SystemTextClassifier(
+            Context context,
+            TextClassificationConstants settings,
+            boolean useDefault) throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
-        mSettings = Preconditions.checkNotNull(settings);
-        mFallback = context.getSystemService(TextClassificationManager.class)
-                .getTextClassifier(TextClassifier.LOCAL);
-        mPackageName = Preconditions.checkNotNull(context.getOpPackageName());
-        mUserId = context.getUserId();
+        mSettings = Objects.requireNonNull(settings);
+        mFallback = TextClassifier.NO_OP;
+        // NOTE: Always set this before sending a request to the manager service otherwise the
+        // manager service will throw a remote exception.
+        mSystemTcMetadata = new SystemTextClassifierMetadata(
+                Objects.requireNonNull(context.getOpPackageName()), context.getUserId(),
+                useDefault);
     }
 
     /**
@@ -74,11 +84,10 @@ public final class SystemTextClassifier implements TextClassifier {
     @Override
     @WorkerThread
     public TextSelection suggestSelection(TextSelection.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
-            request.setCallingPackageName(mPackageName);
-            request.setUserId(mUserId);
+            request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextSelection> callback =
                     new BlockingCallback<>("textselection");
             mManagerService.onSuggestSelection(mSessionId, request, callback);
@@ -98,11 +107,10 @@ public final class SystemTextClassifier implements TextClassifier {
     @Override
     @WorkerThread
     public TextClassification classifyText(TextClassification.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
         try {
-            request.setCallingPackageName(mPackageName);
-            request.setUserId(mUserId);
+            request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextClassification> callback =
                     new BlockingCallback<>("textclassification");
             mManagerService.onClassifyText(mSessionId, request, callback);
@@ -122,16 +130,17 @@ public final class SystemTextClassifier implements TextClassifier {
     @Override
     @WorkerThread
     public TextLinks generateLinks(@NonNull TextLinks.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
-
+        if (!Utils.checkTextLength(request.getText(), getMaxGenerateLinksTextLength())) {
+            return mFallback.generateLinks(request);
+        }
         if (!mSettings.isSmartLinkifyEnabled() && request.isLegacyFallback()) {
             return Utils.generateLegacyLinks(request);
         }
 
         try {
-            request.setCallingPackageName(mPackageName);
-            request.setUserId(mUserId);
+            request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextLinks> callback =
                     new BlockingCallback<>("textlinks");
             mManagerService.onGenerateLinks(mSessionId, request, callback);
@@ -147,11 +156,11 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public void onSelectionEvent(SelectionEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         Utils.checkMainThread();
 
         try {
-            event.setUserId(mUserId);
+            event.setSystemTextClassifierMetadata(mSystemTcMetadata);
             mManagerService.onSelectionEvent(mSessionId, event);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error reporting selection event.", e);
@@ -160,15 +169,15 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public void onTextClassifierEvent(@NonNull TextClassifierEvent event) {
-        Preconditions.checkNotNull(event);
+        Objects.requireNonNull(event);
         Utils.checkMainThread();
 
         try {
-            final TextClassificationContext tcContext = event.getEventContext() == null
-                    ? new TextClassificationContext.Builder(mPackageName, WIDGET_TYPE_UNKNOWN)
-                            .build()
-                    : event.getEventContext();
-            tcContext.setUserId(mUserId);
+            final TextClassificationContext tcContext =
+                    event.getEventContext() == null ? new TextClassificationContext.Builder(
+                            mSystemTcMetadata.getCallingPackageName(), WIDGET_TYPE_UNKNOWN).build()
+                            : event.getEventContext();
+            tcContext.setSystemTextClassifierMetadata(mSystemTcMetadata);
             event.setEventContext(tcContext);
             mManagerService.onTextClassifierEvent(mSessionId, event);
         } catch (RemoteException e) {
@@ -178,12 +187,11 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public TextLanguage detectLanguage(TextLanguage.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
 
         try {
-            request.setCallingPackageName(mPackageName);
-            request.setUserId(mUserId);
+            request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<TextLanguage> callback =
                     new BlockingCallback<>("textlanguage");
             mManagerService.onDetectLanguage(mSessionId, request, callback);
@@ -199,12 +207,11 @@ public final class SystemTextClassifier implements TextClassifier {
 
     @Override
     public ConversationActions suggestConversationActions(ConversationActions.Request request) {
-        Preconditions.checkNotNull(request);
+        Objects.requireNonNull(request);
         Utils.checkMainThread();
 
         try {
-            request.setCallingPackageName(mPackageName);
-            request.setUserId(mUserId);
+            request.setSystemTextClassifierMetadata(mSystemTcMetadata);
             final BlockingCallback<ConversationActions> callback =
                     new BlockingCallback<>("conversation-actions");
             mManagerService.onSuggestConversationActions(mSessionId, request, callback);
@@ -225,7 +232,7 @@ public final class SystemTextClassifier implements TextClassifier {
     @WorkerThread
     public int getMaxGenerateLinksTextLength() {
         // TODO: retrieve this from the bound service.
-        return mFallback.getMaxGenerateLinksTextLength();
+        return mSettings.getGenerateLinksMaxTextLength();
     }
 
     @Override
@@ -244,9 +251,8 @@ public final class SystemTextClassifier implements TextClassifier {
         printWriter.println("SystemTextClassifier:");
         printWriter.increaseIndent();
         printWriter.printPair("mFallback", mFallback);
-        printWriter.printPair("mPackageName", mPackageName);
         printWriter.printPair("mSessionId", mSessionId);
-        printWriter.printPair("mUserId", mUserId);
+        printWriter.printPair("mSystemTcMetadata",  mSystemTcMetadata);
         printWriter.decreaseIndent();
         printWriter.println();
     }
@@ -260,9 +266,9 @@ public final class SystemTextClassifier implements TextClassifier {
     void initializeRemoteSession(
             @NonNull TextClassificationContext classificationContext,
             @NonNull TextClassificationSessionId sessionId) {
-        mSessionId = Preconditions.checkNotNull(sessionId);
+        mSessionId = Objects.requireNonNull(sessionId);
         try {
-            classificationContext.setUserId(mUserId);
+            classificationContext.setSystemTextClassifierMetadata(mSystemTcMetadata);
             mManagerService.onCreateTextClassificationSession(classificationContext, mSessionId);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error starting a new classification session.", e);
@@ -309,7 +315,7 @@ public final class SystemTextClassifier implements TextClassifier {
         }
 
         public void onFailure() {
-            Log.e(LOG_TAG, "Request failed.", null);
+            Log.e(LOG_TAG, "Request failed at " + mName, null);
             mLatch.countDown();
         }
 

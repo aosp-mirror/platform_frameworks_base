@@ -8,8 +8,12 @@ android_app {
     libs: [
         "telephony-common",
         "ims-common",
+        "unsupportedappusage",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "SettingsLibDisplayDensityUtils",
+    ],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
@@ -21,11 +25,25 @@ android_test {
     // because this test is not an instrumentation test. (because the target runs in the system process.)
     srcs: [
         "test/**/*.java",
+        "src/android/provider/settings/backup/*",
+        "src/android/provider/settings/validators/*",
+        "src/com/android/providers/settings/SettingsBackupAgent.java",
         "src/com/android/providers/settings/SettingsState.java",
         "src/com/android/providers/settings/SettingsHelper.java",
+        "src/com/android/providers/settings/WifiSoftApConfigChangedNotifier.java",
     ],
-    static_libs: ["androidx.test.rules"],
-    libs: ["android.test.base"],
+    static_libs: [
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "SettingsLibDisplayDensityUtils",
+        "platform-test-annotations",
+        "truth-prebuilt",
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.mock",
+        "unsupportedappusage",
+    ],
     resource_dirs: ["res"],
     aaptflags: [
         "--auto-add-overlay",

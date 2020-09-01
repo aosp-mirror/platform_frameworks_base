@@ -27,8 +27,8 @@ public class SparseSetArray<T> {
     }
 
     /**
-     * Add a value at index n.
-     * @return FALSE when the value already existed at the given index, TRUE otherwise.
+     * Add a value for key n.
+     * @return FALSE when the value already existed for the given key, TRUE otherwise.
      */
     public boolean add(int n, T value) {
         ArraySet<T> set = mData.get(n);
@@ -37,10 +37,10 @@ public class SparseSetArray<T> {
             mData.put(n, set);
         }
         if (set.contains(value)) {
-            return true;
+            return false;
         }
         set.add(value);
-        return false;
+        return true;
     }
 
     /**
@@ -51,7 +51,7 @@ public class SparseSetArray<T> {
     }
 
     /**
-     * @return whether a value exists at index n.
+     * @return whether the value exists for the key n.
      */
     public boolean contains(int n, T value) {
         final ArraySet<T> set = mData.get(n);
@@ -62,15 +62,15 @@ public class SparseSetArray<T> {
     }
 
     /**
-     * @return the set of items at index n
+     * @return the set of items of key n
      */
     public ArraySet<T> get(int n) {
         return mData.get(n);
     }
 
     /**
-     * Remove a value from index n.
-     * @return TRUE when the value existed at the given index and removed, FALSE otherwise.
+     * Remove a value for key n.
+     * @return TRUE when the value existed for the given key and removed, FALSE otherwise.
      */
     public boolean remove(int n, T value) {
         final ArraySet<T> set = mData.get(n);
@@ -85,7 +85,7 @@ public class SparseSetArray<T> {
     }
 
     /**
-     * Remove all values from index n.
+     * Remove all values for key n.
      */
     public void remove(int n) {
         mData.remove(n);

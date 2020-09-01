@@ -14,227 +14,59 @@
  * limitations under the License.
  */
 
-#ifndef SOUNDPOOL_H_
-#define SOUNDPOOL_H_
+#pragma once
 
-#include <utils/threads.h>
-#include <utils/List.h>
-#include <utils/Vector.h>
-#include <utils/KeyedVector.h>
-#include <media/AudioTrack.h>
-#include <binder/MemoryHeapBase.h>
-#include <binder/MemoryBase.h>
+#include "SoundManager.h"
+#include "StreamManager.h"
 
 namespace android {
 
-static const int IDLE_PRIORITY = -1;
-
-// forward declarations
-class SoundEvent;
-class SoundPoolThread;
-class SoundPool;
-
-// for queued events
-class SoundPoolEvent {
-public:
-    explicit SoundPoolEvent(int msg, int arg1=0, int arg2=0) :
-        mMsg(msg), mArg1(arg1), mArg2(arg2) {}
-    int         mMsg;
-    int         mArg1;
-    int         mArg2;
-    enum MessageType { INVALID, SAMPLE_LOADED };
-};
-
-// callback function prototype
-typedef void SoundPoolCallback(SoundPoolEvent event, SoundPool* soundPool, void* user);
-
-// tracks samples used by application
-class Sample  : public RefBase {
-public:
-    enum sample_state { UNLOADED, LOADING, READY, UNLOADING };
-    Sample(int sampleID, int fd, int64_t offset, int64_t length);
-    ~Sample();
-    int sampleID() { return mSampleID; }
-    int numChannels() { return mNumChannels; }
-    int sampleRate() { return mSampleRate; }
-    audio_format_t format() { return mFormat; }
-    audio_channel_mask_t channelMask() { return mChannelMask; }
-    size_t size() { return mSize; }
-    int state() { return mState; }
-    uint8_t* data() { return static_cast<uint8_t*>(mData->pointer()); }
-    status_t doLoad();
-    void startLoad() { mState = LOADING; }
-    sp<IMemory> getIMemory() { return mData; }
-
-private:
-    void init();
-
-    size_t               mSize;
-    volatile int32_t     mRefCount;
-    uint16_t             mSampleID;
-    uint16_t             mSampleRate;
-    uint8_t              mState;
-    uint8_t              mNumChannels;
-    audio_format_t       mFormat;
-    audio_channel_mask_t mChannelMask;
-    int                  mFd;
-    int64_t              mOffset;
-    int64_t              mLength;
-    sp<IMemory>          mData;
-    sp<MemoryHeapBase>   mHeap;
-};
-
-// stores pending events for stolen channels
-class SoundEvent
-{
-public:
-    SoundEvent() : mChannelID(0), mLeftVolume(0), mRightVolume(0),
-            mPriority(IDLE_PRIORITY), mLoop(0), mRate(0) {}
-    void set(const sp<Sample>& sample, int channelID, float leftVolume,
-            float rightVolume, int priority, int loop, float rate);
-    sp<Sample>      sample() { return mSample; }
-    int             channelID() { return mChannelID; }
-    float           leftVolume() { return mLeftVolume; }
-    float           rightVolume() { return mRightVolume; }
-    int             priority() { return mPriority; }
-    int             loop() { return mLoop; }
-    float           rate() { return mRate; }
-    void            clear() { mChannelID = 0; mSample.clear(); }
-
-protected:
-    sp<Sample>      mSample;
-    int             mChannelID;
-    float           mLeftVolume;
-    float           mRightVolume;
-    int             mPriority;
-    int             mLoop;
-    float           mRate;
-};
-
-// for channels aka AudioTracks
-class SoundChannel : public SoundEvent {
-public:
-    enum state { IDLE, RESUMING, STOPPING, PAUSED, PLAYING };
-    SoundChannel() : mState(IDLE), mNumChannels(1),
-            mPos(0), mToggle(0), mAutoPaused(false), mMuted(false) {}
-    ~SoundChannel();
-    void init(SoundPool* soundPool);
-    void play(const sp<Sample>& sample, int channelID, float leftVolume, float rightVolume,
-            int priority, int loop, float rate);
-    void setVolume_l(float leftVolume, float rightVolume);
-    void setVolume(float leftVolume, float rightVolume);
-    void mute(bool muting);
-    void stop_l();
-    void stop();
-    void pause();
-    void autoPause();
-    void resume();
-    void autoResume();
-    void setRate(float rate);
-    int state() { return mState; }
-    void setPriority(int priority) { mPriority = priority; }
-    void setLoop(int loop);
-    int numChannels() { return mNumChannels; }
-    void clearNextEvent() { mNextEvent.clear(); }
-    void nextEvent();
-    int nextChannelID() { return mNextEvent.channelID(); }
-    void dump();
-    int getPrevSampleID(void) { return mPrevSampleID; }
-
-private:
-    static void callback(int event, void* user, void *info);
-    void process(int event, void *info, unsigned long toggle);
-    bool doStop_l();
-
-    SoundPool*          mSoundPool;
-    sp<AudioTrack>      mAudioTrack;
-    SoundEvent          mNextEvent;
-    Mutex               mLock;
-    int                 mState;
-    int                 mNumChannels;
-    int                 mPos;
-    int                 mAudioBufferSize;
-    unsigned long       mToggle;
-    bool                mAutoPaused;
-    int                 mPrevSampleID;
-    bool                mMuted;
-};
-
-// application object for managing a pool of sounds
+/**
+ * Native class for Java SoundPool, manages a pool of sounds.
+ *
+ * See the Android SoundPool Java documentation for description of valid values.
+ * https://developer.android.com/reference/android/media/SoundPool
+ */
 class SoundPool {
-    friend class SoundPoolThread;
-    friend class SoundChannel;
 public:
-    SoundPool(int maxChannels, const audio_attributes_t* pAttributes);
+    SoundPool(int32_t maxStreams, const audio_attributes_t* attributes);
     ~SoundPool();
-    int load(int fd, int64_t offset, int64_t length, int priority);
-    bool unload(int sampleID);
-    int play(int sampleID, float leftVolume, float rightVolume, int priority,
-            int loop, float rate);
-    void pause(int channelID);
-    void mute(bool muting);
+
+    // SoundPool Java API support
+    int32_t load(int fd, int64_t offset, int64_t length, int32_t priority);
+    bool unload(int32_t soundID);
+    int32_t play(int32_t soundID, float leftVolume, float rightVolume, int32_t priority,
+            int32_t loop, float rate);
+    void pause(int32_t streamID);
     void autoPause();
-    void resume(int channelID);
+    void resume(int32_t streamID);
     void autoResume();
-    void stop(int channelID);
-    void setVolume(int channelID, float leftVolume, float rightVolume);
-    void setPriority(int channelID, int priority);
-    void setLoop(int channelID, int loop);
-    void setRate(int channelID, float rate);
-    const audio_attributes_t* attributes() { return &mAttributes; }
-
-    // called from SoundPoolThread
-    void sampleLoaded(int sampleID);
-    sp<Sample> findSample(int sampleID);
-
-    // called from AudioTrack thread
-    void done_l(SoundChannel* channel);
-
-    // callback function
+    void stop(int32_t streamID);
+    void setVolume(int32_t streamID, float leftVolume, float rightVolume);
+    void setPriority(int32_t streamID, int32_t priority);
+    void setLoop(int32_t streamID, int32_t loop);
+    void setRate(int32_t streamID, float rate);
     void setCallback(SoundPoolCallback* callback, void* user);
-    void* getUserData() { return mUserData; }
+    void* getUserData() const;
+
+    // not exposed in the public Java API, used for internal playerSetVolume() muting.
+    void mute(bool muting);
 
 private:
-    SoundPool() {} // no default constructor
-    bool startThreads();
-    sp<Sample> findSample_l(int sampleID);
-    SoundChannel* findChannel (int channelID);
-    SoundChannel* findNextChannel (int channelID);
-    SoundChannel* allocateChannel_l(int priority, int sampleID);
-    void moveToFront_l(SoundChannel* channel);
-    void notify(SoundPoolEvent event);
-    void dump();
 
-    // restart thread
-    void addToRestartList(SoundChannel* channel);
-    void addToStopList(SoundChannel* channel);
-    static int beginThread(void* arg);
-    int run();
-    void quit();
+    // Constructor initialized variables
+    // Can access without lock as they are internally locked,
+    // though care needs to be taken that the final result composed of
+    // individually consistent actions are consistent.
+    soundpool::SoundManager  mSoundManager;
+    soundpool::StreamManager mStreamManager;
 
-    Mutex                   mLock;
-    Mutex                   mRestartLock;
-    Condition               mCondition;
-    SoundPoolThread*        mDecodeThread;
-    SoundChannel*           mChannelPool;
-    List<SoundChannel*>     mChannels;
-    List<SoundChannel*>     mRestart;
-    List<SoundChannel*>     mStop;
-    DefaultKeyedVector< int, sp<Sample> >   mSamples;
-    int                     mMaxChannels;
-    audio_attributes_t      mAttributes;
-    int                     mAllocated;
-    int                     mNextSampleID;
-    int                     mNextChannelID;
-    bool                    mQuit;
-    bool                    mMuted;
-
-    // callback
-    Mutex                   mCallbackLock;
-    SoundPoolCallback*      mCallback;
-    void*                   mUserData;
+    // mApiLock serializes SoundPool application calls (configurable by kUseApiLock).
+    // It only locks at the SoundPool layer and not below.  At this level,
+    // mApiLock is only required for autoPause() and autoResume() to prevent zippering
+    // of the individual pauses and resumes, and mute() for self-interaction with itself.
+    // It is optional for all other apis.
+    mutable std::mutex        mApiLock;
 };
 
 } // end namespace android
-
-#endif /*SOUNDPOOL_H_*/

@@ -45,7 +45,7 @@ public final class OverlayInfo implements Parcelable {
             STATE_NO_IDMAP,
             STATE_DISABLED,
             STATE_ENABLED,
-            STATE_ENABLED_STATIC,
+            STATE_ENABLED_IMMUTABLE,
             // @Deprecated STATE_TARGET_IS_BEING_REPLACED,
             STATE_OVERLAY_IS_BEING_REPLACED,
     })
@@ -117,11 +117,12 @@ public final class OverlayInfo implements Parcelable {
 
     /**
      * The overlay package is currently enabled because it is marked as
-     * 'static'. It cannot be disabled but will change state if for instance
+     * 'immutable'. It cannot be disabled but will change state if for instance
      * its target is uninstalled.
      * @hide
      */
-    public static final int STATE_ENABLED_STATIC = 6;
+    @Deprecated
+    public static final int STATE_ENABLED_IMMUTABLE = 6;
 
     /**
      * Overlay category: theme.
@@ -137,6 +138,7 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
+    @NonNull
     public final String packageName;
 
     /**
@@ -144,6 +146,7 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
+    @NonNull
     public final String targetPackageName;
 
     /**
@@ -164,6 +167,7 @@ public final class OverlayInfo implements Parcelable {
      * Full path to the base APK for this overlay package
      * @hide
      */
+    @NonNull
     public final String baseCodePath;
 
     /**
@@ -180,21 +184,21 @@ public final class OverlayInfo implements Parcelable {
     public final int userId;
 
     /**
-     * Priority as read from the manifest. Used if isStatic is true. Not
-     * intended to be exposed to 3rd party.
+     * Priority as configured by {@link com.android.internal.content.om.OverlayConfig}.
+     * Not intended to be exposed to 3rd party.
      *
      * @hide
      */
     public final int priority;
 
     /**
-     * isStatic as read from the manifest. If true, the overlay is
-     * unconditionally loaded and cannot be unloaded. Not intended to be
+     * isMutable as configured by {@link com.android.internal.content.om.OverlayConfig}.
+     * If false, the overlay is unconditionally loaded and cannot be unloaded. Not intended to be
      * exposed to 3rd party.
      *
      * @hide
      */
-    public final boolean isStatic;
+    public final boolean isMutable;
 
     /**
      * Create a new OverlayInfo based on source with an updated state.
@@ -207,14 +211,14 @@ public final class OverlayInfo implements Parcelable {
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
         this(source.packageName, source.targetPackageName, source.targetOverlayableName,
                 source.category, source.baseCodePath, state, source.userId, source.priority,
-                source.isStatic);
+                source.isMutable);
     }
 
     /** @hide */
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
             @Nullable String targetOverlayableName, @Nullable String category,
             @NonNull String baseCodePath, int state, int userId,
-            int priority, boolean isStatic) {
+            int priority, boolean isMutable) {
         this.packageName = packageName;
         this.targetPackageName = targetPackageName;
         this.targetOverlayableName = targetOverlayableName;
@@ -223,7 +227,7 @@ public final class OverlayInfo implements Parcelable {
         this.state = state;
         this.userId = userId;
         this.priority = priority;
-        this.isStatic = isStatic;
+        this.isMutable = isMutable;
         ensureValidState();
     }
 
@@ -237,7 +241,7 @@ public final class OverlayInfo implements Parcelable {
         state = source.readInt();
         userId = source.readInt();
         priority = source.readInt();
-        isStatic = source.readBoolean();
+        isMutable = source.readBoolean();
         ensureValidState();
     }
 
@@ -291,6 +295,7 @@ public final class OverlayInfo implements Parcelable {
         return targetOverlayableName;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void ensureValidState() {
         if (packageName == null) {
             throw new IllegalArgumentException("packageName must not be null");
@@ -307,7 +312,7 @@ public final class OverlayInfo implements Parcelable {
             case STATE_NO_IDMAP:
             case STATE_DISABLED:
             case STATE_ENABLED:
-            case STATE_ENABLED_STATIC:
+            case STATE_ENABLED_IMMUTABLE:
             case STATE_TARGET_IS_BEING_REPLACED:
             case STATE_OVERLAY_IS_BEING_REPLACED:
                 break;
@@ -331,7 +336,7 @@ public final class OverlayInfo implements Parcelable {
         dest.writeInt(state);
         dest.writeInt(userId);
         dest.writeInt(priority);
-        dest.writeBoolean(isStatic);
+        dest.writeBoolean(isMutable);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<OverlayInfo> CREATOR =
@@ -360,7 +365,7 @@ public final class OverlayInfo implements Parcelable {
     public boolean isEnabled() {
         switch (state) {
             case STATE_ENABLED:
-            case STATE_ENABLED_STATIC:
+            case STATE_ENABLED_IMMUTABLE:
                 return true;
             default:
                 return false;
@@ -386,8 +391,8 @@ public final class OverlayInfo implements Parcelable {
                 return "STATE_DISABLED";
             case STATE_ENABLED:
                 return "STATE_ENABLED";
-            case STATE_ENABLED_STATIC:
-                return "STATE_ENABLED_STATIC";
+            case STATE_ENABLED_IMMUTABLE:
+                return "STATE_ENABLED_IMMUTABLE";
             case STATE_TARGET_IS_BEING_REPLACED:
                 return "STATE_TARGET_IS_BEING_REPLACED";
             case STATE_OVERLAY_IS_BEING_REPLACED:

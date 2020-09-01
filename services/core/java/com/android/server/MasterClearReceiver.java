@@ -16,16 +16,15 @@
 
 package com.android.server;
 
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.RecoverySystem;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
-import android.telephony.euicc.EuiccManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
@@ -33,8 +32,6 @@ import android.view.WindowManager;
 import com.android.internal.R;
 
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class MasterClearReceiver extends BroadcastReceiver {
     private static final String TAG = "MasterClear";
@@ -56,6 +53,15 @@ public class MasterClearReceiver extends BroadcastReceiver {
         if (intent.hasExtra(Intent.EXTRA_FORCE_MASTER_CLEAR)) {
             Slog.w(TAG, "The request uses the deprecated Intent#EXTRA_FORCE_MASTER_CLEAR, "
                     + "Intent#EXTRA_FORCE_FACTORY_RESET should be used instead.");
+        }
+
+        final String factoryResetPackage = context
+                .getString(com.android.internal.R.string.config_factoryResetPackage);
+        if (Intent.ACTION_FACTORY_RESET.equals(intent.getAction())
+                && !TextUtils.isEmpty(factoryResetPackage)) {
+            intent.setPackage(factoryResetPackage).setComponent(null);
+            context.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+            return;
         }
 
         final boolean shutdown = intent.getBooleanExtra("shutdown", false);

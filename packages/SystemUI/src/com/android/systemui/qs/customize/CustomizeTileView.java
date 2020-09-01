@@ -49,4 +49,9 @@ public class CustomizeTileView extends QSTileView {
     protected boolean animationsEnabled() {
         return false;
     }
+
+    @Override
+    public boolean isLongClickable() {
+        return false;
+    }
 }

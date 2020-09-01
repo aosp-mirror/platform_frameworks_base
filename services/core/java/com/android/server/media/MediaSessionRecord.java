@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -56,13 +57,15 @@ import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * This is the system implementation of a Session. Apps will interact with the
  * MediaSession wrapper class instead.
  */
-public class MediaSessionRecord implements IBinder.DeathRecipient {
+// TODO(jaewan): Do not call service method directly -- introduce listener instead.
+public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
     private static final String TAG = "MediaSessionRecord";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -71,6 +74,38 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * command before reverting to the last reported volume.
      */
     private static final int OPTIMISTIC_VOLUME_TIMEOUT = 1000;
+
+    /**
+     * These are states that usually indicate the user took an action and should
+     * bump priority regardless of the old state.
+     */
+    private static final List<Integer> ALWAYS_PRIORITY_STATES = Arrays.asList(
+            PlaybackState.STATE_FAST_FORWARDING,
+            PlaybackState.STATE_REWINDING,
+            PlaybackState.STATE_SKIPPING_TO_PREVIOUS,
+            PlaybackState.STATE_SKIPPING_TO_NEXT);
+    /**
+     * These are states that usually indicate the user took an action if they
+     * were entered from a non-priority state.
+     */
+    private static final List<Integer> TRANSITION_PRIORITY_STATES = Arrays.asList(
+            PlaybackState.STATE_BUFFERING,
+            PlaybackState.STATE_CONNECTING,
+            PlaybackState.STATE_PLAYING);
+
+    private static final AudioAttributes DEFAULT_ATTRIBUTES =
+            new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
+
+    private static int getVolumeStream(@Nullable AudioAttributes attr) {
+        if (attr == null) {
+            return DEFAULT_ATTRIBUTES.getVolumeControlStream();
+        }
+        final int stream = attr.getVolumeControlStream();
+        if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            return DEFAULT_ATTRIBUTES.getVolumeControlStream();
+        }
+        return stream;
+    }
 
     private final MessageHandler mHandler;
 
@@ -92,7 +127,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             new ArrayList<>();
 
     private long mFlags;
-    private PendingIntent mMediaButtonReceiver;
+    private MediaButtonReceiverHolder mMediaButtonReceiverHolder;
     private PendingIntent mLaunchIntent;
 
     // TransportPerformer fields
@@ -115,6 +150,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private int mMaxVolume = 0;
     private int mCurrentVolume = 0;
     private int mOptimisticVolume = -1;
+    private String mVolumeControlId;
     // End volume handling fields
 
     private boolean mIsActive = false;
@@ -123,9 +159,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private long mDuration = -1;
     private String mMetadataDescription;
 
+    private int mPolicies;
+
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, Bundle sessionInfo,
-            MediaSessionService service, Looper handlerLooper) {
+            MediaSessionService service, Looper handlerLooper, int policies)
+            throws RemoteException {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
@@ -133,7 +172,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mTag = tag;
         mSessionInfo = sessionInfo;
         mController = new ControllerStub();
-        mSessionToken = new MediaSession.Token(mController);
+        mSessionToken = new MediaSession.Token(ownerUid, mController);
         mSession = new SessionStub();
         mSessionCb = new SessionCb(cb);
         mService = service;
@@ -141,7 +180,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mHandler = new MessageHandler(handlerLooper);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
-        mAudioAttrs = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
+        mAudioAttrs = DEFAULT_ATTRIBUTES;
+        mPolicies = policies;
+
+        // May throw RemoteException if the session app is killed.
+        mSessionCb.mCb.asBinder().linkToDeath(this, 0);
     }
 
     /**
@@ -151,15 +194,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     public ISession getSessionBinder() {
         return mSession;
-    }
-
-    /**
-     * Get the controller binder for the {@link MediaController}.
-     *
-     * @return The controller binder apps talk to.
-     */
-    public ISessionController getControllerBinder() {
-        return mController;
     }
 
     /**
@@ -176,17 +210,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return Info that identifies this session.
      */
+    @Override
     public String getPackageName() {
         return mPackageName;
-    }
-
-    /**
-     * Get the tag for the session.
-     *
-     * @return The session's tag.
-     */
-    public String getTag() {
-        return mTag;
     }
 
     /**
@@ -194,27 +220,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The pending intent set by the app or null.
      */
-    public PendingIntent getMediaButtonReceiver() {
-        return mMediaButtonReceiver;
-    }
-
-    /**
-     * Get this session's flags.
-     *
-     * @return The flags for this session.
-     */
-    public long getFlags() {
-        return mFlags;
-    }
-
-    /**
-     * Check if this session has the specified flag.
-     *
-     * @param flag The flag to check.
-     * @return True if this session has that flag set, false otherwise.
-     */
-    public boolean hasFlag(int flag) {
-        return (mFlags & flag) != 0;
+    public MediaButtonReceiverHolder getMediaButtonReceiver() {
+        return mMediaButtonReceiverHolder;
     }
 
     /**
@@ -222,6 +229,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The UID for this session.
      */
+    @Override
     public int getUid() {
         return mOwnerUid;
     }
@@ -231,6 +239,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The user id for this session.
      */
+    @Override
     public int getUserId() {
         return mUserId;
     }
@@ -241,6 +250,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return True if this is a system priority session, false otherwise
      */
+    @Override
     public boolean isSystemPriority() {
         return (mFlags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
     }
@@ -254,7 +264,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param opPackageName The op package that made the original volume request.
      * @param pid The pid that made the original volume request.
      * @param uid The uid that made the original volume request.
-     * @param caller caller binder. can be {@code null} if it's from the volume key.
      * @param asSystemService {@code true} if the event sent to the session as if it was come from
      *          the system service instead of the app process. This helps sessions to distinguish
      *          between the key injection by the app and key events from the hardware devices.
@@ -265,15 +274,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param useSuggested True to use adjustSuggestedStreamVolume instead of
      */
     public void adjustVolume(String packageName, String opPackageName, int pid, int uid,
-            ISessionControllerCallback caller, boolean asSystemService, int direction, int flags,
-            boolean useSuggested) {
+            boolean asSystemService, int direction, int flags, boolean useSuggested) {
         int previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
-        if (isPlaybackActive() || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
+        if (checkPlaybackActiveState(true) || isSystemPriority()) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             // Adjust the volume with a handler not to be blocked by other system service.
-            int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
+            int stream = getVolumeStream(mAudioAttrs);
             postAdjustLocalVolume(stream, direction, flags, opPackageName, pid, uid,
                     asSystemService, useSuggested, previousFlagPlaySound);
         } else {
@@ -291,7 +299,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
                         + asSystemService + ", dir=" + direction);
             }
-            mSessionCb.adjustVolume(packageName, pid, uid, caller, asSystemService, direction);
+            mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
             mOptimisticVolume = volumeBefore + direction;
@@ -310,17 +318,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    private void setVolumeTo(String packageName, String opPackageName, int pid, int uid,
-            ISessionControllerCallback caller, int value, int flags) {
+    private void setVolumeTo(String packageName, String opPackageName, int pid, int uid, int value,
+            int flags) {
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
-            int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
+            int stream = getVolumeStream(mAudioAttrs);
             final int volumeValue = value;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         mAudioManagerInternal.setStreamVolumeForUid(stream, volumeValue, flags,
-                                opPackageName, uid);
+                                opPackageName, uid, pid);
                     } catch (IllegalArgumentException | SecurityException e) {
                         Log.e(TAG, "Cannot set volume: stream=" + stream + ", value=" + volumeValue
                                 + ", flags=" + flags, e);
@@ -333,7 +341,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 return;
             }
             value = Math.max(0, Math.min(value, mMaxVolume));
-            mSessionCb.setVolumeTo(packageName, pid, uid, caller, value);
+            mSessionCb.setVolumeTo(packageName, pid, uid, value);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
             mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
@@ -353,116 +361,70 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     /**
      * Check if this session has been set to active by the app.
+     * <p>
+     * It's not used to prioritize sessions for dispatching media keys since API 26, but still used
+     * to filter session list in MediaSessionManager#getActiveSessions().
      *
      * @return True if the session is active, false otherwise.
      */
+    @Override
     public boolean isActive() {
         return mIsActive && !mDestroyed;
     }
 
     /**
-     * Get the playback state.
+     * Check if the session's playback active state matches with the expectation. This always return
+     * {@code false} if the playback state is {@code null}, where we cannot know the actual playback
+     * state associated with the session.
      *
-     * @return The current playback state.
+     * @param expected True if playback is expected to be active. false otherwise.
+     * @return True if the session's playback matches with the expectation. false otherwise.
      */
-    public PlaybackState getPlaybackState() {
-        return mPlaybackState;
+    @Override
+    public boolean checkPlaybackActiveState(boolean expected) {
+        if (mPlaybackState == null) {
+            return false;
+        }
+        return MediaSession.isActiveState(mPlaybackState.getState()) == expected;
     }
 
     /**
-     * Check if the session is currently performing playback.
+     * Get whether the playback is local.
      *
-     * @return True if the session is performing playback, false otherwise.
+     * @return {@code true} if the playback is local.
      */
-    public boolean isPlaybackActive() {
-        int state = mPlaybackState == null ? PlaybackState.STATE_NONE : mPlaybackState.getState();
-        return MediaSession.isActiveState(state);
-    }
-
-    /**
-     * Get the type of playback, either local or remote.
-     *
-     * @return The current type of playback.
-     */
-    public int getPlaybackType() {
-        return mVolumeType;
-    }
-
-    /**
-     * Get the local audio stream being used. Only valid if playback type is
-     * local.
-     *
-     * @return The audio stream the session is using.
-     */
-    public AudioAttributes getAudioAttributes() {
-        return mAudioAttrs;
-    }
-
-    /**
-     * Get the type of volume control. Only valid if playback type is remote.
-     *
-     * @return The volume control type being used.
-     */
-    public int getVolumeControl() {
-        return mVolumeControlType;
-    }
-
-    /**
-     * Get the max volume that can be set. Only valid if playback type is
-     * remote.
-     *
-     * @return The max volume that can be set.
-     */
-    public int getMaxVolume() {
-        return mMaxVolume;
-    }
-
-    /**
-     * Get the current volume for this session. Only valid if playback type is
-     * remote.
-     *
-     * @return The current volume of the remote playback.
-     */
-    public int getCurrentVolume() {
-        return mCurrentVolume;
-    }
-
-    /**
-     * Get the volume we'd like it to be set to. This is only valid for a short
-     * while after a call to adjust or set volume.
-     *
-     * @return The current optimistic volume or -1.
-     */
-    public int getOptimisticVolume() {
-        return mOptimisticVolume;
-    }
-
-    public boolean isTransportControlEnabled() {
-        return hasFlag(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+    @Override
+    public boolean isPlaybackTypeLocal() {
+        return mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
     }
 
     @Override
     public void binderDied() {
-        mService.sessionDied(this);
+        mService.onSessionDied(this);
     }
 
     /**
      * Finish cleaning up this session, including disconnecting if connected and
      * removing the death observer from the callback binder.
      */
-    public void onDestroy() {
+    @Override
+    public void close() {
         synchronized (mLock) {
             if (mDestroyed) {
                 return;
             }
+            mSessionCb.mCb.asBinder().unlinkToDeath(this, 0);
             mDestroyed = true;
             mPlaybackState = null;
             mHandler.post(MessageHandler.MSG_DESTROYED);
         }
     }
 
-    public ISessionCallback getCallback() {
-        return mSessionCb.mCb;
+    @Override
+    public boolean isClosed() {
+        synchronized (mLock) {
+            return mDestroyed;
+        }
     }
 
     /**
@@ -477,7 +439,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param sequenceId (optional) sequence id. Use this only when a wake lock is needed.
      * @param cb (optional) result receiver to receive callback. Use this only when a wake lock is
      *           needed.
-     * @return {@code true} if the attempt to send media button was successfuly.
+     * @return {@code true} if the attempt to send media button was successfully.
      *         {@code false} otherwise.
      */
     public boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
@@ -486,6 +448,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 cb);
     }
 
+    @Override
+    public int getSessionPolicies() {
+        synchronized (mLock) {
+            return mPolicies;
+        }
+    }
+
+    @Override
+    public void setSessionPolicies(int policies) {
+        synchronized (mLock) {
+            mPolicies = policies;
+        }
+    }
+
+    @Override
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + mTag + " " + this);
 
@@ -494,7 +471,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 + ", userId=" + mUserId);
         pw.println(indent + "package=" + mPackageName);
         pw.println(indent + "launchIntent=" + mLaunchIntent);
-        pw.println(indent + "mediaButtonReceiver=" + mMediaButtonReceiver);
+        pw.println(indent + "mediaButtonReceiver=" + mMediaButtonReceiverHolder);
         pw.println(indent + "active=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
@@ -524,12 +501,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         // Must use opPackageName for adjusting volumes with UID.
         final String opPackageName;
         final int uid;
+        final int pid;
         if (asSystemService) {
             opPackageName = mContext.getOpPackageName();
             uid = Process.SYSTEM_UID;
+            pid = Process.myPid();
         } else {
             opPackageName = callingOpPackageName;
             uid = callingUid;
+            pid = callingPid;
         }
         mHandler.post(new Runnable() {
             @Override
@@ -538,15 +518,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     if (useSuggested) {
                         if (AudioSystem.isStreamActive(stream, 0)) {
                             mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream,
-                                    direction, flags, opPackageName, uid);
+                                    direction, flags, opPackageName, uid, pid);
                         } else {
                             mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
                                     AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
-                                    flags | previousFlagPlaySound, opPackageName, uid);
+                                    flags | previousFlagPlaySound, opPackageName, uid, pid);
                         }
                     } else {
                         mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
-                                opPackageName, uid);
+                                opPackageName, uid, pid);
                     }
                 } catch (IllegalArgumentException | SecurityException e) {
                     Log.e(TAG, "Cannot adjust volume: direction=" + direction + ", stream="
@@ -778,16 +758,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
                 int current = mOptimisticVolume != -1 ? mOptimisticVolume : mCurrentVolume;
                 return new PlaybackInfo(mVolumeType, mVolumeControlType, mMaxVolume, current,
-                        mAudioAttrs);
+                        mAudioAttrs, mVolumeControlId);
             }
             volumeType = mVolumeType;
             attributes = mAudioAttrs;
         }
-        int stream = AudioAttributes.toLegacyStreamType(attributes);
+        int stream = getVolumeStream(attributes);
         int max = mAudioManager.getStreamMaxVolume(stream);
         int current = mAudioManager.getStreamVolume(stream);
         return new PlaybackInfo(volumeType, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max,
-                current, attributes);
+                current, attributes, null);
     }
 
     private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
@@ -806,7 +786,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void destroySession() throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.destroySession(MediaSessionRecord.this);
+                mService.onSessionDied(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -828,7 +808,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             mIsActive = active;
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.updateSession(MediaSessionRecord.this);
+                mService.onSessionActiveStateChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -856,9 +836,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
-            mMediaButtonReceiver = pi;
             final long token = Binder.clearCallingIdentity();
             try {
+                if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
+                        != 0) {
+                    return;
+                }
+                mMediaButtonReceiverHolder =
+                        MediaButtonReceiverHolder.create(mContext, mUserId, pi);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -895,12 +880,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     ? PlaybackState.STATE_NONE : mPlaybackState.getState();
             int newState = state == null
                     ? PlaybackState.STATE_NONE : state.getState();
+            boolean shouldUpdatePriority = ALWAYS_PRIORITY_STATES.contains(newState)
+                    || (!TRANSITION_PRIORITY_STATES.contains(oldState)
+                    && TRANSITION_PRIORITY_STATES.contains(newState));
             synchronized (mLock) {
                 mPlaybackState = state;
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                mService.onSessionPlaystateChanged(MediaSessionRecord.this, oldState, newState);
+                mService.onSessionPlaybackStateChanged(
+                        MediaSessionRecord.this, shouldUpdatePriority);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -946,6 +935,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             synchronized (mLock) {
                 typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
                 mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
+                mVolumeControlId = null;
                 if (attributes != null) {
                     mAudioAttrs = attributes;
                 } else {
@@ -964,13 +954,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setPlaybackToRemote(int control, int max) throws RemoteException {
+        public void setPlaybackToRemote(int control, int max, String controlId)
+                throws RemoteException {
             boolean typeChanged;
             synchronized (mLock) {
                 typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
                 mVolumeType = PlaybackInfo.PLAYBACK_TYPE_REMOTE;
                 mVolumeControlType = control;
                 mMaxVolume = max;
+                mVolumeControlId = controlId;
             }
             if (typeChanged) {
                 final long token = Binder.clearCallingIdentity();
@@ -1009,14 +1001,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         public boolean sendMediaButton(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, boolean asSystemService,
-                KeyEvent keyEvent) {
+                boolean asSystemService, KeyEvent keyEvent) {
             try {
                 if (asSystemService) {
                     mCb.onMediaButton(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, createMediaButtonIntent(keyEvent), 0, null);
                 } else {
-                    mCb.onMediaButtonFromController(packageName, pid, uid, caller,
+                    mCb.onMediaButtonFromController(packageName, pid, uid,
                             createMediaButtonIntent(keyEvent));
                 }
                 return true;
@@ -1026,201 +1017,189 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             return false;
         }
 
-        public void sendCommand(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, String command, Bundle args, ResultReceiver cb) {
+        public void sendCommand(String packageName, int pid, int uid, String command, Bundle args,
+                ResultReceiver cb) {
             try {
-                mCb.onCommand(packageName, pid, uid, caller, command, args, cb);
+                mCb.onCommand(packageName, pid, uid, command, args, cb);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCommand.", e);
             }
         }
 
-        public void sendCustomAction(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, String action,
+        public void sendCustomAction(String packageName, int pid, int uid, String action,
                 Bundle args) {
             try {
-                mCb.onCustomAction(packageName, pid, uid, caller, action, args);
+                mCb.onCustomAction(packageName, pid, uid, action, args);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCustomAction.", e);
             }
         }
 
-        public void prepare(String packageName, int pid, int uid,
-                ISessionControllerCallback caller) {
+        public void prepare(String packageName, int pid, int uid) {
             try {
-                mCb.onPrepare(packageName, pid, uid, caller);
+                mCb.onPrepare(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepare.", e);
             }
         }
 
-        public void prepareFromMediaId(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, String mediaId, Bundle extras) {
+        public void prepareFromMediaId(String packageName, int pid, int uid, String mediaId,
+                Bundle extras) {
             try {
-                mCb.onPrepareFromMediaId(packageName, pid, uid, caller, mediaId, extras);
+                mCb.onPrepareFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromMediaId.", e);
             }
         }
 
-        public void prepareFromSearch(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, String query, Bundle extras) {
+        public void prepareFromSearch(String packageName, int pid, int uid, String query,
+                Bundle extras) {
             try {
-                mCb.onPrepareFromSearch(packageName, pid, uid, caller, query, extras);
+                mCb.onPrepareFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromSearch.", e);
             }
         }
 
-        public void prepareFromUri(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, Uri uri, Bundle extras) {
+        public void prepareFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             try {
-                mCb.onPrepareFromUri(packageName, pid, uid, caller, uri, extras);
+                mCb.onPrepareFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromUri.", e);
             }
         }
 
-        public void play(String packageName, int pid, int uid, ISessionControllerCallback caller) {
+        public void play(String packageName, int pid, int uid) {
             try {
-                mCb.onPlay(packageName, pid, uid, caller);
+                mCb.onPlay(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in play.", e);
             }
         }
 
-        public void playFromMediaId(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, String mediaId, Bundle extras) {
+        public void playFromMediaId(String packageName, int pid, int uid, String mediaId,
+                Bundle extras) {
             try {
-                mCb.onPlayFromMediaId(packageName, pid, uid, caller, mediaId, extras);
+                mCb.onPlayFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromMediaId.", e);
             }
         }
 
-        public void playFromSearch(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, String query, Bundle extras) {
+        public void playFromSearch(String packageName, int pid, int uid, String query,
+                Bundle extras) {
             try {
-                mCb.onPlayFromSearch(packageName, pid, uid, caller, query, extras);
+                mCb.onPlayFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromSearch.", e);
             }
         }
 
-        public void playFromUri(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, Uri uri, Bundle extras) {
+        public void playFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             try {
-                mCb.onPlayFromUri(packageName, pid, uid, caller, uri, extras);
+                mCb.onPlayFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromUri.", e);
             }
         }
 
-        public void skipToTrack(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, long id) {
+        public void skipToTrack(String packageName, int pid, int uid, long id) {
             try {
-                mCb.onSkipToTrack(packageName, pid, uid, caller, id);
+                mCb.onSkipToTrack(packageName, pid, uid, id);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in skipToTrack", e);
             }
         }
 
-        public void pause(String packageName, int pid, int uid, ISessionControllerCallback caller) {
+        public void pause(String packageName, int pid, int uid) {
             try {
-                mCb.onPause(packageName, pid, uid, caller);
+                mCb.onPause(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in pause.", e);
             }
         }
 
-        public void stop(String packageName, int pid, int uid, ISessionControllerCallback caller) {
+        public void stop(String packageName, int pid, int uid) {
             try {
-                mCb.onStop(packageName, pid, uid, caller);
+                mCb.onStop(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in stop.", e);
             }
         }
 
-        public void next(String packageName, int pid, int uid, ISessionControllerCallback caller) {
+        public void next(String packageName, int pid, int uid) {
             try {
-                mCb.onNext(packageName, pid, uid, caller);
+                mCb.onNext(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in next.", e);
             }
         }
 
-        public void previous(String packageName, int pid, int uid,
-                ISessionControllerCallback caller) {
+        public void previous(String packageName, int pid, int uid) {
             try {
-                mCb.onPrevious(packageName, pid, uid, caller);
+                mCb.onPrevious(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in previous.", e);
             }
         }
 
-        public void fastForward(String packageName, int pid, int uid,
-                ISessionControllerCallback caller) {
+        public void fastForward(String packageName, int pid, int uid) {
             try {
-                mCb.onFastForward(packageName, pid, uid, caller);
+                mCb.onFastForward(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in fastForward.", e);
             }
         }
 
-        public void rewind(String packageName, int pid, int uid,
-                ISessionControllerCallback caller) {
+        public void rewind(String packageName, int pid, int uid) {
             try {
-                mCb.onRewind(packageName, pid, uid, caller);
+                mCb.onRewind(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rewind.", e);
             }
         }
 
-        public void seekTo(String packageName, int pid, int uid, ISessionControllerCallback caller,
-                long pos) {
+        public void seekTo(String packageName, int pid, int uid, long pos) {
             try {
-                mCb.onSeekTo(packageName, pid, uid, caller, pos);
+                mCb.onSeekTo(packageName, pid, uid, pos);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in seekTo.", e);
             }
         }
 
-        public void rate(String packageName, int pid, int uid, ISessionControllerCallback caller,
-                Rating rating) {
+        public void rate(String packageName, int pid, int uid, Rating rating) {
             try {
-                mCb.onRate(packageName, pid, uid, caller, rating);
+                mCb.onRate(packageName, pid, uid, rating);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rate.", e);
             }
         }
 
-        public void setPlaybackSpeed(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, float speed) {
+        public void setPlaybackSpeed(String packageName, int pid, int uid, float speed) {
             try {
-                mCb.onSetPlaybackSpeed(packageName, pid, uid, caller, speed);
+                mCb.onSetPlaybackSpeed(packageName, pid, uid, speed);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in setPlaybackSpeed.", e);
             }
         }
 
-        public void adjustVolume(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, boolean asSystemService, int direction) {
+        public void adjustVolume(String packageName, int pid, int uid, boolean asSystemService,
+                int direction) {
             try {
                 if (asSystemService) {
                     mCb.onAdjustVolume(mContext.getPackageName(), Process.myPid(),
-                            Process.SYSTEM_UID, null, direction);
+                            Process.SYSTEM_UID, direction);
                 } else {
-                    mCb.onAdjustVolume(packageName, pid, uid, caller, direction);
+                    mCb.onAdjustVolume(packageName, pid, uid, direction);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in adjustVolume.", e);
             }
         }
 
-        public void setVolumeTo(String packageName, int pid, int uid,
-                ISessionControllerCallback caller, int value) {
+        public void setVolumeTo(String packageName, int pid, int uid, int value) {
             try {
-                mCb.onSetVolumeTo(packageName, pid, uid, caller, value);
+                mCb.onSetVolumeTo(packageName, pid, uid, value);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in setVolumeTo.", e);
             }
@@ -1235,17 +1214,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     class ControllerStub extends ISessionController.Stub {
         @Override
-        public void sendCommand(String packageName, ISessionControllerCallback caller,
-                String command, Bundle args, ResultReceiver cb) {
+        public void sendCommand(String packageName, String command, Bundle args,
+                ResultReceiver cb) {
             mSessionCb.sendCommand(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, command, args, cb);
+                    command, args, cb);
         }
 
         @Override
-        public boolean sendMediaButton(String packageName, ISessionControllerCallback cb,
-                KeyEvent keyEvent) {
+        public boolean sendMediaButton(String packageName, KeyEvent keyEvent) {
             return mSessionCb.sendMediaButton(packageName, Binder.getCallingPid(),
-                    Binder.getCallingUid(), cb, false, keyEvent);
+                    Binder.getCallingUid(), false, keyEvent);
         }
 
         @Override
@@ -1316,13 +1294,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void adjustVolume(String packageName, String opPackageName,
-                ISessionControllerCallback caller, int direction, int flags) {
+        public void adjustVolume(String packageName, String opPackageName, int direction,
+                int flags) {
             int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.adjustVolume(packageName, opPackageName, pid, uid, caller,
+                MediaSessionRecord.this.adjustVolume(packageName, opPackageName, pid, uid,
                         false, direction, flags, false /* useSuggested */);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1330,134 +1308,120 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setVolumeTo(String packageName, String opPackageName,
-                ISessionControllerCallback caller, int value, int flags) {
+        public void setVolumeTo(String packageName, String opPackageName, int value, int flags) {
             int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.setVolumeTo(packageName, opPackageName, pid, uid, caller,
-                        value, flags);
+                MediaSessionRecord.this.setVolumeTo(packageName, opPackageName, pid, uid, value,
+                        flags);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public void prepare(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.prepare(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller);
+        public void prepare(String packageName) {
+            mSessionCb.prepare(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void prepareFromMediaId(String packageName, ISessionControllerCallback caller,
-                String mediaId, Bundle extras) {
+        public void prepareFromMediaId(String packageName, String mediaId, Bundle extras) {
             mSessionCb.prepareFromMediaId(packageName, Binder.getCallingPid(),
-                    Binder.getCallingUid(), caller, mediaId, extras);
+                    Binder.getCallingUid(), mediaId, extras);
         }
 
         @Override
-        public void prepareFromSearch(String packageName, ISessionControllerCallback caller,
-                String query, Bundle extras) {
+        public void prepareFromSearch(String packageName, String query, Bundle extras) {
             mSessionCb.prepareFromSearch(packageName, Binder.getCallingPid(),
-                    Binder.getCallingUid(), caller, query, extras);
+                    Binder.getCallingUid(), query, extras);
         }
 
         @Override
-        public void prepareFromUri(String packageName, ISessionControllerCallback caller,
-                Uri uri, Bundle extras) {
+        public void prepareFromUri(String packageName, Uri uri, Bundle extras) {
             mSessionCb.prepareFromUri(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, uri, extras);
+                    uri, extras);
         }
 
         @Override
-        public void play(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.play(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller);
+        public void play(String packageName) {
+            mSessionCb.play(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void playFromMediaId(String packageName, ISessionControllerCallback caller,
-                String mediaId, Bundle extras) {
+        public void playFromMediaId(String packageName, String mediaId, Bundle extras) {
             mSessionCb.playFromMediaId(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, mediaId, extras);
+                    mediaId, extras);
         }
 
         @Override
-        public void playFromSearch(String packageName, ISessionControllerCallback caller,
-                String query, Bundle extras) {
+        public void playFromSearch(String packageName, String query, Bundle extras) {
             mSessionCb.playFromSearch(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, query, extras);
+                     query, extras);
         }
 
         @Override
-        public void playFromUri(String packageName, ISessionControllerCallback caller,
-                Uri uri, Bundle extras) {
+        public void playFromUri(String packageName, Uri uri, Bundle extras) {
             mSessionCb.playFromUri(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, uri, extras);
+                    uri, extras);
         }
 
         @Override
-        public void skipToQueueItem(String packageName, ISessionControllerCallback caller,
-                long id) {
-            mSessionCb.skipToTrack(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, id);
+        public void skipToQueueItem(String packageName, long id) {
+            mSessionCb.skipToTrack(packageName, Binder.getCallingPid(), Binder.getCallingUid(), id);
         }
 
         @Override
-        public void pause(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.pause(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller);
+        public void pause(String packageName) {
+            mSessionCb.pause(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void stop(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.stop(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller);
+        public void stop(String packageName) {
+            mSessionCb.stop(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void next(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.next(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller);
+        public void next(String packageName) {
+            mSessionCb.next(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void previous(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.previous(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller);
+        public void previous(String packageName) {
+            mSessionCb.previous(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void fastForward(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.fastForward(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller);
+        public void fastForward(String packageName) {
+            mSessionCb.fastForward(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void rewind(String packageName, ISessionControllerCallback caller) {
-            mSessionCb.rewind(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller);
+        public void rewind(String packageName) {
+            mSessionCb.rewind(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void seekTo(String packageName, ISessionControllerCallback caller, long pos) {
-            mSessionCb.seekTo(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller,
-                    pos);
+        public void seekTo(String packageName, long pos) {
+            mSessionCb.seekTo(packageName, Binder.getCallingPid(), Binder.getCallingUid(), pos);
         }
 
         @Override
-        public void rate(String packageName, ISessionControllerCallback caller, Rating rating) {
-            mSessionCb.rate(packageName, Binder.getCallingPid(), Binder.getCallingUid(), caller,
-                    rating);
+        public void rate(String packageName, Rating rating) {
+            mSessionCb.rate(packageName, Binder.getCallingPid(), Binder.getCallingUid(), rating);
         }
 
         @Override
-        public void setPlaybackSpeed(String packageName, ISessionControllerCallback caller,
+        public void setPlaybackSpeed(String packageName,
                 float speed) {
             mSessionCb.setPlaybackSpeed(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, speed);
+                    speed);
         }
 
         @Override
-        public void sendCustomAction(String packageName, ISessionControllerCallback caller,
-                String action, Bundle args) {
+        public void sendCustomAction(String packageName, String action, Bundle args) {
             mSessionCb.sendCustomAction(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
-                    caller, action, args);
+                    action, args);
         }
 
         @Override
@@ -1570,5 +1534,4 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             msg.sendToTarget();
         }
     }
-
 }

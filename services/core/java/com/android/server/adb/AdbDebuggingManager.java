@@ -23,7 +23,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -36,6 +35,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.debug.AdbManager;
+import android.debug.AdbNotifications;
 import android.debug.AdbProtoEnums;
 import android.debug.AdbTransportType;
 import android.debug.PairDevice;
@@ -64,14 +64,13 @@ import android.service.adb.AdbDebuggingManagerProto;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
@@ -178,7 +177,15 @@ public class AdbDebuggingManager {
         private String mPairingCode;
         private String mGuid;
         private String mServiceName;
-        private final String mServiceType = "_adb_secure_pairing._tcp.";
+        // From RFC6763 (https://tools.ietf.org/html/rfc6763#section-7.2),
+        // The rules for Service Names [RFC6335] state that they may be no more
+        // than fifteen characters long (not counting the mandatory underscore),
+        // consisting of only letters, digits, and hyphens, must begin and end
+        // with a letter or digit, must not contain consecutive hyphens, and
+        // must contain at least one letter.
+        @VisibleForTesting
+        static final String SERVICE_PROTOCOL = "adb-tls-pairing";
+        private final String mServiceType = String.format("_%s._tcp.", SERVICE_PROTOCOL);
         private int mPort;
 
         private native int native_pairing_start(String guid, String password);
@@ -330,6 +337,7 @@ public class AdbDebuggingManager {
 
     class PortListenerImpl implements AdbConnectionPortListener {
         public void onPortReceived(int port) {
+            if (DEBUG) Slog.d(TAG, "Received tls port=" + port);
             Message msg = mHandler.obtainMessage(port > 0
                      ? AdbDebuggingHandler.MSG_SERVER_CONNECTED
                      : AdbDebuggingHandler.MSG_SERVER_DISCONNECTED);
@@ -385,6 +393,7 @@ public class AdbDebuggingManager {
 
                 mOutputStream = mSocket.getOutputStream();
                 mInputStream = mSocket.getInputStream();
+                mHandler.sendEmptyMessage(AdbDebuggingHandler.MSG_ADBD_SOCKET_CONNECTED);
             } catch (IOException ioe) {
                 Slog.e(TAG, "Caught an exception opening the socket: " + ioe);
                 closeSocketLocked();
@@ -497,6 +506,7 @@ public class AdbDebuggingManager {
             } catch (IOException ex) {
                 Slog.e(TAG, "Failed closing socket: " + ex);
             }
+            mHandler.sendEmptyMessage(AdbDebuggingHandler.MSG_ADBD_SOCKET_DISCONNECTED);
         }
 
         /** Call to stop listening on the socket and exit the thread. */
@@ -722,6 +732,10 @@ public class AdbDebuggingManager {
         static final int MSG_SERVER_CONNECTED = 24;
         // Notifies us the TLS server is disconnected
         static final int MSG_SERVER_DISCONNECTED = 25;
+        // Notification when adbd socket successfully connects.
+        static final int MSG_ADBD_SOCKET_CONNECTED = 26;
+        // Notification when adbd socket is disconnected.
+        static final int MSG_ADBD_SOCKET_DISCONNECTED = 27;
 
         // === Messages we can send to adbd ===========
         static final String MSG_DISCONNECT_DEVICE = "DD";
@@ -760,40 +774,13 @@ public class AdbDebuggingManager {
         // Show when at least one device is connected.
         public void showAdbConnectedNotification(boolean show) {
             final int id = SystemMessage.NOTE_ADB_WIFI_ACTIVE;
-            final int titleRes = com.android.internal.R.string.adbwifi_active_notification_title;
             if (show == mAdbNotificationShown) {
                 return;
             }
             setupNotifications();
             if (!mAdbNotificationShown) {
-                Resources r = mContext.getResources();
-                CharSequence title = r.getText(titleRes);
-                CharSequence message = r.getText(
-                        com.android.internal.R.string.adbwifi_active_notification_message);
-
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
-                        intent, 0, null, UserHandle.CURRENT);
-
-                Notification notification =
-                        new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
-                                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                                .setWhen(0)
-                                .setOngoing(true)
-                                .setTicker(title)
-                                .setDefaults(0)  // please be quiet
-                                .setColor(mContext.getColor(
-                                        com.android.internal.R.color
-                                                .system_notification_accent_color))
-                                .setContentTitle(title)
-                                .setContentText(message)
-                                .setContentIntent(pi)
-                                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                                .extend(new Notification.TvExtender()
-                                        .setChannelId(ADB_NOTIFICATION_CHANNEL_ID_TV))
-                                .build();
+                Notification notification = AdbNotifications.createNotification(mContext,
+                        AdbTransportType.WIFI);
                 mAdbNotificationShown = true;
                 mNotificationManager.notifyAsUser(null, id, notification,
                         UserHandle.ALL);
@@ -891,6 +878,7 @@ public class AdbDebuggingManager {
 
                 case MESSAGE_ADB_DENY:
                     if (mThread != null) {
+                        Slog.w(TAG, "Denying adb confirmation");
                         mThread.sendResponse("NO");
                         logAdbConnectionChanged(null, AdbProtoEnums.USER_DENIED, false);
                     }
@@ -900,7 +888,7 @@ public class AdbDebuggingManager {
                     String key = (String) msg.obj;
                     if ("trigger_restart_min_framework".equals(
                             SystemProperties.get("vold.decrypt"))) {
-                        Slog.d(TAG, "Deferring adb confirmation until after vold decrypt");
+                        Slog.w(TAG, "Deferring adb confirmation until after vold decrypt");
                         if (mThread != null) {
                             mThread.sendResponse("NO");
                             logAdbConnectionChanged(key, AdbProtoEnums.DENIED_VOLD_DECRYPT, false);
@@ -1190,6 +1178,28 @@ public class AdbDebuggingManager {
                     }
                     break;
                 }
+                case MSG_ADBD_SOCKET_CONNECTED: {
+                    if (DEBUG) Slog.d(TAG, "adbd socket connected");
+                    if (mAdbWifiEnabled) {
+                        // In scenarios where adbd is restarted, the tls port may change.
+                        mConnectionPortPoller =
+                                new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
+                        mConnectionPortPoller.start();
+                    }
+                    break;
+                }
+                case MSG_ADBD_SOCKET_DISCONNECTED: {
+                    if (DEBUG) Slog.d(TAG, "adbd socket disconnected");
+                    if (mConnectionPortPoller != null) {
+                        mConnectionPortPoller.cancelAndWait();
+                        mConnectionPortPoller = null;
+                    }
+                    if (mAdbWifiEnabled) {
+                        // In scenarios where adbd is restarted, the tls port may change.
+                        onAdbdWifiServerDisconnected(-1);
+                    }
+                    break;
+                }
             }
         }
 
@@ -1205,8 +1215,8 @@ public class AdbDebuggingManager {
                     "Logging key " + key + ", state = " + state + ", alwaysAllow = " + alwaysAllow
                             + ", lastConnectionTime = " + lastConnectionTime + ", authWindow = "
                             + authWindow);
-            StatsLog.write(StatsLog.ADB_CONNECTION_CHANGED, lastConnectionTime, authWindow, state,
-                    alwaysAllow);
+            FrameworkStatsLog.write(FrameworkStatsLog.ADB_CONNECTION_CHANGED, lastConnectionTime,
+                    authWindow, state, alwaysAllow);
         }
 
 
@@ -1853,6 +1863,7 @@ public class AdbDebuggingManager {
         public void removeKey(String key) {
             if (mKeyMap.containsKey(key)) {
                 mKeyMap.remove(key);
+                writeKeys(mKeyMap.keySet());
                 sendPersistKeyStoreMessage();
             }
         }

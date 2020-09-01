@@ -175,8 +175,6 @@
     </array>
 
     <!-- Used in ResolverTargetActionsDialogFragment -->
-    
-    <!-- Used in ResolverTargetActionsDialogFragment -->
     <string-array name="resolver_target_actions_pin">
         <item>@string/pin_target</item>
         <item>@string/app_info</item>

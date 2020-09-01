@@ -29,8 +29,10 @@ public interface RankingConfig {
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
-    boolean areBubblesAllowed(String packageName, int uid);
+    int getBubblePreference(String packageName, int uid);
     boolean bubblesEnabled();
+    /** Returns true when feature is enabled that shows media notifications in quick settings. */
+    boolean isMediaNotificationFilteringEnabled();
     boolean isGroupBlocked(String packageName, int uid, String groupId);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
@@ -41,10 +43,16 @@ public interface RankingConfig {
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty);
     boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp, boolean hasDndAccess);
-    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel, boolean fromUser);
-    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
+    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel,
+            boolean fromUser);
+    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
+            boolean includeDeleted);
+    NotificationChannel getConversationNotificationChannel(String pkg, int uid, String channelId,
+            String conversationId, boolean returnParentIfNoConversationChannel,
+            boolean includeDeleted);
     void deleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannels(String pkg, int uid);
-    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid, boolean includeDeleted);
+    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
+            boolean includeDeleted);
 }

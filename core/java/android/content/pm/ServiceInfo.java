@@ -147,6 +147,28 @@ public class ServiceInfo extends ComponentInfo
     public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION = 1 << 5;
 
     /**
+     * Constant corresponding to {@code camera} in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Use the camera device or record video.
+     * For apps with <code>targetSdkVersion</code> {@link android.os.Build.VERSION_CODES#R} and
+     * above, a foreground service will not be able to access the camera if this type is not
+     * specified in the manifest and in
+     * {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_CAMERA = 1 << 6;
+
+    /**
+     * Constant corresponding to {@code microphone} in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Use the microphone device or record audio.
+     * For apps with <code>targetSdkVersion</code> {@link android.os.Build.VERSION_CODES#R} and
+     * above, a foreground service will not be able to access the microphone if this type is not
+     * specified in the manifest and in
+     * {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_MICROPHONE = 1 << 7;
+
+    /**
      * A special value indicates to use all types set in manifest file.
      */
     public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1;
@@ -166,6 +188,8 @@ public class ServiceInfo extends ComponentInfo
             FOREGROUND_SERVICE_TYPE_LOCATION,
             FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
             FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION,
+            FOREGROUND_SERVICE_TYPE_CAMERA,
+            FOREGROUND_SERVICE_TYPE_MICROPHONE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ForegroundServiceType {}
@@ -220,7 +244,7 @@ public class ServiceInfo extends ComponentInfo
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
-        dest.writeString(permission);
+        dest.writeString8(permission);
         dest.writeInt(flags);
         dest.writeInt(mForegroundServiceType);
     }
@@ -237,7 +261,7 @@ public class ServiceInfo extends ComponentInfo
 
     private ServiceInfo(Parcel source) {
         super(source);
-        permission = source.readString();
+        permission = source.readString8();
         flags = source.readInt();
         mForegroundServiceType = source.readInt();
     }

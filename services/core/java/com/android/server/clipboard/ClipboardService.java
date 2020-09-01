@@ -400,7 +400,7 @@ public class ClipboardService extends SystemService {
                 final int intendingUid = getIntendingUid(callingPackage, userId);
                 final int intendingUserId = UserHandle.getUserId(intendingUid);
                 if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
-                        intendingUid, intendingUserId)
+                        intendingUid, intendingUserId, false)
                         || isDeviceLocked(intendingUserId)) {
                     return null;
                 }
@@ -416,7 +416,7 @@ public class ClipboardService extends SystemService {
                 final int intendingUid = getIntendingUid(callingPackage, userId);
                 final int intendingUserId = UserHandle.getUserId(intendingUid);
                 if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
-                        intendingUid, intendingUserId)
+                        intendingUid, intendingUserId, false)
                         || isDeviceLocked(intendingUserId)) {
                     return false;
                 }
@@ -450,7 +450,7 @@ public class ClipboardService extends SystemService {
                 final int intendingUid = getIntendingUid(callingPackage, userId);
                 final int intendingUserId = UserHandle.getUserId(intendingUid);
                 if (!clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, callingPackage,
-                        intendingUid, intendingUserId)
+                        intendingUid, intendingUserId, false)
                         || isDeviceLocked(intendingUserId)) {
                     return false;
                 }
@@ -740,14 +740,21 @@ public class ClipboardService extends SystemService {
 
     private boolean clipboardAccessAllowed(int op, String callingPackage, int uid,
             @UserIdInt int userId) {
-        // Check the AppOp.
-        if (mAppOps.noteOp(op, uid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
-            return false;
-        }
+        return clipboardAccessAllowed(op, callingPackage, uid, userId, true);
+    }
+
+    private boolean clipboardAccessAllowed(int op, String callingPackage, int uid,
+            @UserIdInt int userId, boolean shouldNoteOp) {
+
+        boolean allowed = false;
+
+        // First, verify package ownership to ensure use below is safe.
+        mAppOps.checkPackage(uid, callingPackage);
+
         // Shell can access the clipboard for testing purposes.
         if (mPm.checkPermission(android.Manifest.permission.READ_CLIPBOARD_IN_BACKGROUND,
                     callingPackage) == PackageManager.PERMISSION_GRANTED) {
-            return true;
+            allowed = true;
         }
         // The default IME is always allowed to access the clipboard.
         String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
@@ -755,7 +762,7 @@ public class ClipboardService extends SystemService {
         if (!TextUtils.isEmpty(defaultIme)) {
             final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
             if (imePkg.equals(callingPackage)) {
-                return true;
+                allowed = true;
             }
         }
 
@@ -766,8 +773,10 @@ public class ClipboardService extends SystemService {
                 // at the same time. e.x. SystemUI. It needs to check the window focus of
                 // Binder.getCallingUid(). Without checking, the user X can't copy any thing from
                 // INTERNAL_SYSTEM_WINDOW to the other applications.
-                boolean allowed = mWm.isUidFocused(uid)
-                        || isInternalSysWindowAppWithWindowFocus(callingPackage);
+                if (!allowed) {
+                    allowed = mWm.isUidFocused(uid)
+                            || isInternalSysWindowAppWithWindowFocus(callingPackage);
+                }
                 if (!allowed && mContentCaptureInternal != null) {
                     // ...or the Content Capture Service
                     // The uid parameter of mContentCaptureInternal.isContentCaptureServiceForUser
@@ -786,17 +795,28 @@ public class ClipboardService extends SystemService {
                     // userId must pass intending userId. i.e. user#10.
                     allowed = mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId);
                 }
-                if (!allowed) {
-                    Slog.e(TAG, "Denying clipboard access to " + callingPackage
-                            + ", application is not in focus neither is a system service for "
-                            + "user " + userId);
-                }
-                return allowed;
+                break;
             case AppOpsManager.OP_WRITE_CLIPBOARD:
                 // Writing is allowed without focus.
-                return true;
+                allowed = true;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown clipboard appop " + op);
         }
+        if (!allowed) {
+            Slog.e(TAG, "Denying clipboard access to " + callingPackage
+                    + ", application is not in focus nor is it a system service for "
+                    + "user " + userId);
+            return false;
+        }
+        // Finally, check the app op.
+        int appOpsResult;
+        if (shouldNoteOp) {
+            appOpsResult = mAppOps.noteOp(op, uid, callingPackage);
+        } else {
+            appOpsResult = mAppOps.checkOp(op, uid, callingPackage);
+        }
+
+        return appOpsResult == AppOpsManager.MODE_ALLOWED;
     }
 }

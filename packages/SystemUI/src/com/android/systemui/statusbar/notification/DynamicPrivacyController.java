@@ -16,16 +16,13 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.content.Context;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,12 +31,11 @@ import javax.inject.Singleton;
  * A controller which dynamically controls the visibility of Notification content
  */
 @Singleton
-public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMethodChangedListener {
+public class DynamicPrivacyController implements KeyguardStateController.Callback {
 
-    private final UnlockMethodCache mUnlockMethodCache;
+    private final KeyguardStateController mKeyguardStateController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final StatusBarStateController mStateController;
-    private final KeyguardMonitor mKeyguardMonitor;
     private ArraySet<Listener> mListeners = new ArraySet<>();
 
     private boolean mLastDynamicUnlocked;
@@ -47,32 +43,25 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Inject
-    DynamicPrivacyController(Context context,
-            KeyguardMonitor keyguardMonitor,
-            NotificationLockscreenUserManager notificationLockscreenUserManager,
-            StatusBarStateController stateController) {
-        this(notificationLockscreenUserManager, keyguardMonitor,
-                UnlockMethodCache.getInstance(context),
-                stateController);
-    }
-
-    @VisibleForTesting
     DynamicPrivacyController(NotificationLockscreenUserManager notificationLockscreenUserManager,
-            KeyguardMonitor keyguardMonitor,
-            UnlockMethodCache unlockMethodCache,
+            KeyguardStateController keyguardStateController,
             StatusBarStateController stateController) {
         mLockscreenUserManager = notificationLockscreenUserManager;
         mStateController = stateController;
-        mUnlockMethodCache = unlockMethodCache;
-        mKeyguardMonitor = keyguardMonitor;
-        mUnlockMethodCache.addListener(this);
+        mKeyguardStateController = keyguardStateController;
+        mKeyguardStateController.addCallback(this);
         mLastDynamicUnlocked = isDynamicallyUnlocked();
     }
 
     @Override
-    public void onUnlockMethodStateChanged() {
+    public void onKeyguardFadingAwayChanged() {
+        onUnlockedChanged();
+    }
+
+    @Override
+    public void onUnlockedChanged() {
         if (isDynamicPrivacyEnabled()) {
-            // We only want to notify our listeners if dynamic privacy is actually active
+            // We only want to notify our listeners if dynamic privacy is actually enabled
             boolean dynamicallyUnlocked = isDynamicallyUnlocked();
             if (dynamicallyUnlocked != mLastDynamicUnlocked || mCacheInvalid) {
                 mLastDynamicUnlocked = dynamicallyUnlocked;
@@ -92,8 +81,9 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
     }
 
     public boolean isDynamicallyUnlocked() {
-        return (mUnlockMethodCache.canSkipBouncer() || mKeyguardMonitor.isKeyguardGoingAway()
-                || mKeyguardMonitor.isKeyguardFadingAway())
+        return (mKeyguardStateController.canDismissLockScreen()
+                || mKeyguardStateController.isKeyguardGoingAway()
+                || mKeyguardStateController.isKeyguardFadingAway())
                 && isDynamicPrivacyEnabled();
     }
 
@@ -107,7 +97,7 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
      */
     public boolean isInLockedDownShade() {
         if (!mStatusBarKeyguardViewManager.isShowing()
-                || !mUnlockMethodCache.isMethodSecure()) {
+                || !mKeyguardStateController.isMethodSecure()) {
             return false;
         }
         int state = mStateController.getState();

@@ -20,13 +20,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.LongSparseArray;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Pools.Pool;
 import android.util.Pools.SynchronizedPool;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.glrenderer.BasicTexture;
@@ -164,9 +163,7 @@ public class TiledImageRenderer {
 
     private static boolean isHighResolution(Context context) {
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager)
-                context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(metrics);
+        context.getDisplayNoVerify().getRealMetrics(metrics);
         return metrics.heightPixels > 2048 ||  metrics.widthPixels > 2048;
     }
 

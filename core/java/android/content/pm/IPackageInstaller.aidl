@@ -51,8 +51,13 @@ interface IPackageInstaller {
     void uninstall(in VersionedPackage versionedPackage, String callerPackageName, int flags,
             in IntentSender statusReceiver, int userId);
 
+    void uninstallExistingPackage(in VersionedPackage versionedPackage, String callerPackageName,
+            in IntentSender statusReceiver, int userId);
+
     void installExistingPackage(String packageName, int installFlags, int installReason,
             in IntentSender statusReceiver, int userId, in List<String> whiteListedPermissions);
 
     void setPermissionsResult(int sessionId, boolean accepted);
+
+    void bypassNextStagedInstallerCheck(boolean value);
 }

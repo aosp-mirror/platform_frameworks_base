@@ -436,9 +436,9 @@ void SetLongVersionCode(xml::Element* manifest, uint64_t version) {
 }
 
 std::regex GetRegularExpression(const std::string &input) {
-  // Standard ECMAScript grammar plus case insensitive.
+  // Standard ECMAScript grammar.
   std::regex case_insensitive(
-      input, std::regex_constants::icase | std::regex_constants::ECMAScript);
+      input, std::regex_constants::ECMAScript);
   return case_insensitive;
 }
 

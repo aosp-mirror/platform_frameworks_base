@@ -115,7 +115,7 @@ message GlobalSettingsProto {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
         optional SettingProto backup_agent_timeout_parameters = 1;
-        optional SettingProto backup_multi_user_enabled = 2;
+        reserved 2; // Used to be backup_multi_user_enabled which was never used
     }
     optional Backup backup = 146;
 
@@ -169,6 +169,7 @@ message GlobalSettingsProto {
 
     optional SettingProto boot_count = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto bugreport_in_power_menu = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cached_apps_freezer_enabled = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto call_auto_retry = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message CaptivePortal {
@@ -281,6 +282,7 @@ message GlobalSettingsProto {
         optional SettingProto force_rtl = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto emulate_display_cutout = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto force_desktop_mode_on_external_displays = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto enable_sizecompat_freeform = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Development development = 39;
 
@@ -385,7 +387,6 @@ message GlobalSettingsProto {
 
         optional SettingProto provisioned = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto factory_reset_timeout_millis = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto unsupported_countries = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Euicc euicc = 52;
 
@@ -566,6 +567,7 @@ message GlobalSettingsProto {
     optional LowPowerMode low_power_mode = 70;
 
     optional SettingProto lte_service_forced = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    repeated SettingProto max_error_bytes = 151;
     optional SettingProto mdc_initial_max_retry = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Mhl {
@@ -856,6 +858,7 @@ message GlobalSettingsProto {
         optional SettingProto low_battery_sounds_enabled = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto trusted = 13;
         optional SettingProto unlock = 14;
+        optional SettingProto wireless_charging_started = 15;
     }
     optional Sounds sounds = 110;
 
@@ -994,7 +997,7 @@ message GlobalSettingsProto {
         optional SettingProto display_certification_on = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto display_wps_config = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto networks_available_notification_on = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto carrier_networks_available_notification_on = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 7; reserved "carrier_networks_available_notification_on";
         optional SettingProto networks_available_repeat_delay = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto country_code = 9;
         optional SettingProto framework_scan_interval_ms = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -1012,7 +1015,7 @@ message GlobalSettingsProto {
         optional SettingProto watchdog_poor_network_test_enabled = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto suspend_optimizations_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto verbose_logging_enabled = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        reserved 25; // connected_mac_randomization_enabled
+        reserved 25; reserved "connected_mac_randomization_enabled";
         optional SettingProto max_dhcp_retry_count = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto mobile_data_transition_wakelock_timeout_ms = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Controls whether WiFi configurations created by a Device Owner app should
@@ -1024,7 +1027,7 @@ message GlobalSettingsProto {
         optional SettingProto device_owner_configs_lockdown = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto frequency_band = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto p2p_device_name = 30;
-        optional SettingProto reenable_delay_ms = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 31; reserved "reenable_delay_ms";
         optional SettingProto ephemeral_out_of_range_timeout_ms = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto on_when_proxy_disconnected = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto bounce_delay_override_ms = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];

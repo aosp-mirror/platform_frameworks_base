@@ -21,35 +21,34 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.function.Function;
 
-public abstract class SystemUI implements SysUiServiceProvider {
-    public Context mContext;
-    public Map<Class<?>, Object> mComponents;
+/**
+ * A top-level module of system UI code (sometimes called "system UI services" elsewhere in code).
+ * Which SystemUI modules are loaded can be controlled via a config resource.
+ *
+ * @see SystemUIApplication#startServicesIfNeeded()
+ */
+public abstract class SystemUI implements Dumpable {
+    protected final Context mContext;
+
+    public SystemUI(Context context) {
+        mContext = context;
+    }
 
     public abstract void start();
 
     protected void onConfigurationChanged(Configuration newConfig) {
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
     protected void onBootCompleted() {
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
-    }
-
-    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
-        if (mComponents != null) {
-            mComponents.put(interfaceType, component);
-        }
     }
 
     public static void overrideNotificationAppName(Context context, Notification.Builder n,
@@ -61,8 +60,5 @@ public abstract class SystemUI implements SysUiServiceProvider {
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, appName);
 
         n.addExtras(extras);
-    }
-
-    public interface Injector extends Function<Context, SystemUI> {
     }
 }

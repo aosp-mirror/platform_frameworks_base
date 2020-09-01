@@ -25,7 +25,9 @@ package android.drm;
  * An valid offset value is provided only from a success call to
  * {@link DrmManagerClient#closeConvertSession DrmManagerClient.closeConvertSession()}.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmConvertedStatus {
     // The following status code constants must be in sync with
     // DrmConvertedStatus.cpp. Please also update isValidStatusCode()

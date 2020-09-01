@@ -16,8 +16,10 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,44 +33,69 @@ import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class InsetsSourceProviderTest extends WindowTestsBase {
 
-    private InsetsSource mSource = new InsetsSource(TYPE_TOP_BAR);
+    private InsetsSource mSource = new InsetsSource(ITYPE_STATUS_BAR);
     private InsetsSourceProvider mProvider;
+    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME);
+    private InsetsSourceProvider mImeProvider;
 
     @Before
     public void setUp() throws Exception {
         mSource.setVisible(true);
         mProvider = new InsetsSourceProvider(mSource,
                 mDisplayContent.getInsetsStateController(), mDisplayContent);
+        mImeProvider = new InsetsSourceProvider(mImeSource,
+                mDisplayContent.getInsetsStateController(), mDisplayContent);
     }
 
     @Test
     public void testPostLayout() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        topBar.getFrameLw().set(0, 0, 500, 100);
-        topBar.mHasSurface = true;
-        mProvider.setWindow(topBar, null);
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        statusBar.mHasSurface = true;
+        mProvider.setWindow(statusBar, null, null);
         mProvider.onPostLayout();
         assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
         assertEquals(Insets.of(0, 100, 0, 0),
                 mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
                         false /* ignoreVisibility */));
+        assertEquals(Insets.of(0, 100, 0, 0),
+                mProvider.getSource().calculateVisibleInsets(new Rect(0, 0, 500, 500)));
+    }
+
+    @Test
+    public void testPostLayout_givenInsets() {
+        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        ime.getFrameLw().set(0, 0, 500, 100);
+        ime.getGivenContentInsetsLw().set(0, 0, 0, 60);
+        ime.getGivenVisibleInsetsLw().set(0, 0, 0, 75);
+        ime.mHasSurface = true;
+        mProvider.setWindow(ime, null, null);
+        mProvider.onPostLayout();
+        assertEquals(new Rect(0, 0, 500, 40), mProvider.getSource().getFrame());
+        assertEquals(new Rect(0, 0, 500, 25), mProvider.getSource().getVisibleFrame());
+        assertEquals(Insets.of(0, 40, 0, 0),
+                mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
+                        false /* ignoreVisibility */));
+        assertEquals(Insets.of(0, 25, 0, 0),
+                mProvider.getSource().calculateVisibleInsets(new Rect(0, 0, 500, 500)));
     }
 
     @Test
     public void testPostLayout_invisible() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        topBar.getFrameLw().set(0, 0, 500, 100);
-        mProvider.setWindow(topBar, null);
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        mProvider.setWindow(statusBar, null, null);
         mProvider.onPostLayout();
         assertEquals(Insets.NONE, mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
                         false /* ignoreVisibility */));
@@ -76,50 +103,142 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout_frameProvider() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
-        topBar.getFrameLw().set(0, 0, 500, 100);
-        mProvider.setWindow(topBar,
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        statusBar.mHasSurface = true;
+        mProvider.setWindow(statusBar,
                 (displayFrames, windowState, rect) -> {
                     rect.set(10, 10, 20, 20);
-                });
+                }, null);
         mProvider.onPostLayout();
         assertEquals(new Rect(10, 10, 20, 20), mProvider.getSource().getFrame());
     }
 
     @Test
     public void testUpdateControlForTarget() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
-        topBar.getFrameLw().set(0, 0, 500, 100);
-        mProvider.setWindow(topBar, null);
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+
+        // We must not have control or control target before we have the insets source window.
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+
+        // We can have the control or the control target after we have the insets source window.
+        mProvider.setWindow(statusBar, null, null);
         mProvider.updateControlForTarget(target, false /* force */);
-        assertNotNull(mProvider.getControl());
+        assertNotNull(mProvider.getControl(target));
+        assertNotNull(mProvider.getControlTarget());
+
+        // We must not have control or control target while we are performing seamless rotation.
+        // And the control and the control target must not be updated during that.
+        mProvider.startSeamlessRotation();
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+
+        // We can have the control and the control target after seamless rotation.
+        mProvider.finishSeamlessRotation(false /* timeout */);
+        mProvider.updateControlForTarget(target, false /* force */);
+        assertNotNull(mProvider.getControl(target));
+        assertNotNull(mProvider.getControlTarget());
+
+        // We can clear the control and the control target.
         mProvider.updateControlForTarget(null, false /* force */);
-        assertNull(mProvider.getControl());
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+
+        // We must not have control or control target if the insets source window doesn't have a
+        // surface.
+        statusBar.setSurfaceControl(null);
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+    }
+
+    @Test
+    public void testUpdateControlForFakeTarget() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        mProvider.setWindow(statusBar, null, null);
+        mProvider.updateControlForFakeTarget(target);
+        assertNotNull(mProvider.getControl(target));
+        assertNull(mProvider.getControl(target).getLeash());
+        mProvider.updateControlForFakeTarget(null);
+        assertNull(mProvider.getControl(target));
+    }
+
+    @Test
+    public void testUpdateSourceFrameForIme() {
+        final WindowState inputMethod = createWindow(null, TYPE_INPUT_METHOD, "inputMethod");
+
+        inputMethod.getFrameLw().set(new Rect(0, 400, 500, 500));
+
+        mImeProvider.setWindow(inputMethod, null, null);
+        mImeProvider.setServerVisible(false);
+        mImeSource.setVisible(true);
+        mImeProvider.updateSourceFrame();
+        assertEquals(new Rect(0, 0, 0, 0), mImeSource.getFrame());
+        Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
+                false /* ignoreVisibility */);
+        assertEquals(Insets.of(0, 0, 0, 0), insets);
+
+        mImeProvider.setServerVisible(true);
+        mImeSource.setVisible(true);
+        mImeProvider.updateSourceFrame();
+        assertEquals(inputMethod.getFrameLw(), mImeSource.getFrame());
+        insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
+                false /* ignoreVisibility */);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
     }
 
     @Test
     public void testInsetsModified() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
-        topBar.getFrameLw().set(0, 0, 500, 100);
-        mProvider.setWindow(topBar, null);
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        mProvider.setWindow(statusBar, null, null);
         mProvider.updateControlForTarget(target, false /* force */);
         InsetsState state = new InsetsState();
-        state.getSource(TYPE_TOP_BAR).setVisible(false);
-        mProvider.onInsetsModified(target, state.getSource(TYPE_TOP_BAR));
+        state.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        mProvider.onInsetsModified(target, state.getSource(ITYPE_STATUS_BAR));
         assertFalse(mSource.isVisible());
     }
 
     @Test
     public void testInsetsModified_noControl() {
-        final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
-        topBar.getFrameLw().set(0, 0, 500, 100);
-        mProvider.setWindow(topBar, null);
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        mProvider.setWindow(statusBar, null, null);
         InsetsState state = new InsetsState();
-        state.getSource(TYPE_TOP_BAR).setVisible(false);
-        mProvider.onInsetsModified(target, state.getSource(TYPE_TOP_BAR));
+        state.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        mProvider.onInsetsModified(target, state.getSource(ITYPE_STATUS_BAR));
         assertTrue(mSource.isVisible());
+    }
+
+    @Test
+    public void testInsetGeometries() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        statusBar.mHasSurface = true;
+        mProvider.setWindow(statusBar, null, null);
+        mProvider.onPostLayout();
+        assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
+        // Still apply top insets if window overlaps even if it's top doesn't exactly match
+        // the inset-window's top.
+        assertEquals(Insets.of(0, 100, 0, 0),
+                mProvider.getSource().calculateInsets(new Rect(0, -100, 500, 400),
+                        false /* ignoreVisibility */));
+
+        // Don't apply left insets if window is left-of inset-window but still overlaps
+        statusBar.getFrameLw().set(100, 0, 0, 0);
+        assertEquals(Insets.of(0, 0, 0, 0),
+                mProvider.getSource().calculateInsets(new Rect(-100, 0, 400, 500),
+                        false /* ignoreVisibility */));
     }
 }

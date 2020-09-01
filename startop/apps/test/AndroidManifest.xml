@@ -37,6 +37,18 @@
         </activity>
 
         <activity
+            android:label="CPU Intensive Benchmark Test"
+            android:name=".CPUIntensiveBenchmarkActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:label="Empty Activity Layout Test"
             android:name=".EmptyActivity"
             android:exported="true" >
@@ -61,6 +73,18 @@
         </activity>
 
         <activity
+            android:label="Initialization Check Overhead Test"
+            android:name=".InitCheckOverheadBenchmarkActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:label="TextView Layout Test"
             android:name=".TextViewInflationActivity"
             android:exported="true" >
@@ -71,6 +95,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:label="Interactive Microbenchmarks"
+            android:name=".InteractiveMicrobenchmarkActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:label="Non-interactive Microbenchmarks"
+            android:name=".NonInteractiveMicrobenchmarkActivity"
+            android:exported="true" />
+
     </application>
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

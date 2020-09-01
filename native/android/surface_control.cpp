@@ -100,7 +100,11 @@ static bool isDataSpaceValid(const sp<SurfaceControl>& surfaceControl, ADataSpac
             return getWideColorSupport(surfaceControl);
         // These data space need HDR support.
         case HAL_DATASPACE_BT2020_PQ:
-            return getHdrSupport(surfaceControl);
+            if (!getHdrSupport(surfaceControl)) {
+                ALOGE("Invalid dataspace - device does not support hdr");
+                return false;
+            }
+            return true;
         default:
             return false;
     }
@@ -290,7 +294,7 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
 
         auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
 
-        for (const auto& [surfaceControl, acquireTime, previousReleaseFence] : surfaceControlStats) {
+        for (const auto& [surfaceControl, latchTime, acquireTime, presentFence, previousReleaseFence, transformHint, frameEvents] : surfaceControlStats) {
             ASurfaceControl* aSurfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
             aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
             aSurfaceControlStats[aSurfaceControl].previousReleaseFence = previousReleaseFence;
@@ -458,10 +462,11 @@ void ASurfaceTransaction_setBufferDataSpace(ASurfaceTransaction* aSurfaceTransac
     CHECK_NOT_NULL(aSurfaceControl);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    LOG_ALWAYS_FATAL_IF(!isDataSpaceValid(surfaceControl, aDataSpace), "invalid dataspace");
-
+    if (!isDataSpaceValid(surfaceControl, aDataSpace)) {
+        ALOGE("Failed to set buffer dataspace - invalid dataspace");
+        return;
+    }
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
-
     transaction->setDataspace(surfaceControl, static_cast<ui::Dataspace>(aDataSpace));
 }
 
@@ -527,7 +532,10 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
     CHECK_NOT_NULL(aSurfaceControl);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    LOG_ALWAYS_FATAL_IF(!isDataSpaceValid(surfaceControl, dataspace), "invalid dataspace");
+    if (!isDataSpaceValid(surfaceControl, dataspace)) {
+        ALOGE("Failed to set buffer dataspace - invalid dataspace");
+        return;
+    }
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
     half3 color;
@@ -536,4 +544,14 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
     color.b = b;
 
     transaction->setBackgroundColor(surfaceControl, color, alpha, static_cast<ui::Dataspace>(dataspace));
+}
+
+void ASurfaceTransaction_setFrameRate(ASurfaceTransaction* aSurfaceTransaction,
+                                      ASurfaceControl* aSurfaceControl, float frameRate,
+                                      int8_t compatibility) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    transaction->setFrameRate(surfaceControl, frameRate, compatibility);
 }

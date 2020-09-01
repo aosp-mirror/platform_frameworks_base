@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
@@ -46,6 +47,7 @@ import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenPolicy;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -169,6 +171,78 @@ public class NotificationManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED =
             "android.app.action.NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED";
+
+    /**
+     * Intent that is broadcast when the status of an {@link AutomaticZenRule} has changed.
+     *
+     * <p>Use this to know whether you need to continue monitor to device state in order to
+     * provide up-to-date states (with {@link #setAutomaticZenRuleState(String, Condition)}) for
+     * this rule.</p>
+     *
+     * Input: nothing
+     * Output: {@link #EXTRA_AUTOMATIC_ZEN_RULE_ID}
+     * Output: {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS}
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED =
+            "android.app.action.AUTOMATIC_ZEN_RULE_STATUS_CHANGED";
+
+    /**
+     * Integer extra for {@link #ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED} containing the state of
+     * the {@link AutomaticZenRule}.
+     *
+     * <p>
+     *     The value will be one of {@link #AUTOMATIC_RULE_STATUS_ENABLED},
+     *     {@link #AUTOMATIC_RULE_STATUS_DISABLED}, {@link #AUTOMATIC_RULE_STATUS_REMOVED},
+     *     {@link #AUTOMATIC_RULE_STATUS_UNKNOWN}.
+     * </p>
+     */
+    public static final String EXTRA_AUTOMATIC_ZEN_RULE_STATUS =
+            "android.app.extra.AUTOMATIC_ZEN_RULE_STATUS";
+
+    /**
+     * String extra for {@link #ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED} containing the id of the
+     * {@link AutomaticZenRule} (see {@link #addAutomaticZenRule(AutomaticZenRule)}) that has
+     * changed.
+     */
+    public static final String EXTRA_AUTOMATIC_ZEN_RULE_ID =
+            "android.app.extra.AUTOMATIC_ZEN_RULE_ID";
+
+    /** @hide */
+    @IntDef(prefix = { "AUTOMATIC_RULE_STATUS" }, value = {
+            AUTOMATIC_RULE_STATUS_ENABLED, AUTOMATIC_RULE_STATUS_DISABLED,
+            AUTOMATIC_RULE_STATUS_REMOVED, AUTOMATIC_RULE_STATUS_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutomaticZenRuleStatus {}
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the current status of the
+     * rule is unknown at your target sdk version, and you should continue to provide state changes
+     * via {@link #setAutomaticZenRuleState(String, Condition)}.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_UNKNOWN = -1;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule currently
+     * exists and is enabled. You should continue to provide state changes via
+     * {@link #setAutomaticZenRuleState(String, Condition)}.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_ENABLED = 1;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule currently
+     * exists but is disabled. You do not need to continue to provide state changes via
+     * {@link #setAutomaticZenRuleState(String, Condition)} until the rule is reenabled.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_DISABLED = 2;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule has been
+     * deleted. Further calls to {@link #setAutomaticZenRuleState(String, Condition)} will be
+     * ignored.
+     */
+    public static final int AUTOMATIC_RULE_STATUS_REMOVED = 3;
 
     /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
@@ -378,6 +452,19 @@ public class NotificationManager {
      */
     public static final int IMPORTANCE_MAX = 5;
 
+    /**
+     * @hide
+     */
+    public static final int BUBBLE_PREFERENCE_NONE = 0;
+    /**
+     * @hide
+     */
+    public static final int BUBBLE_PREFERENCE_ALL = 1;
+    /**
+     * @hide
+     */
+    public static final int BUBBLE_PREFERENCE_SELECTED = 2;
+
     @UnsupportedAppUsage
     private static INotificationManager sService;
 
@@ -466,7 +553,7 @@ public class NotificationManager {
      * @param notification A {@link Notification} object describing what to
      *        show the user. Must not be null.
      */
-    public void notifyAsPackage(@NonNull String targetPackage, @NonNull String tag, int id,
+    public void notifyAsPackage(@NonNull String targetPackage, @Nullable String tag, int id,
             @NonNull Notification notification) {
         INotificationManager service = getService();
         String sender = mContext.getPackageName();
@@ -519,10 +606,7 @@ public class NotificationManager {
         }
 
         notification.reduceImageSizes(mContext);
-
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        boolean isLowRam = am.isLowRamDevice();
-        return Builder.maybeCloneStrippedForDelivery(notification, isLowRam, mContext);
+        return Builder.maybeCloneStrippedForDelivery(notification);
     }
 
     private void fixLegacySmallIcon(Notification n, String pkg) {
@@ -532,9 +616,13 @@ public class NotificationManager {
     }
 
     /**
-     * Cancel a previously shown notification.  If it's transient, the view
-     * will be hidden.  If it's persistent, it will be removed from the status
-     * bar.
+     * Cancels a previously posted notification.
+     *
+     *  <p>If the notification does not currently represent a
+     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
+     *  removed from the UI and live
+     *  {@link android.service.notification.NotificationListenerService notification listeners}
+     *  will be informed so they can remove the notification from their UIs.</p>
      */
     public void cancel(int id)
     {
@@ -542,13 +630,46 @@ public class NotificationManager {
     }
 
     /**
-     * Cancel a previously shown notification.  If it's transient, the view
-     * will be hidden.  If it's persistent, it will be removed from the status
-     * bar.
+     * Cancels a previously posted notification.
+     *
+     *  <p>If the notification does not currently represent a
+     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
+     *  removed from the UI and live
+     *  {@link android.service.notification.NotificationListenerService notification listeners}
+     *  will be informed so they can remove the notification from their UIs.</p>
      */
-    public void cancel(String tag, int id)
+    public void cancel(@Nullable String tag, int id)
     {
         cancelAsUser(tag, id, mContext.getUser());
+    }
+
+    /**
+     * Cancels a previously posted notification.
+     *
+     * <p>If the notification does not currently represent a
+     * {@link Service#startForeground(int, Notification) foreground service}, it will be
+     * removed from the UI and live
+     * {@link android.service.notification.NotificationListenerService notification listeners}
+     * will be informed so they can remove the notification from their UIs.</p>
+     *
+     * <p>This method may be used by {@link #getNotificationDelegate() a notification delegate} to
+     * cancel notifications that they have posted via {@link #notifyAsPackage(String, String, int,
+     * Notification)}.</p>
+     *
+     * @param targetPackage The package to cancel the notification as. If this package is not your
+     *                      package, you can only cancel notifications you posted with
+     *                      {@link #notifyAsPackage(String, String, int, Notification).
+     * @param tag A string identifier for this notification.  May be {@code null}.
+     * @param id An identifier for this notification.
+     */
+    public void cancelAsPackage(@NonNull String targetPackage, @Nullable String tag, int id) {
+        INotificationManager service = getService();
+        try {
+            service.cancelNotificationWithTag(targetPackage, mContext.getOpPackageName(),
+                    tag, id, mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -561,7 +682,8 @@ public class NotificationManager {
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
         try {
-            service.cancelNotificationWithTag(pkg, tag, id, user.getIdentifier());
+            service.cancelNotificationWithTag(
+                    pkg, mContext.getOpPackageName(), tag, id, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -733,6 +855,27 @@ public class NotificationManager {
     }
 
     /**
+     * Returns the notification channel settings for a given channel and
+     * {@link ShortcutInfo#getId() conversation id}.
+     *
+     * <p>The channel must belong to your package, or to a package you are an approved notification
+     * delegate for (see {@link #canNotifyAsPackage(String)}), or it will not be returned. To query
+     * a channel as a notification delegate, call this method from a context created for that
+     * package (see {@link Context#createPackageContext(String, int)}).</p>
+     */
+    public @Nullable NotificationChannel getNotificationChannel(@NonNull String channelId,
+            @NonNull String conversationId) {
+        INotificationManager service = getService();
+        try {
+            return service.getConversationNotificationChannel(mContext.getOpPackageName(),
+                    mContext.getUserId(), mContext.getPackageName(), channelId, true,
+                    conversationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns all notification channels belonging to the calling package.
      *
      * <p>Approved notification delegates (see {@link #canNotifyAsPackage(String)}) can query
@@ -887,9 +1030,15 @@ public class NotificationManager {
     }
 
     /**
-     * @hide
+     * Returns the currently applied notification policy.
+     *
+     * <p>
+     * If {@link #getCurrentInterruptionFilter} is equal to {@link #INTERRUPTION_FILTER_ALL},
+     * then the consolidated notification policy will match the default notification policy
+     * returned by {@link #getNotificationPolicy}.
+     * </p>
      */
-    public NotificationManager.Policy getConsolidatedNotificationPolicy() {
+    public @NonNull NotificationManager.Policy getConsolidatedNotificationPolicy() {
         INotificationManager service = getService();
         try {
             return service.getConsolidatedNotificationPolicy();
@@ -914,7 +1063,7 @@ public class NotificationManager {
      * Returns AutomaticZenRules owned by the caller.
      *
      * <p>
-     * Throws a SecurityException if policy access is granted to this package.
+     * Throws a SecurityException if policy access is not granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      */
     public Map<String, AutomaticZenRule> getAutomaticZenRules() {
@@ -938,7 +1087,7 @@ public class NotificationManager {
      * Returns the AutomaticZenRule with the given id, if it exists and the caller has access.
      *
      * <p>
-     * Throws a SecurityException if policy access is granted to this package.
+     * Throws a SecurityException if policy access is not granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>
@@ -958,7 +1107,7 @@ public class NotificationManager {
      * Creates the given zen rule.
      *
      * <p>
-     * Throws a SecurityException if policy access is granted to this package.
+     * Throws a SecurityException if policy access is not granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * @param automaticZenRule the rule to create.
@@ -977,7 +1126,7 @@ public class NotificationManager {
      * Updates the given zen rule.
      *
      * <p>
-     * Throws a SecurityException if policy access is granted to this package.
+     * Throws a SecurityException if policy access is not granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>
@@ -1019,7 +1168,7 @@ public class NotificationManager {
      * Deletes the automatic zen rule with the given id.
      *
      * <p>
-     * Throws a SecurityException if policy access is granted to this package.
+     * Throws a SecurityException if policy access is not granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>
@@ -1077,7 +1226,7 @@ public class NotificationManager {
 
 
     /**
-     * Sets whether notifications posted by this app can appear outside of the
+     * Gets whether all notifications posted by this app can appear outside of the
      * notification shade, floating over other apps' content.
      *
      * <p>This value will be ignored for notifications that are posted to channels that do not
@@ -1420,20 +1569,34 @@ public class NotificationManager {
         public static final int PRIORITY_CATEGORY_MEDIA = 1 << 6;
         /**System (catch-all for non-never suppressible sounds) are prioritized */
         public static final int PRIORITY_CATEGORY_SYSTEM = 1 << 7;
+        /**
+         * Conversations are allowed through DND.
+         */
+        public static final int PRIORITY_CATEGORY_CONVERSATIONS = 1 << 8;
 
         /**
          * @hide
          */
         public static final int[] ALL_PRIORITY_CATEGORIES = {
-            PRIORITY_CATEGORY_ALARMS,
-            PRIORITY_CATEGORY_MEDIA,
-            PRIORITY_CATEGORY_SYSTEM,
-            PRIORITY_CATEGORY_REMINDERS,
-            PRIORITY_CATEGORY_EVENTS,
-            PRIORITY_CATEGORY_MESSAGES,
-            PRIORITY_CATEGORY_CALLS,
-            PRIORITY_CATEGORY_REPEAT_CALLERS,
+                PRIORITY_CATEGORY_ALARMS,
+                PRIORITY_CATEGORY_MEDIA,
+                PRIORITY_CATEGORY_SYSTEM,
+                PRIORITY_CATEGORY_REMINDERS,
+                PRIORITY_CATEGORY_EVENTS,
+                PRIORITY_CATEGORY_MESSAGES,
+                PRIORITY_CATEGORY_CALLS,
+                PRIORITY_CATEGORY_REPEAT_CALLERS,
+                PRIORITY_CATEGORY_CONVERSATIONS,
         };
+
+        /** @hide */
+        @IntDef(prefix = { "PRIORITY_SENDERS_" }, value = {
+                PRIORITY_SENDERS_ANY,
+                PRIORITY_SENDERS_CONTACTS,
+                PRIORITY_SENDERS_STARRED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PrioritySenders {}
 
         /** Any sender is prioritized. */
         public static final int PRIORITY_SENDERS_ANY = 0;
@@ -1441,6 +1604,31 @@ public class NotificationManager {
         public static final int PRIORITY_SENDERS_CONTACTS = 1;
         /** Only starred contacts are prioritized. */
         public static final int PRIORITY_SENDERS_STARRED = 2;
+
+
+        /** @hide */
+        @IntDef(prefix = { "CONVERSATION_SENDERS_" }, value = {
+                CONVERSATION_SENDERS_ANYONE,
+                CONVERSATION_SENDERS_IMPORTANT,
+                CONVERSATION_SENDERS_NONE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ConversationSenders {}
+        /**
+         * Used to indicate all conversations can bypass dnd.
+         */
+        public static final int CONVERSATION_SENDERS_ANYONE = ZenPolicy.CONVERSATION_SENDERS_ANYONE;
+
+        /**
+         * Used to indicate important conversations can bypass dnd.
+         */
+        public static final int CONVERSATION_SENDERS_IMPORTANT =
+                ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
+
+        /**
+         * Used to indicate no conversations can bypass dnd.
+         */
+        public static final int CONVERSATION_SENDERS_NONE = ZenPolicy.CONVERSATION_SENDERS_NONE;
 
         /** Notification categories to prioritize. Bitmask of PRIORITY_CATEGORY_* constants. */
         public final int priorityCategories;
@@ -1452,6 +1640,18 @@ public class NotificationManager {
         /** Notification senders to prioritize for messages. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
         public final int priorityMessageSenders;
+
+        /**
+         * Notification senders to prioritize for conversations. One of:
+         * {@link #CONVERSATION_SENDERS_NONE}, {@link #CONVERSATION_SENDERS_IMPORTANT},
+         * {@link #CONVERSATION_SENDERS_ANYONE}.
+         */
+        public final int priorityConversationSenders;
+
+        /**
+         * @hide
+         */
+        public static final int CONVERSATION_SENDERS_UNSET = -1;
 
         /**
          * @hide
@@ -1530,21 +1730,6 @@ public class NotificationManager {
                 SUPPRESSED_EFFECT_NOTIFICATION_LIST
         };
 
-        private static final int[] SCREEN_OFF_SUPPRESSED_EFFECTS = {
-                SUPPRESSED_EFFECT_SCREEN_OFF,
-                SUPPRESSED_EFFECT_FULL_SCREEN_INTENT,
-                SUPPRESSED_EFFECT_LIGHTS,
-                SUPPRESSED_EFFECT_AMBIENT,
-        };
-
-        private static final int[] SCREEN_ON_SUPPRESSED_EFFECTS = {
-                SUPPRESSED_EFFECT_SCREEN_ON,
-                SUPPRESSED_EFFECT_PEEK,
-                SUPPRESSED_EFFECT_STATUS_BAR,
-                SUPPRESSED_EFFECT_BADGE,
-                SUPPRESSED_EFFECT_NOTIFICATION_LIST
-        };
-
         /**
          * Visual effects to suppress for a notification that is filtered by Do Not Disturb mode.
          * Bitmask of SUPPRESSED_EFFECT_* constants.
@@ -1583,17 +1768,16 @@ public class NotificationManager {
          */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders) {
             this(priorityCategories, priorityCallSenders, priorityMessageSenders,
-                    SUPPRESSED_EFFECTS_UNSET, STATE_UNSET);
+                    SUPPRESSED_EFFECTS_UNSET, STATE_UNSET, CONVERSATION_SENDERS_UNSET);
         }
 
         /**
          * Constructs a policy for Do Not Disturb priority mode behavior.
          *
          * <p>
-         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     Apps that target API levels below {@link Build.VERSION_CODES#R} cannot
          *     change user-designated values to allow or disallow
-         *     {@link Policy#PRIORITY_CATEGORY_ALARMS}, {@link Policy#PRIORITY_CATEGORY_SYSTEM}, and
-         *     {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd.
+         *     {@link Policy#PRIORITY_CATEGORY_CONVERSATIONS}, from bypassing dnd.
          * <p>
          *     Additionally, apps that target API levels below {@link Build.VERSION_CODES#P} can
          *     only modify the {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
@@ -1617,27 +1801,69 @@ public class NotificationManager {
          */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
                 int suppressedVisualEffects) {
-            this.priorityCategories = priorityCategories;
-            this.priorityCallSenders = priorityCallSenders;
-            this.priorityMessageSenders = priorityMessageSenders;
-            this.suppressedVisualEffects = suppressedVisualEffects;
-            this.state = STATE_UNSET;
+            this(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                    suppressedVisualEffects, STATE_UNSET, CONVERSATION_SENDERS_UNSET);
+        }
+
+        /**
+         * Constructs a policy for Do Not Disturb priority mode behavior.
+         *
+         * <p>
+         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     change user-designated values to allow or disallow
+         *     {@link Policy#PRIORITY_CATEGORY_CONVERSATIONS} from bypassing dnd. If you do need
+         *     to change them, use a {@link ZenPolicy} associated with an {@link AutomaticZenRule}
+         *     instead of changing the global setting.
+         * <p>
+         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     change user-designated values to allow or disallow
+         *     {@link Policy#PRIORITY_CATEGORY_ALARMS},
+         *     {@link Policy#PRIORITY_CATEGORY_SYSTEM}, and
+         *     {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd.
+         * <p>
+         *     Additionally, apps that target API levels below {@link Build.VERSION_CODES#P} can
+         *     only modify the {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_OFF} bits of the suppressed visual effects field.
+         *     All other suppressed effects will be ignored and reconstituted from the screen on
+         *     and screen off values.
+         * <p>
+         *     Apps that target {@link Build.VERSION_CODES#P} or above can set any
+         *     suppressed visual effects. However, if any suppressed effects >
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_ON} are set, {@link #SUPPRESSED_EFFECT_SCREEN_ON}
+         *     and {@link #SUPPRESSED_EFFECT_SCREEN_OFF} will be ignored and reconstituted from
+         *     the more specific suppressed visual effect bits. Apps should migrate to targeting
+         *     specific effects instead of the deprecated {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_OFF} effects.
+         *
+         * @param priorityCategories bitmask of categories of notifications that can bypass DND.
+         * @param priorityCallSenders which callers can bypass DND.
+         * @param priorityMessageSenders which message senders can bypass DND.
+         * @param suppressedVisualEffects which visual interruptions should be suppressed from
+         *                                notifications that are filtered by DND.
+         */
+        public Policy(int priorityCategories, @PrioritySenders int priorityCallSenders,
+                @PrioritySenders int priorityMessageSenders,
+                int suppressedVisualEffects, @ConversationSenders int priorityConversationSenders) {
+            this(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                    suppressedVisualEffects, STATE_UNSET, priorityConversationSenders);
         }
 
         /** @hide */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
-                int suppressedVisualEffects, int state) {
+                int suppressedVisualEffects, int state, int priorityConversationSenders) {
             this.priorityCategories = priorityCategories;
             this.priorityCallSenders = priorityCallSenders;
             this.priorityMessageSenders = priorityMessageSenders;
             this.suppressedVisualEffects = suppressedVisualEffects;
             this.state = state;
+            this.priorityConversationSenders = priorityConversationSenders;
         }
+
 
         /** @hide */
         public Policy(Parcel source) {
             this(source.readInt(), source.readInt(), source.readInt(), source.readInt(),
-                    source.readInt());
+                    source.readInt(), source.readInt());
         }
 
         @Override
@@ -1647,6 +1873,7 @@ public class NotificationManager {
             dest.writeInt(priorityMessageSenders);
             dest.writeInt(suppressedVisualEffects);
             dest.writeInt(state);
+            dest.writeInt(priorityConversationSenders);
         }
 
         @Override
@@ -1657,7 +1884,7 @@ public class NotificationManager {
         @Override
         public int hashCode() {
             return Objects.hash(priorityCategories, priorityCallSenders, priorityMessageSenders,
-                    suppressedVisualEffects, state);
+                    suppressedVisualEffects, state, priorityConversationSenders);
         }
 
         @Override
@@ -1670,7 +1897,8 @@ public class NotificationManager {
                     && other.priorityMessageSenders == priorityMessageSenders
                     && suppressedVisualEffectsEqual(suppressedVisualEffects,
                     other.suppressedVisualEffects)
-                    && other.state == this.state;
+                    && other.state == this.state
+                    && other.priorityConversationSenders == this.priorityConversationSenders;
         }
 
         private boolean suppressedVisualEffectsEqual(int suppressedEffects,
@@ -1732,6 +1960,8 @@ public class NotificationManager {
                     + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
                     + ",priorityCallSenders=" + prioritySendersToString(priorityCallSenders)
                     + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
+                    + ",priorityConvSenders="
+                    + conversationSendersToString(priorityConversationSenders)
                     + ",suppressedVisualEffects="
                     + suppressedEffectsToString(suppressedVisualEffects)
                     + ",areChannelsBypassingDnd=" + (((state & STATE_CHANNELS_BYPASSING_DND) != 0)
@@ -1740,7 +1970,7 @@ public class NotificationManager {
         }
 
         /** @hide */
-        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long pToken = proto.start(fieldId);
 
             bitwiseToProtoEnum(proto, PolicyProto.PRIORITY_CATEGORIES, priorityCategories);
@@ -1868,6 +2098,7 @@ public class NotificationManager {
                 case PRIORITY_CATEGORY_ALARMS: return "PRIORITY_CATEGORY_ALARMS";
                 case PRIORITY_CATEGORY_MEDIA: return "PRIORITY_CATEGORY_MEDIA";
                 case PRIORITY_CATEGORY_SYSTEM: return "PRIORITY_CATEGORY_SYSTEM";
+                case PRIORITY_CATEGORY_CONVERSATIONS: return "PRIORITY_CATEGORY_CONVERSATIONS";
                 default: return "PRIORITY_CATEGORY_UNKNOWN_" + priorityCategory;
             }
         }
@@ -1881,7 +2112,25 @@ public class NotificationManager {
             }
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<Policy> CREATOR = new Parcelable.Creator<Policy>() {
+        /**
+         * @hide
+         */
+        public static @NonNull String conversationSendersToString(int priorityConversationSenders) {
+            switch (priorityConversationSenders) {
+                case CONVERSATION_SENDERS_ANYONE:
+                    return "anyone";
+                case CONVERSATION_SENDERS_IMPORTANT:
+                    return "important";
+                case CONVERSATION_SENDERS_NONE:
+                    return "none";
+                case CONVERSATION_SENDERS_UNSET:
+                    return "unset";
+            }
+            return "invalidConversationType{" + priorityConversationSenders + "}";
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<Policy> CREATOR
+                = new Parcelable.Creator<Policy>() {
             @Override
             public Policy createFromParcel(Parcel in) {
                 return new Policy(in);
@@ -1919,6 +2168,11 @@ public class NotificationManager {
         }
 
         /** @hide **/
+        public boolean allowConversations() {
+            return (priorityCategories & PRIORITY_CATEGORY_CONVERSATIONS) != 0;
+        }
+
+        /** @hide **/
         public boolean allowMessages() {
             return (priorityCategories & PRIORITY_CATEGORY_MESSAGES) != 0;
         }
@@ -1941,6 +2195,11 @@ public class NotificationManager {
         /** @hide **/
         public int allowMessagesFrom() {
             return priorityMessageSenders;
+        }
+
+        /** @hide **/
+        public int allowConversationsFrom() {
+            return priorityConversationSenders;
         }
 
         /** @hide **/

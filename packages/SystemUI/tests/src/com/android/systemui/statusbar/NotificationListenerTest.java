@@ -27,18 +27,16 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,55 +51,39 @@ public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    @Mock private NotificationPresenter mPresenter;
-    @Mock private NotificationListenerService.RankingMap mRanking;
-    @Mock private NotificationData mNotificationData;
-
-    // Dependency mocks:
-    @Mock private NotificationEntryManager mEntryManager;
-    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+    @Mock private NotificationHandler mNotificationHandler;
     @Mock private NotificationManager mNotificationManager;
 
     private NotificationListener mListener;
     private StatusBarNotification mSbn;
+    private RankingMap mRanking = new RankingMap(new Ranking[0]);
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
-        mDependency.injectTestDependency(NotificationRemoteInputManager.class,
-                mRemoteInputManager);
-        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+
+        mListener = new NotificationListener(
+                mContext,
+                mNotificationManager,
                 new Handler(TestableLooper.get(this).getLooper()));
-        mContext.addMockSystemService(NotificationManager.class, mNotificationManager);
-
-        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
-
-        mListener = new NotificationListener(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
+
+        mListener.addNotificationHandler(mNotificationHandler);
     }
 
     @Test
     public void testNotificationAddCallsAddNotification() {
         mListener.onNotificationPosted(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).addNotification(mSbn, mRanking);
-    }
-
-    @Test
-    public void testNotificationUpdateCallsUpdateNotification() {
-        when(mNotificationData.get(mSbn.getKey())).thenReturn(new NotificationEntry(mSbn));
-        mListener.onNotificationPosted(mSbn, mRanking);
-        TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).updateNotification(mSbn, mRanking);
+        verify(mNotificationHandler).onNotificationPosted(mSbn, mRanking);
     }
 
     @Test
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).removeNotification(eq(mSbn.getKey()), eq(mRanking), anyInt());
+        verify(mNotificationHandler).onNotificationRemoved(eq(mSbn), eq(mRanking), anyInt());
     }
 
     @Test
@@ -109,7 +91,7 @@ public class NotificationListenerTest extends SysuiTestCase {
         mListener.onNotificationRankingUpdate(mRanking);
         TestableLooper.get(this).processAllMessages();
         // RankingMap may be modified by plugins.
-        verify(mEntryManager).updateNotificationRanking(any());
+        verify(mNotificationHandler).onNotificationRankingUpdate(any());
     }
 
     @Test

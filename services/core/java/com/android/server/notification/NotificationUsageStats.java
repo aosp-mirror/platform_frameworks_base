@@ -41,7 +41,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
-import java.lang.Math;
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -264,9 +263,20 @@ public class NotificationUsageStats {
         }
     }
 
+    /**
+     * Call this when RemoteViews object has been removed from a notification because the images
+     * it contains are too big (even after rescaling).
+     */
+    public synchronized void registerImageRemoved(String packageName) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(packageName);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numImagesRemoved++;
+        }
+    }
+
     // Locked by this.
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
-        return getAggregatedStatsLocked(record.sbn.getPackageName());
+        return getAggregatedStatsLocked(record.getSbn().getPackageName());
     }
 
     // Locked by this.
@@ -416,6 +426,7 @@ public class NotificationUsageStats {
         public int numQuotaViolations;
         public int numUndecoratedRemoteViews;
         public long mLastAccessTime;
+        public int numImagesRemoved;
 
         public AggregatedStats(Context context, String key) {
             this.key = key;
@@ -540,6 +551,7 @@ public class NotificationUsageStats {
             maybeCount("note_over_rate", (numRateViolations - previous.numRateViolations));
             maybeCount("note_over_alert_rate", (numAlertViolations - previous.numAlertViolations));
             maybeCount("note_over_quota", (numQuotaViolations - previous.numQuotaViolations));
+            maybeCount("note_images_removed", (numImagesRemoved - previous.numImagesRemoved));
             noisyImportance.maybeCount(previous.noisyImportance);
             quietImportance.maybeCount(previous.quietImportance);
             finalImportance.maybeCount(previous.finalImportance);
@@ -573,6 +585,7 @@ public class NotificationUsageStats {
             previous.numRateViolations = numRateViolations;
             previous.numAlertViolations = numAlertViolations;
             previous.numQuotaViolations = numQuotaViolations;
+            previous.numImagesRemoved = numImagesRemoved;
             noisyImportance.update(previous.noisyImportance);
             quietImportance.update(previous.quietImportance);
             finalImportance.update(previous.finalImportance);
@@ -678,6 +691,8 @@ public class NotificationUsageStats {
             output.append("numAlertViolations=").append(numAlertViolations).append("\n");
             output.append(indentPlusTwo);
             output.append("numQuotaViolations=").append(numQuotaViolations).append("\n");
+            output.append(indentPlusTwo);
+            output.append("numImagesRemoved=").append(numImagesRemoved).append("\n");
             output.append(indentPlusTwo).append(noisyImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(quietImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(finalImportance.toString()).append("\n");
@@ -722,6 +737,7 @@ public class NotificationUsageStats {
             maybePut(dump, "numQuotaLViolations", numQuotaViolations);
             maybePut(dump, "notificationEnqueueRate", getEnqueueRate());
             maybePut(dump, "numAlertViolations", numAlertViolations);
+            maybePut(dump, "numImagesRemoved", numImagesRemoved);
             noisyImportance.maybePut(dump, previous.noisyImportance);
             quietImportance.maybePut(dump, previous.quietImportance);
             finalImportance.maybePut(dump, previous.finalImportance);
@@ -1126,7 +1142,7 @@ public class NotificationUsageStats {
                     long nowMs = System.currentTimeMillis();
                     switch (msg.what) {
                         case MSG_POST:
-                            writeEvent(r.sbn.getPostTime(), EVENT_TYPE_POST, r);
+                            writeEvent(r.getSbn().getPostTime(), EVENT_TYPE_POST, r);
                             break;
                         case MSG_CLICK:
                             writeEvent(nowMs, EVENT_TYPE_CLICK, r);
@@ -1271,7 +1287,7 @@ public class NotificationUsageStats {
 
         private void writeEvent(long eventTimeMs, int eventType, NotificationRecord r) {
             ContentValues cv = new ContentValues();
-            cv.put(COL_EVENT_USER_ID, r.sbn.getUser().getIdentifier());
+            cv.put(COL_EVENT_USER_ID, r.getSbn().getUser().getIdentifier());
             cv.put(COL_EVENT_TIME, eventTimeMs);
             cv.put(COL_EVENT_TYPE, eventType);
             putNotificationIdentifiers(r, cv);
@@ -1308,16 +1324,16 @@ public class NotificationUsageStats {
         }
 
         private static void putNotificationIdentifiers(NotificationRecord r, ContentValues outCv) {
-            outCv.put(COL_KEY, r.sbn.getKey());
-            outCv.put(COL_PKG, r.sbn.getPackageName());
+            outCv.put(COL_KEY, r.getSbn().getKey());
+            outCv.put(COL_PKG, r.getSbn().getPackageName());
         }
 
         private static void putNotificationDetails(NotificationRecord r, ContentValues outCv) {
-            outCv.put(COL_NOTIFICATION_ID, r.sbn.getId());
-            if (r.sbn.getTag() != null) {
-                outCv.put(COL_TAG, r.sbn.getTag());
+            outCv.put(COL_NOTIFICATION_ID, r.getSbn().getId());
+            if (r.getSbn().getTag() != null) {
+                outCv.put(COL_TAG, r.getSbn().getTag());
             }
-            outCv.put(COL_WHEN_MS, r.sbn.getPostTime());
+            outCv.put(COL_WHEN_MS, r.getSbn().getPostTime());
             outCv.put(COL_FLAGS, r.getNotification().flags);
             final int before = r.stats.requestedImportance;
             final int after = r.getImportance();

@@ -178,7 +178,7 @@ class ThemeOverlayManager {
                 } else {
                     mOverlayManager.setEnabled(pkg, false, userHandle);
                 }
-            } catch (IllegalStateException e) {
+            } catch (SecurityException | IllegalStateException e) {
                 Log.e(TAG,
                         String.format("setEnabled failed: %s %s %b", pkg, userHandle, enabled), e);
             }

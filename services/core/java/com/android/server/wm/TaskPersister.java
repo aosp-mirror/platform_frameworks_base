@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
@@ -39,7 +39,6 @@ import com.android.internal.util.XmlUtils;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedReader;
@@ -118,11 +117,11 @@ public class TaskPersister implements PersisterQueue.Listener {
         mPersisterQueue.addListener(this);
     }
 
-    private void removeThumbnails(TaskRecord task) {
+    private void removeThumbnails(Task task) {
         mPersisterQueue.removeItems(
                 item -> {
                     File file = new File(item.mFilePath);
-                    return file.getName().startsWith(Integer.toString(task.taskId));
+                    return file.getName().startsWith(Integer.toString(task.mTaskId));
                 },
                 ImageWriteQueueItem.class);
     }
@@ -185,7 +184,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         mTaskIdsInFile.delete(userId);
     }
 
-    void wakeup(TaskRecord task, boolean flush) {
+    void wakeup(Task task, boolean flush) {
         synchronized (mPersisterQueue) {
             if (task != null) {
                 final TaskWriteQueueItem item = mPersisterQueue.findLastItem(
@@ -256,13 +255,13 @@ public class TaskPersister implements PersisterQueue.Listener {
         }
     }
 
-    private TaskRecord taskIdToTask(int taskId, ArrayList<TaskRecord> tasks) {
+    private Task taskIdToTask(int taskId, ArrayList<Task> tasks) {
         if (taskId < 0) {
             return null;
         }
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
-            if (task.taskId == taskId) {
+            final Task task = tasks.get(taskNdx);
+            if (task.mTaskId == taskId) {
                 return task;
             }
         }
@@ -270,8 +269,8 @@ public class TaskPersister implements PersisterQueue.Listener {
         return null;
     }
 
-    List<TaskRecord> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
-        final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
+    List<Task> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
+        final ArrayList<Task> tasks = new ArrayList<Task>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
         File userTasksDir = getUserTasksDir(userId);
@@ -320,7 +319,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     if (event == XmlPullParser.START_TAG) {
                         if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: START_TAG name=" + name);
                         if (TAG_TASK.equals(name)) {
-                            final TaskRecord task = TaskRecord.restoreFromXml(in, mStackSupervisor);
+                            final Task task = Task.restoreFromXml(in, mStackSupervisor);
                             if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: restored task="
                                     + task);
                             if (task != null) {
@@ -329,18 +328,18 @@ public class TaskPersister implements PersisterQueue.Listener {
                                 // read the same thing again.
                                 // mWriteQueue.add(new TaskWriteQueueItem(task));
 
-                                final int taskId = task.taskId;
-                                if (mService.mRootActivityContainer.anyTaskForId(taskId,
+                                final int taskId = task.mTaskId;
+                                if (mService.mRootWindowContainer.anyTaskForId(taskId,
                                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
-                                } else if (userId != task.userId) {
+                                } else if (userId != task.mUserId) {
                                     // Should not happen.
-                                    Slog.wtf(TAG, "Task with userId " + task.userId + " found in "
+                                    Slog.wtf(TAG, "Task with userId " + task.mUserId + " found in "
                                             + userTasksDir.getAbsolutePath());
                                 } else {
                                     // Looks fine.
-                                    mStackSupervisor.setNextTaskIdForUserLocked(taskId, userId);
+                                    mStackSupervisor.setNextTaskIdForUser(taskId, userId);
                                     task.isPersistable = true;
                                     tasks.add(task);
                                     recoveredTaskIds.add(taskId);
@@ -375,14 +374,14 @@ public class TaskPersister implements PersisterQueue.Listener {
 
         // Fix up task affiliation from taskIds
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
+            final Task task = tasks.get(taskNdx);
             task.setPrevAffiliate(taskIdToTask(task.mPrevAffiliateTaskId, tasks));
             task.setNextAffiliate(taskIdToTask(task.mNextAffiliateTaskId, tasks));
         }
 
-        Collections.sort(tasks, new Comparator<TaskRecord>() {
+        Collections.sort(tasks, new Comparator<Task>() {
             @Override
-            public int compare(TaskRecord lhs, TaskRecord rhs) {
+            public int compare(Task lhs, Task rhs) {
                 final long diff = rhs.mLastTimeMoved - lhs.mLastTimeMoved;
                 if (diff < 0) {
                     return -1;
@@ -507,14 +506,14 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private static class TaskWriteQueueItem implements PersisterQueue.WriteQueueItem {
         private final ActivityTaskManagerService mService;
-        private final TaskRecord mTask;
+        private final Task mTask;
 
-        TaskWriteQueueItem(TaskRecord task, ActivityTaskManagerService service) {
+        TaskWriteQueueItem(Task task, ActivityTaskManagerService service) {
             mTask = task;
             mService = service;
         }
 
-        private StringWriter saveToXml(TaskRecord task) throws IOException, XmlPullParserException {
+        private StringWriter saveToXml(Task task) throws Exception {
             if (DEBUG) Slog.d(TAG, "saveToXml: task=" + task);
             final XmlSerializer xmlSerializer = new FastXmlSerializer();
             StringWriter stringWriter = new StringWriter();
@@ -542,7 +541,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         public void process() {
             // Write out one task.
             StringWriter stringWriter = null;
-            TaskRecord task = mTask;
+            Task task = mTask;
             if (DEBUG) Slog.d(TAG, "Writing task=" + task);
             synchronized (mService.mGlobalLock) {
                 if (task.inRecents) {
@@ -550,8 +549,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     try {
                         if (DEBUG) Slog.d(TAG, "Saving task=" + task);
                         stringWriter = saveToXml(task);
-                    } catch (IOException e) {
-                    } catch (XmlPullParserException e) {
+                    } catch (Exception e) {
                     }
                 }
             }
@@ -560,14 +558,14 @@ public class TaskPersister implements PersisterQueue.Listener {
                 FileOutputStream file = null;
                 AtomicFile atomicFile = null;
                 try {
-                    File userTasksDir = getUserTasksDir(task.userId);
+                    File userTasksDir = getUserTasksDir(task.mUserId);
                     if (!userTasksDir.isDirectory() && !userTasksDir.mkdirs()) {
-                        Slog.e(TAG, "Failure creating tasks directory for user " + task.userId
+                        Slog.e(TAG, "Failure creating tasks directory for user " + task.mUserId
                                 + ": " + userTasksDir + " Dropping persistence for task " + task);
                         return;
                     }
                     atomicFile = new AtomicFile(new File(userTasksDir,
-                            String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
+                            String.valueOf(task.mTaskId) + TASK_FILENAME_SUFFIX));
                     file = atomicFile.startWrite();
                     file.write(stringWriter.toString().getBytes());
                     file.write('\n');

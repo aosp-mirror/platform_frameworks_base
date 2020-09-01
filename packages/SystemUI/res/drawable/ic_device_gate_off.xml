@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M4,7H2V17H4V7Z"
+      android:fillColor="#FF000000" />
+  <path
+      android:pathData="M15,5H9C7.9391,5 6.9217,5.4215 6.1716,6.1716C5.4214,6.9218 5,7.9391 5,9V19H19V9C19,7.9391 18.5786,6.9218 17.8284,6.1716C17.0783,5.4215 16.0609,5 15,5ZM7,9C7,8.4696 7.2107,7.9608 7.5858,7.5857C7.9609,7.2106 8.4696,7 9,7H11V11H9V13H11V17H7V9ZM17,17H13V13H15V11H13V7H15C15.5304,7 16.0391,7.2106 16.4142,7.5857C16.7893,7.9608 17,8.4696 17,9V17Z"
+      android:fillColor="#FF000000" />
+  <path
+      android:pathData="M22,7H20V17H22V7Z"
+      android:fillColor="#FF000000" />
+</vector>

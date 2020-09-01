@@ -14,8 +14,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<com.android.systemui.util.NeverExactlyLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clickable="true"
     android:paddingBottom="@dimen/qs_tile_padding_top"
@@ -23,23 +23,28 @@
     android:paddingStart="@dimen/qs_footer_padding_start"
     android:paddingEnd="@dimen/qs_footer_padding_end"
     android:gravity="center_vertical"
-    android:background="?android:attr/colorPrimary" >
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:background="@android:color/transparent">
 
-    <TextView
+    <com.android.systemui.util.AutoMarqueeTextView
         android:id="@+id/footer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="start"
         android:layout_weight="1"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:textColor="?android:attr/textColorSecondary"/>
+        android:textColor="?android:attr/textColorPrimary"/>
 
     <ImageView
         android:id="@+id/footer_icon"
         android:layout_width="@dimen/qs_footer_icon_size"
         android:layout_height="@dimen/qs_footer_icon_size"
+        android:layout_marginStart="8dp"
         android:contentDescription="@null"
         android:src="@drawable/ic_info_outline"
-        android:tint="?android:attr/textColorSecondary"/>
+        android:tint="?android:attr/textColorPrimary" />
 
-</LinearLayout>
+</com.android.systemui.util.NeverExactlyLinearLayout>

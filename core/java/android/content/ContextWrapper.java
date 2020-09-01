@@ -42,6 +42,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.autofill.AutofillManager.AutofillClient;
 
 import java.io.File;
@@ -161,6 +162,12 @@ public class ContextWrapper extends Context {
         return mBase.getOpPackageName();
     }
 
+    /** @hide */
+    @Override
+    public @Nullable String getAttributionTag() {
+        return mBase.getAttributionTag();
+    }
+
     @Override
     public ApplicationInfo getApplicationInfo() {
         return mBase.getApplicationInfo();
@@ -244,6 +251,16 @@ public class ContextWrapper extends Context {
     @Override
     public File getFilesDir() {
         return mBase.getFilesDir();
+    }
+
+    /**
+     * {@inheritDoc Context#getCrateDir()}
+     * @hide
+     */
+    @NonNull
+    @Override
+    public File getCrateDir(@NonNull String cratedId) {
+        return mBase.getCrateDir(cratedId);
     }
 
     @Override
@@ -458,7 +475,8 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions) {
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions) {
         mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions);
     }
 
@@ -960,6 +978,17 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @NonNull
+    public Context createWindowContext(@WindowType int type, @Nullable Bundle options) {
+        return mBase.createWindowContext(type, options);
+    }
+
+    @Override
+    public @NonNull Context createAttributionContext(@Nullable String attributionTag) {
+        return mBase.createAttributionContext(attributionTag);
+    }
+
+    @Override
     public boolean isRestricted() {
         return mBase.isRestricted();
     }
@@ -970,12 +999,15 @@ public class ContextWrapper extends Context {
         return mBase.getDisplayAdjustments(displayId);
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    @TestApi
     @Override
-    public Display getDisplay() {
+    public @Nullable Display getDisplay() {
         return mBase.getDisplay();
+    }
+
+    /** @hide */
+    @Override
+    public @Nullable Display getDisplayNoVerify() {
+        return mBase.getDisplayNoVerify();
     }
 
     /**
@@ -1112,5 +1144,16 @@ public class ContextWrapper extends Context {
         if (mBase != null) {
             mBase.setContentCaptureOptions(options);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUiContext() {
+        if (mBase == null) {
+            return false;
+        }
+        return mBase.isUiContext();
     }
 }

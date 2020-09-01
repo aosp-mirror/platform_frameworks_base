@@ -19,12 +19,12 @@ package android.app.admin;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.stats.devicepolicy.nano.StringList;
-import android.util.StatsLog;
 
 import com.android.framework.protobuf.nano.MessageNano;
-import com.android.internal.util.Preconditions;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A wrapper for logging managed device events using {@link StatsLog}.
@@ -136,7 +136,7 @@ public class DevicePolicyEventLogger {
      * in that order.
      */
     public DevicePolicyEventLogger setStrings(String value, String[] values) {
-        Preconditions.checkNotNull(values, "values parameter cannot be null");
+        Objects.requireNonNull(values, "values parameter cannot be null");
         mStringArrayValue = new String[values.length + 1];
         mStringArrayValue[0] = value;
         System.arraycopy(values, 0, mStringArrayValue, 1, values.length);
@@ -150,7 +150,7 @@ public class DevicePolicyEventLogger {
      * and <code>values</code>, in that order.
      */
     public DevicePolicyEventLogger setStrings(String value1, String value2, String[] values) {
-        Preconditions.checkNotNull(values, "values parameter cannot be null");
+        Objects.requireNonNull(values, "values parameter cannot be null");
         mStringArrayValue = new String[values.length + 2];
         mStringArrayValue[0] = value1;
         mStringArrayValue[1] = value2;
@@ -196,8 +196,8 @@ public class DevicePolicyEventLogger {
      */
     public void write() {
         byte[] bytes = stringArrayValueToBytes(mStringArrayValue);
-        StatsLog.write(StatsLog.DEVICE_POLICY_EVENT, mEventId, mAdminPackageName, mIntValue,
-                mBooleanValue, mTimePeriodMs, bytes);
+        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_POLICY_EVENT, mEventId, mAdminPackageName,
+                mIntValue, mBooleanValue, mTimePeriodMs, bytes);
     }
 
     /**

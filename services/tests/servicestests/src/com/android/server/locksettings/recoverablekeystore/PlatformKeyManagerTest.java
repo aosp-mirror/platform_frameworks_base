@@ -67,12 +67,24 @@ import javax.crypto.KeyGenerator;
 public class PlatformKeyManagerTest {
 
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
-    private static final int USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS = 15;
+    private static final int MIN_GENERATION_ID = 1000000;
+    private static final int PRIMARY_USER_ID_FIXTURE = 0;
     private static final int USER_ID_FIXTURE = 42;
     private static final long USER_SID = 4200L;
     private static final String KEY_ALGORITHM = "AES";
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String TESTING_KEYSTORE_KEY_ALIAS = "testing-key-store-key-alias";
+
+    private static final String ENCRYPTION_KEY_ALIAS_1 =
+             "com.android.server.locksettings.recoverablekeystore/platform/42/1000000/encrypt";
+    private static final String DECRYPTION_KEY_ALIAS_1 =
+             "com.android.server.locksettings.recoverablekeystore/platform/42/1000000/decrypt";
+    private static final String DECRYPTION_KEY_FOR_ALIAS_PRIMARY_USER_1 =
+             "com.android.server.locksettings.recoverablekeystore/platform/0/1000000/decrypt";
+    private static final String ENCRYPTION_KEY_ALIAS_2 =
+             "com.android.server.locksettings.recoverablekeystore/platform/42/1000001/encrypt";
+    private static final String DECRYPTION_KEY_ALIAS_2 =
+             "com.android.server.locksettings.recoverablekeystore/platform/42/1000001/decrypt";
 
     @Mock private Context mContext;
     @Mock private KeyStoreProxy mKeyStoreProxy;
@@ -114,7 +126,7 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_1),
                 any(),
                 any());
     }
@@ -156,7 +168,7 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any(),
                 any());
     }
@@ -187,19 +199,33 @@ public class PlatformKeyManagerTest {
     }
 
     @Test
-    public void init_createsDecryptKeyWithAuthenticationRequired() throws Exception {
-        mPlatformKeyManager.init(USER_ID_FIXTURE);
+    public void init_primaryUser_createsDecryptKeyWithUnlockedDeviceRequired() throws Exception {
+        mPlatformKeyManager.init(PRIMARY_USER_ID_FIXTURE);
 
-        assertTrue(getDecryptKeyProtection().isUserAuthenticationRequired());
+        assertTrue(getDecryptKeyProtectionForPrimaryUser().isUnlockedDeviceRequired());
     }
 
     @Test
-    public void init_createsDecryptKeyWithAuthenticationValidFor15Seconds() throws Exception {
+    public void init_primaryUser_createsDecryptKeyWithoutAuthenticationRequired() throws Exception {
+        mPlatformKeyManager.init(PRIMARY_USER_ID_FIXTURE);
+
+        assertFalse(getDecryptKeyProtectionForPrimaryUser().isUserAuthenticationRequired());
+    }
+
+    @Test
+    public void init_secondaryUser_createsDecryptKeyWithoutUnlockedDeviceRequired()
+            throws Exception {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(
-                USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS,
-                getDecryptKeyProtection().getUserAuthenticationValidityDurationSeconds());
+        assertFalse(getDecryptKeyProtection().isUnlockedDeviceRequired());
+    }
+
+    @Test
+    public void init_secondaryUserUser_createsDecryptKeyWithAuthenticationRequired()
+            throws Exception {
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
+
+        assertTrue(getDecryptKeyProtection().isUserAuthenticationRequired());
     }
 
     @Test
@@ -219,7 +245,7 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy, never()).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any(),
                 any());
     }
@@ -231,7 +257,7 @@ public class PlatformKeyManagerTest {
         expectThrows(RemoteException.class, () -> mPlatformKeyManager.init(USER_ID_FIXTURE));
 
         verify(mKeyStoreProxy, never()).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any(),
                 any());
     }
@@ -251,15 +277,15 @@ public class PlatformKeyManagerTest {
     public void init_savesGenerationIdToDatabase() throws Exception {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(1,
+        assertEquals(MIN_GENERATION_ID,
                 mRecoverableKeyStoreDb.getPlatformKeyGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
-    public void init_setsGenerationIdTo1() throws Exception {
+    public void init_setsGenerationId() throws Exception {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
+        assertEquals(MIN_GENERATION_ID, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
@@ -268,22 +294,20 @@ public class PlatformKeyManagerTest {
 
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(2, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
+        assertEquals(MIN_GENERATION_ID + 1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
     public void init_doesNotIncrementGenerationIdIfKeyAvailable() throws Exception {
         mPlatformKeyManager.init(USER_ID_FIXTURE);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
 
         mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
+        assertEquals(MIN_GENERATION_ID, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
@@ -294,226 +318,194 @@ public class PlatformKeyManagerTest {
     @Test
     public void getDecryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy.getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any())).thenReturn(generateAndroidKeyStoreKey());
 
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any());
     }
 
     @Test
     public void getDecryptKey_generatesNewKeyIfOldDecryptKeyWasRemoved() throws Exception {
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(false); // was removed
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(false); // was removed
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true); // new version is available
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true); // new version
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
         when(mKeyStoreProxy.getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_2),
                 any())).thenReturn(generateAndroidKeyStoreKey());
 
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).containsAlias(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"));
+                eq(DECRYPTION_KEY_ALIAS_1));
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getDecryptKey_generatesNewKeyIfOldEncryptKeyWasRemoved() throws Exception {
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(false); // was removed
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(false); // was removed
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
 
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).containsAlias(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"));
+                eq(ENCRYPTION_KEY_ALIAS_1));
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getEncryptKey_generatesNewKeyIfOldOneIsInvalid() throws Exception {
         doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_1),
                 any());
 
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
 
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_1),
                 any());
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getDecryptKey_generatesNewKeyIfOldOneIsInvalid() throws Exception {
         doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any());
         when(mKeyStoreProxy.getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_2),
                 any())).thenReturn(generateAndroidKeyStoreKey());
 
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
 
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).containsAlias(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"));
+                eq(DECRYPTION_KEY_ALIAS_1));
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getEncryptKey_generatesNewKeyIfDecryptKeyIsUnrecoverable() throws Exception {
         doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
                 any());
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(false); // was removed
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(false); // was removed
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true); // new version is available
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true); // new version
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
 
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getEncryptKey_generatesNewKeyIfOldDecryptKeyWasRemoved() throws Exception {
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(false); // was removed
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(false); // was removed
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true); // new version is available
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true); // new version
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
 
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).containsAlias(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"));
+                eq(ENCRYPTION_KEY_ALIAS_1));
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getEncryptKey_generatesNewKeyIfOldEncryptKeyWasRemoved() throws Exception {
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(false); // was removed
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(false); // was removed
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_2)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/2/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_2)).thenReturn(true);
 
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).containsAlias(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"));
+                eq(ENCRYPTION_KEY_ALIAS_1));
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_2),
                 any());
     }
 
     @Test
     public void getEncryptKey_getsEncryptKeyWithCorrectAlias() throws Exception {
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/encrypt")).thenReturn(true);
+                .containsAlias(ENCRYPTION_KEY_ALIAS_1)).thenReturn(true);
         when(mKeyStoreProxy
-                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
-                        + "platform/42/1/decrypt")).thenReturn(true);
+                .containsAlias(DECRYPTION_KEY_ALIAS_1)).thenReturn(true);
 
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_1),
                 any());
     }
 
@@ -523,7 +515,7 @@ public class PlatformKeyManagerTest {
 
         mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
-        assertEquals(2, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
+        assertEquals(MIN_GENERATION_ID + 1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
@@ -533,17 +525,17 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).deleteEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"));
+                eq(ENCRYPTION_KEY_ALIAS_1));
         verify(mKeyStoreProxy).deleteEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"));
+                eq(DECRYPTION_KEY_ALIAS_1));
 
         mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         // Removes second generation keys.
         verify(mKeyStoreProxy).deleteEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"));
+                eq(ENCRYPTION_KEY_ALIAS_2));
         verify(mKeyStoreProxy).deleteEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"));
+                eq(DECRYPTION_KEY_ALIAS_2));
     }
 
     @Test
@@ -553,7 +545,7 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_2),
                 any(),
                 any());
     }
@@ -565,14 +557,14 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_2),
                 any(),
                 any());
     }
 
     private KeyProtection getEncryptKeyProtection() throws Exception {
         verify(mKeyStoreProxy).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                eq(ENCRYPTION_KEY_ALIAS_1),
                 any(),
                 mProtectionParameterCaptor.capture());
         return (KeyProtection) mProtectionParameterCaptor.getValue();
@@ -580,7 +572,15 @@ public class PlatformKeyManagerTest {
 
     private KeyProtection getDecryptKeyProtection() throws Exception {
         verify(mKeyStoreProxy).setEntry(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                eq(DECRYPTION_KEY_ALIAS_1),
+                any(),
+                mProtectionParameterCaptor.capture());
+        return (KeyProtection) mProtectionParameterCaptor.getValue();
+    }
+
+    private KeyProtection getDecryptKeyProtectionForPrimaryUser() throws Exception {
+        verify(mKeyStoreProxy).setEntry(
+                eq(DECRYPTION_KEY_FOR_ALIAS_PRIMARY_USER_1),
                 any(),
                 mProtectionParameterCaptor.capture());
         return (KeyProtection) mProtectionParameterCaptor.getValue();

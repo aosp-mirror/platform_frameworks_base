@@ -334,8 +334,9 @@ public class ConfigurationContainerTests {
         private TestConfigurationContainer mParent;
 
         TestConfigurationContainer addChild(TestConfigurationContainer childContainer) {
+            final ConfigurationContainer oldParent = childContainer.getParent();
             childContainer.mParent = this;
-            childContainer.onParentChanged();
+            childContainer.onParentChanged(this, oldParent);
             mChildren.add(childContainer);
             return childContainer;
         }
@@ -349,8 +350,9 @@ public class ConfigurationContainerTests {
         }
 
         void removeChild(TestConfigurationContainer child) {
+            final ConfigurationContainer oldParent = child.getParent();
             child.mParent = null;
-            child.onParentChanged();
+            child.onParentChanged(null, oldParent);
         }
 
         @Override

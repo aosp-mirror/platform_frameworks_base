@@ -34,14 +34,9 @@ import java.util.regex.Pattern;
  * {@hide}
  */
 public abstract class SmsMessageBase {
-
     // Copied from Telephony.Mms.NAME_ADDR_EMAIL_PATTERN
     public static final Pattern NAME_ADDR_EMAIL_PATTERN =
             Pattern.compile("\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*");
-
-    @UnsupportedAppUsage
-    public SmsMessageBase() {
-    }
 
     /** {@hide} The address of the SMSC. May be null */
     @UnsupportedAppUsage
@@ -111,6 +106,10 @@ public abstract class SmsMessageBase {
     /** TP-Message-Reference - Message Reference of sent message. @hide */
     @UnsupportedAppUsage
     public int mMessageRef;
+
+    @UnsupportedAppUsage
+    public SmsMessageBase() {
+    }
 
     // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
     public static abstract class SubmitPduBase  {

@@ -62,7 +62,6 @@ private:
     ~RenderState() {}
 
     // Context notifications are only to be triggered by renderthread::RenderThread
-    void onContextCreated();
     void onContextDestroyed();
 
     std::set<IGpuContextCallback*> mContextCallbacks;

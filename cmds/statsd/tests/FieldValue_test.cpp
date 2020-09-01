@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "matchers/matcher_util.h"
 #include "src/logd/LogEvent.h"
+#include "stats_event.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
 #include "subscriber/SubscriberReporter.h"
+#include "tests/statsd_test_util.h"
 
 #ifdef __ANDROID__
 
@@ -29,6 +32,40 @@ using android::util::ProtoReader;
 namespace android {
 namespace os {
 namespace statsd {
+
+// These constants must be kept in sync with those in StatsDimensionsValue.java.
+const static int STATS_DIMENSIONS_VALUE_STRING_TYPE = 2;
+const static int STATS_DIMENSIONS_VALUE_INT_TYPE = 3;
+const static int STATS_DIMENSIONS_VALUE_FLOAT_TYPE = 6;
+const static int STATS_DIMENSIONS_VALUE_TUPLE_TYPE = 7;
+
+namespace {
+void makeLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
+                  const vector<int>& attributionUids, const vector<string>& attributionTags,
+                  const string& name) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, atomId);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
+
+    writeAttribution(statsEvent, attributionUids, attributionTags);
+    AStatsEvent_writeString(statsEvent, name.c_str());
+
+    parseStatsEventToLogEvent(statsEvent, logEvent);
+}
+
+void makeLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
+                  const vector<int>& attributionUids, const vector<string>& attributionTags,
+                  const int32_t value) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, atomId);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestamp);
+
+    writeAttribution(statsEvent, attributionUids, attributionTags);
+    AStatsEvent_writeInt32(statsEvent, value);
+
+    parseStatsEventToLogEvent(statsEvent, logEvent);
+}
+}  // anonymous namespace
 
 TEST(AtomMatcherTest, TestFieldTranslation) {
     FieldMatcher matcher1;
@@ -43,7 +80,7 @@ TEST(AtomMatcherTest, TestFieldTranslation) {
     vector<Matcher> output;
     translateFieldMatcher(matcher1, &output);
 
-    EXPECT_EQ((size_t)1, output.size());
+    ASSERT_EQ((size_t)1, output.size());
 
     const auto& matcher12 = output[0];
     EXPECT_EQ((int32_t)10, matcher12.mMatcher.getTag());
@@ -64,7 +101,7 @@ TEST(AtomMatcherTest, TestFieldTranslation_ALL) {
     vector<Matcher> output;
     translateFieldMatcher(matcher1, &output);
 
-    EXPECT_EQ((size_t)1, output.size());
+    ASSERT_EQ((size_t)1, output.size());
 
     const auto& matcher12 = output[0];
     EXPECT_EQ((int32_t)10, matcher12.mMatcher.getTag());
@@ -88,31 +125,16 @@ TEST(AtomMatcherTest, TestFilter_ALL) {
     vector<Matcher> matchers;
     translateFieldMatcher(matcher1, &matchers);
 
-    AttributionNodeInternal attribution_node1;
-    attribution_node1.set_uid(1111);
-    attribution_node1.set_tag("location1");
+    std::vector<int> attributionUids = {1111, 2222, 3333};
+    std::vector<string> attributionTags = {"location1", "location2", "location3"};
 
-    AttributionNodeInternal attribution_node2;
-    attribution_node2.set_uid(2222);
-    attribution_node2.set_tag("location2");
-
-    AttributionNodeInternal attribution_node3;
-    attribution_node3.set_uid(3333);
-    attribution_node3.set_tag("location3");
-    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2,
-                                                              attribution_node3};
-
-    // Set up the event
-    LogEvent event(10, 12345);
-    event.write(attribution_nodes);
-    event.write("some value");
-    // Convert to a LogEvent
-    event.init();
+    LogEvent event(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event, 10 /*atomId*/, 1012345, attributionUids, attributionTags, "some value");
     HashableDimensionKey output;
 
     filterValues(matchers, event.getValues(), &output);
 
-    EXPECT_EQ((size_t)7, output.getValues().size());
+    ASSERT_EQ((size_t)7, output.getValues().size());
     EXPECT_EQ((int32_t)0x02010101, output.getValues()[0].mField.getField());
     EXPECT_EQ((int32_t)1111, output.getValues()[0].mValue.int_value);
     EXPECT_EQ((int32_t)0x02010102, output.getValues()[1].mField.getField());
@@ -174,26 +196,11 @@ TEST(AtomMatcherTest, TestSubDimension) {
 }
 
 TEST(AtomMatcherTest, TestMetric2ConditionLink) {
-    AttributionNodeInternal attribution_node1;
-    attribution_node1.set_uid(1111);
-    attribution_node1.set_tag("location1");
+    std::vector<int> attributionUids = {1111, 2222, 3333};
+    std::vector<string> attributionTags = {"location1", "location2", "location3"};
 
-    AttributionNodeInternal attribution_node2;
-    attribution_node2.set_uid(2222);
-    attribution_node2.set_tag("location2");
-
-    AttributionNodeInternal attribution_node3;
-    attribution_node3.set_uid(3333);
-    attribution_node3.set_tag("location3");
-    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2,
-                                                              attribution_node3};
-
-    // Set up the event
-    LogEvent event(10, 12345);
-    event.write(attribution_nodes);
-    event.write("some value");
-    // Convert to a LogEvent
-    event.init();
+    LogEvent event(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event, 10 /*atomId*/, 12345, attributionUids, attributionTags, "some value");
 
     FieldMatcher whatMatcher;
     whatMatcher.set_field(10);
@@ -217,12 +224,12 @@ TEST(AtomMatcherTest, TestMetric2ConditionLink) {
     translateFieldMatcher(whatMatcher, &link.metricFields);
     translateFieldMatcher(conditionMatcher, &link.conditionFields);
 
-    EXPECT_EQ((size_t)1, link.metricFields.size());
+    ASSERT_EQ((size_t)1, link.metricFields.size());
     EXPECT_EQ((int32_t)0x02010001, link.metricFields[0].mMatcher.getField());
     EXPECT_EQ((int32_t)0xff7f007f, link.metricFields[0].mMask);
     EXPECT_EQ((int32_t)10, link.metricFields[0].mMatcher.getTag());
 
-    EXPECT_EQ((size_t)1, link.conditionFields.size());
+    ASSERT_EQ((size_t)1, link.conditionFields.size());
     EXPECT_EQ((int32_t)0x02028002, link.conditionFields[0].mMatcher.getField());
     EXPECT_EQ((int32_t)0xff7f807f, link.conditionFields[0].mMask);
     EXPECT_EQ((int32_t)27, link.conditionFields[0].mMatcher.getTag());
@@ -263,15 +270,15 @@ TEST(AtomMatcherTest, TestWriteDimensionPath) {
         }
 
         DimensionsValue result;
-        EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+        ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
 
         EXPECT_EQ(10, result.field());
         EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, result.value_case());
-        EXPECT_EQ(3, result.value_tuple().dimensions_value_size());
+        ASSERT_EQ(3, result.value_tuple().dimensions_value_size());
 
         const auto& dim1 = result.value_tuple().dimensions_value(0);
         EXPECT_EQ(2, dim1.field());
-        EXPECT_EQ(2, dim1.value_tuple().dimensions_value_size());
+        ASSERT_EQ(2, dim1.value_tuple().dimensions_value_size());
 
         const auto& dim11 = dim1.value_tuple().dimensions_value(0);
         EXPECT_EQ(1, dim11.field());
@@ -284,38 +291,81 @@ TEST(AtomMatcherTest, TestWriteDimensionPath) {
 
         const auto& dim3 = result.value_tuple().dimensions_value(2);
         EXPECT_EQ(6, dim3.field());
-        EXPECT_EQ(1, dim3.value_tuple().dimensions_value_size());
+        ASSERT_EQ(1, dim3.value_tuple().dimensions_value_size());
         const auto& dim31 = dim3.value_tuple().dimensions_value(0);
         EXPECT_EQ(2, dim31.field());
     }
 }
 
-TEST(AtomMatcherTest, TestSubscriberDimensionWrite) {
-    HashableDimensionKey dim;
+void checkAttributionNodeInDimensionsValueParcel(StatsDimensionsValueParcel& attributionNodeParcel,
+                                                 int32_t nodeDepthInAttributionChain,
+                                                 int32_t uid, string tag) {
+    EXPECT_EQ(attributionNodeParcel.field, nodeDepthInAttributionChain /*position at depth 1*/);
+    ASSERT_EQ(attributionNodeParcel.valueType, STATS_DIMENSIONS_VALUE_TUPLE_TYPE);
+    ASSERT_EQ(attributionNodeParcel.tupleValue.size(), 2);
 
+    StatsDimensionsValueParcel uidParcel = attributionNodeParcel.tupleValue[0];
+    EXPECT_EQ(uidParcel.field, 1 /*position at depth 2*/);
+    EXPECT_EQ(uidParcel.valueType, STATS_DIMENSIONS_VALUE_INT_TYPE);
+    EXPECT_EQ(uidParcel.intValue, uid);
+
+    StatsDimensionsValueParcel tagParcel = attributionNodeParcel.tupleValue[1];
+    EXPECT_EQ(tagParcel.field, 2 /*position at depth 2*/);
+    EXPECT_EQ(tagParcel.valueType, STATS_DIMENSIONS_VALUE_STRING_TYPE);
+    EXPECT_EQ(tagParcel.stringValue, tag);
+}
+
+// Test conversion of a HashableDimensionKey into a StatsDimensionValueParcel
+TEST(AtomMatcherTest, TestSubscriberDimensionWrite) {
+    int atomId = 10;
+    // First four fields form an attribution chain
     int pos1[] = {1, 1, 1};
     int pos2[] = {1, 1, 2};
-    int pos3[] = {1, 1, 3};
-    int pos4[] = {2, 0, 0};
+    int pos3[] = {1, 2, 1};
+    int pos4[] = {1, 2, 2};
+    int pos5[] = {2, 1, 1};
 
-    Field field1(10, pos1, 2);
-    Field field2(10, pos2, 2);
-    Field field3(10, pos3, 2);
-    Field field4(10, pos4, 0);
+    Field field1(atomId, pos1, /*depth=*/2);
+    Field field2(atomId, pos2, /*depth=*/2);
+    Field field3(atomId, pos3, /*depth=*/2);
+    Field field4(atomId, pos4, /*depth=*/2);
+    Field field5(atomId, pos5, /*depth=*/0);
 
-    Value value1((int32_t)10025);
-    Value value2("tag");
-    Value value3((int32_t)987654);
-    Value value4((int32_t)99999);
+    Value value1((int32_t)1);
+    Value value2("string2");
+    Value value3((int32_t)3);
+    Value value4("string4");
+    Value value5((float)5.0);
 
-    dim.addValue(FieldValue(field1, value1));
-    dim.addValue(FieldValue(field2, value2));
-    dim.addValue(FieldValue(field3, value3));
-    dim.addValue(FieldValue(field4, value4));
+    HashableDimensionKey dimensionKey;
+    dimensionKey.addValue(FieldValue(field1, value1));
+    dimensionKey.addValue(FieldValue(field2, value2));
+    dimensionKey.addValue(FieldValue(field3, value3));
+    dimensionKey.addValue(FieldValue(field4, value4));
+    dimensionKey.addValue(FieldValue(field5, value5));
 
-    SubscriberReporter::getStatsDimensionsValue(dim);
-    // TODO(b/110562792): can't test anything here because StatsDimensionsValue class doesn't
-    // have any read api.
+    StatsDimensionsValueParcel rootParcel = dimensionKey.toStatsDimensionsValueParcel();
+    EXPECT_EQ(rootParcel.field, atomId);
+    ASSERT_EQ(rootParcel.valueType, STATS_DIMENSIONS_VALUE_TUPLE_TYPE);
+    ASSERT_EQ(rootParcel.tupleValue.size(), 2);
+
+    // Check that attribution chain is populated correctly
+    StatsDimensionsValueParcel attributionChainParcel = rootParcel.tupleValue[0];
+    EXPECT_EQ(attributionChainParcel.field, 1 /*position at depth 0*/);
+    ASSERT_EQ(attributionChainParcel.valueType, STATS_DIMENSIONS_VALUE_TUPLE_TYPE);
+    ASSERT_EQ(attributionChainParcel.tupleValue.size(), 2);
+    checkAttributionNodeInDimensionsValueParcel(attributionChainParcel.tupleValue[0],
+                                                /*nodeDepthInAttributionChain=*/1,
+                                                value1.int_value, value2.str_value);
+    checkAttributionNodeInDimensionsValueParcel(attributionChainParcel.tupleValue[1],
+                                                /*nodeDepthInAttributionChain=*/2,
+                                                value3.int_value, value4.str_value);
+
+    // Check that the float is populated correctly
+    StatsDimensionsValueParcel floatParcel = rootParcel.tupleValue[1];
+    EXPECT_EQ(floatParcel.field, 2 /*position at depth 0*/);
+    EXPECT_EQ(floatParcel.valueType, STATS_DIMENSIONS_VALUE_FLOAT_TYPE);
+    EXPECT_EQ(floatParcel.floatValue, value5.float_value);
 }
 
 TEST(AtomMatcherTest, TestWriteDimensionToProto) {
@@ -354,14 +404,14 @@ TEST(AtomMatcherTest, TestWriteDimensionToProto) {
     }
 
     DimensionsValue result;
-    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
     EXPECT_EQ(10, result.field());
     EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, result.value_case());
-    EXPECT_EQ(2, result.value_tuple().dimensions_value_size());
+    ASSERT_EQ(2, result.value_tuple().dimensions_value_size());
 
     const auto& dim1 = result.value_tuple().dimensions_value(0);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, dim1.value_case());
-    EXPECT_EQ(3, dim1.value_tuple().dimensions_value_size());
+    ASSERT_EQ(3, dim1.value_tuple().dimensions_value_size());
 
     const auto& dim11 = dim1.value_tuple().dimensions_value(0);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim11.value_case());
@@ -416,8 +466,8 @@ TEST(AtomMatcherTest, TestWriteDimensionLeafNodesToProto) {
     }
 
     DimensionsValueTuple result;
-    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
-    EXPECT_EQ(4, result.dimensions_value_size());
+    ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    ASSERT_EQ(4, result.dimensions_value_size());
 
     const auto& dim1 = result.dimensions_value(0);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim1.value_case());
@@ -437,22 +487,11 @@ TEST(AtomMatcherTest, TestWriteDimensionLeafNodesToProto) {
 }
 
 TEST(AtomMatcherTest, TestWriteAtomToProto) {
-    AttributionNodeInternal attribution_node1;
-    attribution_node1.set_uid(1111);
-    attribution_node1.set_tag("location1");
+    std::vector<int> attributionUids = {1111, 2222};
+    std::vector<string> attributionTags = {"location1", "location2"};
 
-    AttributionNodeInternal attribution_node2;
-    attribution_node2.set_uid(2222);
-    attribution_node2.set_tag("location2");
-
-    std::vector<AttributionNodeInternal> attribution_nodes = {attribution_node1, attribution_node2};
-
-    // Set up the event
-    LogEvent event(4, 12345);
-    event.write(attribution_nodes);
-    event.write((int32_t)999);
-    // Convert to a LogEvent
-    event.init();
+    LogEvent event(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event, 4 /*atomId*/, 12345, attributionUids, attributionTags, 999);
 
     android::util::ProtoOutputStream protoOutput;
     writeFieldValueTreeToStream(event.GetTagId(), event.getValues(), &protoOutput);
@@ -469,10 +508,10 @@ TEST(AtomMatcherTest, TestWriteAtomToProto) {
     }
 
     Atom result;
-    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
     EXPECT_EQ(Atom::PushedCase::kBleScanResultReceived, result.pushed_case());
     const auto& atom = result.ble_scan_result_received();
-    EXPECT_EQ(2, atom.attribution_node_size());
+    ASSERT_EQ(2, atom.attribution_node_size());
     EXPECT_EQ(1111, atom.attribution_node(0).uid());
     EXPECT_EQ("location1", atom.attribution_node(0).tag());
     EXPECT_EQ(2222, atom.attribution_node(1).uid());
@@ -480,6 +519,137 @@ TEST(AtomMatcherTest, TestWriteAtomToProto) {
     EXPECT_EQ(999, atom.num_results());
 }
 
+/*
+ * Test two Matchers is not a subset of one Matcher.
+ * Test one Matcher is subset of two Matchers.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions1) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+    child->set_position(Position::ALL);
+    child->add_child()->set_field(1);
+    child->add_child()->set_field(2);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+    ASSERT_EQ(2, matchers1.size());
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(10);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+    child->set_position(Position::ALL);
+    child->add_child()->set_field(1);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+    ASSERT_EQ(1, matchers2.size());
+
+    EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
+    EXPECT_TRUE(subsetDimensions(matchers2, matchers1));
+}
+/*
+ * Test not a subset with one matching Matcher, one non-matching Matcher.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions2) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+
+    child = matcher1.add_child();
+    child->set_field(2);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(10);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+
+    child = matcher2.add_child();
+    child->set_field(3);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+
+    EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
+}
+
+/*
+ * Test not a subset if parent field is not equal.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions3) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(5);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+
+    EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
+}
+
+/*
+ * Test is subset with two matching Matchers.
+ */
+TEST(AtomMatcherTest, TestSubsetDimensions4) {
+    // Initialize first set of matchers
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+
+    child = matcher1.add_child();
+    child->set_field(2);
+
+    vector<Matcher> matchers1;
+    translateFieldMatcher(matcher1, &matchers1);
+
+    // Initialize second set of matchers
+    FieldMatcher matcher2;
+    matcher2.set_field(10);
+
+    child = matcher2.add_child();
+    child->set_field(1);
+
+    child = matcher2.add_child();
+    child->set_field(2);
+
+    child = matcher2.add_child();
+    child->set_field(3);
+
+    vector<Matcher> matchers2;
+    translateFieldMatcher(matcher2, &matchers2);
+
+    EXPECT_TRUE(subsetDimensions(matchers1, matchers2));
+    EXPECT_FALSE(subsetDimensions(matchers2, matchers1));
+}
 
 }  // namespace statsd
 }  // namespace os

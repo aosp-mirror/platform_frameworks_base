@@ -34,7 +34,10 @@ import static org.junit.Assert.fail;
 
 import android.app.usage.UsageEvents.Event;
 import android.os.Parcel;
+import android.os.UserHandle;
+import android.support.test.uiautomator.UiDevice;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -121,6 +124,15 @@ public class UsageStatsTest {
     }
 
     @Test
+    public void testDataIsInCe() throws Exception {
+        final int userId = UserHandle.myUserId();
+        final String expectedPath = "/data/system_ce/" + userId + "/usagestats";
+        final String actualPath = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                .executeShellCommand("dumpsys usagestats stats-directory " + userId).trim();
+        assertEquals(expectedPath, actualPath);
+    }
+
+    @Test
     public void testParcelable() {
         left.mPackageName = "com.test";
         left.mBeginTimeStamp = 100000;
@@ -161,7 +173,7 @@ public class UsageStatsTest {
         left.update("com.test.activity1", 400000, ACTIVITY_STOPPED, 1);
         assertEquals(left.mLastTimeUsed, 350000);
         assertEquals(left.mLastTimeVisible, 400000);
-        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertTrue(left.mActivities.indexOfKey(1) < 0);
         assertEquals(left.mTotalTimeInForeground, 350000 - 200000);
         assertEquals(left.mTotalTimeVisible, 400000 - 200000);
 
@@ -219,7 +231,7 @@ public class UsageStatsTest {
         left.update("com.test.activity1", 400000, ACTIVITY_STOPPED, 1);
         assertEquals(left.mLastTimeUsed, 300000);
         assertEquals(left.mLastTimeVisible, 400000);
-        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertTrue(left.mActivities.indexOfKey(1) < 0);
         assertEquals(left.mTotalTimeInForeground, 300000 - 200000);
         assertEquals(left.mTotalTimeVisible, 400000 - 100000);
     }
@@ -237,7 +249,7 @@ public class UsageStatsTest {
         left.update("com.test.activity1", 200000, ACTIVITY_STOPPED, 1);
         assertEquals(left.mLastTimeUsed, 200000);
         assertEquals(left.mLastTimeVisible, 200000);
-        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertTrue(left.mActivities.indexOfKey(1) < 0);
         assertEquals(left.mTotalTimeInForeground, 200000 - 100000);
         assertEquals(left.mTotalTimeVisible, 200000 - 100000);
 
@@ -347,14 +359,14 @@ public class UsageStatsTest {
         left.update("com.test.activity1", 550000, ACTIVITY_STOPPED, 1);
         assertEquals(left.mLastTimeUsed, 450000);
         assertEquals(left.mLastTimeVisible, 550000);
-        assertEquals(left.mActivities.get(1), ACTIVITY_STOPPED);
+        assertTrue(left.mActivities.indexOfKey(1) < 0);
         assertEquals(left.mTotalTimeInForeground, 350000);
         assertEquals(left.mTotalTimeVisible, 350000 + 100000 /*550000 - 450000*/);
 
         left.update("com.test.activity2", 650000, ACTIVITY_STOPPED, 2);
         assertEquals(left.mLastTimeUsed, 450000);
         assertEquals(left.mLastTimeVisible, 650000);
-        assertEquals(left.mActivities.get(2), ACTIVITY_STOPPED);
+        assertTrue(left.mActivities.indexOfKey(2) < 0);
         assertEquals(left.mTotalTimeInForeground, 350000);
         assertEquals(left.mTotalTimeVisible, 450000 + 100000 /*650000 - 550000*/);
     }

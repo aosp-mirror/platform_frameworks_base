@@ -23,7 +23,9 @@ import android.net.wifi.WifiManager;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
+import android.telephony.ims.ImsMmTelManager;
+import android.telephony.ims.RegistrationManager;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
@@ -32,19 +34,30 @@ import androidx.preference.PreferenceScreen;
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
 /**
  * Preference controller for IMS status
  */
 public abstract class AbstractImsStatusPreferenceController
         extends AbstractConnectivityPreferenceController {
 
+    private static final String LOG_TAG = "AbstractImsPrefController";
+
     @VisibleForTesting
     static final String KEY_IMS_REGISTRATION_STATE = "ims_reg_state";
+
+    private static final long MAX_THREAD_BLOCKING_TIME_MS = 2000;
 
     private static final String[] CONNECTIVITY_INTENTS = {
             BluetoothAdapter.ACTION_STATE_CHANGED,
             ConnectivityManager.CONNECTIVITY_ACTION,
-            WifiManager.LINK_CONFIGURATION_CHANGED_ACTION,
+            WifiManager.ACTION_LINK_CONFIGURATION_CHANGED,
             WifiManager.NETWORK_STATE_CHANGED_ACTION,
     };
 
@@ -57,8 +70,9 @@ public abstract class AbstractImsStatusPreferenceController
 
     @Override
     public boolean isAvailable() {
-        CarrierConfigManager configManager = mContext.getSystemService(CarrierConfigManager.class);
-        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        final CarrierConfigManager configManager =
+                mContext.getSystemService(CarrierConfigManager.class);
+        final int subId = SubscriptionManager.getDefaultDataSubscriptionId();
         PersistableBundle config = null;
         if (configManager != null) {
             config = configManager.getConfigForSubId(subId);
@@ -86,11 +100,57 @@ public abstract class AbstractImsStatusPreferenceController
 
     @Override
     protected void updateConnectivity() {
-        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
-        if (mImsStatus != null) {
-            TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-            mImsStatus.setSummary((tm != null && tm.isImsRegistered(subId)) ?
-                    R.string.ims_reg_status_registered : R.string.ims_reg_status_not_registered);
+        if (mImsStatus == null) {
+            return;
+        }
+        final int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            mImsStatus.setSummary(R.string.ims_reg_status_not_registered);
+            return;
+        }
+        final ExecutorService executors = Executors.newSingleThreadExecutor();
+        final StateCallback stateCallback = new StateCallback();
+
+        final ImsMmTelManager imsMmTelManager = ImsMmTelManager.createForSubscriptionId(subId);
+        try {
+            imsMmTelManager.getRegistrationState(executors, stateCallback);
+        } catch (Exception ex) {
+        }
+
+        mImsStatus.setSummary(stateCallback.waitUntilResult()
+                ? R.string.ims_reg_status_registered : R.string.ims_reg_status_not_registered);
+
+        try {
+            executors.shutdownNow();
+        } catch (Exception exception) {
+        }
+    }
+
+    private final class StateCallback extends AtomicBoolean implements Consumer<Integer> {
+        private StateCallback() {
+            super(false);
+            mSemaphore = new Semaphore(0);
+        }
+
+        private final Semaphore mSemaphore;
+
+        public void accept(Integer state) {
+            set(state == RegistrationManager.REGISTRATION_STATE_REGISTERED);
+            try {
+                mSemaphore.release();
+            } catch (Exception ex) {
+            }
+        }
+
+        public boolean waitUntilResult() {
+            try {
+                if (!mSemaphore.tryAcquire(MAX_THREAD_BLOCKING_TIME_MS, TimeUnit.MILLISECONDS)) {
+                    Log.w(LOG_TAG, "IMS registration state query timeout");
+                    return false;
+                }
+            } catch (Exception ex) {
+            }
+            return get();
         }
     }
 }

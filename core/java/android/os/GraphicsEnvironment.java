@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -69,6 +70,8 @@ public class GraphicsEnvironment {
     private static final String METADATA_DRIVER_BUILD_TIME = "com.android.gamedriver.build_time";
     private static final String METADATA_DEVELOPER_DRIVER_ENABLE =
             "com.android.graphics.developerdriver.enable";
+    private static final String METADATA_INJECT_LAYERS_ENABLE =
+            "com.android.graphics.injectLayers.enable";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -91,8 +94,8 @@ public class GraphicsEnvironment {
     private static final int GAME_DRIVER_GLOBAL_OPT_IN_OFF = 3;
 
     private ClassLoader mClassLoader;
-    private String mLayerPath;
-    private String mDebugLayerPath;
+    private String mLibrarySearchPaths;
+    private String mLibraryPermittedPaths;
 
     /**
      * Set up GraphicsEnvironment
@@ -100,14 +103,16 @@ public class GraphicsEnvironment {
     public void setup(Context context, Bundle coreSettings) {
         final PackageManager pm = context.getPackageManager();
         final String packageName = context.getPackageName();
+        final ApplicationInfo appInfoWithMetaData =
+                getAppInfoWithMetadata(context, pm, packageName);
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupGpuLayers");
-        setupGpuLayers(context, coreSettings, pm, packageName);
+        setupGpuLayers(context, coreSettings, pm, packageName, appInfoWithMetaData);
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupAngle");
         setupAngle(context, coreSettings, pm, packageName);
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "chooseDriver");
-        if (!chooseDriver(context, coreSettings, pm, packageName)) {
+        if (!chooseDriver(context, coreSettings, pm, packageName, appInfoWithMetaData)) {
             setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME, SYSTEM_DRIVER_VERSION_CODE,
                     SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName,
                     getVulkanVersion(pm));
@@ -173,117 +178,139 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Store the layer paths available to the loader.
+     * Check whether application is has set the manifest metadata for layer injection.
+     */
+    private static boolean canInjectLayers(ApplicationInfo ai) {
+        return (ai.metaData != null && ai.metaData.getBoolean(METADATA_INJECT_LAYERS_ENABLE)
+                && setInjectLayersPrSetDumpable());
+    }
+
+    /**
+     * Store the class loader for namespace lookup later.
      */
     public void setLayerPaths(ClassLoader classLoader,
-                              String layerPath,
-                              String debugLayerPath) {
+                              String searchPaths,
+                              String permittedPaths) {
         // We have to store these in the class because they are set up before we
         // have access to the Context to properly set up GraphicsEnvironment
         mClassLoader = classLoader;
-        mLayerPath = layerPath;
-        mDebugLayerPath = debugLayerPath;
+        mLibrarySearchPaths = searchPaths;
+        mLibraryPermittedPaths = permittedPaths;
+    }
+
+    /**
+     * Returns the debug layer paths from settings.
+     * Returns null if:
+     *     1) The application process is not debuggable or layer injection metadata flag is not
+     *        true; Or
+     *     2) ENABLE_GPU_DEBUG_LAYERS is not true; Or
+     *     3) Package name is not equal to GPU_DEBUG_APP.
+     */
+    public String getDebugLayerPathsFromSettings(
+            Bundle coreSettings, IPackageManager pm, String packageName,
+            ApplicationInfo ai) {
+        if (!debugLayerEnabled(coreSettings, packageName, ai)) {
+            return null;
+        }
+        Log.i(TAG, "GPU debug layers enabled for " + packageName);
+        String debugLayerPaths = "";
+
+        // Grab all debug layer apps and add to paths.
+        final String gpuDebugLayerApps =
+                coreSettings.getString(Settings.Global.GPU_DEBUG_LAYER_APP, "");
+        if (!gpuDebugLayerApps.isEmpty()) {
+            Log.i(TAG, "GPU debug layer apps: " + gpuDebugLayerApps);
+            // If a colon is present, treat this as multiple apps, so Vulkan and GLES
+            // layer apps can be provided at the same time.
+            final String[] layerApps = gpuDebugLayerApps.split(":");
+            for (int i = 0; i < layerApps.length; i++) {
+                String paths = getDebugLayerAppPaths(pm, layerApps[i]);
+                if (!paths.isEmpty()) {
+                    // Append the path so files placed in the app's base directory will
+                    // override the external path
+                    debugLayerPaths += paths + File.pathSeparator;
+                }
+            }
+        }
+        return debugLayerPaths;
     }
 
     /**
      * Return the debug layer app's on-disk and in-APK lib directories
      */
-    private static String getDebugLayerAppPaths(PackageManager pm, String app) {
+    private static String getDebugLayerAppPaths(IPackageManager pm, String packageName) {
         final ApplicationInfo appInfo;
         try {
-            appInfo = pm.getApplicationInfo(app, PackageManager.MATCH_ALL);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Debug layer app '" + app + "' not installed");
-
-            return null;
+            appInfo = pm.getApplicationInfo(packageName, PackageManager.MATCH_ALL,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            return "";
+        }
+        if (appInfo == null) {
+            Log.w(TAG, "Debug layer app '" + packageName + "' not installed");
         }
 
         final String abi = chooseAbi(appInfo);
-
         final StringBuilder sb = new StringBuilder();
         sb.append(appInfo.nativeLibraryDir)
-            .append(File.pathSeparator);
-        sb.append(appInfo.sourceDir)
+            .append(File.pathSeparator)
+            .append(appInfo.sourceDir)
             .append("!/lib/")
             .append(abi);
         final String paths = sb.toString();
-
         if (DEBUG) Log.v(TAG, "Debug layer app libs: " + paths);
 
         return paths;
     }
 
-    /**
-     * Set up layer search paths for all apps
-     * If debuggable, check for additional debug settings
-     */
-    private void setupGpuLayers(
-            Context context, Bundle coreSettings, PackageManager pm, String packageName) {
-        String layerPaths = "";
-
+    private boolean debugLayerEnabled(Bundle coreSettings, String packageName, ApplicationInfo ai) {
         // Only enable additional debug functionality if the following conditions are met:
-        // 1. App is debuggable or device is rooted
+        // 1. App is debuggable or device is rooted or layer injection metadata flag is true
         // 2. ENABLE_GPU_DEBUG_LAYERS is true
         // 3. Package name is equal to GPU_DEBUG_APP
+        if (!isDebuggable() && !canInjectLayers(ai)) {
+            return false;
+        }
+        final int enable = coreSettings.getInt(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
+        if (enable == 0) {
+            return false;
+        }
+        final String gpuDebugApp = coreSettings.getString(Settings.Global.GPU_DEBUG_APP, "");
+        if (packageName == null
+                || (gpuDebugApp.isEmpty() || packageName.isEmpty())
+                || !gpuDebugApp.equals(packageName)) {
+            return false;
+        }
+        return true;
+    }
 
-        if (isDebuggable()) {
+    /**
+     * Set up layer search paths for all apps
+     */
+    private void setupGpuLayers(
+            Context context, Bundle coreSettings, PackageManager pm, String packageName,
+            ApplicationInfo ai) {
+        final boolean enabled = debugLayerEnabled(coreSettings, packageName, ai);
+        String layerPaths = "";
+        if (enabled) {
+            layerPaths = mLibraryPermittedPaths;
 
-            final int enable = coreSettings.getInt(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
+            final String layers = coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS);
+            Log.i(TAG, "Vulkan debug layer list: " + layers);
+            if (layers != null && !layers.isEmpty()) {
+                setDebugLayers(layers);
+            }
 
-            if (enable != 0) {
-
-                final String gpuDebugApp = coreSettings.getString(Settings.Global.GPU_DEBUG_APP);
-
-                if ((gpuDebugApp != null && packageName != null)
-                        && (!gpuDebugApp.isEmpty() && !packageName.isEmpty())
-                        && gpuDebugApp.equals(packageName)) {
-                    Log.i(TAG, "GPU debug layers enabled for " + packageName);
-
-                    // Prepend the debug layer path as a searchable path.
-                    // This will ensure debug layers added will take precedence over
-                    // the layers specified by the app.
-                    layerPaths = mDebugLayerPath + ":";
-
-                    // If there is a debug layer app specified, add its path.
-                    final String gpuDebugLayerApp =
-                            coreSettings.getString(Settings.Global.GPU_DEBUG_LAYER_APP);
-
-                    if (gpuDebugLayerApp != null && !gpuDebugLayerApp.isEmpty()) {
-                        Log.i(TAG, "GPU debug layer app: " + gpuDebugLayerApp);
-                        // If a colon is present, treat this as multiple apps, so Vulkan and GLES
-                        // layer apps can be provided at the same time.
-                        String[] layerApps = gpuDebugLayerApp.split(":");
-                        for (int i = 0; i < layerApps.length; i++) {
-                            String paths = getDebugLayerAppPaths(pm, layerApps[i]);
-                            if (paths != null) {
-                                // Append the path so files placed in the app's base directory will
-                                // override the external path
-                                layerPaths += paths + ":";
-                            }
-                        }
-                    }
-
-                    final String layers = coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS);
-
-                    Log.i(TAG, "Vulkan debug layer list: " + layers);
-                    if (layers != null && !layers.isEmpty()) {
-                        setDebugLayers(layers);
-                    }
-
-                    final String layersGLES =
-                            coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS_GLES);
-
-                    Log.i(TAG, "GLES debug layer list: " + layersGLES);
-                    if (layersGLES != null && !layersGLES.isEmpty()) {
-                        setDebugLayersGLES(layersGLES);
-                    }
-                }
+            final String layersGLES =
+                    coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS_GLES);
+            Log.i(TAG, "GLES debug layer list: " + layersGLES);
+            if (layersGLES != null && !layersGLES.isEmpty()) {
+                setDebugLayersGLES(layersGLES);
             }
         }
 
         // Include the app's lib directory in all cases
-        layerPaths += mLayerPath;
-
+        layerPaths += mLibrarySearchPaths;
         setLayerPaths(mClassLoader, layerPaths);
     }
 
@@ -334,6 +361,20 @@ public class GraphicsEnvironment {
         }
 
         return -1;
+    }
+
+    private static ApplicationInfo getAppInfoWithMetadata(Context context,
+                                                          PackageManager pm, String packageName) {
+        ApplicationInfo ai;
+        try {
+            // Get the ApplicationInfo from PackageManager so that metadata fields present.
+            ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Unlikely to fail for applications, but in case of failure, fall back to use the
+            // ApplicationInfo from context directly.
+            ai = context.getApplicationInfo();
+        }
+        return ai;
     }
 
     private static String getDriverForPkg(Context context, Bundle bundle, String packageName) {
@@ -680,8 +721,7 @@ public class GraphicsEnvironment {
     /**
      * Return the driver package name to use. Return null for system driver.
      */
-    private static String chooseDriverInternal(
-            Context context, Bundle coreSettings, PackageManager pm, String packageName) {
+    private static String chooseDriverInternal(Bundle coreSettings, ApplicationInfo ai) {
         final String gameDriver = SystemProperties.get(PROPERTY_GFX_DRIVER);
         final boolean hasGameDriver = gameDriver != null && !gameDriver.isEmpty();
 
@@ -696,15 +736,6 @@ public class GraphicsEnvironment {
         // To minimize risk of driver updates crippling the device beyond user repair, never use an
         // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
         // were tested thoroughly with the pre-installed driver.
-        ApplicationInfo ai;
-        try {
-            // Get the ApplicationInfo from PackageManager so that metadata fields present.
-            ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            // Unlikely to fail for applications, but in case of failure, fall back to use the
-            // ApplicationInfo from context directly.
-            ai = context.getApplicationInfo();
-        }
         if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
             if (DEBUG) Log.v(TAG, "Ignoring driver package for privileged/non-updated system app.");
             return null;
@@ -784,9 +815,9 @@ public class GraphicsEnvironment {
      * Choose whether the current process should use the builtin or an updated driver.
      */
     private static boolean chooseDriver(
-            Context context, Bundle coreSettings, PackageManager pm, String packageName) {
-        final String driverPackageName = chooseDriverInternal(context, coreSettings, pm,
-                packageName);
+            Context context, Bundle coreSettings, PackageManager pm, String packageName,
+            ApplicationInfo ai) {
+        final String driverPackageName = chooseDriverInternal(coreSettings, ai);
         if (driverPackageName == null) {
             return false;
         }
@@ -898,4 +929,5 @@ public class GraphicsEnvironment {
     private static native void setAngleInfo(String path, String appPackage, String devOptIn,
             FileDescriptor rulesFd, long rulesOffset, long rulesLength);
     private static native boolean getShouldUseAngle(String packageName);
+    private static native boolean setInjectLayersPrSetDumpable();
 }

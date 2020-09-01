@@ -15,11 +15,14 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
+
 #include <chrono>
 #include <thread>
 #include <vector>
+
 #include "../metrics/metrics_test_helper.h"
 #include "src/stats_log_util.h"
+#include "stats_event.h"
 #include "tests/statsd_test_util.h"
 
 #ifdef __ANDROID__
@@ -35,7 +38,7 @@ using std::vector;
 using std::this_thread::sleep_for;
 using testing::Contains;
 
-// cooldown time 1sec.
+namespace {
 int pullTagId = 10014;
 
 bool pullSuccess;
@@ -44,7 +47,8 @@ long pullDelayNs;
 
 class FakePuller : public StatsPuller {
 public:
-    FakePuller() : StatsPuller(pullTagId){};
+    FakePuller()
+        : StatsPuller(pullTagId, /*coolDownNs=*/MillisToNano(10), /*timeoutNs=*/MillisToNano(5)){};
 
 private:
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override {
@@ -56,11 +60,15 @@ private:
 
 FakePuller puller;
 
-shared_ptr<LogEvent> createSimpleEvent(int64_t eventTimeNs, int64_t value) {
-    shared_ptr<LogEvent> event = make_shared<LogEvent>(pullTagId, eventTimeNs);
-    event->write(value);
-    event->init();
-    return event;
+std::unique_ptr<LogEvent> createSimpleEvent(int64_t eventTimeNs, int64_t value) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, pullTagId);
+    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
+    AStatsEvent_writeInt64(statsEvent, value);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
+    return logEvent;
 }
 
 class StatsPullerTest : public ::testing::Test {
@@ -76,31 +84,33 @@ public:
     }
 };
 
-TEST_F(StatsPullerTest, PullSucces) {
+}  // Anonymous namespace.
+
+TEST_F(StatsPullerTest, PullSuccess) {
     pullData.push_back(createSimpleEvent(1111L, 33));
 
     pullSuccess = true;
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_TRUE(puller.Pull(&dataHolder));
-    EXPECT_EQ(1, dataHolder.size());
+    EXPECT_TRUE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
     EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
     EXPECT_EQ(1111L, dataHolder[0]->GetElapsedTimestampNs());
-    EXPECT_EQ(1, dataHolder[0]->size());
+    ASSERT_EQ(1, dataHolder[0]->size());
     EXPECT_EQ(33, dataHolder[0]->getValues()[0].mValue.int_value);
 
-    sleep_for(std::chrono::seconds(1));
+    sleep_for(std::chrono::milliseconds(11));
 
     pullData.clear();
     pullData.push_back(createSimpleEvent(2222L, 44));
 
     pullSuccess = true;
 
-    EXPECT_TRUE(puller.Pull(&dataHolder));
-    EXPECT_EQ(1, dataHolder.size());
+    EXPECT_TRUE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
     EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
     EXPECT_EQ(2222L, dataHolder[0]->GetElapsedTimestampNs());
-    EXPECT_EQ(1, dataHolder[0]->size());
+    ASSERT_EQ(1, dataHolder[0]->size());
     EXPECT_EQ(44, dataHolder[0]->getValues()[0].mValue.int_value);
 }
 
@@ -110,47 +120,49 @@ TEST_F(StatsPullerTest, PullFailAfterSuccess) {
     pullSuccess = true;
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_TRUE(puller.Pull(&dataHolder));
-    EXPECT_EQ(1, dataHolder.size());
+    EXPECT_TRUE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
     EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
     EXPECT_EQ(1111L, dataHolder[0]->GetElapsedTimestampNs());
-    EXPECT_EQ(1, dataHolder[0]->size());
+    ASSERT_EQ(1, dataHolder[0]->size());
     EXPECT_EQ(33, dataHolder[0]->getValues()[0].mValue.int_value);
 
-    sleep_for(std::chrono::seconds(1));
+    sleep_for(std::chrono::milliseconds(11));
 
     pullData.clear();
     pullData.push_back(createSimpleEvent(2222L, 44));
 
     pullSuccess = false;
     dataHolder.clear();
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 
+    // Fails due to hitting the cool down.
     pullSuccess = true;
     dataHolder.clear();
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 // Test pull takes longer than timeout, 2nd pull happens shorter than cooldown
 TEST_F(StatsPullerTest, PullTakeTooLongAndPullFast) {
     pullData.push_back(createSimpleEvent(1111L, 33));
     pullSuccess = true;
-    // timeout is 0.5
-    pullDelayNs = (long)(0.8 * NS_PER_SEC);
+    // timeout is 5ms
+    pullDelayNs = MillisToNano(6);
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 
     pullData.clear();
     pullData.push_back(createSimpleEvent(2222L, 44));
+    pullDelayNs = 0;
 
     pullSuccess = true;
     dataHolder.clear();
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 TEST_F(StatsPullerTest, PullFail) {
@@ -159,19 +171,19 @@ TEST_F(StatsPullerTest, PullFail) {
     pullSuccess = false;
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 TEST_F(StatsPullerTest, PullTakeTooLong) {
     pullData.push_back(createSimpleEvent(1111L, 33));
 
     pullSuccess = true;
-    pullDelayNs = NS_PER_SEC;
+    pullDelayNs = MillisToNano(6);
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 TEST_F(StatsPullerTest, PullTooFast) {
@@ -180,11 +192,11 @@ TEST_F(StatsPullerTest, PullTooFast) {
     pullSuccess = true;
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_TRUE(puller.Pull(&dataHolder));
-    EXPECT_EQ(1, dataHolder.size());
+    EXPECT_TRUE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
     EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
     EXPECT_EQ(1111L, dataHolder[0]->GetElapsedTimestampNs());
-    EXPECT_EQ(1, dataHolder[0]->size());
+    ASSERT_EQ(1, dataHolder[0]->size());
     EXPECT_EQ(33, dataHolder[0]->getValues()[0].mValue.int_value);
 
     pullData.clear();
@@ -193,11 +205,11 @@ TEST_F(StatsPullerTest, PullTooFast) {
     pullSuccess = true;
 
     dataHolder.clear();
-    EXPECT_TRUE(puller.Pull(&dataHolder));
-    EXPECT_EQ(1, dataHolder.size());
+    EXPECT_TRUE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
     EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
     EXPECT_EQ(1111L, dataHolder[0]->GetElapsedTimestampNs());
-    EXPECT_EQ(1, dataHolder[0]->size());
+    ASSERT_EQ(1, dataHolder[0]->size());
     EXPECT_EQ(33, dataHolder[0]->getValues()[0].mValue.int_value);
 }
 
@@ -207,16 +219,93 @@ TEST_F(StatsPullerTest, PullFailsAndTooFast) {
     pullSuccess = false;
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 
     pullData.clear();
     pullData.push_back(createSimpleEvent(2222L, 44));
 
     pullSuccess = true;
 
-    EXPECT_FALSE(puller.Pull(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    EXPECT_FALSE(puller.Pull(getElapsedRealtimeNs(), &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
+}
+
+TEST_F(StatsPullerTest, PullSameEventTime) {
+    pullData.push_back(createSimpleEvent(1111L, 33));
+
+    pullSuccess = true;
+    int64_t eventTimeNs = getElapsedRealtimeNs();
+
+    vector<std::shared_ptr<LogEvent>> dataHolder;
+    EXPECT_TRUE(puller.Pull(eventTimeNs, &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
+    EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
+    EXPECT_EQ(1111L, dataHolder[0]->GetElapsedTimestampNs());
+    ASSERT_EQ(1, dataHolder[0]->size());
+    EXPECT_EQ(33, dataHolder[0]->getValues()[0].mValue.int_value);
+
+    pullData.clear();
+    pullData.push_back(createSimpleEvent(2222L, 44));
+
+    // Sleep to ensure the cool down expires.
+    sleep_for(std::chrono::milliseconds(11));
+    pullSuccess = true;
+
+    dataHolder.clear();
+    EXPECT_TRUE(puller.Pull(eventTimeNs, &dataHolder));
+    ASSERT_EQ(1, dataHolder.size());
+    EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
+    EXPECT_EQ(1111L, dataHolder[0]->GetElapsedTimestampNs());
+    ASSERT_EQ(1, dataHolder[0]->size());
+    EXPECT_EQ(33, dataHolder[0]->getValues()[0].mValue.int_value);
+}
+
+// Test pull takes longer than timeout, 2nd pull happens at same event time
+TEST_F(StatsPullerTest, PullTakeTooLongAndPullSameEventTime) {
+    pullData.push_back(createSimpleEvent(1111L, 33));
+    pullSuccess = true;
+    int64_t eventTimeNs = getElapsedRealtimeNs();
+    // timeout is 5ms
+    pullDelayNs = MillisToNano(6);
+
+    vector<std::shared_ptr<LogEvent>> dataHolder;
+    EXPECT_FALSE(puller.Pull(eventTimeNs, &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
+
+    // Sleep to ensure the cool down expires. 6ms is taken by the delay, so only 5 is needed here.
+    sleep_for(std::chrono::milliseconds(5));
+
+    pullData.clear();
+    pullData.push_back(createSimpleEvent(2222L, 44));
+    pullDelayNs = 0;
+
+    pullSuccess = true;
+    dataHolder.clear();
+    EXPECT_FALSE(puller.Pull(eventTimeNs, &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
+}
+
+TEST_F(StatsPullerTest, PullFailsAndPullSameEventTime) {
+    pullData.push_back(createSimpleEvent(1111L, 33));
+
+    pullSuccess = false;
+    int64_t eventTimeNs = getElapsedRealtimeNs();
+
+    vector<std::shared_ptr<LogEvent>> dataHolder;
+    EXPECT_FALSE(puller.Pull(eventTimeNs, &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
+
+    // Sleep to ensure the cool down expires.
+    sleep_for(std::chrono::milliseconds(11));
+
+    pullData.clear();
+    pullData.push_back(createSimpleEvent(2222L, 44));
+
+    pullSuccess = true;
+
+    EXPECT_FALSE(puller.Pull(eventTimeNs, &dataHolder));
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 }  // namespace statsd

@@ -16,9 +16,10 @@
 
 package com.android.server.notification;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertTrue;
 
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
@@ -52,18 +53,18 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
     @Test
     public void testPriorityOnlyMutingAllNotifications() {
-        ZenModeConfig config = getMutedNotificationsConfig();
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        ZenModeConfig config = getMutedRingerConfig();
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
 
         config.allowReminders = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
         config.allowReminders = false;
 
         config.areChannelsBypassingDnd = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
         config.areChannelsBypassingDnd = false;
 
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
     }
 
     @Test
@@ -90,6 +91,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         int priorityCategories = originalPolicy.priorityCategories;
         int priorityCallSenders = originalPolicy.priorityCallSenders;
         int priorityMessageSenders = originalPolicy.priorityMessageSenders;
+        int priorityConversationsSenders = originalPolicy.priorityConversationSenders;
         int suppressedVisualEffects = originalPolicy.suppressedVisualEffects;
         priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
@@ -98,34 +100,62 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
 
         Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
-                priorityMessageSenders, suppressedVisualEffects, 0);
-
+                priorityMessageSenders, suppressedVisualEffects, 0, priorityConversationsSenders);
         assertEquals(expectedPolicy, config.toNotificationPolicy(zenPolicy));
+    }
+
+    @Test
+    public void testZenConfigToZenPolicy() {
+        ZenPolicy expected = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowReminders(true)
+                .allowEvents(true)
+                .showLights(false)
+                .showBadges(false)
+                .showInAmbientDisplay(false)
+                .build();
+
+        ZenModeConfig config = getMutedAllConfig();
+        config.allowAlarms = true;
+        config.allowReminders = true;
+        config.allowEvents = true;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+        ZenPolicy actual = config.toZenPolicy();
+
+        assertEquals(expected.getVisualEffectBadge(), actual.getVisualEffectBadge());
+        assertEquals(expected.getPriorityCategoryAlarms(), actual.getPriorityCategoryAlarms());
+        assertEquals(expected.getPriorityCategoryReminders(),
+                actual.getPriorityCategoryReminders());
+        assertEquals(expected.getPriorityCategoryEvents(), actual.getPriorityCategoryEvents());
+        assertEquals(expected.getVisualEffectLights(), actual.getVisualEffectLights());
+        assertEquals(expected.getVisualEffectAmbient(), actual.getVisualEffectAmbient());
     }
 
     @Test
     public void testPriorityOnlyMutingAll() {
         ZenModeConfig config = getMutedAllConfig();
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(true, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
 
         config.allowReminders = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(false, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
         config.allowReminders = false;
 
         config.areChannelsBypassingDnd = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(false, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
         config.areChannelsBypassingDnd = false;
 
         config.allowAlarms = true;
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(false, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
         config.allowAlarms = false;
 
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(true, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
     }
 
     @Test
@@ -200,14 +230,14 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.zenMode, fromXml.zenMode);
     }
 
-    private ZenModeConfig getMutedNotificationsConfig() {
+    private ZenModeConfig getMutedRingerConfig() {
         ZenModeConfig config = new ZenModeConfig();
-        // Allow alarms, media, and system
+        // Allow alarms, media
         config.allowAlarms = true;
         config.allowMedia = true;
-        config.allowSystem = true;
 
-        // All notification sounds are not allowed
+        // All sounds that respect the ringer are not allowed
+        config.allowSystem = false;
         config.allowCalls = false;
         config.allowRepeatCallers = false;
         config.allowMessages = false;
@@ -234,6 +264,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         config.areChannelsBypassingDnd = false;
         config.allowCallsFrom = ZenModeConfig.SOURCE_ANYONE;
         config.allowMessagesFrom = ZenModeConfig.SOURCE_ANYONE;
+        config.allowConversations = true;
+        config.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
 
         config.suppressedVisualEffects = 0;
         return config;
@@ -251,6 +283,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         config.allowReminders = false;
         config.allowEvents = false;
         config.areChannelsBypassingDnd = false;
+        config.allowConversations = false;
+        config.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_NONE;
 
         config.suppressedVisualEffects = 0;
         return config;

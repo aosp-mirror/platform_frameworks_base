@@ -21,6 +21,7 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import android.os.Handler;
 import android.os.Trace;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.ServiceThread;
 
 /**
@@ -54,6 +55,22 @@ public final class SurfaceAnimationThread extends ServiceThread {
         synchronized (SurfaceAnimationThread.class) {
             ensureThreadLocked();
             return sHandler;
+        }
+    }
+
+    /**
+     * Disposes current surface animation thread if it's initialized. Should only be used in tests
+     * to set up a new environment.
+     */
+    @VisibleForTesting
+    public static void dispose() {
+        synchronized (SurfaceAnimationThread.class) {
+            if (sInstance == null) {
+                return;
+            }
+
+            getHandler().runWithScissors(() -> sInstance.quit(), 0 /* timeout */);
+            sInstance = null;
         }
     }
 }

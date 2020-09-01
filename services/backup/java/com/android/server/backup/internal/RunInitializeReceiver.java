@@ -53,21 +53,8 @@ public class RunInitializeReceiver extends BroadcastReceiver {
 
             if (pendingInits.size() > 0) {
                 String[] transports = pendingInits.toArray(new String[pendingInits.size()]);
-
                 mUserBackupManagerService.clearPendingInits();
-
-                UserBackupManagerService.BackupWakeLock wakelock =
-                        mUserBackupManagerService.getWakelock();
-                wakelock.acquire();
-                OnTaskFinishedListener listener = caller -> wakelock.release();
-
-                Runnable task =
-                        new PerformInitializeTask(
-                                mUserBackupManagerService,
-                                transports,
-                                /* observer */ null,
-                                listener);
-                mUserBackupManagerService.getBackupHandler().post(task);
+                mUserBackupManagerService.initializeTransports(transports, null);
             }
         }
     }

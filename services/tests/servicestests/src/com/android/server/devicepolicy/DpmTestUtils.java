@@ -25,6 +25,8 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 import android.util.Printer;
 
+import com.android.server.pm.RestrictionsSet;
+
 import libcore.io.Streams;
 
 import com.google.android.collect.Lists;
@@ -35,7 +37,6 @@ import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -58,12 +59,30 @@ public class DpmTestUtils extends AndroidTestCase {
         return list == null ? 0 : list.size();
     }
 
+    public static RestrictionsSet newRestrictions(int userId, String... restrictions) {
+        Bundle localRestrictionsBundle = newRestrictions(restrictions);
+        RestrictionsSet localRestrictions = new RestrictionsSet();
+        localRestrictions.updateRestrictions(userId, localRestrictionsBundle);
+        return localRestrictions;
+    }
+
     public static Bundle newRestrictions(String... restrictions) {
         final Bundle ret = new Bundle();
         for (String restriction : restrictions) {
             ret.putBoolean(restriction, true);
         }
         return ret;
+    }
+
+    public static void assertRestrictions(RestrictionsSet expected, RestrictionsSet actual) {
+        assertEquals(expected.size(), actual.size());
+
+        for (int i = 0; i < expected.size(); i++) {
+            int originatingUserId = expected.keyAt(i);
+            Bundle actualRestrictions = actual.getRestrictions(originatingUserId);
+            assertFalse(actualRestrictions.isEmpty());
+            assertRestrictions(expected.getRestrictions(originatingUserId), actualRestrictions);
+        }
     }
 
     public static void assertRestrictions(Bundle expected, Bundle actual) {

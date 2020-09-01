@@ -27,12 +27,9 @@ import static com.android.shell.BugreportPrefs.getWarningState;
 import static com.android.shell.BugreportPrefs.setWarningState;
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
 import static com.android.shell.BugreportProgressService.EXTRA_ID;
-import static com.android.shell.BugreportProgressService.EXTRA_MAX;
 import static com.android.shell.BugreportProgressService.EXTRA_NAME;
-import static com.android.shell.BugreportProgressService.EXTRA_PID;
 import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
-import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTED;
 import static com.android.shell.BugreportProgressService.SCREENSHOT_DELAY_SECONDS;
 
 import static org.junit.Assert.assertEquals;
@@ -145,6 +142,11 @@ public class BugreportReceiverTest {
     private static final String TITLE2 = "Master of the Universe";
     private static final String DESCRIPTION = "One's description...";
     private static final String DESCRIPTION2 = "...is another's treasure.";
+    // TODO(b/143130523): Fix (update) tests and add to presubmit
+    private static final String EXTRA_MAX = "android.intent.extra.MAX";
+    private static final String EXTRA_PID = "android.intent.extra.PID";
+    private static final String INTENT_BUGREPORT_STARTED =
+            "com.android.internal.intent.action.BUGREPORT_STARTED";
 
     private static final String NO_DESCRIPTION = null;
     private static final String NO_NAME = null;

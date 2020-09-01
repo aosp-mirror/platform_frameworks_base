@@ -16,6 +16,7 @@
 #define LOG_TAG "libprotoutil"
 
 #include <stdlib.h>
+#include <sys/mman.h>
 
 #include <android/util/EncodedBuffer.h>
 #include <android/util/protobuf.h>
@@ -82,14 +83,16 @@ EncodedBuffer::Pointer::copy() const
 }
 
 // ===========================================================
-EncodedBuffer::EncodedBuffer() : EncodedBuffer(0)
+EncodedBuffer::EncodedBuffer() : EncodedBuffer(BUFFER_SIZE)
 {
 }
 
 EncodedBuffer::EncodedBuffer(size_t chunkSize)
         :mBuffers()
 {
-    mChunkSize = chunkSize == 0 ? BUFFER_SIZE : chunkSize;
+    // Align chunkSize to memory page size
+    chunkSize = chunkSize == 0 ? BUFFER_SIZE : chunkSize;
+    mChunkSize = (chunkSize / PAGE_SIZE + ((chunkSize % PAGE_SIZE == 0) ? 0 : 1)) * PAGE_SIZE;
     mWp = Pointer(mChunkSize);
     mEp = Pointer(mChunkSize);
 }
@@ -98,7 +101,7 @@ EncodedBuffer::~EncodedBuffer()
 {
     for (size_t i=0; i<mBuffers.size(); i++) {
         uint8_t* buf = mBuffers[i];
-        free(buf);
+        munmap(buf, mChunkSize);
     }
 }
 
@@ -135,7 +138,10 @@ EncodedBuffer::writeBuffer()
     if (mWp.index() > mBuffers.size()) return NULL;
     uint8_t* buf = NULL;
     if (mWp.index() == mBuffers.size()) {
-        buf = (uint8_t*)malloc(mChunkSize);
+        // Use mmap instead of malloc to ensure memory alignment i.e. no fragmentation so that
+        // the mem region can be immediately reused by the allocator after calling munmap()
+        buf = (uint8_t*)mmap(NULL, mChunkSize, PROT_READ | PROT_WRITE,
+                MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
 
         if (buf == NULL) return NULL; // This indicates NO_MEMORY
 

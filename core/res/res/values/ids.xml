@@ -179,11 +179,11 @@
   <!-- Action used to manually trigger an autofill request -->
   <item type="id" name="autofill" />
 
-    <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TOOLTIP}. -->
-    <item type="id" name="accessibilityActionShowTooltip" />
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TOOLTIP}. -->
+  <item type="id" name="accessibilityActionShowTooltip" />
 
-    <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_HIDE_TOOLTIP}. -->
-    <item type="id" name="accessibilityActionHideTooltip" />
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_HIDE_TOOLTIP}. -->
+  <item type="id" name="accessibilityActionHideTooltip" />
 
   <!-- A tag used to save the view added to a transition overlay -->
   <item type="id" name="transition_overlay_view_tag" />
@@ -196,4 +196,37 @@
 
   <!-- Marks the "copy to clipboard" button in the ChooserActivity -->
   <item type="id" name="chooser_copy_button" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK}. -->
+  <item type="id" name="accessibilitySystemActionBack" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_HOME}. -->
+  <item type="id" name="accessibilitySystemActionHome" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_RECENTS}. -->
+  <item type="id" name="accessibilitySystemActionRecents" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_NOTIFICATIONS}. -->
+  <item type="id" name="accessibilitySystemActionNotifications" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_QUICK_SETTINGS}. -->
+  <item type="id" name="accessibilitySystemActionQuickSettings" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_POWER_DIALOG}. -->
+  <item type="id" name="accessibilitySystemActionPowerDialog" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN}. -->
+  <item type="id" name="accessibilitySystemActionToggleSplitScreen" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_LOCK_SCREEN}. -->
+  <item type="id" name="accessibilitySystemActionLockScreen" />
+
+  <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_TAKE_SCREENSHOT}. -->
+  <item type="id" name="accessibilitySystemActionTakeScreenshot" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PRESS_AND_HOLD}. -->
+  <item type="id" name="accessibilityActionPressAndHold" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_IME_ENTER}. -->
+  <item type="id" name="accessibilityActionImeEnter" />
 </resources>

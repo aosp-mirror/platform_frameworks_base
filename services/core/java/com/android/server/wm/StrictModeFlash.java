@@ -27,27 +27,38 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
+import java.util.function.Supplier;
+
 class StrictModeFlash {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "StrictModeFlash" : TAG_WM;
 
     private final SurfaceControl mSurfaceControl;
-    private final Surface mSurface = new Surface();
+    private final Surface mSurface;
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
     private final int mThickness = 20;
 
-    public StrictModeFlash(DisplayContent dc) {
+    StrictModeFlash(Supplier<Surface> surfaceFactory, DisplayContent dc,
+            SurfaceControl.Transaction t) {
+        mSurface = surfaceFactory.get();
         SurfaceControl ctrl = null;
         try {
             ctrl = dc.makeOverlay()
                     .setName("StrictModeFlash")
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
+                    .setCallsite("StrictModeFlash")
                     .build();
-            ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
-            ctrl.setPosition(0, 0);
-            ctrl.show();
+
+            // one more than Watermark? arbitrary.
+            t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);
+            t.setPosition(ctrl, 0, 0);
+            t.show(ctrl);
+            // Ensure we aren't considered as obscuring for Input purposes.
+            InputMonitor.setTrustedOverlayInputInfo(ctrl, t, dc.getDisplayId(),
+                    "StrictModeFlash");
+
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }
@@ -100,25 +111,25 @@ class StrictModeFlash {
 
     // Note: caller responsible for being inside
     // Surface.openTransaction() / closeTransaction()
-    public void setVisibility(boolean on) {
+    public void setVisibility(boolean on, SurfaceControl.Transaction t) {
         if (mSurfaceControl == null) {
             return;
         }
         drawIfNeeded();
         if (on) {
-            mSurfaceControl.show();
+            t.show(mSurfaceControl);
         } else {
-            mSurfaceControl.hide();
+            t.hide(mSurfaceControl);
         }
     }
 
-    void positionSurface(int dw, int dh) {
+    void positionSurface(int dw, int dh, SurfaceControl.Transaction t) {
         if (mLastDW == dw && mLastDH == dh) {
             return;
         }
         mLastDW = dw;
         mLastDH = dh;
-        mSurfaceControl.setBufferSize(dw, dh);
+        t.setBufferSize(mSurfaceControl, dw, dh);
         mDrawNeeded = true;
     }
 

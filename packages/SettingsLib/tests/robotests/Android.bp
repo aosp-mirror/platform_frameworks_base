@@ -32,6 +32,9 @@ android_app {
 android_robolectric_test {
     name: "SettingsLibRoboTests",
     srcs: ["src/**/*.java"],
+    static_libs: [
+        "SettingsLib-robo-testutils",
+    ],
     java_resource_dirs: ["config"],
     instrumentation_for: "SettingsLibShell",
     coverage_libs: ["SettingsLib"],
@@ -43,7 +46,7 @@ android_robolectric_test {
 java_library {
     name: "SettingsLib-robo-testutils",
     srcs: [
-        "src/com/android/settingslib/testutils/**/*.java",
+        "testutils/com/android/settingslib/testutils/**/*.java",
     ],
 
     libs: [

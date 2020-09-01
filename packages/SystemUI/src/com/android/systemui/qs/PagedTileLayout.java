@@ -22,7 +22,9 @@ import android.widget.Scroller;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
 
@@ -63,7 +65,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mLayoutDirection;
     private int mHorizontalClipBound;
     private final Rect mClippingRect;
-    private int mLastMaxHeight = -1;
+    private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
+    private int mExcessHeight;
+    private int mLastExcessHeight;
+    private int mMinRows = 1;
+    private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -75,6 +81,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mLayoutDirection = getLayoutDirection();
         mClippingRect = new Rect();
     }
+    private int mLastMaxHeight = -1;
 
     public void saveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_PAGE, getCurrentItem());
@@ -126,6 +133,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         return page;
     }
 
+    // This will dump to the ui log all the tiles that are visible in this page
+    private void logVisibleTiles(TilePage page) {
+        for (int i = 0; i < page.mRecords.size(); i++) {
+            QSTile t = page.mRecords.get(i).tile;
+            mUiEventLogger.logWithInstanceId(QSEvent.QS_TILE_VISIBLE, 0, t.getMetricsSpec(),
+                    t.getInstanceId());
+        }
+    }
+
     @Override
     public void setListening(boolean listening) {
         if (mListening == listening) return;
@@ -140,12 +156,33 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
-    public void computeScroll() {
-        if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
-            fakeDragBy(getScrollX() - mScroller.getCurrX());
+    public void fakeDragBy(float xOffset) {
+        try {
+            super.fakeDragBy(xOffset);
             // Keep on drawing until the animation has finished.
             postInvalidateOnAnimation();
-            return;
+        } catch (NullPointerException e) {
+            Log.e(TAG, "FakeDragBy called before begin", e);
+            // If we were trying to fake drag, it means we just added a new tile to the last
+            // page, so animate there.
+            final int lastPageNumber = mPages.size() - 1;
+            post(() -> {
+                setCurrentItem(lastPageNumber, true);
+                if (mBounceAnimatorSet != null) {
+                    mBounceAnimatorSet.start();
+                }
+                setOffscreenPageLimit(1);
+            });
+        }
+    }
+
+    @Override
+    public void computeScroll() {
+        if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+            if (!isFakeDragging()) {
+                beginFakeDrag();
+            }
+            fakeDragBy(getScrollX() - mScroller.getCurrX());
         } else if (isFakeDragging()) {
             endFakeDrag();
             mBounceAnimatorSet.start();
@@ -162,9 +199,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mPages.add((TilePage) LayoutInflater.from(getContext())
-                .inflate(R.layout.qs_paged_page, this, false));
+        mPages.add(createTilePage());
         mAdapter.notifyDataSetChanged();
+    }
+
+    private TilePage createTilePage() {
+        TilePage page = (TilePage) LayoutInflater.from(getContext())
+                .inflate(R.layout.qs_paged_page, this, false);
+        page.setMinRows(mMinRows);
+        page.setMaxColumns(mMaxColumns);
+        return page;
     }
 
     public void setPageIndicator(PageIndicator indicator) {
@@ -215,7 +259,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         int currentItem = getCurrentPageNumber();
         for (int i = 0; i < mPages.size(); i++) {
-            mPages.get(i).setSelected(i == currentItem ? selected : false);
+            TilePage page = mPages.get(i);
+            page.setSelected(i == currentItem ? selected : false);
+            if (page.isSelected()) {
+                logVisibleTiles(page);
+            }
         }
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
@@ -243,15 +291,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     private void emptyAndInflateOrRemovePages() {
-        final int nTiles = mTiles.size();
-        // We should always have at least one page, even if it's empty.
-        int numPages = Math.max(nTiles / mPages.get(0).maxTiles(), 1);
-
-        // Add one more not full page if needed
-        if (nTiles > numPages * mPages.get(0).maxTiles()) {
-            numPages++;
-        }
-
+        final int numPages = getNumPages();
         final int NP = mPages.size();
         for (int i = 0; i < NP; i++) {
             mPages.get(i).removeAllViews();
@@ -261,8 +301,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
         while (mPages.size() < numPages) {
             if (DEBUG) Log.d(TAG, "Adding page");
-            mPages.add((TilePage) LayoutInflater.from(getContext())
-                    .inflate(R.layout.qs_paged_page, this, false));
+            mPages.add(createTilePage());
         }
         while (mPages.size() > numPages) {
             if (DEBUG) Log.d(TAG, "Removing page");
@@ -305,17 +344,54 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public boolean setMinRows(int minRows) {
+        mMinRows = minRows;
+        boolean changed = false;
+        for (int i = 0; i < mPages.size(); i++) {
+            if (mPages.get(i).setMinRows(minRows)) {
+                changed = true;
+                mDistributeTiles = true;
+            }
+        }
+        return changed;
+    }
+
+    @Override
+    public boolean setMaxColumns(int maxColumns) {
+        mMaxColumns = maxColumns;
+        boolean changed = false;
+        for (int i = 0; i < mPages.size(); i++) {
+            if (mPages.get(i).setMaxColumns(maxColumns)) {
+                changed = true;
+                mDistributeTiles = true;
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * Set the amount of excess space that we gave this view compared to the actual available
+     * height. This is because this view is in a scrollview.
+     */
+    public void setExcessHeight(int excessHeight) {
+        mExcessHeight = excessHeight;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         final int nTiles = mTiles.size();
         // If we have no reason to recalculate the number of rows, skip this step. In particular,
         // if the height passed by its parent is the same as the last time, we try not to remeasure.
-        if (mDistributeTiles || mLastMaxHeight != MeasureSpec.getSize(heightMeasureSpec)) {
+        if (mDistributeTiles || mLastMaxHeight != MeasureSpec.getSize(heightMeasureSpec)
+                || mLastExcessHeight != mExcessHeight) {
 
             mLastMaxHeight = MeasureSpec.getSize(heightMeasureSpec);
+            mLastExcessHeight = mExcessHeight;
             // Only change the pages if the number of rows or columns (from updateResources) has
             // changed or the tiles have changed
-            if (mPages.get(0).updateMaxRows(heightMeasureSpec, nTiles) || mDistributeTiles) {
+            int availableHeight = mLastMaxHeight - mExcessHeight;
+            if (mPages.get(0).updateMaxRows(availableHeight, nTiles) || mDistributeTiles) {
                 mDistributeTiles = false;
                 distributeTiles();
             }
@@ -345,6 +421,22 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     public int getColumnCount() {
         if (mPages.size() == 0) return 0;
         return mPages.get(0).mColumns;
+    }
+
+    /**
+     * Gets the number of pages in this paged tile layout
+     */
+    public int getNumPages() {
+        final int nTiles = mTiles.size();
+        // We should always have at least one page, even if it's empty.
+        int numPages = Math.max(nTiles / mPages.get(0).maxTiles(), 1);
+
+        // Add one more not full page if needed
+        if (nTiles > numPages * mPages.get(0).maxTiles()) {
+            numPages++;
+        }
+
+        return numPages;
     }
 
     public int getNumVisibleTiles() {
@@ -416,6 +508,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                         mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
                                 : position == 0);
                     }
+
                 }
 
                 @Override
@@ -446,14 +539,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             // show even 1 or there are no tiles, it probably means we are in the middle of setting
             // up.
             return Math.max(mColumns * mRows, 1);
-        }
-
-        @Override
-        public boolean updateResources() {
-            final int sidePadding = getContext().getResources().getDimensionPixelSize(
-                    R.dimen.notification_side_paddings);
-            setPadding(sidePadding, 0, sidePadding, 0);
-            return super.updateResources();
         }
     }
 

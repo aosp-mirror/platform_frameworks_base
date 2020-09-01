@@ -77,7 +77,6 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
         broadcastActiveSource();
         queryDevicePowerStatus();
-        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
@@ -87,19 +86,19 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         HdmiCecLocalDeviceSource source = source();
         source.mService.setAndBroadcastActiveSourceFromOneDeviceType(
                 mTargetAddress, getSourcePath());
-        // Set local active port to HOME when One Touch Play.
-        // Active Port and Current Input are handled by the switch functionality device.
+        // When OneTouchPlay is called, client side should be responsible to send out the intent
+        // of which internal source, for example YouTube, it would like to switch to.
+        // Here we only update the active port and the active source records in the local
+        // device as well as claiming Active Source.
         if (source.mService.audioSystem() != null) {
             source = source.mService.audioSystem();
-        }
-        if (source.getLocalActivePort() != Constants.CEC_SWITCH_HOME) {
-            source.switchInputOnReceivingNewActivePath(getSourcePath());
         }
         source.setRoutingPort(Constants.CEC_SWITCH_HOME);
         source.setLocalActivePort(Constants.CEC_SWITCH_HOME);
     }
 
     private void queryDevicePowerStatus() {
+        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
                 mTargetAddress));
     }

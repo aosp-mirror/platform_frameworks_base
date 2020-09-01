@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/magnification_controls_size"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentEnd="true"
+    android:layout_height="@dimen/magnification_controls_size"
+    android:gravity="center">
+
+  <RelativeLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content">
+
+    <ImageView
+        android:focusable="true"
+        android:id="@+id/controller"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_control_magnification_grey" />
+
+    <View
+        android:id="@+id/left_control"
+        android:layout_width="@dimen/magnifier_left_right_controls_width"
+        android:layout_height="@dimen/magnifier_left_right_controls_height"
+        android:layout_alignLeft="@+id/controller"
+        android:layout_centerVertical="true" />
+
+    <View
+        android:id="@+id/up_control"
+        android:layout_width="@dimen/magnifier_up_down_controls_width"
+        android:layout_height="@dimen/magnifier_up_down_controls_height"
+        android:layout_alignTop="@+id/controller"
+        android:layout_centerHorizontal="true" />
+
+    <View
+        android:id="@+id/right_control"
+        android:layout_width="@dimen/magnifier_left_right_controls_width"
+        android:layout_height="@dimen/magnifier_left_right_controls_height"
+        android:layout_alignRight="@+id/controller"
+        android:layout_centerVertical="true" />
+
+    <View
+        android:id="@+id/down_control"
+        android:layout_width="@dimen/magnifier_up_down_controls_width"
+        android:layout_height="@dimen/magnifier_up_down_controls_height"
+        android:layout_alignBottom="@+id/controller"
+        android:layout_centerHorizontal="true" />
+  </RelativeLayout>
+
+</FrameLayout>

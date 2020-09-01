@@ -82,7 +82,7 @@ public class MessagingImageTransformState extends ImageTransformState {
             float startActualWidth = getStartActualWidth();
             mImageMessage.setActualWidth(
                     (int) NotificationUtils.interpolate(startActualWidth,
-                            mImageMessage.getStaticWidth(),
+                            mImageMessage.getWidth(),
                             interpolatedValue));
             float startActualHeight = getStartActualHeight();
             mImageMessage.setActualHeight(
@@ -121,7 +121,7 @@ public class MessagingImageTransformState extends ImageTransformState {
     @Override
     protected void resetTransformedView() {
         super.resetTransformedView();
-        mImageMessage.setActualWidth(mImageMessage.getStaticWidth());
+        mImageMessage.setActualWidth(mImageMessage.getWidth());
         mImageMessage.setActualHeight(mImageMessage.getHeight());
     }
 

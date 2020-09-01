@@ -16,16 +16,39 @@
 
 package android.database;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentResolver.NotifyFlags;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Receives call backs for changes to content.
  * Must be implemented by objects which are added to a {@link ContentObservable}.
  */
 public abstract class ContentObserver {
+    /**
+     * Starting in {@link android.os.Build.VERSION_CODES#R}, there is a new
+     * public API overload {@link #onChange(boolean, Uri, int)} that delivers a
+     * {@code int flags} argument.
+     * <p>
+     * Some apps may be relying on a previous hidden API that delivered a
+     * {@code int userId} argument, and this change is used to control delivery
+     * of the new {@code int flags} argument in its place.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
+    private static final long ADD_CONTENT_OBSERVER_FLAGS = 150939131L;
+
     private final Object mLock = new Object();
     private Transport mTransport; // guarded by mLock
 
@@ -101,12 +124,10 @@ public abstract class ContentObserver {
      * This method is called when a content change occurs.
      * Includes the changed content Uri when available.
      * <p>
-     * Subclasses should override this method to handle content changes.
-     * To ensure correct operation on older versions of the framework that
-     * did not provide a Uri argument, applications should also implement
-     * the {@link #onChange(boolean)} overload of this method whenever they
-     * implement the {@link #onChange(boolean, Uri)} overload.
-     * </p><p>
+     * Subclasses should override this method to handle content changes. To
+     * ensure correct operation on older versions of the framework that did not
+     * provide richer arguments, applications should implement all overloads.
+     * <p>
      * Example implementation:
      * <pre><code>
      * // Implement the onChange(boolean) method to delegate the change notification to
@@ -126,38 +147,73 @@ public abstract class ContentObserver {
      * </p>
      *
      * @param selfChange True if this is a self-change notification.
-     * @param uri The Uri of the changed content, or null if unknown.
+     * @param uri The Uri of the changed content.
      */
-    public void onChange(boolean selfChange, Uri uri) {
+    public void onChange(boolean selfChange, @Nullable Uri uri) {
         onChange(selfChange);
     }
 
     /**
-     * Dispatches a change notification to the observer. Includes the changed
-     * content Uri when available and also the user whose content changed.
+     * This method is called when a content change occurs. Includes the changed
+     * content Uri when available.
+     * <p>
+     * Subclasses should override this method to handle content changes. To
+     * ensure correct operation on older versions of the framework that did not
+     * provide richer arguments, applications should implement all overloads.
      *
      * @param selfChange True if this is a self-change notification.
-     * @param uri The Uri of the changed content, or null if unknown.
-     * @param userId The user whose content changed. Can be either a specific
-     *         user or {@link UserHandle#USER_ALL}.
-     *
-     * @hide
+     * @param uri The Uri of the changed content.
+     * @param flags Flags indicating details about this change.
      */
-    public void onChange(boolean selfChange, Uri uri, int userId) {
+    public void onChange(boolean selfChange, @Nullable Uri uri, @NotifyFlags int flags) {
         onChange(selfChange, uri);
+    }
+
+    /**
+     * This method is called when a content change occurs. Includes the changed
+     * content Uris when available.
+     * <p>
+     * Subclasses should override this method to handle content changes. To
+     * ensure correct operation on older versions of the framework that did not
+     * provide richer arguments, applications should implement all overloads.
+     *
+     * @param selfChange True if this is a self-change notification.
+     * @param uris The Uris of the changed content.
+     * @param flags Flags indicating details about this change.
+     */
+    public void onChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags) {
+        for (Uri uri : uris) {
+            onChange(selfChange, uri, flags);
+        }
+    }
+
+    /** @hide */
+    public void onChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags, @UserIdInt int userId) {
+        // There are dozens of people relying on the hidden API inside the
+        // system UID, so hard-code the old behavior for all of them; for
+        // everyone else we gate based on a specific change
+        if (!CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS)
+                || android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
+            // Deliver userId through argument to preserve hidden API behavior
+            onChange(selfChange, uris, userId);
+        } else {
+            onChange(selfChange, uris, flags);
+        }
     }
 
     /**
      * Dispatches a change notification to the observer.
      * <p>
-     * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
-     * then a call to the {@link #onChange} method is posted to the handler's message queue.
-     * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
-     * </p>
+     * If a {@link Handler} was supplied to the {@link ContentObserver}
+     * constructor, then a call to the {@link #onChange} method is posted to the
+     * handler's message queue. Otherwise, the {@link #onChange} method is
+     * invoked immediately on this thread.
      *
-     * @param selfChange True if this is a self-change notification.
-     *
-     * @deprecated Use {@link #dispatchChange(boolean, Uri)} instead.
+     * @deprecated Callers should migrate towards using a richer overload that
+     *             provides more details about the change, such as
+     *             {@link #dispatchChange(boolean, Collection, int)}.
      */
     @Deprecated
     public final void dispatchChange(boolean selfChange) {
@@ -165,57 +221,66 @@ public abstract class ContentObserver {
     }
 
     /**
-     * Dispatches a change notification to the observer.
-     * Includes the changed content Uri when available.
+     * Dispatches a change notification to the observer. Includes the changed
+     * content Uri when available.
      * <p>
-     * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
-     * then a call to the {@link #onChange} method is posted to the handler's message queue.
-     * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
-     * </p>
+     * If a {@link Handler} was supplied to the {@link ContentObserver}
+     * constructor, then a call to the {@link #onChange} method is posted to the
+     * handler's message queue. Otherwise, the {@link #onChange} method is
+     * invoked immediately on this thread.
      *
      * @param selfChange True if this is a self-change notification.
-     * @param uri The Uri of the changed content, or null if unknown.
+     * @param uri The Uri of the changed content.
      */
-    public final void dispatchChange(boolean selfChange, Uri uri) {
-        dispatchChange(selfChange, uri, UserHandle.getCallingUserId());
+    public final void dispatchChange(boolean selfChange, @Nullable Uri uri) {
+        dispatchChange(selfChange, uri, 0);
     }
 
     /**
      * Dispatches a change notification to the observer. Includes the changed
-     * content Uri when available and also the user whose content changed.
+     * content Uri when available.
      * <p>
-     * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
-     * then a call to the {@link #onChange} method is posted to the handler's message queue.
-     * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
-     * </p>
+     * If a {@link Handler} was supplied to the {@link ContentObserver}
+     * constructor, then a call to the {@link #onChange} method is posted to the
+     * handler's message queue. Otherwise, the {@link #onChange} method is
+     * invoked immediately on this thread.
      *
      * @param selfChange True if this is a self-change notification.
-     * @param uri The Uri of the changed content, or null if unknown.
-     * @param userId The user whose content changed.
+     * @param uri The Uri of the changed content.
+     * @param flags Flags indicating details about this change.
      */
-    private void dispatchChange(boolean selfChange, Uri uri, int userId) {
-        if (mHandler == null) {
-            onChange(selfChange, uri, userId);
-        } else {
-            mHandler.post(new NotificationRunnable(selfChange, uri, userId));
-        }
+    public final void dispatchChange(boolean selfChange, @Nullable Uri uri,
+            @NotifyFlags int flags) {
+        dispatchChange(selfChange, Arrays.asList(uri), flags);
     }
 
+    /**
+     * Dispatches a change notification to the observer. Includes the changed
+     * content Uris when available.
+     * <p>
+     * If a {@link Handler} was supplied to the {@link ContentObserver}
+     * constructor, then a call to the {@link #onChange} method is posted to the
+     * handler's message queue. Otherwise, the {@link #onChange} method is
+     * invoked immediately on this thread.
+     *
+     * @param selfChange True if this is a self-change notification.
+     * @param uris The Uri of the changed content.
+     * @param flags Flags indicating details about this change.
+     */
+    public final void dispatchChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags) {
+        dispatchChange(selfChange, uris, flags, UserHandle.getCallingUserId());
+    }
 
-    private final class NotificationRunnable implements Runnable {
-        private final boolean mSelfChange;
-        private final Uri mUri;
-        private final int mUserId;
-
-        public NotificationRunnable(boolean selfChange, Uri uri, int userId) {
-            mSelfChange = selfChange;
-            mUri = uri;
-            mUserId = userId;
-        }
-
-        @Override
-        public void run() {
-            ContentObserver.this.onChange(mSelfChange, mUri, mUserId);
+    /** @hide */
+    public final void dispatchChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags, @UserIdInt int userId) {
+        if (mHandler == null) {
+            onChange(selfChange, uris, flags, userId);
+        } else {
+            mHandler.post(() -> {
+                onChange(selfChange, uris, flags, userId);
+            });
         }
     }
 
@@ -228,9 +293,16 @@ public abstract class ContentObserver {
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
+            // This is kept intact purely for apps using hidden APIs, to
+            // redirect to the updated implementation
+            onChangeEtc(selfChange, new Uri[] { uri }, 0, userId);
+        }
+
+        @Override
+        public void onChangeEtc(boolean selfChange, Uri[] uris, int flags, int userId) {
             ContentObserver contentObserver = mContentObserver;
             if (contentObserver != null) {
-                contentObserver.dispatchChange(selfChange, uri, userId);
+                contentObserver.dispatchChange(selfChange, Arrays.asList(uris), flags, userId);
             }
         }
 

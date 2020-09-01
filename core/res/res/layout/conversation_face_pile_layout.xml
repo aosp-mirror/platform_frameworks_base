@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations underthe License
+  -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/conversation_face_pile"
+    android:layout_width="@dimen/conversation_avatar_size"
+    android:layout_height="@dimen/conversation_avatar_size"
+    android:forceHasOverlappingRendering="false"
+    >
+    <ImageView
+        android:id="@+id/conversation_face_pile_top"
+        android:layout_width="@dimen/messaging_avatar_size"
+        android:layout_height="@dimen/messaging_avatar_size"
+        android:scaleType="centerCrop"
+        android:layout_gravity="end|top"
+        />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom">
+        <ImageView
+            android:id="@+id/conversation_face_pile_bottom_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/conversation_badge_background"
+            />
+        <ImageView
+            android:id="@+id/conversation_face_pile_bottom"
+            android:layout_width="@dimen/messaging_avatar_size"
+            android:layout_height="@dimen/messaging_avatar_size"
+            android:scaleType="centerCrop"
+            android:layout_gravity="center"
+            />
+    </FrameLayout>
+</FrameLayout>

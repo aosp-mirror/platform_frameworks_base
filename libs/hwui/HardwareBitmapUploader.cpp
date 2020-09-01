@@ -187,7 +187,9 @@ private:
             EGLSyncKHR fence = mUploadThread->queue().runSync([&]() -> EGLSyncKHR {
                 AutoSkiaGlTexture glTexture;
                 glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, autoImage.image);
-                GL_CHECKPOINT(MODERATE);
+                if (GLUtils::dumpGLErrors()) {
+                    return EGL_NO_SYNC_KHR;
+                }
 
                 // glTexSubImage2D is synchronous in sense that it memcpy() from pointer that we
                 // provide.
@@ -195,19 +197,26 @@ private:
                 // when we first use it in drawing
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap.width(), bitmap.height(),
                                 format.format, format.type, bitmap.getPixels());
-                GL_CHECKPOINT(MODERATE);
+                if (GLUtils::dumpGLErrors()) {
+                    return EGL_NO_SYNC_KHR;
+                }
 
                 EGLSyncKHR uploadFence =
                         eglCreateSyncKHR(eglGetCurrentDisplay(), EGL_SYNC_FENCE_KHR, NULL);
-                LOG_ALWAYS_FATAL_IF(uploadFence == EGL_NO_SYNC_KHR,
-                                    "Could not create sync fence %#x", eglGetError());
+                if (uploadFence == EGL_NO_SYNC_KHR) {
+                    ALOGW("Could not create sync fence %#x", eglGetError());
+                };
                 glFlush();
+                GLUtils::dumpGLErrors();
                 return uploadFence;
             });
 
+            if (fence == EGL_NO_SYNC_KHR) {
+                return false;
+            }
             EGLint waitStatus = eglClientWaitSyncKHR(display, fence, 0, FENCE_TIMEOUT);
-            LOG_ALWAYS_FATAL_IF(waitStatus != EGL_CONDITION_SATISFIED_KHR,
-                                "Failed to wait for the fence %#x", eglGetError());
+            ALOGE_IF(waitStatus != EGL_CONDITION_SATISFIED_KHR,
+                    "Failed to wait for the fence %#x", eglGetError());
 
             eglDestroySyncKHR(display, fence);
         }
@@ -404,8 +413,9 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
     if (!sUploader->uploadHardwareBitmap(bitmap, format, buffer)) {
         return nullptr;
     }
-    return Bitmap::createFrom(buffer, bitmap.colorType(), bitmap.refColorSpace(),
-                              bitmap.alphaType(), Bitmap::computePalette(bitmap));
+    return Bitmap::createFrom(buffer->toAHardwareBuffer(), bitmap.colorType(),
+                              bitmap.refColorSpace(), bitmap.alphaType(),
+			      Bitmap::computePalette(bitmap));
 }
 
 void HardwareBitmapUploader::initialize() {

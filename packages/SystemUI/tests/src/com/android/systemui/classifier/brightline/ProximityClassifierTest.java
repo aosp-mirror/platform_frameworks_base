@@ -24,12 +24,12 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.sensors.ProximitySensor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +40,6 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class ProximityClassifierTest extends ClassifierTest {
 
     private static final long NS_PER_MS = 1000000;
@@ -57,7 +56,8 @@ public class ProximityClassifierTest extends ClassifierTest {
         MockitoAnnotations.initMocks(this);
         when(mDataProvider.getInteractionType()).thenReturn(GENERIC);
         when(mDistanceClassifier.isLongSwipe()).thenReturn(false);
-        mClassifier = new ProximityClassifier(mDistanceClassifier, mDataProvider);
+        mClassifier = new ProximityClassifier(
+                mDistanceClassifier, mDataProvider, new DeviceConfigProxyFake());
     }
 
     @After

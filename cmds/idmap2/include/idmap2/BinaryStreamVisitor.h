@@ -29,16 +29,19 @@ class BinaryStreamVisitor : public Visitor {
  public:
   explicit BinaryStreamVisitor(std::ostream& stream) : stream_(stream) {
   }
-  virtual void visit(const Idmap& idmap);
-  virtual void visit(const IdmapHeader& header);
-  virtual void visit(const IdmapData& data);
-  virtual void visit(const IdmapData::Header& header);
-  virtual void visit(const IdmapData::TypeEntry& type_entry);
+  ~BinaryStreamVisitor() override = default;
+  void visit(const Idmap& idmap) override;
+  void visit(const IdmapHeader& header) override;
+  void visit(const IdmapData& data) override;
+  void visit(const IdmapData::Header& header) override;
 
  private:
+  void Write(const void* value, size_t length);
+  void Write8(uint8_t value);
   void Write16(uint16_t value);
   void Write32(uint32_t value);
-  void WriteString(const StringPiece& value);
+  void WriteString256(const StringPiece& value);
+  void WriteString(const std::string& value);
   std::ostream& stream_;
 };
 

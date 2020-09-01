@@ -16,7 +16,9 @@
 
 package android.hardware.input;
 
+import android.annotation.NonNull;
 import android.hardware.display.DisplayViewport;
+import android.os.IBinder;
 import android.view.InputEvent;
 
 import java.util.List;
@@ -59,4 +61,21 @@ public abstract class InputManagerInternal {
      * Set whether the input stack should deliver pulse gesture events when the device is asleep.
      */
     public abstract void setPulseGestureEnabled(boolean enabled);
+
+    /**
+     * Atomically transfers touch focus from one window to another as identified by
+     * their input channels.  It is possible for multiple windows to have
+     * touch focus if they support split touch dispatch
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
+     * method only transfers touch focus of the specified window without affecting
+     * other windows that may also have touch focus at the same time.
+     *
+     * @param fromChannelToken The channel token of a window that currently has touch focus.
+     * @param toChannelToken The channel token of the window that should receive touch focus in
+     * place of the first.
+     * @return {@code true} if the transfer was successful. {@code false} if the window with the
+     * specified channel did not actually have touch focus at the time of the request.
+     */
+    public abstract boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+            @NonNull IBinder toChannelToken);
 }

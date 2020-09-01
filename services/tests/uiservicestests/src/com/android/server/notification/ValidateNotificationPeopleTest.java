@@ -16,11 +16,23 @@
 package com.android.server.notification;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.Person;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserManager;
+import android.provider.ContactsContract;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableString;
 
@@ -30,6 +42,7 @@ import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -167,6 +180,64 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         bundle.putParcelableArrayList(Notification.EXTRA_PEOPLE_LIST, arrayList);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testPeopleArrayList", expected, result);
+    }
+
+    @Test
+    public void testSearchContacts_workContact_queriesWorkContactProvider()
+            throws Exception {
+        final int personalUserId = 0;
+        final int workUserId = 12;
+        final int contactId = 12345;
+        final Context mockContext = mock(Context.class);
+        when(mockContext.getUserId()).thenReturn(personalUserId);
+        final UserManager mockUserManager = mock(UserManager.class);
+        when(mockContext.getSystemService(UserManager.class)).thenReturn(mockUserManager);
+        when(mockUserManager.getProfileIds(personalUserId, /* enabledOnly= */ true))
+                .thenReturn(new int[] {personalUserId, workUserId});
+        when(mockUserManager.isManagedProfile(workUserId)).thenReturn(true);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        final Uri lookupUri = Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_LOOKUP_URI,
+                ContactsContract.Contacts.ENTERPRISE_CONTACT_LOOKUP_PREFIX + contactId);
+
+        new ValidateNotificationPeople().searchContacts(mockContext, lookupUri);
+
+        ArgumentCaptor<Uri> queryUri = ArgumentCaptor.forClass(Uri.class);
+        verify(mockContentResolver).query(
+                queryUri.capture(),
+                any(),
+                /* selection= */ isNull(),
+                /* selectionArgs= */ isNull(),
+                /* sortOrder= */ isNull());
+        assertEquals(workUserId, ContentProvider.getUserIdFromUri(queryUri.getValue()));
+    }
+
+    @Test
+    public void testSearchContacts_personalContact_queriesPersonalContactProvider()
+            throws Exception {
+        final int personalUserId = 0;
+        final int workUserId = 12;
+        final int contactId = 12345;
+        final Context mockContext = mock(Context.class);
+        when(mockContext.getUserId()).thenReturn(personalUserId);
+        final UserManager mockUserManager = mock(UserManager.class);
+        when(mockContext.getSystemService(UserManager.class)).thenReturn(mockUserManager);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        final Uri lookupUri = Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_LOOKUP_URI, String.valueOf(contactId));
+
+        new ValidateNotificationPeople().searchContacts(mockContext, lookupUri);
+
+        ArgumentCaptor<Uri> queryUri = ArgumentCaptor.forClass(Uri.class);
+        verify(mockContentResolver).query(
+                queryUri.capture(),
+                any(),
+                /* selection= */ isNull(),
+                /* selectionArgs= */ isNull(),
+                /* sortOrder= */ isNull());
+        assertFalse(ContentProvider.uriHasUserId(queryUri.getValue()));
     }
 
     private void assertStringArrayEquals(String message, String[] expected, String[] result) {

@@ -40,7 +40,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class CastTileTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private KeyguardMonitor mKeyguard;
+    private KeyguardStateController mKeyguard;
     @Mock
     private NetworkController mNetworkController;
     @Mock
@@ -83,7 +83,7 @@ public class CastTileTest extends SysuiTestCase {
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mController = mDependency.injectMockDependency(CastController.class);
         mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
-        mKeyguard = mDependency.injectMockDependency(KeyguardMonitor.class);
+        mKeyguard = mDependency.injectMockDependency(KeyguardStateController.class);
         mNetworkController = mDependency.injectMockDependency(NetworkController.class);
 
         when(mHost.getContext()).thenReturn(mContext);

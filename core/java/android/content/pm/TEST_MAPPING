@@ -9,5 +9,21 @@
     {
       "path": "system/apex/tests"
     }
+  ],
+  "presubmit": [
+    {
+      "name": "CtsInstantAppTests",
+      "file_patterns": ["(/|^)InstantApp[^/]*"]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
+        }
+      ]
+    }
   ]
 }

@@ -25,6 +25,7 @@ import android.hardware.light.ILights;
 import android.hardware.lights.ILightsManager;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -37,24 +38,30 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class LightsService extends SystemService {
     static final String TAG = "LightsService";
     static final boolean DEBUG = false;
 
-    private LightImpl[] mLights = null;
-    private SparseArray<LightImpl> mLightsById = null;
+    private final LightImpl[] mLightsByType = new LightImpl[LightsManager.LIGHT_ID_COUNT];
+    private final SparseArray<LightImpl> mLightsById = new SparseArray<>();
 
-    private ILights mVintfLights = null;
+    @Nullable
+    private final Supplier<ILights> mVintfLights;
 
     @VisibleForTesting
     final LightsManagerBinderService mManagerService;
@@ -95,8 +102,8 @@ public class LightsService extends SystemService {
             synchronized (LightsService.this) {
                 final List<Light> lights = new ArrayList<Light>();
                 for (int i = 0; i < mLightsById.size(); i++) {
-                    HwLight hwLight = mLightsById.valueAt(i).getHwLight();
-                    if (!isSystemLight(hwLight)) {
+                    if (!mLightsById.valueAt(i).isSystemLight()) {
+                        HwLight hwLight = mLightsById.valueAt(i).mHwLight;
                         lights.add(new Light(hwLight.id, hwLight.ordinal, hwLight.type));
                     }
                 }
@@ -137,7 +144,7 @@ public class LightsService extends SystemService {
 
             synchronized (LightsService.this) {
                 final LightImpl light = mLightsById.get(lightId);
-                if (light == null || isSystemLight(light.getHwLight())) {
+                if (light == null || light.isSystemLight()) {
                     throw new IllegalArgumentException("Invalid light: " + lightId);
                 }
                 return new LightState(light.getColor());
@@ -170,6 +177,36 @@ public class LightsService extends SystemService {
             closeSessionInternal(token);
         }
 
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+
+            synchronized (LightsService.this) {
+                if (mVintfLights != null) {
+                    pw.println("Service: aidl (" + mVintfLights.get() + ")");
+                } else {
+                    pw.println("Service: hidl");
+                }
+
+                pw.println("Lights:");
+                for (int i = 0; i < mLightsById.size(); i++) {
+                    final LightImpl light = mLightsById.valueAt(i);
+                    pw.println(String.format("  Light id=%d ordinal=%d color=%08x",
+                            light.mHwLight.id, light.mHwLight.ordinal, light.getColor()));
+                }
+
+                pw.println("Session clients:");
+                for (Session session : mSessions) {
+                    pw.println("  Session token=" + session.mToken);
+                    for (int i = 0; i < session.mRequests.size(); i++) {
+                        pw.println(String.format("    Request id=%d color=%08x",
+                                session.mRequests.keyAt(i),
+                                session.mRequests.valueAt(i).getColor()));
+                    }
+                }
+            }
+        }
+
         private void closeSessionInternal(IBinder token) {
             synchronized (LightsService.this) {
                 final Session session = getSessionLocked(token);
@@ -183,9 +220,8 @@ public class LightsService extends SystemService {
         private void checkRequestIsValid(int[] lightIds) {
             for (int i = 0; i < lightIds.length; i++) {
                 final LightImpl light = mLightsById.get(lightIds[i]);
-                final HwLight hwLight = light.getHwLight();
-                Preconditions.checkState(light != null && !isSystemLight(hwLight),
-                        "invalid lightId " + hwLight.id);
+                Preconditions.checkState(light != null && !light.isSystemLight(),
+                        "Invalid lightId " + lightIds[i]);
             }
         }
 
@@ -204,9 +240,8 @@ public class LightsService extends SystemService {
             }
             for (int i = 0; i < mLightsById.size(); i++) {
                 LightImpl light = mLightsById.valueAt(i);
-                HwLight hwLight = light.getHwLight();
-                if (!isSystemLight(hwLight)) {
-                    LightState state = states.get(hwLight.id);
+                if (!light.isSystemLight()) {
+                    LightState state = states.get(light.mHwLight.id);
                     if (state != null) {
                         light.setColor(state.getColor());
                     } else {
@@ -249,17 +284,21 @@ public class LightsService extends SystemService {
         }
 
         @Override
-        public void setBrightness(int brightness) {
+        public void setBrightness(float brightness) {
             setBrightness(brightness, BRIGHTNESS_MODE_USER);
         }
 
         @Override
-        public void setBrightness(int brightness, int brightnessMode) {
+        public void setBrightness(float brightness, int brightnessMode) {
+            if (Float.isNaN(brightness)) {
+                Slog.w(TAG, "Brightness is not valid: " + brightness);
+                return;
+            }
             synchronized (this) {
                 // LOW_PERSISTENCE cannot be manually set
                 if (brightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
                     Slog.w(TAG, "setBrightness with LOW_PERSISTENCE unexpected #" + mHwLight.id
-                            + ": brightness=0x" + Integer.toHexString(brightness));
+                            + ": brightness=" + brightness);
                     return;
                 }
                 // Ideally, we'd like to set the brightness mode through the SF/HWC as well, but
@@ -267,6 +306,7 @@ public class LightsService extends SystemService {
                 // anything but USER or the device shouldBeInLowPersistenceMode().
                 if (brightnessMode == BRIGHTNESS_MODE_USER && !shouldBeInLowPersistenceMode()
                         && mSurfaceControlMaximumBrightness == 255) {
+                    // New system
                     // TODO: the last check should be mSurfaceControlMaximumBrightness != 0; the
                     // reason we enforce 255 right now is to stay consistent with the old path. In
                     // the future, the framework should be refactored so that brightness is a float
@@ -275,10 +315,12 @@ public class LightsService extends SystemService {
                     if (DEBUG) {
                         Slog.d(TAG, "Using new setBrightness path!");
                     }
-                    SurfaceControl.setDisplayBrightness(mDisplayToken,
-                            (float) brightness / mSurfaceControlMaximumBrightness);
+                    SurfaceControl.setDisplayBrightness(mDisplayToken, brightness);
                 } else {
-                    int color = brightness & 0x000000ff;
+                    // Old system
+                    int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(
+                            getContext(), brightness);
+                    int color = brightnessInt & 0x000000ff;
                     color = 0xff000000 | (color << 16) | (color << 8) | color;
                     setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
                 }
@@ -377,26 +419,22 @@ public class LightsService extends SystemService {
                 int brightnessMode) {
             Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLightState(" + mHwLight.id + ", 0x"
                     + Integer.toHexString(color) + ")");
-            if (mVintfLights != null) {
-                HwLightState lightState = new HwLightState();
-                lightState.color = color;
-                lightState.flashMode = (byte) mode;
-                lightState.flashOnMs = onMS;
-                lightState.flashOffMs = offMS;
-                lightState.brightnessMode = (byte) brightnessMode;
-                try {
-                    mVintfLights.setLightState(mHwLight.id, lightState);
-                } catch (RemoteException | UnsupportedOperationException ex) {
-                    Slog.e(TAG, "Failed issuing setLightState", ex);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
-                }
-            } else {
-                try {
+            try {
+                if (mVintfLights != null) {
+                    HwLightState lightState = new HwLightState();
+                    lightState.color = color;
+                    lightState.flashMode = (byte) mode;
+                    lightState.flashOnMs = onMS;
+                    lightState.flashOffMs = offMS;
+                    lightState.brightnessMode = (byte) brightnessMode;
+                    mVintfLights.get().setLightState(mHwLight.id, lightState);
+                } else {
                     setLight_native(mHwLight.id, color, mode, onMS, offMS, brightnessMode);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
                 }
+            } catch (RemoteException | UnsupportedOperationException ex) {
+                Slog.e(TAG, "Failed issuing setLightState", ex);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             }
         }
 
@@ -404,8 +442,14 @@ public class LightsService extends SystemService {
             return mVrModeEnabled && mUseLowPersistenceForVR;
         }
 
-        private HwLight getHwLight() {
-            return mHwLight;
+        /**
+         * Returns whether a light is system-use-only or should be accessible to
+         * applications using the {@link android.hardware.lights.LightsManager} API.
+         */
+        private boolean isSystemLight() {
+            // LIGHT_ID_COUNT comes from the 2.0 HIDL HAL and only contains system lights.
+            // Newly-added lights are made available via the public LightsManager API.
+            return (0 <= mHwLight.type && mHwLight.type < LightsManager.LIGHT_ID_COUNT);
         }
 
         private int getColor() {
@@ -427,52 +471,51 @@ public class LightsService extends SystemService {
     }
 
     public LightsService(Context context) {
-        this(context,
-                ILights.Stub.asInterface(
-                        ServiceManager.getService("android.hardware.light.ILights/default")),
-                Looper.myLooper());
+        this(context, new VintfHalCache(), Looper.myLooper());
     }
 
     @VisibleForTesting
-    LightsService(Context context, ILights service, Looper looper) {
+    LightsService(Context context, Supplier<ILights> service, Looper looper) {
         super(context);
         mH = new Handler(looper);
-        mVintfLights = service;
-        mManagerService = new LightsManagerBinderService();
+        mVintfLights = service.get() != null ? service : null;
+
         populateAvailableLights(context);
+        mManagerService = new LightsManagerBinderService();
     }
 
     private void populateAvailableLights(Context context) {
-        mLights = new LightImpl[LightsManager.LIGHT_ID_COUNT];
-        mLightsById = new SparseArray<>();
-
         if (mVintfLights != null) {
-            try {
-                for (HwLight availableLight : mVintfLights.getLights()) {
-                    LightImpl light = new LightImpl(context, availableLight);
-                    int type = (int) availableLight.type;
-                    if (0 <= type && type < mLights.length && mLights[type] == null) {
-                        mLights[type] = light;
-                    }
-                    mLightsById.put(availableLight.id, light);
-                }
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Unable to get lights for initialization", ex);
-            }
+            populateAvailableLightsFromAidl(context);
+        } else {
+            populateAvailableLightsFromHidl(context);
         }
 
-        // In the case where only the old HAL is available, all lights will be initialized here
-        for (int i = 0; i < mLights.length; i++) {
-            if (mLights[i] == null) {
-                // The ordinal can be anything if there is only 1 light of each type. Set it to 1.
-                HwLight light = new HwLight();
-                light.id = (byte) i;
-                light.ordinal = 1;
-                light.type = (byte) i;
-
-                mLights[i] = new LightImpl(context, light);
-                mLightsById.put(i, mLights[i]);
+        for (int i = mLightsById.size() - 1; i >= 0; i--) {
+            final int type = mLightsById.keyAt(i);
+            if (0 <= type && type < mLightsByType.length) {
+                mLightsByType[type] = mLightsById.valueAt(i);
             }
+        }
+    }
+
+    private void populateAvailableLightsFromAidl(Context context) {
+        try {
+            for (HwLight hwLight : mVintfLights.get().getLights()) {
+                mLightsById.put(hwLight.id, new LightImpl(context, hwLight));
+            }
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Unable to get lights from HAL", ex);
+        }
+    }
+
+    private void populateAvailableLightsFromHidl(Context context) {
+        for (int i = 0; i < mLightsByType.length; i++) {
+            HwLight hwLight = new HwLight();
+            hwLight.id = (byte) i;
+            hwLight.ordinal = 1;
+            hwLight.type = (byte) i;
+            mLightsById.put(hwLight.id, new LightImpl(context, hwLight));
         }
     }
 
@@ -497,23 +540,39 @@ public class LightsService extends SystemService {
     private final LightsManager mService = new LightsManager() {
         @Override
         public LogicalLight getLight(int lightType) {
-            if (mLights != null && 0 <= lightType && lightType < mLights.length) {
-                return mLights[lightType];
+            if (mLightsByType != null && 0 <= lightType && lightType < mLightsByType.length) {
+                return mLightsByType[lightType];
             } else {
                 return null;
             }
         }
     };
 
-    /**
-     * Returns whether a light is system-use-only or should be accessible to
-     * applications using the {@link android.hardware.lights.LightsManager} API.
-     */
-    private static boolean isSystemLight(HwLight light) {
-        // LIGHT_ID_COUNT comes from the 2.0 HIDL HAL and only contains system
-        // lights. Newly added lights will be made available via the
-        // LightsManager API.
-        return 0 <= light.type && light.type < LightsManager.LIGHT_ID_COUNT;
+    private static class VintfHalCache implements Supplier<ILights>, IBinder.DeathRecipient {
+        @GuardedBy("this")
+        private ILights mInstance = null;
+
+        @Override
+        public synchronized ILights get() {
+            if (mInstance == null) {
+                IBinder binder = Binder.allowBlocking(ServiceManager.waitForDeclaredService(
+                        "android.hardware.light.ILights/default"));
+                if (binder != null) {
+                    mInstance = ILights.Stub.asInterface(binder);
+                    try {
+                        binder.linkToDeath(this, 0);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to register DeathRecipient for " + mInstance);
+                    }
+                }
+            }
+            return mInstance;
+        }
+
+        @Override
+        public synchronized void binderDied() {
+            mInstance = null;
+        }
     }
 
     static native void setLight_native(int light, int color, int mode,

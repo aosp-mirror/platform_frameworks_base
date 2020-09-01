@@ -32,6 +32,7 @@ android_library {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
+        "car-ui-lib",
         "android.car.userlib",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
@@ -53,7 +54,6 @@ android_library {
     ],
 
     libs: [
-        "telephony-common",
         "android.car",
     ],
 
@@ -61,6 +61,64 @@ android_library {
 
     plugins: ["dagger2-compiler"],
 
+}
+
+android_library {
+    name: "CarSystemUI-tests",
+    manifest: "tests/AndroidManifest.xml",
+    resource_dirs: [
+        "tests/res",
+        "res-keyguard",
+        "res",
+    ],
+    srcs: [
+        "tests/src/**/*.java",
+        "src/**/*.java",
+        "src/**/I*.aidl",
+    ],
+    static_libs: [
+        "SystemUI-tests",
+        "CarNotificationLib",
+        "SystemUIPluginLib",
+        "SystemUISharedLib",
+        "SettingsLib",
+        "android.car.userlib",
+        "androidx.legacy_legacy-support-v4",
+        "androidx.recyclerview_recyclerview",
+        "androidx.preference_preference",
+        "androidx.appcompat_appcompat",
+        "androidx.mediarouter_mediarouter",
+        "androidx.palette_palette",
+        "androidx.legacy_legacy-preference-v14",
+        "androidx.leanback_leanback",
+        "androidx.slice_slice-core",
+        "androidx.slice_slice-view",
+        "androidx.slice_slice-builders",
+        "androidx.arch.core_core-runtime",
+        "androidx.lifecycle_lifecycle-extensions",
+        "car-ui-lib",
+        "SystemUI-tags",
+        "SystemUI-proto",
+        "metrics-helper-lib",
+        "androidx.test.rules", "hamcrest-library",
+        "mockito-target-inline-minus-junit4",
+        "testables",
+        "truth-prebuilt",
+        "dagger2",
+        "//external/kotlinc:kotlin-annotations",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.car",
+    ],
+
+    aaptflags: [
+        "--extra-packages",
+        "com.android.systemui",
+    ],
+
+    plugins: ["dagger2-compiler"],
 }
 
 android_app {
@@ -71,7 +129,6 @@ android_app {
     ],
 
     libs: [
-        "telephony-common",
         "android.car",
     ],
 

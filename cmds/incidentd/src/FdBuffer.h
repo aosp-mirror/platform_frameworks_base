@@ -35,6 +35,7 @@ using namespace android::util;
 class FdBuffer {
 public:
     FdBuffer();
+    FdBuffer(sp<EncodedBuffer> buffer, bool isBufferPooled = false);
     ~FdBuffer();
 
     /**
@@ -114,6 +115,7 @@ private:
     int64_t mFinishTime;
     bool mTimedOut;
     bool mTruncated;
+    bool mIsBufferPooled;
 };
 
 }  // namespace incidentd

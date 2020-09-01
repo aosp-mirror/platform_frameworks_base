@@ -49,15 +49,6 @@ public class QuickStepContract {
     public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
-    // Action sent by a system app to switch to gesture nav
-    public static final String ACTION_ENABLE_GESTURE_NAV =
-            "com.android.systemui.ENABLE_GESTURE_NAV";
-    // Action for the intent to receive the result
-    public static final String ACTION_ENABLE_GESTURE_NAV_RESULT =
-            "com.android.systemui.action.ENABLE_GESTURE_NAV_RESULT";
-    // Extra containing the pending intent to receive the result
-    public static final String EXTRA_RESULT_INTENT = "com.android.systemui.EXTRA_RESULT_INTENT";
-
     // Overview is disabled, either because the device is in lock task mode, or because the device
     // policy has disabled the feature
     public static final int SYSUI_STATE_SCREEN_PINNING = 1 << 0;
@@ -82,12 +73,21 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED = 1 << 9;
     // The search feature is disabled (either by SUW/SysUI/device policy)
     public static final int SYSUI_STATE_SEARCH_DISABLED = 1 << 10;
-    // The notification panel is expanded and interactive (either locked or unlocked), and the
-    // quick settings is not expanded
+    // The notification panel is expanded and interactive (either locked or unlocked), and quick
+    // settings is expanded.
     public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
+    // Winscope tracing is enabled
+    public static final int SYSUI_STATE_TRACING_ENABLED = 1 << 12;
     // The Assistant gesture should be constrained. It is up to the launcher implementation to
     // decide how to constrain it
-    public static final int SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED = 1 << 12;
+    public static final int SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED = 1 << 13;
+    // The bubble stack is expanded. This means that the home gesture should be ignored, since a
+    // swipe up is an attempt to close the bubble stack, but that the back gesture should remain
+    // enabled (since it's used to navigate back within the bubbled app, or to collapse the bubble
+    // stack.
+    public static final int SYSUI_STATE_BUBBLES_EXPANDED = 1 << 14;
+    // The global actions dialog is showing
+    public static final int SYSUI_STATE_GLOBAL_ACTIONS_SHOWING = 1 << 15;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -101,7 +101,11 @@ public class QuickStepContract {
             SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
             SYSUI_STATE_OVERVIEW_DISABLED,
             SYSUI_STATE_HOME_DISABLED,
-            SYSUI_STATE_SEARCH_DISABLED
+            SYSUI_STATE_SEARCH_DISABLED,
+            SYSUI_STATE_TRACING_ENABLED,
+            SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
+            SYSUI_STATE_BUBBLES_EXPANDED,
+            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
     })
     public @interface SystemUiStateFlags {}
 
@@ -118,10 +122,13 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
                 ? "keygrd_occluded" : "");
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
+        str.add((flags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0 ? "global_actions" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
+        str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
         str.add((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0
                 ? "asst_gesture_constrain" : "");
+        str.add((flags & SYSUI_STATE_BUBBLES_EXPANDED) != 0 ? "bubbles_expanded" : "");
         return str.toString();
     }
 
@@ -189,8 +196,9 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isBackGestureDisabled(int sysuiStateFlags) {
-        // Always allow when the bouncer is showing (even on top of the keyguard)
-        if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0) {
+        // Always allow when the bouncer/global actions is showing (even on top of the keyguard)
+        if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
+                || (sysuiStateFlags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0) {
             return false;
         }
         // Disable when in immersive, or the notifications are interactive

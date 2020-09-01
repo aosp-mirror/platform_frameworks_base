@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -32,8 +33,10 @@ import com.android.internal.annotations.GuardedBy;
  */
 public final class UidRecord {
     final int uid;
-    private int mCurProcState;
+    int mCurProcState;
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+    int curCapability;
+    int setCapability;
     long lastBackgroundTime;
     boolean ephemeral;
     boolean foregroundServices;
@@ -42,6 +45,7 @@ public final class UidRecord {
     boolean idle;
     boolean setIdle;
     int numProcs;
+    ArraySet<ProcessRecord> procRecords = new ArraySet<>();
 
     /**
      * Sequence number associated with the {@link #mCurProcState}. This is incremented using
@@ -108,6 +112,7 @@ public final class UidRecord {
         int uid;
         int change;
         int processState;
+        int capability;
         boolean ephemeral;
         long procStateSeq;
     }
@@ -132,6 +137,8 @@ public final class UidRecord {
     public void reset() {
         setCurProcState(ActivityManager.PROCESS_STATE_CACHED_EMPTY);
         foregroundServices = false;
+        curCapability = 0;
+
     }
 
     public void updateHasInternetPermission() {
@@ -151,7 +158,7 @@ public final class UidRecord {
     }
 
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(UidRecordProto.UID, uid);
         proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(mCurProcState));

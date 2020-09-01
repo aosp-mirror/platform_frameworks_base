@@ -18,9 +18,11 @@ package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.permission.PermissionsState;
 
-abstract class SettingBase {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
 

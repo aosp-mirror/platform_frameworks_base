@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<WifiConfigStoreData>
+<int name="Version" value="3" />
+<NetworkList />
+<PasspointConfigData>
+<ProviderList>
+<Provider>
+<long name="ProviderID" value="0" />
+<int name="CreatorUID" value="10085" />
+<string name="PackageName">com.android.certinstaller</string>
+<list name="CaCertificateAliases">
+<string>HS2_0_0</string>
+</list>
+<null name="ClientPrivateKeyAlias" />
+<boolean name="HasEverConnected" value="false" />
+<boolean name="IsFromSuggestion" value="false" />
+<boolean name="IsTrusted" value="true" />
+<Configuration>
+<int name="UpdateIdentifier" value="-2147483648" />
+<int name="CredentialPriority" value="-2147483648" />
+<null name="TrustRootCertList" />
+<long name="SubscriptionCreationTime" value="-9223372036854775808" />
+<long name="SubscriptionExpirationTime" value="-9223372036854775808" />
+<null name="SubscriptionType" />
+<long name="UsageLimitTimePeriod" value="-9223372036854775808" />
+<long name="UsageLimitStartTime" value="-9223372036854775808" />
+<long name="UsageLimitDataLimit" value="-9223372036854775808" />
+<long name="UsageLimitTimeLimit" value="-9223372036854775808" />
+<HomeSP>
+<string name="FQDN">Passpoint.net</string>
+<string name="FriendlyName">Passpoint Friendly Name</string>
+<null name="IconURL" />
+<null name="HomeNetworkIDs" />
+<null name="MatchAllOIs" />
+<null name="MatchAnyOIs" />
+<null name="OtherHomePartners" />
+<null name="RoamingConsortiumOIs" />
+</HomeSP>
+<Credential>
+<long name="CreationTime" value="-9223372036854775808" />
+<long name="ExpirationTime" value="-9223372036854775808" />
+<string name="Realm">passpoint.com</string>
+<boolean name="CheckAAAServerCertStatus" value="false" />
+<UserCredential>
+<string name="Username">blahblahblah</string>
+<string name="Password">doubleblahlah</string>
+<boolean name="MachineManaged" value="true" />
+<null name="SoftTokenApp" />
+<boolean name="AbleToShare" value="false" />
+<int name="EAPType" value="21" />
+<string name="NonEAPInnerMethod">PAP</string>
+</UserCredential>
+</Credential>
+<int name="CarrierId" value="-1" />
+<boolean name="AutoJoinEnabled" value="true" />
+<boolean name="IsMacRandomizationEnabled" value="true" />
+<int name="MeteredOverride" value="0" />
+</Configuration>
+<null name="RemediationCaCertificateAlias" />
+</Provider>
+</ProviderList>
+</PasspointConfigData>
+<OpenNetworkNotifierBlacklistConfigData />
+<NetworkRequestMap>
+<ApprovedAccessPointsPerApp>
+<string name="RequestorPackageName">com.android.cts.verifier</string>
+<AccessPoint>
+<string name="SSID">OPEN_SSID</string>
+<string name="BSSID">00:11:22:33:44:55</string>
+<int name="NetworkType" value="0" />
+</AccessPoint>
+</ApprovedAccessPointsPerApp>
+</NetworkRequestMap>
+<WakeupConfigStoreData>
+<FeatureState>
+<boolean name="IsActive" value="false" />
+<boolean name="IsOnboarded" value="false" />
+<int name="NotificationsShown" value="1" />
+</FeatureState>
+</WakeupConfigStoreData>
+</WifiConfigStoreData>

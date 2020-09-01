@@ -18,6 +18,8 @@
 
 #include "incidentd_util.h"
 
+#include <android/util/EncodedBuffer.h>
+#include <fcntl.h>
 #include <sys/prctl.h>
 #include <wait.h>
 
@@ -26,8 +28,6 @@
 namespace android {
 namespace os {
 namespace incidentd {
-
-using namespace android::base;
 
 const Privacy* get_privacy_of_section(int id) {
     int l = 0;
@@ -47,6 +47,30 @@ const Privacy* get_privacy_of_section(int id) {
     return NULL;
 }
 
+std::vector<sp<EncodedBuffer>> gBufferPool;
+std::mutex gBufferPoolLock;
+
+sp<EncodedBuffer> get_buffer_from_pool() {
+    std::scoped_lock<std::mutex> lock(gBufferPoolLock);
+    if (gBufferPool.size() == 0) {
+        return new EncodedBuffer();
+    }
+    sp<EncodedBuffer> buffer = gBufferPool.back();
+    gBufferPool.pop_back();
+    return buffer;
+}
+
+void return_buffer_to_pool(sp<EncodedBuffer> buffer) {
+    buffer->clear();
+    std::scoped_lock<std::mutex> lock(gBufferPoolLock);
+    gBufferPool.push_back(buffer);
+}
+
+void clear_buffer_pool() {
+    std::scoped_lock<std::mutex> lock(gBufferPoolLock);
+    gBufferPool.clear();
+}
+
 // ================================================================================
 Fpipe::Fpipe() : mRead(), mWrite() {}
 
@@ -64,28 +88,52 @@ unique_fd& Fpipe::readFd() { return mRead; }
 
 unique_fd& Fpipe::writeFd() { return mWrite; }
 
-pid_t fork_execute_cmd(char* const argv[], Fpipe* input, Fpipe* output) {
-    // fork used in multithreaded environment, avoid adding unnecessary code in child process
-    pid_t pid = fork();
+pid_t fork_execute_cmd(char* const argv[], Fpipe* input, Fpipe* output, int* status) {
+    int in = -1;
+    if (input != nullptr) {
+        in = input->readFd().release();
+        // Auto close write end of the input pipe on exec to prevent leaking fd in child process
+        fcntl(input->writeFd().get(), F_SETFD, FD_CLOEXEC);
+    }
+    int out = output->writeFd().release();
+    // Auto close read end of the output pipe on exec
+    fcntl(output->readFd().get(), F_SETFD, FD_CLOEXEC);
+    return fork_execute_cmd(argv, in, out, status);
+}
+
+pid_t fork_execute_cmd(char* const argv[], int in, int out, int* status) {
+    int dummy_status = 0;
+    if (status == nullptr) {
+        status = &dummy_status;
+    }
+    *status = 0;
+    pid_t pid = vfork();
+    if (pid < 0) {
+        *status = -errno;
+        return -1;
+    }
     if (pid == 0) {
-        if (input != NULL && (TEMP_FAILURE_RETRY(dup2(input->readFd().get(), STDIN_FILENO)) < 0 ||
-                              !input->close())) {
+        // In child
+        if (in >= 0 && (TEMP_FAILURE_RETRY(dup2(in, STDIN_FILENO)) < 0 || close(in))) {
             ALOGW("Failed to dup2 stdin.");
             _exit(EXIT_FAILURE);
         }
-        if (TEMP_FAILURE_RETRY(dup2(output->writeFd().get(), STDOUT_FILENO)) < 0 ||
-            !output->close()) {
+        if (TEMP_FAILURE_RETRY(dup2(out, STDOUT_FILENO)) < 0 || close(out)) {
             ALOGW("Failed to dup2 stdout.");
             _exit(EXIT_FAILURE);
         }
-        /* make sure the child dies when incidentd dies */
+        // Make sure the child dies when incidentd dies
         prctl(PR_SET_PDEATHSIG, SIGKILL);
         execvp(argv[0], argv);
         _exit(errno);  // always exits with failure if any
     }
-    // close the fds used in child process.
-    if (input != NULL) input->readFd().reset();
-    output->writeFd().reset();
+    // In parent
+    if ((in >= 0 && close(in) < 0) || close(out) < 0) {
+        ALOGW("Failed to close pd. Killing child process");
+        *status = -errno;
+        kill_child(pid);
+        return -1;
+    }
     return pid;
 }
 
@@ -120,9 +168,6 @@ uint64_t Nanotime() {
 }
 
 // ================================================================================
-const int WAIT_MAX = 5;
-const struct timespec WAIT_INTERVAL_NS = {0, 200 * 1000 * 1000};
-
 static status_t statusCode(int status) {
     if (WIFSIGNALED(status)) {
         VLOG("return by signal: %s", strerror(WTERMSIG(status)));
@@ -134,25 +179,64 @@ static status_t statusCode(int status) {
     return NO_ERROR;
 }
 
+static bool waitpid_with_timeout(pid_t pid, int timeout_ms, int* status) {
+    sigset_t child_mask, old_mask;
+    sigemptyset(&child_mask);
+    sigaddset(&child_mask, SIGCHLD);
+
+    if (sigprocmask(SIG_BLOCK, &child_mask, &old_mask) == -1) {
+        ALOGW("sigprocmask failed: %s", strerror(errno));
+        return false;
+    }
+
+    timespec ts;
+    ts.tv_sec = timeout_ms / 1000;
+    ts.tv_nsec = (timeout_ms % 1000) * 1000000;
+    int ret = TEMP_FAILURE_RETRY(sigtimedwait(&child_mask, nullptr, &ts));
+    int saved_errno = errno;
+
+    // Set the signals back the way they were.
+    if (sigprocmask(SIG_SETMASK, &old_mask, nullptr) == -1) {
+        ALOGW("sigprocmask failed: %s", strerror(errno));
+        if (ret == 0) {
+            return false;
+        }
+    }
+    if (ret == -1) {
+        errno = saved_errno;
+        if (errno == EAGAIN) {
+            errno = ETIMEDOUT;
+        } else {
+            ALOGW("sigtimedwait failed: %s", strerror(errno));
+        }
+        return false;
+    }
+
+    pid_t child_pid = waitpid(pid, status, WNOHANG);
+    if (child_pid == pid) {
+        return true;
+    }
+    if (child_pid == -1) {
+        ALOGW("waitpid failed: %s", strerror(errno));
+    } else {
+        ALOGW("Waiting for pid %d, got pid %d instead", pid, child_pid);
+    }
+    return false;
+}
+
 status_t kill_child(pid_t pid) {
     int status;
-    VLOG("try to kill child process %d", pid);
     kill(pid, SIGKILL);
     if (waitpid(pid, &status, 0) == -1) return -1;
     return statusCode(status);
 }
 
-status_t wait_child(pid_t pid) {
+status_t wait_child(pid_t pid, int timeout_ms) {
     int status;
-    bool died = false;
-    // wait for child to report status up to 1 seconds
-    for (int loop = 0; !died && loop < WAIT_MAX; loop++) {
-        if (waitpid(pid, &status, WNOHANG) == pid) died = true;
-        // sleep for 0.2 second
-        nanosleep(&WAIT_INTERVAL_NS, NULL);
+    if (waitpid_with_timeout(pid, timeout_ms, &status)) {
+        return statusCode(status);
     }
-    if (!died) return kill_child(pid);
-    return statusCode(status);
+    return kill_child(pid);
 }
 
 }  // namespace incidentd

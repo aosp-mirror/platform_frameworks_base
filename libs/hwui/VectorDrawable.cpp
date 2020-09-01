@@ -16,17 +16,23 @@
 
 #include "VectorDrawable.h"
 
+#include <math.h>
+#include <string.h>
 #include <utils/Log.h>
+
 #include "PathParser.h"
 #include "SkColorFilter.h"
 #include "SkImageInfo.h"
 #include "SkShader.h"
+#include "hwui/Paint.h"
+
+#ifdef __ANDROID__
+#include "renderthread/RenderThread.h"
+#endif
+
 #include "utils/Macros.h"
 #include "utils/TraceUtils.h"
 #include "utils/VectorDrawableUtils.h"
-
-#include <math.h>
-#include <string.h>
 
 namespace android {
 namespace uirenderer {
@@ -129,8 +135,7 @@ const SkPath& FullPath::getUpdatedPath(bool useStagingData, SkPath* tempStagingP
     bool setFillPath = properties.getFillGradient() != nullptr ||
                        properties.getFillColor() != SK_ColorTRANSPARENT;
     if (setFillPath) {
-        SkPath::FillType ft = static_cast<SkPath::FillType>(properties.getFillType());
-        outPath->setFillType(ft);
+        outPath->setFillType(static_cast<SkPathFillType>(properties.getFillType()));
     }
     return *outPath;
 }
@@ -458,8 +463,12 @@ void Tree::drawStaging(Canvas* outCanvas) {
         mStagingCache.dirty = false;
     }
 
-    SkPaint paint;
-    getPaintFor(&paint, mStagingProperties);
+    SkPaint skp;
+    getPaintFor(&skp, mStagingProperties);
+    Paint paint;
+    paint.setFilterQuality(skp.getFilterQuality());
+    paint.setColorFilter(skp.refColorFilter());
+    paint.setAlpha(skp.getAlpha());
     outCanvas->drawBitmap(*mStagingCache.bitmap, 0, 0, mStagingCache.bitmap->width(),
                           mStagingCache.bitmap->height(), mStagingProperties.getBounds().left(),
                           mStagingProperties.getBounds().top(),
@@ -467,7 +476,7 @@ void Tree::drawStaging(Canvas* outCanvas) {
                           mStagingProperties.getBounds().bottom(), &paint);
 }
 
-void Tree::getPaintFor(SkPaint* outPaint, const TreeProperties &prop) const {
+void Tree::getPaintFor(SkPaint* outPaint, const TreeProperties& prop) const {
     // HWUI always draws VD with bilinear filtering.
     outPaint->setFilterQuality(kLow_SkFilterQuality);
     if (prop.getColorFilter() != nullptr) {
@@ -486,66 +495,6 @@ Bitmap& Tree::getBitmapUpdateIfDirty() {
     return *mCache.bitmap;
 }
 
-void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context) {
-    SkRect dst;
-    sk_sp<SkSurface> surface = mCache.getSurface(&dst);
-    bool canReuseSurface = surface && dst.width() >= mProperties.getScaledWidth() &&
-                           dst.height() >= mProperties.getScaledHeight();
-    if (!canReuseSurface) {
-        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
-        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        auto atlasEntry = atlas->requestNewEntry(scaledWidth, scaledHeight, context);
-        if (INVALID_ATLAS_KEY != atlasEntry.key) {
-            dst = atlasEntry.rect;
-            surface = atlasEntry.surface;
-            mCache.setAtlas(atlas, atlasEntry.key);
-        } else {
-            // don't draw, if we failed to allocate an offscreen buffer
-            mCache.clear();
-            surface.reset();
-        }
-    }
-    if (!canReuseSurface || mCache.dirty) {
-        if (surface) {
-            Bitmap& bitmap = getBitmapUpdateIfDirty();
-            SkBitmap skiaBitmap;
-            bitmap.getSkBitmap(&skiaBitmap);
-            surface->writePixels(skiaBitmap, dst.fLeft, dst.fTop);
-        }
-        mCache.dirty = false;
-    }
-}
-
-void Tree::Cache::setAtlas(sp<skiapipeline::VectorDrawableAtlas> newAtlas,
-                           skiapipeline::AtlasKey newAtlasKey) {
-    LOG_ALWAYS_FATAL_IF(newAtlasKey == INVALID_ATLAS_KEY);
-    clear();
-    mAtlas = newAtlas;
-    mAtlasKey = newAtlasKey;
-}
-
-sk_sp<SkSurface> Tree::Cache::getSurface(SkRect* bounds) {
-    sk_sp<SkSurface> surface;
-    sp<skiapipeline::VectorDrawableAtlas> atlas = mAtlas.promote();
-    if (atlas.get() && mAtlasKey != INVALID_ATLAS_KEY) {
-        auto atlasEntry = atlas->getEntry(mAtlasKey);
-        *bounds = atlasEntry.rect;
-        surface = atlasEntry.surface;
-        mAtlasKey = atlasEntry.key;
-    }
-
-    return surface;
-}
-
-void Tree::Cache::clear() {
-    sp<skiapipeline::VectorDrawableAtlas> lockAtlas = mAtlas.promote();
-    if (lockAtlas.get()) {
-        lockAtlas->releaseEntry(mAtlasKey);
-    }
-    mAtlas = nullptr;
-    mAtlasKey = INVALID_ATLAS_KEY;
-}
-
 void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) {
     if (canvas->quickReject(bounds)) {
         // The RenderNode is on screen, but the AVD is not.
@@ -556,39 +505,14 @@ void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) 
     SkPaint paint = inPaint;
     paint.setAlpha(mProperties.getRootAlpha() * 255);
 
-    if (canvas->getGrContext() == nullptr) {
-        // Recording to picture, don't use the SkSurface which won't work off of renderthread.
-        Bitmap& bitmap = getBitmapUpdateIfDirty();
-        SkBitmap skiaBitmap;
-        bitmap.getSkBitmap(&skiaBitmap);
+    Bitmap& bitmap = getBitmapUpdateIfDirty();
+    SkBitmap skiaBitmap;
+    bitmap.getSkBitmap(&skiaBitmap);
 
-        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
-        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
-                               &paint, SkCanvas::kFast_SrcRectConstraint);
-        return;
-    }
-
-    SkRect src;
-    sk_sp<SkSurface> vdSurface = mCache.getSurface(&src);
-    if (vdSurface) {
-        canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src, bounds, &paint,
-                              SkCanvas::kFast_SrcRectConstraint);
-    } else {
-        // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
-        // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
-        // frame will be cached into the atlas.
-        Bitmap& bitmap = getBitmapUpdateIfDirty();
-        SkBitmap skiaBitmap;
-        bitmap.getSkBitmap(&skiaBitmap);
-
-        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
-        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
-                               &paint, SkCanvas::kFast_SrcRectConstraint);
-        mCache.clear();
-        markDirty();
-    }
+    int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
+    int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
+    canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
+                           &paint, SkCanvas::kFast_SrcRectConstraint);
 }
 
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {

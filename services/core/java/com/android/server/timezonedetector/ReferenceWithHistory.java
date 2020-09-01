@@ -22,7 +22,7 @@ import android.annotation.Nullable;
 
 import com.android.internal.util.IndentingPrintWriter;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 /**
  * A class that behaves like the following definition, except it stores the history of values set
@@ -50,11 +50,18 @@ import java.util.LinkedList;
  */
 public final class ReferenceWithHistory<V> {
 
-    /** The size the history linked list is allowed to grow to. */
+    private static final Object NULL_MARKER = "{null marker}";
+
+    /** The maximum number of references to store. */
     private final int mMaxHistorySize;
 
+    /**
+     * The history storage. Note that ArrayDeque doesn't support {@code null} so this stores Object
+     * and not V. Use {@link #packNullIfRequired(Object)} and {@link #unpackNullIfRequired(Object)}
+     * to convert to / from the storage object.
+     */
     @Nullable
-    private LinkedList<V> mValues;
+    private ArrayDeque<Object> mValues;
 
     /**
      * Creates an instance that records, at most, the specified number of values.
@@ -69,22 +76,31 @@ public final class ReferenceWithHistory<V> {
     /** Returns the current value, or {@code null} if it has never been set. */
     @Nullable
     public V get() {
-        return (mValues == null || mValues.isEmpty()) ? null : mValues.getFirst();
+        if (mValues == null || mValues.isEmpty()) {
+            return null;
+        }
+        Object value = mValues.getFirst();
+        return unpackNullIfRequired(value);
     }
 
-    /** Sets the current value. Returns the previous value, or {@code null}. */
+    /**
+     * Sets the current value. Returns the previous value, which can be {@code null} if the
+     * reference has never been set, or if the reference has been set to {@code null}.
+     */
     @Nullable
     public V set(@Nullable V newValue) {
         if (mValues == null) {
-            mValues = new LinkedList<>();
+            mValues = new ArrayDeque<>(mMaxHistorySize);
+        }
+
+        if (mValues.size() >= mMaxHistorySize) {
+            mValues.removeLast();
         }
 
         V previous = get();
 
-        mValues.addFirst(newValue);
-        if (mValues.size() > mMaxHistorySize) {
-            mValues.removeLast();
-        }
+        Object nullSafeValue = packNullIfRequired(newValue);
+        mValues.addFirst(nullSafeValue);
         return previous;
     }
 
@@ -96,8 +112,8 @@ public final class ReferenceWithHistory<V> {
             ipw.println("{Empty}");
         } else {
             int i = 0;
-            for (V value : mValues) {
-                ipw.println(i + ": " + value);
+            for (Object value : mValues) {
+                ipw.println(i + ": " + unpackNullIfRequired(value));
                 i++;
             }
         }
@@ -114,5 +130,24 @@ public final class ReferenceWithHistory<V> {
     @Override
     public String toString() {
         return String.valueOf(get());
+    }
+
+    /**
+     * Turns a non-nullable Object into a nullable value. See also
+     * {@link #packNullIfRequired(Object)}.
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private V unpackNullIfRequired(@NonNull Object value) {
+        return value == NULL_MARKER ? null : (V) value;
+    }
+
+    /**
+     * Turns a nullable value into a non-nullable Object. See also
+     * {@link #unpackNullIfRequired(Object)}.
+     */
+    @NonNull
+    private Object packNullIfRequired(@Nullable V value) {
+        return value == null ? NULL_MARKER : value;
     }
 }

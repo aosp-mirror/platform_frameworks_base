@@ -40,7 +40,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.HandlerThread;
-import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.annotation.UiThreadTest;
@@ -168,8 +167,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
 
         // Plugin shouldn't be connected because it is the wrong version.
         verify(mMockListener, never()).onPluginConnected(any(), any());
-        verify(nm).notifyAsUser(eq(TestPlugin.class.getName()), eq(SystemMessage.NOTE_PLUGIN),
-                any(), eq(UserHandle.ALL));
+        verify(nm).notify(eq(SystemMessage.NOTE_PLUGIN), any());
     }
 
     @Test

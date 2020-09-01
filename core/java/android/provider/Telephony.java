@@ -24,6 +24,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -36,7 +38,6 @@ import android.database.sqlite.SqliteWrapper;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.telephony.CarrierConfigManager;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
@@ -879,22 +880,58 @@ public final class Telephony {
             public static final int RESULT_SMS_GENERIC_ERROR = 2;
 
             /**
-             * Set by BroadcastReceiver to indicate insufficient memory to store
-             * the message.
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate
+             * insufficient memory to store the message.
              */
             public static final int RESULT_SMS_OUT_OF_MEMORY = 3;
 
             /**
-             * Set by BroadcastReceiver to indicate that the message, while
-             * possibly valid, is of a format or encoding that is not
-             * supported.
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate that
+             * the message, while possibly valid, is of a format or encoding that is not supported.
              */
             public static final int RESULT_SMS_UNSUPPORTED = 4;
 
             /**
-             * Set by BroadcastReceiver to indicate a duplicate incoming message.
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a
+             * duplicate incoming message.
              */
             public static final int RESULT_SMS_DUPLICATED = 5;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a
+             * dispatch failure.
+             */
+            public static final int RESULT_SMS_DISPATCH_FAILURE = 6;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a null
+             * PDU was received.
+             */
+            public static final int RESULT_SMS_NULL_PDU = 7;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a null
+             * message was encountered.
+             */
+            public static final int RESULT_SMS_NULL_MESSAGE = 8;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate an sms
+             * was received while the phone was in encrypted state.
+             */
+            public static final int RESULT_SMS_RECEIVED_WHILE_ENCRYPTED = 9;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a
+             * telephony database error.
+             */
+            public static final int RESULT_SMS_DATABASE_ERROR = 10;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate an
+             * invalid uri.
+             */
+            public static final int RESULT_SMS_INVALID_URI = 11;
 
             /**
              * Activity action: Ask the user to change the default
@@ -1258,17 +1295,6 @@ public final class Telephony {
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String ACTION_EXTERNAL_PROVIDER_CHANGE =
                           "android.provider.action.EXTERNAL_PROVIDER_CHANGE";
-
-            /**
-             * Same as {@link #ACTION_DEFAULT_SMS_PACKAGE_CHANGED} but it's implicit (e.g. sent to
-             * all apps) and requires
-             * {@link android.Manifest.permission#MONITOR_DEFAULT_SMS_PACKAGE} to receive.
-             *
-             * @hide
-             */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            public static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
-                    "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
 
             /**
              * Broadcast action: When SMS-MMS db is being created. If file-based encryption is
@@ -3525,7 +3551,6 @@ public final class Telephony {
          * can manage DPC-owned APNs.
          * @hide
          */
-        @SystemApi
         public static final @NonNull Uri DPC_URI = Uri.parse("content://telephony/carriers/dpc");
 
         /**
@@ -3838,7 +3863,6 @@ public final class Telephony {
          * Integer value denoting an invalid APN id
          * @hide
          */
-        @SystemApi
         public static final int INVALID_APN_ID = -1;
 
         /**
@@ -3996,15 +4020,17 @@ public final class Telephony {
         @Retention(RetentionPolicy.SOURCE)
         public @interface EditStatus {}
 
-        /** @hide */
-        @IntDef({
-                SKIP_464XLAT_DEFAULT,
-                SKIP_464XLAT_DISABLE,
-                SKIP_464XLAT_ENABLE,
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface Skip464XlatStatus {}
-
+        /**
+         * Compat framework change ID for the APN db read permission change.
+         *
+         * In API level 30 and beyond, accessing the APN database will require the
+         * {@link android.Manifest.permission#WRITE_APN_SETTINGS} permission. This change ID tracks
+         * apps that are affected because they don't hold this permission.
+         * @hide
+         */
+        @ChangeId
+        @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
+        public static final long APN_READING_PERMISSION_CHANGE_ID = 124107808L;
     }
 
     /**
@@ -4301,6 +4327,15 @@ public final class Telephony {
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
+         * ETWS (Earthquake and Tsunami Warning System) primary message or not (ETWS alerts only).
+         * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
+         * <P>Type: BOOLEAN</P>
+         *
+         * @hide        // TODO: Unhide this for S.
+         */
+        public static final String ETWS_IS_PRIMARY = "etws_is_primary";
+
+        /**
          * CMAS (Commercial Mobile Alert System) message class (CMAS alerts only).
          * <p>See {@link android.telephony.SmsCbCmasInfo}</p>
          * <P>Type: INTEGER</P>
@@ -4440,37 +4475,6 @@ public final class Telephony {
                 CMAS_URGENCY,
                 CMAS_CERTAINTY
         };
-
-        /**
-         * Query columns for instantiating {@link android.telephony.SmsCbMessage} objects.
-         * @hide
-         */
-        public static final String[] QUERY_COLUMNS_FWK = {
-                _ID,
-                SLOT_INDEX,
-                SUBSCRIPTION_ID,
-                GEOGRAPHICAL_SCOPE,
-                PLMN,
-                LAC,
-                CID,
-                SERIAL_NUMBER,
-                SERVICE_CATEGORY,
-                LANGUAGE_CODE,
-                MESSAGE_BODY,
-                MESSAGE_FORMAT,
-                MESSAGE_PRIORITY,
-                ETWS_WARNING_TYPE,
-                CMAS_MESSAGE_CLASS,
-                CMAS_CATEGORY,
-                CMAS_RESPONSE_TYPE,
-                CMAS_SEVERITY,
-                CMAS_URGENCY,
-                CMAS_CERTAINTY,
-                RECEIVED_TIME,
-                MESSAGE_BROADCASTED,
-                GEOMETRIES,
-                MAXIMUM_WAIT_TIME
-        };
     }
 
     /**
@@ -4536,32 +4540,6 @@ public final class Telephony {
         }
 
         /**
-         * Used to insert a ServiceState into the ServiceStateProvider as a ContentValues instance.
-         *
-         * @param state the ServiceState to convert into ContentValues
-         * @return the convertedContentValues instance
-         * @hide
-         */
-        public static ContentValues getContentValuesForServiceState(ServiceState state) {
-            ContentValues values = new ContentValues();
-            final Parcel p = Parcel.obtain();
-            state.writeToParcel(p, 0);
-            // Turn the parcel to byte array. Safe to do this because the content values were never
-            // written into a persistent storage. ServiceStateProvider keeps values in the memory.
-            values.put(SERVICE_STATE, p.marshall());
-            return values;
-        }
-
-        /**
-         * The current service state.
-         *
-         * This is the entire {@link ServiceState} object in byte array.
-         *
-         * @hide
-         */
-        public static final String SERVICE_STATE = "service_state";
-
-        /**
          * An integer value indicating the current voice service state.
          * <p>
          * Valid values: {@link ServiceState#STATE_IN_SERVICE},
@@ -4571,53 +4549,6 @@ public final class Telephony {
          * This is the same as {@link ServiceState#getState()}.
          */
         public static final String VOICE_REG_STATE = "voice_reg_state";
-
-        /**
-         * An integer value indicating the current data service state.
-         * <p>
-         * Valid values: {@link ServiceState#STATE_IN_SERVICE},
-         * {@link ServiceState#STATE_OUT_OF_SERVICE}, {@link ServiceState#STATE_EMERGENCY_ONLY},
-         * {@link ServiceState#STATE_POWER_OFF}.
-         * <p>
-         * This is the same as {@link ServiceState#getDataRegState()}.
-         * @hide
-         */
-        public static final String DATA_REG_STATE = "data_reg_state";
-
-        /**
-         * An integer value indicating the current voice roaming type.
-         * <p>
-         * This is the same as {@link ServiceState#getVoiceRoamingType()}.
-         * @hide
-         */
-        public static final String VOICE_ROAMING_TYPE = "voice_roaming_type";
-
-        /**
-         * An integer value indicating the current data roaming type.
-         * <p>
-         * This is the same as {@link ServiceState#getDataRoamingType()}.
-         * @hide
-         */
-        public static final String DATA_ROAMING_TYPE = "data_roaming_type";
-
-        /**
-         * The current registered voice network operator name in long alphanumeric format.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorAlphaLong()}.
-         * @hide
-         */
-        public static final String VOICE_OPERATOR_ALPHA_LONG = "voice_operator_alpha_long";
-
-        /**
-         * The current registered operator name in short alphanumeric format.
-         * <p>
-         * In GSM/UMTS, short format can be up to 8 characters long. The current registered voice
-         * network operator name in long alphanumeric format.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorAlphaShort()}.
-         * @hide
-         */
-        public static final String VOICE_OPERATOR_ALPHA_SHORT = "voice_operator_alpha_short";
 
         /**
          * The current registered operator numeric id.
@@ -4630,125 +4561,11 @@ public final class Telephony {
         public static final String VOICE_OPERATOR_NUMERIC = "voice_operator_numeric";
 
         /**
-         * The current registered data network operator name in long alphanumeric format.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorAlphaLong()}.
-         * @hide
-         */
-        public static final String DATA_OPERATOR_ALPHA_LONG = "data_operator_alpha_long";
-
-        /**
-         * The current registered data network operator name in short alphanumeric format.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorAlphaShort()}.
-         * @hide
-         */
-        public static final String DATA_OPERATOR_ALPHA_SHORT = "data_operator_alpha_short";
-
-        /**
-         * The current registered data network operator numeric id.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorNumeric()}.
-         * @hide
-         */
-        public static final String DATA_OPERATOR_NUMERIC = "data_operator_numeric";
-
-        /**
          * The current network selection mode.
          * <p>
          * This is the same as {@link ServiceState#getIsManualSelection()}.
          */
         public static final String IS_MANUAL_NETWORK_SELECTION = "is_manual_network_selection";
-
-        /**
-         * This is the same as {@link ServiceState#getRilVoiceRadioTechnology()}.
-         * @hide
-         */
-        public static final String RIL_VOICE_RADIO_TECHNOLOGY = "ril_voice_radio_technology";
-
-        /**
-         * This is the same as {@link ServiceState#getRilDataRadioTechnology()}.
-         * @hide
-         */
-        public static final String RIL_DATA_RADIO_TECHNOLOGY = "ril_data_radio_technology";
-
-        /**
-         * This is the same as {@link ServiceState#getCssIndicator()}.
-         * @hide
-         */
-        public static final String CSS_INDICATOR = "css_indicator";
-
-        /**
-         * This is the same as {@link ServiceState#getCdmaNetworkId()}.
-         * @hide
-         */
-        public static final String NETWORK_ID = "network_id";
-
-        /**
-         * This is the same as {@link ServiceState#getCdmaSystemId()}.
-         * @hide
-         */
-        public static final String SYSTEM_ID = "system_id";
-
-        /**
-         * This is the same as {@link ServiceState#getCdmaRoamingIndicator()}.
-         * @hide
-         */
-        public static final String CDMA_ROAMING_INDICATOR = "cdma_roaming_indicator";
-
-        /**
-         * This is the same as {@link ServiceState#getCdmaDefaultRoamingIndicator()}.
-         * @hide
-         */
-        public static final String CDMA_DEFAULT_ROAMING_INDICATOR =
-                "cdma_default_roaming_indicator";
-
-        /**
-         * This is the same as {@link ServiceState#getCdmaEriIconIndex()}.
-         * @hide
-         */
-        public static final String CDMA_ERI_ICON_INDEX = "cdma_eri_icon_index";
-
-        /**
-         * This is the same as {@link ServiceState#getCdmaEriIconMode()}.
-         * @hide
-         */
-        public static final String CDMA_ERI_ICON_MODE = "cdma_eri_icon_mode";
-
-        /**
-         * This is the same as {@link ServiceState#isEmergencyOnly()}.
-         * @hide
-         */
-        public static final String IS_EMERGENCY_ONLY = "is_emergency_only";
-
-        /**
-         * This is the same as {@link ServiceState#getDataRoamingFromRegistration()}.
-         * @hide
-         */
-        public static final String IS_DATA_ROAMING_FROM_REGISTRATION =
-                "is_data_roaming_from_registration";
-
-        /**
-         * This is the same as {@link ServiceState#isUsingCarrierAggregation()}.
-         * @hide
-         */
-        public static final String IS_USING_CARRIER_AGGREGATION = "is_using_carrier_aggregation";
-
-        /**
-         * The current registered raw data network operator name in long alphanumeric format.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorAlphaLongRaw()}.
-         * @hide
-         */
-        public static final String OPERATOR_ALPHA_LONG_RAW = "operator_alpha_long_raw";
-
-        /**
-         * The current registered raw data network operator name in short alphanumeric format.
-         * <p>
-         * This is the same as {@link ServiceState#getOperatorAlphaShortRaw()}.
-         * @hide
-         */
-        public static final String OPERATOR_ALPHA_SHORT_RAW = "operator_alpha_short_raw";
     }
 
     /**

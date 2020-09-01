@@ -33,9 +33,9 @@ import android.widget.LinearLayout;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-
-import java.util.Arrays;
 
 /**
  * Base class for PIN and password unlock screens.
@@ -51,6 +51,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     private boolean mDismissing;
     protected boolean mResumed;
     private CountDownTimer mCountdownTimer = null;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -62,6 +63,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     public KeyguardAbsKeyInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     @Override
@@ -132,19 +134,19 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected void verifyPasswordAndUnlock() {
         if (mDismissing) return; // already verified but haven't been dismissed; don't do it again.
 
-        final byte[] entry = getPasswordText();
+        final LockscreenCredential password = getEnteredCredential();
         setPasswordEntryInputEnabled(false);
         if (mPendingLockCheck != null) {
             mPendingLockCheck.cancel(false);
         }
 
         final int userId = KeyguardUpdateMonitor.getCurrentUser();
-        if (entry.length <= MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
+        if (password.size() <= MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
             setPasswordEntryInputEnabled(true);
             onPasswordChecked(userId, false /* matched */, 0, false /* not valid - too short */);
-            Arrays.fill(entry, (byte) 0);
+            password.zeroize();
             return;
         }
 
@@ -152,9 +154,11 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
             LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL);
             LatencyTracker.getInstance(mContext).onActionStart(ACTION_CHECK_CREDENTIAL_UNLOCKED);
         }
-        mPendingLockCheck = LockPatternChecker.checkPassword(
+
+        mKeyguardUpdateMonitor.setCredentialAttempted();
+        mPendingLockCheck = LockPatternChecker.checkCredential(
                 mLockPatternUtils,
-                entry,
+                password,
                 userId,
                 new LockPatternChecker.OnCheckCallback() {
 
@@ -166,7 +170,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                         }
                         onPasswordChecked(userId, true /* matched */, 0 /* timeoutMs */,
                                 true /* isValidPassword */);
-                        Arrays.fill(entry, (byte) 0);
+                        password.zeroize();
                     }
 
                     @Override
@@ -181,7 +185,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                             onPasswordChecked(userId, false /* matched */, timeoutMs,
                                     true /* isValidPassword */);
                         }
-                        Arrays.fill(entry, (byte) 0);
+                        password.zeroize();
                     }
 
                     @Override
@@ -192,7 +196,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                             LatencyTracker.getInstance(mContext).onActionEnd(
                                     ACTION_CHECK_CREDENTIAL_UNLOCKED);
                         }
-                        Arrays.fill(entry, (byte) 0);
+                        password.zeroize();
                     }
                 });
     }
@@ -223,7 +227,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected abstract void resetPasswordText(boolean animate, boolean announce);
-    protected abstract byte[] getPasswordText();
+    protected abstract LockscreenCredential getEnteredCredential();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
     protected abstract void setPasswordEntryInputEnabled(boolean enabled);
 

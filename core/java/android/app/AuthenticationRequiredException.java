@@ -21,7 +21,7 @@ import android.content.ContentResolver;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * Specialization of {@link SecurityException} that is thrown when authentication is needed from the
@@ -60,7 +60,7 @@ public final class AuthenticationRequiredException extends SecurityException imp
      */
     public AuthenticationRequiredException(Throwable cause, PendingIntent userAction) {
         super(cause.getMessage());
-        mUserAction = Preconditions.checkNotNull(userAction);
+        mUserAction = Objects.requireNonNull(userAction);
     }
 
     /**

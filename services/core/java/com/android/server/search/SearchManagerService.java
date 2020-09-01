@@ -18,7 +18,6 @@ package com.android.server.search;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.ISearchManager;
 import android.app.SearchManager;
@@ -29,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Bundle;
@@ -265,63 +265,12 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     @Override
-    public void launchAssist(Bundle args) {
+    public void launchAssist(int userHandle, Bundle args) {
         StatusBarManagerInternal statusBarManager =
                 LocalServices.getService(StatusBarManagerInternal.class);
         if (statusBarManager != null) {
             statusBarManager.startAssist(args);
         }
-    }
-
-    // Check and return VIS component
-    private ComponentName getLegacyAssistComponent(int userHandle) {
-        try {
-            userHandle = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userHandle, true, false, "getLegacyAssistComponent",
-                    null);
-            PackageManager pm = mContext.getPackageManager();
-            Intent intentAssistProbe = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
-            List<ResolveInfo> infoListVis = pm.queryIntentServicesAsUser(intentAssistProbe,
-                    PackageManager.MATCH_SYSTEM_ONLY, userHandle);
-            if (infoListVis == null || infoListVis.isEmpty()) {
-                return null;
-            } else {
-                ResolveInfo rInfo = infoListVis.get(0);
-                return new ComponentName(
-                        rInfo.serviceInfo.applicationInfo.packageName,
-                        rInfo.serviceInfo.name);
-
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception in getLegacyAssistComponent: " + e);
-        }
-        return null;
-    }
-
-    @Override
-    public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
-        ComponentName comp = getLegacyAssistComponent(userHandle);
-        if (comp == null) {
-            return false;
-        }
-        long ident = Binder.clearCallingIdentity();
-        try {
-            Intent intent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
-            intent.setComponent(comp);
-
-            IActivityTaskManager am = ActivityTaskManager.getService();
-            if (args != null) {
-                args.putInt(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent.KEYCODE_ASSIST);
-            }
-            intent.putExtras(args);
-
-            return am.launchAssistIntent(intent, ActivityManager.ASSIST_CONTEXT_BASIC, hint,
-                    userHandle, args);
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-        return true;
     }
 
     @Override

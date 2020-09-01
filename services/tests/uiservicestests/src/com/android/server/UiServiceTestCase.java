@@ -27,9 +27,11 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.server.uri.UriGrantsManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 public class UiServiceTestCase {
@@ -39,6 +41,7 @@ public class UiServiceTestCase {
     protected static final String PKG_N_MR1 = "com.example.n_mr1";
     protected static final String PKG_O = "com.example.o";
     protected static final String PKG_P = "com.example.p";
+    protected static final String PKG_R = "com.example.r";
 
     @Rule
     public final TestableContext mContext =
@@ -67,6 +70,8 @@ public class UiServiceTestCase {
                             return Build.VERSION_CODES.O;
                         case PKG_P:
                             return Build.VERSION_CODES.P;
+                        case PKG_R:
+                            return Build.VERSION_CODES.R;
                         default:
                             return Build.VERSION_CODES.CUR_DEVELOPMENT;
                     }
@@ -76,5 +81,10 @@ public class UiServiceTestCase {
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         when(mUgmInternal.checkGrantUriPermission(
                 anyInt(), anyString(), any(Uri.class), anyInt(), anyInt())).thenReturn(-1);
+    }
+
+    @After
+    public final void cleanUpMockito() {
+        Mockito.framework().clearInlineMocks();
     }
 }

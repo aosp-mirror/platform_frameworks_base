@@ -23,6 +23,7 @@
 #include "config/ConfigKey.h"
 #include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
 #include "metrics/MetricProducer.h"
@@ -35,7 +36,7 @@ namespace os {
 namespace statsd {
 
 // A MetricsManager is responsible for managing metrics from one single config source.
-class MetricsManager : public virtual android::RefBase {
+class MetricsManager : public virtual android::RefBase, public virtual PullUidProvider {
 public:
     MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const int64_t timeBaseNs,
                    const int64_t currentTimeNs, const sp<UidMap>& uidMap,
@@ -68,6 +69,12 @@ public:
     void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid);
 
     void onUidMapReceived(const int64_t& eventTimeNs);
+
+    void onStatsdInitCompleted(const int64_t& elapsedTimeNs);
+
+    void init();
+
+    vector<int32_t> getPullAtomUids(int32_t atomId) override;
 
     bool shouldWriteToDisk() const {
         return mNoReportMetricIds.size() != mAllMetricProducers.size();
@@ -139,6 +146,14 @@ public:
     void writeActiveConfigToProtoOutputStream(
             int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
 
+    // Returns true if at least one piece of metadata is written.
+    bool writeMetadataToProto(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs,
+                              metadata::StatsMetadata* statsMetadata);
+
+    void loadMetadata(const metadata::StatsMetadata& metadata,
+                      int64_t currentWallClockTimeNs,
+                      int64_t systemElapsedTimeNs);
 private:
     // For test only.
     inline int64_t getTtlEndNs() const { return mTtlEndNs; }
@@ -159,6 +174,8 @@ private:
     int64_t mLastReportTimeNs;
     int64_t mLastReportWallClockNs;
 
+    sp<StatsPullerManager> mPullerManager;
+
     // The uid log sources from StatsdConfig.
     std::vector<int32_t> mAllowedUid;
 
@@ -169,13 +186,29 @@ private:
     // Logs from uids that are not in the list will be ignored to avoid spamming.
     std::set<int32_t> mAllowedLogSources;
 
+    // To guard access to mAllowedLogSources
+    mutable std::mutex mAllowedLogSourcesMutex;
+
+    const std::set<int32_t> mWhitelistedAtomIds;
+
+    // We can pull any atom from these uids.
+    std::set<int32_t> mDefaultPullUids;
+
+    // Uids that specific atoms can pull from.
+    // This is a map<atom id, set<uids>>
+    std::map<int32_t, std::set<int32_t>> mPullAtomUids;
+
+    // Packages that specific atoms can be pulled from.
+    std::map<int32_t, std::set<std::string>> mPullAtomPackages;
+
+    // All uids to pull for this atom. NOTE: Does not include the default uids for memory.
+    std::map<int32_t, std::set<int32_t>> mCombinedPullAtomUids;
+
     // Contains the annotations passed in with StatsdConfig.
     std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
 
     const bool mShouldPersistHistory;
 
-    // To guard access to mAllowedLogSources
-    mutable std::mutex mAllowedLogSourcesMutex;
 
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
@@ -230,9 +263,15 @@ private:
     // Maps deactivation triggering event to MetricProducers.
     std::unordered_map<int, std::vector<int>> mDeactivationAtomTrackerToMetricMap;
 
+    // Maps AlertIds to the index of the corresponding AnomalyTracker stored in mAllAnomalyTrackers.
+    // The map is used in LoadMetadata to more efficiently lookup AnomalyTrackers from an AlertId.
+    std::unordered_map<int64_t, int> mAlertTrackerMap;
+
     std::vector<int> mMetricIndexesWithActivation;
 
     void initLogSourceWhiteList();
+
+    void initPullAtomSources();
 
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
@@ -253,23 +292,12 @@ private:
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition);
     FRIEND_TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_OR_CombinationCondition);
-
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_SimpleCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_SimpleCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_SimpleCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_AND_CombinationCondition);
-    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_AND_CombinationCondition);
 
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_written);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
@@ -282,6 +310,8 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
+    FRIEND_TEST(MetricsManagerTest, TestLogSources);
+
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
@@ -289,12 +319,31 @@ private:
             TestActivationOnBootMultipleActivationsDifferentActivationTypes);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
 
+    FRIEND_TEST(CountMetricE2eTest, TestInitialConditionChanges);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedState);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithMap);
+    FRIEND_TEST(CountMetricE2eTest, TestMultipleSlicedStates);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields);
+
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);
     FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStateMapped);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSuperset);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset);
+
+    FRIEND_TEST(ValueMetricE2eTest, TestInitialConditionChanges);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
 };
 
 }  // namespace statsd

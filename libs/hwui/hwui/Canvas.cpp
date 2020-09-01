@@ -34,7 +34,7 @@ Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::Rende
 }
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
-                              const SkPaint& paint, Canvas* canvas) {
+                              const Paint& paint, Canvas* canvas) {
     const SkScalar strokeWidth = fmax(thickness, 1.0f);
     const SkScalar bottom = top + strokeWidth;
     canvas->drawRect(left, top, right, bottom, paint);
@@ -95,18 +95,10 @@ public:
 
     void operator()(size_t start, size_t end) {
         auto glyphFunc = [&](uint16_t* text, float* positions) {
-            if (canvas->drawTextAbsolutePos()) {
-                for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
-                    text[textIndex++] = layout.getGlyphId(i);
-                    positions[posIndex++] = x + layout.getX(i);
-                    positions[posIndex++] = y + layout.getY(i);
-                }
-            } else {
-                for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
-                    text[textIndex++] = layout.getGlyphId(i);
-                    positions[posIndex++] = layout.getX(i);
-                    positions[posIndex++] = layout.getY(i);
-                }
+            for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
+                text[textIndex++] = layout.getGlyphId(i);
+                positions[posIndex++] = x + layout.getX(i);
+                positions[posIndex++] = y + layout.getY(i);
             }
         };
 
@@ -154,6 +146,11 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
     // minikin may modify the original paint
     Paint paint(origPaint);
 
+    // interpret 'linear metrics' flag as 'linear', forcing no-hinting when drawing
+    if (paint.getSkFont().isLinearMetrics()) {
+        paint.getSkFont().setHinting(SkFontHinting::kNone);
+    }
+
     minikin::Layout layout = MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, textSize,
                                                     start, count, contextStart, contextCount, mt);
 
@@ -161,9 +158,6 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
 
     minikin::MinikinRect bounds;
     layout.getBounds(&bounds);
-    if (!drawTextAbsolutePos()) {
-        bounds.offset(x, y);
-    }
 
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
@@ -177,7 +171,7 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
 void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
                             float outerBottom, float outerRx, float outerRy, float innerLeft,
                             float innerTop, float innerRight, float innerBottom, float innerRx,
-                            float innerRy, const SkPaint& paint) {
+                            float innerRy, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
     SkRect inner = SkRect::MakeLTRB(innerLeft, innerTop, innerRight, innerBottom);
@@ -193,7 +187,7 @@ void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerR
 void Canvas::drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
                             float outerBottom, const float* outerRadii, float innerLeft,
                             float innerTop, float innerRight, float innerBottom,
-                            const float* innerRadii, const SkPaint& paint) {
+                            const float* innerRadii, const Paint& paint) {
     static_assert(sizeof(SkVector) == sizeof(float) * 2);
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
@@ -234,23 +228,30 @@ private:
 };
 
 void Canvas::drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
-                            const SkPath& path, float hOffset, float vOffset, const Paint& paint,
-                            const Typeface* typeface) {
-    Paint paintCopy(paint);
+                            const SkPath& path, float hOffset, float vOffset,
+                            const Paint& origPaint, const Typeface* typeface) {
+    // minikin may modify the original paint
+    Paint paint(origPaint);
+
+    // interpret 'linear metrics' flag as 'linear', forcing no-hinting when drawing
+    if (paint.getSkFont().isLinearMetrics()) {
+        paint.getSkFont().setHinting(SkFontHinting::kNone);
+    }
+
     minikin::Layout layout =
-            MinikinUtils::doLayout(&paintCopy, bidiFlags, typeface, text, count,  // text buffer
-                                   0, count,                                      // draw range
-                                   0, count,                                      // context range
+            MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, count,  // text buffer
+                                   0, count,                                  // draw range
+                                   0, count,                                  // context range
                                    nullptr);
-    hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
+    hOffset += MinikinUtils::hOffsetForTextAlign(&paint, layout, path);
 
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
     // care of all alignment.
-    paintCopy.setTextAlign(Paint::kLeft_Align);
+    paint.setTextAlign(Paint::kLeft_Align);
 
-    DrawTextOnPathFunctor f(layout, this, hOffset, vOffset, paintCopy, path);
-    MinikinUtils::forFontRun(layout, &paintCopy, f);
+    DrawTextOnPathFunctor f(layout, this, hOffset, vOffset, paint, path);
+    MinikinUtils::forFontRun(layout, &paint, f);
 }
 
 int Canvas::sApiLevel = 1;

@@ -20,14 +20,16 @@ package android.hardware.biometrics;
  * @hide
  */
 oneway interface IBiometricServiceReceiver {
-    // Notify BiometricPrompt that authentication was successful
-    void onAuthenticationSucceeded();
+    // Notify BiometricPrompt that authentication was successful.
+    void onAuthenticationSucceeded(int authenticationType);
     // Noties that authentication failed.
     void onAuthenticationFailed();
     // Notify BiometricPrompt that an error has occurred.
-    void onError(int error, String message);
+    void onError(int modality, int error, int vendorCode);
     // Notifies that a biometric has been acquired.
     void onAcquired(int acquiredInfo, String message);
     // Notifies that the SystemUI dialog has been dismissed.
     void onDialogDismissed(int reason);
+    // Notifies the client that an internal event, e.g. back button has occurred.
+    void onSystemEvent(int event);
 }

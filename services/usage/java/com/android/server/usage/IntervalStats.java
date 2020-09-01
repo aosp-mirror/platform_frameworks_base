@@ -28,6 +28,7 @@ import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.KEYGUARD_HIDDEN;
 import static android.app.usage.UsageEvents.Event.KEYGUARD_SHOWN;
+import static android.app.usage.UsageEvents.Event.LOCUS_ID_SET;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.SCREEN_INTERACTIVE;
@@ -42,8 +43,12 @@ import android.app.usage.EventStats;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.proto.ProtoInputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -52,6 +57,8 @@ import java.io.IOException;
 import java.util.List;
 
 public class IntervalStats {
+    private static final String TAG = "IntervalStats";
+
     public static final int CURRENT_MAJOR_VERSION = 1;
     public static final int CURRENT_MINOR_VERSION = 1;
     public int majorVersion = CURRENT_MAJOR_VERSION;
@@ -64,6 +71,8 @@ public class IntervalStats {
     public final EventTracker keyguardShownTracker = new EventTracker();
     public final EventTracker keyguardHiddenTracker = new EventTracker();
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
+    /** @hide */
+    public final SparseArray<UsageStats> packageStatsObfuscated = new SparseArray<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
     public final EventList events = new EventList();
@@ -225,6 +234,10 @@ public class IntervalStats {
                     event.mTaskRootClass = getCachedStringRef(stringPool.get(
                             parser.readInt(IntervalStatsProto.Event.TASK_ROOT_CLASS_INDEX) - 1));
                     break;
+                case (int) IntervalStatsProto.Event.LOCUS_ID_INDEX:
+                    event.mLocusId = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.LOCUS_ID_INDEX) - 1));
+                    break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     // Handle default values for certain events types
                     switch (event.mEventType) {
@@ -243,10 +256,11 @@ public class IntervalStats {
                                 event.mNotificationChannelId = "";
                             }
                             break;
-                    }
-                    if (event.mTimeStamp == 0) {
-                        //mTimestamp not set, assume default value 0 plus beginTime
-                        event.mTimeStamp = beginTime;
+                        case LOCUS_ID_SET:
+                            if (event.mLocusId == null) {
+                                event.mLocusId = "";
+                            }
+                            break;
                     }
                     return event;
             }
@@ -435,5 +449,265 @@ public class IntervalStats {
           Optional upgrade code here.
         */
         majorVersion = CURRENT_MAJOR_VERSION;
+    }
+
+    /**
+     * Parses all of the tokens to strings in the obfuscated usage stats data. This includes
+     * deobfuscating each of the package tokens and chooser actions and categories.
+     *
+     * @return {@code true} if any stats were omitted while deobfuscating, {@code false} otherwise.
+     */
+    private boolean deobfuscateUsageStats(PackagesTokenData packagesTokenData) {
+        boolean dataOmitted = false;
+        final int usageStatsSize = packageStatsObfuscated.size();
+        for (int statsIndex = 0; statsIndex < usageStatsSize; statsIndex++) {
+            final int packageToken = packageStatsObfuscated.keyAt(statsIndex);
+            final UsageStats usageStats = packageStatsObfuscated.valueAt(statsIndex);
+            usageStats.mPackageName = packagesTokenData.getPackageString(packageToken);
+            if (usageStats.mPackageName == null) {
+                Slog.e(TAG, "Unable to parse usage stats package " + packageToken);
+                dataOmitted = true;
+                continue;
+            }
+
+            // Update chooser counts
+            final int chooserActionsSize = usageStats.mChooserCountsObfuscated.size();
+            for (int actionIndex = 0; actionIndex < chooserActionsSize; actionIndex++) {
+                final ArrayMap<String, Integer> categoryCountsMap = new ArrayMap<>();
+                final int actionToken = usageStats.mChooserCountsObfuscated.keyAt(actionIndex);
+                final String action = packagesTokenData.getString(packageToken, actionToken);
+                if (action == null) {
+                    Slog.i(TAG, "Unable to parse chooser action " + actionToken
+                            + " for package " + packageToken);
+                    continue;
+                }
+                final SparseIntArray categoryCounts =
+                        usageStats.mChooserCountsObfuscated.valueAt(actionIndex);
+                final int categoriesSize = categoryCounts.size();
+                for (int categoryIndex = 0; categoryIndex < categoriesSize; categoryIndex++) {
+                    final int categoryToken = categoryCounts.keyAt(categoryIndex);
+                    final String category = packagesTokenData.getString(packageToken,
+                            categoryToken);
+                    if (category == null) {
+                        Slog.i(TAG, "Unable to parse chooser category " + categoryToken
+                                + " for package " + packageToken);
+                        continue;
+                    }
+                    categoryCountsMap.put(category, categoryCounts.valueAt(categoryIndex));
+                }
+                usageStats.mChooserCounts.put(action, categoryCountsMap);
+            }
+            packageStats.put(usageStats.mPackageName, usageStats);
+        }
+        return dataOmitted;
+    }
+
+    /**
+     * Parses all of the tokens to strings in the obfuscated events data. This includes
+     * deobfuscating the package token, along with any class, task root package/class tokens, and
+     * shortcut or notification channel tokens.
+     *
+     * @return {@code true} if any events were omitted while deobfuscating, {@code false} otherwise.
+     */
+    private boolean deobfuscateEvents(PackagesTokenData packagesTokenData) {
+        boolean dataOmitted = false;
+        for (int i = this.events.size() - 1; i >= 0; i--) {
+            final Event event = this.events.get(i);
+            final int packageToken = event.mPackageToken;
+            event.mPackage = packagesTokenData.getPackageString(packageToken);
+            if (event.mPackage == null) {
+                Slog.e(TAG, "Unable to parse event package " + packageToken);
+                this.events.remove(i);
+                dataOmitted = true;
+                continue;
+            }
+
+            if (event.mClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                event.mClass = packagesTokenData.getString(packageToken, event.mClassToken);
+                if (event.mClass == null) {
+                    Slog.i(TAG, "Unable to parse class " + event.mClassToken
+                            + " for package " + packageToken);
+                }
+            }
+            if (event.mTaskRootPackageToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                event.mTaskRootPackage = packagesTokenData.getString(packageToken,
+                        event.mTaskRootPackageToken);
+                if (event.mTaskRootPackage == null) {
+                    Slog.i(TAG, "Unable to parse task root package " + event.mTaskRootPackageToken
+                            + " for package " + packageToken);
+                }
+            }
+            if (event.mTaskRootClassToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                event.mTaskRootClass = packagesTokenData.getString(packageToken,
+                        event.mTaskRootClassToken);
+                if (event.mTaskRootClass == null) {
+                    Slog.i(TAG, "Unable to parse task root class " + event.mTaskRootClassToken
+                            + " for package " + packageToken);
+                }
+            }
+            switch (event.mEventType) {
+                case CONFIGURATION_CHANGE:
+                    if (event.mConfiguration == null) {
+                        event.mConfiguration = new Configuration();
+                    }
+                    break;
+                case SHORTCUT_INVOCATION:
+                    event.mShortcutId = packagesTokenData.getString(packageToken,
+                            event.mShortcutIdToken);
+                    if (event.mShortcutId == null) {
+                        Slog.e(TAG, "Unable to parse shortcut " + event.mShortcutIdToken
+                                + " for package " + packageToken);
+                        this.events.remove(i);
+                        dataOmitted = true;
+                        continue;
+                    }
+                    break;
+                case NOTIFICATION_INTERRUPTION:
+                    event.mNotificationChannelId = packagesTokenData.getString(packageToken,
+                            event.mNotificationChannelIdToken);
+                    if (event.mNotificationChannelId == null) {
+                        Slog.e(TAG, "Unable to parse notification channel "
+                                + event.mNotificationChannelIdToken + " for package "
+                                + packageToken);
+                        this.events.remove(i);
+                        dataOmitted = true;
+                        continue;
+                    }
+                    break;
+                case LOCUS_ID_SET:
+                    event.mLocusId = packagesTokenData.getString(packageToken, event.mLocusIdToken);
+                    if (event.mLocusId == null) {
+                        Slog.e(TAG, "Unable to parse locus " + event.mLocusIdToken
+                                + " for package " + packageToken);
+                        this.events.remove(i);
+                        dataOmitted = true;
+                        continue;
+                    }
+                    break;
+            }
+        }
+        return dataOmitted;
+    }
+
+    /**
+     * Parses the obfuscated tokenized data held in this interval stats object.
+     *
+     * @return {@code true} if any data was omitted while deobfuscating, {@code false} otherwise.
+     * @hide
+     */
+    public boolean deobfuscateData(PackagesTokenData packagesTokenData) {
+        final boolean statsOmitted = deobfuscateUsageStats(packagesTokenData);
+        final boolean eventsOmitted = deobfuscateEvents(packagesTokenData);
+        return statsOmitted || eventsOmitted;
+    }
+
+    /**
+     * Obfuscates certain strings within each package stats such as the package name, and the
+     * chooser actions and categories.
+     */
+    private void obfuscateUsageStatsData(PackagesTokenData packagesTokenData) {
+        final int usageStatsSize = packageStats.size();
+        for (int statsIndex = 0; statsIndex < usageStatsSize; statsIndex++) {
+            final String packageName = packageStats.keyAt(statsIndex);
+            final UsageStats usageStats = packageStats.valueAt(statsIndex);
+            if (usageStats == null) {
+                continue;
+            }
+
+            final int packageToken = packagesTokenData.getPackageTokenOrAdd(
+                    packageName, usageStats.mEndTimeStamp);
+            // don't obfuscate stats whose packages have been removed
+            if (packageToken == PackagesTokenData.UNASSIGNED_TOKEN) {
+                continue;
+            }
+            usageStats.mPackageToken = packageToken;
+            // Update chooser counts.
+            final int chooserActionsSize = usageStats.mChooserCounts.size();
+            for (int actionIndex = 0; actionIndex < chooserActionsSize; actionIndex++) {
+                final String action = usageStats.mChooserCounts.keyAt(actionIndex);
+                final ArrayMap<String, Integer> categoriesMap =
+                        usageStats.mChooserCounts.valueAt(actionIndex);
+                if (categoriesMap == null) {
+                    continue;
+                }
+
+                final SparseIntArray categoryCounts = new SparseIntArray();
+                final int categoriesSize = categoriesMap.size();
+                for (int categoryIndex = 0; categoryIndex < categoriesSize; categoryIndex++) {
+                    String category = categoriesMap.keyAt(categoryIndex);
+                    int categoryToken = packagesTokenData.getTokenOrAdd(packageToken, packageName,
+                            category);
+                    categoryCounts.put(categoryToken, categoriesMap.valueAt(categoryIndex));
+                }
+                int actionToken = packagesTokenData.getTokenOrAdd(packageToken, packageName,
+                        action);
+                usageStats.mChooserCountsObfuscated.put(actionToken, categoryCounts);
+            }
+            packageStatsObfuscated.put(packageToken, usageStats);
+        }
+    }
+
+    /**
+     * Obfuscates certain strings within an event such as the package name, the class name,
+     * task root package and class names, and shortcut and notification channel ids.
+     */
+    private void obfuscateEventsData(PackagesTokenData packagesTokenData) {
+        for (int i = events.size() - 1; i >= 0; i--) {
+            final Event event = events.get(i);
+            if (event == null) {
+                continue;
+            }
+
+            final int packageToken = packagesTokenData.getPackageTokenOrAdd(
+                    event.mPackage, event.mTimeStamp);
+            // don't obfuscate events from packages that have been removed
+            if (packageToken == PackagesTokenData.UNASSIGNED_TOKEN) {
+                events.remove(i);
+                continue;
+            }
+            event.mPackageToken = packageToken;
+            if (!TextUtils.isEmpty(event.mClass)) {
+                event.mClassToken = packagesTokenData.getTokenOrAdd(packageToken,
+                        event.mPackage, event.mClass);
+            }
+            if (!TextUtils.isEmpty(event.mTaskRootPackage)) {
+                event.mTaskRootPackageToken = packagesTokenData.getTokenOrAdd(packageToken,
+                        event.mPackage, event.mTaskRootPackage);
+            }
+            if (!TextUtils.isEmpty(event.mTaskRootClass)) {
+                event.mTaskRootClassToken = packagesTokenData.getTokenOrAdd(packageToken,
+                        event.mPackage, event.mTaskRootClass);
+            }
+            switch (event.mEventType) {
+                case SHORTCUT_INVOCATION:
+                    if (!TextUtils.isEmpty(event.mShortcutId)) {
+                        event.mShortcutIdToken = packagesTokenData.getTokenOrAdd(packageToken,
+                                event.mPackage, event.mShortcutId);
+                    }
+                    break;
+                case NOTIFICATION_INTERRUPTION:
+                    if (!TextUtils.isEmpty(event.mNotificationChannelId)) {
+                        event.mNotificationChannelIdToken = packagesTokenData.getTokenOrAdd(
+                                packageToken, event.mPackage, event.mNotificationChannelId);
+                    }
+                    break;
+                case LOCUS_ID_SET:
+                    if (!TextUtils.isEmpty(event.mLocusId)) {
+                        event.mLocusIdToken = packagesTokenData.getTokenOrAdd(packageToken,
+                                event.mPackage, event.mLocusId);
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Obfuscates the data in this instance of interval stats.
+     *
+     * @hide
+     */
+    public void obfuscateData(PackagesTokenData packagesTokenData) {
+        obfuscateUsageStatsData(packagesTokenData);
+        obfuscateEventsData(packagesTokenData);
     }
 }

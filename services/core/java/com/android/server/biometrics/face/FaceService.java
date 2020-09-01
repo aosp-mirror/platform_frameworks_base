@@ -20,6 +20,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.RESET_FACE_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -103,6 +104,9 @@ public class FaceService extends BiometricServiceBase {
     private static final String NOTIFICATION_TAG = "FaceService";
     private static final int NOTIFICATION_ID = 1;
 
+    private static final String SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST =
+            "com.android.server.biometrics.face.skip_keyguard_acquire_ignore_list";
+
     /**
      * Events for bugreports.
      */
@@ -114,14 +118,16 @@ public class FaceService extends BiometricServiceBase {
         private int mError;
         // Only valid if mError is ERROR_VENDOR
         private int mVendorError;
+        private int mUser;
 
         AuthenticationEvent(long startTime, long latency, boolean authenticated, int error,
-                int vendorError) {
+                int vendorError, int user) {
             mStartTime = startTime;
             mLatency = latency;
             mAuthenticated = authenticated;
             mError = error;
             mVendorError = vendorError;
+            mUser = user;
         }
 
         public String toString(Context context) {
@@ -130,6 +136,7 @@ public class FaceService extends BiometricServiceBase {
                     + "\tAuthenticated: " + mAuthenticated
                     + "\tError: " + mError
                     + "\tVendorCode: " + mVendorError
+                    + "\tUser: " + mUser
                     + "\t" + FaceManager.getErrorString(context, mError, mVendorError);
         }
     }
@@ -229,6 +236,11 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
+        public boolean isStrongBiometric() {
+            return FaceService.this.isStrongBiometric();
+        }
+
+        @Override
         public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
                 boolean authenticated, ArrayList<Byte> token) {
             final boolean result = super.onAuthenticated(identifier, authenticated, token);
@@ -238,7 +250,8 @@ public class FaceService extends BiometricServiceBase {
                     System.currentTimeMillis() - getStartTimeMs() /* latency */,
                     authenticated,
                     0 /* error */,
-                    0 /* vendorError */));
+                    0 /* vendorError */,
+                    getTargetUserId()));
 
             // For face, the authentication lifecycle ends either when
             // 1) Authenticated == true
@@ -256,7 +269,8 @@ public class FaceService extends BiometricServiceBase {
                     System.currentTimeMillis() - getStartTimeMs() /* latency */,
                     false /* authenticated */,
                     error,
-                    vendorCode));
+                    vendorCode,
+                    getTargetUserId()));
 
             return super.onError(deviceId, error, vendorCode);
         }
@@ -368,8 +382,10 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(userId, opPackageName);
 
-            mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
-                    UserHandle.CURRENT);
+            mHandler.post(() -> {
+                mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
+                        UserHandle.CURRENT);
+            });
 
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
@@ -535,7 +551,7 @@ public class FaceService extends BiometricServiceBase {
 
         // TODO: refactor out common code here
         @Override // Binder call
-        public boolean isHardwareDetected(long deviceId, String opPackageName) {
+        public boolean isHardwareDetected(String opPackageName) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
                     Binder.getCallingUid(), Binder.getCallingPid(),
@@ -592,24 +608,9 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public long getAuthenticatorId(String opPackageName) {
-            // In this method, we're not checking whether the caller is permitted to use face
-            // API because current authenticator ID is leaked (in a more contrived way) via Android
-            // Keystore (android.security.keystore package): the user of that API can create a key
-            // which requires face authentication for its use, and then query the key's
-            // characteristics (hidden API) which returns, among other things, face
-            // authenticator ID which was active at key creation time.
-            //
-            // Reason: The part of Android Keystore which runs inside an app's process invokes this
-            // method in certain cases. Those cases are not always where the developer demonstrates
-            // explicit intent to use face functionality. Thus, to avoiding throwing an
-            // unexpected SecurityException this method does not check whether its caller is
-            // permitted to use face API.
-            //
-            // The permission check should be restored once Android Keystore no longer invokes this
-            // method from inside app processes.
-
-            return FaceService.this.getAuthenticatorId(opPackageName);
+        public long getAuthenticatorId(int callingUserId) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            return FaceService.this.getAuthenticatorId(callingUserId);
         }
 
         @Override // Binder call
@@ -721,6 +722,12 @@ public class FaceService extends BiometricServiceBase {
             }
             return 0;
         }
+
+        @Override // Binder call
+        public void initConfiguredStrength(int strength) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            initConfiguredStrengthInternal(strength);
+        }
     }
 
     /**
@@ -749,8 +756,7 @@ public class FaceService extends BiometricServiceBase {
         public void onError(long deviceId, int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onError(cookie, error,
-                        FaceManager.getErrorString(getContext(), error, vendorCode));
+                getWrapperReceiver().onError(cookie, TYPE_FACE, error, vendorCode);
             }
         }
     }
@@ -791,7 +797,7 @@ public class FaceService extends BiometricServiceBase {
             if (mFaceServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Face) {
                     mFaceServiceReceiver.onAuthenticationSucceeded(deviceId, (Face) biometric,
-                            userId);
+                            userId, isStrongBiometric());
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-face biometric");
                 }
@@ -954,9 +960,10 @@ public class FaceService extends BiometricServiceBase {
         @Override
         public void onLockoutChanged(long duration) {
             Slog.d(TAG, "onLockoutChanged: " + duration);
+
             if (duration == 0) {
                 mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_NONE;
-            } else if (duration == Long.MAX_VALUE) {
+            } else if (duration == -1 || duration == Long.MAX_VALUE) {
                 mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_PERMANENT;
             } else {
                 mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_TIMED;
@@ -1049,6 +1056,9 @@ public class FaceService extends BiometricServiceBase {
     public FaceService(Context context) {
         super(context);
 
+        final boolean ignoreKeyguardBlacklist = Settings.Secure.getInt(context.getContentResolver(),
+                SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST, 0) != 0;
+
         mUsageStats = new UsageStats(context);
 
         mNotificationManager = getContext().getSystemService(NotificationManager.class);
@@ -1057,10 +1067,11 @@ public class FaceService extends BiometricServiceBase {
                 .getIntArray(R.array.config_face_acquire_biometricprompt_ignorelist);
         mBiometricPromptIgnoreListVendor = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_vendor_biometricprompt_ignorelist);
-        mKeyguardIgnoreList = getContext().getResources()
+        mKeyguardIgnoreList = ignoreKeyguardBlacklist ? new int[0] : getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_keyguard_ignorelist);
-        mKeyguardIgnoreListVendor = getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_vendor_keyguard_ignorelist);
+        mKeyguardIgnoreListVendor =
+                ignoreKeyguardBlacklist ? new int[0] : getContext().getResources()
+                        .getIntArray(R.array.config_face_acquire_vendor_keyguard_ignorelist);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()
@@ -1082,7 +1093,7 @@ public class FaceService extends BiometricServiceBase {
         publishBinderService(Context.FACE_SERVICE, new FaceServiceWrapper());
         // Get the face daemon on FaceService's on thread so SystemServerInitThreadPool isn't
         // blocked
-        SystemServerInitThreadPool.get().submit(() -> mHandler.post(this::getFaceDaemon),
+        SystemServerInitThreadPool.submit(() -> mHandler.post(this::getFaceDaemon),
                 TAG + ".onStart");
     }
 

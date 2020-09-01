@@ -24,6 +24,7 @@ import static android.text.TextUtils.makeSafeForPresentation;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -33,10 +34,10 @@ import android.text.TextUtils;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.Preconditions;
 
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Base class containing information common to all package items held by
@@ -48,8 +49,16 @@ import java.util.Comparator;
  * in the implementation of Parcelable in subclasses.
  */
 public class PackageItemInfo {
-    /** The maximum length of a safe label, in characters */
-    private static final int MAX_SAFE_LABEL_LENGTH = 50000;
+
+    /**
+     * The maximum length of a safe label, in characters
+     *
+     * TODO(b/157997155): It may make sense to expose this publicly so that apps can check for the
+     *  value and truncate the strings/use a different label, without having to hardcode and make
+     *  assumptions about the value.
+     * @hide
+     */
+    public static final int MAX_SAFE_LABEL_LENGTH = 1000;
 
     /** @hide */
     public static final float DEFAULT_MAX_LABEL_SIZE_PX = 500f;
@@ -194,7 +203,7 @@ public class PackageItemInfo {
      * item does not have a label, its name is returned.
      */
     public @NonNull CharSequence loadLabel(@NonNull PackageManager pm) {
-        if (sForceSafeLabels) {
+        if (sForceSafeLabels && !Objects.equals(packageName, ActivityThread.currentPackageName())) {
             return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_STRING_FLAG_TRIM
                     | SAFE_STRING_FLAG_FIRST_LINE);
         } else {
@@ -240,7 +249,7 @@ public class PackageItemInfo {
     @SystemApi
     public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm,
             @FloatRange(from = 0) float ellipsizeDip, @TextUtils.SafeStringFlags int flags) {
-        Preconditions.checkNotNull(pm);
+        Objects.requireNonNull(pm);
 
         return makeSafeForPresentation(loadUnsafeLabel(pm).toString(), MAX_SAFE_LABEL_LENGTH,
                 ellipsizeDip, flags);
@@ -422,8 +431,8 @@ public class PackageItemInfo {
     }
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
-        dest.writeString(name);
-        dest.writeString(packageName);
+        dest.writeString8(name);
+        dest.writeString8(packageName);
         dest.writeInt(labelRes);
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
@@ -436,7 +445,7 @@ public class PackageItemInfo {
     /**
      * @hide
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId, int dumpFlags) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, int dumpFlags) {
         long token = proto.start(fieldId);
         if (name != null) {
             proto.write(PackageItemInfoProto.NAME, name);
@@ -452,8 +461,8 @@ public class PackageItemInfo {
     }
 
     protected PackageItemInfo(Parcel source) {
-        name = source.readString();
-        packageName = source.readString();
+        name = source.readString8();
+        packageName = source.readString8();
         labelRes = source.readInt();
         nonLocalizedLabel
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

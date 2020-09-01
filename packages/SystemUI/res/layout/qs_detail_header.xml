@@ -53,12 +53,12 @@
             android:src="@drawable/ic_settings"
             android:visibility="gone"/>
 
-        <Switch
-            android:id="@android:id/toggle"
+        <ViewStub
+            android:id="@+id/toggle_stub"
+            android:inflatedId="@+id/toggle"
+            android:layout="@layout/qs_detail_switch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 

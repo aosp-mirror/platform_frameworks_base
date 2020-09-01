@@ -20,7 +20,10 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -45,7 +48,9 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
@@ -54,32 +59,41 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.settings.CurrentUserContextTracker;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import javax.inject.Provider;
 
 /**
  * Tests for {@link NotificationGutsManager}.
@@ -107,20 +121,38 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBar mStatusBar;
+    @Mock private AccessibilityManager mAccessibilityManager;
+    @Mock private HighPriorityProvider mHighPriorityProvider;
+    @Mock private INotificationManager mINotificationManager;
+    @Mock private LauncherApps mLauncherApps;
+    @Mock private ShortcutManager mShortcutManager;
+    @Mock private ChannelEditorDialogController mChannelEditorDialogController;
+    @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    @Mock private CurrentUserContextTracker mContextTracker;
+    @Mock private BubbleController mBubbleController;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private PriorityOnboardingDialogController.Builder mBuilder;
+    private Provider<PriorityOnboardingDialogController.Builder> mProvider = () -> mBuilder;
 
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectTestDependency(BubbleController.class, mBubbleController);
+        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
-        mContext.putComponent(StatusBar.class, mStatusBar);
-        mHelper = new NotificationTestHelper(mContext);
+        mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
-        mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager);
+        mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
+                () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
+                mINotificationManager, mLauncherApps, mShortcutManager,
+                mChannelEditorDialogController, mContextTracker, mProvider, mBubbleController,
+                new UiEventLoggerFake());
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -267,7 +299,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mNotificationActivityStarter, times(1))
                 .startNotificationGutsIntent(captor.capture(), anyInt(), any());
-        assertEquals(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, captor.getValue().getAction());
+        assertEquals(Settings.ACTION_MANAGE_APP_OVERLAY_PERMISSION, captor.getValue().getAction());
     }
 
     @Test
@@ -308,91 +340,34 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitializeNotificationInfoView_showBlockingHelper() throws Exception {
-        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
-
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
-
-        verify(notificationInfoView).bindNotification(
-                any(PackageManager.class),
-                any(INotificationManager.class),
-                eq(mVisualStabilityManager),
-                eq(statusBarNotification.getPackageName()),
-                any(NotificationChannel.class),
-                anySet(),
-                eq(statusBarNotification),
-                any(NotificationInfo.CheckSaveListener.class),
-                any(NotificationInfo.OnSettingsClickListener.class),
-                any(NotificationInfo.OnAppSettingsClickListener.class),
-                eq(false),
-                eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(0),
-                eq(false) /* wasShownHighPriority */);
-    }
-
-    @Test
-    public void testInitializeNotificationInfoView_dontShowBlockingHelper() throws Exception {
-        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(false);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
-
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
-
-        verify(notificationInfoView).bindNotification(
-                any(PackageManager.class),
-                any(INotificationManager.class),
-                eq(mVisualStabilityManager),
-                eq(statusBarNotification.getPackageName()),
-                any(NotificationChannel.class),
-                anySet(),
-                eq(statusBarNotification),
-                any(NotificationInfo.CheckSaveListener.class),
-                any(NotificationInfo.OnSettingsClickListener.class),
-                any(NotificationInfo.OnAppSettingsClickListener.class),
-                eq(false),
-                eq(false),
-                eq(false) /* isForBlockingHelper */,
-                eq(0),
-                eq(false) /* wasShownHighPriority */);
-    }
-
-    @Test
     public void testInitializeNotificationInfoView_highPriority() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        row.getEntry().importance = IMPORTANCE_DEFAULT;
-        row.getEntry().setIsHighPriority(true);
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        final NotificationEntry entry = row.getEntry();
+        modifyRanking(entry)
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .setImportance(IMPORTANCE_HIGH)
+                .build();
 
+        when(row.getIsNonblockable()).thenReturn(false);
+        when(mHighPriorityProvider.isHighPriority(entry)).thenReturn(true);
+        StatusBarNotification statusBarNotification = entry.getSbn();
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
         verify(notificationInfoView).bindNotification(
                 any(PackageManager.class),
                 any(INotificationManager.class),
                 eq(mVisualStabilityManager),
+                eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
-                any(NotificationInfo.CheckSaveListener.class),
+                eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(false),
                 eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(IMPORTANCE_DEFAULT),
                 eq(true) /* wasShownHighPriority */);
     }
 
@@ -401,9 +376,13 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(false);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
+        NotificationEntry entry = row.getEntry();
+
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -412,17 +391,16 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(PackageManager.class),
                 any(INotificationManager.class),
                 eq(mVisualStabilityManager),
+                eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
-                any(NotificationInfo.CheckSaveListener.class),
+                eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(true),
                 eq(false),
-                eq(false) /* isForBlockingHelper */,
-                eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
 
@@ -431,9 +409,12 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(true);
-        row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        modifyRanking(row.getEntry())
+                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
+                .build();
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
+        NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
@@ -441,17 +422,16 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(PackageManager.class),
                 any(INotificationManager.class),
                 eq(mVisualStabilityManager),
+                eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
-                any(NotificationInfo.CheckSaveListener.class),
+                eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(false),
                 eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
 
@@ -473,13 +453,13 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         NotificationEntry entry = createTestNotificationRow().getEntry();
         mGutsManager.setShouldManageLifetime(entry, true /* shouldManage */);
 
-        assertTrue(entry.key.equals(mGutsManager.mKeyToRemoveOnGutsClosed));
+        assertTrue(entry.getKey().equals(mGutsManager.mKeyToRemoveOnGutsClosed));
     }
 
     @Test
     public void testSetShouldManageLifetime_setShouldNotManage() {
         NotificationEntry entry = createTestNotificationRow().getEntry();
-        mGutsManager.mKeyToRemoveOnGutsClosed = entry.key;
+        mGutsManager.mKeyToRemoveOnGutsClosed = entry.getKey();
         mGutsManager.setShouldManageLifetime(entry, false /* shouldManage */);
 
         assertNull(mGutsManager.mKeyToRemoveOnGutsClosed);
@@ -498,7 +478,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         try {
             ExpandableNotificationRow row = mHelper.createRow(nb.build());
-            row.getEntry().channel = mTestNotificationChannel;
+            modifyRanking(row.getEntry())
+                    .setChannel(mTestNotificationChannel)
+                    .build();
             return row;
         } catch (Exception e) {
             fail();
@@ -507,8 +489,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     }
 
     private NotificationMenuRowPlugin.MenuItem createTestMenuItem(ExpandableNotificationRow row) {
-        NotificationMenuRowPlugin menuRow = new NotificationMenuRow(mContext);
-        menuRow.createMenu(row, row.getStatusBarNotification());
+        NotificationMenuRowPlugin menuRow =
+                new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
+        menuRow.createMenu(row, row.getEntry().getSbn());
 
         NotificationMenuRowPlugin.MenuItem menuItem = menuRow.getLongpressMenuItem(mContext);
         assertNotNull(menuItem);

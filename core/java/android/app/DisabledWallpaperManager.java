@@ -52,7 +52,6 @@ final class DisabledWallpaperManager extends WallpaperManager {
     }
 
     private DisabledWallpaperManager() {
-        super(null, null, null);
     }
 
     @Override
@@ -336,6 +335,11 @@ final class DisabledWallpaperManager extends WallpaperManager {
 
     @Override
     public boolean isWallpaperBackupEligible(int which) {
+        return unsupportedBoolean();
+    }
+
+    @Override
+    public boolean wallpaperSupportsWcg(int which) {
         return unsupportedBoolean();
     }
 }

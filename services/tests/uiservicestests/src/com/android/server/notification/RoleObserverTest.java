@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import static android.app.role.RoleManager.ROLE_DIALER;
 import static android.app.role.RoleManager.ROLE_EMERGENCY;
-import static android.app.role.RoleManager.ROLE_SMS;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
 import static junit.framework.Assert.assertFalse;
@@ -36,6 +35,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUriGrantsManager;
+import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -56,14 +56,20 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Pair;
 
+import androidx.test.InstrumentationRegistry;
+
+import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.server.LocalServices;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,29 +99,32 @@ public class RoleObserverTest extends UiServiceTestCase {
     private Executor mExecutor;
     @Mock
     private RoleManager mRoleManager;
-
+    NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
+    private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
+            1 << 30);
     private List<UserInfo> mUsers;
 
     private static class TestableNotificationManagerService extends NotificationManagerService {
-
-        TestableNotificationManagerService(Context context) {
-            super(context);
+        TestableNotificationManagerService(Context context,
+                NotificationRecordLogger logger,
+                InstanceIdSequence notificationInstanceIdSequence) {
+            super(context, logger, notificationInstanceIdSequence);
         }
 
         @Override
-        protected void handleSavePolicyFile() {
-            return;
-        }
+        protected void handleSavePolicyFile() { }
 
         @Override
-        protected void loadPolicyFile() {
-            return;
-        }
+        protected void loadPolicyFile() { }
     }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        // Shell permisssions will override permissions of our app, so add all necessary permissions
+        // for this test here:
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                "android.permission.READ_CONTACTS");
 
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mock(WindowManagerInternal.class));
@@ -126,11 +135,13 @@ public class RoleObserverTest extends UiServiceTestCase {
         mUsers.add(new UserInfo(10, "second", 0));
         when(mUm.getUsers()).thenReturn(mUsers);
 
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
+                mNotificationInstanceIdSequence);
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
-            mService.init(mock(Looper.class),
+            mService.init(mService.new WorkerHandler(mock(Looper.class)),
+                    mock(RankingHandler.class),
                     mock(IPackageManager.class), mock(PackageManager.class),
                     mock(LightsManager.class),
                     mock(NotificationListeners.class), mock(NotificationAssistants.class),
@@ -138,16 +149,24 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(SnoozeHelper.class), mock(NotificationUsageStats.class),
                     mock(AtomicFile.class), mock(ActivityManager.class),
                     mock(GroupHelper.class), mock(IActivityManager.class),
+                    mock(ActivityTaskManagerInternal.class),
                     mock(UsageStatsManagerInternal.class),
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
-                    mock(AppOpsManager.class), mUm, mock(TelephonyManager.class));
+                    mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
+                    mock(StatsManager.class), mock(TelephonyManager.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
             }
         }
         mService.setPreferencesHelper(mPreferencesHelper);
+    }
+
+    @After
+    public void tearDown() {
+        InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation().dropShellPermissionIdentity();
     }
 
     @Test

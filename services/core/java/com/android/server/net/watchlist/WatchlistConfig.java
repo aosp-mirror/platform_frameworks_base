@@ -18,7 +18,6 @@ package com.android.server.net.watchlist;
 
 import android.annotation.Nullable;
 import android.os.FileUtils;
-import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
@@ -66,11 +65,11 @@ class WatchlistConfig {
     }
 
     private static class CrcShaDigests {
-        final HarmfulDigests crc32Digests;
-        final HarmfulDigests sha256Digests;
+        public final HarmfulCrcs crc32s;
+        public final HarmfulDigests sha256Digests;
 
-        public CrcShaDigests(HarmfulDigests crc32Digests, HarmfulDigests sha256Digests) {
-            this.crc32Digests = crc32Digests;
+        CrcShaDigests(HarmfulCrcs crc32s, HarmfulDigests sha256Digests) {
+            this.crc32s = crc32s;
             this.sha256Digests = sha256Digests;
         }
     }
@@ -140,9 +139,9 @@ class WatchlistConfig {
                 }
             }
             parser.require(XmlPullParser.END_TAG, null, XmlTags.WATCHLIST_CONFIG);
-            mDomainDigests = new CrcShaDigests(new HarmfulDigests(crc32DomainList),
+            mDomainDigests = new CrcShaDigests(new HarmfulCrcs(crc32DomainList),
                     new HarmfulDigests(sha256DomainList));
-            mIpDigests = new CrcShaDigests(new HarmfulDigests(crc32IpList),
+            mIpDigests = new CrcShaDigests(new HarmfulCrcs(crc32IpList),
                     new HarmfulDigests(sha256IpList));
             Log.i(TAG, "Reload watchlist done");
         } catch (IllegalStateException | NullPointerException | NumberFormatException |
@@ -171,8 +170,8 @@ class WatchlistConfig {
             return false;
         }
         // First it does a quick CRC32 check.
-        final byte[] crc32 = getCrc32(domain);
-        if (!domainDigests.crc32Digests.contains(crc32)) {
+        final int crc32 = getCrc32(domain);
+        if (!domainDigests.crc32s.contains(crc32)) {
             return false;
         }
         // Now we do a slow SHA256 check.
@@ -187,8 +186,8 @@ class WatchlistConfig {
             return false;
         }
         // First it does a quick CRC32 check.
-        final byte[] crc32 = getCrc32(ip);
-        if (!ipDigests.crc32Digests.contains(crc32)) {
+        final int crc32 = getCrc32(ip);
+        if (!ipDigests.crc32s.contains(crc32)) {
             return false;
         }
         // Now we do a slow SHA256 check.
@@ -198,15 +197,11 @@ class WatchlistConfig {
 
 
     /** Get CRC32 of a string
-     *
-     * TODO: Review if we should use CRC32 or other algorithms
      */
-    private byte[] getCrc32(String str) {
+    private int getCrc32(String str) {
         final CRC32 crc = new CRC32();
         crc.update(str.getBytes());
-        final long tmp = crc.getValue();
-        return new byte[]{(byte) (tmp >> 24 & 255), (byte) (tmp >> 16 & 255),
-                (byte) (tmp >> 8 & 255), (byte) (tmp & 255)};
+        return (int) crc.getValue();
     }
 
     /** Get SHA256 of a string */
@@ -279,7 +274,7 @@ class WatchlistConfig {
         pw.println("Domain CRC32 digest list:");
         // mDomainDigests won't go from non-null to null so it's safe
         if (mDomainDigests != null) {
-            mDomainDigests.crc32Digests.dump(fd, pw, args);
+            mDomainDigests.crc32s.dump(fd, pw, args);
         }
         pw.println("Domain SHA256 digest list:");
         if (mDomainDigests != null) {
@@ -288,7 +283,7 @@ class WatchlistConfig {
         pw.println("Ip CRC32 digest list:");
         // mIpDigests won't go from non-null to null so it's safe
         if (mIpDigests != null) {
-            mIpDigests.crc32Digests.dump(fd, pw, args);
+            mIpDigests.crc32s.dump(fd, pw, args);
         }
         pw.println("Ip SHA256 digest list:");
         if (mIpDigests != null) {

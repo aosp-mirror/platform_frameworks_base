@@ -16,7 +16,9 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.gameperformance">
+    package="android.gameperformance"
+    android:versionCode="3"
+    android:versionName="3.0" >
     <uses-sdk android:minSdkVersion="25"/>
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
@@ -24,7 +26,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application android:theme="@style/noeffects">
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.gameperformance.GamePerformanceActivity" >
+        <activity android:name="android.gameperformance.GamePerformanceActivity"
+                  android:screenOrientation="landscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

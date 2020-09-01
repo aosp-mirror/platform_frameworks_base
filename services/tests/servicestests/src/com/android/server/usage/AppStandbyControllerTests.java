@@ -23,15 +23,26 @@ import static android.app.usage.UsageEvents.Event.SLICE_PINNED_PRIV;
 import static android.app.usage.UsageEvents.Event.SYSTEM_INTERACTION;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
-import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYNC_ADAPTER;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_INTERACTION;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static org.junit.Assert.assertEquals;
@@ -39,17 +50,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -57,6 +71,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -66,6 +81,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.SystemService;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,6 +90,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -91,8 +108,14 @@ public class AppStandbyControllerTests {
     private static final int UID_1 = 10000;
     private static final String PACKAGE_EXEMPTED_1 = "com.android.exempted";
     private static final int UID_EXEMPTED_1 = 10001;
+    private static final String PACKAGE_SYSTEM_HEADFULL = "com.example.system.headfull";
+    private static final int UID_SYSTEM_HEADFULL = 10002;
+    private static final String PACKAGE_SYSTEM_HEADLESS = "com.example.system.headless";
+    private static final int UID_SYSTEM_HEADLESS = 10003;
     private static final int USER_ID = 0;
     private static final int USER_ID2 = 10;
+    private static final UserHandle USER_HANDLE_USER2 = new UserHandle(USER_ID2);
+    private static final int USER_ID3 = 11;
 
     private static final String PACKAGE_UNKNOWN = "com.example.unknown";
 
@@ -107,14 +130,22 @@ public class AppStandbyControllerTests {
     private static final long WORKING_SET_THRESHOLD = 12 * HOUR_MS;
     private static final long FREQUENT_THRESHOLD = 24 * HOUR_MS;
     private static final long RARE_THRESHOLD = 48 * HOUR_MS;
-    // Short STABLE_CHARGING_THRESHOLD for testing purposes
-    private static final long STABLE_CHARGING_THRESHOLD = 2000;
+    private static final long RESTRICTED_THRESHOLD = 96 * HOUR_MS;
 
     /** Mock variable used in {@link MyInjector#isPackageInstalled(String, int, int)} */
     private static boolean isPackageInstalled = true;
 
     private MyInjector mInjector;
     private AppStandbyController mController;
+
+    private CountDownLatch mStateChangedLatch = new CountDownLatch(1);
+    private AppIdleStateChangeListener mListener = new AppIdleStateChangeListener() {
+        @Override
+        public void onAppIdleStateChanged(String packageName, int userId,
+                boolean idle, int bucket, int reason) {
+            mStateChangedLatch.countDown();
+        }
+    };
 
     static class MyContextWrapper extends ContextWrapper {
         PackageManager mockPm = mock(PackageManager.class);
@@ -126,16 +157,27 @@ public class AppStandbyControllerTests {
         public PackageManager getPackageManager() {
             return mockPm;
         }
+
+        public Object getSystemService(@NonNull String name) {
+            if (Context.ACTIVITY_SERVICE.equals(name)) {
+                return mock(ActivityManager.class);
+            }
+            return super.getSystemService(name);
+        }
     }
 
     static class MyInjector extends AppStandbyController.Injector {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
-        List<String> mPowerSaveWhitelistExceptIdle = new ArrayList<>();
+        boolean mIsRestrictedBucketEnabled = true;
+        List<String> mNonIdleWhitelistApps = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
         String mBoundWidgetPackage = PACKAGE_EXEMPTED_1;
+        int[] mRunningUsers = new int[] {USER_ID};
+        List<UserHandle> mCrossProfileTargets = Collections.emptyList();
+        boolean mDeviceIdleMode = false;
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -171,8 +213,17 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean isPowerSaveWhitelistExceptIdleApp(String packageName) throws RemoteException {
-            return mPowerSaveWhitelistExceptIdle.contains(packageName);
+        boolean isNonIdleWhitelisted(String packageName) {
+            return mNonIdleWhitelistApps.contains(packageName);
+        }
+
+        @Override
+        void updatePowerWhitelistCache() {
+        }
+
+        @Override
+        boolean isRestrictedBucketEnabled() {
+            return mIsRestrictedBucketEnabled;
         }
 
         @Override
@@ -198,7 +249,7 @@ public class AppStandbyControllerTests {
 
         @Override
         int[] getRunningUserIds() {
-            return new int[] {USER_ID};
+            return mRunningUsers;
         }
 
         @Override
@@ -225,15 +276,18 @@ public class AppStandbyControllerTests {
         @Override
         String getAppIdleSettings() {
             return "screen_thresholds=0/0/0/" + HOUR_MS + ",elapsed_thresholds=0/"
-                    + WORKING_SET_THRESHOLD + "/"
-                    + FREQUENT_THRESHOLD + "/"
-                    + RARE_THRESHOLD + ","
-                    + "stable_charging_threshold=" + STABLE_CHARGING_THRESHOLD;
+                    + WORKING_SET_THRESHOLD + "/" + FREQUENT_THRESHOLD + "/" + RARE_THRESHOLD
+                    + "/" + RESTRICTED_THRESHOLD;
         }
 
         @Override
         public boolean isDeviceIdleMode() {
-            return false;
+            return mDeviceIdleMode;
+        }
+
+        @Override
+        public List<UserHandle> getValidCrossProfileTargets(String pkg, int userId) {
+            return mCrossProfileTargets;
         }
 
         // Internal methods
@@ -260,15 +314,33 @@ public class AppStandbyControllerTests {
         pie.packageName = PACKAGE_EXEMPTED_1;
         packages.add(pie);
 
+        PackageInfo pis = new PackageInfo();
+        pis.activities = new ActivityInfo[]{mock(ActivityInfo.class)};
+        pis.applicationInfo = new ApplicationInfo();
+        pis.applicationInfo.uid = UID_SYSTEM_HEADFULL;
+        pis.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        pis.packageName = PACKAGE_SYSTEM_HEADFULL;
+        packages.add(pis);
+
+        PackageInfo pish = new PackageInfo();
+        pish.applicationInfo = new ApplicationInfo();
+        pish.applicationInfo.uid = UID_SYSTEM_HEADLESS;
+        pish.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        pish.packageName = PACKAGE_SYSTEM_HEADLESS;
+        packages.add(pish);
+
         doReturn(packages).when(mockPm).getInstalledPackagesAsUser(anyInt(), anyInt());
         try {
-            doReturn(UID_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_1), anyInt(), anyInt());
-            doReturn(UID_EXEMPTED_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_EXEMPTED_1),
-                    anyInt(), anyInt());
-            doReturn(pi.applicationInfo).when(mockPm).getApplicationInfo(eq(pi.packageName),
-                    anyInt());
-            doReturn(pie.applicationInfo).when(mockPm).getApplicationInfo(eq(pie.packageName),
-                    anyInt());
+            for (int i = 0; i < packages.size(); ++i) {
+                PackageInfo pkg = packages.get(i);
+
+                doReturn(pkg.applicationInfo.uid).when(mockPm)
+                        .getPackageUidAsUser(eq(pkg.packageName), anyInt());
+                doReturn(pkg.applicationInfo.uid).when(mockPm)
+                        .getPackageUidAsUser(eq(pkg.packageName), anyInt(), anyInt());
+                doReturn(pkg.applicationInfo).when(mockPm)
+                        .getApplicationInfo(eq(pkg.packageName), anyInt());
+            }
         } catch (PackageManager.NameNotFoundException nnfe) {}
     }
 
@@ -297,13 +369,11 @@ public class AppStandbyControllerTests {
         mInjector.setDisplayOn(true);
         setChargingState(controller, false);
         controller.checkIdleStates(USER_ID);
-        assertEquals(STANDBY_BUCKET_EXEMPTED,
-                controller.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
-                        mInjector.mElapsedRealtime, false));
         assertNotEquals(STANDBY_BUCKET_EXEMPTED,
                 controller.getAppStandbyBucket(PACKAGE_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
 
+        controller.addListener(mListener);
         return controller;
     }
 
@@ -316,30 +386,29 @@ public class AppStandbyControllerTests {
         MyContextWrapper myContext = new MyContextWrapper(InstrumentationRegistry.getContext());
         mInjector = new MyInjector(myContext, Looper.getMainLooper());
         mController = setupController();
-        setChargingState(mController, false);
     }
 
-    private class TestParoleListener extends UsageStatsManagerInternal.AppIdleStateChangeListener {
-        private boolean mOnParole = false;
+    @Test
+    public void testBoundWidgetPackageExempt() throws Exception {
+        assumeTrue(mInjector.getContext().getSystemService(AppWidgetManager.class) != null);
+        assertEquals(STANDBY_BUCKET_ACTIVE,
+                mController.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
+                        mInjector.mElapsedRealtime, false));
+    }
+
+    private static class TestParoleListener extends AppIdleStateChangeListener {
+        private boolean mIsParoleOn = false;
         private CountDownLatch mLatch;
-        private long mLastParoleChangeTime;
         private boolean mIsExpecting = false;
         private boolean mExpectedParoleState;
 
-        public boolean getParoleState() {
+        boolean getParoleState() {
             synchronized (this) {
-                return mOnParole;
+                return mIsParoleOn;
             }
         }
 
-        public void rearmLatch() {
-            synchronized (this) {
-                mLatch = new CountDownLatch(1);
-                mIsExpecting = false;
-            }
-        }
-
-        public void rearmLatch(boolean expectedParoleState) {
+        void rearmLatch(boolean expectedParoleState) {
             synchronized (this) {
                 mLatch = new CountDownLatch(1);
                 mIsExpecting = true;
@@ -347,14 +416,8 @@ public class AppStandbyControllerTests {
             }
         }
 
-        public void awaitOnLatch(long time) throws Exception {
+        void awaitOnLatch(long time) throws Exception {
             mLatch.await(time, TimeUnit.MILLISECONDS);
-        }
-
-        public long getLastParoleChangeTime() {
-            synchronized (this) {
-                return mLastParoleChangeTime;
-            }
         }
 
         @Override
@@ -367,9 +430,8 @@ public class AppStandbyControllerTests {
             synchronized (this) {
                 // Only record information if it is being looked for
                 if (mLatch != null && mLatch.getCount() > 0) {
-                    mOnParole = isParoleOn;
-                    mLastParoleChangeTime = getCurrentTime();
-                    if (!mIsExpecting || isParoleOn == mExpectedParoleState) {
+                    mIsParoleOn = isParoleOn;
+                    if (mIsExpecting && isParoleOn == mExpectedParoleState) {
                         mLatch.countDown();
                     }
                 }
@@ -378,137 +440,76 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testCharging() throws Exception {
-        long startTime;
+    public void testIsAppIdle_Charging() throws Exception {
         TestParoleListener paroleListener = new TestParoleListener();
-        long marginOfError = 200;
-
-        // Charging
-        paroleListener.rearmLatch();
         mController.addListener(paroleListener);
-        startTime = getCurrentTime();
-        setChargingState(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        // Parole will only be granted after device has been charging for a sufficient amount of
-        // time.
-        assertEquals(STABLE_CHARGING_THRESHOLD,
-                paroleListener.getLastParoleChangeTime() - startTime,
-                marginOfError);
 
-        // Discharging
-        paroleListener.rearmLatch();
-        startTime = getCurrentTime();
         setChargingState(mController, false);
-        mController.checkIdleStates(USER_ID);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.getParoleState());
-        // Parole should be revoked immediately
-        assertEquals(0,
-                paroleListener.getLastParoleChangeTime() - startTime,
-                marginOfError);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+        assertFalse(mController.isInParole());
 
-        // Brief Charging
-        paroleListener.rearmLatch();
+        paroleListener.rearmLatch(true);
         setChargingState(mController, true);
-        setChargingState(mController, false);
-        // Device stopped charging before the stable charging threshold.
-        // Parole should not be granted at the end of the threshold
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.getParoleState());
-
-        // Charging Again
-        paroleListener.rearmLatch();
-        startTime = getCurrentTime();
-        setChargingState(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        paroleListener.awaitOnLatch(2000);
         assertTrue(paroleListener.getParoleState());
-        assertTrue(paroleListener.mOnParole);
-        assertEquals(STABLE_CHARGING_THRESHOLD,
-                paroleListener.getLastParoleChangeTime() - startTime,
-                marginOfError);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+        assertTrue(mController.isInParole());
+
+        paroleListener.rearmLatch(false);
+        setChargingState(mController, false);
+        paroleListener.awaitOnLatch(2000);
+        assertFalse(paroleListener.getParoleState());
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+        assertFalse(mController.isInParole());
     }
 
     @Test
-    public void testEnabledState() throws Exception {
-        TestParoleListener paroleListener = new TestParoleListener();
-        paroleListener.rearmLatch(true);
-        mController.addListener(paroleListener);
-        long lastUpdateTime;
-
-        // Test that listeners are notified if enabled changes when the device is not in parole.
+    public void testIsAppIdle_Enabled() throws Exception {
         setChargingState(mController, false);
+        TestParoleListener paroleListener = new TestParoleListener();
+        mController.addListener(paroleListener);
 
-        // Start off not enabled. Device is effectively in permanent parole.
-        setAppIdleEnabled(mController, false);
-        // Since AppStandbyController uses a handler to notify listeners of a state change, there is
-        // some inherent latency between changing the state and getting the notification. We need to
-        // wait until the paroleListener has been notified that parole is on before continuing with
-        // the test.
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-
-        // Enable controller
-        paroleListener.rearmLatch();
         setAppIdleEnabled(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.mOnParole);
-        lastUpdateTime = paroleListener.getLastParoleChangeTime();
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
 
-        paroleListener.rearmLatch();
+        paroleListener.rearmLatch(false);
+        setAppIdleEnabled(mController, false);
+        paroleListener.awaitOnLatch(2000);
+        assertTrue(paroleListener.mIsParoleOn);
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+
+        paroleListener.rearmLatch(true);
         setAppIdleEnabled(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.mOnParole);
-        // Make sure AppStandbyController doesn't notify listeners when there's no change.
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
-
-        // Disable controller
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        lastUpdateTime = paroleListener.getLastParoleChangeTime();
-
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        // Make sure AppStandbyController doesn't notify listeners when there's no change.
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
-
-
-        // Test that listeners aren't notified if enabled status changes when the device is already
-        // in parole.
-
-        // A device is in parole whenever it's charging.
-        setChargingState(mController, true);
-
-        // Start off not enabled.
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        lastUpdateTime = paroleListener.getLastParoleChangeTime();
-
-        // Test that toggling doesn't notify the listener.
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
-
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
+        paroleListener.awaitOnLatch(2000);
+        assertFalse(paroleListener.getParoleState());
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
     }
 
     private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket) {
+        assertTimeout(controller, elapsedTime, bucket, USER_ID);
+    }
+
+    private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket,
+            int userId) {
         mInjector.mElapsedRealtime = elapsedTime;
-        controller.checkIdleStates(USER_ID);
+        controller.checkIdleStates(userId);
         assertEquals(bucket,
-                controller.getAppStandbyBucket(PACKAGE_1, USER_ID, mInjector.mElapsedRealtime,
+                controller.getAppStandbyBucket(PACKAGE_1, userId, mInjector.mElapsedRealtime,
                         false));
     }
 
@@ -519,16 +520,33 @@ public class AppStandbyControllerTests {
         UsageEvents.Event ev = new UsageEvents.Event();
         ev.mPackage = packageName;
         ev.mEventType = eventType;
-        controller.reportEvent(ev, elapsedTime, USER_ID);
+        controller.reportEvent(ev, USER_ID);
     }
 
     private int getStandbyBucket(AppStandbyController controller, String packageName) {
-        return controller.getAppStandbyBucket(packageName, USER_ID, mInjector.mElapsedRealtime,
+        return getStandbyBucket(USER_ID, controller, packageName);
+    }
+
+    private int getStandbyBucket(int userId, AppStandbyController controller, String packageName) {
+        return controller.getAppStandbyBucket(packageName, userId, mInjector.mElapsedRealtime,
                 true);
     }
 
+    private int getStandbyBucketReason(String packageName) {
+        return mController.getAppStandbyBucketReason(packageName, USER_ID,
+                mInjector.mElapsedRealtime);
+    }
+
     private void assertBucket(int bucket) {
-        assertEquals(bucket, getStandbyBucket(mController, PACKAGE_1));
+        assertBucket(bucket, PACKAGE_1);
+    }
+
+    private void assertBucket(int bucket, String pkg) {
+        assertEquals(bucket, getStandbyBucket(mController, pkg));
+    }
+
+    private void assertNotBucket(int bucket) {
+        assertNotEquals(bucket, getStandbyBucket(mController, PACKAGE_1));
     }
 
     @Test
@@ -552,20 +570,24 @@ public class AppStandbyControllerTests {
         // RARE bucket
         assertTimeout(mController, RARE_THRESHOLD + 1, STANDBY_BUCKET_RARE);
 
+        // RESTRICTED bucket
+        assertTimeout(mController, RESTRICTED_THRESHOLD + 1, STANDBY_BUCKET_RESTRICTED);
+
         reportEvent(mController, USER_INTERACTION, RARE_THRESHOLD + 1, PACKAGE_1);
 
         assertTimeout(mController, RARE_THRESHOLD + 1, STANDBY_BUCKET_ACTIVE);
 
-        // RARE bucket
-        assertTimeout(mController, RARE_THRESHOLD * 2 + 2, STANDBY_BUCKET_RARE);
+        // RESTRICTED bucket
+        assertTimeout(mController, RESTRICTED_THRESHOLD * 2 + 2, STANDBY_BUCKET_RESTRICTED);
     }
 
     @Test
     public void testSetAppStandbyBucket() throws Exception {
         // For a known package, standby bucket should be set properly
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        mInjector.mElapsedRealtime = HOUR_MS;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_TIMEOUT, HOUR_MS);
+                REASON_MAIN_TIMEOUT);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
 
         // For an unknown package, standby bucket should not be set, hence NEVER is returned
@@ -573,7 +595,7 @@ public class AppStandbyControllerTests {
         mController.clearAppIdleForPackage(PACKAGE_UNKNOWN, USER_ID);
         isPackageInstalled = false; // Mock package is not installed
         mController.setAppStandbyBucket(PACKAGE_UNKNOWN, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_TIMEOUT, HOUR_MS);
+                REASON_MAIN_TIMEOUT);
         isPackageInstalled = true; // Reset mocked variable for other tests
         assertEquals(STANDBY_BUCKET_NEVER, getStandbyBucket(mController, PACKAGE_UNKNOWN));
     }
@@ -616,7 +638,7 @@ public class AppStandbyControllerTests {
         assertNotEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
 
         mInjector.setDisplayOn(true);
-        assertTimeout(mController, RARE_THRESHOLD * 2 + 2, STANDBY_BUCKET_RARE);
+        assertTimeout(mController, RARE_THRESHOLD + 2 * HOUR_MS + 1, STANDBY_BUCKET_RARE);
     }
 
     @Test
@@ -665,14 +687,15 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testPredictionTimedout() throws Exception {
+    public void testPredictionTimedOut() throws Exception {
         // Set it to timeout or usage, so that prediction can override it
+        mInjector.mElapsedRealtime = HOUR_MS;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
-                REASON_MAIN_TIMEOUT, HOUR_MS);
+                REASON_MAIN_TIMEOUT);
         assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
 
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_PREDICTED, HOUR_MS);
+                REASON_MAIN_PREDICTED);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
 
         // Fast forward 12 hours
@@ -696,29 +719,110 @@ public class AppStandbyControllerTests {
     @Test
     public void testOverrides() throws Exception {
         // Can force to NEVER
+        mInjector.mElapsedRealtime = HOUR_MS;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
-                REASON_MAIN_FORCED, 1 * HOUR_MS);
+                REASON_MAIN_FORCED_BY_USER);
         assertEquals(STANDBY_BUCKET_NEVER, getStandbyBucket(mController, PACKAGE_1));
 
-        // Prediction can't override FORCED reason
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_FORCED, 1 * HOUR_MS);
+        // Prediction can't override FORCED reasons
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
-                REASON_MAIN_PREDICTED, 1 * HOUR_MS);
+                REASON_MAIN_PREDICTED);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_MAIN_FORCED_BY_USER);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_PREDICTED);
         assertEquals(STANDBY_BUCKET_FREQUENT, getStandbyBucket(mController, PACKAGE_1));
 
         // Prediction can't override NEVER
+        mInjector.mElapsedRealtime = 2 * HOUR_MS;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
-                REASON_MAIN_DEFAULT, 2 * HOUR_MS);
+                REASON_MAIN_DEFAULT);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_PREDICTED, 2 * HOUR_MS);
+                REASON_MAIN_PREDICTED);
         assertEquals(STANDBY_BUCKET_NEVER, getStandbyBucket(mController, PACKAGE_1));
 
         // Prediction can't set to NEVER
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_USAGE, 2 * HOUR_MS);
+                REASON_MAIN_USAGE);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
-                REASON_MAIN_PREDICTED, 2 * HOUR_MS);
+                REASON_MAIN_PREDICTED);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
+
+        // Prediction can't remove from RESTRICTED
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_PREDICTED);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_PREDICTED);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        // Force from user can remove from RESTRICTED
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        // Force from system can remove from RESTRICTED if it was put it in due to system
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_PREDICTED);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        // Non-user usage can't remove from RESTRICTED
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_USAGE);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_USAGE | REASON_SUB_USAGE_SYSTEM_INTERACTION);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_USAGE | REASON_SUB_USAGE_SYNC_ADAPTER);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_USAGE | REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        // Explicit user usage can remove from RESTRICTED
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_USAGE | REASON_SUB_USAGE_USER_INTERACTION);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_USAGE | REASON_SUB_USAGE_MOVE_TO_FOREGROUND);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
     }
 
@@ -729,7 +833,7 @@ public class AppStandbyControllerTests {
 
         mInjector.mElapsedRealtime = 2000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
         // bucketing works after timeout
@@ -739,9 +843,220 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_FREQUENT);
 
         // Way past prediction timeout, use system thresholds
-        mInjector.mElapsedRealtime = RARE_THRESHOLD * 4;
+        mInjector.mElapsedRealtime = RARE_THRESHOLD;
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RARE);
+    }
+
+    /**
+     * Test that setAppStandbyBucket to RESTRICTED doesn't change the bucket until the usage
+     * timeout has passed.
+     */
+    @Test
+    public void testTimeoutBeforeRestricted() throws Exception {
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mElapsedRealtime += WORKING_SET_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        // Bucket shouldn't change
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // bucketing works after timeout
+        mInjector.mElapsedRealtime += DAY_MS;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Way past all timeouts. Make sure timeout processing doesn't raise bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    /**
+     * Test that an app is put into the RESTRICTED bucket after enough time has passed.
+     */
+    @Test
+    public void testRestrictedDelay() throws Exception {
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mElapsedRealtime += mInjector.getAutoRestrictedBucketDelayMs() - 5000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        // Bucket shouldn't change
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // bucketing works after timeout
+        mInjector.mElapsedRealtime += 6000;
+
+        Thread.sleep(6000);
+        // Enough time has passed. The app should automatically be put into the RESTRICTED bucket.
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    /**
+     * Test that an app is put into the RESTRICTED bucket after enough time has passed.
+     */
+    @Test
+    public void testRestrictedDelay_DelayChange() throws Exception {
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mAutoRestrictedBucketDelayMs = 2 * HOUR_MS;
+        mInjector.mElapsedRealtime += 2 * HOUR_MS - 5000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        // Bucket shouldn't change
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // bucketing works after timeout
+        mInjector.mElapsedRealtime += 6000;
+
+        Thread.sleep(6000);
+        // Enough time has passed. The app should automatically be put into the RESTRICTED bucket.
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    /**
+     * Test that an app is "timed out" into the RESTRICTED bucket if prediction tries to put it into
+     * a low bucket after the RESTRICTED timeout.
+     */
+    @Test
+    public void testRestrictedTimeoutOverridesRestoredLowBucketPrediction() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Predict to RARE Not long enough to time out into RESTRICTED.
+        mInjector.mElapsedRealtime += RARE_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        // Add a short timeout event
+        mInjector.mElapsedRealtime += 1000;
+        reportEvent(mController, SYSTEM_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+        mInjector.mElapsedRealtime += 1000;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Long enough that it could have timed out into RESTRICTED. Instead of reverting to
+        // predicted RARE, should go into RESTRICTED
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Ensure that prediction can still raise it out despite this override.
+        mInjector.mElapsedRealtime += 1;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+    }
+
+    /**
+     * Test that an app is "timed out" into the RESTRICTED bucket if prediction tries to put it into
+     * a low bucket after the RESTRICTED timeout.
+     */
+    @Test
+    public void testRestrictedTimeoutOverridesPredictionLowBucket() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Not long enough to time out into RESTRICTED.
+        mInjector.mElapsedRealtime += RARE_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        mInjector.mElapsedRealtime += 1;
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Long enough that it could have timed out into RESTRICTED.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    @Test
+    public void testRestrictedBucketDisabled() {
+        mInjector.mIsRestrictedBucketEnabled = false;
+        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
+        // at the moment.
+        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+
+        // Nothing should be able to put it into the RESTRICTED bucket.
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_TIMEOUT);
+        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_PREDICTED);
+        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    @Test
+    public void testRestrictedBucket_EnabledToDisabled() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        mInjector.mIsRestrictedBucketEnabled = false;
+        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
+        // at the moment.
+        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        mController.checkIdleStates(USER_ID);
+        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    @Test
+    public void testPredictionRaiseFromRestrictedTimeout_highBucket() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Way past all timeouts. App times out into RESTRICTED bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Since the app timed out into RESTRICTED, prediction should be able to remove from the
+        // bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+    }
+
+    @Test
+    public void testPredictionRaiseFromRestrictedTimeout_lowBucket() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Way past all timeouts. App times out into RESTRICTED bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Prediction into a low bucket means no expectation of the app being used, so we shouldn't
+        // elevate the app from RESTRICTED.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
 
     @Test
@@ -753,15 +1068,17 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
-                REASON_MAIN_PREDICTED, 1000);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
+        mInjector.mElapsedRealtime = 2000 + mController.mStrongUsageTimeoutMillis;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_PREDICTED, 2000 + mController.mStrongUsageTimeoutMillis);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_WORKING_SET);
 
+        mInjector.mElapsedRealtime = 2000 + mController.mNotificationSeenTimeoutMillis;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_PREDICTED, 2000 + mController.mNotificationSeenTimeoutMillis);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_FREQUENT);
     }
 
@@ -781,25 +1098,23 @@ public class AppStandbyControllerTests {
         // Still in ACTIVE after first USER_INTERACTION times out
         mInjector.mElapsedRealtime = mController.mStrongUsageTimeoutMillis + 1000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
         // Both timed out, so NOTIFICATION_SEEN timeout should be effective
         mInjector.mElapsedRealtime = mController.mStrongUsageTimeoutMillis * 2 + 2000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_WORKING_SET);
 
         mInjector.mElapsedRealtime = mController.mNotificationSeenTimeoutMillis + 2000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
-                REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_RARE);
     }
 
     @Test
     public void testSystemInteractionTimeout() throws Exception {
-        setChargingState(mController, false);
-
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         // Fast forward to RARE
         mInjector.mElapsedRealtime = RARE_THRESHOLD + 100;
@@ -823,12 +1138,10 @@ public class AppStandbyControllerTests {
 
     @Test
     public void testInitialForegroundServiceTimeout() throws Exception {
-        setChargingState(mController, false);
-
         mInjector.mElapsedRealtime = 1 * RARE_THRESHOLD + 100;
         // Make sure app is in NEVER bucket
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
-                REASON_MAIN_FORCED, mInjector.mElapsedRealtime);
+                REASON_MAIN_FORCED_BY_USER);
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_NEVER);
 
@@ -873,7 +1186,7 @@ public class AppStandbyControllerTests {
         // Predict to ACTIVE
         mInjector.mElapsedRealtime += 1000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
         // CheckIdleStates should not change the prediction
@@ -890,7 +1203,7 @@ public class AppStandbyControllerTests {
         // Predict to FREQUENT
         mInjector.mElapsedRealtime = RARE_THRESHOLD;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+                REASON_MAIN_PREDICTED);
         assertBucket(STANDBY_BUCKET_FREQUENT);
 
         // Add a short timeout event
@@ -905,6 +1218,79 @@ public class AppStandbyControllerTests {
         mInjector.mElapsedRealtime += WORKING_SET_THRESHOLD / 2;
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_FREQUENT);
+    }
+
+    @Test
+    public void testSystemForcedFlags_NotAddedForUserForce() throws Exception {
+        final int expectedReason = REASON_MAIN_FORCED_BY_USER;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        assertEquals(expectedReason, getStandbyBucketReason(PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        assertEquals(expectedReason, getStandbyBucketReason(PACKAGE_1));
+    }
+
+    @Test
+    public void testSystemForcedFlags_AddedForSystemForce() throws Exception {
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_DEFAULT);
+        mInjector.mElapsedRealtime += 4 * RESTRICTED_THRESHOLD;
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE,
+                getStandbyBucketReason(PACKAGE_1));
+
+        mController.restrictApp(PACKAGE_1, USER_ID, REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        // Flags should be combined
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM
+                | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE
+                | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE, getStandbyBucketReason(PACKAGE_1));
+    }
+
+    @Test
+    public void testSystemForcedFlags_SystemForceChangesBuckets() throws Exception {
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_DEFAULT);
+        mInjector.mElapsedRealtime += 4 * RESTRICTED_THRESHOLD;
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+        assertEquals(STANDBY_BUCKET_FREQUENT, getStandbyBucket(mController, PACKAGE_1));
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE,
+                getStandbyBucketReason(PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE);
+        assertEquals(STANDBY_BUCKET_FREQUENT, getStandbyBucket(mController, PACKAGE_1));
+        // Flags should be combined
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
+                getStandbyBucketReason(PACKAGE_1));
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        // Flags should be combined
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY,
+                getStandbyBucketReason(PACKAGE_1));
+
+        mController.restrictApp(PACKAGE_1, USER_ID, REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED);
+        assertEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+        // Flags should not be combined since the bucket changed.
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED,
+                getStandbyBucketReason(PACKAGE_1));
     }
 
     @Test
@@ -966,6 +1352,170 @@ public class AppStandbyControllerTests {
         assertIsNotActiveAdmin(ADMIN_PKG2, USER_ID);
     }
 
+    @Test
+    public void testUserInteraction_CrossProfile() throws Exception {
+        mInjector.mRunningUsers = new int[] {USER_ID, USER_ID2, USER_ID3};
+        mInjector.mCrossProfileTargets = Arrays.asList(USER_HANDLE_USER2);
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertEquals("Cross profile connected package bucket should be elevated on usage",
+                STANDBY_BUCKET_ACTIVE, getStandbyBucket(USER_ID2, mController, PACKAGE_1));
+        assertEquals("Not Cross profile connected package bucket should not be elevated on usage",
+                STANDBY_BUCKET_NEVER, getStandbyBucket(USER_ID3, mController, PACKAGE_1));
+
+        assertTimeout(mController, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE, USER_ID);
+        assertTimeout(mController, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE, USER_ID2);
+
+        assertTimeout(mController, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET, USER_ID);
+        assertTimeout(mController, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET, USER_ID2);
+
+        mInjector.mCrossProfileTargets = Collections.emptyList();
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertEquals("No longer cross profile connected package bucket should not be "
+                        + "elevated on usage",
+                STANDBY_BUCKET_WORKING_SET, getStandbyBucket(USER_ID2, mController, PACKAGE_1));
+    }
+
+    @Test
+    public void testUnexemptedSyncScheduled() throws Exception {
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.addListener(mListener);
+        assertEquals("Test package did not start in the Never bucket", STANDBY_BUCKET_NEVER,
+                getStandbyBucket(mController, PACKAGE_1));
+
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, false);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Unexempted sync scheduled should bring the package out of the Never bucket",
+                STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, false);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Unexempted sync scheduled should not elevate a non Never bucket",
+                STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+    }
+
+    @Test
+    public void testExemptedSyncScheduled() throws Exception {
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+        mInjector.mDeviceIdleMode = true;
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, true);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Exempted sync scheduled in doze should set bucket to working set",
+                STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+        mInjector.mDeviceIdleMode = false;
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, true);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Exempted sync scheduled while not in doze should set bucket to active",
+                STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
+    }
+
+    @Test
+    public void testAppUpdateOnRestrictedBucketStatus() {
+        // Updates shouldn't change bucket if the app timed out.
+        // Way past all timeouts. App times out into RESTRICTED bucket.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Updates shouldn't change bucket if the app was forced by the system for a non-buggy
+        // reason.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Updates should change bucket if the app was forced by the system for a buggy reason.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertNotEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        // Updates shouldn't change bucket if the app was forced by the system for more than just
+        // a buggy reason.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
+                getStandbyBucketReason(PACKAGE_1));
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Updates shouldn't change bucket if the app was forced by the user.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    @Test
+    public void testSystemHeadlessAppElevated() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime,
+                PACKAGE_SYSTEM_HEADFULL);
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime,
+                PACKAGE_SYSTEM_HEADLESS);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+
+
+        mController.setAppStandbyBucket(PACKAGE_SYSTEM_HEADFULL, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_RARE, PACKAGE_SYSTEM_HEADFULL);
+
+        // Make sure headless system apps don't get lowered.
+        mController.setAppStandbyBucket(PACKAGE_SYSTEM_HEADLESS, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_SYSTEM_HEADLESS);
+
+        // Package 1 doesn't have activities and is headless, but is not a system app, so it can
+        // be lowered.
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_RARE, PACKAGE_1);
+    }
+
     private String getAdminAppsStr(int userId) {
         return getAdminAppsStr(userId, mController.getActiveAdminAppsForTest(userId));
     }
@@ -1005,5 +1555,13 @@ public class AppStandbyControllerTests {
 
     private void setActiveAdmins(int userId, String... admins) {
         mController.setActiveAdminApps(new ArraySet<>(Arrays.asList(admins)), userId);
+    }
+
+    private void setAndAssertBucket(String pkg, int user, int bucket, int reason) throws Exception {
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.setAppStandbyBucket(pkg, user, bucket, reason);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Failed to set package bucket", bucket,
+                getStandbyBucket(mController, PACKAGE_1));
     }
 }

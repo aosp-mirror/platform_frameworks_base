@@ -42,6 +42,7 @@ class KeyguardPatternViewTest : SysuiTestCase() {
     @Before
     fun setup() {
         val inflater = LayoutInflater.from(context)
+        mDependency.injectMockDependency(KeyguardUpdateMonitor::class.java)
         mKeyguardPatternView = inflater.inflate(R.layout.keyguard_pattern_view, null)
                 as KeyguardPatternView
         mSecurityMessage = KeyguardMessageArea(mContext, null,

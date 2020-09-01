@@ -17,17 +17,16 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
-
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the rate of change is constant
  */
 @HasNativeInterpolator
-public class LinearInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
+public class LinearInterpolator extends BaseInterpolator implements NativeInterpolator {
 
     public LinearInterpolator() {
     }
@@ -42,6 +41,6 @@ public class LinearInterpolator extends BaseInterpolator implements NativeInterp
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createLinearInterpolator();
+        return NativeInterpolatorFactory.createLinearInterpolator();
     }
 }

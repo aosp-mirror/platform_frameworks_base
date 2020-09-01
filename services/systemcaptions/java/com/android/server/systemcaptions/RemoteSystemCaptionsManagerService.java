@@ -16,6 +16,8 @@
 
 package com.android.server.systemcaptions;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,6 +38,8 @@ final class RemoteSystemCaptionsManagerService {
 
     private static final String SERVICE_INTERFACE =
             "android.service.systemcaptions.SystemCaptionsManagerService";
+
+    private static final int MSG_BIND = 1;
 
     private final Object mLock = new Object();
 
@@ -71,18 +75,26 @@ final class RemoteSystemCaptionsManagerService {
         if (mVerbose) {
             Slog.v(TAG, "initialize()");
         }
-        ensureBound();
+        scheduleBind();
     }
 
-    void destroy() {
+    /**
+     * Destroys this service.
+     */
+    public void destroy() {
+        mHandler.sendMessage(
+                obtainMessage(RemoteSystemCaptionsManagerService::handleDestroy, this));
+    }
+
+    void handleDestroy() {
         if (mVerbose) {
-            Slog.v(TAG, "destroy()");
+            Slog.v(TAG, "handleDestroy()");
         }
 
         synchronized (mLock) {
             if (mDestroyed) {
                 if (mVerbose) {
-                    Slog.v(TAG, "destroy(): Already destroyed");
+                    Slog.v(TAG, "handleDestroy(): Already destroyed");
                 }
                 return;
             }
@@ -97,18 +109,29 @@ final class RemoteSystemCaptionsManagerService {
         }
     }
 
-    private void ensureBound() {
+    private void scheduleBind() {
+        if (mHandler.hasMessages(MSG_BIND)) {
+            if (mVerbose) Slog.v(TAG, "scheduleBind(): already scheduled");
+            return;
+        }
+        mHandler.sendMessage(
+                obtainMessage(RemoteSystemCaptionsManagerService::handleEnsureBound, this)
+                .setWhat(MSG_BIND));
+    }
+
+    private void handleEnsureBound() {
         synchronized (mLock) {
             if (mService != null || mBinding) {
                 return;
             }
 
             if (mVerbose) {
-                Slog.v(TAG, "ensureBound(): binding");
+                Slog.v(TAG, "handleEnsureBound(): binding");
             }
             mBinding = true;
 
-            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                    | Context.BIND_INCLUDE_CAPABILITIES;
             boolean willBind = mContext.bindServiceAsUser(mIntent, mServiceConnection, flags,
                     mHandler, new UserHandle(mUserId));
             if (!willBind) {

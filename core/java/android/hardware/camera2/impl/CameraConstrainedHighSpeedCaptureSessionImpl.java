@@ -20,6 +20,8 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraOfflineSession;
+import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallback;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -278,6 +280,25 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     @Override
     public void updateOutputConfiguration(OutputConfiguration config)
             throws CameraAccessException {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                + " this method");
+    }
+
+    @Override
+    public CameraOfflineSession switchToOffline(Collection<Surface> offlineOutputs,
+            Executor executor, CameraOfflineSessionCallback listener) throws CameraAccessException {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                + " this method");
+    }
+
+    @Override
+    public boolean supportsOfflineProcessing(Surface surface) {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support" +
+                " offline mode");
+    }
+
+    @Override
+    public void closeWithoutDraining() {
         throw new UnsupportedOperationException("Constrained high speed session doesn't support"
                 + " this method");
     }

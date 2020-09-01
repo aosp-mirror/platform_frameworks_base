@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;

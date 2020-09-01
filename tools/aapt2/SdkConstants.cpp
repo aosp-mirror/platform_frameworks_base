@@ -57,6 +57,8 @@ static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x0568, SDK_O},
     {0x056d, SDK_O_MR1},
     {0x0586, SDK_P},
+    {0x0606, SDK_Q},
+    {0x0617, SDK_R},
 };
 
 static bool less_entry_id(const std::pair<uint16_t, ApiVersion>& p, uint16_t entryId) {

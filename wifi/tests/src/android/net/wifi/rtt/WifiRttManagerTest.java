@@ -54,6 +54,7 @@ public class WifiRttManagerTest {
     private Executor mMockLooperExecutor;
 
     private final String packageName = "some.package.name.for.rtt.app";
+    private final String featureId = "some.feature.id.in.rtt.app";
 
     @Mock
     public Context mockContext;
@@ -70,6 +71,7 @@ public class WifiRttManagerTest {
         mMockLooperExecutor = mMockLooper.getNewExecutor();
 
         when(mockContext.getOpPackageName()).thenReturn(packageName);
+        when(mockContext.getAttributionTag()).thenReturn(featureId);
     }
 
     /**
@@ -87,8 +89,8 @@ public class WifiRttManagerTest {
 
         // verify ranging request passed to service
         mDut.startRanging(request, mMockLooperExecutor, callbackMock);
-        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
-                eq(request), callbackCaptor.capture());
+        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(featureId),
+                eq(null),  eq(request), callbackCaptor.capture());
 
         // service calls back with success
         callbackCaptor.getValue().onRangingResults(results);
@@ -111,8 +113,8 @@ public class WifiRttManagerTest {
 
         // verify ranging request passed to service
         mDut.startRanging(request, mMockLooperExecutor, callbackMock);
-        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(null),
-                eq(request), callbackCaptor.capture());
+        verify(mockRttService).startRanging(any(IBinder.class), eq(packageName), eq(featureId),
+                eq(null), eq(request), callbackCaptor.capture());
 
         // service calls back with failure code
         callbackCaptor.getValue().onRangingFailure(failureCode);

@@ -16,8 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 import android.content.Context;
 import android.metrics.LogMaker;
@@ -27,29 +26,28 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Manager for the notification blocking helper - tracks and helps create the blocking helper
  * affordance.
  */
-@Singleton
 public class NotificationBlockingHelperManager {
     /** Enables debug logging and always makes the blocking helper show up after a dismiss. */
     private static final boolean DEBUG = false;
     private static final String TAG = "BlockingHelper";
 
     private final Context mContext;
+    private final NotificationGutsManager mNotificationGutsManager;
+    private final NotificationEntryManager mNotificationEntryManager;
+    private final MetricsLogger mMetricsLogger;
     /** Row that the blocking helper will be shown in (via {@link NotificationGuts}. */
     private ExpandableNotificationRow mBlockingHelperRow;
     private Set<String> mNonBlockablePkgs;
@@ -60,11 +58,18 @@ public class NotificationBlockingHelperManager {
      */
     private boolean mIsShadeExpanded;
 
-    private MetricsLogger mMetricsLogger = new MetricsLogger();
-
-    @Inject
-    public NotificationBlockingHelperManager(Context context) {
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
+    public NotificationBlockingHelperManager(
+            Context context,
+            NotificationGutsManager notificationGutsManager,
+            NotificationEntryManager notificationEntryManager,
+            MetricsLogger metricsLogger) {
         mContext = context;
+        mNotificationGutsManager = notificationGutsManager;
+        mNotificationEntryManager = notificationEntryManager;
+        mMetricsLogger = metricsLogger;
         mNonBlockablePkgs = new HashSet<>();
         Collections.addAll(mNonBlockablePkgs, mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_nonBlockableNotificationPackages));
@@ -87,7 +92,7 @@ public class NotificationBlockingHelperManager {
         // - The row is blockable (i.e. not non-blockable)
         // - The dismissed row is a valid group (>1 or 0 children from the same channel)
         // or the only child in the group
-        if ((row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE || DEBUG)
+        if ((row.getEntry().getUserSentiment() == USER_SENTIMENT_NEGATIVE || DEBUG)
                 && mIsShadeExpanded
                 && !row.getIsNonblockable()
                 && ((!row.isChildInGroup() || row.isOnlyChildInGroup())
@@ -99,7 +104,6 @@ public class NotificationBlockingHelperManager {
             if (DEBUG) {
                 Log.d(TAG, "Manager.perhapsShowBlockingHelper: Showing new blocking helper");
             }
-            NotificationGutsManager manager = Dependency.get(NotificationGutsManager.class);
 
             // Enable blocking helper on the row before moving forward so everything in the guts is
             // correctly prepped.
@@ -113,10 +117,10 @@ public class NotificationBlockingHelperManager {
 
             // We don't care about the touch origin (x, y) since we're opening guts without any
             // explicit user interaction.
-            manager.openGuts(mBlockingHelperRow, 0, 0, menuRow.getLongpressMenuItem(mContext));
+            mNotificationGutsManager.openGuts(
+                    mBlockingHelperRow, 0, 0, menuRow.getLongpressMenuItem(mContext));
 
-            Dependency.get(MetricsLogger.class)
-                    .count(NotificationCounters.BLOCKING_HELPER_SHOWN, 1);
+            mMetricsLogger.count(NotificationCounters.BLOCKING_HELPER_SHOWN, 1);
             return true;
         }
         return false;
@@ -139,7 +143,7 @@ public class NotificationBlockingHelperManager {
 
             mBlockingHelperRow.setBlockingHelperShowing(false);
             if (mBlockingHelperRow.isAttachedToWindow()) {
-                Dependency.get(NotificationEntryManager.class).updateNotifications();
+                mNotificationEntryManager.updateNotifications("dismissCurrentBlockingHelper");
             }
             mBlockingHelperRow = null;
             return true;
@@ -165,7 +169,7 @@ public class NotificationBlockingHelperManager {
     }
 
     private LogMaker getLogMaker() {
-        return mBlockingHelperRow.getStatusBarNotification()
+        return mBlockingHelperRow.getEntry().getSbn()
             .getLogMaker()
             .setCategory(MetricsEvent.NOTIFICATION_BLOCKING_HELPER);
     }

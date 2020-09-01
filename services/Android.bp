@@ -1,3 +1,10 @@
+java_defaults {
+    name: "services_defaults",
+    plugins: [
+        "error_prone_android_framework",
+    ],
+}
+
 filegroup {
     name: "services-main-sources",
     srcs: ["java/**/*.java"],
@@ -6,7 +13,7 @@ filegroup {
 }
 
 filegroup {
-    name: "services-sources",
+    name: "services-all-sources",
     srcs: [
         ":services.core-sources",
         ":services.accessibility-sources",
@@ -14,6 +21,7 @@ filegroup {
         ":services.appwidget-sources",
         ":services.autofill-sources",
         ":services.backup-sources",
+        ":backuplib-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
@@ -28,6 +36,9 @@ filegroup {
         ":services.usage-sources",
         ":services.usb-sources",
         ":services.voiceinteraction-sources",
+        ":services.wifi-sources",
+        ":service-permission-sources",
+        ":service-statsd-sources",
     ],
     visibility: ["//visibility:private"],
 }
@@ -60,6 +71,7 @@ java_library {
         "services.devicepolicy",
         "services.midi",
         "services.net",
+        "services.people",
         "services.print",
         "services.restrictions",
         "services.startop",
@@ -67,6 +79,9 @@ java_library {
         "services.usage",
         "services.usb",
         "services.voiceinteraction",
+        "services.wifi",
+        "service-blobstore",
+        "service-jobscheduler",
         "android.hidl.base-V1.0-java",
     ],
 
@@ -77,7 +92,6 @@ java_library {
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
-
 }
 
 // native library
@@ -90,8 +104,8 @@ cc_library_shared {
 }
 
 platform_compat_config {
-   name: "services-platform-compat-config",
-   src: ":services",
+    name: "services-platform-compat-config",
+    src: ":services",
 }
 
 filegroup {
@@ -104,7 +118,7 @@ filegroup {
 
 droidstubs {
     name: "services-stubs.sources",
-    srcs: [":services-sources"],
+    srcs: [":services-all-sources"],
     installable: false,
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
@@ -122,7 +136,7 @@ droidstubs {
         },
         last_released: {
             api_file: ":android.api.system-server.latest",
-            removed_api_file: "api/removed.txt",
+            removed_api_file: ":removed.api.system-server.latest",
             baseline_file: ":system-server-api-incompatibilities-with-last-released"
         },
         api_lint: {

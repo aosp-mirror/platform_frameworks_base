@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -23,6 +24,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Parcel;
@@ -57,6 +59,23 @@ public final class NotificationChannel implements Parcelable {
     public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
 
     /**
+     * The formatter used by the system to create an id for notification
+     * channels when it automatically creates conversation channels on behalf of an app. The format
+     * string takes two arguments, in this order: the
+     * {@link #getId()} of the original notification channel, and the
+     * {@link ShortcutInfo#getId() id} of the conversation.
+     * @hide
+     */
+    public static final String CONVERSATION_CHANNEL_ID_FORMAT = "%1$s : %2$s";
+
+    /**
+     * TODO: STOPSHIP  remove
+     * Conversation id to use for apps that aren't providing them yet.
+     * @hide
+     */
+    public static final String PLACEHOLDER_CONVERSATION_ID = ":placeholder_id";
+
+    /**
      * The maximum length for text fields in a NotificationChannel. Fields will be truncated at this
      * limit.
      */
@@ -83,7 +102,12 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
-    private static final String ATT_ALLOW_BUBBLE = "can_bubble";
+    private static final String ATT_ALLOW_BUBBLE = "allow_bubbles";
+    private static final String ATT_ORIG_IMP = "orig_imp";
+    private static final String ATT_PARENT_CHANNEL = "parent";
+    private static final String ATT_CONVERSATION_ID = "conv_id";
+    private static final String ATT_IMP_CONVERSATION = "imp_conv";
+    private static final String ATT_DEMOTE = "dem";
     private static final String DELIMITER = ",";
 
     /**
@@ -109,6 +133,8 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @SystemApi
+    @TestApi
     public static final int USER_LOCKED_SOUND = 0x00000020;
 
     /**
@@ -135,6 +161,19 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_ALLOW_BUBBLE
     };
 
+    /**
+     * @hide
+     */
+    public static final int DEFAULT_ALLOW_BUBBLE = -1;
+    /**
+     * @hide
+     */
+    public static final int ALLOW_BUBBLE_ON = 1;
+    /**
+     * @hide
+     */
+    public static final int ALLOW_BUBBLE_OFF = 0;
+
     private static final int DEFAULT_LIGHT_COLOR = 0;
     private static final int DEFAULT_VISIBILITY =
             NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -142,13 +181,13 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
 
     @UnsupportedAppUsage
-    private final String mId;
+    private String mId;
     private String mName;
     private String mDesc;
     private int mImportance = DEFAULT_IMPORTANCE;
+    private int mOriginalImportance = DEFAULT_IMPORTANCE;
     private boolean mBypassDnd;
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
     private Uri mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
@@ -166,9 +205,13 @@ public final class NotificationChannel implements Parcelable {
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
     // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
-    private boolean mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
+    private int mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
     private boolean mImportanceLockedByOEM;
     private boolean mImportanceLockedDefaultApp;
+    private String mParentId = null;
+    private String mConversationId = null;
+    private boolean mDemoted = false;
+    private boolean mImportantConvo = false;
 
     /**
      * Creates a notification channel.
@@ -230,8 +273,13 @@ public final class NotificationChannel implements Parcelable {
         mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
         mLightColor = in.readInt();
         mBlockableSystem = in.readBoolean();
-        mAllowBubbles = in.readBoolean();
+        mAllowBubbles = in.readInt();
         mImportanceLockedByOEM = in.readBoolean();
+        mOriginalImportance = in.readInt();
+        mParentId = in.readString();
+        mConversationId = in.readString();
+        mDemoted = in.readBoolean();
+        mImportantConvo = in.readBoolean();
     }
 
     @Override
@@ -284,13 +332,19 @@ public final class NotificationChannel implements Parcelable {
         }
         dest.writeInt(mLightColor);
         dest.writeBoolean(mBlockableSystem);
-        dest.writeBoolean(mAllowBubbles);
+        dest.writeInt(mAllowBubbles);
         dest.writeBoolean(mImportanceLockedByOEM);
+        dest.writeInt(mOriginalImportance);
+        dest.writeString(mParentId);
+        dest.writeString(mConversationId);
+        dest.writeBoolean(mDemoted);
+        dest.writeBoolean(mImportantConvo);
     }
 
     /**
      * @hide
      */
+    @TestApi
     public void lockFields(int field) {
         mUserLockedFields |= field;
     }
@@ -305,6 +359,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void setFgServiceShown(boolean shown) {
         mFgServiceShown = shown;
     }
@@ -312,21 +367,33 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public void setDeleted(boolean deleted) {
         mDeleted = deleted;
     }
 
     /**
+     * @hide
+     */
+    @TestApi
+    public void setImportantConversation(boolean importantConvo) {
+        mImportantConvo = importantConvo;
+    }
+
+    /**
      * Allows users to block notifications sent through this channel, if this channel belongs to
-     * a package that is signed with the system signature. If the channel does not belong to a
-     * package that is signed with the system signature, this method does nothing.
-     * @param blockableSystem if {@code true}, allows users to block notifications on this channel.
+     * a package that is signed with the system signature.
+     *
+     * If the channel does not belong to a package that is signed with the system signature, this
+     * method does nothing, since such channels are blockable by default and cannot be set to be
+     * unblockable.
+     * @param blockable if {@code true}, allows users to block notifications on this channel.
      * @hide
      */
     @SystemApi
     @TestApi
-    public void setBlockableSystem(boolean blockableSystem) {
-        mBlockableSystem = blockableSystem;
+    public void setBlockable(boolean blockable) {
+        mBlockableSystem = blockable;
     }
     // Modifiable by apps post channel creation
 
@@ -355,6 +422,13 @@ public final class NotificationChannel implements Parcelable {
             return input.substring(0, MAX_TEXT_LENGTH);
         }
         return input;
+    }
+
+    /**
+     * @hide
+     */
+    public void setId(String id) {
+        mId = id;
     }
 
     // Modifiable by apps on channel creation.
@@ -483,19 +557,36 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets whether notifications posted to this channel can appear outside of the notification
-     * shade, floating over other apps' content as a bubble.
-     *
-     * <p>This value will be ignored for channels that aren't allowed to pop on screen (that is,
-     * channels whose {@link #getImportance() importance} is <
-     * {@link NotificationManager#IMPORTANCE_HIGH}.</p>
-     *
-     * <p>Only modifiable before the channel is submitted to
-     *      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.</p>
+     * As of Android 11 this value is no longer respected.
+     * @see #canBubble()
      * @see Notification#getBubbleMetadata()
      */
     public void setAllowBubbles(boolean allowBubbles) {
-        mAllowBubbles = allowBubbles;
+        mAllowBubbles = allowBubbles ? ALLOW_BUBBLE_ON : ALLOW_BUBBLE_OFF;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAllowBubbles(int allowed) {
+        mAllowBubbles = allowed;
+    }
+
+    /**
+     * Sets this channel as being converastion-centric. Different settings and functionality may be
+     * exposed for conversation-centric channels.
+     *
+     * @param parentChannelId The {@link #getId()} id} of the generic channel that notifications of
+     *                        this type would be posted to in absence of a specific conversation id.
+     *                        For example, if this channel represents 'Messages from Person A', the
+     *                        parent channel would be 'Messages.'
+     * @param conversationId The {@link ShortcutInfo#getId()} of the shortcut representing this
+     *                       channel's conversation.
+     */
+    public void setConversationId(@NonNull String parentChannelId,
+            @NonNull String conversationId) {
+        mParentId = parentChannelId;
+        mConversationId = conversationId;
     }
 
     /**
@@ -537,6 +628,18 @@ public final class NotificationChannel implements Parcelable {
      */
     public boolean canBypassDnd() {
         return mBypassDnd;
+    }
+
+    /**
+     * Whether or not notifications in this conversation are considered important.
+     *
+     * <p>Important conversations may get special visual treatment, and might be able to bypass DND.
+     *
+     * <p>This is only valid for channels that represent conversations, that is, those with a valid
+     * {@link #getConversationId() conversation id}.
+     */
+    public boolean isImportantConversation() {
+        return mImportantConvo;
     }
 
     /**
@@ -611,11 +714,36 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Returns whether notifications posted to this channel can display outside of the notification
-     * shade, in a floating window on top of other apps.
+     * Returns whether notifications posted to this channel are allowed to display outside of the
+     * notification shade, in a floating window on top of other apps.
+     *
+     * @see Notification#getBubbleMetadata()
      */
     public boolean canBubble() {
+        return mAllowBubbles == ALLOW_BUBBLE_ON;
+    }
+
+    /**
+     * @hide
+     */
+    public int getAllowBubbles() {
         return mAllowBubbles;
+    }
+
+    /**
+     * Returns the {@link #getId() id} of the parent notification channel to this channel, if it's
+     * a conversation related channel. See {@link #setConversationId(String, String)}.
+     */
+    public @Nullable String getParentChannelId() {
+        return mParentId;
+    }
+
+    /**
+     * Returns the {@link ShortcutInfo#getId() id} of the conversation backing this channel, if it's
+     * associated with a conversation. See {@link #setConversationId(String, String)}.
+     */
+    public @Nullable String getConversationId() {
+        return mConversationId;
     }
 
     /**
@@ -645,7 +773,7 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @TestApi
-    public boolean isBlockableSystem() {
+    public boolean isBlockable() {
         return mBlockableSystem;
     }
 
@@ -682,12 +810,50 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    @TestApi
+    public int getOriginalImportance() {
+        return mOriginalImportance;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setOriginalImportance(int importance) {
+        mOriginalImportance = importance;
+    }
+
+    /**
+     * @hide
+     */
+    public void setDemoted(boolean demoted) {
+        mDemoted = demoted;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isDemoted() {
+        return mDemoted;
+    }
+
+    /**
      * Returns whether the user has chosen the importance of this channel, either to affirm the
      * initial selection from the app, or changed it to be higher or lower.
      * @see #getImportance()
      */
     public boolean hasUserSetImportance() {
         return (mUserLockedFields & USER_LOCKED_IMPORTANCE) != 0;
+    }
+
+    /**
+     * Returns whether the user has chosen the sound of this channel.
+     * @see #getSound()
+     */
+    public boolean hasUserSetSound() {
+        return (mUserLockedFields & USER_LOCKED_SOUND) != 0;
     }
 
     /**
@@ -731,8 +897,13 @@ public final class NotificationChannel implements Parcelable {
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
-        setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
-        setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
+        setBlockable(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
+        setAllowBubbles(safeInt(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
+        setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
+        setConversationId(parser.getAttributeValue(null, ATT_PARENT_CHANNEL),
+                parser.getAttributeValue(null, ATT_CONVERSATION_ID));
+        setDemoted(safeBool(parser, ATT_DEMOTE, false));
+        setImportantConversation(safeBool(parser, ATT_IMP_CONVERSATION, false));
     }
 
     @Nullable
@@ -848,11 +1019,26 @@ public final class NotificationChannel implements Parcelable {
         if (getGroup() != null) {
             out.attribute(null, ATT_GROUP, getGroup());
         }
-        if (isBlockableSystem()) {
-            out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockableSystem()));
+        if (isBlockable()) {
+            out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockable()));
         }
-        if (canBubble() != DEFAULT_ALLOW_BUBBLE) {
-            out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(canBubble()));
+        if (getAllowBubbles() != DEFAULT_ALLOW_BUBBLE) {
+            out.attribute(null, ATT_ALLOW_BUBBLE, Integer.toString(getAllowBubbles()));
+        }
+        if (getOriginalImportance() != DEFAULT_IMPORTANCE) {
+            out.attribute(null, ATT_ORIG_IMP, Integer.toString(getOriginalImportance()));
+        }
+        if (getParentChannelId() != null) {
+            out.attribute(null, ATT_PARENT_CHANNEL, getParentChannelId());
+        }
+        if (getConversationId() != null) {
+            out.attribute(null, ATT_CONVERSATION_ID, getConversationId());
+        }
+        if (isDemoted()) {
+            out.attribute(null, ATT_DEMOTE, Boolean.toString(isDemoted()));
+        }
+        if (isImportantConversation()) {
+            out.attribute(null, ATT_IMP_CONVERSATION, Boolean.toString(isImportantConversation()));
         }
 
         // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
@@ -898,8 +1084,9 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
-        record.put(ATT_BLOCKABLE_SYSTEM, isBlockableSystem());
-        record.put(ATT_ALLOW_BUBBLE, canBubble());
+        record.put(ATT_BLOCKABLE_SYSTEM, isBlockable());
+        record.put(ATT_ALLOW_BUBBLE, getAllowBubbles());
+        // TODO: original importance
         return record;
     }
 
@@ -999,7 +1186,7 @@ public final class NotificationChannel implements Parcelable {
                 && mVibrationEnabled == that.mVibrationEnabled
                 && mShowBadge == that.mShowBadge
                 && isDeleted() == that.isDeleted()
-                && isBlockableSystem() == that.isBlockableSystem()
+                && isBlockable() == that.isBlockable()
                 && mAllowBubbles == that.mAllowBubbles
                 && Objects.equals(getId(), that.getId())
                 && Objects.equals(getName(), that.getName())
@@ -1009,7 +1196,12 @@ public final class NotificationChannel implements Parcelable {
                 && Objects.equals(getGroup(), that.getGroup())
                 && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
                 && mImportanceLockedByOEM == that.mImportanceLockedByOEM
-                && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp;
+                && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp
+                && mOriginalImportance == that.mOriginalImportance
+                && Objects.equals(getParentChannelId(), that.getParentChannelId())
+                && Objects.equals(getConversationId(), that.getConversationId())
+                && isDemoted() == that.isDemoted()
+                && isImportantConversation() == that.isImportantConversation();
     }
 
     @Override
@@ -1018,8 +1210,9 @@ public final class NotificationChannel implements Parcelable {
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
-                getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
-                mImportanceLockedByOEM, mImportanceLockedDefaultApp);
+                getAudioAttributes(), isBlockable(), mAllowBubbles,
+                mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
+                mParentId, mConversationId, mDemoted, mImportantConvo);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
     }
@@ -1030,25 +1223,7 @@ public final class NotificationChannel implements Parcelable {
         String output = "NotificationChannel{"
                 + "mId='" + mId + '\''
                 + ", mName=" + redactedName
-                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
-                + ", mImportance=" + mImportance
-                + ", mBypassDnd=" + mBypassDnd
-                + ", mLockscreenVisibility=" + mLockscreenVisibility
-                + ", mSound=" + mSound
-                + ", mLights=" + mLights
-                + ", mLightColor=" + mLightColor
-                + ", mVibration=" + Arrays.toString(mVibration)
-                + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
-                + ", mFgServiceShown=" + mFgServiceShown
-                + ", mVibrationEnabled=" + mVibrationEnabled
-                + ", mShowBadge=" + mShowBadge
-                + ", mDeleted=" + mDeleted
-                + ", mGroup='" + mGroup + '\''
-                + ", mAudioAttributes=" + mAudioAttributes
-                + ", mBlockableSystem=" + mBlockableSystem
-                + ", mAllowBubbles=" + mAllowBubbles
-                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
-                + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
+                + getFieldsString()
                 + '}';
         pw.println(prefix + output);
     }
@@ -1058,7 +1233,12 @@ public final class NotificationChannel implements Parcelable {
         return "NotificationChannel{"
                 + "mId='" + mId + '\''
                 + ", mName=" + mName
-                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
+                + getFieldsString()
+                + '}';
+    }
+
+    private String getFieldsString() {
+        return  ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
                 + ", mImportance=" + mImportance
                 + ", mBypassDnd=" + mBypassDnd
                 + ", mLockscreenVisibility=" + mLockscreenVisibility
@@ -1077,11 +1257,15 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAllowBubbles=" + mAllowBubbles
                 + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
-                + '}';
+                + ", mOriginalImp=" + mOriginalImportance
+                + ", mParent=" + mParentId
+                + ", mConversationId=" + mConversationId
+                + ", mDemoted=" + mDemoted
+                + ", mImportantConvo=" + mImportantConvo;
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(NotificationChannelProto.ID, mId);
@@ -1107,7 +1291,7 @@ public final class NotificationChannel implements Parcelable {
         proto.write(NotificationChannelProto.IS_DELETED, mDeleted);
         proto.write(NotificationChannelProto.GROUP, mGroup);
         if (mAudioAttributes != null) {
-            mAudioAttributes.writeToProto(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
+            mAudioAttributes.dumpDebug(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
         }
         proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
         proto.write(NotificationChannelProto.ALLOW_APP_OVERLAY, mAllowBubbles);

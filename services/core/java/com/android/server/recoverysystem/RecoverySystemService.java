@@ -17,23 +17,32 @@
 package com.android.server.recoverysystem;
 
 import android.content.Context;
+import android.content.IntentSender;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.Binder;
 import android.os.IRecoverySystem;
 import android.os.IRecoverySystemProgressListener;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.RebootEscrowListener;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +54,7 @@ import java.nio.charset.StandardCharsets;
  * triggers /system/bin/uncrypt via init to de-encrypt an OTA package on the
  * /data partition so that it can be accessed under the recovery image.
  */
-public class RecoverySystemService extends IRecoverySystem.Stub {
+public class RecoverySystemService extends IRecoverySystem.Stub implements RebootEscrowListener {
     private static final String TAG = "RecoverySystemService";
     private static final boolean DEBUG = false;
 
@@ -67,6 +76,10 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
     private final Injector mInjector;
     private final Context mContext;
 
+    private boolean mPreparedForReboot;
+    private String mUnattendedRebootToken;
+    private IntentSender mPreparedForRebootIntentSender;
+
     static class Injector {
         protected final Context mContext;
 
@@ -76,6 +89,10 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
 
         public Context getContext() {
             return mContext;
+        }
+
+        public LockSettingsInternal getLockSettingsService() {
+            return LocalServices.getService(LockSettingsInternal.class);
         }
 
         public PowerManager getPowerManager() {
@@ -120,14 +137,23 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
      * Handles the lifecycle events for the RecoverySystemService.
      */
     public static final class Lifecycle extends SystemService {
+        private RecoverySystemService mRecoverySystemService;
+
         public Lifecycle(Context context) {
             super(context);
         }
 
         @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+                mRecoverySystemService.onSystemServicesReady();
+            }
+        }
+
+        @Override
         public void onStart() {
-            RecoverySystemService recoverySystemService = new RecoverySystemService(getContext());
-            publishBinderService(Context.RECOVERY_SERVICE, recoverySystemService);
+            mRecoverySystemService = new RecoverySystemService(getContext());
+            publishBinderService(Context.RECOVERY_SERVICE, mRecoverySystemService);
         }
     }
 
@@ -139,6 +165,11 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
     RecoverySystemService(Injector injector) {
         mInjector = injector;
         mContext = injector.getContext();
+    }
+
+    @VisibleForTesting
+    void onSystemServicesReady() {
+        mInjector.getLockSettingsService().setRebootEscrowListener(this);
     }
 
     @Override // Binder call
@@ -253,6 +284,98 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
             PowerManager pm = mInjector.getPowerManager();
             pm.reboot(PowerManager.REBOOT_RECOVERY);
         }
+    }
+
+    @Override // Binder call
+    public boolean requestLskf(String updateToken, IntentSender intentSender) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+
+        if (updateToken == null) {
+            return false;
+        }
+
+        // No need to prepare again for the same token.
+        if (mPreparedForReboot && updateToken.equals(mUnattendedRebootToken)) {
+            return true;
+        }
+
+        mPreparedForReboot = false;
+        mUnattendedRebootToken = updateToken;
+        mPreparedForRebootIntentSender = intentSender;
+
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            mInjector.getLockSettingsService().prepareRebootEscrow();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onPreparedForReboot(boolean ready) {
+        if (mUnattendedRebootToken == null) {
+            Slog.w(TAG, "onPreparedForReboot called when mUnattendedRebootToken is null");
+        }
+
+        mPreparedForReboot = ready;
+        if (ready) {
+            sendPreparedForRebootIntentIfNeeded();
+        }
+    }
+
+    private void sendPreparedForRebootIntentIfNeeded() {
+        final IntentSender intentSender = mPreparedForRebootIntentSender;
+        if (intentSender != null) {
+            try {
+                intentSender.sendIntent(null, 0, null, null, null);
+            } catch (IntentSender.SendIntentException e) {
+                Slog.w(TAG, "Could not send intent for prepared reboot: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override // Binder call
+    public boolean clearLskf() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+
+        mPreparedForReboot = false;
+        mUnattendedRebootToken = null;
+        mPreparedForRebootIntentSender = null;
+
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            mInjector.getLockSettingsService().clearRebootEscrow();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+
+        return true;
+    }
+
+    @Override // Binder call
+    public boolean rebootWithLskf(String updateToken, String reason) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+
+        if (!mPreparedForReboot) {
+            Slog.i(TAG, "Reboot requested before prepare completed");
+            return false;
+        }
+
+        if (updateToken != null && !updateToken.equals(mUnattendedRebootToken)) {
+            Slog.i(TAG, "Reboot requested after preparation, but with mismatching token");
+            return false;
+        }
+
+        if (!mInjector.getLockSettingsService().armRebootEscrow()) {
+            Slog.w(TAG, "Failure to escrow key for reboot");
+            return false;
+        }
+
+        PowerManager pm = mInjector.getPowerManager();
+        pm.reboot(reason);
+        return true;
     }
 
     /**
@@ -432,6 +555,30 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
             IoUtils.closeQuietly(mInputStream);
             IoUtils.closeQuietly(mOutputStream);
             IoUtils.closeQuietly(mLocalSocket);
+        }
+    }
+
+    private boolean isCallerShell() {
+        final int callingUid = Binder.getCallingUid();
+        return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
+    }
+
+    private void enforceShell() {
+        if (!isCallerShell()) {
+            throw new SecurityException("Caller must be shell");
+        }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        enforceShell();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            new RecoverySystemShellCommand(this).exec(
+                    this, in, out, err, args, callback, resultReceiver);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 }

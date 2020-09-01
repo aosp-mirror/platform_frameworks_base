@@ -78,6 +78,7 @@ public class KeyInfo implements KeySpec {
     private final @KeyProperties.BlockModeEnum String[] mBlockModes;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
+    private final @KeyProperties.AuthEnum int mUserAuthenticationType;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mTrustedUserPresenceRequired;
@@ -101,6 +102,7 @@ public class KeyInfo implements KeySpec {
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
+            @KeyProperties.AuthEnum int userAuthenticationType,
             boolean userAuthenticationRequirementEnforcedBySecureHardware,
             boolean userAuthenticationValidWhileOnBody,
             boolean trustedUserPresenceRequired,
@@ -122,6 +124,7 @@ public class KeyInfo implements KeySpec {
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mUserAuthenticationType = userAuthenticationType;
         mUserAuthenticationRequirementEnforcedBySecureHardware =
                 userAuthenticationRequirementEnforcedBySecureHardware;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
@@ -298,6 +301,22 @@ public class KeyInfo implements KeySpec {
      */
     public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
+    }
+
+    /**
+     * Gets the acceptable user authentication types for which this key can be authorized to be
+     * used. This has effect only if user authentication is required (see
+     * {@link #isUserAuthenticationRequired()}).
+     *
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
+     *
+     * @return integer representing the accepted forms of user authentication for this key
+     *
+     * @see #isUserAuthenticationRequired()
+     */
+    public @KeyProperties.AuthEnum int getUserAuthenticationType() {
+        return mUserAuthenticationType;
     }
 
     /**

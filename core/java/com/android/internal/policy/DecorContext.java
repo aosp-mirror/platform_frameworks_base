@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.view.ContextThemeWrapper;
-import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.view.contentcapture.ContentCaptureManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -31,8 +29,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.ref.WeakReference;
 
 /**
- * Context for decor views which can be seeded with pure application context and not depend on the
- * activity, but still provide some of the facilities that Activity has,
+ * Context for decor views which can be seeded with display context and not depend on the activity,
+ * but still provide some of the facilities that Activity has,
  * e.g. themes, activity-based resources, etc.
  *
  * @hide
@@ -40,79 +38,93 @@ import java.lang.ref.WeakReference;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class DecorContext extends ContextThemeWrapper {
     private PhoneWindow mPhoneWindow;
-    private WindowManager mWindowManager;
-    private Resources mActivityResources;
+    private Resources mResources;
     private ContentCaptureManager mContentCaptureManager;
 
-    private WeakReference<Context> mActivityContext;
+    private WeakReference<Context> mContext;
 
     @VisibleForTesting
-    public DecorContext(Context context, Context activityContext) {
-        super(context.createDisplayContext(activityContext.getDisplay()), null);
-        mActivityContext = new WeakReference<>(activityContext);
-        mActivityResources = activityContext.getResources();
+    public DecorContext(Context baseContext, PhoneWindow phoneWindow) {
+        super(null /* base */, null);
+        setPhoneWindow(phoneWindow);
+        final Context displayContext = baseContext.createDisplayContext(
+                // TODO(b/149790106): Non-activity context can be passed.
+                phoneWindow.getContext().getDisplayNoVerify());
+        attachBaseContext(displayContext);
     }
 
     void setPhoneWindow(PhoneWindow phoneWindow) {
         mPhoneWindow = phoneWindow;
-        mWindowManager = null;
+        final Context context = phoneWindow.getContext();
+        mContext = new WeakReference<>(context);
+        mResources = context.getResources();
     }
 
     @Override
     public Object getSystemService(String name) {
         if (Context.WINDOW_SERVICE.equals(name)) {
-            if (mWindowManager == null) {
-                WindowManagerImpl wm =
-                        (WindowManagerImpl) super.getSystemService(Context.WINDOW_SERVICE);
-                mWindowManager = wm.createLocalWindowManager(mPhoneWindow);
-            }
-            return mWindowManager;
+            return mPhoneWindow.getWindowManager();
         }
+        final Context context = mContext.get();
         if (Context.CONTENT_CAPTURE_MANAGER_SERVICE.equals(name)) {
-            if (mContentCaptureManager == null) {
-                Context activityContext = mActivityContext.get();
-                if (activityContext != null) {
-                    mContentCaptureManager = (ContentCaptureManager) activityContext
-                            .getSystemService(name);
-                }
+            if (context != null && mContentCaptureManager == null) {
+                mContentCaptureManager = (ContentCaptureManager) context.getSystemService(name);
             }
             return mContentCaptureManager;
         }
-        return super.getSystemService(name);
+        // TODO(b/154191411): Try to revisit this issue in S.
+        // We use application to get DisplayManager here because ViewRootImpl holds reference of
+        // DisplayManager and implicitly holds reference of mContext, which makes activity cannot
+        // be GC'd even after destroyed if mContext is an activity object.
+        if (Context.DISPLAY_SERVICE.equals(name)) {
+            return super.getSystemService(name);
+        }
+        // LayoutInflater and WallpaperManagerService should also be obtained from visual context
+        // instead of base context.
+        return (context != null) ? context.getSystemService(name) : super.getSystemService(name);
     }
 
     @Override
     public Resources getResources() {
-        Context activityContext = mActivityContext.get();
+        Context context = mContext.get();
         // Attempt to update the local cached Resources from the activity context. If the activity
         // is no longer around, return the old cached values.
-        if (activityContext != null) {
-            mActivityResources = activityContext.getResources();
+        if (context != null) {
+            mResources = context.getResources();
         }
 
-        return mActivityResources;
+        return mResources;
     }
 
     @Override
     public AssetManager getAssets() {
-        return mActivityResources.getAssets();
+        return mResources.getAssets();
     }
 
     @Override
     public AutofillOptions getAutofillOptions() {
-        Context activityContext = mActivityContext.get();
-        if (activityContext != null) {
-            return activityContext.getAutofillOptions();
+        Context context = mContext.get();
+        if (context != null) {
+            return context.getAutofillOptions();
         }
         return null;
     }
 
     @Override
     public ContentCaptureOptions getContentCaptureOptions() {
-        Context activityContext = mActivityContext.get();
-        if (activityContext != null) {
-            return activityContext.getContentCaptureOptions();
+        Context context = mContext.get();
+        if (context != null) {
+            return context.getContentCaptureOptions();
         }
         return null;
+    }
+
+    @Override
+    public boolean isUiContext() {
+        Context context = mContext.get();
+        if (context != null) {
+            return context.isUiContext();
+        }
+        return false;
     }
 }

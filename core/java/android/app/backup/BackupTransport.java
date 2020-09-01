@@ -85,6 +85,15 @@ public class BackupTransport {
     public static final int FLAG_NON_INCREMENTAL = 1 << 2;
 
     /**
+     * For key value backup, indicates that the backup contains no new data since the last backup
+     * attempt completed without any errors. The transport should use this to record that
+     * a successful backup attempt has been completed but no backup data has been changed.
+     *
+     * @see #performBackup(PackageInfo, ParcelFileDescriptor, int)
+     */
+    public static final int FLAG_DATA_NOT_CHANGED = 1 << 3;
+
+    /**
      * Used as a boolean extra in the binding intent of transports. We pass {@code true} to
      * notify transports that the current connection is used for registering the transport.
      */
@@ -302,7 +311,8 @@ public class BackupTransport {
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
      * @param flags a combination of {@link BackupTransport#FLAG_USER_INITIATED}, {@link
-     *   BackupTransport#FLAG_NON_INCREMENTAL}, {@link BackupTransport#FLAG_INCREMENTAL}, or 0.
+     *   BackupTransport#FLAG_NON_INCREMENTAL}, {@link BackupTransport#FLAG_INCREMENTAL},
+     *   {@link BackupTransport#FLAG_DATA_NOT_CHANGED},or 0.
      * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
      *  {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED} (to suppress backup of this
      *  specific package, but allow others to proceed),

@@ -98,8 +98,10 @@ public class MediaProjectionPermissionActivity extends Activity
         paint.setTextSize(42);
 
         CharSequence dialogText = null;
+        CharSequence dialogTitle = null;
         if (Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName)) {
             dialogText = getString(R.string.media_projection_dialog_service_text);
+            dialogTitle = getString(R.string.media_projection_dialog_service_title);
         } else {
             String label = aInfo.loadLabel(packageManager).toString();
 
@@ -138,9 +140,8 @@ public class MediaProjectionPermissionActivity extends Activity
                         appNameIndex, appNameIndex + appName.length(), 0);
             }
             dialogText = message;
+            dialogTitle = getString(R.string.media_projection_dialog_title, appName);
         }
-
-        String dialogTitle = getString(R.string.media_projection_dialog_title);
 
         View dialogTitleView = View.inflate(this, R.layout.media_projection_dialog_title, null);
         TextView titleText = (TextView) dialogTitleView.findViewById(R.id.dialog_title);

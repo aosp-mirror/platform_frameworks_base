@@ -11,8 +11,8 @@ LOCAL_SHARED_LIBRARIES := \
     libnativehelper \
     libRS \
     libcutils \
-    liblog \
     libhwui \
+    liblog \
     libutils \
     libui \
     libgui \

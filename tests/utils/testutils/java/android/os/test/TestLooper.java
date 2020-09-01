@@ -48,6 +48,8 @@ public class TestLooper {
     private static final Method MESSAGE_MARK_IN_USE_METHOD;
     private static final String TAG = "TestLooper";
 
+    private final Clock mClock;
+
     private AutoDispatchThread mAutoDispatchThread;
 
     static {
@@ -69,8 +71,25 @@ public class TestLooper {
         }
     }
 
-
+    /**
+     * Creates a TestLooper and installs it as the looper for the current thread.
+     */
     public TestLooper() {
+        this(SystemClock::uptimeMillis);
+    }
+
+    /**
+     * Creates a TestLooper with a custom clock and installs it as the looper for the current
+     * thread.
+     *
+     * Messages are dispatched when their {@link Message#when} is before or at {@link
+     * Clock#uptimeMillis()}.
+     * Use a custom clock with care. When using an offsettable clock like {@link
+     * com.android.server.testutils.OffsettableClock} be sure not to double offset messages by
+     * offsetting the clock and calling {@link #moveTimeForward(long)}. Instead, offset the clock
+     * and call {@link #dispatchAll()}.
+     */
+    public TestLooper(Clock clock) {
         try {
             mLooper = LOOPER_CONSTRUCTOR.newInstance(false);
 
@@ -80,6 +99,8 @@ public class TestLooper {
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             throw new RuntimeException("Reflection error constructing or accessing looper", e);
         }
+
+        mClock = clock;
     }
 
     public Looper getLooper() {
@@ -116,9 +137,13 @@ public class TestLooper {
         }
     }
 
+    private long currentTime() {
+        return mClock.uptimeMillis();
+    }
+
     private Message messageQueueNext() {
         try {
-            long now = SystemClock.uptimeMillis();
+            long now = currentTime();
 
             Message prevMsg = null;
             Message msg = getMessageLinkedList();
@@ -157,7 +182,7 @@ public class TestLooper {
     public synchronized boolean isIdle() {
         Message messageList = getMessageLinkedList();
 
-        return messageList != null && SystemClock.uptimeMillis() >= messageList.getWhen();
+        return messageList != null && currentTime() >= messageList.getWhen();
     }
 
     /**
@@ -187,6 +212,7 @@ public class TestLooper {
     /**
      * Dispatch all messages currently in the queue
      * Will not fail if there are no messages pending
+     *
      * @return the number of messages dispatched
      */
     public synchronized int dispatchAll() {
@@ -196,6 +222,10 @@ public class TestLooper {
             ++count;
         }
         return count;
+    }
+
+    public interface Clock {
+        long uptimeMillis();
     }
 
     /**
@@ -210,33 +240,36 @@ public class TestLooper {
         /**
          * Run method for the auto dispatch thread.
          * The thread loops a maximum of MAX_LOOPS times with a 10ms sleep between loops.
-         * The thread continues looping and attempting to dispatch all messages until at
-         * least one message has been dispatched.
+         * The thread continues looping and attempting to dispatch all messages until
+         * {@link #stopAutoDispatch()} has been invoked.
          */
         @Override
         public void run() {
             int dispatchCount = 0;
             for (int i = 0; i < MAX_LOOPS; i++) {
                 try {
-                    dispatchCount = dispatchAll();
+                    dispatchCount += dispatchAll();
                 } catch (RuntimeException e) {
                     mAutoDispatchException = e;
-                }
-                Log.d(TAG, "dispatched " + dispatchCount + " messages");
-                if (dispatchCount > 0) {
                     return;
                 }
+                Log.d(TAG, "dispatched " + dispatchCount + " messages");
                 try {
                     Thread.sleep(LOOP_SLEEP_TIME_MS);
                 } catch (InterruptedException e) {
-                    mAutoDispatchException = new IllegalStateException(
-                            "stopAutoDispatch called before any messages were dispatched.");
+                    if (dispatchCount == 0) {
+                        Log.e(TAG, "stopAutoDispatch called before any messages were dispatched.");
+                        mAutoDispatchException = new IllegalStateException(
+                                "stopAutoDispatch called before any messages were dispatched.");
+                    }
                     return;
                 }
             }
-            Log.e(TAG, "AutoDispatchThread did not dispatch any messages.");
-            mAutoDispatchException = new IllegalStateException(
-                    "TestLooper did not dispatch any messages before exiting.");
+            if (dispatchCount == 0) {
+                Log.e(TAG, "AutoDispatchThread did not dispatch any messages.");
+                mAutoDispatchException = new IllegalStateException(
+                        "TestLooper did not dispatch any messages before exiting.");
+            }
         }
 
         /**
@@ -286,5 +319,18 @@ public class TestLooper {
             throw new IllegalStateException(
                     "stopAutoDispatch called without startAutoDispatch.");
         }
+    }
+
+    /**
+     * If an AutoDispatchThread is currently running, stop and clean up.
+     * This method ignores exceptions raised for indicating that no messages were dispatched.
+     */
+    public void stopAutoDispatchAndIgnoreExceptions() {
+        try {
+            stopAutoDispatch();
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "stopAutoDispatch", e);
+        }
+
     }
 }

@@ -75,8 +75,16 @@ message SecureSettingsProto {
         // Settings for accessibility timeout
         optional SettingProto non_interactive_ui_timeout_ms = 32 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto interactive_ui_timeout_ms = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Settings for magnification mode
+        optional SettingProto accessibility_magnification_mode = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto button_targets = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
+
+    message AdaptiveSleep {
+        optional SettingProto enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional AdaptiveSleep adaptive_sleep = 78;
 
     // Origins for which browsers should allow geolocation by default.
     // The value is a space-separated list of origins.
@@ -172,6 +180,14 @@ message SecureSettingsProto {
     optional SettingProto cmas_additional_broadcast_pkg = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     repeated SettingProto completed_categories = 15;
     optional SettingProto connectivity_release_pending_intent_delay_ms = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Controls {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Controls controls = 79;
+
     optional SettingProto device_paired = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto dialer_default_application = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto display_density_forced = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -186,6 +202,7 @@ message SecureSettingsProto {
         optional SettingProto pulse_on_long_press = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto pulse_on_double_tap = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto pulse_on_tap = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto suppress = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Doze doze = 21;
 
@@ -218,6 +235,12 @@ message SecureSettingsProto {
             DEST_AUTOMATIC ];
     }
     optional Gesture gesture = 74;
+
+    message GestureNavigation {
+        optional SettingProto back_gesture_inset_scale_left = 1 [(android.privacy).dest = DEST_AUTOMATIC];
+        optional SettingProto back_gesture_inset_scale_right = 2 [(android.privacy).dest = DEST_AUTOMATIC];
+    }
+    optional GestureNavigation gesture_navigation = 77;
 
     optional SettingProto immersive_mode_confirmations = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -264,9 +287,7 @@ message SecureSettingsProto {
         // The App or module that changes the location mode.
         optional SettingProto changer = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-        // What should happen to the location permissions when upgraded to Android Q.
-        // 0 == revoke permissions. Anything else == do nothing.
-        optional SettingProto permissions_upgrade_to_q_mode = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 3; // used to be used for permissions_upgrade_to_q_mode
     }
     optional Location location = 31;
 
@@ -318,6 +339,7 @@ message SecureSettingsProto {
     optional SettingProto multi_press_timeout = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     optional SettingProto navigation_mode = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     message NfcPayment {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -374,6 +396,13 @@ message SecureSettingsProto {
         optional SettingProto redirect_url = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional ParentalControl parental_control = 43;
+
+    message PowerMenuPrivacy {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto show = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional PowerMenuPrivacy power_menu_privacy = 81;
 
     message PrintService {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -566,5 +595,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 77;
+    // Next tag = 82;
 }

@@ -23,12 +23,14 @@
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
+#include "hwui/Paint.h"
 #include "SkiaCanvas.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 #include "pipeline/skia/SkiaUtils.h"
 #include "renderthread/CanvasContext.h"
+#include "tests/common/TestContext.h"
 #include "tests/common/TestUtils.h"
 
 #include <gui/BufferItemConsumer.h>
@@ -59,43 +61,10 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
-    auto redNode = TestUtils::createSkiaNode(
-            0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
-                redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
-            });
-
-    LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRectMakeLargest();
-    std::vector<sp<RenderNode>> renderNodes;
-    renderNodes.push_back(redNode);
-    bool opaque = true;
-    android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
-    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    {
-        // add a pointer to a deleted vector drawable object in the pipeline
-        sp<VectorDrawableRoot> dirtyVD(new VectorDrawableRoot(new VectorDrawable::Group()));
-        dirtyVD->mutateProperties()->setScaledSize(5, 5);
-        pipeline->getVectorDrawables()->push_back(dirtyVD.get());
-    }
-
-    // pipeline should clean list of dirty vector drawables before prepare tree
-    pipeline->onPrepareTree();
-
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
-    surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-
-    // drawFrame will crash if "SkiaPipeline::onPrepareTree" did not clean invalid VD pointer
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
-            SkMatrix::I());
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
-}
-
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto halfGreenNode = TestUtils::createSkiaNode(
             0, 0, 2, 2, [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
-                SkPaint greenPaint;
+                Paint greenPaint;
                 greenPaint.setColor(SK_ColorGREEN);
                 greenPaint.setStyle(SkPaint::kFill_Style);
                 bottomHalfGreenCanvas.drawRect(0, 1, 2, 2, greenPaint);
@@ -293,7 +262,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
     };
 
     std::vector<sp<RenderNode>> nodes;
-    SkPaint transparentPaint;
+    Paint transparentPaint;
     transparentPaint.setAlpha(128);
 
     // backdrop
@@ -424,21 +393,50 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
 
-static sp<Surface> createDummySurface() {
-    sp<IGraphicBufferProducer> producer;
-    sp<IGraphicBufferConsumer> consumer;
-    BufferQueue::createBufferQueue(&producer, &consumer);
-    producer->setMaxDequeuedBufferCount(1);
-    producer->setAsyncMode(true);
-    return new Surface(producer);
-}
-
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
-    auto surface = createDummySurface();
+    test::TestContext context;
+    auto surface = context.surface();
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     EXPECT_FALSE(pipeline->isSurfaceReady());
-    EXPECT_TRUE(pipeline->setSurface(surface.get(), SwapBehavior::kSwap_default, ColorMode::SRGB, 0));
+    EXPECT_TRUE(pipeline->setSurface(surface.get(), SwapBehavior::kSwap_default));
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
+}
+
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {
+    // create a pipeline and add a picture callback
+    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
+    int callbackCount = 0;
+    pipeline->setPictureCapturedCallback(
+            [&callbackCount](sk_sp<SkPicture>&& picture) { callbackCount += 1; });
+
+    // create basic red frame and render it
+    auto redNode = TestUtils::createSkiaNode(
+            0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
+                redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
+            });
+    LayerUpdateQueue layerUpdateQueue;
+    SkRect dirty = SkRectMakeLargest();
+    std::vector<sp<RenderNode>> renderNodes;
+    renderNodes.push_back(redNode);
+    bool opaque = true;
+    android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
+    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+                          SkMatrix::I());
+
+    // verify the callback was called
+    EXPECT_EQ(1, callbackCount);
+
+    // render a second frame and check the callback count
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+                          SkMatrix::I());
+    EXPECT_EQ(2, callbackCount);
+
+    // unset the callback, render another frame, check callback was not invoked
+    pipeline->setPictureCapturedCallback(nullptr);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+                          SkMatrix::I());
+    EXPECT_EQ(2, callbackCount);
 }

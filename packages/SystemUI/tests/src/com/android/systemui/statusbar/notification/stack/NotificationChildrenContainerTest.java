@@ -25,8 +25,8 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -44,8 +44,11 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        allowTestableLooperAsMainThread();
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         mGroup = mNotificationTestHelper.createGroup();
         mChildrenContainer = mGroup.getChildrenContainer();
     }
@@ -143,7 +146,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testRecreateNotificationHeader_hasHeader() {
-        mChildrenContainer.recreateNotificationHeader(null);
+        mChildrenContainer.recreateNotificationHeader(null, false);
         Assert.assertNotNull("Children container must have a header after recreation",
                 mChildrenContainer.getCurrentHeaderView());
     }

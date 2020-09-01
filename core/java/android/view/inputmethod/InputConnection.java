@@ -158,7 +158,11 @@ public interface InputConnection {
      * trigger an IPC round-trip that will take some time. Assume this
      * method consumes a lot of time. Also, please keep in mind the
      * Editor may choose to return less characters than requested even
-     * if they are available for performance reasons.</p>
+     * if they are available for performance reasons. If you are using
+     * this to get the initial text around the cursor, you may consider
+     * using {@link EditorInfo#getInitialTextBeforeCursor(int, int)},
+     * {@link EditorInfo#getInitialSelectedText(int)}, and
+     * {@link EditorInfo#getInitialTextAfterCursor(int, int)} to prevent IPC costs.</p>
      *
      * <p><strong>Editor authors:</strong> please be careful of race
      * conditions in implementing this call. An IME can make a change
@@ -196,7 +200,11 @@ public interface InputConnection {
      *
      * <p><strong>IME authors:</strong> please consider this will
      * trigger an IPC round-trip that will take some time. Assume this
-     * method consumes a lot of time.</p>
+     * method consumes a lot of time. If you are using this to get the
+     * initial text around the cursor, you may consider using
+     * {@link EditorInfo#getInitialTextBeforeCursor(int, int)},
+     * {@link EditorInfo#getInitialSelectedText(int)}, and
+     * {@link EditorInfo#getInitialTextAfterCursor(int, int)} to prevent IPC costs.</p>
      *
      * <p><strong>Editor authors:</strong> please be careful of race
      * conditions in implementing this call. An IME can make a change
@@ -234,7 +242,11 @@ public interface InputConnection {
      *
      * <p><strong>IME authors:</strong> please consider this will
      * trigger an IPC round-trip that will take some time. Assume this
-     * method consumes a lot of time.</p>
+     * method consumes a lot of time. If you are using this to get the
+     * initial text around the cursor, you may consider using
+     * {@link EditorInfo#getInitialTextBeforeCursor(int, int)},
+     * {@link EditorInfo#getInitialSelectedText(int)}, and
+     * {@link EditorInfo#getInitialTextAfterCursor(int, int)} to prevent IPC costs.</p>
      *
      * <p><strong>Editor authors:</strong> please be careful of race
      * conditions in implementing this call. An IME can make a change

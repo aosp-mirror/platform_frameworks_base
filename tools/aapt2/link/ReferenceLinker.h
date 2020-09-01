@@ -39,13 +39,16 @@ class ReferenceLinker : public IResourceTableConsumer {
   // package if the reference has no package name defined (implicit).
   // Returns nullptr if the symbol was not found.
   static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference,
-                                                  const CallSite& callsite, SymbolTable* symbols);
+                                                  const CallSite& callsite,
+                                                  IAaptContext* context,
+                                                  SymbolTable* symbols);
 
   // Performs name mangling and looks up the resource in the symbol table. If the symbol is not
   // visible by the reference at the callsite, nullptr is returned.
   // `out_error` holds the error message.
   static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(const Reference& reference,
                                                                  const CallSite& callsite,
+                                                                 IAaptContext* context,
                                                                  SymbolTable* symbols,
                                                                  std::string* out_error);
 
@@ -53,6 +56,7 @@ class ReferenceLinker : public IResourceTableConsumer {
   // That is, the return value will have a non-null value for ISymbolTable::Symbol::attribute.
   static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(const Reference& reference,
                                                                     const CallSite& callsite,
+                                                                    IAaptContext* context,
                                                                     SymbolTable* symbols,
                                                                     std::string* out_error);
 
@@ -60,6 +64,7 @@ class ReferenceLinker : public IResourceTableConsumer {
   // If resolution fails, outError holds the error message.
   static Maybe<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
                                                        const CallSite& callsite,
+                                                       IAaptContext* context,
                                                        SymbolTable* symbols,
                                                        std::string* out_error);
 

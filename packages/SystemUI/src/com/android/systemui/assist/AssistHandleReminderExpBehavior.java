@@ -33,8 +33,11 @@ import androidx.annotation.Nullable;
 import androidx.slice.Clock;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.systemui.BootCompleteCache;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -81,7 +84,6 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
 
     private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
             PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
-            Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_PACKAGE_ADDED,
             Intent.ACTION_PACKAGE_CHANGED,
             Intent.ACTION_PACKAGE_REMOVED
@@ -117,12 +119,9 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 public void onOverviewShown(boolean fromHome) {
                     handleOverviewShown();
                 }
-
-                @Override
-                public void onSystemUiStateChanged(int sysuiStateFlags) {
-                    handleSystemUiStateChanged(sysuiStateFlags);
-                }
             };
+    private final SysUiState.SysUiStateCallback mSysUiStateCallback =
+            this::handleSystemUiStateChanged;
     private final WakefulnessLifecycle.Observer mWakefulnessLifecycleObserver =
             new WakefulnessLifecycle.Observer() {
                 @Override
@@ -151,6 +150,15 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             mDefaultHome = getCurrentDefaultHome();
         }
     };
+
+    private final BootCompleteCache.BootCompleteListener mBootCompleteListener =
+            new BootCompleteCache.BootCompleteListener() {
+        @Override
+        public void onBootComplete() {
+            mDefaultHome = getCurrentDefaultHome();
+        }
+    };
+
     private final IntentFilter mDefaultHomeIntentFilter;
     private final Runnable mResetConsecutiveTaskSwitches = this::resetConsecutiveTaskSwitches;
 
@@ -160,8 +168,11 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private final Lazy<StatusBarStateController> mStatusBarStateController;
     private final Lazy<ActivityManagerWrapper> mActivityManagerWrapper;
     private final Lazy<OverviewProxyService> mOverviewProxyService;
+    private final Lazy<SysUiState> mSysUiFlagContainer;
     private final Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
     private final Lazy<PackageManagerWrapper> mPackageManagerWrapper;
+    private final Lazy<BroadcastDispatcher> mBroadcastDispatcher;
+    private final Lazy<BootCompleteCache> mBootCompleteCache;
 
     private boolean mOnLockscreen;
     private boolean mIsDozing;
@@ -192,20 +203,26 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             Lazy<StatusBarStateController> statusBarStateController,
             Lazy<ActivityManagerWrapper> activityManagerWrapper,
             Lazy<OverviewProxyService> overviewProxyService,
+            Lazy<SysUiState> sysUiFlagContainer,
             Lazy<WakefulnessLifecycle> wakefulnessLifecycle,
-            Lazy<PackageManagerWrapper> packageManagerWrapper) {
+            Lazy<PackageManagerWrapper> packageManagerWrapper,
+            Lazy<BroadcastDispatcher> broadcastDispatcher,
+            Lazy<BootCompleteCache> bootCompleteCache) {
         mClock = clock;
         mHandler = handler;
         mDeviceConfigHelper = deviceConfigHelper;
         mStatusBarStateController = statusBarStateController;
         mActivityManagerWrapper = activityManagerWrapper;
         mOverviewProxyService = overviewProxyService;
+        mSysUiFlagContainer = sysUiFlagContainer;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mPackageManagerWrapper = packageManagerWrapper;
         mDefaultHomeIntentFilter = new IntentFilter();
         for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
             mDefaultHomeIntentFilter.addAction(action);
         }
+        mBroadcastDispatcher = broadcastDispatcher;
+        mBootCompleteCache = bootCompleteCache;
     }
 
     @Override
@@ -213,8 +230,10 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mContext = context;
         mAssistHandleCallbacks = callbacks;
         mConsecutiveTaskSwitches = 0;
+        mBootCompleteCache.get().addListener(mBootCompleteListener);
         mDefaultHome = getCurrentDefaultHome();
-        context.registerReceiver(mDefaultHomeBroadcastReceiver, mDefaultHomeIntentFilter);
+        mBroadcastDispatcher.get()
+                .registerReceiver(mDefaultHomeBroadcastReceiver, mDefaultHomeIntentFilter);
         mOnLockscreen = onLockscreen(mStatusBarStateController.get().getState());
         mIsDozing = mStatusBarStateController.get().isDozing();
         mStatusBarStateController.get().addCallback(mStatusBarStateListener);
@@ -223,6 +242,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mRunningTaskId = runningTaskInfo == null ? 0 : runningTaskInfo.taskId;
         mActivityManagerWrapper.get().registerTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.get().addCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.get().addCallback(mSysUiStateCallback);
         mIsAwake = mWakefulnessLifecycle.get().getWakefulness()
                 == WakefulnessLifecycle.WAKEFULNESS_AWAKE;
         mWakefulnessLifecycle.get().addObserver(mWakefulnessLifecycleObserver);
@@ -242,7 +262,8 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
         if (mContext != null) {
-            mContext.unregisterReceiver(mDefaultHomeBroadcastReceiver);
+            mBroadcastDispatcher.get().unregisterReceiver(mDefaultHomeBroadcastReceiver);
+            mBootCompleteCache.get().removeListener(mBootCompleteListener);
             Settings.Secure.putLong(mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, 0);
             Settings.Secure.putInt(mContext.getContentResolver(), LEARNING_EVENT_COUNT_KEY, 0);
             Settings.Secure.putLong(mContext.getContentResolver(), LEARNED_HINT_LAST_SHOWN_KEY, 0);
@@ -251,6 +272,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mStatusBarStateController.get().removeCallback(mStatusBarStateListener);
         mActivityManagerWrapper.get().unregisterTaskStackListener(mTaskStackChangeListener);
         mOverviewProxyService.get().removeCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.get().removeCallback(mSysUiStateCallback);
         mWakefulnessLifecycle.get().removeObserver(mWakefulnessLifecycleObserver);
     }
 

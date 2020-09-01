@@ -1,0 +1,45 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsBatterySavingTestCases",
+      "options": [
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+      ]
+    },
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {"include-filter": "com.android.server.power"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {"include-filter": "com.android.server.power"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsBatterySavingTestCases"
+    },
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {"include-filter": "com.android.server.power"}
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {"include-filter": "com.android.server.power"}
+      ]
+    }
+  ]
+}

@@ -24,19 +24,15 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.android.internal.telephony.util.TelephonyUtils;
-
-import java.util.List;
 
 /**
  * Helper for performing location access checks.
@@ -111,6 +107,9 @@ public final class LocationAccessPolicy {
                 return this;
             }
 
+            /**
+             * Mandatory parameter, used for performing permission checks.
+             */
             public Builder setCallingUid(int callingUid) {
                 mCallingUid = callingUid;
                 return this;
@@ -195,6 +194,17 @@ public final class LocationAccessPolicy {
         }
     }
 
+    private static String getAppOpsString(String manifestPermission) {
+        switch (manifestPermission) {
+            case Manifest.permission.ACCESS_FINE_LOCATION:
+                return AppOpsManager.OPSTR_FINE_LOCATION;
+            case Manifest.permission.ACCESS_COARSE_LOCATION:
+                return AppOpsManager.OPSTR_COARSE_LOCATION;
+            default:
+                return null;
+        }
+    }
+
     private static LocationPermissionResult checkAppLocationPermissionHelper(Context context,
             LocationPermissionQuery query, String permissionToCheck) {
         String locationTypeForLog =
@@ -208,8 +218,8 @@ public final class LocationAccessPolicy {
         if (hasManifestPermission) {
             // Only check the app op if the app has the permission.
             int appOpMode = context.getSystemService(AppOpsManager.class)
-                    .noteOpNoThrow(AppOpsManager.permissionToOpCode(permissionToCheck),
-                            query.callingUid, query.callingPackage);
+                    .noteOpNoThrow(getAppOpsString(permissionToCheck), query.callingUid,
+                            query.callingPackage, query.callingFeatureId, null);
             if (appOpMode == AppOpsManager.MODE_ALLOWED) {
                 // If the app did everything right, return without logging.
                 return LocationPermissionResult.ALLOWED;
@@ -295,7 +305,7 @@ public final class LocationAccessPolicy {
     }
 
     private static boolean checkSystemLocationAccess(@NonNull Context context, int uid, int pid) {
-        if (!isLocationModeEnabled(context, UserHandle.getUserId(uid))) {
+        if (!isLocationModeEnabled(context, UserHandle.getUserHandleForUid(uid).getIdentifier())) {
             if (DBG) Log.w(TAG, "Location disabled, failed, (" + uid + ")");
             return false;
         }
@@ -322,20 +332,17 @@ public final class LocationAccessPolicy {
     private static boolean isCurrentProfile(@NonNull Context context, int uid) {
         long token = Binder.clearCallingIdentity();
         try {
-            final int currentUser = ActivityManager.getCurrentUser();
-            final int callingUserId = UserHandle.getUserId(uid);
-            if (callingUserId == currentUser) {
+            if (UserHandle.getUserHandleForUid(uid).getIdentifier()
+                    == ActivityManager.getCurrentUser()) {
                 return true;
-            } else {
-                List<UserInfo> userProfiles = context.getSystemService(
-                        UserManager.class).getProfiles(currentUser);
-                for (UserInfo user : userProfiles) {
-                    if (user.id == callingUserId) {
-                        return true;
-                    }
-                }
             }
-            return false;
+            ActivityManager activityManager = context.getSystemService(ActivityManager.class);
+            if (activityManager != null) {
+                return activityManager.isProfileForeground(
+                        UserHandle.getUserHandleForUid(ActivityManager.getCurrentUser()));
+            } else {
+                return false;
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }

@@ -77,7 +77,7 @@ public class WifiRttManager {
             "android.net.wifi.rtt.action.WIFI_RTT_STATE_CHANGED";
 
     /** @hide */
-    public WifiRttManager(Context context, IWifiRttManager service) {
+    public WifiRttManager(@NonNull Context context, @NonNull IWifiRttManager service) {
         mContext = context;
         mService = service;
     }
@@ -146,8 +146,8 @@ public class WifiRttManager {
 
         Binder binder = new Binder();
         try {
-            mService.startRanging(binder, mContext.getOpPackageName(), workSource, request,
-                    new IRttCallback.Stub() {
+            mService.startRanging(binder, mContext.getOpPackageName(),
+                    mContext.getAttributionTag(), workSource, request, new IRttCallback.Stub() {
                         @Override
                         public void onRangingFailure(int status) throws RemoteException {
                             clearCallingIdentity();

@@ -1,8 +1,0 @@
-// Copyright 2013 The Android Open Source Project
-//
-
-java_binary {
-    name: "media",
-    wrapper: "media",
-    srcs: ["**/*.java"],
-}

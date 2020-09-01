@@ -28,7 +28,6 @@ import android.hardware.broadcastradio.V2_0.MetadataKey;
 import android.hardware.broadcastradio.V2_0.ProgramFilter;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
-import android.hardware.broadcastradio.V2_0.ProgramInfoFlags;
 import android.hardware.broadcastradio.V2_0.ProgramListChunk;
 import android.hardware.broadcastradio.V2_0.Properties;
 import android.hardware.broadcastradio.V2_0.Result;

@@ -41,7 +41,9 @@ import com.android.server.SystemService;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -239,18 +241,37 @@ final public class IpConnectivityMetrics extends SystemService {
         mDefaultNetworkMetrics.listEvents(pw);
     }
 
+    private List<IpConnectivityEvent> listEventsAsProtos() {
+        final List<IpConnectivityEvent> events = IpConnectivityEventBuilder.toProto(getEvents());
+        if (mNetdListener != null) {
+            events.addAll(mNetdListener.listAsProtos());
+        }
+        events.addAll(mDefaultNetworkMetrics.listEventsAsProto());
+        return events;
+    }
+
     /*
      * Print the content of the rolling event buffer in text proto format.
      */
-    private void cmdListAsProto(PrintWriter pw) {
-        final List<ConnectivityMetricsEvent> events = getEvents();
-        for (IpConnectivityEvent ev : IpConnectivityEventBuilder.toProto(events)) {
-            pw.print(ev.toString());
+    private void cmdListAsTextProto(PrintWriter pw) {
+        listEventsAsProtos().forEach(e -> pw.print(e.toString()));
+    }
+
+    /*
+     * Write the content of the rolling event buffer in proto wire format to the given OutputStream.
+     */
+    private void cmdListAsBinaryProto(OutputStream out) {
+        final int dropped;
+        synchronized (mLock) {
+            dropped = mDropped;
         }
-        if (mNetdListener != null) {
-            mNetdListener.listAsProtos(pw);
+        try {
+            byte[] data = IpConnectivityEventBuilder.serialize(dropped, listEventsAsProtos());
+            out.write(data);
+            out.flush();
+        } catch (IOException e) {
+            Log.e(TAG, "could not serialize events", e);
         }
-        mDefaultNetworkMetrics.listEventsAsProto(pw);
     }
 
     /*
@@ -267,6 +288,9 @@ final public class IpConnectivityMetrics extends SystemService {
         static final String CMD_FLUSH = "flush";
         // Dump the rolling buffer of metrics event in human readable proto text format.
         static final String CMD_PROTO = "proto";
+        // Dump the rolling buffer of metrics event in proto wire format. See usage() of
+        // frameworks/native/cmds/dumpsys/dumpsys.cpp for details.
+        static final String CMD_PROTO_BIN = "--proto";
         // Dump the rolling buffer of metrics event and pretty print events using a human readable
         // format. Also print network dns/connect statistics and default network event time series.
         static final String CMD_LIST = "list";
@@ -291,7 +315,10 @@ final public class IpConnectivityMetrics extends SystemService {
                     cmdFlush(pw);
                     return;
                 case CMD_PROTO:
-                    cmdListAsProto(pw);
+                    cmdListAsTextProto(pw);
+                    return;
+                case CMD_PROTO_BIN:
+                    cmdListAsBinaryProto(new FileOutputStream(fd));
                     return;
                 case CMD_LIST:
                 default:

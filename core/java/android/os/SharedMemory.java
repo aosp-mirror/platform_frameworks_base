@@ -27,6 +27,7 @@ import dalvik.system.VMRuntime;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DirectByteBuffer;
 import java.nio.NioUtils;
@@ -270,6 +271,20 @@ public final class SharedMemory implements Parcelable, Closeable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         checkOpen();
         dest.writeFileDescriptor(mFileDescriptor);
+    }
+
+    /**
+     * Returns a dup'd ParcelFileDescriptor from the SharedMemory FileDescriptor.
+     * This obeys standard POSIX semantics, where the
+     * new file descriptor shared state such as file position with the
+     * original file descriptor.
+     * TODO: propose this method as a public or system API for next release to achieve parity with
+     *  NDK ASharedMemory_dupFromJava.
+     *
+     * @hide
+     */
+    public ParcelFileDescriptor getFdDup() throws IOException {
+        return ParcelFileDescriptor.dup(mFileDescriptor);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<SharedMemory> CREATOR =

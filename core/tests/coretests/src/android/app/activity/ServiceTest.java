@@ -16,453 +16,250 @@
 
 package android.app.activity;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
+
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
-import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
 
 import androidx.test.filters.MediumTest;
-import androidx.test.filters.Suppress;
 
-// These test binders purport to support an interface whose canonical
-// interface name is ServiceTest.SERVICE_LOCAL
-// Temporarily suppress, this test is causing unit test suite run to fail
-// TODO: remove this suppress
-@Suppress
-public class ServiceTest extends ActivityTestsBase {
+import junit.framework.TestCase;
 
-    public static final String SERVICE_LOCAL =
-            "com.android.frameworks.coretests.activity.SERVICE_LOCAL";
-    public static final String SERVICE_LOCAL_GRANTED =
-            "com.android.frameworks.coretests.activity.SERVICE_LOCAL_GRANTED";
-    public static final String SERVICE_LOCAL_DENIED =
-            "com.android.frameworks.coretests.activity.SERVICE_LOCAL_DENIED";
+import org.junit.Test;
 
-    public static final String REPORT_OBJ_NAME = "report";
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
-    public static final int STARTED_CODE = 1;
-    public static final int DESTROYED_CODE = 2;
-    public static final int SET_REPORTER_CODE = 3;
-    public static final int UNBIND_CODE = 4;
-    public static final int REBIND_CODE = 5;
+/**
+ * Test for verifying the behavior of {@link Service}.
+ * <p>
+ * Tests related to internal behavior are usually placed here, e.g. the restart delay may be
+ * different depending on the current amount of restarting services.
+ * <p>
+ * Build/Install/Run:
+ *  atest FrameworksCoreTests:ServiceTest
+ */
+@MediumTest
+public class ServiceTest extends TestCase {
+    private static final String ACTION_SERVICE_STARTED = RemoteService.class.getName() + "_STARTED";
+    private static final String EXTRA_START_CODE = "start_code";
+    private static final String EXTRA_PID = "pid";
 
-    public static final int STATE_START_1 = 0;
-    public static final int STATE_START_2 = 1;
-    public static final int STATE_UNBIND = 2;
-    public static final int STATE_DESTROY = 3;
-    public static final int STATE_REBIND = 4;
-    public static final int STATE_UNBIND_ONLY = 5;
-    public int mStartState;
+    private static final long TIMEOUT_SEC = 5;
+    private static final int NOT_STARTED = -1;
 
-    public IBinder mStartReceiver = new Binder() {
+    private final Context mContext = getInstrumentation().getContext();
+    private final Intent mServiceIntent = new Intent(mContext, RemoteService.class);
+    private TestConnection mCurrentConnection;
+
+    @Override
+    public void tearDown() {
+        mContext.stopService(mServiceIntent);
+        if (mCurrentConnection != null) {
+            mContext.unbindService(mCurrentConnection);
+            mCurrentConnection = null;
+        }
+    }
+
+    @Test
+    public void testRestart_stickyStartedService_restarted() {
+        testRestartStartedService(Service.START_STICKY, true /* shouldRestart */);
+    }
+
+    @Test
+    public void testRestart_redeliveryStartedService_restarted() {
+        testRestartStartedService(Service.START_FLAG_REDELIVERY, true /* shouldRestart */);
+    }
+
+    @Test
+    public void testRestart_notStickyStartedService_notRestarted() {
+        testRestartStartedService(Service.START_NOT_STICKY, false /* shouldRestart */);
+    }
+
+    private void testRestartStartedService(int startFlag, boolean shouldRestart) {
+        final int servicePid = startService(startFlag);
+        assertThat(servicePid, not(NOT_STARTED));
+
+        final int restartedServicePid = waitForServiceStarted(
+                () -> Process.killProcess(servicePid));
+        assertThat(restartedServicePid, shouldRestart ? not(NOT_STARTED) : is(NOT_STARTED));
+    }
+
+    @Test
+    public void testRestart_boundService_restarted() {
+        final int servicePid = bindService(Context.BIND_AUTO_CREATE);
+        assertThat(servicePid, not(NOT_STARTED));
+
+        Process.killProcess(servicePid);
+        // The service should be restarted and the connection will receive onServiceConnected again.
+        assertThat(mCurrentConnection.takePid(), not(NOT_STARTED));
+    }
+
+    @Test
+    public void testRestart_boundNotStickyStartedService_restarted() {
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        final Supplier<RunningServiceInfo> serviceInfoGetter = () -> {
+            for (RunningServiceInfo rs : am.getRunningServices(Integer.MAX_VALUE)) {
+                if (mServiceIntent.getComponent().equals(rs.service)) {
+                    return rs;
+                }
+            }
+            return null;
+        };
+
+        final int servicePid = bindService(Context.BIND_AUTO_CREATE);
+        assertThat(servicePid, not(NOT_STARTED));
+        assertThat(startService(Service.START_NOT_STICKY), is(servicePid));
+
+        RunningServiceInfo info = serviceInfoGetter.get();
+        assertThat(info, notNullValue());
+        assertThat(info.started, is(true));
+
+        Process.killProcess(servicePid);
+        // The service will be restarted for connection but the started state should be gone.
+        final int restartedServicePid = mCurrentConnection.takePid();
+        assertThat(restartedServicePid, not(NOT_STARTED));
+
+        info = serviceInfoGetter.get();
+        assertThat(info, notNullValue());
+        assertThat(info.started, is(false));
+        assertThat(info.clientCount, is(1));
+    }
+
+    @Test
+    public void testRestart_notStickyStartedNoAutoCreateBoundService_notRestarted() {
+        final int servicePid = startService(Service.START_NOT_STICKY);
+        assertThat(servicePid, not(NOT_STARTED));
+        assertThat(bindService(0 /* flags */), is(servicePid));
+
+        Process.killProcess(servicePid);
+        assertThat(mCurrentConnection.takePid(), is(NOT_STARTED));
+    }
+
+    /** @return The pid of the started service. */
+    private int startService(int code) {
+        return waitForServiceStarted(
+                () -> mContext.startService(mServiceIntent.putExtra(EXTRA_START_CODE, code)));
+    }
+
+    /** @return The pid of the started service. */
+    private int waitForServiceStarted(Runnable serviceTrigger) {
+        final CompletableFuture<Integer> pidResult = new CompletableFuture<>();
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                pidResult.complete(intent.getIntExtra(EXTRA_PID, NOT_STARTED));
+                mContext.unregisterReceiver(this);
+            }
+        }, new IntentFilter(ACTION_SERVICE_STARTED));
+
+        serviceTrigger.run();
+        try {
+            return pidResult.get(TIMEOUT_SEC, TimeUnit.SECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException ignored) {
+        }
+        return NOT_STARTED;
+    }
+
+    /** @return The pid of the bound service. */
+    private int bindService(int flags) {
+        mCurrentConnection = new TestConnection();
+        assertThat(mContext.bindService(mServiceIntent, mCurrentConnection, flags), is(true));
+        return mCurrentConnection.takePid();
+    }
+
+    private static class TestConnection implements ServiceConnection {
+        private CompletableFuture<Integer> mServicePid = new CompletableFuture<>();
+
+        /**
+         * @return The pid of the connected service. It is only valid once after
+         *         {@link #onServiceConnected} is called.
+         */
+        int takePid() {
+            try {
+                return mServicePid.get(TIMEOUT_SEC, TimeUnit.SECONDS);
+            } catch (ExecutionException | InterruptedException | TimeoutException ignored) {
+            } finally {
+                mServicePid = new CompletableFuture<>();
+            }
+            return NOT_STARTED;
+        }
+
         @Override
-        protected boolean onTransact(int code, Parcel data, Parcel reply,
-                int flags) throws RemoteException {
-            //Log.i("ServiceTest", "Received code " + code + " in state " + mStartState);
-            if (code == STARTED_CODE) {
-                data.enforceInterface(SERVICE_LOCAL);
-                int count = data.readInt();
-                if (mStartState == STATE_START_1) {
-                    if (count == 1) {
-                        finishGood();
-                    } else {
-                        finishBad("onStart() again on an object when it should have been the first time");
-                    }
-                } else if (mStartState == STATE_START_2) {
-                    if (count == 2) {
-                        finishGood();
-                    } else {
-                        finishBad("onStart() the first time on an object when it should have been the second time");
-                    }
-                } else {
-                    finishBad("onStart() was called when not expected (state="+mStartState+")");
-                }
-                return true;
-            } else if (code == DESTROYED_CODE) {
-                data.enforceInterface(SERVICE_LOCAL);
-                if (mStartState == STATE_DESTROY) {
-                    finishGood();
-                } else {
-                    finishBad("onDestroy() was called when not expected (state="+mStartState+")");
-                }
-                return true;
-            } else if (code == UNBIND_CODE) {
-                data.enforceInterface(SERVICE_LOCAL);
-                if (mStartState == STATE_UNBIND) {
-                    mStartState = STATE_DESTROY;
-                } else if (mStartState == STATE_UNBIND_ONLY) {
-                    finishGood();
-                } else {
-                    finishBad("onUnbind() was called when not expected (state="+mStartState+")");
-                }
-                return true;
-            } else if (code == REBIND_CODE) {
-                data.enforceInterface(SERVICE_LOCAL);
-                if (mStartState == STATE_REBIND) {
-                    finishGood();
-                } else {
-                    finishBad("onRebind() was called when not expected (state="+mStartState+")");
-                }
-                return true;
-            } else {
-                return super.onTransact(code, data, reply, flags);
-            }
-        }
-    };
-
-    public class EmptyConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName name, IBinder service) {
-        }
-
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    }
-
-    public class TestConnection implements ServiceConnection {
-        private final boolean mExpectDisconnect;
-        private final boolean mSetReporter;
-        private boolean mMonitor;
-        private int mCount;
-
-        public TestConnection(boolean expectDisconnect, boolean setReporter) {
-            mExpectDisconnect = expectDisconnect;
-            mSetReporter = setReporter;
-            mMonitor = !setReporter;
-        }
-
-        void setMonitor(boolean v) {
-            mMonitor = v;
-        }
-
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (mSetReporter) {
-                Parcel data = Parcel.obtain();
-                data.writeInterfaceToken(SERVICE_LOCAL);
-                data.writeStrongBinder(mStartReceiver);
-                try {
-                    service.transact(SET_REPORTER_CODE, data, null, 0);
-                } catch (RemoteException e) {
-                    finishBad("DeadObjectException when sending reporting object");
-                }
+            final Parcel data = Parcel.obtain();
+            final Parcel reply = Parcel.obtain();
+            data.writeInterfaceToken(RemoteService.DESCRIPTOR);
+            try {
+                service.transact(RemoteService.TRANSACTION_GET_PID, data, reply, 0 /* flags */);
+                reply.readException();
+                mServicePid.complete(reply.readInt());
+            } catch (RemoteException e) {
+                mServicePid.complete(NOT_STARTED);
+            } finally {
                 data.recycle();
-            }
-
-            if (mMonitor) {
-                mCount++;
-                if (mStartState == STATE_START_1) {
-                    if (mCount == 1) {
-                        finishGood();
-                    } else {
-                        finishBad("onServiceConnected() again on an object when it should have been the first time");
-                    }
-                } else if (mStartState == STATE_START_2) {
-                    if (mCount == 2) {
-                        finishGood();
-                    } else {
-                        finishBad("onServiceConnected() the first time on an object when it should have been the second time");
-                    }
-                } else {
-                    finishBad("onServiceConnected() called unexpectedly");
-                }
+                reply.recycle();
             }
         }
 
+        @Override
         public void onServiceDisconnected(ComponentName name) {
-            if (mMonitor) {
-                if (mStartState == STATE_DESTROY) {
-                    if (mExpectDisconnect) {
-                        finishGood();
-                    } else {
-                        finishBad("onServiceDisconnected() when it shouldn't have been");
+        }
+    }
+
+    public static class RemoteService extends Service {
+        static final String DESCRIPTOR = RemoteService.class.getName();
+        static final int TRANSACTION_GET_PID = Binder.FIRST_CALL_TRANSACTION;
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            new Handler().post(() -> {
+                final Intent responseIntent = new Intent(ACTION_SERVICE_STARTED);
+                responseIntent.putExtra(EXTRA_PID, Process.myPid());
+                sendBroadcast(responseIntent);
+            });
+            if (intent != null && intent.hasExtra(EXTRA_START_CODE)) {
+                return intent.getIntExtra(EXTRA_START_CODE, Service.START_NOT_STICKY);
+            }
+            return super.onStartCommand(intent, flags, startId);
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return new Binder() {
+                @Override
+                protected boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                        throws RemoteException {
+                    if (code == TRANSACTION_GET_PID) {
+                        data.enforceInterface(DESCRIPTOR);
+                        reply.writeNoException();
+                        reply.writeInt(Process.myPid());
+                        return true;
                     }
-                } else {
-                    finishBad("onServiceDisconnected() called unexpectedly");
+                    return super.onTransact(code, data, reply, flags);
                 }
-            }
-        }
-    }
-
-    void startExpectResult(Intent service) {
-        startExpectResult(service, new Bundle());
-    }
-
-    void startExpectResult(Intent service, Bundle bundle) {
-        bundle.putIBinder(REPORT_OBJ_NAME, mStartReceiver);
-        boolean success = false;
-        try {
-            //Log.i("foo", "STATE_START_1");
-            mStartState = STATE_START_1;
-            getContext().startService(new Intent(service).putExtras(bundle));
-            waitForResultOrThrow(5 * 1000, "service to start first time");
-            //Log.i("foo", "STATE_START_2");
-            mStartState = STATE_START_2;
-            getContext().startService(new Intent(service).putExtras(bundle));
-            waitForResultOrThrow(5 * 1000, "service to start second time");
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    getContext().stopService(service);
-                } catch (Exception e) {
-                    // eat
-                }
-            }
-        }
-        //Log.i("foo", "STATE_DESTROY");
-        mStartState = STATE_DESTROY;
-        getContext().stopService(service);
-        waitForResultOrThrow(5 * 1000, "service to be destroyed");
-    }
-
-    void startExpectNoPermission(Intent service) {
-        try {
-            getContext().startService(service);
-            fail("Expected security exception when starting " + service);
-        } catch (SecurityException e) {
-            // expected
-        }
-    }
-
-    void bindExpectResult(Intent service) {
-        TestConnection conn = new TestConnection(true, false);
-        TestConnection conn2 = new TestConnection(false, false);
-        boolean success = false;
-        try {
-            // Expect to see the TestConnection connected.
-            mStartState = STATE_START_1;
-            getContext().bindService(service, conn, 0);
-            getContext().startService(service);
-            waitForResultOrThrow(5 * 1000, "existing connection to receive service");
-
-            // Expect to see the second TestConnection connected.
-            getContext().bindService(service, conn2, 0);
-            waitForResultOrThrow(5 * 1000, "new connection to receive service");
-
-            getContext().unbindService(conn2);
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    getContext().stopService(service);
-                    getContext().unbindService(conn);
-                    getContext().unbindService(conn2);
-                } catch (Exception e) {
-                    // eat
-                }
-            }
-        }
-
-        // Expect to see the TestConnection disconnected.
-        mStartState = STATE_DESTROY;
-        getContext().stopService(service);
-        waitForResultOrThrow(5 * 1000, "existing connection to lose service");
-
-        getContext().unbindService(conn);
-
-        conn = new TestConnection(true, true);
-        success = false;
-        try {
-            // Expect to see the TestConnection connected.
-            conn.setMonitor(true);
-            mStartState = STATE_START_1;
-            getContext().bindService(service, conn, 0);
-            getContext().startService(service);
-            waitForResultOrThrow(5 * 1000, "existing connection to receive service");
-
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    getContext().stopService(service);
-                    getContext().unbindService(conn);
-                } catch (Exception e) {
-                    // eat
-                }
-            }
-        }
-
-        // Expect to see the service unbind and then destroyed.
-        conn.setMonitor(false);
-        mStartState = STATE_UNBIND;
-        getContext().stopService(service);
-        waitForResultOrThrow(5 * 1000, "existing connection to lose service");
-
-        getContext().unbindService(conn);
-
-        conn = new TestConnection(true, true);
-        success = false;
-        try {
-            // Expect to see the TestConnection connected.
-            conn.setMonitor(true);
-            mStartState = STATE_START_1;
-            getContext().bindService(service, conn, 0);
-            getContext().startService(service);
-            waitForResultOrThrow(5 * 1000, "existing connection to receive service");
-
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    getContext().stopService(service);
-                    getContext().unbindService(conn);
-                } catch (Exception e) {
-                    // eat
-                }
-            }
-        }
-
-        // Expect to see the service unbind but not destroyed.
-        conn.setMonitor(false);
-        mStartState = STATE_UNBIND_ONLY;
-        getContext().unbindService(conn);
-        waitForResultOrThrow(5 * 1000, "existing connection to unbind service");
-
-        // Expect to see the service rebound.
-        mStartState = STATE_REBIND;
-        getContext().bindService(service, conn, 0);
-        waitForResultOrThrow(5 * 1000, "existing connection to rebind service");
-
-        // Expect to see the service unbind and then destroyed.
-        mStartState = STATE_UNBIND;
-        getContext().stopService(service);
-        waitForResultOrThrow(5 * 1000, "existing connection to lose service");
-
-        getContext().unbindService(conn);
-    }
-
-    void bindAutoExpectResult(Intent service) {
-        TestConnection conn = new TestConnection(false, true);
-        boolean success = false;
-        try {
-            conn.setMonitor(true);
-            mStartState = STATE_START_1;
-            getContext().bindService(
-                    service, conn, Context.BIND_AUTO_CREATE);
-            waitForResultOrThrow(5 * 1000, "connection to start and receive service");
-            success = true;
-        } finally {
-            if (!success) {
-                try {
-                    getContext().unbindService(conn);
-                } catch (Exception e) {
-                    // eat
-                }
-            }
-        }
-        mStartState = STATE_UNBIND;
-        getContext().unbindService(conn);
-        waitForResultOrThrow(5 * 1000, "disconnecting from service");
-    }
-
-    void bindExpectNoPermission(Intent service) {
-        TestConnection conn = new TestConnection(false, false);
-        try {
-            getContext().bindService(service, conn, Context.BIND_AUTO_CREATE);
-            fail("Expected security exception when binding " + service);
-        } catch (SecurityException e) {
-            // expected
-        } finally {
-            getContext().unbindService(conn);
-        }
-    }
-
-
-    @MediumTest
-    public void testLocalStartClass() throws Exception {
-        startExpectResult(new Intent(getContext(), LocalService.class));
-    }
-
-    @MediumTest
-    public void testLocalStartAction() throws Exception {
-        startExpectResult(new Intent(SERVICE_LOCAL));
-    }
-
-    @MediumTest
-    public void testLocalBindClass() throws Exception {
-        bindExpectResult(new Intent(getContext(), LocalService.class));
-    }
-
-    @MediumTest
-    public void testLocalBindAction() throws Exception {
-        bindExpectResult(new Intent(SERVICE_LOCAL));
-    }
-
-    @MediumTest
-    public void testLocalBindAutoClass() throws Exception {
-        bindAutoExpectResult(new Intent(getContext(), LocalService.class));
-    }
-
-    @MediumTest
-    public void testLocalBindAutoAction() throws Exception {
-        bindAutoExpectResult(new Intent(SERVICE_LOCAL));
-    }
-
-    @MediumTest
-    public void testLocalStartClassPermissionGranted() throws Exception {
-        startExpectResult(new Intent(getContext(), LocalGrantedService.class));
-    }
-
-    @MediumTest
-    public void testLocalStartActionPermissionGranted() throws Exception {
-        startExpectResult(new Intent(SERVICE_LOCAL_GRANTED));
-    }
-
-    @MediumTest
-    public void testLocalBindClassPermissionGranted() throws Exception {
-        bindExpectResult(new Intent(getContext(), LocalGrantedService.class));
-    }
-
-    @MediumTest
-    public void testLocalBindActionPermissionGranted() throws Exception {
-        bindExpectResult(new Intent(SERVICE_LOCAL_GRANTED));
-    }
-
-    @MediumTest
-    public void testLocalBindAutoClassPermissionGranted() throws Exception {
-        bindAutoExpectResult(new Intent(getContext(), LocalGrantedService.class));
-    }
-
-    @MediumTest
-    public void testLocalBindAutoActionPermissionGranted() throws Exception {
-        bindAutoExpectResult(new Intent(SERVICE_LOCAL_GRANTED));
-    }
-
-    @MediumTest
-    public void testLocalStartClassPermissionDenied() throws Exception {
-        startExpectNoPermission(new Intent(getContext(), LocalDeniedService.class));
-    }
-
-    @MediumTest
-    public void testLocalStartActionPermissionDenied() throws Exception {
-        startExpectNoPermission(new Intent(SERVICE_LOCAL_DENIED));
-    }
-
-    @MediumTest
-    public void testLocalBindClassPermissionDenied() throws Exception {
-        bindExpectNoPermission(new Intent(getContext(), LocalDeniedService.class));
-    }
-
-    @MediumTest
-    public void testLocalBindActionPermissionDenied() throws Exception {
-        bindExpectNoPermission(new Intent(SERVICE_LOCAL_DENIED));
-    }
-
-    @MediumTest
-    public void testLocalUnbindTwice() throws Exception {
-        EmptyConnection conn = new EmptyConnection();
-        getContext().bindService(
-                new Intent(SERVICE_LOCAL_GRANTED), conn, 0);
-        getContext().unbindService(conn);
-        try {
-            getContext().unbindService(conn);
-            fail("No exception thrown on second unbind");
-        } catch (IllegalArgumentException e) {
-            //Log.i("foo", "Unbind exception", e);
+            };
         }
     }
 }

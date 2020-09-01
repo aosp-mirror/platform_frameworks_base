@@ -364,6 +364,13 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
+    public void jumpToCurrentState() {
+        if (mDrawable != null) {
+            mDrawable.jumpToCurrentState();
+        }
+    }
+
+    @Override
     protected boolean onLevelChange(int level) {
         return mDrawable != null && mDrawable.setLevel(level);
     }

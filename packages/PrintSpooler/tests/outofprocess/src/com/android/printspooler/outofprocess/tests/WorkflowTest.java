@@ -36,6 +36,7 @@ import android.print.test.services.FirstPrintService;
 import android.print.test.services.PrinterDiscoverySessionCallbacks;
 import android.print.test.services.StubbablePrinterDiscoverySession;
 import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
@@ -76,6 +77,10 @@ public class WorkflowTest extends BasePrintTest {
 
     interface InterruptableConsumer<T> {
         void accept(T t) throws InterruptedException;
+    }
+
+    public static UiDevice getUiDevice() {
+        return UiDevice.getInstance(getInstrumentation());
     }
 
     /**

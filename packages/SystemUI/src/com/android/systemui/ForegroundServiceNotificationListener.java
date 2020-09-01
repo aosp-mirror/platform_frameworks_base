@@ -21,12 +21,16 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.util.time.SystemClock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,42 +44,66 @@ public class ForegroundServiceNotificationListener {
 
     private final Context mContext;
     private final ForegroundServiceController mForegroundServiceController;
+    private final NotificationEntryManager mEntryManager;
 
     @Inject
     public ForegroundServiceNotificationListener(Context context,
             ForegroundServiceController foregroundServiceController,
-            NotificationEntryManager notificationEntryManager) {
+            NotificationEntryManager notificationEntryManager,
+            NotifPipeline notifPipeline,
+            ForegroundServiceLifetimeExtender fgsLifetimeExtender,
+            SystemClock systemClock) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
-        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+
+        // TODO: (b/145659174) remove mEntryManager when moving to NewNotifPipeline. Replaced by
+        //  ForegroundCoordinator
+        mEntryManager = notificationEntryManager;
+        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
-                addNotification(entry.notification, entry.importance);
+                addNotification(entry, entry.getImportance());
             }
 
             @Override
-            public void onPostEntryUpdated(NotificationEntry entry) {
-                updateNotification(entry.notification, entry.importance);
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                updateNotification(entry, entry.getImportance());
             }
 
             @Override
             public void onEntryRemoved(
                     NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean removedByUser) {
-                removeNotification(entry.notification);
+                    boolean removedByUser,
+                    int reason) {
+                removeNotification(entry.getSbn());
             }
         });
+        mEntryManager.addNotificationLifetimeExtender(fgsLifetimeExtender);
 
-        notificationEntryManager.addNotificationLifetimeExtender(
-                new ForegroundServiceLifetimeExtender());
+        notifPipeline.addCollectionListener(new NotifCollectionListener() {
+            @Override
+            public void onEntryAdded(NotificationEntry entry) {
+                addNotification(entry, entry.getImportance());
+            }
+
+            @Override
+            public void onEntryUpdated(NotificationEntry entry) {
+                updateNotification(entry, entry.getImportance());
+            }
+
+            @Override
+            public void onEntryRemoved(NotificationEntry entry, int reason) {
+                removeNotification(entry.getSbn());
+            }
+        });
     }
 
     /**
-     * @param sbn notification that was just posted
+     * @param entry notification that was just posted
      */
-    private void addNotification(StatusBarNotification sbn, int importance) {
-        updateNotification(sbn, importance);
+    private void addNotification(NotificationEntry entry, int importance) {
+        updateNotification(entry, importance);
     }
 
     /**
@@ -113,9 +141,10 @@ public class ForegroundServiceNotificationListener {
     }
 
     /**
-     * @param sbn notification that was just changed in some way
+     * @param entry notification that was just changed in some way
      */
-    private void updateNotification(StatusBarNotification sbn, int newImportance) {
+    private void updateNotification(NotificationEntry entry, int newImportance) {
+        final StatusBarNotification sbn = entry.getSbn();
         mForegroundServiceController.updateUserState(
                 sbn.getUserId(),
                 userState -> {
@@ -134,17 +163,33 @@ public class ForegroundServiceNotificationListener {
                                 userState.addImportantNotification(sbn.getPackageName(),
                                         sbn.getKey());
                             }
-                            final Notification.Builder builder =
-                                    Notification.Builder.recoverBuilder(
-                                            mContext, sbn.getNotification());
-                            if (builder.usesStandardHeader()) {
-                                userState.addStandardLayoutNotification(
-                                        sbn.getPackageName(), sbn.getKey());
-                            }
+                        }
+                        final Notification.Builder builder =
+                                Notification.Builder.recoverBuilder(
+                                        mContext, sbn.getNotification());
+                        if (builder.usesStandardHeader()) {
+                            userState.addStandardLayoutNotification(
+                                    sbn.getPackageName(), sbn.getKey());
                         }
                     }
+                    tagAppOps(entry);
                     return true;
                 },
                 true /* create if not found */);
+    }
+
+    // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
+    //  AppOpsCoordinator
+    private void tagAppOps(NotificationEntry entry) {
+        final StatusBarNotification sbn = entry.getSbn();
+        ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
+                sbn.getUserId(),
+                sbn.getPackageName());
+        synchronized (entry.mActiveAppOps) {
+            entry.mActiveAppOps.clear();
+            if (activeOps != null) {
+                entry.mActiveAppOps.addAll(activeOps);
+            }
+        }
     }
 }

@@ -32,6 +32,7 @@ message UsbServiceDumpProto {
     optional UsbPortManagerProto port_manager = 3;
     optional UsbAlsaManagerProto alsa_manager = 4;
     optional UsbSettingsManagerProto settings_manager = 5;
+    optional UsbPermissionsManagerProto permissions_manager = 6;
 }
 
 message UsbDeviceManagerProto {
@@ -309,24 +310,10 @@ message UsbUserSettingsManagerProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 user_id = 1;
-    repeated UsbSettingsDevicePermissionProto device_permissions = 2;
-    repeated UsbSettingsAccessoryPermissionProto accessory_permissions = 3;
+    reserved 2; // previously device_permissions, now unused
+    reserved 3; // previously accessory_permissions, now unused
     repeated UsbDeviceAttachedActivities device_attached_activities = 4;
     repeated UsbAccessoryAttachedActivities accessory_attached_activities = 5;
-}
-
-message UsbSettingsDevicePermissionProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string device_name = 1;
-    repeated int32 uids = 2;
-}
-
-message UsbSettingsAccessoryPermissionProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string accessory_description = 1;
-    repeated int32 uids = 2;
 }
 
 message UsbProfileGroupSettingsManagerProto {
@@ -343,6 +330,63 @@ message UsbSettingsDevicePreferenceProto {
 
     optional UsbDeviceFilterProto filter = 1;
     optional UserPackageProto user_package = 2;
+}
+
+message UsbPermissionsManagerProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated UsbUserPermissionsManagerProto user_permissions = 1;
+}
+
+message UsbUserPermissionsManagerProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 user_id = 1;
+
+    repeated UsbDevicePermissionProto device_permissions = 2;
+    repeated UsbAccessoryPermissionProto accessory_permissions = 3;
+
+    repeated UsbDevicePersistentPermissionProto device_persistent_permissions = 4;
+    repeated UsbAccessoryPersistentPermissionProto accessory_persistent_permissions = 5;
+}
+
+message UsbDevicePermissionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Name of device set by manufacturer
+    // All devices of the same model have the same name
+    optional string device_name = 1;
+    repeated int32 uids = 2;
+}
+
+message UsbAccessoryPermissionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Description of accessory set by manufacturer
+    // All accessories of the same model have the same description
+    optional string accessory_description = 1;
+    repeated int32 uids = 2;
+}
+
+message UsbDevicePersistentPermissionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional UsbDeviceFilterProto device_filter = 1;
+    repeated UsbUidPermissionProto permission_values = 2;
+}
+
+message UsbAccessoryPersistentPermissionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional UsbAccessoryFilterProto accessory_filter = 1;
+    repeated UsbUidPermissionProto permission_values = 2;
+}
+
+message UsbUidPermissionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 uid = 1;
+    optional bool is_granted = 2;
 }
 
 message UsbDeviceFilterProto {

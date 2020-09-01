@@ -80,10 +80,6 @@
                 layout="@layout/notification_material_media_action"
                 android:id="@+id/action4"
             />
-            <include
-                layout="@layout/notification_material_media_action"
-                android:id="@+id/media_seamless"
-            />
         </LinearLayout>
         <ViewStub android:id="@+id/notification_media_seekbar_container"
             android:layout_width="match_parent"

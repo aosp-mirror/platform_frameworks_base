@@ -63,9 +63,16 @@ public interface DozeHost {
     void setDozeScreenBrightness(int value);
 
     /**
-     * Makes scrims black and changes animation durations.
+     * Fade out screen before switching off the display power mode.
+     * @param onDisplayOffCallback Executed when the display is black.
      */
-    default void prepareForGentleWakeUp() {}
+    void prepareForGentleSleep(Runnable onDisplayOffCallback);
+
+    /**
+     * Cancel pending {@code onDisplayOffCallback} callback.
+     * @see #prepareForGentleSleep(Runnable)
+     */
+    void cancelGentleSleep();
 
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
@@ -73,6 +80,9 @@ public interface DozeHost {
      * Leaves pulsing state, going back to ambient UI.
      */
     void stopPulsing();
+
+    /** Returns whether doze is suppressed. */
+    boolean isDozeSuppressed();
 
     interface Callback {
         /**
@@ -87,6 +97,9 @@ public interface DozeHost {
          * @param active whether power save is active or not
          */
         default void onPowerSaveChanged(boolean active) {}
+
+        /** Called when the doze suppression state changes. */
+        default void onDozeSuppressedChanged(boolean suppressed) {}
     }
 
     interface PulseCallback {

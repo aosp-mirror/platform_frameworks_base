@@ -16,22 +16,26 @@
 
 package android.perftests.utils;
 
+import android.annotation.IntRange;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Stats {
-    private long mMedian, mMin, mMax, mPercentile90, mPercentile95;
+    private long mMedian, mMin, mMax;
     private double mMean, mStandardDeviation;
+    private final List<Long> mValues;
 
     /* Calculate stats in constructor. */
     public Stats(List<Long> values) {
-        // make a copy since we're modifying it
-        values = new ArrayList<>(values);
         final int size = values.size();
         if (size < 2) {
             throw new IllegalArgumentException("At least two results are necessary.");
         }
+
+        // Make a copy since we're modifying it.
+        mValues = values = new ArrayList<>(values);
 
         Collections.sort(values);
 
@@ -40,8 +44,6 @@ public class Stats {
 
         mMedian = size % 2 == 0 ? (values.get(size / 2) + values.get(size / 2 - 1)) / 2 :
                 values.get(size / 2);
-        mPercentile90 = getPercentile(values, 90);
-        mPercentile95 = getPercentile(values, 95);
 
         for (int i = 0; i < size; ++i) {
             long result = values.get(i);
@@ -54,6 +56,10 @@ public class Stats {
             mStandardDeviation += tmp * tmp;
         }
         mStandardDeviation = Math.sqrt(mStandardDeviation / (double) (size - 1));
+    }
+
+    public int getSize() {
+        return mValues.size();
     }
 
     public double getMean() {
@@ -76,12 +82,8 @@ public class Stats {
         return mStandardDeviation;
     }
 
-    public long getPercentile90() {
-        return mPercentile90;
-    }
-
-    public long getPercentile95() {
-        return mPercentile95;
+    public long getPercentile(@IntRange(from = 0, to = 100) int percentile) {
+        return getPercentile(mValues, percentile);
     }
 
     private static long getPercentile(List<Long> values, int percentile) {

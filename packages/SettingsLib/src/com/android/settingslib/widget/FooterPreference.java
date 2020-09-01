@@ -16,11 +16,14 @@
 
 package com.android.settingslib.widget;
 
+import android.annotation.StringRes;
 import android.content.Context;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -55,9 +58,84 @@ public class FooterPreference extends Preference {
         title.setLongClickable(false);
     }
 
+    @Override
+    public void setSummary(CharSequence summary) {
+        setTitle(summary);
+    }
+
+    @Override
+    public void setSummary(int summaryResId) {
+        setTitle(summaryResId);
+    }
+
+    @Override
+    public CharSequence getSummary() {
+        return getTitle();
+    }
+
     private void init() {
-        setIcon(R.drawable.ic_info_outline_24);
-        setKey(KEY_FOOTER);
+        if (getIcon() == null) {
+            setIcon(R.drawable.ic_info_outline_24);
+        }
         setOrder(ORDER_FOOTER);
+        if (TextUtils.isEmpty(getKey())) {
+            setKey(KEY_FOOTER);
+        }
+    }
+
+    /**
+     * The builder is convenient to creat a dynamic FooterPreference.
+     */
+    public static class Builder {
+        private Context mContext;
+        private String mKey;
+        private CharSequence mTitle;
+
+        public Builder(@NonNull Context context) {
+            mContext = context;
+        }
+
+        /**
+         * To set the key value of the {@link FooterPreference}.
+         * @param key The key value.
+         */
+        public Builder setKey(@NonNull String key) {
+            mKey = key;
+            return this;
+        }
+
+        /**
+         * To set the title of the {@link FooterPreference}.
+         * @param title The title.
+         */
+        public Builder setTitle(CharSequence title) {
+            mTitle = title;
+            return this;
+        }
+
+        /**
+         * To set the title of the {@link FooterPreference}.
+         * @param titleResId The resource id of the title.
+         */
+        public Builder setTitle(@StringRes int titleResId) {
+            mTitle = mContext.getText(titleResId);
+            return this;
+        }
+
+        /**
+         * To generate the {@link FooterPreference}.
+         */
+        public FooterPreference build() {
+            final FooterPreference footerPreference = new FooterPreference(mContext);
+            footerPreference.setSelectable(false);
+            if (TextUtils.isEmpty(mTitle)) {
+                throw new IllegalArgumentException("Footer title cannot be empty!");
+            }
+            footerPreference.setTitle(mTitle);
+            if (!TextUtils.isEmpty(mKey)) {
+                footerPreference.setKey(mKey);
+            }
+            return footerPreference;
+        }
     }
 }

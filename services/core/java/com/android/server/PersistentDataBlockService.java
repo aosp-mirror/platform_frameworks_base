@@ -162,7 +162,7 @@ public class PersistentDataBlockService extends SystemService {
     @Override
     public void onStart() {
         // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
-        SystemServerInitThreadPool.get().submit(() -> {
+        SystemServerInitThreadPool.submit(() -> {
             mAllowedUid = getAllowedUid(UserHandle.USER_SYSTEM);
             enforceChecksumValidity();
             formatIfOemUnlockEnabled();
@@ -678,6 +678,11 @@ public class PersistentDataBlockService extends SystemService {
         public void clearTestHarnessModeData() {
             int size = Math.min(MAX_TEST_MODE_DATA_SIZE, getTestHarnessModeData().length) + 4;
             writeDataBuffer(getTestHarnessModeDataOffset(), ByteBuffer.allocate(size));
+        }
+
+        @Override
+        public int getAllowedUid() {
+            return mAllowedUid;
         }
 
         private void writeInternal(byte[] data, long offset, int dataLength) {

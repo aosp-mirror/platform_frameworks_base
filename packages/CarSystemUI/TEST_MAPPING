@@ -1,0 +1,12 @@
+{
+  "auto-end-to-end-presubmit": [
+    {
+      "name": "AndroidAutoUiTests",
+      "options" : [
+        {
+          "include-filter": "android.test.functional.auto.apps.HomeHelperTest"
+        }
+      ]
+    }
+  ]
+}

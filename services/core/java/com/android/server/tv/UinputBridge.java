@@ -16,12 +16,11 @@
 
 package com.android.server.tv;
 
-import android.os.Binder;
 import android.os.IBinder;
 
-import java.io.IOException;
-
 import dalvik.system.CloseGuard;
+
+import java.io.IOException;
 
 /**
  * Sends the input event to the linux driver.
@@ -29,17 +28,41 @@ import dalvik.system.CloseGuard;
 public final class UinputBridge {
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private long mPtr;
-    private IBinder mToken = null;
+    private IBinder mToken;
 
     private static native long nativeOpen(String name, String uniqueId, int width, int height,
                                           int maxPointers);
     private static native void nativeClose(long ptr);
     private static native void nativeClear(long ptr);
-    private static native void nativeSendTimestamp(long ptr, long timestamp);
     private static native void nativeSendKey(long ptr, int keyCode, boolean down);
     private static native void nativeSendPointerDown(long ptr, int pointerId, int x, int y);
     private static native void nativeSendPointerUp(long ptr, int pointerId);
     private static native void nativeSendPointerSync(long ptr);
+
+    /** Opens a gamepad - will support gamepad key and axis sending */
+    private static native long nativeGamepadOpen(String name, String uniqueId);
+
+    /**
+     * Marks the specified key up/down for a gamepad.
+     *
+     *  @param keyCode - a code like BUTTON_MODE, BUTTON_A, BUTTON_B, ...
+     */
+    private static native void nativeSendGamepadKey(long ptr, int keyCode, boolean down);
+
+    /**
+     * Send an axis value.
+     *
+     * Available axes are:
+     *  <li> Left joystick: AXIS_X, AXIS_Y
+     *  <li> Right joystick: AXIS_Z, AXIS_RZ
+     *  <li> Analog triggers: AXIS_LTRIGGER, AXIS_RTRIGGER
+     *  <li> DPad: AXIS_HAT_X, AXIS_HAT_Y
+     *
+     * @param axis is a MotionEvent.AXIS_* value.
+     * @param value is a value between -1 and 1 (inclusive)
+     *
+     */
+    private static native void nativeSendGamepadAxisValue(long ptr, int axis, float value);
 
     public UinputBridge(IBinder token, String name, int width, int height, int maxPointers)
                         throws IOException {
@@ -60,12 +83,31 @@ public final class UinputBridge {
         mCloseGuard.open("close");
     }
 
+    /** Constructor used by static factory methods */
+    private UinputBridge(IBinder token, long ptr) {
+        mPtr = ptr;
+        mToken = token;
+        mCloseGuard.open("close");
+    }
+
+    /** Opens a UinputBridge that supports gamepad buttons and axes. */
+    public static UinputBridge openGamepad(IBinder token, String name)
+            throws IOException {
+        if (token == null) {
+            throw new IllegalArgumentException("Token cannot be null");
+        }
+        long ptr = nativeGamepadOpen(name, token.toString());
+        if (ptr == 0) {
+            throw new IOException("Could not open uinput device " + name);
+        }
+
+        return new UinputBridge(token, ptr);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mCloseGuard != null) {
-                mCloseGuard.warnIfOpen();
-            }
+            mCloseGuard.warnIfOpen();
             close(mToken);
         } finally {
             mToken = null;
@@ -91,12 +133,6 @@ public final class UinputBridge {
 
     protected boolean isTokenValid(IBinder token) {
         return mToken.equals(token);
-    }
-
-    public void sendTimestamp(IBinder token, long timestamp) {
-        if (isTokenValid(token)) {
-            nativeSendTimestamp(mPtr, timestamp);
-        }
     }
 
     public void sendKeyDown(IBinder token, int keyCode) {
@@ -127,7 +163,28 @@ public final class UinputBridge {
         if (isTokenValid(token)) {
             nativeSendPointerSync(mPtr);
         }
+    }
 
+    /** Send a gamepad key
+     *  @param keyIndex - the index of the w3-spec key
+     *  @param down - is the key pressed ?
+     */
+    public void sendGamepadKey(IBinder token, int keyCode, boolean down) {
+        if (isTokenValid(token)) {
+            nativeSendGamepadKey(mPtr, keyCode, down);
+        }
+    }
+
+    /**
+     * Send a gamepad axis value.
+     *
+     * @param axis is the axis code (MotionEvent.AXIS_*)
+     * @param value is the value to set for that axis in [-1, 1]
+     */
+    public void sendGamepadAxisValue(IBinder token, int axis, float value) {
+        if (isTokenValid(token)) {
+            nativeSendGamepadAxisValue(mPtr, axis, value);
+        }
     }
 
     public void clear(IBinder token) {

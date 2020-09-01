@@ -245,7 +245,8 @@ std::map<size_t, std::string> AssetManagerSymbolSource::GetAssignedPackageIds() 
   return package_map;
 }
 
-bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId) const {
+bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId,
+    const std::string& package_name) const {
   if (packageId == 0) {
     return true;
   }
@@ -253,7 +254,7 @@ bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId) const {
   for (const std::unique_ptr<const ApkAssets>& assets : apk_assets_) {
     for (const std::unique_ptr<const android::LoadedPackage>& loaded_package
          : assets->GetLoadedArsc()->GetPackages()) {
-      if (packageId == loaded_package->GetPackageId() && loaded_package->IsDynamic()) {
+      if (package_name == loaded_package->GetPackageName() && loaded_package->IsDynamic()) {
         return true;
       }
     }
@@ -313,6 +314,7 @@ static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
       symbol.symbol.name = parsed_name.value();
       symbol.symbol.id = ResourceId(map_entry.key);
       symbol.value = map_entry.value.data;
+      symbol.type = map_entry.value.dataType;
       s->attribute->symbols.push_back(std::move(symbol));
     }
   }
@@ -327,19 +329,19 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   bool found = false;
   ResourceId res_id = 0;
   uint32_t type_spec_flags;
+  ResourceName real_name;
 
   // There can be mangled resources embedded within other packages. Here we will
   // look into each package and look-up the mangled name until we find the resource.
   asset_manager_.ForEachPackage([&](const std::string& package_name, uint8_t id) -> bool {
-    ResourceName real_name(name.package, name.type, name.entry);
-
+    real_name = ResourceName(name.package, name.type, name.entry);
     if (package_name != name.package) {
       real_name.entry = mangled_entry;
       real_name.package = package_name;
     }
 
     res_id = asset_manager_.GetResourceId(real_name.to_string());
-    if (res_id.is_valid() && asset_manager_.GetResourceFlags(res_id.id, &type_spec_flags)) {
+    if (res_id.is_valid_static() && asset_manager_.GetResourceFlags(res_id.id, &type_spec_flags)) {
       found = true;
       return false;
     }
@@ -352,12 +354,12 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   }
 
   std::unique_ptr<SymbolTable::Symbol> s;
-  if (name.type == ResourceType::kAttr) {
+  if (real_name.type == ResourceType::kAttr) {
     s = LookupAttributeInTable(asset_manager_, res_id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = res_id;
-    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id());
+    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package);
   }
 
   if (s) {
@@ -378,7 +380,7 @@ static Maybe<ResourceName> GetResourceName(android::AssetManager2& am,
 
 std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     ResourceId id) {
-  if (!id.is_valid()) {
+  if (!id.is_valid_static()) {
     // Exit early and avoid the error logs from AssetManager.
     return {};
   }
@@ -405,7 +407,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = id;
-    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id());
+    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package);
   }
 
   if (s) {

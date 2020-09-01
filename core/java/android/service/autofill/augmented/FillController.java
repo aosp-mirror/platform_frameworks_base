@@ -62,12 +62,13 @@ public final class FillController {
 
         try {
             mProxy.autofill(values);
-            final FillWindow fillWindow = mProxy.getFillWindow();
-            if (fillWindow != null) {
-                fillWindow.destroy();
-            }
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
+        }
+
+        final FillWindow fillWindow = mProxy.getFillWindow();
+        if (fillWindow != null) {
+            fillWindow.destroy();
         }
     }
 }

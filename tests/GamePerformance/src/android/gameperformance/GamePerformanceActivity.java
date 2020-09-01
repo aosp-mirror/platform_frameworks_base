@@ -25,13 +25,31 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 /**
- * Minimal activity that holds SurfaceView or GLSurfaceView.
- * call attachSurfaceView or attachOpenGLView to switch views.
+ * Minimal activity that holds different types of views.
+ * call attachSurfaceView, attachOpenGLView or attachControlView to switch
+ * the view.
  */
 public class GamePerformanceActivity extends Activity {
     private CustomSurfaceView mSurfaceView = null;
     private CustomOpenGLView mOpenGLView = null;
+    private CustomControlView mControlView = null;
+
     private RelativeLayout mRootLayout;
+
+    private void detachAllViews() {
+        if (mOpenGLView != null) {
+            mRootLayout.removeView(mOpenGLView);
+            mOpenGLView = null;
+        }
+        if (mSurfaceView != null) {
+            mRootLayout.removeView(mSurfaceView);
+            mSurfaceView = null;
+        }
+        if (mControlView != null) {
+            mRootLayout.removeView(mControlView);
+            mControlView = null;
+        }
+    }
 
     public void attachSurfaceView() throws InterruptedException {
         synchronized (mRootLayout) {
@@ -42,10 +60,7 @@ public class GamePerformanceActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (mOpenGLView != null) {
-                        mRootLayout.removeView(mOpenGLView);
-                        mOpenGLView = null;
-                    }
+                    detachAllViews();
                     mSurfaceView = new CustomSurfaceView(GamePerformanceActivity.this);
                     mRootLayout.addView(mSurfaceView);
                     latch.countDown();
@@ -65,10 +80,7 @@ public class GamePerformanceActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (mSurfaceView != null) {
-                        mRootLayout.removeView(mSurfaceView);
-                        mSurfaceView = null;
-                    }
+                    detachAllViews();
                     mOpenGLView = new CustomOpenGLView(GamePerformanceActivity.this);
                     mRootLayout.addView(mOpenGLView);
                     latch.countDown();
@@ -76,6 +88,40 @@ public class GamePerformanceActivity extends Activity {
             });
             latch.await();
         }
+    }
+
+    public void attachControlView() throws InterruptedException {
+        synchronized (mRootLayout) {
+            if (mControlView != null) {
+                return;
+            }
+            final CountDownLatch latch = new CountDownLatch(1);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    detachAllViews();
+                    mControlView = new CustomControlView(GamePerformanceActivity.this);
+                    mRootLayout.addView(mControlView);
+                    latch.countDown();
+                }
+            });
+            latch.await();
+        }
+    }
+
+
+    public CustomOpenGLView getOpenGLView() {
+        if (mOpenGLView == null) {
+            throw new RuntimeException("OpenGL view is not attached");
+        }
+        return mOpenGLView;
+    }
+
+    public CustomControlView getControlView() {
+        if (mControlView == null) {
+            throw new RuntimeException("Control view is not attached");
+        }
+        return mControlView;
     }
 
     @Override
@@ -105,6 +151,8 @@ public class GamePerformanceActivity extends Activity {
             mSurfaceView.resetFrameTimes();
         } else if (mOpenGLView != null) {
             mOpenGLView.resetFrameTimes();
+        } else if (mControlView != null) {
+            mControlView.resetFrameTimes();
         } else {
             throw new IllegalStateException("Nothing attached");
         }
@@ -115,6 +163,8 @@ public class GamePerformanceActivity extends Activity {
             return mSurfaceView.getFps();
         } else if (mOpenGLView != null) {
             return mOpenGLView.getFps();
+        } else if (mControlView != null) {
+            return mControlView.getFps();
         } else {
             throw new IllegalStateException("Nothing attached");
         }

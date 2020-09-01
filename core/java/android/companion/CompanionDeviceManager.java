@@ -16,12 +16,12 @@
 
 package android.companion;
 
-
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
@@ -29,24 +29,31 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.net.MacAddress;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
  * System level service for managing companion devices
+ *
+ * See <a href="{@docRoot}guide/topics/connectivity/companion-device-pairing">this guide</a>
+ * for a usage example.
  *
  * <p>To obtain an instance call {@link Context#getSystemService}({@link
  * Context#COMPANION_DEVICE_SERVICE}) Then, call {@link #associate(AssociationRequest,
  * Callback, Handler)} to initiate the flow of associating current package with a
  * device selected by user.</p>
  *
+ * @see CompanionDeviceManager#associate
  * @see AssociationRequest
  */
 @SystemService(Context.COMPANION_DEVICE_SERVICE)
@@ -58,6 +65,13 @@ public final class CompanionDeviceManager {
     /**
      * A device, returned in the activity result of the {@link IntentSender} received in
      * {@link Callback#onDeviceFound}
+     *
+     * Type is:
+     * <ul>
+     *     <li>for classic Bluetooth - {@link android.bluetooth.BluetoothDevice}</li>
+     *     <li>for Bluetooth LE - {@link android.bluetooth.le.ScanResult}</li>
+     *     <li>for WiFi - {@link android.net.wifi.ScanResult}</li>
+     * </ul>
      */
     public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
 
@@ -141,8 +155,8 @@ public final class CompanionDeviceManager {
         if (!checkFeaturePresent()) {
             return;
         }
-        checkNotNull(request, "Request cannot be null");
-        checkNotNull(callback, "Callback cannot be null");
+        Objects.requireNonNull(request, "Request cannot be null");
+        Objects.requireNonNull(callback, "Callback cannot be null");
         try {
             mService.associate(
                     request,
@@ -243,6 +257,49 @@ public final class CompanionDeviceManager {
         }
         try {
             return mService.hasNotificationAccess(component);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check if a given package was {@link #associate associated} with a device with given
+     * Wi-Fi MAC address for a given user.
+     *
+     * <p>This is a system API protected by the
+     * {@link andrioid.Manifest.permission#MANAGE_COMPANION_DEVICES} permission, that’s currently
+     * called by the Android Wi-Fi stack to determine whether user consent is required to connect
+     * to a Wi-Fi network. Devices that have been pre-registered as companion devices will not
+     * require user consent to connect.</p>
+     *
+     * <p>Note if the caller has the
+     * {@link android.Manifest.permission#COMPANION_APPROVE_WIFI_CONNECTIONS} permission, this
+     * method will return true by default.</p>
+     *
+     * @param packageName the name of the package that has the association with the companion device
+     * @param macAddress the Wi-Fi MAC address or BSSID of the companion device to check for
+     * @param user the user handle that currently hosts the package being queried for a companion
+     *             device association
+     * @return whether a corresponding association record exists
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public boolean isDeviceAssociatedForWifiConnection(
+            @NonNull String packageName,
+            @NonNull MacAddress macAddress,
+            @NonNull UserHandle user) {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(macAddress, "mac address cannot be null");
+        Objects.requireNonNull(user, "user cannot be null");
+        try {
+            return mService.isDeviceAssociatedForWifiConnection(
+                    packageName, macAddress.toString(), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -23,15 +23,19 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
@@ -95,9 +99,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.RemoteViews;
-
 import com.android.internal.R;
 import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
@@ -112,11 +114,6 @@ import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -138,6 +135,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
         OnCrossProfileWidgetProvidersChangeListener {
@@ -231,6 +231,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private KeyguardManager mKeyguardManager;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
+    private ActivityManagerInternal mActivityManagerInternal;
+    private AppOpsManagerInternal mAppOpsManagerInternal;
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     private SecurityPolicy mSecurityPolicy;
 
@@ -271,9 +274,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         LocalServices.addService(AppWidgetManagerInternal.class, new AppWidgetManagerLocal());
     }
 
+    void systemServicesReady() {
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mAppOpsManagerInternal = LocalServices.getService(AppOpsManagerInternal.class);
+        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
+    }
+
     private void computeMaximumWidgetBitmapMemory() {
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
+        Display display = mContext.getDisplayNoVerify();
         Point size = new Point();
         display.getRealSize(size);
         // Cap memory usage at 1.5 times the size of the display
@@ -630,10 +638,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
                             providerUserId, true);
                 } else {
-                    final SuspendDialogInfo dialogInfo = mPackageManagerInternal
-                            .getSuspendedDialogInfo(providerPackage, providerUserId);
+                    final SuspendDialogInfo dialogInfo =
+                            mPackageManagerInternal.getSuspendedDialogInfo(providerPackage,
+                                    suspendingPackage, providerUserId);
+                    // onUnsuspend is null because we don't want to start any activity on
+                    // unsuspending from a suspended widget.
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
-                            providerPackage, suspendingPackage, dialogInfo, providerUserId);
+                            providerPackage, suspendingPackage, dialogInfo, null, null,
+                            providerUserId);
                 }
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;
@@ -782,6 +794,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         proto.write(WidgetProto.PROVIDER_PACKAGE, widget.provider.id.componentName.getPackageName());
         proto.write(WidgetProto.PROVIDER_CLASS, widget.provider.id.componentName.getClassName());
         if (widget.options != null) {
+            proto.write(WidgetProto.RESTORE_COMPLETED,
+                    widget.options.getBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED));
             proto.write(WidgetProto.MIN_WIDTH,
                 widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0));
             proto.write(WidgetProto.MIN_HEIGHT,
@@ -856,13 +870,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             ArrayList<PendingHostUpdate> outUpdates = new ArrayList<>(N);
             LongSparseArray<PendingHostUpdate> updatesMap = new LongSparseArray<>();
             for (int i = 0; i < N; i++) {
-                if (host.getPendingUpdatesForId(appWidgetIds[i], updatesMap)) {
-                    // We key the updates based on request id, so that the values are sorted in the
-                    // order they were received.
-                    int M = updatesMap.size();
-                    for (int j = 0; j < M; j++) {
-                        outUpdates.add(updatesMap.valueAt(j));
-                    }
+                updatesMap.clear();
+                host.getPendingUpdatesForId(appWidgetIds[i], updatesMap);
+                // We key the updates based on request id, so that the values are sorted in the
+                // order they were received.
+                int m = updatesMap.size();
+                for (int j = 0; j < m; j++) {
+                    outUpdates.add(updatesMap.valueAt(j));
                 }
             }
             // Reset the update counter once all the updates have been calculated
@@ -893,6 +907,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (host != null) {
                 host.callbacks = null;
                 pruneHostLocked(host);
+                mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUids(), false);
             }
         }
     }
@@ -1950,7 +1965,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
         }
     }
-
     private void scheduleNotifyAppWidgetViewDataChanged(Widget widget, int viewId) {
         if (viewId == ID_VIEWS_UPDATE || viewId == ID_PROVIDER_CHANGED) {
             // A view id should never collide with these constants but a developer can call this
@@ -2096,6 +2110,40 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
             synchronized (mLock){
+                Slog.e(TAG, "Widget host dead: " + host.id, re);
+                host.callbacks = null;
+            }
+        }
+    }
+
+    private void scheduleNotifyAppWidgetRemovedLocked(Widget widget) {
+        long requestId = UPDATE_COUNTER.incrementAndGet();
+        if (widget != null) {
+            widget.updateSequenceNos.clear();
+        }
+        if (widget == null || widget.provider == null || widget.provider.zombie
+                || widget.host.callbacks == null || widget.host.zombie) {
+            return;
+        }
+
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = widget.host;
+        args.arg2 = widget.host.callbacks;
+        args.arg3 = requestId;
+        args.argi1 = widget.appWidgetId;
+
+        mCallbackHandler.obtainMessage(
+            CallbackHandler.MSG_NOTIFY_APP_WIDGET_REMOVED,
+            args).sendToTarget();
+    }
+
+    private void handleNotifyAppWidgetRemoved(Host host, IAppWidgetHost callbacks, int appWidgetId,
+            long requestId) {
+        try {
+            callbacks.appWidgetRemoved(appWidgetId);
+            host.lastWidgetUpdateSequenceNo = requestId;
+        } catch (RemoteException re) {
+            synchronized (mLock) {
                 Slog.e(TAG, "Widget host dead: " + host.id, re);
                 host.callbacks = null;
             }
@@ -2461,7 +2509,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.endTag(null, "h");
     }
 
-    private static void serializeAppWidget(XmlSerializer out, Widget widget) throws IOException {
+    private static void serializeAppWidget(XmlSerializer out, Widget widget,
+            boolean saveRestoreCompleted) throws IOException {
         out.startTag(null, "g");
         out.attribute(null, "id", Integer.toHexString(widget.appWidgetId));
         out.attribute(null, "rid", Integer.toHexString(widget.restoredId));
@@ -2480,8 +2529,48 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             out.attribute(null, "max_height", Integer.toHexString((maxHeight > 0) ? maxHeight : 0));
             out.attribute(null, "host_category", Integer.toHexString(widget.options.getInt(
                     AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
+            if (saveRestoreCompleted) {
+                boolean restoreCompleted = widget.options.getBoolean(
+                        AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED);
+                out.attribute(null, "restore_completed", Boolean.toString(restoreCompleted));
+            }
         }
         out.endTag(null, "g");
+    }
+
+    private static Bundle parseWidgetIdOptions(XmlPullParser parser) {
+        Bundle options = new Bundle();
+        String restoreCompleted = parser.getAttributeValue(null, "restore_completed");
+        if (restoreCompleted != null) {
+            options.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED,
+                    Boolean.valueOf(restoreCompleted));
+        }
+        String minWidthString = parser.getAttributeValue(null, "min_width");
+        if (minWidthString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+                    Integer.parseInt(minWidthString, 16));
+        }
+        String minHeightString = parser.getAttributeValue(null, "min_height");
+        if (minHeightString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
+                    Integer.parseInt(minHeightString, 16));
+        }
+        String maxWidthString = parser.getAttributeValue(null, "max_width");
+        if (maxWidthString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
+                    Integer.parseInt(maxWidthString, 16));
+        }
+        String maxHeightString = parser.getAttributeValue(null, "max_height");
+        if (maxHeightString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+                    Integer.parseInt(maxHeightString, 16));
+        }
+        String categoryString = parser.getAttributeValue(null, "host_category");
+        if (categoryString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                    Integer.parseInt(categoryString, 16));
+        }
+        return options;
     }
 
     @Override
@@ -2870,8 +2959,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      */
     void removeWidgetLocked(Widget widget) {
         mWidgets.remove(widget);
-
         onWidgetRemovedLocked(widget);
+        scheduleNotifyAppWidgetRemovedLocked(widget);
     }
 
     private void onWidgetRemovedLocked(Widget widget) {
@@ -3016,7 +3105,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (widget.host.getUserId() != userId) {
                     continue;
                 }
-                serializeAppWidget(out, widget);
+                serializeAppWidget(out, widget, true);
             }
 
             Iterator<Pair<Integer, String>> it = mPackagesWithBindWidgetPermission.iterator();
@@ -3155,34 +3244,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         String restoredIdString = parser.getAttributeValue(null, "rid");
                         widget.restoredId = (restoredIdString == null) ? 0
                                 : Integer.parseInt(restoredIdString, 16);
-
-                        Bundle options = new Bundle();
-                        String minWidthString = parser.getAttributeValue(null, "min_width");
-                        if (minWidthString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-                                    Integer.parseInt(minWidthString, 16));
-                        }
-                        String minHeightString = parser.getAttributeValue(null, "min_height");
-                        if (minHeightString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-                                    Integer.parseInt(minHeightString, 16));
-                        }
-                        String maxWidthString = parser.getAttributeValue(null, "max_width");
-                        if (maxWidthString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-                                    Integer.parseInt(maxWidthString, 16));
-                        }
-                        String maxHeightString = parser.getAttributeValue(null, "max_height");
-                        if (maxHeightString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-                                    Integer.parseInt(maxHeightString, 16));
-                        }
-                        String categoryString = parser.getAttributeValue(null, "host_category");
-                        if (categoryString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                                    Integer.parseInt(categoryString, 16));
-                        }
-                        widget.options = options;
+                        widget.options = parseWidgetIdOptions(parser);
 
                         final int hostTag = Integer.parseInt(parser.getAttributeValue(
                                 null, "h"), 16);
@@ -3582,11 +3644,51 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return false;
     }
 
+    /**
+     * Note an app widget is tapped on. If a app widget is tapped, the underlying app is treated as
+     * foreground so the app can get while-in-use permission.
+     *
+     * @param callingPackage calling app's packageName.
+     * @param appWidgetId App widget id.
+     */
+    @Override
+    public void noteAppWidgetTapped(String callingPackage, int appWidgetId) {
+        mSecurityPolicy.enforceCallFromPackage(callingPackage);
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            // The launcher must be at TOP.
+            final int procState = mActivityManagerInternal.getUidProcessState(callingUid);
+            if (procState > ActivityManager.PROCESS_STATE_TOP) {
+                return;
+            }
+            synchronized (mLock) {
+                final Widget widget = lookupWidgetLocked(appWidgetId, callingUid, callingPackage);
+                if (widget == null) {
+                    return;
+                }
+                final ProviderId providerId = widget.provider.id;
+                final String packageName = providerId.componentName.getPackageName();
+                if (packageName == null) {
+                    return;
+                }
+                final SparseArray<String> uid2PackageName = new SparseArray<String>();
+                uid2PackageName.put(providerId.uid, packageName);
+                mAppOpsManagerInternal.updateAppWidgetVisibility(uid2PackageName, true);
+                mUsageStatsManagerInternal.reportEvent(packageName,
+                        UserHandle.getUserId(providerId.uid), UsageEvents.Event.USER_INTERACTION);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private final class CallbackHandler extends Handler {
         public static final int MSG_NOTIFY_UPDATE_APP_WIDGET = 1;
         public static final int MSG_NOTIFY_PROVIDER_CHANGED = 2;
         public static final int MSG_NOTIFY_PROVIDERS_CHANGED = 3;
         public static final int MSG_NOTIFY_VIEW_DATA_CHANGED = 4;
+        public static final int MSG_NOTIFY_APP_WIDGET_REMOVED = 5;
 
         public CallbackHandler(Looper looper) {
             super(looper, null, false);
@@ -3617,6 +3719,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     args.recycle();
 
                     handleNotifyProviderChanged(host, callbacks, appWidgetId, info, requestId);
+                } break;
+
+                case MSG_NOTIFY_APP_WIDGET_REMOVED: {
+                    SomeArgs args = (SomeArgs) message.obj;
+                    Host host = (Host) args.arg1;
+                    IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
+                    long requestId = (Long) args.arg3;
+                    final int appWidgetId = args.argi1;
+                    args.recycle();
+                    handleNotifyAppWidgetRemoved(host, callbacks, appWidgetId, requestId);
                 } break;
 
                 case MSG_NOTIFY_PROVIDERS_CHANGED: {
@@ -4017,14 +4129,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         /**
          * Adds all pending updates in {@param outUpdates} keys by the update time.
          */
-        public boolean getPendingUpdatesForId(int appWidgetId,
+        public void getPendingUpdatesForId(int appWidgetId,
                 LongSparseArray<PendingHostUpdate> outUpdates) {
             long updateSequenceNo = lastWidgetUpdateSequenceNo;
             int N = widgets.size();
             for (int i = 0; i < N; i++) {
                 Widget widget = widgets.get(i);
                 if (widget.appWidgetId == appWidgetId) {
-                    outUpdates.clear();
                     for (int j = widget.updateSequenceNos.size() - 1; j >= 0; j--) {
                         long requestId = widget.updateSequenceNos.valueAt(j);
                         if (requestId <= updateSequenceNo) {
@@ -4046,10 +4157,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         }
                         outUpdates.put(requestId, update);
                     }
-                    return true;
+                    return;
                 }
             }
-            return false;
+            outUpdates.put(lastWidgetUpdateSequenceNo,
+                    PendingHostUpdate.appWidgetRemoved(appWidgetId));
+        }
+
+        public SparseArray<String> getWidgetUids() {
+            final SparseArray<String> uids = new SparseArray<>();
+            for (int i = widgets.size() - 1; i >= 0; i--) {
+                final Widget widget = widgets.get(i);
+                final ProviderId providerId = widget.provider.id;
+                uids.put(providerId.uid, providerId.componentName.getPackageName());
+            }
+            return uids;
         }
 
         @Override
@@ -4293,7 +4415,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         if (widget.host.isInPackageForUser(backedupPackage, userId)
                                 || (provider != null
                                 &&  provider.isInPackageForUser(backedupPackage, userId))) {
-                            serializeAppWidget(out, widget);
+                            serializeAppWidget(out, widget, false);
                         }
                     }
 
@@ -4726,36 +4848,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     || widget.provider.getUserId() == userId);
         }
 
-        private Bundle parseWidgetIdOptions(XmlPullParser parser) {
-            Bundle options = new Bundle();
-            String minWidthString = parser.getAttributeValue(null, "min_width");
-            if (minWidthString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-                        Integer.parseInt(minWidthString, 16));
-            }
-            String minHeightString = parser.getAttributeValue(null, "min_height");
-            if (minHeightString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-                        Integer.parseInt(minHeightString, 16));
-            }
-            String maxWidthString = parser.getAttributeValue(null, "max_width");
-            if (maxWidthString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-                        Integer.parseInt(maxWidthString, 16));
-            }
-            String maxHeightString = parser.getAttributeValue(null, "max_height");
-            if (maxHeightString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-                        Integer.parseInt(maxHeightString, 16));
-            }
-            String categoryString = parser.getAttributeValue(null, "host_category");
-            if (categoryString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                        Integer.parseInt(categoryString, 16));
-            }
-            return options;
-        }
-
         private int countPendingUpdates(ArrayList<RestoreUpdateRecord> updates) {
             int pending = 0;
             final int N = updates.size();
@@ -4791,7 +4883,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final int widgetCount = mWidgets.size();
                 for (int i = 0; i < widgetCount; i++) {
                     final Widget widget = mWidgets.get(i);
-                    if  (widget.host.id.uid == uid) {
+                    if  (widget.host.id.uid == uid && widget.provider != null) {
                         if (widgetPackages == null) {
                             widgetPackages = new ArraySet<>();
                         }
@@ -4806,6 +4898,5 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public void unlockUser(int userId) {
             handleUserUnlocked(userId);
         }
-
     }
 }

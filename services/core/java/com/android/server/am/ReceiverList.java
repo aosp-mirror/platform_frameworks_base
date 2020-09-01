@@ -80,20 +80,20 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
         return false;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        app.writeToProto(proto, ReceiverListProto.APP);
+        app.dumpDebug(proto, ReceiverListProto.APP);
         proto.write(ReceiverListProto.PID, pid);
         proto.write(ReceiverListProto.UID, uid);
         proto.write(ReceiverListProto.USER, userId);
         if (curBroadcast != null) {
-            curBroadcast.writeToProto(proto, ReceiverListProto.CURRENT);
+            curBroadcast.dumpDebug(proto, ReceiverListProto.CURRENT);
         }
         proto.write(ReceiverListProto.LINKED_TO_DEATH, linkedToDeath);
         final int N = size();
         for (int i=0; i<N; i++) {
             BroadcastFilter bf = get(i);
-            bf.writeToProto(proto, ReceiverListProto.FILTERS);
+            bf.dumpDebug(proto, ReceiverListProto.FILTERS);
         }
         proto.write(ReceiverListProto.HEX_HASH, Integer.toHexString(System.identityHashCode(this)));
         proto.end(token);

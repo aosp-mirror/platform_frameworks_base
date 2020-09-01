@@ -21,9 +21,7 @@ import android.app.Application;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.biometrics.BiometricManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -573,7 +571,7 @@ public class KeyStore {
         }
         KeyCharacteristics characteristics = result.getKeyCharacteristics();
         if (characteristics == null) {
-            Log.e(TAG, "generateKeyInternal got empty key cheractariestics " + error);
+            Log.e(TAG, "generateKeyInternal got empty key characteristics " + error);
             return SYSTEM_ERROR;
         }
         outCharacteristics.shallowCopyFrom(characteristics);
@@ -1348,19 +1346,26 @@ public class KeyStore {
                     return new UserNotAuthenticatedException();
                 }
 
-                final long fingerprintOnlySid = getFingerprintOnlySid();
-                if ((fingerprintOnlySid != 0)
-                        && (keySids.contains(KeymasterArguments.toUint64(fingerprintOnlySid)))) {
-                    // One of the key's SIDs is the current fingerprint SID -- user can be
-                    // authenticated against that SID.
-                    return new UserNotAuthenticatedException();
+                final BiometricManager bm = mContext.getSystemService(BiometricManager.class);
+                long[] biometricSids = bm.getAuthenticatorIds();
+
+                // The key must contain every biometric SID. This is because the current API surface
+                // treats all biometrics (capable of keystore integration) equally. e.g. if the
+                // device has multiple keystore-capable sensors, and one of the sensor's SIDs
+                // changed, 1) there is no way for a developer to specify authentication with a
+                // specific sensor (the one that hasn't changed), and 2) currently the only
+                // signal to developers is the UserNotAuthenticatedException, which doesn't
+                // indicate a specific sensor.
+                boolean canUnlockViaBiometrics = true;
+                for (long sid : biometricSids) {
+                    if (!keySids.contains(KeymasterArguments.toUint64(sid))) {
+                        canUnlockViaBiometrics = false;
+                        break;
+                    }
                 }
 
-                final long faceOnlySid = getFaceOnlySid();
-                if ((faceOnlySid != 0)
-                        && (keySids.contains(KeymasterArguments.toUint64(faceOnlySid)))) {
-                    // One of the key's SIDs is the current face SID -- user can be
-                    // authenticated against that SID.
+                if (canUnlockViaBiometrics) {
+                    // All of the biometric SIDs are contained in the key's SIDs.
                     return new UserNotAuthenticatedException();
                 }
 
@@ -1372,36 +1377,6 @@ public class KeyStore {
             default:
                 return new InvalidKeyException("Keystore operation failed", e);
         }
-    }
-
-    private long getFaceOnlySid() {
-        final PackageManager packageManager = mContext.getPackageManager();
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            return 0;
-        }
-        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
-        if (faceManager == null) {
-            return 0;
-        }
-
-        // TODO: Restore USE_BIOMETRIC or USE_BIOMETRIC_INTERNAL permission check in
-        // FaceManager.getAuthenticatorId once the ID is no longer needed here.
-        return faceManager.getAuthenticatorId();
-    }
-
-    private long getFingerprintOnlySid() {
-        final PackageManager packageManager = mContext.getPackageManager();
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            return 0;
-        }
-        FingerprintManager fingerprintManager = mContext.getSystemService(FingerprintManager.class);
-        if (fingerprintManager == null) {
-            return 0;
-        }
-
-        // TODO: Restore USE_FINGERPRINT permission check in
-        // FingerprintManager.getAuthenticatorId once the ID is no longer needed here.
-        return fingerprintManager.getAuthenticatorId();
     }
 
     /**

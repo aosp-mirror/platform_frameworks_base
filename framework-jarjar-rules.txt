@@ -1,0 +1,2 @@
+rule android.hidl.** android.internal.hidl.@1
+rule android.net.wifi.WifiAnnotations* android.internal.wifi.WifiAnnotations@1

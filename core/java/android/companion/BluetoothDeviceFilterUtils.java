@@ -51,13 +51,6 @@ public class BluetoothDeviceFilterUtils {
         return s == null ? null : Pattern.compile(s);
     }
 
-    static boolean matches(ScanFilter filter, BluetoothDevice device) {
-        boolean result = matchesAddress(filter.getDeviceAddress(), device)
-                && matchesServiceUuid(filter.getServiceUuid(), filter.getServiceUuidMask(), device);
-        if (DEBUG) debugLogMatchResult(result, device, filter);
-        return result;
-    }
-
     static boolean matchesAddress(String deviceAddress, BluetoothDevice device) {
         final boolean result = deviceAddress == null
                 || (device != null && deviceAddress.equals(device.getAddress()));

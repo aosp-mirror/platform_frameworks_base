@@ -25,12 +25,15 @@ import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.util.animation.PhysicsAnimator;
+import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import com.google.android.collect.Sets;
 
@@ -53,7 +56,7 @@ public class ExpandedAnimationController
     private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
     /** Duration of the expand/collapse target path animation. */
-    private static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
+    public static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
 
     /** Stiffness for the expand/collapse path-following animation. */
     private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
@@ -61,27 +64,44 @@ public class ExpandedAnimationController
     /** What percentage of the screen to use when centering the bubbles in landscape. */
     private static final float CENTER_BUBBLES_LANDSCAPE_PERCENT = 0.66f;
 
+    /**
+     * Velocity required to dismiss an individual bubble without dragging it into the dismiss
+     * target.
+     */
+    private static final float FLING_TO_DISMISS_MIN_VELOCITY = 6000f;
+
+    private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
+            new PhysicsAnimator.SpringConfig(
+                    EXPAND_COLLAPSE_ANIM_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
     /** Space between status bar and bubbles in the expanded state. */
     private float mBubblePaddingTop;
     /** Size of each bubble. */
     private float mBubbleSizePx;
+    /** Space between bubbles in row above expanded view. */
+    private float mSpaceBetweenBubbles;
     /** Height of the status bar. */
     private float mStatusBarHeight;
     /** Size of display. */
     private Point mDisplaySize;
-    /** Max number of bubbles shown in row above expanded view.*/
+    /** Max number of bubbles shown in row above expanded view. */
     private int mBubblesMaxRendered;
     /** What the current screen orientation is. */
     private int mScreenOrientation;
 
-    /** Whether the dragged-out bubble is in the dismiss target. */
-    private boolean mIndividualBubbleWithinDismissTarget = false;
-
     private boolean mAnimatingExpand = false;
+
+    /**
+     * Whether we are animating other Bubbles UI elements out in preparation for a call to
+     * {@link #collapseBackToStack}. If true, we won't animate bubbles in response to adds or
+     * reorders.
+     */
+    private boolean mPreparingToCollapse = false;
+
     private boolean mAnimatingCollapse = false;
-    private Runnable mAfterExpand;
+    private @Nullable Runnable mAfterExpand;
     private Runnable mAfterCollapse;
     private PointF mCollapsePoint;
 
@@ -96,14 +116,30 @@ public class ExpandedAnimationController
      */
     private boolean mSpringingBubbleToTouch = false;
 
+    /**
+     * Whether to spring the bubble to the next touch event coordinates. This is used to animate the
+     * bubble out of the magnetic dismiss target to the touch location.
+     *
+     * Once it 'catches up' and the animation ends, we'll revert to moving it directly.
+     */
+    private boolean mSpringToTouchOnNextMotionEvent = false;
+
+    /** The bubble currently being dragged out of the row (to potentially be dismissed). */
+    private MagnetizedObject<View> mMagnetizedBubbleDraggingOut;
+
     private int mExpandedViewPadding;
-    private float mLauncherGridDiff;
+
+    /**
+     * Callback to run whenever any bubble is animated out. The BubbleStackView will check if the
+     * end of this animation means we have no bubbles left, and notify the BubbleController.
+     */
+    private Runnable mOnBubbleAnimatedOutAction;
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
-            int orientation) {
-        updateOrientation(orientation, displaySize);
+            int orientation, Runnable onBubbleAnimatedOutAction) {
+        updateResources(orientation, displaySize);
         mExpandedViewPadding = expandedViewPadding;
-        mLauncherGridDiff = 30f;
+        mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
     }
 
     /**
@@ -112,23 +148,46 @@ public class ExpandedAnimationController
      */
     private boolean mBubbleDraggedOutEnough = false;
 
-    /** The bubble currently being dragged out of the row (to potentially be dismissed). */
-    private View mBubbleDraggingOut;
+    /** End action to run when the lead bubble's expansion animation completes. */
+    @Nullable private Runnable mLeadBubbleEndAction;
+
+    /**
+     * Animates expanding the bubbles into a row along the top of the screen, optionally running an
+     * end action when the entire animation completes, and an end action when the lead bubble's
+     * animation ends.
+     */
+    public void expandFromStack(
+            @Nullable Runnable after, @Nullable Runnable leadBubbleEndAction) {
+        mPreparingToCollapse = false;
+        mAnimatingCollapse = false;
+        mAnimatingExpand = true;
+        mAfterExpand = after;
+        mLeadBubbleEndAction = leadBubbleEndAction;
+
+        startOrUpdatePathAnimation(true /* expanding */);
+    }
 
     /**
      * Animates expanding the bubbles into a row along the top of the screen.
      */
-    public void expandFromStack(Runnable after) {
-        mAnimatingCollapse = false;
-        mAnimatingExpand = true;
-        mAfterExpand = after;
+    public void expandFromStack(@Nullable Runnable after) {
+        expandFromStack(after, null /* leadBubbleEndAction */);
+    }
 
-        startOrUpdatePathAnimation(true /* expanding */);
+    /**
+     * Sets that we're animating the stack collapsed, but haven't yet called
+     * {@link #collapseBackToStack}. This will temporarily suspend animations for bubbles that are
+     * added or re-ordered, since the upcoming collapse animation will handle positioning those
+     * bubbles in the collapsed stack.
+     */
+    public void notifyPreparingToCollapse() {
+        mPreparingToCollapse = true;
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
     public void collapseBackToStack(PointF collapsePoint, Runnable after) {
         mAnimatingExpand = false;
+        mPreparingToCollapse = false;
         mAnimatingCollapse = true;
         mAfterCollapse = after;
         mCollapsePoint = collapsePoint;
@@ -141,15 +200,25 @@ public class ExpandedAnimationController
      * @param orientation Landscape or portrait.
      * @param displaySize Updated display size.
      */
-    public void updateOrientation(int orientation, Point displaySize) {
+    public void updateResources(int orientation, Point displaySize) {
         mScreenOrientation = orientation;
         mDisplaySize = displaySize;
-        if (mLayout != null) {
-            Resources res = mLayout.getContext().getResources();
-            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-            mStatusBarHeight = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
+        if (mLayout == null) {
+            return;
         }
+        Resources res = mLayout.getContext().getResources();
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mStatusBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
+
+        // Includes overflow button.
+        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
+                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
+        mSpaceBetweenBubbles = totalGapWidth / mBubblesMaxRendered;
     }
 
     /**
@@ -168,6 +237,10 @@ public class ExpandedAnimationController
                 }
 
                 mAfterExpand = null;
+
+                // Update bubble positions in case any bubbles were added or removed during the
+                // expansion animation.
+                updateBubblePositions();
             };
         } else {
             after = () -> {
@@ -224,22 +297,69 @@ public class ExpandedAnimationController
                     ? (index * 10)
                     : ((mLayout.getChildCount() - index) * 10);
 
+            final boolean isLeadBubble =
+                    (firstBubbleLeads && index == 0)
+                            || (!firstBubbleLeads && index == mLayout.getChildCount() - 1);
+
             animation
                     .followAnimatedTargetAlongPath(
                             path,
                             EXPAND_COLLAPSE_TARGET_ANIM_DURATION /* targetAnimDuration */,
-                            Interpolators.LINEAR /* targetAnimInterpolator */)
+                            Interpolators.LINEAR /* targetAnimInterpolator */,
+                            isLeadBubble ? mLeadBubbleEndAction : null /* endAction */,
+                            () -> mLeadBubbleEndAction = null /* endAction */)
                     .withStartDelay(startDelay)
                     .withStiffness(EXPAND_COLLAPSE_ANIM_STIFFNESS);
         }).startAll(after);
     }
 
-    /** Prepares the given bubble to be dragged out. */
-    public void prepareForBubbleDrag(View bubble) {
+    /** Notifies the controller that the dragged-out bubble was unstuck from the magnetic target. */
+    public void onUnstuckFromTarget() {
+        mSpringToTouchOnNextMotionEvent = true;
+    }
+
+    /**
+     * Prepares the given bubble view to be dragged out, using the provided magnetic target and
+     * listener.
+     */
+    public void prepareForBubbleDrag(
+            View bubble,
+            MagnetizedObject.MagneticTarget target,
+            MagnetizedObject.MagnetListener listener) {
         mLayout.cancelAnimationsOnView(bubble);
 
-        mBubbleDraggingOut = bubble;
-        mBubbleDraggingOut.setTranslationZ(Short.MAX_VALUE);
+        bubble.setTranslationZ(Short.MAX_VALUE);
+        mMagnetizedBubbleDraggingOut = new MagnetizedObject<View>(
+                mLayout.getContext(), bubble,
+                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y) {
+            @Override
+            public float getWidth(@NonNull View underlyingObject) {
+                return mBubbleSizePx;
+            }
+
+            @Override
+            public float getHeight(@NonNull View underlyingObject) {
+                return mBubbleSizePx;
+            }
+
+            @Override
+            public void getLocationOnScreen(@NonNull View underlyingObject, @NonNull int[] loc) {
+                loc[0] = (int) bubble.getTranslationX();
+                loc[1] = (int) bubble.getTranslationY();
+            }
+        };
+        mMagnetizedBubbleDraggingOut.addTarget(target);
+        mMagnetizedBubbleDraggingOut.setMagnetListener(listener);
+        mMagnetizedBubbleDraggingOut.setHapticsEnabled(true);
+        mMagnetizedBubbleDraggingOut.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
+    }
+
+    private void springBubbleTo(View bubble, float x, float y) {
+        animationForChild(bubble)
+                .translationX(x)
+                .translationY(y)
+                .withStiffness(SpringForce.STIFFNESS_HIGH)
+                .start();
     }
 
     /**
@@ -248,20 +368,20 @@ public class ExpandedAnimationController
      * bubble is dragged back into the row.
      */
     public void dragBubbleOut(View bubbleView, float x, float y) {
-        if (mSpringingBubbleToTouch) {
+        if (mSpringToTouchOnNextMotionEvent) {
+            springBubbleTo(mMagnetizedBubbleDraggingOut.getUnderlyingObject(), x, y);
+            mSpringToTouchOnNextMotionEvent = false;
+            mSpringingBubbleToTouch = true;
+        } else if (mSpringingBubbleToTouch) {
             if (mLayout.arePropertiesAnimatingOnView(
                     bubbleView, DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y)) {
-                animationForChild(mBubbleDraggingOut)
-                        .translationX(x)
-                        .translationY(y)
-                        .withStiffness(SpringForce.STIFFNESS_HIGH)
-                        .start();
+                springBubbleTo(mMagnetizedBubbleDraggingOut.getUnderlyingObject(), x, y);
             } else {
                 mSpringingBubbleToTouch = false;
             }
         }
 
-        if (!mSpringingBubbleToTouch && !mIndividualBubbleWithinDismissTarget) {
+        if (!mSpringingBubbleToTouch && !mMagnetizedBubbleDraggingOut.getObjectStuckToTarget()) {
             bubbleView.setTranslationX(x);
             bubbleView.setTranslationY(y);
         }
@@ -275,13 +395,15 @@ public class ExpandedAnimationController
     }
 
     /** Plays a dismiss animation on the dragged out bubble. */
-    public void dismissDraggedOutBubble(View bubble, Runnable after) {
-        mIndividualBubbleWithinDismissTarget = false;
-
+    public void dismissDraggedOutBubble(View bubble, float translationYBy, Runnable after) {
+        if (bubble == null) {
+            return;
+        }
         animationForChild(bubble)
                 .withStiffness(SpringForce.STIFFNESS_HIGH)
-                .scaleX(1.1f)
-                .scaleY(1.1f)
+                .scaleX(0f)
+                .scaleY(0f)
+                .translationY(bubble.getTranslationY() + translationYBy)
                 .alpha(0f, after)
                 .start();
 
@@ -289,37 +411,14 @@ public class ExpandedAnimationController
     }
 
     @Nullable public View getDraggedOutBubble() {
-        return mBubbleDraggingOut;
+        return mMagnetizedBubbleDraggingOut == null
+                ? null
+                : mMagnetizedBubbleDraggingOut.getUnderlyingObject();
     }
 
-    /** Magnets the given bubble to the dismiss target. */
-    public void magnetBubbleToDismiss(
-            View bubbleView, float velX, float velY, float destY, Runnable after) {
-        mIndividualBubbleWithinDismissTarget = true;
-        mSpringingBubbleToTouch = false;
-        animationForChild(bubbleView)
-                .withStiffness(SpringForce.STIFFNESS_MEDIUM)
-                .withDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
-                .withPositionStartVelocities(velX, velY)
-                .translationX(mLayout.getWidth() / 2f - mBubbleSizePx / 2f)
-                .translationY(destY, after)
-                .start();
-    }
-
-    /**
-     * Springs the dragged-out bubble towards the given coordinates and sets flags to have touch
-     * events update the spring's final position until it's settled.
-     */
-    public void demagnetizeBubbleTo(float x, float y, float velX, float velY) {
-        mIndividualBubbleWithinDismissTarget = false;
-        mSpringingBubbleToTouch = true;
-
-        animationForChild(mBubbleDraggingOut)
-                .translationX(x)
-                .translationY(y)
-                .withPositionStartVelocities(velX, velY)
-                .withStiffness(SpringForce.STIFFNESS_HIGH)
-                .start();
+    /** Returns the MagnetizedObject instance for the dragging-out bubble. */
+    public MagnetizedObject<View> getMagnetizedBubbleDraggingOut() {
+        return mMagnetizedBubbleDraggingOut;
     }
 
     /**
@@ -334,13 +433,15 @@ public class ExpandedAnimationController
                 .withPositionStartVelocities(velX, velY)
                 .start(() -> bubbleView.setTranslationZ(0f) /* after */);
 
+        mMagnetizedBubbleDraggingOut = null;
+
         updateBubblePositions();
     }
 
     /** Resets bubble drag out gesture flags. */
     public void onGestureFinished() {
         mBubbleDraggedOutEnough = false;
-        mBubbleDraggingOut = null;
+        mMagnetizedBubbleDraggingOut = null;
         updateBubblePositions();
     }
 
@@ -360,10 +461,10 @@ public class ExpandedAnimationController
         }
         final WindowInsets insets = mLayout.getRootWindowInsets();
         return mBubblePaddingTop + Math.max(
-            mStatusBarHeight,
-            insets.getDisplayCutout() != null
-                ? insets.getDisplayCutout().getSafeInsetTop()
-                : 0);
+                mStatusBarHeight,
+                insets.getDisplayCutout() != null
+                        ? insets.getDisplayCutout().getSafeInsetTop()
+                        : 0);
     }
 
     /** Description of current animation controller state. */
@@ -372,19 +473,12 @@ public class ExpandedAnimationController
         pw.print("  isActive:          "); pw.println(isActiveController());
         pw.print("  animatingExpand:   "); pw.println(mAnimatingExpand);
         pw.print("  animatingCollapse: "); pw.println(mAnimatingCollapse);
-        pw.print("  bubbleInDismiss:   "); pw.println(mIndividualBubbleWithinDismissTarget);
         pw.print("  springingBubble:   "); pw.println(mSpringingBubbleToTouch);
     }
 
     @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
-        final Resources res = layout.getResources();
-        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
+        updateResources(mScreenOrientation, mDisplaySize);
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
         // in.
@@ -430,29 +524,34 @@ public class ExpandedAnimationController
             startOrUpdatePathAnimation(false /* expanding */);
         } else {
             child.setTranslationX(getBubbleLeft(index));
-            animationForChild(child)
-                    .translationY(
-                            getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
-                            getExpandedY() /* to */)
-                    .start();
-            updateBubblePositions();
+
+            // If we're preparing to collapse, don't start animations since the collapse animation
+            // will take over and animate the new bubble into the correct (stacked) position.
+            if (!mPreparingToCollapse) {
+                animationForChild(child)
+                        .translationY(
+                                getExpandedY()
+                                        - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
+                                getExpandedY() /* to */)
+                        .start();
+                updateBubblePositions();
+            }
         }
     }
 
     @Override
     void onChildRemoved(View child, int index, Runnable finishRemoval) {
-        final PhysicsAnimationLayout.PhysicsPropertyAnimator animator = animationForChild(child);
-
         // If we're removing the dragged-out bubble, that means it got dismissed.
-        if (child.equals(mBubbleDraggingOut)) {
-            mBubbleDraggingOut = null;
+        if (child.equals(getDraggedOutBubble())) {
+            mMagnetizedBubbleDraggingOut = null;
             finishRemoval.run();
+            mOnBubbleAnimatedOutAction.run();
         } else {
-            animator.alpha(0f, finishRemoval /* endAction */)
-                    .withStiffness(SpringForce.STIFFNESS_HIGH)
-                    .withDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
-                    .scaleX(1.1f)
-                    .scaleY(1.1f)
+            PhysicsAnimator.getInstance(child)
+                    .spring(DynamicAnimation.ALPHA, 0f)
+                    .spring(DynamicAnimation.SCALE_X, 0f, mAnimateOutSpringConfig)
+                    .spring(DynamicAnimation.SCALE_Y, 0f, mAnimateOutSpringConfig)
+                    .withEndActions(finishRemoval, mOnBubbleAnimatedOutAction)
                     .start();
         }
 
@@ -462,12 +561,20 @@ public class ExpandedAnimationController
 
     @Override
     void onChildReordered(View child, int oldIndex, int newIndex) {
-        updateBubblePositions();
+        if (mPreparingToCollapse) {
+            // If a re-order is received while we're preparing to collapse, ignore it. Once started,
+            // the collapse animation will animate all of the bubbles to their correct (stacked)
+            // position.
+            return;
+        }
 
-        // We expect reordering during collapse, since we'll put the last selected bubble on top.
-        // Update the collapse animation so they end up in the right stacked positions.
         if (mAnimatingCollapse) {
+            // If a re-order is received during collapse, update the animation so that the bubbles
+            // end up in the correct (stacked) position.
             startOrUpdatePathAnimation(false /* expanding */);
+        } else {
+            // Otherwise, animate the bubbles around to reflect their new order.
+            updateBubblePositions();
         }
     }
 
@@ -481,7 +588,7 @@ public class ExpandedAnimationController
 
             // Don't animate the dragging out bubble, or it'll jump around while being dragged. It
             // will be snapped to the correct X value after the drag (if it's not dismissed).
-            if (bubble.equals(mBubbleDraggingOut)) {
+            if (bubble.equals(getDraggedOutBubble())) {
                 return;
             }
 
@@ -496,7 +603,7 @@ public class ExpandedAnimationController
      * @return Bubble left x from left edge of screen.
      */
     public float getBubbleLeft(int index) {
-        final float bubbleFromRowLeft = index * (mBubbleSizePx + getSpaceBetweenBubbles());
+        final float bubbleFromRowLeft = index * (mBubbleSizePx + mSpaceBetweenBubbles);
         return getRowLeft() + bubbleFromRowLeft;
     }
 
@@ -507,7 +614,7 @@ public class ExpandedAnimationController
      *
      * @return the desired width to display the expanded bubbles in.
      */
-    private float getWidthForDisplayingBubbles() {
+    public float getWidthForDisplayingBubbles() {
         final float availableWidth = getAvailableScreenWidth(true /* includeStableInsets */);
         if (mScreenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
             // display size y in landscape will be the smaller dimension of the screen
@@ -521,7 +628,7 @@ public class ExpandedAnimationController
      * Determines the available screen width without the cutout.
      *
      * @param subtractStableInsets Whether or not stable insets should also be removed from the
-     *                            returned width.
+     *                             returned width.
      * @return the total screen width available accounting for cutouts and insets,
      * iff {@param includeStableInsets} is true.
      */
@@ -548,43 +655,13 @@ public class ExpandedAnimationController
         if (mLayout == null) {
             return 0;
         }
-
-        int bubbleCount = mLayout.getChildCount();
-
-        final float totalBubbleWidth = bubbleCount * mBubbleSizePx;
-        final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
-        final float rowWidth = totalGapWidth + totalBubbleWidth;
+        float rowWidth = (mLayout.getChildCount() * mBubbleSizePx)
+                + ((mLayout.getChildCount() - 1) * mSpaceBetweenBubbles);
 
         // This display size we're using includes the size of the insets, we want the true
         // center of the display minus the notch here, which means we should include the
         // stable insets (e.g. status bar, nav bar) in this calculation.
         final float trueCenter = getAvailableScreenWidth(false /* subtractStableInsets */) / 2f;
-        final float halfRow = rowWidth / 2f;
-        final float rowLeft = trueCenter - halfRow;
-
-        return rowLeft;
-    }
-
-    /**
-     * @return Space between bubbles in row above expanded view.
-     */
-    private float getSpaceBetweenBubbles() {
-        /**
-         * Ordered left to right:
-         *  Screen edge
-         *      [mExpandedViewPadding]
-         *  Expanded view edge
-         *      [launcherGridDiff] --- arbitrary value until launcher exports widths
-         *  Launcher's app icon grid edge that we must match
-         */
-        final float rowMargins = (mExpandedViewPadding + mLauncherGridDiff) * 2;
-        final float maxRowWidth = getWidthForDisplayingBubbles() - rowMargins;
-
-        final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;
-        final float totalGapWidth = maxRowWidth - totalBubbleWidth;
-
-        final int gapCount = mBubblesMaxRendered - 1;
-        final float gapWidth = totalGapWidth / gapCount;
-        return gapWidth;
+        return trueCenter - (rowWidth / 2f);
     }
 }

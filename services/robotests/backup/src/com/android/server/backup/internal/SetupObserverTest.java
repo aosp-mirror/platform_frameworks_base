@@ -32,6 +32,7 @@ import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
+import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,12 @@ import java.io.File;
  * UserBackupManagerService}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowApplicationPackageManager.class, ShadowJobScheduler.class})
+@Config(
+        shadows = {
+            ShadowApplicationPackageManager.class,
+            ShadowJobScheduler.class,
+            ShadowSystemServiceRegistry.class
+        })
 @Presubmit
 public class SetupObserverTest {
     private static final String TAG = "SetupObserverTest";

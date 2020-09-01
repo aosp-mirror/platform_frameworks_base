@@ -22,8 +22,8 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.animation.RenderNodeAnimator;
 import android.view.NativeVectorDrawableAnimator;
-import android.view.RenderNodeAnimator;
 import android.view.Surface;
 import android.view.View;
 
@@ -63,7 +63,7 @@ import java.lang.annotation.RetentionPolicy;
  * <h3>Creating a RenderNode</h3>
  * <pre class="prettyprint">
  *     RenderNode renderNode = new RenderNode("myRenderNode");
- *     renderNode.setLeftTopRightBottom(0, 0, 50, 50); // Set the size to 50x50
+ *     renderNode.setPosition(0, 0, 50, 50); // Set the size to 50x50
  *     RecordingCanvas canvas = renderNode.beginRecording();
  *     try {
  *         // Draw with the canvas
@@ -104,7 +104,7 @@ import java.lang.annotation.RetentionPolicy;
  * <pre class="prettyprint">
  *     private void createDisplayList() {
  *         mRenderNode = new RenderNode("MyRenderNode");
- *         mRenderNode.setLeftTopRightBottom(0, 0, width, height);
+ *         mRenderNode.setPosition(0, 0, width, height);
  *         RecordingCanvas canvas = mRenderNode.beginRecording();
  *         try {
  *             for (Bitmap b : mBitmaps) {
@@ -687,8 +687,8 @@ public final class RenderNode {
                         outline.mRect.left, outline.mRect.top,
                         outline.mRect.right, outline.mRect.bottom,
                         outline.mRadius, outline.mAlpha);
-            case Outline.MODE_CONVEX_PATH:
-                return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath,
+            case Outline.MODE_PATH:
+                return nSetOutlinePath(mNativeRenderNode, outline.mPath.mNativePath,
                         outline.mAlpha);
         }
 
@@ -1380,7 +1380,22 @@ public final class RenderNode {
      * @return Approximate memory usage in bytes.
      */
     public @BytesLong long computeApproximateMemoryUsage() {
-        return nGetDebugSize(mNativeRenderNode);
+        return nGetUsageSize(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the approximate amount of memory allocated for the RenderNode for debug purposes.
+     * Does not include the memory allocated by any child RenderNodes nor any bitmaps, only the
+     * memory allocated for this RenderNode and any data it owns.
+     *
+     * The difference between this and {@link #computeApproximateMemoryUsage()} is this includes
+     * memory allocated but not used. In particular structures such as DisplayLists are similar
+     * to things like ArrayLists - they need to resize as commands are added to them. As such,
+     * memory used can be less than memory allocated.
+     *
+     * @hide */
+    public @BytesLong long computeApproximateMemoryAllocated() {
+        return nGetAllocatedSize(mNativeRenderNode);
     }
 
     /**
@@ -1485,7 +1500,8 @@ public final class RenderNode {
 
     private static native void nOutput(long renderNode);
 
-    private static native int nGetDebugSize(long renderNode);
+    private static native int nGetUsageSize(long renderNode);
+    private static native int nGetAllocatedSize(long renderNode);
 
     private static native void nRequestPositionUpdates(long renderNode,
             PositionUpdateListener callback);
@@ -1604,7 +1620,7 @@ public final class RenderNode {
             int right, int bottom, float radius, float alpha);
 
     @CriticalNative
-    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath,
+    private static native boolean nSetOutlinePath(long renderNode, long nativePath,
             float alpha);
 
     @CriticalNative

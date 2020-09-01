@@ -23,6 +23,10 @@ import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 
 import android.provider.DeviceConfig;
 
+import com.android.systemui.util.DeviceConfigProxy;
+
+import java.util.Locale;
+
 /**
  * False on swipes that are too close to 45 degrees.
  *
@@ -42,14 +46,14 @@ class DiagonalClassifier extends FalsingClassifier {
     private final float mHorizontalAngleRange;
     private final float mVerticalAngleRange;
 
-    DiagonalClassifier(FalsingDataProvider dataProvider) {
+    DiagonalClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 
-        mHorizontalAngleRange = DeviceConfig.getFloat(
+        mHorizontalAngleRange = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE,
                 HORIZONTAL_ANGLE_RANGE);
-        mVerticalAngleRange = DeviceConfig.getFloat(
+        mVerticalAngleRange = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE,
                 VERTICAL_ANGLE_RANGE);
@@ -80,6 +84,15 @@ class DiagonalClassifier extends FalsingClassifier {
                 || angleBetween(angle, minAngle - NINETY_DEG, maxAngle - NINETY_DEG)
                 || angleBetween(angle, minAngle + ONE_HUNDRED_EIGHTY_DEG,
                 maxAngle + ONE_HUNDRED_EIGHTY_DEG);
+    }
+
+    @Override
+    String getReason() {
+        return String.format(
+                (Locale) null,
+                "{angle=%f, vertical=%s}",
+                getAngle(),
+                isVertical());
     }
 
     private boolean angleBetween(float angle, float min, float max) {

@@ -436,7 +436,7 @@ public abstract class KernelCpuUidTimeReader<T> {
         }
 
         private long[] readFreqs(String line) {
-            if (line == null) {
+            if (line == null || line.trim().isEmpty()) {
                 return null;
             }
             final String[] lineArray = line.split(" ");
@@ -738,14 +738,18 @@ public abstract class KernelCpuUidTimeReader<T> {
                 return true;
             }
 
-            String str = line.toString();
+            String str = line.toString().trim();
+            if (str.isEmpty()) {
+                Slog.w(mTag, "Empty uid_concurrent_active_time");
+                return false;
+            }
             if (!str.startsWith("cpus:")) {
-                Slog.wtf(mTag, "Malformed uid_concurrent_active_time line: " + line);
+                Slog.wtf(mTag, "Malformed uid_concurrent_active_time line: " + str);
                 return false;
             }
             int cores = Integer.parseInt(str.substring(5).trim(), 10);
             if (cores <= 0) {
-                Slog.wtf(mTag, "Malformed uid_concurrent_active_time line: " + line);
+                Slog.wtf(mTag, "Malformed uid_concurrent_active_time line: " + str);
                 return false;
             }
             mCores = cores;
@@ -923,17 +927,22 @@ public abstract class KernelCpuUidTimeReader<T> {
             if (mNumClusters > 0) {
                 return true;
             }
+            String lineStr = line.toString().trim();
+            if (lineStr.isEmpty()) {
+                Slog.w(mTag, "Empty uid_concurrent_policy_time");
+                return false;
+            }
             // Parse # cores in clusters.
-            String[] lineArray = line.toString().split(" ");
+            String[] lineArray = lineStr.split(" ");
             if (lineArray.length % 2 != 0) {
-                Slog.wtf(mTag, "Malformed uid_concurrent_policy_time line: " + line);
+                Slog.wtf(mTag, "Malformed uid_concurrent_policy_time line: " + lineStr);
                 return false;
             }
             int[] clusters = new int[lineArray.length / 2];
             int cores = 0;
             for (int i = 0; i < clusters.length; i++) {
                 if (!lineArray[i * 2].startsWith("policy")) {
-                    Slog.wtf(mTag, "Malformed uid_concurrent_policy_time line: " + line);
+                    Slog.wtf(mTag, "Malformed uid_concurrent_policy_time line: " + lineStr);
                     return false;
                 }
                 clusters[i] = Integer.parseInt(lineArray[i * 2 + 1], 10);

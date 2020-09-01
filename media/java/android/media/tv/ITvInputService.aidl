@@ -30,8 +30,9 @@ oneway interface ITvInputService {
     void registerCallback(in ITvInputServiceCallback callback);
     void unregisterCallback(in ITvInputServiceCallback callback);
     void createSession(in InputChannel channel, in ITvInputSessionCallback callback,
-            in String inputId);
-    void createRecordingSession(in ITvInputSessionCallback callback, in String inputId);
+            in String inputId, in String sessionId);
+    void createRecordingSession(in ITvInputSessionCallback callback, in String inputId,
+            in String sessionId);
 
     // For hardware TvInputService
     void notifyHardwareAdded(in TvInputHardwareInfo hardwareInfo);

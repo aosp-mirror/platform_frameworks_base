@@ -27,13 +27,17 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.FlakyTest;
 
+import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerService;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,6 +68,17 @@ public class ProcessRecordTests {
             sService.mActivityTaskManager.initialize(null, null, sContext.getMainLooper());
             sService.mAtmInternal = sService.mActivityTaskManager.getAtmInternal();
         });
+
+        // Avoid NPE when initializing {@link ProcessRecord#mWindowProcessController}.
+        final PackageManagerInternal packageManagerInternal = mock(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, packageManagerInternal);
+        final ComponentName sysUiName = new ComponentName(sContext.getPackageName(), "test");
+        doReturn(sysUiName).when(packageManagerInternal).getSystemUiServiceComponent();
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 
     @Before
@@ -99,7 +114,7 @@ public class ProcessRecordTests {
     public void testAnrWhenCrash() {
         mProcessRecord.setCrashing(true);
         assertTrue(mProcessRecord.isCrashing());
-        mProcessRecord.appNotResponding(null, null, null, null, false, "Test ANR when crash");
+        appNotResponding(mProcessRecord, "Test ANR when crash");
         assertFalse(mProcessRecord.isNotResponding());
         assertFalse(mProcessRecord.killedByAm);
         assertFalse(mProcessRecord.killed);
@@ -111,8 +126,7 @@ public class ProcessRecordTests {
     @Test
     public void testAnrWhenKilledByAm() {
         mProcessRecord.killedByAm = true;
-        mProcessRecord.appNotResponding(null, null, null, null, false,
-                "Test ANR when killed by AM");
+        appNotResponding(mProcessRecord, "Test ANR when killed by AM");
         assertFalse(mProcessRecord.isNotResponding());
         assertFalse(mProcessRecord.isCrashing());
         assertFalse(mProcessRecord.killed);
@@ -124,7 +138,7 @@ public class ProcessRecordTests {
     @Test
     public void testAnrWhenKilled() {
         mProcessRecord.killed = true;
-        mProcessRecord.appNotResponding(null, null, null, null, false, "Test ANR when killed");
+        appNotResponding(mProcessRecord, "Test ANR when killed");
         assertFalse(mProcessRecord.isNotResponding());
         assertFalse(mProcessRecord.isCrashing());
         assertFalse(mProcessRecord.killedByAm);
@@ -136,7 +150,7 @@ public class ProcessRecordTests {
      */
     @Test
     public void testNonSilentAnr() {
-        mProcessRecord.appNotResponding(null, null, null, null, false, "Test non-silent ANR");
+        appNotResponding(mProcessRecord, "Test non-silent ANR");
         assertTrue(mProcessRecord.isNotResponding());
         assertFalse(mProcessRecord.isCrashing());
         assertFalse(mProcessRecord.killedByAm);
@@ -151,10 +165,16 @@ public class ProcessRecordTests {
     public void testSilentAnr() {
         // Silent Anr will run through even without a parent process, and directly killed by AM.
         doReturn(true).when(mProcessRecord).isSilentAnr();
-        mProcessRecord.appNotResponding(null, null, null, null, false, "Test silent ANR");
+        appNotResponding(mProcessRecord, "Test silent ANR");
         assertTrue(mProcessRecord.isNotResponding());
         assertFalse(mProcessRecord.isCrashing());
         assertTrue(mProcessRecord.killedByAm);
         assertTrue(mProcessRecord.killed);
+    }
+
+    private static void appNotResponding(ProcessRecord processRecord, String annotation) {
+        processRecord.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
+                null /* parentShortComponentName */, null /* parentProcess */,
+                false /* aboveSystem */, annotation, false /* onlyDumpSelf */);
     }
 }

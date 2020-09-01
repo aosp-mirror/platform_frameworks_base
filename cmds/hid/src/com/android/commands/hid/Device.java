@@ -20,12 +20,15 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.MessageQueue;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.os.SomeArgs;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Map;
 
 public class Device {
     private static final String TAG = "HidDevice";
@@ -40,6 +43,7 @@ public class Device {
     private final DeviceHandler mHandler;
     // mFeatureReports is limited to 256 entries, because the report number is 8-bit
     private final SparseArray<byte[]> mFeatureReports;
+    private final Map<ByteBuffer, byte[]> mOutputs;
     private long mTimeToSend;
 
     private final Object mCond = new Object();
@@ -48,23 +52,25 @@ public class Device {
         System.loadLibrary("hidcommand_jni");
     }
 
-    private static native long nativeOpenDevice(String name, int id, int vid, int pid,
+    private static native long nativeOpenDevice(String name, int id, int vid, int pid, int bus,
             byte[] descriptor, DeviceCallback callback);
     private static native void nativeSendReport(long ptr, byte[] data);
     private static native void nativeSendGetFeatureReportReply(long ptr, int id, byte[] data);
     private static native void nativeCloseDevice(long ptr);
 
-    public Device(int id, String name, int vid, int pid, byte[] descriptor,
-            byte[] report, SparseArray<byte[]> featureReports) {
+    public Device(int id, String name, int vid, int pid, int bus, byte[] descriptor,
+            byte[] report, SparseArray<byte[]> featureReports, Map<ByteBuffer, byte[]> outputs) {
         mId = id;
         mThread = new HandlerThread("HidDeviceHandler");
         mThread.start();
         mHandler = new DeviceHandler(mThread.getLooper());
         mFeatureReports = featureReports;
+        mOutputs = outputs;
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = id;
         args.argi2 = vid;
         args.argi3 = pid;
+        args.argi4 = bus;
         if (name != null) {
             args.arg1 = name;
         } else {
@@ -110,7 +116,7 @@ public class Device {
                 case MSG_OPEN_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
                     mPtr = nativeOpenDevice((String) args.arg1, args.argi1, args.argi2, args.argi3,
-                            (byte[]) args.arg2, new DeviceCallback());
+                            args.argi4, (byte[]) args.arg2, new DeviceCallback());
                     pauseEvents();
                     break;
                 case MSG_SEND_REPORT:
@@ -160,6 +166,11 @@ public class Device {
         }
 
         public void onDeviceGetReport(int requestId, int reportId) {
+            if (mFeatureReports == null) {
+                Log.e(TAG, "Received GET_REPORT request for reportId=" + reportId
+                        + ", but 'feature_reports' section is not found");
+                return;
+            }
             byte[] report = mFeatureReports.get(reportId);
 
             if (report == null) {
@@ -172,6 +183,29 @@ public class Device {
             // Message is set to asynchronous so it won't be blocked by synchronization
             // barrier during UHID_OPEN. This is necessary for drivers that do
             // UHID_GET_REPORT requests during probe.
+            msg.setAsynchronous(true);
+            mHandler.sendMessageAtTime(msg, mTimeToSend);
+        }
+
+        // native callback
+        public void onDeviceOutput(byte[] data) {
+            if (mOutputs == null) {
+                Log.e(TAG, "Received OUTPUT request, but 'outputs' section is not found");
+                return;
+            }
+            byte[] response = mOutputs.get(ByteBuffer.wrap(data));
+            if (response == null) {
+                Log.i(TAG,
+                        "Requested response for output " + Arrays.toString(data) + " is not found");
+                return;
+            }
+
+            Message msg;
+            msg = mHandler.obtainMessage(MSG_SEND_REPORT, response);
+
+            // Message is set to asynchronous so it won't be blocked by synchronization
+            // barrier during UHID_OPEN. This is necessary for drivers that do
+            // UHID_OUTPUT requests during probe, and expect a response right away.
             msg.setAsynchronous(true);
             mHandler.sendMessageAtTime(msg, mTimeToSend);
         }

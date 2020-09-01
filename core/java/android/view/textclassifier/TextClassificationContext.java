@@ -18,15 +18,12 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A representation of the context in which text classification would be performed.
@@ -34,23 +31,22 @@ import java.util.Locale;
  */
 public final class TextClassificationContext implements Parcelable {
 
-    private final String mPackageName;
+    private String mPackageName;
     private final String mWidgetType;
     @Nullable private final String mWidgetVersion;
-    @UserIdInt
-    private int mUserId = UserHandle.USER_NULL;
+    private SystemTextClassifierMetadata mSystemTcMetadata;
 
     private TextClassificationContext(
             String packageName,
             String widgetType,
             String widgetVersion) {
-        mPackageName = Preconditions.checkNotNull(packageName);
-        mWidgetType = Preconditions.checkNotNull(widgetType);
+        mPackageName = Objects.requireNonNull(packageName);
+        mWidgetType = Objects.requireNonNull(widgetType);
         mWidgetVersion = widgetVersion;
     }
 
     /**
-     * Returns the package name for the calling package.
+     * Returns the package name of the app that this context originated in.
      */
     @NonNull
     public String getPackageName() {
@@ -58,21 +54,22 @@ public final class TextClassificationContext implements Parcelable {
     }
 
     /**
-     * Sets the id of this context's user.
-     * <p>
-     * Package-private for SystemTextClassifier's use.
+     * Sets the information about the {@link SystemTextClassifier} that sent this request.
+     *
+     * @hide
      */
-    void setUserId(@UserIdInt int userId) {
-        mUserId = userId;
+    void setSystemTextClassifierMetadata(@Nullable SystemTextClassifierMetadata systemTcMetadata) {
+        mSystemTcMetadata = systemTcMetadata;
     }
 
     /**
-     * Returns the id of this context's user.
+     * Returns the information about the {@link SystemTextClassifier} that sent this request.
+     *
      * @hide
      */
-    @UserIdInt
-    public int getUserId() {
-        return mUserId;
+    @Nullable
+    public SystemTextClassifierMetadata getSystemTextClassifierMetadata() {
+        return mSystemTcMetadata;
     }
 
     /**
@@ -97,8 +94,8 @@ public final class TextClassificationContext implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US, "TextClassificationContext{"
-                + "packageName=%s, widgetType=%s, widgetVersion=%s, userId=%d}",
-                mPackageName, mWidgetType, mWidgetVersion, mUserId);
+                + "packageName=%s, widgetType=%s, widgetVersion=%s, systemTcMetadata=%s}",
+                mPackageName, mWidgetType, mWidgetVersion, mSystemTcMetadata);
     }
 
     /**
@@ -120,8 +117,8 @@ public final class TextClassificationContext implements Parcelable {
          * @return this builder
          */
         public Builder(@NonNull String packageName, @NonNull @WidgetType String widgetType) {
-            mPackageName = Preconditions.checkNotNull(packageName);
-            mWidgetType = Preconditions.checkNotNull(widgetType);
+            mPackageName = Objects.requireNonNull(packageName);
+            mWidgetType = Objects.requireNonNull(widgetType);
         }
 
         /**
@@ -155,14 +152,14 @@ public final class TextClassificationContext implements Parcelable {
         parcel.writeString(mPackageName);
         parcel.writeString(mWidgetType);
         parcel.writeString(mWidgetVersion);
-        parcel.writeInt(mUserId);
+        parcel.writeParcelable(mSystemTcMetadata, flags);
     }
 
     private TextClassificationContext(Parcel in) {
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mWidgetVersion = in.readString();
-        mUserId = in.readInt();
+        mSystemTcMetadata = in.readParcelable(null);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationContext> CREATOR =

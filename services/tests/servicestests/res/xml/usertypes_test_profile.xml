@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<user-types>
+    <profile-type
+        name='android.test.2'
+        max-allowed-per-parent='12'
+        icon-badge='@*android:drawable/ic_corp_icon_badge_case'
+        badge-plain='garbage'
+        badge-no-background='@*android:drawable/ic_corp_badge_no_background'
+        >
+        <badge-labels>
+            <item res='@*android:string/managed_profile_label_badge' />
+            <item res='@*android:string/managed_profile_label_badge_2' />
+        </badge-labels>
+        <badge-colors>
+            <item res='@*android:color/profile_badge_1' />
+            <item res='@*android:color/profile_badge_2' />
+        </badge-colors>
+        <default-restrictions no_remove_user='true' no_bluetooth='true' />
+    </profile-type>
+    <profile-type name='custom.test.1' max-allowed-per-parent='14' />
+</user-types>

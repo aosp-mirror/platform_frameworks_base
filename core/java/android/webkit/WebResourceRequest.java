@@ -32,10 +32,10 @@ public interface WebResourceRequest {
     Uri getUrl();
 
     /**
-     * Gets whether the request was made for the main frame.
+     * Gets whether the request was made in order to fetch the main frame's document.
      *
-     * @return whether the request was made for the main frame. Will be {@code false} for iframes,
-     *         for example.
+     * @return whether the request was made for the main frame document. Will be
+     *         {@code false} for subresources or iframes, for example.
      */
     boolean isForMainFrame();
 

@@ -455,35 +455,6 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
       const ResTable_overlayable_policy_header* policy_header =
           ConvertTo<ResTable_overlayable_policy_header>(parser.chunk());
 
-      OverlayableItem::PolicyFlags policies = OverlayableItem::Policy::kNone;
-      if (policy_header->policy_flags & ResTable_overlayable_policy_header::POLICY_PUBLIC) {
-        policies |= OverlayableItem::Policy::kPublic;
-      }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION) {
-        policies |= OverlayableItem::Policy::kSystem;
-      }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION) {
-        policies |= OverlayableItem::Policy::kVendor;
-      }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION) {
-        policies |= OverlayableItem::Policy::kProduct;
-      }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_SIGNATURE) {
-        policies |= OverlayableItem::Policy::kSignature;
-      }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_ODM_PARTITION) {
-        policies |= OverlayableItem::Policy::kOdm;
-      }
-      if (policy_header->policy_flags
-          & ResTable_overlayable_policy_header::POLICY_OEM_PARTITION) {
-        policies |= OverlayableItem::Policy::kOem;
-      }
-
       const ResTable_ref* const ref_begin = reinterpret_cast<const ResTable_ref*>(
           ((uint8_t *)policy_header) + util::DeviceToHost32(policy_header->header.headerSize));
       const ResTable_ref* const ref_end = ref_begin
@@ -501,7 +472,7 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
         }
 
         OverlayableItem overlayable_item(overlayable);
-        overlayable_item.policies = policies;
+        overlayable_item.policies = policy_header->policy_flags;
         if (!table_->SetOverlayable(iter->second, overlayable_item, diag_)) {
           return false;
         }
@@ -614,6 +585,7 @@ std::unique_ptr<Attribute> BinaryResourceParser::ParseAttr(const ResourceNameRef
     if (attr->type_mask & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) {
       Attribute::Symbol symbol;
       symbol.value = util::DeviceToHost32(map_entry.value.data);
+      symbol.type = map_entry.value.dataType;
       symbol.symbol = Reference(util::DeviceToHost32(map_entry.name.ident));
       attr->symbols.push_back(std::move(symbol));
     }

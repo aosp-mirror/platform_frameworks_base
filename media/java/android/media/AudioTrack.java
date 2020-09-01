@@ -22,6 +22,8 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
@@ -188,6 +190,10 @@ public class AudioTrack extends PlayerBase
 
     // Events:
     // to keep in sync with frameworks/av/include/media/AudioTrack.h
+    // Note: To avoid collisions with other event constants,
+    // do not define an event here that is the same value as
+    // AudioSystem.NATIVE_EVENT_ROUTING_CHANGE.
+
     /**
      * Event id denotes when playback head has reached a previously set marker.
      */
@@ -210,9 +216,145 @@ public class AudioTrack extends PlayerBase
      * back (after stop is called) for an offloaded track.
      */
     private static final int NATIVE_EVENT_STREAM_END = 7;
+    /**
+     * Event id denotes when the codec format changes.
+     *
+     * Note: Similar to a device routing change (AudioSystem.NATIVE_EVENT_ROUTING_CHANGE),
+     * this event comes from the AudioFlinger Thread / Output Stream management
+     * (not from buffer indications as above).
+     */
+    private static final int NATIVE_EVENT_CODEC_FORMAT_CHANGE = 100;
 
     private final static String TAG = "android.media.AudioTrack";
 
+    /** @hide */
+    @IntDef({
+        ENCAPSULATION_MODE_NONE,
+        ENCAPSULATION_MODE_ELEMENTARY_STREAM,
+        // ENCAPSULATION_MODE_HANDLE, @SystemApi
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncapsulationMode {}
+
+    // Important: The ENCAPSULATION_MODE values must be kept in sync with native header files.
+    /**
+     * This mode indicates no metadata encapsulation,
+     * which is the default mode for sending audio data
+     * through {@code AudioTrack}.
+     */
+    public static final int ENCAPSULATION_MODE_NONE = 0;
+    /**
+     * This mode indicates metadata encapsulation with an elementary stream payload.
+     * Both compressed and PCM format is allowed.
+     */
+    public static final int ENCAPSULATION_MODE_ELEMENTARY_STREAM = 1;
+    /**
+     * This mode indicates metadata encapsulation with a handle payload
+     * and is set through {@link Builder#setEncapsulationMode(int)}.
+     * The handle is a 64 bit long, provided by the Tuner API
+     * in {@link android.os.Build.VERSION_CODES#R}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int ENCAPSULATION_MODE_HANDLE = 2;
+
+    /* Enumeration of metadata types permitted for use by
+     * encapsulation mode audio streams.
+     */
+    /** @hide */
+    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
+        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncapsulationMetadataType {}
+
+    /**
+     * Reserved do not use.
+     * @hide
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_NONE = 0; // reserved
+
+    /**
+     * Encapsulation metadata type for framework tuner information.
+     *
+     * Refer to the Android Media TV Tuner API for details.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER = 1;
+
+    /**
+     * Encapsulation metadata type for DVB AD descriptor.
+     *
+     * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
+
+    /* Dual Mono handling is used when a stereo audio stream
+     * contains separate audio content on the left and right channels.
+     * Such information about the content of the stream may be found, for example, in
+     * ITU T-REC-J.94-201610 A.6.2.3 Component descriptor.
+     */
+    /** @hide */
+    @IntDef({
+        DUAL_MONO_MODE_OFF,
+        DUAL_MONO_MODE_LR,
+        DUAL_MONO_MODE_LL,
+        DUAL_MONO_MODE_RR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DualMonoMode {}
+    // Important: The DUAL_MONO_MODE values must be kept in sync with native header files.
+    /**
+     * This mode disables any Dual Mono presentation effect.
+     *
+     */
+    public static final int DUAL_MONO_MODE_OFF = 0;
+
+    /**
+     * This mode indicates that a stereo stream should be presented
+     * with the left and right audio channels blended together
+     * and delivered to both channels.
+     *
+     * Behavior for non-stereo streams is implementation defined.
+     * A suggested guideline is that the left-right stereo symmetric
+     * channels are pairwise blended;
+     * the other channels such as center are left alone.
+     *
+     * The Dual Mono effect occurs before volume scaling.
+     */
+    public static final int DUAL_MONO_MODE_LR = 1;
+
+    /**
+     * This mode indicates that a stereo stream should be presented
+     * with the left audio channel replicated into the right audio channel.
+     *
+     * Behavior for non-stereo streams is implementation defined.
+     * A suggested guideline is that all channels with left-right
+     * stereo symmetry will have the left channel position replicated
+     * into the right channel position.
+     * The center channels (with no left/right symmetry) or unbalanced
+     * channels are left alone.
+     *
+     * The Dual Mono effect occurs before volume scaling.
+     */
+    public static final int DUAL_MONO_MODE_LL = 2;
+
+    /**
+     * This mode indicates that a stereo stream should be presented
+     * with the right audio channel replicated into the left audio channel.
+     *
+     * Behavior for non-stereo streams is implementation defined.
+     * A suggested guideline is that all channels with left-right
+     * stereo symmetry will have the right channel position replicated
+     * into the left channel position.
+     * The center channels (with no left/right symmetry) or unbalanced
+     * channels are left alone.
+     *
+     * The Dual Mono effect occurs before volume scaling.
+     */
+    public static final int DUAL_MONO_MODE_RR = 3;
 
     /** @hide */
     @IntDef({
@@ -592,11 +734,13 @@ public class AudioTrack extends PlayerBase
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
-        this(attributes, format, bufferSizeInBytes, mode, sessionId, false /*offload*/);
+        this(attributes, format, bufferSizeInBytes, mode, sessionId, false /*offload*/,
+                ENCAPSULATION_MODE_NONE, null /* tunerConfiguration */);
     }
 
     private AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
-            int mode, int sessionId, boolean offload)
+            int mode, int sessionId, boolean offload, int encapsulationMode,
+            @Nullable TunerConfiguration tunerConfiguration)
                     throws IllegalArgumentException {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // mState already == STATE_UNINITIALIZED
@@ -663,7 +807,7 @@ public class AudioTrack extends PlayerBase
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
                 sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload);
+                offload, encapsulationMode, tunerConfiguration);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
@@ -671,6 +815,8 @@ public class AudioTrack extends PlayerBase
 
         mSampleRate = sampleRate[0];
         mSessionId = session[0];
+
+        // TODO: consider caching encapsulationMode and tunerConfiguration in the Java object.
 
         if ((mAttributes.getFlags() & AudioAttributes.FLAG_HW_AV_SYNC) != 0) {
             int frameSizeInBytes;
@@ -745,7 +891,9 @@ public class AudioTrack extends PlayerBase
                     0 /*mDataLoadMode - NA*/,
                     session,
                     nativeTrackInJavaObj,
-                    false /*offload*/);
+                    false /*offload*/,
+                    ENCAPSULATION_MODE_NONE,
+                    null /* tunerConfiguration */);
             if (initResult != SUCCESS) {
                 loge("Error code "+initResult+" when initializing AudioTrack.");
                 return; // with mState == STATE_UNINITIALIZED
@@ -754,6 +902,63 @@ public class AudioTrack extends PlayerBase
             mSessionId = session[0];
 
             mState = STATE_INITIALIZED;
+        }
+    }
+
+    /**
+     * TunerConfiguration is used to convey tuner information
+     * from the android.media.tv.Tuner API to AudioTrack construction.
+     *
+     * Use the Builder to construct the TunerConfiguration object,
+     * which is then used by the {@link AudioTrack.Builder} to create an AudioTrack.
+     * @hide
+     */
+    @SystemApi
+    public static class TunerConfiguration {
+        private final int mContentId;
+        private final int mSyncId;
+
+        /**
+         * Constructs a TunerConfiguration instance for use in {@link AudioTrack.Builder}
+         *
+         * @param contentId selects the audio stream to use.
+         *     The contentId may be obtained from
+         *     {@link android.media.tv.tuner.filter.Filter#getId()}.
+         *     This is always a positive number.
+         * @param syncId selects the clock to use for synchronization
+         *     of audio with other streams such as video.
+         *     The syncId may be obtained from
+         *     {@link android.media.tv.tuner.Tuner#getAvSyncHwId()}.
+         *     This is always a positive number.
+         */
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public TunerConfiguration(
+                @IntRange(from = 1) int contentId, @IntRange(from = 1)int syncId) {
+            if (contentId < 1) {
+                throw new IllegalArgumentException(
+                        "contentId " + contentId + " must be positive");
+            }
+            if (syncId < 1) {
+                throw new IllegalArgumentException("syncId " + syncId + " must be positive");
+            }
+            mContentId = contentId;
+            mSyncId = syncId;
+        }
+
+        /**
+         * Returns the contentId.
+         */
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @IntRange(from = 1) int getContentId() {
+            return mContentId; // The Builder ensures this is > 0.
+        }
+
+        /**
+         * Returns the syncId.
+         */
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @IntRange(from = 1) int getSyncId() {
+            return mSyncId;  // The Builder ensures this is > 0.
         }
     }
 
@@ -799,10 +1004,12 @@ public class AudioTrack extends PlayerBase
         private AudioAttributes mAttributes;
         private AudioFormat mFormat;
         private int mBufferSizeInBytes;
+        private int mEncapsulationMode = ENCAPSULATION_MODE_NONE;
         private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
         private int mMode = MODE_STREAM;
         private int mPerformanceMode = PERFORMANCE_MODE_NONE;
         private boolean mOffload = false;
+        private TunerConfiguration mTunerConfiguration;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -865,6 +1072,33 @@ public class AudioTrack extends PlayerBase
                 throw new IllegalArgumentException("Invalid buffer size " + bufferSizeInBytes);
             }
             mBufferSizeInBytes = bufferSizeInBytes;
+            return this;
+        }
+
+        /**
+         * Sets the encapsulation mode.
+         *
+         * Encapsulation mode allows metadata to be sent together with
+         * the audio data payload in a {@code ByteBuffer}.
+         * This requires a compatible hardware audio codec.
+         *
+         * @param encapsulationMode one of {@link AudioTrack#ENCAPSULATION_MODE_NONE},
+         *        or {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM}.
+         * @return the same Builder instance.
+         */
+        // Note: with the correct permission {@code AudioTrack#ENCAPSULATION_MODE_HANDLE}
+        // may be used as well.
+        public @NonNull Builder setEncapsulationMode(@EncapsulationMode int encapsulationMode) {
+            switch (encapsulationMode) {
+                case ENCAPSULATION_MODE_NONE:
+                case ENCAPSULATION_MODE_ELEMENTARY_STREAM:
+                case ENCAPSULATION_MODE_HANDLE:
+                    mEncapsulationMode = encapsulationMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid encapsulation mode " + encapsulationMode);
+            }
             return this;
         }
 
@@ -949,6 +1183,28 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * Sets the tuner configuration for the {@code AudioTrack}.
+         *
+         * The {@link AudioTrack.TunerConfiguration} consists of parameters obtained from
+         * the Android TV tuner API which indicate the audio content stream id and the
+         * synchronization id for the {@code AudioTrack}.
+         *
+         * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
+         * @return the same Builder instance.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @NonNull Builder setTunerConfiguration(
+                @NonNull TunerConfiguration tunerConfiguration) {
+            if (tunerConfiguration == null) {
+                throw new IllegalArgumentException("tunerConfiguration is null");
+            }
+            mTunerConfiguration = tunerConfiguration;
+            return this;
+        }
+
+        /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
          * @return a new successfully initialized {@link AudioTrack} instance.
@@ -1003,6 +1259,8 @@ public class AudioTrack extends PlayerBase
                 }
             }
 
+            // TODO: Check mEncapsulationMode compatibility with MODE_STATIC, etc?
+
             try {
                 // If the buffer size is not specified in streaming mode,
                 // use a single frame for the buffer size and let the
@@ -1012,7 +1270,8 @@ public class AudioTrack extends PlayerBase
                             * mFormat.getBytesPerSample(mFormat.getEncoding());
                 }
                 final AudioTrack track = new AudioTrack(
-                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload);
+                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload,
+                        mEncapsulationMode, mTunerConfiguration);
                 if (track.getState() == STATE_UNINITIALIZED) {
                     // release is not necessary
                     throw new UnsupportedOperationException("Cannot create AudioTrack");
@@ -1160,6 +1419,140 @@ public class AudioTrack extends PlayerBase
         return native_is_direct_output_supported(format.getEncoding(), format.getSampleRate(),
                 format.getChannelMask(), format.getChannelIndexMask(),
                 attributes.getContentType(), attributes.getUsage(), attributes.getFlags());
+    }
+
+    /*
+     * The MAX_LEVEL should be exactly representable by an IEEE 754-2008 base32 float.
+     * This means fractions must be divisible by a power of 2. For example,
+     * 10.25f is OK as 0.25 is 1/4, but 10.1f is NOT OK as 1/10 is not expressable by
+     * a finite binary fraction.
+     *
+     * 48.f is the nominal max for API level {@link android os.Build.VERSION_CODES#R}.
+     * We use this to suggest a baseline range for implementation.
+     *
+     * The API contract specification allows increasing this value in a future
+     * API release, but not decreasing this value.
+     */
+    private static final float MAX_AUDIO_DESCRIPTION_MIX_LEVEL = 48.f;
+
+    private static boolean isValidAudioDescriptionMixLevel(float level) {
+        return !(Float.isNaN(level) || level > MAX_AUDIO_DESCRIPTION_MIX_LEVEL);
+    }
+
+    /**
+     * Sets the Audio Description mix level in dB.
+     *
+     * For AudioTracks incorporating a secondary Audio Description stream
+     * (where such contents may be sent through an Encapsulation Mode
+     * other than {@link #ENCAPSULATION_MODE_NONE}).
+     * or internally by a HW channel),
+     * the level of mixing of the Audio Description to the Main Audio stream
+     * is controlled by this method.
+     *
+     * Such mixing occurs <strong>prior</strong> to overall volume scaling.
+     *
+     * @param level a floating point value between
+     *     {@code Float.NEGATIVE_INFINITY} to {@code +48.f},
+     *     where {@code Float.NEGATIVE_INFINITY} means the Audio Description is not mixed
+     *     and a level of {@code 0.f} means the Audio Description is mixed without scaling.
+     * @return true on success, false on failure.
+     */
+    public boolean setAudioDescriptionMixLeveldB(
+            @FloatRange(to = 48.f, toInclusive = true) float level) {
+        if (!isValidAudioDescriptionMixLevel(level)) {
+            throw new IllegalArgumentException("level is out of range" + level);
+        }
+        return native_set_audio_description_mix_level_db(level) == SUCCESS;
+    }
+
+    /**
+     * Returns the Audio Description mix level in dB.
+     *
+     * If Audio Description mixing is unavailable from the hardware device,
+     * a value of {@code Float.NEGATIVE_INFINITY} is returned.
+     *
+     * @return the current Audio Description Mix Level in dB.
+     *     A value of {@code Float.NEGATIVE_INFINITY} means
+     *     that the audio description is not mixed or
+     *     the hardware is not available.
+     *     This should reflect the <strong>true</strong> internal device mix level;
+     *     hence the application might receive any floating value
+     *     except {@code Float.NaN}.
+     */
+    public float getAudioDescriptionMixLeveldB() {
+        float[] level = { Float.NEGATIVE_INFINITY };
+        try {
+            final int status = native_get_audio_description_mix_level_db(level);
+            if (status != SUCCESS || Float.isNaN(level[0])) {
+                return Float.NEGATIVE_INFINITY;
+            }
+        } catch (Exception e) {
+            return Float.NEGATIVE_INFINITY;
+        }
+        return level[0];
+    }
+
+    private static boolean isValidDualMonoMode(@DualMonoMode int dualMonoMode) {
+        switch (dualMonoMode) {
+            case DUAL_MONO_MODE_OFF:
+            case DUAL_MONO_MODE_LR:
+            case DUAL_MONO_MODE_LL:
+            case DUAL_MONO_MODE_RR:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Sets the Dual Mono mode presentation on the output device.
+     *
+     * The Dual Mono mode is generally applied to stereo audio streams
+     * where the left and right channels come from separate sources.
+     *
+     * For compressed audio, where the decoding is done in hardware,
+     * Dual Mono presentation needs to be performed
+     * by the hardware output device
+     * as the PCM audio is not available to the framework.
+     *
+     * @param dualMonoMode one of {@link #DUAL_MONO_MODE_OFF},
+     *     {@link #DUAL_MONO_MODE_LR},
+     *     {@link #DUAL_MONO_MODE_LL},
+     *     {@link #DUAL_MONO_MODE_RR}.
+     *
+     * @return true on success, false on failure if the output device
+     *     does not support Dual Mono mode.
+     */
+    public boolean setDualMonoMode(@DualMonoMode int dualMonoMode) {
+        if (!isValidDualMonoMode(dualMonoMode)) {
+            throw new IllegalArgumentException(
+                    "Invalid Dual Mono mode " + dualMonoMode);
+        }
+        return native_set_dual_mono_mode(dualMonoMode) == SUCCESS;
+    }
+
+    /**
+     * Returns the Dual Mono mode presentation setting.
+     *
+     * If no Dual Mono presentation is available for the output device,
+     * then {@link #DUAL_MONO_MODE_OFF} is returned.
+     *
+     * @return one of {@link #DUAL_MONO_MODE_OFF},
+     *     {@link #DUAL_MONO_MODE_LR},
+     *     {@link #DUAL_MONO_MODE_LL},
+     *     {@link #DUAL_MONO_MODE_RR}.
+     */
+    public @DualMonoMode int getDualMonoMode() {
+        int[] dualMonoMode = { DUAL_MONO_MODE_OFF };
+        try {
+            final int status = native_get_dual_mono_mode(dualMonoMode);
+            if (status != SUCCESS || !isValidDualMonoMode(dualMonoMode[0])) {
+                return DUAL_MONO_MODE_OFF;
+            }
+        } catch (Exception e) {
+            return DUAL_MONO_MODE_OFF;
+        }
+        return dualMonoMode[0];
     }
 
     // mask of all the positional channels supported, however the allowed combinations
@@ -3228,6 +3621,67 @@ public class AudioTrack extends PlayerBase
         }
     }
 
+    //--------------------------------------------------------------------------
+    // Codec notifications
+    //--------------------
+
+    // OnCodecFormatChangedListener notifications uses an instance
+    // of ListenerList to manage its listeners.
+
+    private final Utils.ListenerList<AudioMetadataReadMap> mCodecFormatChangedListeners =
+            new Utils.ListenerList();
+
+    /**
+     * Interface definition for a listener for codec format changes.
+     */
+    public interface OnCodecFormatChangedListener {
+        /**
+         * Called when the compressed codec format changes.
+         *
+         * @param audioTrack is the {@code AudioTrack} instance associated with the codec.
+         * @param info is a {@link AudioMetadataReadMap} of values which contains decoded format
+         *     changes reported by the codec.  Not all hardware
+         *     codecs indicate codec format changes. Acceptable keys are taken from
+         *     {@code AudioMetadata.Format.KEY_*} range, with the associated value type.
+         */
+        void onCodecFormatChanged(
+                @NonNull AudioTrack audioTrack, @Nullable AudioMetadataReadMap info);
+    }
+
+    /**
+     * Adds an {@link OnCodecFormatChangedListener} to receive notifications of
+     * codec format change events on this {@code AudioTrack}.
+     *
+     * @param executor  Specifies the {@link Executor} object to control execution.
+     *
+     * @param listener The {@link OnCodecFormatChangedListener} interface to receive
+     *     notifications of codec events.
+     */
+    public void addOnCodecFormatChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnCodecFormatChangedListener listener) { // NPE checks done by ListenerList.
+        mCodecFormatChangedListeners.add(
+                listener, /* key for removal */
+                executor,
+                (int eventCode, AudioMetadataReadMap readMap) -> {
+                    // eventCode is unused by this implementation.
+                    listener.onCodecFormatChanged(this, readMap);
+                }
+        );
+    }
+
+    /**
+     * Removes an {@link OnCodecFormatChangedListener} which has been previously added
+     * to receive codec format change events.
+     *
+     * @param listener The previously added {@link OnCodecFormatChangedListener} interface
+     * to remove.
+     */
+    public void removeOnCodecFormatChangedListener(
+            @NonNull OnCodecFormatChangedListener listener) {
+        mCodecFormatChangedListeners.remove(listener);  // NPE checks done by ListenerList.
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -3564,6 +4018,19 @@ public class AudioTrack extends PlayerBase
             return;
         }
 
+        if (what == NATIVE_EVENT_CODEC_FORMAT_CHANGE) {
+            ByteBuffer buffer = (ByteBuffer) obj;
+            buffer.order(ByteOrder.nativeOrder());
+            buffer.rewind();
+            AudioMetadataReadMap audioMetaData = AudioMetadata.fromByteBuffer(buffer);
+            if (audioMetaData == null) {
+                Log.e(TAG, "Unable to get audio metadata from byte buffer");
+                return;
+            }
+            track.mCodecFormatChangedListeners.notify(0 /* eventCode, unused */, audioMetaData);
+            return;
+        }
+
         if (what == NATIVE_EVENT_CAN_WRITE_MORE_DATA
                 || what == NATIVE_EVENT_NEW_IAUDIOTRACK
                 || what == NATIVE_EVENT_STREAM_END) {
@@ -3595,7 +4062,7 @@ public class AudioTrack extends PlayerBase
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload);
+            boolean offload, int encapsulationMode, Object tunerConfiguration);
 
     private native final void native_finalize();
 
@@ -3686,6 +4153,11 @@ public class AudioTrack extends PlayerBase
     private native int native_getPortId();
 
     private native void native_set_delay_padding(int delayInFrames, int paddingInFrames);
+
+    private native int native_set_audio_description_mix_level_db(float level);
+    private native int native_get_audio_description_mix_level_db(float[] level);
+    private native int native_set_dual_mono_mode(int dualMonoMode);
+    private native int native_get_dual_mono_mode(int[] dualMonoMode);
 
     //---------------------------------------------------------
     // Utility methods

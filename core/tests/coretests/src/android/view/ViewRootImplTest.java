@@ -16,125 +16,157 @@
 
 package android.view;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.graphics.Insets;
-import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.WindowInsets.Side;
+import android.view.WindowInsets.Type;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
+/**
+ * Tests for {@link ViewRootImpl}
+ *
+ * Build/Install/Run:
+ *  atest FrameworksCoreTests:ViewRootImplTest
+ */
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ViewRootImplTest {
 
-    private Context mContext;
-    private ViewRootImplAccessor mViewRootImpl;
+    private ViewRootImpl mViewRootImpl;
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
+        final Context context = getInstrumentation().getTargetContext();
 
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mViewRootImpl = new ViewRootImplAccessor(
-                    new ViewRootImpl(mContext, mContext.getDisplay()));
-        });
+        getInstrumentation().runOnMainSync(() ->
+                mViewRootImpl = new ViewRootImpl(context, context.getDisplayNoVerify()));
     }
 
     @Test
-    public void negativeInsets_areSetToZero() throws Exception {
-        mViewRootImpl.getAttachInfo().getContentInsets().set(-10, -20, -30 , -40);
-        mViewRootImpl.getAttachInfo().getStableInsets().set(-10, -20, -30 , -40);
-        final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
+    public void adjustLayoutParamsForCompatibility_layoutFullscreen() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertThat(insets.getSystemWindowInsets(), equalTo(Insets.NONE));
-        assertThat(insets.getStableInsets(), equalTo(Insets.NONE));
+        // Type.statusBars() must be removed.
+        assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
     }
 
     @Test
-    public void negativeInsets_areSetToZero_positiveAreLeftAsIs() throws Exception {
-        mViewRootImpl.getAttachInfo().getContentInsets().set(-10, 20, -30 , 40);
-        mViewRootImpl.getAttachInfo().getStableInsets().set(10, -20, 30 , -40);
-        final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
+    public void adjustLayoutParamsForCompatibility_layoutInScreen() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.flags = FLAG_LAYOUT_IN_SCREEN;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertThat(insets.getSystemWindowInsets(), equalTo(Insets.of(0, 20, 0, 40)));
-        assertThat(insets.getStableInsets(), equalTo(Insets.of(10, 0, 30, 0)));
+        // Type.statusBars() must be removed.
+        assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
     }
 
     @Test
-    public void positiveInsets_areLeftAsIs() throws Exception {
-        mViewRootImpl.getAttachInfo().getContentInsets().set(10, 20, 30 , 40);
-        mViewRootImpl.getAttachInfo().getStableInsets().set(10, 20, 30 , 40);
-        final WindowInsets insets = mViewRootImpl.getWindowInsets(true /* forceConstruct */);
+    public void adjustLayoutParamsForCompatibility_layoutHideNavigation() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertThat(insets.getSystemWindowInsets(), equalTo(Insets.of(10, 20, 30, 40)));
-        assertThat(insets.getStableInsets(), equalTo(Insets.of(10, 20, 30, 40)));
+        // Type.systemBars() must be removed.
+        assertEquals(0, attrs.getFitInsetsTypes() & Type.systemBars());
     }
 
-    private static class ViewRootImplAccessor {
+    @Test
+    public void adjustLayoutParamsForCompatibility_toast() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_TOAST);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        private final ViewRootImpl mViewRootImpl;
+        assertTrue(attrs.isFitInsetsIgnoringVisibility());
+    }
 
-        ViewRootImplAccessor(ViewRootImpl viewRootImpl) {
-            mViewRootImpl = viewRootImpl;
-        }
+    @Test
+    public void adjustLayoutParamsForCompatibility_systemAlert() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_SYSTEM_ALERT);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        public ViewRootImpl get() {
-            return mViewRootImpl;
-        }
+        assertTrue(attrs.isFitInsetsIgnoringVisibility());
+    }
 
-        AttachInfoAccessor getAttachInfo() throws Exception {
-            return new AttachInfoAccessor(
-                    getField(mViewRootImpl, ViewRootImpl.class.getDeclaredField("mAttachInfo")));
-        }
+    @Test
+    public void adjustLayoutParamsForCompatibility_fitSystemBars() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        WindowInsets getWindowInsets(boolean forceConstruct) throws Exception {
-            return (WindowInsets) invokeMethod(mViewRootImpl,
-                    ViewRootImpl.class.getDeclaredMethod("getWindowInsets", boolean.class),
-                    forceConstruct);
-        }
+        // A window which fits system bars must fit IME, unless its type is toast or system alert.
+        assertEquals(Type.systemBars() | Type.ime(), attrs.getFitInsetsTypes());
+    }
 
-        class AttachInfoAccessor {
+    @Test
+    public void adjustLayoutParamsForCompatibility_noAdjustLayout() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        final int types = Type.all();
+        final int sides = Side.TOP | Side.LEFT;
+        final boolean fitMaxInsets = true;
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        attrs.setFitInsetsTypes(types);
+        attrs.setFitInsetsSides(sides);
+        attrs.setFitInsetsIgnoringVisibility(fitMaxInsets);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-            private final Class<?> mClass;
-            private final Object mAttachInfo;
+        // Fit-insets related fields must not be adjusted due to legacy system UI visibility
+        // after calling fit-insets related methods.
+        assertEquals(types, attrs.getFitInsetsTypes());
+        assertEquals(sides, attrs.getFitInsetsSides());
+        assertEquals(fitMaxInsets, attrs.isFitInsetsIgnoringVisibility());
+    }
 
-            AttachInfoAccessor(Object attachInfo) throws Exception {
-                mAttachInfo = attachInfo;
-                mClass = ViewRootImpl.class.getClassLoader().loadClass(
-                        "android.view.View$AttachInfo");
-            }
+    @Test
+    public void adjustLayoutParamsForCompatibility_noAdjustAppearance() {
+        final WindowInsetsController controller = mViewRootImpl.getInsetsController();
+        final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
+        final int appearance = 0;
+        controller.setSystemBarsAppearance(appearance, 0xffffffff);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LOW_PROFILE
+                | SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                | SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-            Rect getContentInsets() throws Exception {
-                return (Rect) getField(mAttachInfo, mClass.getDeclaredField("mContentInsets"));
-            }
+        // Appearance must not be adjusted due to legacy system UI visibility after calling
+        // setSystemBarsAppearance.
+        assertEquals(appearance, controller.getSystemBarsAppearance());
+    }
 
-            Rect getStableInsets() throws Exception {
-                return (Rect) getField(mAttachInfo, mClass.getDeclaredField("mStableInsets"));
-            }
-        }
+    @Test
+    public void adjustLayoutParamsForCompatibility_noAdjustBehavior() {
+        final WindowInsetsController controller = mViewRootImpl.getInsetsController();
+        final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
+        final int behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
+        controller.setSystemBarsBehavior(behavior);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        private static Object getField(Object o, Field field) throws Exception {
-            field.setAccessible(true);
-            return field.get(o);
-        }
-
-        private static Object invokeMethod(Object o, Method method, Object... args)
-                throws Exception {
-            method.setAccessible(true);
-            return method.invoke(o, args);
-        }
+        // Behavior must not be adjusted due to legacy system UI visibility after calling
+        // setSystemBarsBehavior.
+        assertEquals(behavior, controller.getSystemBarsBehavior());
     }
 }

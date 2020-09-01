@@ -17,7 +17,7 @@
 */
 -->
 
-<com.android.systemui.statusbar.car.CarNavigationBarView
+<com.android.systemui.car.navigationbar.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
@@ -33,10 +33,9 @@
         android:gravity="top"
         android:paddingTop="30dp"
         android:layout_weight="1"
-        android:background="@drawable/system_bar_background"
         android:animateLayoutChanges="true">
 
-        <com.android.systemui.statusbar.car.CarNavigationButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/home"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -47,7 +46,7 @@
             android:paddingBottom="30dp"
         />
 
-        <com.android.systemui.statusbar.car.CarNavigationButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/hvac"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -59,4 +58,4 @@
             android:paddingBottom="30dp"
         />
     </LinearLayout>
-</com.android.systemui.statusbar.car.CarNavigationBarView>
+</com.android.systemui.car.navigationbar.CarNavigationBarView>

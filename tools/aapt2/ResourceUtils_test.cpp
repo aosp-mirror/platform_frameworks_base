@@ -109,6 +109,20 @@ TEST(ResourceUtilsTest, ParsePrivateReference) {
   EXPECT_TRUE(private_ref);
 }
 
+TEST(ResourceUtilsTest, ParseBinaryDynamicReference) {
+  android::Res_value value = {};
+  value.data = util::HostToDevice32(0x01);
+  value.dataType = android::Res_value::TYPE_DYNAMIC_REFERENCE;
+  std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(ResourceType::kId,
+                                                                  android::ConfigDescription(),
+                                                                  android::ResStringPool(), value,
+                                                                  nullptr);
+
+  Reference* ref = ValueCast<Reference>(item.get());
+  EXPECT_TRUE(ref->is_dynamic);
+  EXPECT_EQ(ref->id.value().id, 0x01);
+}
+
 TEST(ResourceUtilsTest, FailToParseAutoCreateNonIdReference) {
   bool create = false;
   bool private_ref = false;

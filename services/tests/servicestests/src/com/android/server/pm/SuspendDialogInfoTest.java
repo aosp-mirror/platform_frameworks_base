@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
+import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -39,7 +42,8 @@ public class SuspendDialogInfoTest {
                 .setIcon(VALID_TEST_RES_ID_1)
                 .setTitle(VALID_TEST_RES_ID_1)
                 .setMessage(VALID_TEST_RES_ID_1)
-                .setNeutralButtonText(VALID_TEST_RES_ID_1);
+                .setNeutralButtonText(VALID_TEST_RES_ID_1)
+                .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS);
     }
 
     @Test
@@ -70,6 +74,25 @@ public class SuspendDialogInfoTest {
         // Only button text is different
         dialogBuilder2.setNeutralButtonText(VALID_TEST_RES_ID_2);
         assertNotEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void equalsComparesButtonAction() {
+        final SuspendDialogInfo.Builder dialogBuilder1 = createDefaultDialogBuilder();
+        final SuspendDialogInfo.Builder dialogBuilder2 = createDefaultDialogBuilder();
+        assertEquals(dialogBuilder1.build(), dialogBuilder2.build());
+        // Only button action is different
+        dialogBuilder2.setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND);
+        assertNotEquals(dialogBuilder1.build(), dialogBuilder2.build());
+    }
+
+    @Test
+    public void defaultButtonAction() {
+        final SuspendDialogInfo.Builder dialogBuilder = new SuspendDialogInfo.Builder()
+                .setIcon(VALID_TEST_RES_ID_1)
+                .setTitle(VALID_TEST_RES_ID_1)
+                .setMessage(VALID_TEST_RES_ID_1);
+        assertEquals(BUTTON_ACTION_MORE_DETAILS, dialogBuilder.build().getNeutralButtonAction());
     }
 
     @Test

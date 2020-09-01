@@ -84,8 +84,10 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
         return line.trim();
     }
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         mUm = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mHasUserRestriction = mUm.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
         mSystemSetUserRestriction = mUm.getUserRestrictionSource(
@@ -145,8 +147,10 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
         assertTrue("Invalid value", value.equals("1") || value.equals("0"));
     }
 
+    @Override
     @After
     public void tearDown() {
+        super.tearDown();
         if (!mHasUserRestriction || mSystemSetUserRestriction) {
             // The test may have modified the user restriction state. Restore it.
             mUm.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,

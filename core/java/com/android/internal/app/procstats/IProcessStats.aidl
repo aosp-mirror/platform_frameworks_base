@@ -34,4 +34,20 @@ interface IProcessStats {
      */
      long getCommittedStats(long highWaterMarkMs, int section, boolean doAggregate,
         out List<ParcelFileDescriptor> committedStats);
+
+    /**
+     * Get stats committed after highWaterMarkMs
+     * @param highWaterMarkMs Report stats committed after this time.
+     * @param section Integer mask to indicate which sections to include in the stats.
+     * @param doAggregate Whether to aggregate the stats or keep them separated.
+     * @param List of Files of individual commits in protobuf binary or one that is merged from them.
+     * @param ProcessStats object that will be used to return the full set of merged stats.
+     */
+     long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
+        out List<ParcelFileDescriptor> committedStats, out ProcessStats mergedStats);
+
+    /**
+     * @return The threshold to decide if a given association should be dumped into metrics.
+     */
+    long getMinAssociationDumpDuration();
 }

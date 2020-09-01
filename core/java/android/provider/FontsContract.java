@@ -334,10 +334,17 @@ public class FontsContract {
             return cachedTypeface;
         }
 
-        // Unfortunately the typeface is not available at this time, but requesting from the font
-        // provider takes too much time. For now, request the font data to ensure it is in the cache
-        // next time and return.
         synchronized (sLock) {
+            // It is possible that Font is loaded during the thread sleep time
+            // re-check the cache to avoid re-loading the font
+            cachedTypeface = sTypefaceCache.get(id);
+            if (cachedTypeface != null) {
+                return cachedTypeface;
+            }
+
+            // Unfortunately the typeface is not available at this time, but requesting from
+            // the font provider takes too much time. For now, request the font data to ensure
+            // it is in the cache next time and return.
             if (sHandler == null) {
                 sThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
                 sThread.start();

@@ -52,6 +52,7 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1189,19 +1190,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 81) {
-            // Add package verification setting
-            db.beginTransaction();
-            SQLiteStatement stmt = null;
-            try {
-                stmt = db.compileStatement("INSERT OR REPLACE INTO secure(name,value)"
-                        + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                        R.bool.def_package_verifier_enable);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                if (stmt != null) stmt.close();
-            }
+            // package_verifier_enable has been removed
             upgradeVersion = 82;
         }
 
@@ -1303,7 +1292,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     String[] settingsToMove = {
-                            Settings.Global.PACKAGE_VERIFIER_ENABLE,
                             Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
                             Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE
                     };
@@ -1496,21 +1484,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 94) {
-            // Add wireless charging started sound setting
-            if (mUserHandle == UserHandle.USER_SYSTEM) {
-                db.beginTransaction();
-                SQLiteStatement stmt = null;
-                try {
-                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
-                            + " VALUES(?,?);");
-                    loadStringSetting(stmt, Settings.Global.CHARGING_STARTED_SOUND,
-                            R.string.def_wireless_charging_started_sound);
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                    if (stmt != null) stmt.close();
-                }
-            }
+            // charging sound moved to SettingsProvider version 184
             upgradeVersion = 95;
         }
 
@@ -1992,8 +1966,11 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     LockPatternUtils lpu = new LockPatternUtils(mContext);
                     List<LockPatternView.Cell> cellPattern =
-                            LockPatternUtils.stringToPattern(lockPattern);
-                    lpu.saveLockPattern(cellPattern, null, UserHandle.USER_SYSTEM);
+                            LockPatternUtils.byteArrayToPattern(lockPattern.getBytes());
+                    lpu.setLockCredential(
+                            LockscreenCredential.createPattern(cellPattern),
+                            LockscreenCredential.createNone(),
+                            UserHandle.USER_SYSTEM);
                 } catch (IllegalArgumentException e) {
                     // Don't want corrupted lock pattern to hang the reboot process
                 }
@@ -2479,9 +2456,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadDefaultAnimationSettings(stmt);
 
             // --- Previously in 'secure'
-            loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                    R.bool.def_package_verifier_enable);
-
             loadBooleanSetting(stmt, Settings.Global.WIFI_ON,
                     R.bool.def_wifi_on);
 
@@ -2554,8 +2528,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_car_dock_sound);
             loadStringSetting(stmt, Settings.Global.CAR_UNDOCK_SOUND,
                     R.string.def_car_undock_sound);
-            loadStringSetting(stmt, Settings.Global.CHARGING_STARTED_SOUND,
-                    R.string.def_wireless_charging_started_sound);
 
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
                     R.integer.def_dock_audio_media_enabled);
@@ -2575,15 +2547,14 @@ class DatabaseHelper extends SQLiteOpenHelper {
             StringBuilder val = new StringBuilder();
             List<Integer> defaultNetworks = TelephonyProperties.default_network();
             int phoneCount = 1;
-            TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+            TelephonyManager telephonyManager = getTelephonyManager();
             if (telephonyManager != null) {
                 phoneCount = telephonyManager.getSupportedModemCount();
             }
             for (int phoneId = 0; phoneId < phoneCount; phoneId++) {
                 int mode = defaultNetworks.size() <= phoneId
                         || defaultNetworks.get(phoneId) == null
-                        ? TelephonyManager.DEFAULT_PREFERRED_NETWORK_MODE
-                        : defaultNetworks.get(phoneId);
+                        ? TelephonyManager.DEFAULT_PREFERRED_NETWORK_MODE : defaultNetworks.get(phoneId);
                 if (phoneId > 0) val.append(',');
                 val.append(mode);
             }
@@ -2695,5 +2666,4 @@ class DatabaseHelper extends SQLiteOpenHelper {
     private TelephonyManager getTelephonyManager() {
         return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
-
 }

@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -31,6 +32,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -143,7 +145,8 @@ abstract class HdmiCecLocalDevice {
 
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
-    private final ArrayList<HdmiCecFeatureAction> mActions = new ArrayList<>();
+    @VisibleForTesting
+    final ArrayList<HdmiCecFeatureAction> mActions = new ArrayList<>();
 
     private final Handler mHandler =
             new Handler() {
@@ -426,15 +429,26 @@ abstract class HdmiCecLocalDevice {
         assertRunOnServiceThread();
         // Note that since this method is called after logical address allocation is done,
         // mDeviceInfo should not be null.
+        buildAndSendSetOsdName(message.getSource());
+        return true;
+    }
+
+    protected void buildAndSendSetOsdName(int dest) {
         HdmiCecMessage cecMessage =
-                HdmiCecMessageBuilder.buildSetOsdNameCommand(
-                        mAddress, message.getSource(), mDeviceInfo.getDisplayName());
+            HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                mAddress, dest, mDeviceInfo.getDisplayName());
         if (cecMessage != null) {
-            mService.sendCecCommand(cecMessage);
+            mService.sendCecCommand(cecMessage, new SendMessageCallback() {
+                @Override
+                public void onSendCompleted(int error) {
+                    if (error != SendMessageResult.SUCCESS) {
+                        HdmiLogger.debug("Failed to send cec command " + cecMessage);
+                    }
+                }
+            });
         } else {
             Slog.w(TAG, "Failed to build <Get Osd Name>:" + mDeviceInfo.getDisplayName());
         }
-        return true;
     }
 
     // Audio System device with no Playback device type
@@ -532,6 +546,8 @@ abstract class HdmiCecLocalDevice {
         } else if (mService.isPowerStandbyOrTransient() && isPowerOnOrToggleCommand(message)) {
             mService.wakeUp();
             return true;
+        } else if (!mService.isHdmiCecVolumeControlEnabled() && isVolumeOrMuteCommand(message)) {
+            return false;
         }
 
         final long downTime = SystemClock.uptimeMillis();
@@ -604,6 +620,16 @@ abstract class HdmiCecLocalDevice {
         return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_OFF_FUNCTION
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
+    }
+
+    static boolean isVolumeOrMuteCommand(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
+                && (params[0] == HdmiCecKeycode.CEC_KEYCODE_VOLUME_DOWN
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_MUTE
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
     }
 
     protected boolean handleTextViewOn(HdmiCecMessage message) {
@@ -864,7 +890,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     ActiveSource getActiveSource() {
-        return mService.getActiveSource();
+        return mService.getLocalActiveSource();
     }
 
     void setActiveSource(ActiveSource newActive) {
@@ -1026,6 +1052,9 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
+        if (!mService.isHdmiCecVolumeControlEnabled()) {
+            return;
+        }
         if (!HdmiCecKeycode.isVolumeKeycode(keyCode)) {
             Slog.w(TAG, "Not a volume key: " + keyCode);
             return;

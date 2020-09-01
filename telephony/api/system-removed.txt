@@ -1,0 +1,24 @@
+// Signature format: 2.0
+package android.telephony {
+
+  public final class PreciseDataConnectionState implements android.os.Parcelable {
+    method @Deprecated @Nullable public android.net.LinkProperties getDataConnectionLinkProperties();
+    method @Deprecated public int getDataConnectionNetworkType();
+  }
+
+  public class TelephonyManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void answerRingingCall();
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public boolean endCall();
+    method @Deprecated public void silenceRinger();
+  }
+
+}
+
+package android.telephony.data {
+
+  public final class DataCallResponse implements android.os.Parcelable {
+    ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+

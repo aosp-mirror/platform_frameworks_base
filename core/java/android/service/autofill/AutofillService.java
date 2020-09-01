@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
+import android.os.BaseBundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -454,7 +455,7 @@ import android.view.autofill.AutofillValue;
  * heuristics purposes, but it should not be sent to external servers.
  *
  * <a name="FieldClassification"></a>
- * <h3>Metrics and field classification</h3
+ * <h3>Metrics and field classification</h3>
  *
  * <p>The service can call {@link #getFillEventHistory()} to get metrics representing the user
  * actions, and then use these metrics to improve its heuristics.
@@ -611,6 +612,7 @@ public abstract class AutofillService extends Service {
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler(Looper.getMainLooper(), null, true);
+        BaseBundle.setShouldDefuse(true);
     }
 
     @Override

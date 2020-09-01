@@ -15,6 +15,7 @@
  */
 
 #include "ProfileData.h"
+#include "Properties.h"
 
 #include <cinttypes>
 
@@ -98,6 +99,11 @@ void ProfileData::mergeWith(const ProfileData& other) {
     if (mStatStartTime > other.mStatStartTime || mStatStartTime == 0) {
         mStatStartTime = other.mStatStartTime;
     }
+    for (size_t i = 0; i < other.mGPUFrameCounts.size(); i++) {
+        mGPUFrameCounts[i] >>= divider;
+        mGPUFrameCounts[i] += other.mGPUFrameCounts[i];
+    }
+    mPipelineType = other.mPipelineType;
 }
 
 void ProfileData::dump(int fd) const {
@@ -115,6 +121,14 @@ void ProfileData::dump(int fd) const {
     }
     dprintf(fd, "\nHISTOGRAM:");
     histogramForEach([fd](HistogramEntry entry) {
+        dprintf(fd, " %ums=%u", entry.renderTimeMs, entry.frameCount);
+    });
+    dprintf(fd, "\n50th gpu percentile: %ums", findGPUPercentile(50));
+    dprintf(fd, "\n90th gpu percentile: %ums", findGPUPercentile(90));
+    dprintf(fd, "\n95th gpu percentile: %ums", findGPUPercentile(95));
+    dprintf(fd, "\n99th gpu percentile: %ums", findGPUPercentile(99));
+    dprintf(fd, "\nGPU HISTOGRAM:");
+    histogramGPUForEach([fd](HistogramEntry entry) {
         dprintf(fd, " %ums=%u", entry.renderTimeMs, entry.frameCount);
     });
 }
@@ -140,10 +154,12 @@ uint32_t ProfileData::findPercentile(int percentile) const {
 void ProfileData::reset() {
     mJankTypeCounts.fill(0);
     mFrameCounts.fill(0);
+    mGPUFrameCounts.fill(0);
     mSlowFrameCounts.fill(0);
     mTotalFrameCount = 0;
     mJankFrameCount = 0;
-    mStatStartTime = systemTime(CLOCK_MONOTONIC);
+    mStatStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
+    mPipelineType = Properties::getRenderPipelineType();
 }
 
 void ProfileData::reportFrame(int64_t duration) {
@@ -164,6 +180,41 @@ void ProfileData::histogramForEach(const std::function<void(HistogramEntry)>& ca
     }
     for (size_t i = 0; i < mSlowFrameCounts.size(); i++) {
         callback(HistogramEntry{frameTimeForSlowFrameCountIndex(i), mSlowFrameCounts[i]});
+    }
+}
+
+uint32_t ProfileData::findGPUPercentile(int percentile) const {
+    uint32_t totalGPUFrameCount = 0;  // this is usually mTotalFrameCount - 3.
+    for (int i = mGPUFrameCounts.size() - 1; i >= 0; i--) {
+        totalGPUFrameCount += mGPUFrameCounts[i];
+    }
+    int pos = percentile * totalGPUFrameCount / 100;
+    int remaining = totalGPUFrameCount - pos;
+    for (int i = mGPUFrameCounts.size() - 1; i >= 0; i--) {
+        remaining -= mGPUFrameCounts[i];
+        if (remaining <= 0) {
+            return GPUFrameTimeForFrameCountIndex(i);
+        }
+    }
+    return 0;
+}
+
+uint32_t ProfileData::GPUFrameTimeForFrameCountIndex(uint32_t index) {
+    return index != 25 ? index + 1 : 4950;
+}
+
+void ProfileData::reportGPUFrame(int64_t duration) {
+    uint32_t index = static_cast<uint32_t>(ns2ms(duration));
+    if (index > 25) {
+        index = 25;
+    }
+
+    mGPUFrameCounts[index]++;
+}
+
+void ProfileData::histogramGPUForEach(const std::function<void(HistogramEntry)>& callback) const {
+    for (size_t i = 0; i < mGPUFrameCounts.size(); i++) {
+        callback(HistogramEntry{GPUFrameTimeForFrameCountIndex(i), mGPUFrameCounts[i]});
     }
 }
 

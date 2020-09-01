@@ -40,12 +40,16 @@ using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
 
+class BringYourOwnSection;
+
 // ================================================================================
 class ReportHandler : public MessageHandler {
 public:
     ReportHandler(const sp<WorkDirectory>& workDirectory,
-            const sp<Broadcaster>& broadcaster, const sp<Looper>& handlerLooper,
-            const sp<Throttler>& throttler);
+                  const sp<Broadcaster>& broadcaster,
+                  const sp<Looper>& handlerLooper,
+                  const sp<Throttler>& throttler,
+                  const vector<BringYourOwnSection*>& registeredSections);
     virtual ~ReportHandler();
 
     virtual void handleMessage(const Message& message);
@@ -78,6 +82,8 @@ private:
     sp<Looper> mHandlerLooper;
     nsecs_t mBacklogDelay;
     sp<Throttler> mThrottler;
+
+    const vector<BringYourOwnSection*>& mRegisteredSections;
 
     sp<ReportBatch> mBatch;
 
@@ -126,6 +132,11 @@ public:
     virtual Status reportIncidentToDumpstate(unique_fd stream,
             const sp<IIncidentReportStatusListener>& listener);
 
+    virtual Status registerSection(int id, const String16& name,
+            const sp<IIncidentDumpCallback>& callback);
+
+    virtual Status unregisterSection(int id);
+
     virtual Status systemRunning();
 
     virtual Status getIncidentReportList(const String16& pkg, const String16& cls,
@@ -149,6 +160,7 @@ private:
     sp<Broadcaster> mBroadcaster;
     sp<ReportHandler> mHandler;
     sp<Throttler> mThrottler;
+    vector<BringYourOwnSection*> mRegisteredSections;
 
     /**
      * Commands print out help.

@@ -26,6 +26,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -97,7 +99,10 @@ public class UnlaunchableAppActivity extends Activity
     @Override
     public void onClick(DialogInterface dialog, int which) {
         if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE && which == DialogInterface.BUTTON_POSITIVE) {
-            UserManager.get(this).requestQuietModeEnabled(false, UserHandle.of(mUserId), mTarget);
+            UserManager userManager = UserManager.get(this);
+            new Handler(Looper.getMainLooper()).post(
+                    () -> userManager.requestQuietModeEnabled(
+                            /* enableQuietMode= */ false, UserHandle.of(mUserId), mTarget));
         }
     }
 

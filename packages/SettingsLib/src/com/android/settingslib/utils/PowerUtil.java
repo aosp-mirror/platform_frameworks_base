@@ -119,7 +119,7 @@ public class PowerUtil {
             return null;
         }
         if (drainTimeMs <= ONE_DAY_MILLIS) {
-            return context.getString(R.string.power_suggestion_extend_battery,
+            return context.getString(R.string.power_suggestion_battery_run_out,
                 getDateTimeStringFromMs(context, drainTimeMs));
         } else {
             return getMoreThanOneDayShortString(context, drainTimeMs,

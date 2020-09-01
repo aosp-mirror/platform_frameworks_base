@@ -19,33 +19,56 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+/**
+ * Manages power menu plugins and communicates power menu actions to the StatusBar.
+ */
+@Singleton
 public class GlobalActionsComponent extends SystemUI implements Callbacks, GlobalActionsManager {
 
+    private final CommandQueue mCommandQueue;
+    private final ExtensionController mExtensionController;
+    private final Provider<GlobalActions> mGlobalActionsProvider;
     private GlobalActions mPlugin;
     private Extension<GlobalActions> mExtension;
     private IStatusBarService mBarService;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+
+    @Inject
+    public GlobalActionsComponent(Context context, CommandQueue commandQueue,
+            ExtensionController extensionController,
+            Provider<GlobalActions> globalActionsProvider,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+        super(context);
+        mCommandQueue = commandQueue;
+        mExtensionController = extensionController;
+        mGlobalActionsProvider = globalActionsProvider;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+    }
 
     @Override
     public void start() {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mExtension = Dependency.get(ExtensionController.class).newExtension(GlobalActions.class)
+        mExtension = mExtensionController.newExtension(GlobalActions.class)
                 .withPlugin(GlobalActions.class)
-                .withDefault(() -> new GlobalActionsImpl(mContext))
+                .withDefault(mGlobalActionsProvider::get)
                 .withCallback(this::onExtensionCallback)
                 .build();
         mPlugin = mExtension.get();
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
     }
 
     private void onExtensionCallback(GlobalActions newPlugin) {
@@ -62,6 +85,7 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
 
     @Override
     public void handleShowGlobalActionsMenu() {
+        mStatusBarKeyguardViewManager.setGlobalActionsVisible(true);
         mExtension.get().showGlobalActions(this);
     }
 
@@ -76,6 +100,7 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
     @Override
     public void onGlobalActionsHidden() {
         try {
+            mStatusBarKeyguardViewManager.setGlobalActionsVisible(false);
             mBarService.onGlobalActionsHidden();
         } catch (RemoteException e) {
         }

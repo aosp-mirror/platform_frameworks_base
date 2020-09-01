@@ -53,20 +53,22 @@ public interface ContentInterface {
 
     public @Nullable Uri uncanonicalize(@NonNull Uri uri) throws RemoteException;
 
-    public boolean refresh(@NonNull Uri uri, @Nullable Bundle args,
+    public boolean refresh(@NonNull Uri uri, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException;
 
-    public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues)
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
             throws RemoteException;
+
+    public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues,
+            @Nullable Bundle extras) throws RemoteException;
 
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] initialValues)
             throws RemoteException;
 
-    public int delete(@NonNull Uri uri, @Nullable String selection,
-            @Nullable String[] selectionArgs) throws RemoteException;
+    public int delete(@NonNull Uri uri, @Nullable Bundle extras) throws RemoteException;
 
-    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
-            @Nullable String[] selectionArgs) throws RemoteException;
+    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable Bundle extras)
+            throws RemoteException;
 
     public @Nullable ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String mode,
             @Nullable CancellationSignal signal) throws RemoteException, FileNotFoundException;

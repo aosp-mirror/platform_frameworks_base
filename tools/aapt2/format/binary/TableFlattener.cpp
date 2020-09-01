@@ -59,10 +59,22 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
   dst[i] = 0;
 }
 
+static bool cmp_style_ids(ResourceId a, ResourceId b) {
+  // If one of a and b is from the framework package (package ID 0x01), and the
+  // other is a dynamic ID (package ID 0x00), then put the dynamic ID after the
+  // framework ID. This ensures that when AssetManager resolves the dynamic IDs,
+  // they will be in sorted order as expected by AssetManager.
+  if ((a.package_id() == kFrameworkPackageId && b.package_id() == 0x00) ||
+      (a.package_id() == 0x00 && b.package_id() == kFrameworkPackageId)) {
+    return b < a;
+  }
+  return a < b;
+}
+
 static bool cmp_style_entries(const Style::Entry& a, const Style::Entry& b) {
   if (a.key.id) {
     if (b.key.id) {
-      return a.key.id.value() < b.key.id.value();
+      return cmp_style_ids(a.key.id.value(), b.key.id.value());
     }
     return true;
   } else if (!b.key.id) {
@@ -107,7 +119,7 @@ class MapFlattenVisitor : public ValueVisitor {
     }
 
     for (Attribute::Symbol& s : attr->symbols) {
-      BinaryPrimitive val(Res_value::TYPE_INT_DEC, s.value);
+      BinaryPrimitive val(s.type, s.value);
       FlattenEntry(&s.symbol, &val);
     }
   }
@@ -221,21 +233,22 @@ class MapFlattenVisitor : public ValueVisitor {
 struct OverlayableChunk {
   std::string actor;
   Source source;
-  std::map<OverlayableItem::PolicyFlags, std::set<ResourceId>> policy_ids;
+  std::map<PolicyFlags, std::set<ResourceId>> policy_ids;
 };
 
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, ResourceTablePackage* package,
                    const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries,
-                   bool collapse_key_stringpool, const std::set<std::string>& whitelisted_resources)
+                   bool collapse_key_stringpool,
+                   const std::set<ResourceName>& name_collapse_exemptions)
       : context_(context),
         diag_(context->GetDiagnostics()),
         package_(package),
         shared_libs_(shared_libs),
         use_sparse_entries_(use_sparse_entries),
         collapse_key_stringpool_(collapse_key_stringpool),
-        whitelisted_resources_(whitelisted_resources) {
+        name_collapse_exemptions_(name_collapse_exemptions) {
   }
 
   bool FlattenPackage(BigBuffer* buffer) {
@@ -480,35 +493,12 @@ class PackageFlattener {
           return false;
         }
 
-        uint32_t policy_flags = 0;
-        if (item.policies & OverlayableItem::Policy::kPublic) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
-        }
-        if (item.policies & OverlayableItem::Policy::kSystem) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
-        }
-        if (item.policies & OverlayableItem::Policy::kVendor) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
-        }
-        if (item.policies & OverlayableItem::Policy::kProduct) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
-        }
-        if (item.policies & OverlayableItem::Policy::kSignature) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_SIGNATURE;
-        }
-        if (item.policies & OverlayableItem::Policy::kOdm) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_ODM_PARTITION;
-        }
-        if (item.policies & OverlayableItem::Policy::kOem) {
-          policy_flags |= ResTable_overlayable_policy_header::POLICY_OEM_PARTITION;
-        }
-
-        auto policy = overlayable_chunk->policy_ids.find(policy_flags);
+        auto policy = overlayable_chunk->policy_ids.find(item.policies);
         if (policy != overlayable_chunk->policy_ids.end()) {
           policy->second.insert(id);
         } else {
           overlayable_chunk->policy_ids.insert(
-              std::make_pair(policy_flags, std::set<ResourceId>{id}));
+              std::make_pair(item.policies, std::set<ResourceId>{id}));
         }
       }
     }
@@ -546,7 +536,8 @@ class PackageFlattener {
         ChunkWriter policy_writer(buffer);
         auto* policy_type = policy_writer.StartChunk<ResTable_overlayable_policy_header>(
             RES_TABLE_OVERLAYABLE_POLICY_TYPE);
-        policy_type->policy_flags = util::HostToDevice32(static_cast<uint32_t>(policy_ids.first));
+        policy_type->policy_flags =
+            static_cast<PolicyFlags>(util::HostToDevice32(static_cast<uint32_t>(policy_ids.first)));
         policy_type->entry_count = util::HostToDevice32(static_cast<uint32_t>(
                                                             policy_ids.second.size()));
         // Write the ids after the policy header
@@ -652,11 +643,12 @@ class PackageFlattener {
 
       for (ResourceEntry* entry : sorted_entries) {
         uint32_t local_key_index;
+        ResourceName resource_name({}, type->type, entry->name);
         if (!collapse_key_stringpool_ ||
-            whitelisted_resources_.find(entry->name) != whitelisted_resources_.end()) {
+            name_collapse_exemptions_.find(resource_name) != name_collapse_exemptions_.end()) {
           local_key_index = (uint32_t)key_pool_.MakeRef(entry->name).index();
         } else {
-          // resource isn't whitelisted, add it as obfuscated value
+          // resource isn't exempt from collapse, add it as obfuscated value
           local_key_index = (uint32_t)key_pool_.MakeRef(obfuscated_resource_name).index();
         }
         // Group values by configuration.
@@ -712,7 +704,7 @@ class PackageFlattener {
   StringPool type_pool_;
   StringPool key_pool_;
   bool collapse_key_stringpool_;
-  const std::set<std::string>& whitelisted_resources_;
+  const std::set<ResourceName>& name_collapse_exemptions_;
 };
 
 }  // namespace
@@ -760,7 +752,7 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
     PackageFlattener flattener(context, package.get(), &table->included_packages_,
                                options_.use_sparse_entries, options_.collapse_key_stringpool,
-                               options_.whitelisted_resources);
+                               options_.name_collapse_exemptions);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;
     }

@@ -45,6 +45,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.UiModeManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.LocaleProto;
@@ -66,7 +67,6 @@ import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -453,6 +453,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((diff & ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
             list.add("CONFIG_SMALLEST_SCREEN_SIZE");
         }
+        if ((diff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            list.add("CONFIG_DENSITY");
+        }
         if ((diff & ActivityInfo.CONFIG_LAYOUT_DIRECTION) != 0) {
             list.add("CONFIG_LAYOUT_DIRECTION");
         }
@@ -461,6 +464,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if ((diff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
             list.add("CONFIG_ASSETS_PATHS");
+        }
+        if ((diff & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
+            list.add("CONFIG_WINDOW_CONFIGURATION");
         }
         StringBuilder builder = new StringBuilder("{");
         for (int i = 0, n = list.size(); i < n; i++) {
@@ -614,6 +620,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int navigationHidden;
 
+    /** @hide **/
+    @IntDef(prefix = {"ORIENTATION_"}, value = {
+            ORIENTATION_UNDEFINED,
+            ORIENTATION_PORTRAIT,
+            ORIENTATION_LANDSCAPE,
+            ORIENTATION_SQUARE
+    })
+    public @interface Orientation {
+    }
+
     /** Constant for {@link #orientation}: a value indicating that no value has been set. */
     public static final int ORIENTATION_UNDEFINED = 0;
     /** Constant for {@link #orientation}, value corresponding to the
@@ -631,6 +647,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Overall orientation of the screen.  May be one of
      * {@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT}.
      */
+    @Orientation
     public int orientation;
 
     /** Constant for {@link #uiMode}: bits that encode the mode type. */
@@ -1105,7 +1122,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @param critical          If true, reduce amount of data written.
      * @hide
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean persisted,
+    public void dumpDebug(ProtoOutputStream protoOutputStream, long fieldId, boolean persisted,
             boolean critical) {
         final long token = protoOutputStream.start(fieldId);
         if (!critical) {
@@ -1128,7 +1145,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             protoOutputStream.write(DENSITY_DPI, densityDpi);
             // For persistence, we do not care about window configuration
             if (!persisted && windowConfiguration != null) {
-                windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+                windowConfiguration.dumpDebug(protoOutputStream, WINDOW_CONFIGURATION);
             }
         }
         protoOutputStream.write(ORIENTATION, orientation);
@@ -1145,8 +1162,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @param fieldId           Field Id of the Configuration as defined in the parent message
      * @hide
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
-        writeToProto(protoOutputStream, fieldId, false /* persisted */, false /* critical */);
+    public void dumpDebug(ProtoOutputStream protoOutputStream, long fieldId) {
+        dumpDebug(protoOutputStream, fieldId, false /* persisted */, false /* critical */);
     }
 
     /**
@@ -1158,8 +1175,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @param critical          If true, reduce amount of data written.
      * @hide
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean critical) {
-        writeToProto(protoOutputStream, fieldId, false /* persisted */, critical);
+    public void dumpDebug(ProtoOutputStream protoOutputStream, long fieldId, boolean critical) {
+        dumpDebug(protoOutputStream, fieldId, false /* persisted */, critical);
     }
 
     /**
@@ -1328,7 +1345,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
 
         final long token = protoOutputStream.start(fieldId);
-        writeToProto(protoOutputStream, CONFIGURATION);
+        dumpDebug(protoOutputStream, CONFIGURATION);
         protoOutputStream.write(SDK_VERSION, Build.VERSION.RESOURCES_SDK_INT);
         protoOutputStream.write(SCREEN_WIDTH_PX, width);
         protoOutputStream.write(SCREEN_HEIGHT_PX, height);
@@ -1586,6 +1603,80 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
 
         return changed;
+    }
+
+    /**
+     * Copies the fields specified by mask from delta into this Configuration object. This will
+     * copy anything allowed by the mask (including undefined values).
+     * @hide
+     */
+    public void setTo(@NonNull Configuration delta, @Config int mask,
+            @WindowConfiguration.WindowConfig int windowMask) {
+        if ((mask & ActivityInfo.CONFIG_FONT_SCALE) != 0) {
+            fontScale = delta.fontScale;
+        }
+        if ((mask & ActivityInfo.CONFIG_MCC) != 0) {
+            mcc = delta.mcc;
+        }
+        if ((mask & ActivityInfo.CONFIG_MNC) != 0) {
+            mnc = delta.mnc;
+        }
+        if ((mask & ActivityInfo.CONFIG_LOCALE) != 0) {
+            mLocaleList = delta.mLocaleList;
+            if (!mLocaleList.isEmpty()) {
+                locale = (Locale) delta.locale.clone();
+            }
+        }
+        if ((mask & ActivityInfo.CONFIG_LAYOUT_DIRECTION) != 0) {
+            final int deltaScreenLayoutDir = delta.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
+            screenLayout = (screenLayout & ~SCREENLAYOUT_LAYOUTDIR_MASK) | deltaScreenLayoutDir;
+        }
+        if ((mask & ActivityInfo.CONFIG_LOCALE) != 0) {
+            userSetLocale = delta.userSetLocale;
+        }
+        if ((mask & ActivityInfo.CONFIG_TOUCHSCREEN) != 0) {
+            touchscreen = delta.touchscreen;
+        }
+        if ((mask & ActivityInfo.CONFIG_KEYBOARD) != 0) {
+            keyboard = delta.keyboard;
+        }
+        if ((mask & ActivityInfo.CONFIG_KEYBOARD_HIDDEN) != 0) {
+            keyboardHidden = delta.keyboardHidden;
+            hardKeyboardHidden = delta.hardKeyboardHidden;
+            navigationHidden = delta.navigationHidden;
+        }
+        if ((mask & ActivityInfo.CONFIG_NAVIGATION) != 0) {
+            navigation = delta.navigation;
+        }
+        if ((mask & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            orientation = delta.orientation;
+        }
+        if ((mask & ActivityInfo.CONFIG_SCREEN_LAYOUT) != 0) {
+            // Not enough granularity for each component unfortunately.
+            screenLayout = screenLayout | (delta.screenLayout & ~SCREENLAYOUT_LAYOUTDIR_MASK);
+        }
+        if ((mask & ActivityInfo.CONFIG_COLOR_MODE) != 0) {
+            colorMode = delta.colorMode;
+        }
+        if ((mask & ActivityInfo.CONFIG_UI_MODE) != 0) {
+            uiMode = delta.uiMode;
+        }
+        if ((mask & ActivityInfo.CONFIG_SCREEN_SIZE) != 0) {
+            screenWidthDp = delta.screenWidthDp;
+            screenHeightDp = delta.screenHeightDp;
+        }
+        if ((mask & ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
+            smallestScreenWidthDp = delta.smallestScreenWidthDp;
+        }
+        if ((mask & ActivityInfo.CONFIG_DENSITY) != 0) {
+            densityDpi = delta.densityDpi;
+        }
+        if ((mask & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+            assetsSeq = delta.assetsSeq;
+        }
+        if ((mask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
+            windowConfiguration.setTo(delta.windowConfiguration, windowMask);
+        }
     }
 
     /**
@@ -1883,6 +1974,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     private Configuration(Parcel source) {
         readFromParcel(source);
+    }
+
+
+    /**
+     * Retuns whether the configuration is in night mode
+     * @return true if night mode is active and false otherwise
+     */
+    public boolean isNightModeActive() {
+        return (uiMode & UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES;
     }
 
     public int compareTo(Configuration that) {
@@ -2641,76 +2741,5 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
         // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
         // out.
-    }
-
-
-    /**
-     * Writes the Configuration's member fields as attributes into the XmlSerializer.
-     * The serializer is expected to have already started a tag so that attributes can be
-     * immediately written.
-     *
-     * @param xml The serializer to which to write the attributes.
-     * @param config The Configuration whose member fields to write.
-     * {@hide}
-     */
-    public static void writeXmlAttrs(XmlSerializer xml, Configuration config) throws IOException {
-        XmlUtils.writeIntAttribute(xml, XML_ATTR_FONT_SCALE,
-                Float.floatToIntBits(config.fontScale));
-        if (config.mcc != 0) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_MCC, config.mcc);
-        }
-        if (config.mnc != 0) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_MNC, config.mnc);
-        }
-        config.fixUpLocaleList();
-        if (!config.mLocaleList.isEmpty()) {
-           XmlUtils.writeStringAttribute(xml, XML_ATTR_LOCALES, config.mLocaleList.toLanguageTags());
-        }
-        if (config.touchscreen != TOUCHSCREEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_TOUCHSCREEN, config.touchscreen);
-        }
-        if (config.keyboard != KEYBOARD_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_KEYBOARD, config.keyboard);
-        }
-        if (config.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_KEYBOARD_HIDDEN, config.keyboardHidden);
-        }
-        if (config.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_HARD_KEYBOARD_HIDDEN,
-                    config.hardKeyboardHidden);
-        }
-        if (config.navigation != NAVIGATION_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_NAVIGATION, config.navigation);
-        }
-        if (config.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_NAVIGATION_HIDDEN, config.navigationHidden);
-        }
-        if (config.orientation != ORIENTATION_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_ORIENTATION, config.orientation);
-        }
-        if (config.screenLayout != SCREENLAYOUT_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_LAYOUT, config.screenLayout);
-        }
-        if (config.colorMode != COLOR_MODE_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_COLOR_MODE, config.colorMode);
-        }
-        if (config.uiMode != 0) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_UI_MODE, config.uiMode);
-        }
-        if (config.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_WIDTH, config.screenWidthDp);
-        }
-        if (config.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_HEIGHT, config.screenHeightDp);
-        }
-        if (config.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SMALLEST_WIDTH, config.smallestScreenWidthDp);
-        }
-        if (config.densityDpi != DENSITY_DPI_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
-        }
-
-        // For persistence, we do not care about assetsSeq and window configuration, so do not write
-        // it out.
     }
 }

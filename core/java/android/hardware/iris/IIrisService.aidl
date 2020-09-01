@@ -21,4 +21,6 @@ package android.hardware.iris;
  * @hide
  */
 interface IIrisService {
+    // Initialize the OEM configured biometric strength
+    void initConfiguredStrength(int strength);
 }

@@ -16,13 +16,10 @@
 
 package com.android.server.am;
 
-import android.content.pm.ApplicationInfo;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
-
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +31,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 
 final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnClickListener {
     private static final String TAG = "AppNotRespondingDialog";
@@ -94,7 +94,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Not Responding: " + mProc.info.processName);
         attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
-                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
     }
 
@@ -145,7 +145,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
             switch (msg.what) {
                 case FORCE_CLOSE:
                     // Kill the application.
-                    mService.killAppAtUsersRequest(mProc, AppNotRespondingDialog.this);
+                    mService.killAppAtUsersRequest(mProc);
                     break;
                 case WAIT_AND_REPORT:
                 case WAIT:
@@ -160,9 +160,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
 
                         app.setNotResponding(false);
                         app.notRespondingReport = null;
-                        if (app.anrDialog == AppNotRespondingDialog.this) {
-                            app.anrDialog = null;
-                        }
+                        app.getDialogController().clearAnrDialogs();
                         mService.mServices.scheduleServiceTimeoutLocked(app);
                     }
                     break;

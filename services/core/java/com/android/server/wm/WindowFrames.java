@@ -23,10 +23,6 @@ import static com.android.server.wm.WindowFramesProto.CUTOUT;
 import static com.android.server.wm.WindowFramesProto.DECOR_FRAME;
 import static com.android.server.wm.WindowFramesProto.DISPLAY_FRAME;
 import static com.android.server.wm.WindowFramesProto.FRAME;
-import static com.android.server.wm.WindowFramesProto.OUTSETS;
-import static com.android.server.wm.WindowFramesProto.OUTSET_FRAME;
-import static com.android.server.wm.WindowFramesProto.OVERSCAN_FRAME;
-import static com.android.server.wm.WindowFramesProto.OVERSCAN_INSETS;
 import static com.android.server.wm.WindowFramesProto.PARENT_FRAME;
 import static com.android.server.wm.WindowFramesProto.STABLE_INSETS;
 import static com.android.server.wm.WindowFramesProto.VISIBLE_FRAME;
@@ -61,21 +57,13 @@ public class WindowFrames {
     public final Rect mParentFrame = new Rect();
 
     /**
-     * The entire screen area of the {@link TaskStack} this window is in. Usually equal to the
+     * The entire screen area of the {@link ActivityStack} this window is in. Usually equal to the
      * screen area of the device.
      *
      * TODO(b/111611553): The name is unclear and most likely should be swapped with
      * {@link #mParentFrame}
      */
     public final Rect mDisplayFrame = new Rect();
-
-    /**
-     * The region of the display frame that the display type supports displaying content on. This
-     * is mostly a special case for TV where some displays don’t have the entire display usable.
-     * {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN} flag can be used to
-     * allow window display contents to extend into the overscan region.
-     */
-    public final Rect mOverscanFrame = new Rect();
 
     /**
      * Legacy stuff. Generally equal to the content frame expect when the IME for older apps
@@ -102,12 +90,6 @@ public class WindowFrames {
     public final Rect mStableFrame = new Rect();
 
     /**
-     * Frame that includes dead area outside of the surface but where we want to pretend that it's
-     * possible to draw.
-     */
-    final public Rect mOutsetFrame = new Rect();
-
-    /**
      * Similar to {@link #mDisplayFrame}
      *
      * TODO: Why is this different than mDisplayFrame
@@ -123,6 +105,16 @@ public class WindowFrames {
      * The last real frame that was reported to the client.
      */
     final Rect mLastFrame = new Rect();
+
+    /**
+     * mFrame but relative to the parent container.
+     */
+    final Rect mRelFrame = new Rect();
+
+    /**
+     * mLastFrame but relative to the parent container
+     */
+    final Rect mLastRelFrame = new Rect();
 
     private boolean mFrameSizeChanged = false;
 
@@ -148,28 +140,12 @@ public class WindowFrames {
     private boolean mDisplayCutoutChanged;
 
     /**
-     * Insets that determine the area covered by the display overscan region.  These are in the
-     * application's coordinate space (without compatibility scale applied).
-     */
-    final Rect mOverscanInsets = new Rect();
-    final Rect mLastOverscanInsets = new Rect();
-    private boolean mOverscanInsetsChanged;
-
-    /**
      * Insets that determine the area covered by the stable system windows.  These are in the
      * application's coordinate space (without compatibility scale applied).
      */
     final Rect mStableInsets = new Rect();
     final Rect mLastStableInsets = new Rect();
     private boolean mStableInsetsChanged;
-
-    /**
-     * Outsets determine the area outside of the surface where we want to pretend that it's possible
-     * to draw anyway.
-     */
-    final Rect mOutsets = new Rect();
-    final Rect mLastOutsets = new Rect();
-    private boolean mOutsetsChanged = false;
 
     /**
      * Insets that determine the actually visible area.  These are in the application's
@@ -190,30 +166,25 @@ public class WindowFrames {
 
     private final Rect mTmpRect = new Rect();
 
-    private boolean mHasOutsets;
-
     private boolean mContentChanged;
 
     public WindowFrames() {
     }
 
-    public WindowFrames(Rect parentFrame, Rect displayFrame, Rect overscanFrame, Rect contentFrame,
-            Rect visibleFrame, Rect decorFrame, Rect stableFrame, Rect outsetFrame) {
-        setFrames(parentFrame, displayFrame, overscanFrame, contentFrame, visibleFrame, decorFrame,
-                stableFrame, outsetFrame);
+    public WindowFrames(Rect parentFrame, Rect displayFrame, Rect contentFrame,
+            Rect visibleFrame, Rect decorFrame, Rect stableFrame) {
+        setFrames(parentFrame, displayFrame, contentFrame, visibleFrame, decorFrame,
+                stableFrame);
     }
 
-    public void setFrames(Rect parentFrame, Rect displayFrame, Rect overscanFrame,
-            Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            Rect outsetFrame) {
+    public void setFrames(Rect parentFrame, Rect displayFrame,
+            Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame) {
         mParentFrame.set(parentFrame);
         mDisplayFrame.set(displayFrame);
-        mOverscanFrame.set(overscanFrame);
         mContentFrame.set(contentFrame);
         mVisibleFrame.set(visibleFrame);
         mDecorFrame.set(decorFrame);
         mStableFrame.set(stableFrame);
-        mOutsetFrame.set(outsetFrame);
     }
 
     public void setParentFrameWasClippedByDisplayCutout(
@@ -236,17 +207,7 @@ public class WindowFrames {
         return (mLastFrame.width() != mFrame.width()) || (mLastFrame.height() != mFrame.height());
     }
 
-    /**
-     * Calculates the outsets for this windowFrame. The outsets are calculated by the area between
-     * the {@link #mOutsetFrame} and the {@link #mContentFrame}. If there are no outsets, then
-     * {@link #mOutsets} is set to empty.
-     */
-    void calculateOutsets() {
-        if (mHasOutsets) {
-            InsetUtils.insetsBetweenFrames(mOutsetFrame, mContentFrame, mOutsets);
-        }
-    }
-
+    // TODO(b/118118435): Remove after migration.
     /**
      * Calculate the insets for the type
      * {@link android.view.WindowManager.LayoutParams#TYPE_DOCK_DIVIDER}
@@ -301,11 +262,9 @@ public class WindowFrames {
      * @param scale The amount to scale the insets by.
      */
     void scaleInsets(float scale) {
-        mOverscanInsets.scale(scale);
         mContentInsets.scale(scale);
         mVisibleInsets.scale(scale);
         mStableInsets.scale(scale);
-        mOutsets.scale(scale);
     }
 
     void offsetFrames(int layoutXDiff, int layoutYDiff) {
@@ -321,15 +280,13 @@ public class WindowFrames {
      * @return true if info about size has changed since last reported.
      */
     boolean setReportResizeHints() {
-        mOverscanInsetsChanged |= !mLastOverscanInsets.equals(mOverscanInsets);
         mContentInsetsChanged |= !mLastContentInsets.equals(mContentInsets);
         mVisibleInsetsChanged |= !mLastVisibleInsets.equals(mVisibleInsets);
         mStableInsetsChanged |= !mLastStableInsets.equals(mStableInsets);
-        mOutsetsChanged |= !mLastOutsets.equals(mOutsets);
         mFrameSizeChanged |= didFrameSizeChange();
         mDisplayCutoutChanged |= !mLastDisplayCutout.equals(mDisplayCutout);
-        return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged
-                || mStableInsetsChanged || mOutsetsChanged || mFrameSizeChanged
+        return mContentInsetsChanged || mVisibleInsetsChanged
+                || mStableInsetsChanged || mFrameSizeChanged
                 || mDisplayCutoutChanged;
     }
 
@@ -338,11 +295,9 @@ public class WindowFrames {
      * after the insets are reported to client.
      */
     void resetInsetsChanged() {
-        mOverscanInsetsChanged = false;
         mContentInsetsChanged = false;
         mVisibleInsetsChanged = false;
         mStableInsetsChanged = false;
-        mOutsetsChanged = false;
         mFrameSizeChanged = false;
         mDisplayCutoutChanged = false;
     }
@@ -351,11 +306,9 @@ public class WindowFrames {
      * Copy over inset values as the last insets that were sent to the client.
      */
     void updateLastInsetValues() {
-        mLastOverscanInsets.set(mOverscanInsets);
         mLastContentInsets.set(mContentInsets);
         mLastVisibleInsets.set(mVisibleInsets);
         mLastStableInsets.set(mStableInsets);
-        mLastOutsets.set(mOutsets);
         mLastDisplayCutout = mDisplayCutout;
     }
 
@@ -365,19 +318,6 @@ public class WindowFrames {
      */
     void resetLastContentInsets() {
         mLastContentInsets.set(-1, -1, -1, -1);
-    }
-
-    /**
-     * Sets whether the frame has outsets.
-     */
-    public void setHasOutsets(boolean hasOutsets) {
-        if (mHasOutsets == hasOutsets) {
-            return;
-        }
-        mHasOutsets = hasOutsets;
-        if (!hasOutsets) {
-            mOutsets.setEmpty();
-        }
     }
 
     /**
@@ -395,23 +335,19 @@ public class WindowFrames {
         return mContentChanged;
     }
 
-    public void writeToProto(@NonNull ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mParentFrame.writeToProto(proto, PARENT_FRAME);
-        mContentFrame.writeToProto(proto, CONTENT_FRAME);
-        mDisplayFrame.writeToProto(proto, DISPLAY_FRAME);
-        mOverscanFrame.writeToProto(proto, OVERSCAN_FRAME);
-        mVisibleFrame.writeToProto(proto, VISIBLE_FRAME);
-        mDecorFrame.writeToProto(proto, DECOR_FRAME);
-        mOutsetFrame.writeToProto(proto, OUTSET_FRAME);
-        mContainingFrame.writeToProto(proto, CONTAINING_FRAME);
-        mFrame.writeToProto(proto, FRAME);
-        mDisplayCutout.getDisplayCutout().writeToProto(proto, CUTOUT);
-        mContentInsets.writeToProto(proto, CONTENT_INSETS);
-        mOverscanInsets.writeToProto(proto, OVERSCAN_INSETS);
-        mVisibleInsets.writeToProto(proto, VISIBLE_INSETS);
-        mStableInsets.writeToProto(proto, STABLE_INSETS);
-        mOutsets.writeToProto(proto, OUTSETS);
+        mParentFrame.dumpDebug(proto, PARENT_FRAME);
+        mContentFrame.dumpDebug(proto, CONTENT_FRAME);
+        mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
+        mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);
+        mDecorFrame.dumpDebug(proto, DECOR_FRAME);
+        mContainingFrame.dumpDebug(proto, CONTAINING_FRAME);
+        mFrame.dumpDebug(proto, FRAME);
+        mDisplayCutout.getDisplayCutout().dumpDebug(proto, CUTOUT);
+        mContentInsets.dumpDebug(proto, CONTENT_INSETS);
+        mVisibleInsets.dumpDebug(proto, VISIBLE_INSETS);
+        mStableInsets.dumpDebug(proto, STABLE_INSETS);
 
         proto.end(token);
     }
@@ -420,33 +356,26 @@ public class WindowFrames {
         pw.println(prefix + "Frames: containing="
                 + mContainingFrame.toShortString(sTmpSB)
                 + " parent=" + mParentFrame.toShortString(sTmpSB));
-        pw.println(prefix + "    display=" + mDisplayFrame.toShortString(sTmpSB)
-                + " overscan=" + mOverscanFrame.toShortString(sTmpSB));
+        pw.println(prefix + "    display=" + mDisplayFrame.toShortString(sTmpSB));
         pw.println(prefix + "    content=" + mContentFrame.toShortString(sTmpSB)
                 + " visible=" + mVisibleFrame.toShortString(sTmpSB));
         pw.println(prefix + "    decor=" + mDecorFrame.toShortString(sTmpSB));
-        pw.println(prefix + "    outset=" + mOutsetFrame.toShortString(sTmpSB));
         pw.println(prefix + "mFrame=" + mFrame.toShortString(sTmpSB)
                 + " last=" + mLastFrame.toShortString(sTmpSB));
         pw.println(prefix + " cutout=" + mDisplayCutout.getDisplayCutout()
                 + " last=" + mLastDisplayCutout.getDisplayCutout());
-        pw.print(prefix + "Cur insets: overscan=" + mOverscanInsets.toShortString(sTmpSB)
-                + " content=" + mContentInsets.toShortString(sTmpSB)
+        pw.print(prefix + "Cur insets: content=" + mContentInsets.toShortString(sTmpSB)
                 + " visible=" + mVisibleInsets.toShortString(sTmpSB)
-                + " stable=" + mStableInsets.toShortString(sTmpSB)
-                + " outsets=" + mOutsets.toShortString(sTmpSB));
-        pw.println(prefix + "Lst insets: overscan=" + mLastOverscanInsets.toShortString(sTmpSB)
-                + " content=" + mLastContentInsets.toShortString(sTmpSB)
+                + " stable=" + mStableInsets.toShortString(sTmpSB));
+        pw.println(prefix + "Lst insets: content=" + mLastContentInsets.toShortString(sTmpSB)
                 + " visible=" + mLastVisibleInsets.toShortString(sTmpSB)
-                + " stable=" + mLastStableInsets.toShortString(sTmpSB)
-                + " outset=" + mLastOutsets.toShortString(sTmpSB));
+                + " stable=" + mLastStableInsets.toShortString(sTmpSB));
     }
 
     String getInsetsInfo() {
         return "ci=" + mContentInsets.toShortString()
                 + " vi=" + mVisibleInsets.toShortString()
-                + " si=" + mStableInsets.toShortString()
-                + " of=" + mOutsets.toShortString();
+                + " si=" + mStableInsets.toShortString();
     }
 
     String getInsetsChangedInfo() {
@@ -456,8 +385,6 @@ public class WindowFrames {
                 + " " + mVisibleInsets.toShortString()
                 + " stableInsetsChanged=" + mStableInsetsChanged
                 + " " + mStableInsets.toShortString()
-                + " outsetsChanged=" + mOutsetsChanged
-                + " " + mOutsets.toShortString()
                 + " displayCutoutChanged=" + mDisplayCutoutChanged;
     }
 }

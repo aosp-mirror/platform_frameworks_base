@@ -1,0 +1,31 @@
+// Signature format: 2.0
+package com.android.server.display.config {
+
+  public class DisplayConfiguration {
+    ctor public DisplayConfiguration();
+    method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
+    method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
+  }
+
+  public class NitsMap {
+    ctor public NitsMap();
+    method @NonNull public final java.util.List<com.android.server.display.config.Point> getPoint();
+  }
+
+  public class Point {
+    ctor public Point();
+    method @NonNull public final java.math.BigDecimal getNits();
+    method @NonNull public final java.math.BigDecimal getValue();
+    method public final void setNits(@NonNull java.math.BigDecimal);
+    method public final void setValue(@NonNull java.math.BigDecimal);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.server.display.config.DisplayConfiguration read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

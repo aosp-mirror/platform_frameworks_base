@@ -25,6 +25,7 @@ cc_defaults {
     cflags: [
         "-Wall",
         "-Werror",
+        "-Wextra",
         "-Wunused",
         "-Wunreachable-code",
     ],
@@ -48,10 +49,11 @@ cc_library_shared {
         "sensor.cpp",
         "sharedmem.cpp",
         "storage_manager.cpp",
-        "surface_texture.cpp",
         "surface_control.cpp",
+        "surface_texture.cpp",
         "system_fonts.cpp",
         "trace.cpp",
+        "thermal.cpp"
     ],
 
     shared_libs: [
@@ -71,14 +73,20 @@ cc_library_shared {
         "libnetd_client",
         "libhwui",
         "libxml2",
+        "libEGL",
+        "libGLESv2",
+        "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
+        "libnativedisplay",
     ],
 
     static_libs: [
         "libstorage",
         "libarect",
     ],
+
+    header_libs: [ "libhwui_internal_headers",],
 
     whole_static_libs: ["libnativewindow"],
 
@@ -115,11 +123,16 @@ llndk_library {
 // Aidl library for platform compat.
 cc_library_shared {
     name: "lib-platform-compat-native-api",
-    defaults: ["libandroid_defaults"],
-
+    cflags: [
+            "-Wall",
+            "-Werror",
+            "-Wno-missing-field-initializers",
+            "-Wno-unused-variable",
+            "-Wunused-parameter",
+        ],
     shared_libs: [
         "libbinder",
-        "libutils",
+         "libutils",
     ],
     aidl: {
         local_include_dirs: ["aidl"],

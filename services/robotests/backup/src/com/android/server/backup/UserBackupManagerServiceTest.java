@@ -30,10 +30,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 import android.app.backup.BackupManager;
@@ -63,6 +66,7 @@ import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
+import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -80,7 +84,12 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -88,12 +97,18 @@ import java.util.List;
  * UserBackupManagerService} that performs operations for its target user.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowAppBackupUtils.class, ShadowApplicationPackageManager.class})
+@Config(
+        shadows = {
+            ShadowAppBackupUtils.class,
+            ShadowApplicationPackageManager.class,
+            ShadowSystemServiceRegistry.class
+        })
 @Presubmit
 public class UserBackupManagerServiceTest {
     private static final String TAG = "BMSTest";
     private static final String PACKAGE_1 = "some.package.1";
     private static final String PACKAGE_2 = "some.package.2";
+    private static final String USER_FACING_PACKAGE = "user.facing.package";
     private static final int USER_ID = 10;
 
     @Mock private TransportManager mTransportManager;
@@ -508,6 +523,23 @@ public class UserBackupManagerServiceTest {
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(SecurityException.class, backupManagerService::getCurrentTransportComponent);
+    }
+
+    /**
+     * Test verifying that {@link UserBackupManagerService#excludeKeysFromRestore(String, List)}
+     * throws a {@link SecurityException} if the caller does not have backup permission.
+     */
+    @Test
+    public void testExcludeKeysFromRestore_withoutPermission() throws Exception {
+        mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.excludeKeysFromRestore(
+                                PACKAGE_1,
+                                new ArrayList<String>(){}));
     }
 
     /* Tests for updating transport attributes */
@@ -999,7 +1031,7 @@ public class UserBackupManagerServiceTest {
         UserBackupManagerService.createAndInitializeService(
                 USER_ID,
                 mContext,
-                new Trampoline(mContext),
+                new BackupManagerService(mContext),
                 mBackupThread,
                 mBaseStateDir,
                 mDataDir,
@@ -1020,7 +1052,7 @@ public class UserBackupManagerServiceTest {
         UserBackupManagerService.createAndInitializeService(
                 USER_ID,
                 mContext,
-                new Trampoline(mContext),
+                new BackupManagerService(mContext),
                 mBackupThread,
                 mBaseStateDir,
                 mDataDir,
@@ -1039,7 +1071,7 @@ public class UserBackupManagerServiceTest {
                         UserBackupManagerService.createAndInitializeService(
                                 USER_ID,
                                 /* context */ null,
-                                new Trampoline(mContext),
+                                new BackupManagerService(mContext),
                                 mBackupThread,
                                 mBaseStateDir,
                                 mDataDir,
@@ -1071,7 +1103,7 @@ public class UserBackupManagerServiceTest {
                         UserBackupManagerService.createAndInitializeService(
                                 USER_ID,
                                 mContext,
-                                new Trampoline(mContext),
+                                new BackupManagerService(mContext),
                                 /* backupThread */ null,
                                 mBaseStateDir,
                                 mDataDir,
@@ -1087,7 +1119,7 @@ public class UserBackupManagerServiceTest {
                         UserBackupManagerService.createAndInitializeService(
                                 USER_ID,
                                 mContext,
-                                new Trampoline(mContext),
+                                new BackupManagerService(mContext),
                                 mBackupThread,
                                 /* baseStateDir */ null,
                                 mDataDir,
@@ -1096,8 +1128,8 @@ public class UserBackupManagerServiceTest {
 
     /**
      * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(int, Context, Trampoline, HandlerThread,
-     * File, File, TransportManager)}.
+     * UserBackupManagerService#createAndInitializeService(int, Context, BackupManagerService,
+     * HandlerThread, File, File, TransportManager)}.
      */
     @Test
     public void testCreateAndInitializeService_withNullDataDir_throws() {
@@ -1107,7 +1139,7 @@ public class UserBackupManagerServiceTest {
                         UserBackupManagerService.createAndInitializeService(
                                 USER_ID,
                                 mContext,
-                                new Trampoline(mContext),
+                                new BackupManagerService(mContext),
                                 mBackupThread,
                                 mBaseStateDir,
                                 /* dataDir */ null,
@@ -1116,8 +1148,8 @@ public class UserBackupManagerServiceTest {
 
     /**
      * Test checking non-null argument on {@link
-     * UserBackupManagerService#createAndInitializeService(int, Context, Trampoline, HandlerThread,
-     * File, File, TransportManager)}.
+     * UserBackupManagerService#createAndInitializeService(int, Context, BackupManagerService,
+     * HandlerThread, File, File, TransportManager)}.
      */
     @Test
     public void testCreateAndInitializeService_withNullTransportManager_throws() {
@@ -1127,7 +1159,7 @@ public class UserBackupManagerServiceTest {
                         UserBackupManagerService.createAndInitializeService(
                                 USER_ID,
                                 mContext,
-                                new Trampoline(mContext),
+                                new BackupManagerService(mContext),
                                 mBackupThread,
                                 mBaseStateDir,
                                 mDataDir,
@@ -1145,7 +1177,7 @@ public class UserBackupManagerServiceTest {
         UserBackupManagerService service = UserBackupManagerService.createAndInitializeService(
                 USER_ID,
                 contextSpy,
-                new Trampoline(mContext),
+                new BackupManagerService(mContext),
                 mBackupThread,
                 mBaseStateDir,
                 mDataDir,
@@ -1157,6 +1189,47 @@ public class UserBackupManagerServiceTest {
         // One call for package changes and one call for sd card events.
         verify(contextSpy, times(2)).registerReceiverAsUser(
                 eq(packageTrackingReceiver), eq(UserHandle.of(USER_ID)), any(), any(), any());
+    }
+
+    @Test
+    public void testFilterUserFacingPackages_shouldSkipUserFacing_filtersUserFacing() {
+        List<PackageInfo> packages = Arrays.asList(getPackageInfo(USER_FACING_PACKAGE),
+                getPackageInfo(PACKAGE_1));
+        UserBackupManagerService backupManagerService = spy(
+                createUserBackupManagerServiceAndRunTasks());
+        when(backupManagerService.shouldSkipUserFacingData()).thenReturn(true);
+        when(backupManagerService.shouldSkipPackage(eq(USER_FACING_PACKAGE))).thenReturn(true);
+
+        List<PackageInfo> filteredPackages = backupManagerService.filterUserFacingPackages(
+                packages);
+
+        assertFalse(containsPackage(filteredPackages, USER_FACING_PACKAGE));
+        assertTrue(containsPackage(filteredPackages, PACKAGE_1));
+    }
+
+    @Test
+    public void testFilterUserFacingPackages_shouldNotSkipUserFacing_doesNotFilterUserFacing() {
+        List<PackageInfo> packages = Arrays.asList(getPackageInfo(USER_FACING_PACKAGE),
+                getPackageInfo(PACKAGE_1));
+        UserBackupManagerService backupManagerService = spy(
+                createUserBackupManagerServiceAndRunTasks());
+        when(backupManagerService.shouldSkipUserFacingData()).thenReturn(false);
+        when(backupManagerService.shouldSkipPackage(eq(USER_FACING_PACKAGE))).thenReturn(true);
+
+        List<PackageInfo> filteredPackages = backupManagerService.filterUserFacingPackages(
+                packages);
+
+        assertTrue(containsPackage(filteredPackages, USER_FACING_PACKAGE));
+        assertTrue(containsPackage(filteredPackages, PACKAGE_1));
+    }
+
+    private static boolean containsPackage(List<PackageInfo> packages, String targetPackage) {
+        for (PackageInfo packageInfo : packages) {
+            if (targetPackage.equals(packageInfo.packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private UserBackupManagerService createUserBackupManagerServiceAndRunTasks() {
@@ -1232,12 +1305,48 @@ public class UserBackupManagerServiceTest {
         assertThat(service.getAncestralSerialNumber()).isEqualTo(testSerialNumber2);
     }
 
+    /**
+     * Test that {@link UserBackupManagerService#dump()} for system user does not prefix dump with
+     * "User 0:".
+     */
+    @Test
+    public void testDump_forSystemUser_DoesNotHaveUserPrefix() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService service =
+                BackupManagerServiceTestUtils.createUserBackupManagerServiceAndRunTasks(
+                        UserHandle.USER_SYSTEM,
+                        mContext,
+                        mBackupThread,
+                        mBaseStateDir,
+                        mDataDir,
+                        mTransportManager);
+
+        StringWriter dump = new StringWriter();
+        service.dump(new FileDescriptor(), new PrintWriter(dump), new String[0]);
+
+        assertThat(dump.toString()).startsWith("Backup Manager is ");
+    }
+
+    /**
+     * Test that {@link UserBackupManagerService#dump()} for non-system user prefixes dump with
+     * "User <userid>:".
+     */
+    @Test
+    public void testDump_forNonSystemUser_HasUserPrefix() throws Exception {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService service = createUserBackupManagerServiceAndRunTasks();
+
+        StringWriter dump = new StringWriter();
+        service.dump(new FileDescriptor(), new PrintWriter(dump), new String[0]);
+
+        assertThat(dump.toString()).startsWith("User " + USER_ID + ":" + "Backup Manager is ");
+    }
+
     private File createTestFile() throws IOException {
         File testFile = new File(mContext.getFilesDir(), "test");
         testFile.createNewFile();
         return testFile;
     }
-
 
     /**
      * We can't mock the void method {@link #schedule(Context, long, BackupManagerConstants)} so we

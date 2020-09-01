@@ -269,7 +269,7 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
-    public void testDefaultSessionLoadsAll() {
+    public void testDefaultSession_isResumed_LoadsAll() {
         mSession.onResume();
 
         addApp(HOME_PACKAGE_NAME, 1);
@@ -293,6 +293,19 @@ public class ApplicationsStateRoboTest {
         AppEntry launchableEntry = findAppEntry(appEntries, 2);
         assertThat(launchableEntry.hasLauncherEntry).isTrue();
         assertThat(launchableEntry.launcherEntryEnabled).isTrue();
+    }
+
+    @Test
+    public void testDefaultSession_isPaused_NotLoadsAll() {
+        mSession.onResume();
+
+        addApp(HOME_PACKAGE_NAME, 1);
+        addApp(LAUNCHABLE_PACKAGE_NAME, 2);
+        mSession.mResumed = false;
+        mSession.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
+        processAllMessages();
+
+        verify(mCallbacks, never()).onRebuildComplete(mAppEntriesCaptor.capture());
     }
 
     @Test
@@ -328,7 +341,6 @@ public class ApplicationsStateRoboTest {
         assertThat(appEntries.size()).isEqualTo(1);
 
         AppEntry launchableEntry = findAppEntry(appEntries, 1);
-        assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
         assertThat(launchableEntry.size).isGreaterThan(0L);
     }
@@ -347,7 +359,6 @@ public class ApplicationsStateRoboTest {
         assertThat(appEntries.size()).isEqualTo(1);
 
         AppEntry launchableEntry = findAppEntry(appEntries, 1);
-        assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
         assertThat(launchableEntry.size).isEqualTo(-1);
         assertThat(launchableEntry.isHomeApp).isTrue();
@@ -367,7 +378,6 @@ public class ApplicationsStateRoboTest {
         assertThat(appEntries.size()).isEqualTo(1);
 
         AppEntry launchableEntry = findAppEntry(appEntries, 1);
-        assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.size).isEqualTo(-1);
         assertThat(launchableEntry.isHomeApp).isFalse();
         assertThat(launchableEntry.hasLauncherEntry).isTrue();

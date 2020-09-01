@@ -95,12 +95,12 @@ public class TransformState {
         if (sameAs(otherState)) {
             ensureVisible();
         } else {
-            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount);
+            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount, true /* remap */);
         }
         transformViewFullyFrom(otherState, transformationAmount);
     }
 
-    protected void ensureVisible() {
+    public void ensureVisible() {
         if (mTransformedView.getVisibility() == View.INVISIBLE
                 || mTransformedView.getAlpha() != 1.0f) {
             // We have the same content, lets show ourselves
@@ -248,7 +248,7 @@ public class TransformState {
     }
 
     protected boolean transformScale(TransformState otherState) {
-        return false;
+        return sameAs(otherState);
     }
 
     /**
@@ -424,7 +424,7 @@ public class TransformState {
         if (transformationAmount == 0.0f) {
             prepareFadeIn();
         }
-        CrossFadeHelper.fadeIn(mTransformedView, transformationAmount);
+        CrossFadeHelper.fadeIn(mTransformedView, transformationAmount, true /* remap */);
     }
 
     public void disappear(float transformationAmount, TransformableView otherView) {

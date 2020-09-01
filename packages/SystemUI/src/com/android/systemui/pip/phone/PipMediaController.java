@@ -37,6 +37,7 @@ import android.os.UserHandle;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 import java.util.ArrayList;
@@ -109,7 +110,8 @@ public class PipMediaController {
 
     private ArrayList<ActionListener> mListeners = new ArrayList<>();
 
-    public PipMediaController(Context context, IActivityManager activityManager) {
+    public PipMediaController(Context context, IActivityManager activityManager,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mActivityManager = activityManager;
         IntentFilter mediaControlFilter = new IntentFilter();
@@ -117,7 +119,7 @@ public class PipMediaController {
         mediaControlFilter.addAction(ACTION_PAUSE);
         mediaControlFilter.addAction(ACTION_NEXT);
         mediaControlFilter.addAction(ACTION_PREV);
-        mContext.registerReceiver(mPlayPauseActionReceiver, mediaControlFilter);
+        broadcastDispatcher.registerReceiver(mPlayPauseActionReceiver, mediaControlFilter);
 
         createMediaActions();
         mMediaSessionManager =
@@ -229,7 +231,7 @@ public class PipMediaController {
      */
     private void resolveActiveMediaController(List<MediaController> controllers) {
         if (controllers != null) {
-            final ComponentName topActivity = PipUtils.getTopPinnedActivity(mContext,
+            final ComponentName topActivity = PipUtils.getTopPipActivity(mContext,
                     mActivityManager).first;
             if (topActivity != null) {
                 for (int i = 0; i < controllers.size(); i++) {

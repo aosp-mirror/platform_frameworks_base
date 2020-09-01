@@ -31,16 +31,22 @@ import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_IWOTH;
 
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.util.Log;
+import android.util.Size;
 
 import dalvik.system.CloseGuard;
 import dalvik.system.VMRuntime;
@@ -79,6 +85,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     /**
      * Wrapped {@link ParcelFileDescriptor}, if any. Used to avoid
      * double-closing {@link #mFd}.
+     * mClosed is always true if mWrapped is non-null.
      */
     private final ParcelFileDescriptor mWrapped;
 
@@ -203,6 +210,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     /**
      * Create a new ParcelFileDescriptor accessing a given file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with files hosted outside your app, use an API like
+     * {@link ContentResolver#openFile(Uri, String, CancellationSignal)}.
      *
      * @param file The file to be opened.
      * @param mode The desired access mode, must be one of
@@ -225,6 +236,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     /**
      * Create a new ParcelFileDescriptor accessing a given file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with files hosted outside your app, use an API like
+     * {@link ContentResolver#openFile(Uri, String, CancellationSignal)}.
      *
      * @param file The file to be opened.
      * @param mode The desired access mode, must be one of
@@ -241,6 +256,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *             be opened with the requested mode.
      * @see #parseMode(String)
      */
+    // We can't accept a generic Executor here, since we need to use
+    // MessageQueue.addOnFileDescriptorEventListener()
+    @SuppressLint("ExecutorRegistration")
     public static ParcelFileDescriptor open(File file, int mode, Handler handler,
             final OnCloseListener listener) throws IOException {
         if (handler == null) {
@@ -256,9 +274,20 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         return fromFd(fd, handler, listener);
     }
 
-    /** {@hide} */
-    public static ParcelFileDescriptor fromPfd(ParcelFileDescriptor pfd, Handler handler,
-            final OnCloseListener listener) throws IOException {
+    /**
+     * Create a new ParcelFileDescriptor wrapping an already-opened file.
+     *
+     * @param pfd The already-opened file.
+     * @param handler to call listener from.
+     * @param listener to be invoked when the returned descriptor has been
+     *            closed.
+     * @return a new ParcelFileDescriptor pointing to the given file.
+     */
+    // We can't accept a generic Executor here, since we need to use
+    // MessageQueue.addOnFileDescriptorEventListener()
+    @SuppressLint("ExecutorRegistration")
+    public static @NonNull ParcelFileDescriptor wrap(@NonNull ParcelFileDescriptor pfd,
+            @NonNull Handler handler, @NonNull OnCloseListener listener) throws IOException {
         final FileDescriptor original = new FileDescriptor();
         original.setInt$(pfd.detachFd());
         return fromFd(original, handler, listener);
@@ -616,10 +645,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     public static File getFile(FileDescriptor fd) throws IOException {
         try {
             final String path = Os.readlink("/proc/self/fd/" + fd.getInt$());
-            if (OsConstants.S_ISREG(Os.stat(path).st_mode)) {
+            if (OsConstants.S_ISREG(Os.stat(path).st_mode)
+                    || OsConstants.S_ISCHR(Os.stat(path).st_mode)) {
                 return new File(path);
             } else {
-                throw new IOException("Not a regular file: " + path);
+                throw new IOException("Not a regular file or character device: " + path);
             }
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
@@ -1022,6 +1052,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
         try {
             if (!mClosed) {
+                // mWrapped was and is null.
                 closeWithStatus(Status.LEAKED, null);
             }
         } finally {

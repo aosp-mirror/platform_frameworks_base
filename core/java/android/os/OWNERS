@@ -1,3 +1,20 @@
+# Haptics
+per-file ExternalVibration.aidl = michaelwr@google.com
+per-file ExternalVibration.java = michaelwr@google.com
+per-file IExternalVibrationController.aidl = michaelwr@google.com
+per-file IExternalVibratorService.aidl = michaelwr@google.com
+per-file IVibratorService.aidl = michaelwr@google.com
+per-file NullVibrator.java = michaelwr@google.com
+per-file SystemVibrator.java = michaelwr@google.com
+per-file VibrationEffect.aidl = michaelwr@google.com
+per-file VibrationEffect.java = michaelwr@google.com
+per-file Vibrator.java = michaelwr@google.com
+
+# PowerManager
+per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
+per-file PowerManager.java = michaelwr@google.com, santoscordon@google.com
+per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.com
+
 # Zygote
 per-file ZygoteProcess.java = calin@google.com, chriswailes@google.com, maco@google.com, narayan@google.com, ngeoffray@google.com
 

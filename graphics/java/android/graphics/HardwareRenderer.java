@@ -28,7 +28,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.TimeUtils;
-import android.view.FrameMetricsObserver;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
 import android.view.NativeVectorDrawableAnimator;
@@ -37,8 +36,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.TextureLayer;
 import android.view.animation.AnimationUtils;
-
-import com.android.internal.util.VirtualRefBasePtr;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -160,7 +157,7 @@ public class HardwareRenderer {
     public HardwareRenderer() {
         mRootNode = RenderNode.adopt(nCreateRootRenderNode());
         mRootNode.setClipToBounds(false);
-        mNativeProxy = nCreateProxy(!mOpaque, mRootNode.mNativeRenderNode);
+        mNativeProxy = nCreateProxy(!mOpaque, mIsWideGamut, mRootNode.mNativeRenderNode);
         if (mNativeProxy == 0) {
             throw new OutOfMemoryError("Unable to create hardware renderer");
         }
@@ -286,10 +283,24 @@ public class HardwareRenderer {
      *                non-null then {@link Surface#isValid()} must be true.
      */
     public void setSurface(@Nullable Surface surface) {
+        setSurface(surface, false);
+    }
+
+    /**
+     * See {@link #setSurface(Surface)}
+     *
+     * @hide
+     * @param discardBuffer determines whether the surface will attempt to preserve its contents
+     *                      between frames.  If set to true the renderer will attempt to preserve
+     *                      the contents of the buffer between frames if the implementation allows
+     *                      it.  If set to false no attempt will be made to preserve the buffer's
+     *                      contents between frames.
+     */
+    public void setSurface(@Nullable Surface surface, boolean discardBuffer) {
         if (surface != null && !surface.isValid()) {
             throw new IllegalArgumentException("Surface is invalid. surface.isValid() == false.");
         }
-        nSetSurface(mNativeProxy, surface);
+        nSetSurface(mNativeProxy, surface, discardBuffer);
     }
 
     /**
@@ -584,9 +595,8 @@ public class HardwareRenderer {
      *
      * @hide
      */
-    public void addFrameMetricsObserver(FrameMetricsObserver observer) {
-        long nativeObserver = nAddFrameMetricsObserver(mNativeProxy, observer);
-        observer.mNative = new VirtualRefBasePtr(nativeObserver);
+    public void addObserver(HardwareRendererObserver observer) {
+        nAddObserver(mNativeProxy, observer.getNativeInstance());
     }
 
     /**
@@ -594,9 +604,8 @@ public class HardwareRenderer {
      *
      * @hide
      */
-    public void removeFrameMetricsObserver(FrameMetricsObserver observer) {
-        nRemoveFrameMetricsObserver(mNativeProxy, observer.mNative.get());
-        observer.mNative = null;
+    public void removeObserver(HardwareRendererObserver observer) {
+        nRemoveObserver(mNativeProxy, observer.getNativeInstance());
     }
 
     /**
@@ -1076,7 +1085,8 @@ public class HardwareRenderer {
 
     private static native long nCreateRootRenderNode();
 
-    private static native long nCreateProxy(boolean translucent, long rootRenderNode);
+    private static native long nCreateProxy(boolean translucent, boolean isWideGamut,
+            long rootRenderNode);
 
     private static native void nDeleteProxy(long nativeProxy);
 
@@ -1084,7 +1094,7 @@ public class HardwareRenderer {
 
     private static native void nSetName(long nativeProxy, String name);
 
-    private static native void nSetSurface(long nativeProxy, Surface window);
+    private static native void nSetSurface(long nativeProxy, Surface window, boolean discardBuffer);
 
     private static native boolean nPause(long nativeProxy);
 
@@ -1156,10 +1166,9 @@ public class HardwareRenderer {
     private static native void nSetFrameCompleteCallback(long nativeProxy,
             FrameCompleteCallback callback);
 
-    private static native long nAddFrameMetricsObserver(long nativeProxy,
-            FrameMetricsObserver observer);
+    private static native void nAddObserver(long nativeProxy, long nativeObserver);
 
-    private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
+    private static native void nRemoveObserver(long nativeProxy, long nativeObserver);
 
     private static native int nCopySurfaceInto(Surface surface,
             int srcLeft, int srcTop, int srcRight, int srcBottom, long bitmapHandle);

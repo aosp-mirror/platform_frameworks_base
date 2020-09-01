@@ -29,7 +29,7 @@
 #include <gui/Surface.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
-#include <media/MediaAnalyticsItem.h>
+#include <media/MediaMetricsItem.h>
 #include <media/MicrophoneInfo.h>
 #include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
@@ -224,6 +224,36 @@ android_media_MediaRecorder_setAudioSource(JNIEnv *env, jobject thiz, jint as)
         return;
     }
     process_media_recorder_call(env, mr->setAudioSource(as), "java/lang/RuntimeException", "setAudioSource failed.");
+}
+
+static void
+android_media_MediaRecorder_setPrivacySensitive(JNIEnv *env, jobject thiz, jboolean privacySensitive)
+{
+    ALOGV("%s(%s)", __func__, privacySensitive ? "true" : "false");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    process_media_recorder_call(env, mr->setPrivacySensitive(privacySensitive),
+        "java/lang/RuntimeException", "setPrivacySensitive failed.");
+}
+
+static jboolean
+android_media_MediaRecorder_isPrivacySensitive(JNIEnv *env, jobject thiz)
+{
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+    bool privacySensitive;
+    process_media_recorder_call(env, mr->isPrivacySensitive(&privacySensitive),
+        "java/lang/RuntimeException", "isPrivacySensitive failed.");
+
+    ALOGV("%s() -> %s", __func__, privacySensitive ? "true" : "false");
+    return privacySensitive;
 }
 
 static void
@@ -664,7 +694,7 @@ android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // build and return the Bundle
-    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
+    std::unique_ptr<mediametrics::Item> item(mediametrics::Item::create());
     item->readFromParcel(reply);
     jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 
@@ -817,6 +847,8 @@ static const JNINativeMethod gMethods[] = {
     {"setCamera",            "(Landroid/hardware/Camera;)V",    (void *)android_media_MediaRecorder_setCamera},
     {"setVideoSource",       "(I)V",                            (void *)android_media_MediaRecorder_setVideoSource},
     {"setAudioSource",       "(I)V",                            (void *)android_media_MediaRecorder_setAudioSource},
+    {"setPrivacySensitive",  "(Z)V",                            (void *)android_media_MediaRecorder_setPrivacySensitive},
+    {"isPrivacySensitive",  "()Z",                             (void *)android_media_MediaRecorder_isPrivacySensitive},
     {"setOutputFormat",      "(I)V",                            (void *)android_media_MediaRecorder_setOutputFormat},
     {"setVideoEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setVideoEncoder},
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},

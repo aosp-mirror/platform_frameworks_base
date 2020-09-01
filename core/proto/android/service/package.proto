@@ -110,8 +110,18 @@ message PackageProto {
         optional bool is_launched = 6;
         optional EnabledState enabled_state = 7;
         optional string last_disabled_app_caller = 8;
-        optional string suspending_package = 9;
+        repeated string suspending_package = 9;
         optional int32 distraction_flags = 10;
+    }
+
+    message InstallSourceProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // The package that requested the installation of this one.
+        optional string initiating_package_name = 1;
+
+        // The package on behalf of which the initiiating package requested the install.
+        optional string originating_package_name = 2;
     }
 
     // Name of package. e.g. "com.android.providers.telephony".
@@ -133,4 +143,6 @@ message PackageProto {
     repeated SplitProto splits = 8;
     // Per-user package info.
     repeated UserInfoProto users = 9;
+    // Where the request to install this package came from,
+    optional InstallSourceProto install_source = 10;
 }

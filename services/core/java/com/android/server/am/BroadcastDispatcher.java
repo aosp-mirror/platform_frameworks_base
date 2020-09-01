@@ -73,9 +73,9 @@ public class BroadcastDispatcher {
             return broadcasts.isEmpty();
         }
 
-        void writeToProto(ProtoOutputStream proto, long fieldId) {
+        void dumpDebug(ProtoOutputStream proto, long fieldId) {
             for (BroadcastRecord br : broadcasts) {
-                br.writeToProto(proto, fieldId);
+                br.dumpDebug(proto, fieldId);
             }
         }
 
@@ -415,18 +415,18 @@ public class BroadcastDispatcher {
     /**
      * Standard proto dump entry point
      */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         if (mCurrentBroadcast != null) {
-            mCurrentBroadcast.writeToProto(proto, fieldId);
+            mCurrentBroadcast.dumpDebug(proto, fieldId);
         }
         for (Deferrals d : mAlarmBroadcasts) {
-            d.writeToProto(proto, fieldId);
+            d.dumpDebug(proto, fieldId);
         }
         for (BroadcastRecord br : mOrderedBroadcasts) {
-            br.writeToProto(proto, fieldId);
+            br.dumpDebug(proto, fieldId);
         }
         for (Deferrals d : mDeferredBroadcasts) {
-            d.writeToProto(proto, fieldId);
+            d.dumpDebug(proto, fieldId);
         }
     }
 

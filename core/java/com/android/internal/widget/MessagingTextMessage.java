@@ -26,13 +26,9 @@ import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.Pools;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
-
-import java.util.Objects;
 
 /**
  * A message of a {@link MessagingLayout}.
@@ -74,7 +70,7 @@ public class MessagingTextMessage extends ImageFloatingTextView implements Messa
         return true;
     }
 
-    static MessagingMessage createMessage(MessagingLayout layout,
+    static MessagingMessage createMessage(IMessagingLayout layout,
             Notification.MessagingStyle.Message m) {
         MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
         MessagingTextMessage createdMessage = sInstancePool.acquire();

@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -36,6 +35,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -386,7 +386,6 @@ public class NetworkScoreManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
     public boolean requestScores(@NonNull NetworkKey[] networks) throws SecurityException {
         try {
@@ -394,6 +393,28 @@ public class NetworkScoreManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Request scoring for networks.
+     *
+     * <p>
+     * Note: The results (i.e scores) for these networks, when available will be provided via the
+     * callback registered with {@link #registerNetworkScoreCallback(int, int, Executor,
+     * NetworkScoreCallback)}. The calling module is responsible for registering a callback to
+     * receive the results before requesting new scores via this API.
+     *
+     * @return true if the request was successfully sent, or false if there is no active scorer.
+     * @throws SecurityException if the caller does not hold the
+     *         {@link permission#REQUEST_NETWORK_SCORES} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REQUEST_NETWORK_SCORES)
+    public boolean requestScores(@NonNull Collection<NetworkKey> networks)
+            throws SecurityException {
+        return requestScores(networks.toArray(new NetworkKey[0]));
     }
 
     /**
@@ -455,28 +476,25 @@ public class NetworkScoreManager {
 
     /**
      * Base class for network score cache callback. Should be extended by applications and set
-     * when calling {@link #registerNetworkScoreCallback(int, int, NetworkScoreCallback,
-     * Executor)}
+     * when calling {@link #registerNetworkScoreCallback(int, int, Executor, NetworkScoreCallback)}.
      *
      * @hide
      */
     @SystemApi
-    public interface NetworkScoreCallback {
+    public abstract static class NetworkScoreCallback {
         /**
          * Called when a new set of network scores are available.
          * This is triggered in response when the client invokes
-         * {@link #requestScores(NetworkKey[])} to score a new set of networks.
+         * {@link #requestScores(Collection)} to score a new set of networks.
          *
          * @param networks List of {@link ScoredNetwork} containing updated scores.
          */
-        @SuppressLint("CallbackMethodName")
-        void updateScores(@NonNull List<ScoredNetwork> networks);
+        public abstract void onScoresUpdated(@NonNull Collection<ScoredNetwork> networks);
 
         /**
          * Invokes when all the previously provided scores are no longer valid.
          */
-        @SuppressLint("CallbackMethodName")
-        void clearScores();
+        public abstract void onScoresInvalidated();
     }
 
     /**
@@ -495,7 +513,7 @@ public class NetworkScoreManager {
         public void updateScores(@NonNull List<ScoredNetwork> networks) {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
-                mCallback.updateScores(networks);
+                mCallback.onScoresUpdated(networks);
             });
         }
 
@@ -503,7 +521,7 @@ public class NetworkScoreManager {
         public void clearScores() {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
-                mCallback.clearScores();
+                mCallback.onScoresInvalidated();
             });
         }
     }

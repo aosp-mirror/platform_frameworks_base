@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,9 +33,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -53,14 +57,14 @@ public class UiAutomationManagerTest {
 
     MessageCapturingHandler mMessageCapturingHandler;
 
-    @Mock AccessibilityManagerService.UserState mMockUserState;
     @Mock Context mMockContext;
     @Mock AccessibilityServiceInfo mMockServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
-    @Mock AccessibilityManagerService.SecurityPolicy mMockSecurityPolicy;
+    @Mock AccessibilitySecurityPolicy mMockSecurityPolicy;
+    @Mock AccessibilityWindowManager mMockA11yWindowManager;
     @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
-    @Mock GlobalActionPerformer mMockGlobalActionPerformer;
+    @Mock SystemActionPerformer mMockSystemActionPerformer;
     @Mock IBinder mMockOwner;
     @Mock IAccessibilityServiceClient mMockAccessibilityServiceClient;
     @Mock IBinder mMockServiceAsBinder;
@@ -76,6 +80,11 @@ public class UiAutomationManagerTest {
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
         when(mMockAccessibilityServiceClient.asBinder()).thenReturn(mMockServiceAsBinder);
+
+        final Context context = getInstrumentation().getTargetContext();
+        when(mMockContext.getSystemService(Context.DISPLAY_SERVICE)).thenReturn(
+                context.getSystemService(
+                        DisplayManager.class));
 
         mMessageCapturingHandler = new MessageCapturingHandler(null);
     }
@@ -165,7 +174,8 @@ public class UiAutomationManagerTest {
         mUiAutomationManager.registerUiTestAutomationServiceLocked(mMockOwner,
                 mMockAccessibilityServiceClient, mMockContext, mMockServiceInfo, SERVICE_ID,
                 mMessageCapturingHandler, mMockSecurityPolicy, mMockSystemSupport,
-                mMockWindowManagerInternal, mMockGlobalActionPerformer, flags);
+                mMockWindowManagerInternal, mMockSystemActionPerformer,
+                mMockA11yWindowManager, flags);
     }
 
     private void unregister() {

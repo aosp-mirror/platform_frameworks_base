@@ -1249,12 +1249,4 @@ public class MockPackageManager extends PackageManager {
             int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
         throw new UnsupportedOperationException();
     }
-
-    /**
-     * @hide
-     */
-    @Override
-    public String getSystemTextClassifierPackageName() {
-        throw new UnsupportedOperationException();
-    }
 }

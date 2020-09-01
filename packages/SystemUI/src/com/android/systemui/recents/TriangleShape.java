@@ -70,6 +70,6 @@ public class TriangleShape extends PathShape {
 
     @Override
     public void getOutline(@NonNull Outline outline) {
-        outline.setConvexPath(mTriangularPath);
+        outline.setPath(mTriangularPath);
     }
 }

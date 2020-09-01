@@ -21,6 +21,8 @@ import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
@@ -62,6 +64,18 @@ public final class AutofillOptions implements Parcelable {
     @Nullable
     public ArraySet<ComponentName> whitelistedActivitiesForAugmentedAutofill;
 
+    /**
+     * The package disable expiration by autofill service.
+     */
+    public long appDisabledExpiration;
+
+    /**
+     * The disabled Activities of the package. key is component name string, value is when they
+     * will be enabled.
+     */
+    @Nullable
+    public ArrayMap<String, Long> disabledActivities;
+
     public AutofillOptions(int loggingLevel, boolean compatModeEnabled) {
         this.loggingLevel = loggingLevel;
         this.compatModeEnabled = compatModeEnabled;
@@ -79,6 +93,29 @@ public final class AutofillOptions implements Parcelable {
         final ComponentName component = autofillClient.autofillClientGetComponentName();
         return whitelistedActivitiesForAugmentedAutofill == null
                 || whitelistedActivitiesForAugmentedAutofill.contains(component);
+    }
+
+    /**
+     * Returns if autofill is disabled by service to the given activity.
+     *
+     * @hide
+     */
+    public boolean isAutofillDisabledLocked(@NonNull ComponentName componentName) {
+        final long elapsedTime = SystemClock.elapsedRealtime();
+        final String component = componentName.flattenToString();
+        // Check app first.
+        if (appDisabledExpiration >= elapsedTime) return true;
+
+        // Then check activities.
+        if (disabledActivities != null) {
+            final Long expiration = disabledActivities.get(component);
+            if (expiration != null) {
+                if (expiration >= elapsedTime) return true;
+                disabledActivities.remove(component);
+            }
+        }
+        appDisabledExpiration = 0;
+        return false;
     }
 
     /**
@@ -110,7 +147,8 @@ public final class AutofillOptions implements Parcelable {
     @Override
     public String toString() {
         return "AutofillOptions [loggingLevel=" + loggingLevel + ", compatMode=" + compatModeEnabled
-                + ", augmentedAutofillEnabled=" + augmentedAutofillEnabled + "]";
+                + ", augmentedAutofillEnabled=" + augmentedAutofillEnabled
+                + ", appDisabledExpiration=" + appDisabledExpiration + "]";
     }
 
     /** @hide */
@@ -121,6 +159,11 @@ public final class AutofillOptions implements Parcelable {
         if (whitelistedActivitiesForAugmentedAutofill != null) {
             pw.print(", whitelistedActivitiesForAugmentedAutofill=");
             pw.print(whitelistedActivitiesForAugmentedAutofill);
+        }
+        pw.print(", appDisabledExpiration="); pw.print(appDisabledExpiration);
+        if (disabledActivities != null) {
+            pw.print(", disabledActivities=");
+            pw.print(disabledActivities);
         }
     }
 
@@ -135,6 +178,16 @@ public final class AutofillOptions implements Parcelable {
         parcel.writeBoolean(compatModeEnabled);
         parcel.writeBoolean(augmentedAutofillEnabled);
         parcel.writeArraySet(whitelistedActivitiesForAugmentedAutofill);
+        parcel.writeLong(appDisabledExpiration);
+        final int size = disabledActivities != null ? disabledActivities.size() : 0;
+        parcel.writeInt(size);
+        if (size > 0) {
+            for (int i = 0; i < size; i++) {
+                final String key = disabledActivities.keyAt(i);
+                parcel.writeString(key);
+                parcel.writeLong(disabledActivities.get(key));
+            }
+        }
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AutofillOptions> CREATOR =
@@ -148,6 +201,14 @@ public final class AutofillOptions implements Parcelable {
                     options.augmentedAutofillEnabled = parcel.readBoolean();
                     options.whitelistedActivitiesForAugmentedAutofill =
                             (ArraySet<ComponentName>) parcel.readArraySet(null);
+                    options.appDisabledExpiration = parcel.readLong();
+                    final int size = parcel.readInt();
+                    if (size > 0) {
+                        options.disabledActivities = new ArrayMap<>();
+                        for (int i = 0; i < size; i++) {
+                            options.disabledActivities.put(parcel.readString(), parcel.readLong());
+                        }
+                    }
                     return options;
                 }
 

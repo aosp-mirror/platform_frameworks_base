@@ -66,12 +66,6 @@ public interface WindowManagerPolicyConstants {
     String NAV_BAR_MODE_GESTURAL_OVERLAY = "com.android.internal.systemui.navbar.gestural";
 
     /**
-     * Broadcast sent when a user activity is detected.
-     */
-    String ACTION_USER_ACTIVITY_NOTIFICATION =
-            "android.intent.action.USER_ACTIVITY_NOTIFICATION";
-
-    /**
      * Sticky broadcast of the current HDMI plugged state.
      */
     String ACTION_HDMI_PLUGGED = "android.intent.action.HDMI_PLUGGED";

@@ -59,14 +59,12 @@ namespace android {
 static const int BUSY_TIMEOUT_MS = 2500;
 
 static struct {
-    jfieldID name;
-    jfieldID numArgs;
-    jmethodID dispatchCallback;
-} gSQLiteCustomFunctionClassInfo;
+    jmethodID apply;
+} gUnaryOperator;
 
 static struct {
-    jclass clazz;
-} gStringClassInfo;
+    jmethodID apply;
+} gBinaryOperator;
 
 struct SQLiteConnection {
     // Open flags.
@@ -203,75 +201,146 @@ static void nativeClose(JNIEnv* env, jclass clazz, jlong connectionPtr) {
     }
 }
 
-// Called each time a custom function is evaluated.
-static void sqliteCustomFunctionCallback(sqlite3_context *context,
+static void sqliteCustomScalarFunctionCallback(sqlite3_context *context,
         int argc, sqlite3_value **argv) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-
-    // Get the callback function object.
-    // Create a new local reference to it in case the callback tries to do something
-    // unexpected like unregister the function (thereby destroying the global ref)
-    // while it is running.
     jobject functionObjGlobal = reinterpret_cast<jobject>(sqlite3_user_data(context));
-    jobject functionObj = env->NewLocalRef(functionObjGlobal);
-
-    jobjectArray argsArray = env->NewObjectArray(argc, gStringClassInfo.clazz, NULL);
-    if (argsArray) {
-        for (int i = 0; i < argc; i++) {
-            const jchar* arg = static_cast<const jchar*>(sqlite3_value_text16(argv[i]));
-            if (!arg) {
-                ALOGW("NULL argument in custom_function_callback.  This should not happen.");
-            } else {
-                size_t argLen = sqlite3_value_bytes16(argv[i]) / sizeof(jchar);
-                jstring argStr = env->NewString(arg, argLen);
-                if (!argStr) {
-                    goto error; // out of memory error
-                }
-                env->SetObjectArrayElement(argsArray, i, argStr);
-                env->DeleteLocalRef(argStr);
-            }
-        }
-
-        // TODO: Support functions that return values.
-        env->CallVoidMethod(functionObj,
-                gSQLiteCustomFunctionClassInfo.dispatchCallback, argsArray);
-
-error:
-        env->DeleteLocalRef(argsArray);
-    }
-
-    env->DeleteLocalRef(functionObj);
+    ScopedLocalRef<jobject> functionObj(env, env->NewLocalRef(functionObjGlobal));
+    ScopedLocalRef<jstring> argString(env,
+            env->NewStringUTF(reinterpret_cast<const char*>(sqlite3_value_text(argv[0]))));
+    ScopedLocalRef<jstring> resString(env,
+            (jstring) env->CallObjectMethod(functionObj.get(), gUnaryOperator.apply, argString.get()));
 
     if (env->ExceptionCheck()) {
-        ALOGE("An exception was thrown by custom SQLite function.");
-        LOGE_EX(env);
+        ALOGE("Exception thrown by custom scalar function");
+        sqlite3_result_error(context, "Exception thrown by custom scalar function", -1);
+        env->ExceptionDescribe();
         env->ExceptionClear();
+        return;
+    }
+
+    if (resString.get() == nullptr) {
+        sqlite3_result_null(context);
+    } else {
+        ScopedUtfChars res(env, resString.get());
+        sqlite3_result_text(context, res.c_str(), -1, SQLITE_TRANSIENT);
     }
 }
 
-// Called when a custom function is destroyed.
-static void sqliteCustomFunctionDestructor(void* data) {
+static void sqliteCustomScalarFunctionDestructor(void* data) {
     jobject functionObjGlobal = reinterpret_cast<jobject>(data);
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteGlobalRef(functionObjGlobal);
 }
 
-static void nativeRegisterCustomFunction(JNIEnv* env, jclass clazz, jlong connectionPtr,
-        jobject functionObj) {
+static void nativeRegisterCustomScalarFunction(JNIEnv* env, jclass clazz, jlong connectionPtr,
+        jstring functionName, jobject functionObj) {
     SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
 
-    jstring nameStr = jstring(env->GetObjectField(
-            functionObj, gSQLiteCustomFunctionClassInfo.name));
-    jint numArgs = env->GetIntField(functionObj, gSQLiteCustomFunctionClassInfo.numArgs);
+    jobject functionObjGlobal = env->NewGlobalRef(functionObj);
+    ScopedUtfChars functionNameChars(env, functionName);
+    int err = sqlite3_create_function_v2(connection->db,
+            functionNameChars.c_str(), 1, SQLITE_UTF8,
+            reinterpret_cast<void*>(functionObjGlobal),
+            &sqliteCustomScalarFunctionCallback,
+            nullptr,
+            nullptr,
+            &sqliteCustomScalarFunctionDestructor);
+
+    if (err != SQLITE_OK) {
+        ALOGE("sqlite3_create_function returned %d", err);
+        env->DeleteGlobalRef(functionObjGlobal);
+        throw_sqlite3_exception(env, connection->db);
+        return;
+    }
+}
+
+static void sqliteCustomAggregateFunctionStep(sqlite3_context *context,
+        int argc, sqlite3_value **argv) {
+    char** agg = reinterpret_cast<char**>(
+            sqlite3_aggregate_context(context, sizeof(const char**)));
+    if (agg == nullptr) {
+        return;
+    } else if (*agg == nullptr) {
+        // During our first call the best we can do is allocate our result
+        // holder and populate it with our first value; we'll reduce it
+        // against any additional values in future calls
+        const char* res = reinterpret_cast<const char*>(sqlite3_value_text(argv[0]));
+        if (res == nullptr) {
+            *agg = nullptr;
+        } else {
+            *agg = strdup(res);
+        }
+        return;
+    }
+
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jobject functionObjGlobal = reinterpret_cast<jobject>(sqlite3_user_data(context));
+    ScopedLocalRef<jobject> functionObj(env, env->NewLocalRef(functionObjGlobal));
+    ScopedLocalRef<jstring> arg0String(env,
+            env->NewStringUTF(reinterpret_cast<const char*>(*agg)));
+    ScopedLocalRef<jstring> arg1String(env,
+            env->NewStringUTF(reinterpret_cast<const char*>(sqlite3_value_text(argv[0]))));
+    ScopedLocalRef<jstring> resString(env,
+            (jstring) env->CallObjectMethod(functionObj.get(), gBinaryOperator.apply,
+                    arg0String.get(), arg1String.get()));
+
+    if (env->ExceptionCheck()) {
+        ALOGE("Exception thrown by custom aggregate function");
+        sqlite3_result_error(context, "Exception thrown by custom aggregate function", -1);
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        return;
+    }
+
+    // One way or another, we have a new value to collect, and we need to
+    // free our previous value
+    if (*agg != nullptr) {
+        free(*agg);
+    }
+    if (resString.get() == nullptr) {
+        *agg = nullptr;
+    } else {
+        ScopedUtfChars res(env, resString.get());
+        *agg = strdup(res.c_str());
+    }
+}
+
+static void sqliteCustomAggregateFunctionFinal(sqlite3_context *context) {
+    // We pass zero size here to avoid allocating for empty sets
+    char** agg = reinterpret_cast<char**>(
+            sqlite3_aggregate_context(context, 0));
+    if (agg == nullptr) {
+        return;
+    } else if (*agg == nullptr) {
+        sqlite3_result_null(context);
+    } else {
+        sqlite3_result_text(context, *agg, -1, SQLITE_TRANSIENT);
+        free(*agg);
+    }
+}
+
+static void sqliteCustomAggregateFunctionDestructor(void* data) {
+    jobject functionObjGlobal = reinterpret_cast<jobject>(data);
+
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->DeleteGlobalRef(functionObjGlobal);
+}
+
+static void nativeRegisterCustomAggregateFunction(JNIEnv* env, jclass clazz, jlong connectionPtr,
+        jstring functionName, jobject functionObj) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
 
     jobject functionObjGlobal = env->NewGlobalRef(functionObj);
-
-    const char* name = env->GetStringUTFChars(nameStr, NULL);
-    int err = sqlite3_create_function_v2(connection->db, name, numArgs, SQLITE_UTF16,
+    ScopedUtfChars functionNameChars(env, functionName);
+    int err = sqlite3_create_function_v2(connection->db,
+            functionNameChars.c_str(), 1, SQLITE_UTF8,
             reinterpret_cast<void*>(functionObjGlobal),
-            &sqliteCustomFunctionCallback, NULL, NULL, &sqliteCustomFunctionDestructor);
-    env->ReleaseStringUTFChars(nameStr, name);
+            nullptr,
+            &sqliteCustomAggregateFunctionStep,
+            &sqliteCustomAggregateFunctionFinal,
+            &sqliteCustomAggregateFunctionDestructor);
 
     if (err != SQLITE_OK) {
         ALOGE("sqlite3_create_function returned %d", err);
@@ -605,12 +674,12 @@ static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
             size_t sizeIncludingNull = sqlite3_column_bytes(statement, i) + 1;
             status = window->putString(addedRows, i, text, sizeIncludingNull);
             if (status) {
-                LOG_WINDOW("Failed allocating %u bytes for text at %d,%d, error=%d",
+                LOG_WINDOW("Failed allocating %zu bytes for text at %d,%d, error=%d",
                         sizeIncludingNull, startPos + addedRows, i, status);
                 result = CPR_FULL;
                 break;
             }
-            LOG_WINDOW("%d,%d is TEXT with %u bytes",
+            LOG_WINDOW("%d,%d is TEXT with %zu bytes",
                     startPos + addedRows, i, sizeIncludingNull);
         } else if (type == SQLITE_INTEGER) {
             // INTEGER data
@@ -622,7 +691,7 @@ static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
                 result = CPR_FULL;
                 break;
             }
-            LOG_WINDOW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
+            LOG_WINDOW("%d,%d is INTEGER %" PRId64, startPos + addedRows, i, value);
         } else if (type == SQLITE_FLOAT) {
             // FLOAT data
             double value = sqlite3_column_double(statement, i);
@@ -640,12 +709,12 @@ static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
             size_t size = sqlite3_column_bytes(statement, i);
             status = window->putBlob(addedRows, i, blob, size);
             if (status) {
-                LOG_WINDOW("Failed allocating %u bytes for blob at %d,%d, error=%d",
+                LOG_WINDOW("Failed allocating %zu bytes for blob at %d,%d, error=%d",
                         size, startPos + addedRows, i, status);
                 result = CPR_FULL;
                 break;
             }
-            LOG_WINDOW("%d,%d is Blob with %u bytes",
+            LOG_WINDOW("%d,%d is Blob with %zu bytes",
                     startPos + addedRows, i, size);
         } else if (type == SQLITE_NULL) {
             // NULL field
@@ -757,8 +826,8 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
         }
     }
 
-    LOG_WINDOW("Resetting statement %p after fetching %d rows and adding %d rows"
-            "to the window in %d bytes",
+    LOG_WINDOW("Resetting statement %p after fetching %d rows and adding %d rows "
+            "to the window in %zu bytes",
             statement, totalRows, addedRows, window->size() - window->freeSpace());
     sqlite3_reset(statement);
 
@@ -813,8 +882,10 @@ static const JNINativeMethod sMethods[] =
             (void*)nativeOpen },
     { "nativeClose", "(J)V",
             (void*)nativeClose },
-    { "nativeRegisterCustomFunction", "(JLandroid/database/sqlite/SQLiteCustomFunction;)V",
-            (void*)nativeRegisterCustomFunction },
+    { "nativeRegisterCustomScalarFunction", "(JLjava/lang/String;Ljava/util/function/UnaryOperator;)V",
+            (void*)nativeRegisterCustomScalarFunction },
+    { "nativeRegisterCustomAggregateFunction", "(JLjava/lang/String;Ljava/util/function/BinaryOperator;)V",
+            (void*)nativeRegisterCustomAggregateFunction },
     { "nativeRegisterLocalizedCollators", "(JLjava/lang/String;)V",
             (void*)nativeRegisterLocalizedCollators },
     { "nativePrepareStatement", "(JLjava/lang/String;)J",
@@ -865,15 +936,13 @@ static const JNINativeMethod sMethods[] =
 
 int register_android_database_SQLiteConnection(JNIEnv *env)
 {
-    jclass clazz = FindClassOrDie(env, "android/database/sqlite/SQLiteCustomFunction");
+    jclass unaryClazz = FindClassOrDie(env, "java/util/function/UnaryOperator");
+    gUnaryOperator.apply = GetMethodIDOrDie(env, unaryClazz,
+            "apply", "(Ljava/lang/Object;)Ljava/lang/Object;");
 
-    gSQLiteCustomFunctionClassInfo.name = GetFieldIDOrDie(env, clazz, "name", "Ljava/lang/String;");
-    gSQLiteCustomFunctionClassInfo.numArgs = GetFieldIDOrDie(env, clazz, "numArgs", "I");
-    gSQLiteCustomFunctionClassInfo.dispatchCallback = GetMethodIDOrDie(env, clazz,
-            "dispatchCallback", "([Ljava/lang/String;)V");
-
-    clazz = FindClassOrDie(env, "java/lang/String");
-    gStringClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+    jclass binaryClazz = FindClassOrDie(env, "java/util/function/BinaryOperator");
+    gBinaryOperator.apply = GetMethodIDOrDie(env, binaryClazz,
+            "apply", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
     return RegisterMethodsOrDie(env, "android/database/sqlite/SQLiteConnection", sMethods,
                                 NELEM(sMethods));

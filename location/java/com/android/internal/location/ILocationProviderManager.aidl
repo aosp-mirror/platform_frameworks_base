@@ -29,7 +29,7 @@ interface ILocationProviderManager {
     void onSetAdditionalProviderPackages(in List<String> packageNames);
 
     @UnsupportedAppUsage
-    void onSetEnabled(boolean enabled);
+    void onSetAllowed(boolean allowed);
 
     @UnsupportedAppUsage
     void onSetProperties(in ProviderProperties properties);

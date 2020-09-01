@@ -23,11 +23,10 @@
 #include <inttypes.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <androidfw/DisplayEventDispatcher.h>
+#include <gui/DisplayEventDispatcher.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/threads.h>
-#include <gui/DisplayEventReceiver.h>
 #include "android_os_MessageQueue.h"
 
 #include <nativehelper/ScopedLocalRef.h>
@@ -59,12 +58,11 @@ protected:
 private:
     jobject mReceiverWeakGlobal;
     sp<MessageQueue> mMessageQueue;
-    DisplayEventReceiver mReceiver;
 
     void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
     void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
-                               int32_t configId) override;
+                               int32_t configId, nsecs_t vsyncPeriod) override;
 };
 
 
@@ -120,23 +118,22 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
     mMessageQueue->raiseAndClearException(env, "dispatchHotplug");
 }
 
-void NativeDisplayEventReceiver::dispatchConfigChanged(nsecs_t timestamp,
-                                                       PhysicalDisplayId displayId,
-                                                       int32_t configId) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+void NativeDisplayEventReceiver::dispatchConfigChanged(
+    nsecs_t timestamp, PhysicalDisplayId displayId, int32_t configId, nsecs_t) {
+  JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
-    if (receiverObj.get()) {
-        ALOGV("receiver %p ~ Invoking config changed handler.", this);
-        env->CallVoidMethod(receiverObj.get(),
-                            gDisplayEventReceiverClassInfo.dispatchConfigChanged,
-                            timestamp, displayId, configId);
-        ALOGV("receiver %p ~ Returned from config changed handler.", this);
-    }
+  ScopedLocalRef<jobject> receiverObj(env,
+                                      jniGetReferent(env, mReceiverWeakGlobal));
+  if (receiverObj.get()) {
+    ALOGV("receiver %p ~ Invoking config changed handler.", this);
+    env->CallVoidMethod(receiverObj.get(),
+                        gDisplayEventReceiverClassInfo.dispatchConfigChanged,
+                        timestamp, displayId, configId);
+    ALOGV("receiver %p ~ Returned from config changed handler.", this);
+  }
 
-    mMessageQueue->raiseAndClearException(env, "dispatchConfigChanged");
+  mMessageQueue->raiseAndClearException(env, "dispatchConfigChanged");
 }
-
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject messageQueueObj, jint vsyncSource, jint configChanged) {

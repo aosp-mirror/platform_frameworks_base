@@ -16,8 +16,7 @@
 
 package android.location;
 
-import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
+import android.annotation.NonNull;
 import android.util.SparseArray;
 
 import java.util.Iterator;
@@ -25,20 +24,18 @@ import java.util.NoSuchElementException;
 
 
 /**
- * This class represents the current state of the GPS engine.
+ * This class represents the current state of the GPS engine and is used in conjunction with {@link
+ * GpsStatus.Listener}.
  *
- * <p>This class is used in conjunction with the {@link Listener} interface.
- *
- * @deprecated use {@link GnssStatus} and {@link GnssStatus.Callback}.
+ * @deprecated Use {@link GnssStatus} instead.
  */
 @Deprecated
 public final class GpsStatus {
-    private static final int NUM_SATELLITES = 255;
+    private static final int MAX_SATELLITES = 255;
     private static final int GLONASS_SVID_OFFSET = 64;
     private static final int BEIDOU_SVID_OFFSET = 200;
     private static final int SBAS_SVID_OFFSET = -87;
 
-    /* These package private values are modified by the LocationManager class */
     private int mTimeToFirstFix;
     private final SparseArray<GpsSatellite> mSatellites = new SparseArray<>();
 
@@ -80,12 +77,7 @@ public final class GpsStatus {
         }
     }
 
-    private Iterable<GpsSatellite> mSatelliteList = new Iterable<GpsSatellite>() {
-        @Override
-        public Iterator<GpsSatellite> iterator() {
-            return new SatelliteIterator();
-        }
-    };
+    private Iterable<GpsSatellite> mSatelliteList = SatelliteIterator::new;
 
     /**
      * Event sent when the GPS system has started.
@@ -111,7 +103,8 @@ public final class GpsStatus {
 
     /**
      * Used for receiving notifications when GPS status has changed.
-     * @deprecated use {@link GnssStatus.Callback} instead.
+     *
+     * @deprecated Use {@link GnssStatus.Callback} instead.
      */
     @Deprecated
     public interface Listener {
@@ -148,17 +141,40 @@ public final class GpsStatus {
         void onNmeaReceived(long timestamp, String nmea);
     }
 
-    // For API-compat a public ctor() is not available
-    GpsStatus() {}
+    /**
+     * Builds a GpsStatus from the given GnssStatus.
+     */
+    @NonNull
+    public static GpsStatus create(@NonNull GnssStatus gnssStatus, int timeToFirstFix) {
+        GpsStatus status = new GpsStatus();
+        status.setStatus(gnssStatus, timeToFirstFix);
+        return status;
+    }
 
-    private void setStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
-            float[] azimuths) {
-        clearSatellites();
-        for (int i = 0; i < svCount; i++) {
-            final int constellationType =
-                    (svidWithFlags[i] >> GnssStatus.CONSTELLATION_TYPE_SHIFT_WIDTH)
-                    & GnssStatus.CONSTELLATION_TYPE_MASK;
-            int prn = svidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH;
+    /**
+     * Builds an empty GpsStatus.
+     *
+     * @hide
+     */
+    static GpsStatus createEmpty() {
+        return new GpsStatus();
+    }
+
+    private GpsStatus() {
+    }
+
+    /**
+     * @hide
+     */
+    void setStatus(GnssStatus status, int timeToFirstFix) {
+        for (int i = 0; i < mSatellites.size(); i++) {
+            mSatellites.valueAt(i).mValid = false;
+        }
+
+        mTimeToFirstFix = timeToFirstFix;
+        for (int i = 0; i < status.getSatelliteCount(); i++) {
+            int constellationType = status.getConstellationType(i);
+            int prn = status.getSvid(i);
             // Other satellites passed through these APIs before GnssSvStatus was availble.
             // GPS, SBAS & QZSS can pass through at their nominally
             // assigned prn number (as long as it fits in the valid 0-255 range below.)
@@ -175,42 +191,24 @@ public final class GpsStatus {
                     (constellationType != GnssStatus.CONSTELLATION_QZSS)) {
                 continue;
             }
-            if (prn > 0 && prn <= NUM_SATELLITES) {
-                GpsSatellite satellite = mSatellites.get(prn);
-                if (satellite == null) {
-                    satellite = new GpsSatellite(prn);
-                    mSatellites.put(prn, satellite);
-                }
-
-                satellite.mValid = true;
-                satellite.mSnr = cn0s[i];
-                satellite.mElevation = elevations[i];
-                satellite.mAzimuth = azimuths[i];
-                satellite.mHasEphemeris =
-                        (svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
-                satellite.mHasAlmanac =
-                        (svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
-                satellite.mUsedInFix =
-                        (svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0;
+            if (prn <= 0 || prn > MAX_SATELLITES) {
+                continue;
             }
+
+            GpsSatellite satellite = mSatellites.get(prn);
+            if (satellite == null) {
+                satellite = new GpsSatellite(prn);
+                mSatellites.put(prn, satellite);
+            }
+
+            satellite.mValid = true;
+            satellite.mSnr = status.getCn0DbHz(i);
+            satellite.mElevation = status.getElevationDegrees(i);
+            satellite.mAzimuth = status.getAzimuthDegrees(i);
+            satellite.mHasEphemeris = status.hasEphemerisData(i);
+            satellite.mHasAlmanac = status.hasAlmanacData(i);
+            satellite.mUsedInFix = status.usedInFix(i);
         }
-    }
-
-    /**
-     * Copies GPS satellites information from GnssStatus object.
-     * Since this method is only used within {@link LocationManager#getGpsStatus},
-     * it does not need to be synchronized.
-     * @hide
-     */
-    void setStatus(GnssStatus status, int timeToFirstFix) {
-        mTimeToFirstFix = timeToFirstFix;
-        setStatus(status.mSvCount, status.mSvidWithFlags, status.mCn0DbHz, status.mElevations,
-                status.mAzimuths);
-    }
-
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    void setTimeToFirstFix(int ttff) {
-        mTimeToFirstFix = ttff;
     }
 
     /**
@@ -240,14 +238,7 @@ public final class GpsStatus {
      * @return the maximum number of satellites
      */
     public int getMaxSatellites() {
-        return NUM_SATELLITES;
+        return mSatellites.size();
     }
 
-    private void clearSatellites() {
-        int satellitesCount = mSatellites.size();
-        for (int i = 0; i < satellitesCount; i++) {
-            GpsSatellite satellite = mSatellites.valueAt(i);
-            satellite.mValid = false;
-        }
-    }
 }

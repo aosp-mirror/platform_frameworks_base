@@ -31,6 +31,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.function.Consumer;
 
@@ -38,10 +39,11 @@ import java.util.function.Consumer;
  * Tests for {@link WindowContainer#forAllWindows} and various implementations.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowContainerTraversalTests
+ *  atest WmTests:WindowContainerTraversalTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowContainerTraversalTests extends WindowTestsBase {
 
     @Test

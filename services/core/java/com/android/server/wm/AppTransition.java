@@ -33,7 +33,6 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
@@ -70,13 +69,13 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnte
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
 import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
 import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 import android.annotation.DrawableRes;
@@ -130,7 +129,9 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.AttributeCache;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.animation.ClipRectLRAnimation;
 import com.android.server.wm.animation.ClipRectTBAnimation;
 import com.android.server.wm.animation.CurvedTranslateAnimation;
@@ -170,6 +171,7 @@ public class AppTransition implements Dump {
     private static final int MAX_CLIP_REVEAL_TRANSITION_DURATION = 420;
     private static final int THUMBNAIL_APP_TRANSITION_DURATION = 336;
     private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
+    static final int MAX_APP_TRANSITION_DURATION = 3 * 1000; // 3 secs.
 
     private final Context mContext;
     private final WindowManagerService mService;
@@ -218,7 +220,7 @@ public class AppTransition implements Dump {
     private int mNextAppTransitionExit;
     private int mNextAppTransitionInPlace;
 
-    // Keyed by task id.
+    // Keyed by WindowContainer hashCode.
     private final SparseArray<AppTransitionAnimationSpec> mNextAppTransitionAnimationsSpecs
             = new SparseArray<>();
     private IAppTransitionAnimationSpecsFuture mNextAppTransitionAnimationsSpecsFuture;
@@ -337,8 +339,8 @@ public class AppTransition implements Dump {
         updateBooster();
     }
 
-    void setLastAppTransition(int transit, AppWindowToken openingApp, AppWindowToken closingApp,
-            AppWindowToken changingApp) {
+    void setLastAppTransition(int transit, ActivityRecord openingApp, ActivityRecord closingApp,
+            ActivityRecord changingApp) {
         mLastUsedAppTransition = transit;
         mLastOpeningApp = "" + openingApp;
         mLastClosingApp = "" + closingApp;
@@ -371,8 +373,9 @@ public class AppTransition implements Dump {
         setAppTransitionState(APP_STATE_TIMEOUT);
     }
 
-    GraphicBuffer getAppTransitionThumbnailHeader(int taskId) {
-        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(taskId);
+    GraphicBuffer getAppTransitionThumbnailHeader(WindowContainer container) {
+        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
+                container.hashCode());
         if (spec == null) {
             spec = mDefaultNextAppTransitionAnimationSpec;
         }
@@ -399,7 +402,6 @@ public class AppTransition implements Dump {
         return mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN ||
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
     }
-
 
     boolean isNextAppTransitionOpenCrossProfileApps() {
         return mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS;
@@ -429,21 +431,20 @@ public class AppTransition implements Dump {
      * @return bit-map of WindowManagerPolicy#FINISH_LAYOUT_REDO_* to indicate whether another
      *         layout pass needs to be done
      */
-    int goodToGo(int transit, AppWindowToken topOpeningApp, ArraySet<AppWindowToken> openingApps) {
+    int goodToGo(int transit, ActivityRecord topOpeningApp, ArraySet<ActivityRecord> openingApps) {
         mNextAppTransition = TRANSIT_UNSET;
         mNextAppTransitionFlags = 0;
         setAppTransitionState(APP_STATE_RUNNING);
-        final AnimationAdapter topOpeningAnim = topOpeningApp != null
-                ? topOpeningApp.getAnimation()
-                : null;
+        final WindowContainer wc =
+                topOpeningApp != null ? topOpeningApp.getAnimatingContainer() : null;
+        final AnimationAdapter topOpeningAnim = wc != null ? wc.getAnimation() : null;
+
         int redoLayout = notifyAppTransitionStartingLocked(transit,
                 topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
                 AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
-        mDisplayContent.getDockedDividerController()
-                .notifyAppTransitionStarting(openingApps, transit);
 
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.goodToGo();
@@ -521,6 +522,12 @@ public class AppTransition implements Dump {
     private void notifyAppTransitionCancelledLocked(int transit) {
         for (int i = 0; i < mListeners.size(); i++) {
             mListeners.get(i).onAppTransitionCancelledLocked(transit);
+        }
+    }
+
+    private void notifyAppTransitionTimeoutLocked() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onAppTransitionTimeoutLocked();
         }
     }
 
@@ -788,14 +795,15 @@ public class AppTransition implements Dump {
         }
     }
 
-    void getNextAppTransitionStartRect(int taskId, Rect rect) {
-        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(taskId);
+    void getNextAppTransitionStartRect(WindowContainer container, Rect rect) {
+        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
+                container.hashCode());
         if (spec == null) {
             spec = mDefaultNextAppTransitionAnimationSpec;
         }
         if (spec == null || spec.rect == null) {
-            Slog.e(TAG, "Starting rect for task: " + taskId + " requested, but not available",
-                    new Throwable());
+            Slog.e(TAG, "Starting rect for container: " + container
+                            + " requested, but not available", new Throwable());
             rect.setEmpty();
         } else {
             rect.set(spec.rect);
@@ -1064,7 +1072,7 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
-            GraphicBuffer thumbnailHeader, final int taskId, int uiMode, int orientation) {
+            GraphicBuffer thumbnailHeader, WindowContainer container, int uiMode, int orientation) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -1072,7 +1080,7 @@ public class AppTransition implements Dump {
         final int appWidth = appRect.width();
 
         float scaleW = appWidth / thumbWidth;
-        getNextAppTransitionStartRect(taskId, mTmpRect);
+        getNextAppTransitionStartRect(container, mTmpRect);
         final float fromX;
         float fromY;
         final float toX;
@@ -1225,7 +1233,7 @@ public class AppTransition implements Dump {
     Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
             int uiMode, int orientation, int transit, Rect containingFrame, Rect contentInsets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean freeform,
-            int taskId) {
+            WindowContainer container) {
         Animation a;
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
@@ -1243,10 +1251,10 @@ public class AppTransition implements Dump {
                 final boolean scaleUp = thumbTransitState == THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
                 if (freeform && scaleUp) {
                     a = createAspectScaledThumbnailEnterFreeformAnimationLocked(
-                            containingFrame, surfaceInsets, taskId);
+                            containingFrame, surfaceInsets, container);
                 } else if (freeform) {
                     a = createAspectScaledThumbnailExitFreeformAnimationLocked(
-                            containingFrame, surfaceInsets, taskId);
+                            containingFrame, surfaceInsets, container);
                 } else {
                     AnimationSet set = new AnimationSet(true);
 
@@ -1358,15 +1366,15 @@ public class AppTransition implements Dump {
     }
 
     private Animation createAspectScaledThumbnailEnterFreeformAnimationLocked(Rect frame,
-            @Nullable Rect surfaceInsets, int taskId) {
-        getNextAppTransitionStartRect(taskId, mTmpRect);
+            @Nullable Rect surfaceInsets, WindowContainer container) {
+        getNextAppTransitionStartRect(container, mTmpRect);
         return createAspectScaledThumbnailFreeformAnimationLocked(mTmpRect, frame, surfaceInsets,
                 true);
     }
 
     private Animation createAspectScaledThumbnailExitFreeformAnimationLocked(Rect frame,
-            @Nullable Rect surfaceInsets, int taskId) {
-        getNextAppTransitionStartRect(taskId, mTmpRect);
+            @Nullable Rect surfaceInsets, WindowContainer container) {
+        getNextAppTransitionStartRect(container, mTmpRect);
         return createAspectScaledThumbnailFreeformAnimationLocked(frame, mTmpRect, surfaceInsets,
                 false);
     }
@@ -1401,23 +1409,7 @@ public class AppTransition implements Dump {
                 : new TranslateAnimation(0, fromX, 0, fromY);
         set.addAnimation(scale);
         set.addAnimation(translation);
-
-        final IRemoteCallback callback = mAnimationFinishedCallback;
-        if (callback != null) {
-            set.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) { }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    mHandler.sendMessage(PooledLambda.obtainMessage(
-                            AppTransition::doAnimationCallback, callback));
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) { }
-            });
-        }
+        setAppTransitionFinishedCallbackIfNeeded(set);
         return set;
     }
 
@@ -1468,10 +1460,10 @@ public class AppTransition implements Dump {
      * leaving, and the activity that is entering.
      */
     Animation createThumbnailEnterExitAnimationLocked(int thumbTransitState, Rect containingFrame,
-            int transit, int taskId) {
+            int transit, WindowContainer container) {
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
-        final GraphicBuffer thumbnailHeader = getAppTransitionThumbnailHeader(taskId);
+        final GraphicBuffer thumbnailHeader = getAppTransitionThumbnailHeader(container);
         Animation a;
         getDefaultNextAppTransitionStartRect(mTmpRect);
         final int thumbWidthI = thumbnailHeader != null ? thumbnailHeader.getWidth() : appWidth;
@@ -1614,7 +1606,7 @@ public class AppTransition implements Dump {
     Animation loadAnimation(LayoutParams lp, int transit, boolean enter, int uiMode,
             int orientation, Rect frame, Rect displayFrame, Rect insets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
-            boolean freeform, int taskId) {
+            boolean freeform, WindowContainer container) {
         Animation a;
         if (isKeyguardGoingAwayTransit(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
@@ -1630,101 +1622,90 @@ public class AppTransition implements Dump {
             a = loadAnimationRes(lp, enter
                     ? com.android.internal.R.anim.voice_activity_open_enter
                     : com.android.internal.R.anim.voice_activity_open_exit);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation voice:"
-                    + " anim=" + a + " transit=" + appTransitionToString(transit)
-                    + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s", a,
+                    appTransitionToString(transit), enter, Debug.getCallers(3));
         } else if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_CLOSE
                 || transit == TRANSIT_TASK_CLOSE
                 || transit == TRANSIT_TASK_TO_BACK)) {
             a = loadAnimationRes(lp, enter
                     ? com.android.internal.R.anim.voice_activity_close_enter
                     : com.android.internal.R.anim.voice_activity_close_exit);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation voice:"
-                    + " anim=" + a + " transit=" + appTransitionToString(transit)
-                    + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s", a,
+                    appTransitionToString(transit), enter, Debug.getCallers(3));
         } else if (transit == TRANSIT_ACTIVITY_RELAUNCH) {
             a = createRelaunchAnimation(frame, insets);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation:"
-                    + " anim=" + a + " nextAppTransition=" + mNextAppTransition
-                    + " transit=" + appTransitionToString(transit)
-                    + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=%d transit=%s Callers=%s", a,
+                    mNextAppTransition, appTransitionToString(transit),
+                    Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
             a = loadAnimationRes(mNextAppTransitionPackage, enter ?
                     mNextAppTransitionEnter : mNextAppTransitionExit);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation:"
-                    + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
-                    + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
-                    + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s "
+                            + "isEntrance=%b Callers=%s",
+                    a, appTransitionToString(transit), enter, Debug.getCallers(3));
+            setAppTransitionFinishedCallbackIfNeeded(a);
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE) {
             a = loadAnimationRes(mNextAppTransitionPackage, mNextAppTransitionInPlace);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation:"
-                    + " anim=" + a + " nextAppTransition=ANIM_CUSTOM_IN_PLACE"
-                    + " transit=" + appTransitionToString(transit)
-                    + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM_IN_PLACE "
+                            + "transit=%s Callers=%s",
+                    a, appTransitionToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
             a = createClipRevealAnimationLocked(transit, enter, frame, displayFrame);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation:"
-                            + " anim=" + a + " nextAppTransition=ANIM_CLIP_REVEAL"
-                            + " transit=" + appTransitionToString(transit)
-                            + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=ANIM_CLIP_REVEAL "
+                            + "transit=%s Callers=%s",
+                    a, appTransitionToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
             a = createScaleUpAnimationLocked(transit, enter, frame);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation:"
-                    + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
-                    + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
-                    + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=ANIM_SCALE_UP transit=%s "
+                            + "isEntrance=%s Callers=%s",
+                    a, appTransitionToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP ||
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             a = createThumbnailEnterExitAnimationLocked(getThumbnailTransitionState(enter),
-                    frame, transit, taskId);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                String animName = mNextAppTransitionScaleUp ?
-                        "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
-                Slog.v(TAG, "applyAnimation:"
-                        + " anim=" + a + " nextAppTransition=" + animName
-                        + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
-                        + " Callers=" + Debug.getCallers(3));
-            }
+                    frame, transit, container);
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=%s transit=%s isEntrance=%b "
+                            + "Callers=%s",
+                    a,  mNextAppTransitionScaleUp
+                            ? "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN",
+                    appTransitionToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP ||
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN) {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             a = createAspectScaledThumbnailEnterExitAnimationLocked(
                     getThumbnailTransitionState(enter), uiMode, orientation, transit, frame,
-                    insets, surfaceInsets, stableInsets, freeform, taskId);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                String animName = mNextAppTransitionScaleUp ?
-                        "ANIM_THUMBNAIL_ASPECT_SCALE_UP" : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN";
-                Slog.v(TAG, "applyAnimation:"
-                        + " anim=" + a + " nextAppTransition=" + animName
-                        + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
-                        + " Callers=" + Debug.getCallers(3));
-            }
+                    insets, surfaceInsets, stableInsets, freeform, container);
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s nextAppTransition=%s transit=%s isEntrance=%b "
+                            + "Callers=%s",
+                    a, mNextAppTransitionScaleUp
+                            ? "ANIM_THUMBNAIL_ASPECT_SCALE_UP"
+                        : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN",
+                    appTransitionToString(transit), enter, Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS && enter) {
             a = loadAnimationRes("android",
                     com.android.internal.R.anim.task_open_enter_cross_profile_apps);
-            Slog.v(TAG,
-                    "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
-                            + " anim=" + a + " transit=" + appTransitionToString(transit)
-                            + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS: "
+                            + "anim=%s transit=%s isEntrance=true Callers=%s",
+                    a, appTransitionToString(transit), Debug.getCallers(3));
         } else if (transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE) {
             // In the absence of a specific adapter, we just want to keep everything stationary.
             a = new AlphaAnimation(1.f, 1.f);
             a.setDuration(WindowChangeAnimationSpec.ANIMATION_DURATION);
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                Slog.v(TAG, "applyAnimation:"
-                        + " anim=" + a + " transit=" + appTransitionToString(transit)
-                        + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
-            }
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s transit=%s isEntrance=%b Callers=%s",
+                    a, appTransitionToString(transit), enter, Debug.getCallers(3));
         } else {
             int animAttr = 0;
             switch (transit) {
@@ -1787,12 +1768,11 @@ public class AppTransition implements Dump {
                             : WindowAnimation_launchTaskBehindTargetAnimation;
             }
             a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation:"
-                    + " anim=" + a
-                    + " animAttr=0x" + Integer.toHexString(animAttr)
-                    + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
-                    + " Callers=" + Debug.getCallers(3));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "
+                            + "Callers=%s",
+                    a, animAttr, appTransitionToString(transit), enter,
+                    Debug.getCallers(3));
         }
         return a;
     }
@@ -1810,15 +1790,11 @@ public class AppTransition implements Dump {
     }
 
     int getAppStackClipMode() {
-        // When dismiss keyguard animation occurs, clip before the animation to prevent docked
-        // app from showing beyond the divider
-        if (mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY
-                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
-            return STACK_CLIP_BEFORE_ANIM;
-        }
         return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
                 || mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
                 || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
+                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY
+                || mNextAppTransition == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER
                 ? STACK_CLIP_NONE
                 : STACK_CLIP_AFTER_ANIM;
     }
@@ -1836,7 +1812,7 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-            IRemoteCallback startedCallback) {
+            IRemoteCallback startedCallback, IRemoteCallback endedCallback) {
         if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
@@ -1845,6 +1821,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionExit = exitAnim;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
+            mAnimationFinishedCallback = endedCallback;
         }
     }
 
@@ -1907,7 +1884,14 @@ public class AppTransition implements Dump {
                 for (int i = 0; i < specs.length; i++) {
                     AppTransitionAnimationSpec spec = specs[i];
                     if (spec != null) {
-                        mNextAppTransitionAnimationsSpecs.put(spec.taskId, spec);
+                        final PooledPredicate p = PooledLambda.obtainPredicate(
+                                Task::isTaskId, PooledLambda.__(Task.class), spec.taskId);
+                        final WindowContainer container = mDisplayContent.getTask(p);
+                        p.recycle();
+                        if (container == null) {
+                            continue;
+                        }
+                        mNextAppTransitionAnimationsSpecs.put(container.hashCode(), spec);
                         if (i == 0) {
                             // In full screen mode, the transition code depends on the default spec
                             // to be set.
@@ -1941,8 +1925,8 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter) {
-        if (DEBUG_APP_TRANSITIONS) Slog.i(TAG, "Override pending remote transitionSet="
-                + isTransitionSet() + " adapter=" + remoteAnimationAdapter);
+        ProtoLog.i(WM_DEBUG_APP_TRANSITIONS, "Override pending remote transitionSet=%b adapter=%s",
+                        isTransitionSet(), remoteAnimationAdapter);
         if (isTransitionSet()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;
@@ -1999,8 +1983,8 @@ public class AppTransition implements Dump {
                             mNextAppTransitionFutureCallback, null /* finishedCallback */,
                             mNextAppTransitionScaleUp);
                     mNextAppTransitionFutureCallback = null;
+                    mService.requestTraversal();
                 }
-                mService.requestTraversal();
             });
         }
     }
@@ -2133,7 +2117,7 @@ public class AppTransition implements Dump {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(APP_TRANSITION_STATE, mAppTransitionState);
         proto.write(LAST_USED_APP_TRANSITION, mLastUsedAppTransition);
@@ -2214,12 +2198,11 @@ public class AppTransition implements Dump {
      */
     boolean prepareAppTransitionLocked(@TransitionType int transit, boolean alwaysKeepCurrent,
             @TransitionFlags int flags, boolean forceOverride) {
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Prepare app transition:"
-                + " transit=" + appTransitionToString(transit)
-                + " " + this
-                + " alwaysKeepCurrent=" + alwaysKeepCurrent
-                + " displayId=" + mDisplayContent.getDisplayId()
-                + " Callers=" + Debug.getCallers(5));
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d "
+                        + "Callers=%s",
+                appTransitionToString(transit), this, alwaysKeepCurrent,
+                mDisplayContent.getDisplayId(), Debug.getCallers(5));
         final boolean allowSetCrashing = !isKeyguardTransit(mNextAppTransition)
                 && transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
         if (forceOverride || isKeyguardTransit(transit) || !isTransitionSet()
@@ -2269,8 +2252,7 @@ public class AppTransition implements Dump {
     static boolean isTaskTransit(int transit) {
         return isTaskOpenTransit(transit)
                 || transit == TRANSIT_TASK_CLOSE
-                || transit == TRANSIT_TASK_TO_BACK
-                || transit == TRANSIT_TASK_IN_PLACE;
+                || transit == TRANSIT_TASK_TO_BACK;
     }
 
     private static  boolean isTaskOpenTransit(int transit) {
@@ -2289,6 +2271,15 @@ public class AppTransition implements Dump {
         return transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE;
     }
 
+    static boolean isClosingTransit(int transit) {
+        return transit == TRANSIT_ACTIVITY_CLOSE
+                || transit == TRANSIT_TASK_CLOSE
+                || transit == TRANSIT_WALLPAPER_CLOSE
+                || transit == TRANSIT_WALLPAPER_INTRA_CLOSE
+                || transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE
+                || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
+    }
+
     /**
      * @return whether the transition should show the thumbnail being scaled down.
      */
@@ -2303,17 +2294,17 @@ public class AppTransition implements Dump {
             if (dc == null) {
                 return;
             }
+            notifyAppTransitionTimeoutLocked();
             if (isTransitionSet() || !dc.mOpeningApps.isEmpty() || !dc.mClosingApps.isEmpty()
-                    || !dc.mChangingApps.isEmpty()) {
-                if (DEBUG_APP_TRANSITIONS) {
-                    Slog.v(TAG_WM, "*** APP TRANSITION TIMEOUT."
-                            + " displayId=" + dc.getDisplayId()
-                            + " isTransitionSet()="
-                            + dc.mAppTransition.isTransitionSet()
-                            + " mOpeningApps.size()=" + dc.mOpeningApps.size()
-                            + " mClosingApps.size()=" + dc.mClosingApps.size()
-                            + " mChangingApps.size()=" + dc.mChangingApps.size());
-                }
+                    || !dc.mChangingContainers.isEmpty()) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                            "*** APP TRANSITION TIMEOUT. displayId=%d isTransitionSet()=%b "
+                                    + "mOpeningApps.size()=%d mClosingApps.size()=%d "
+                                    + "mChangingApps.size()=%d",
+                            dc.getDisplayId(), dc.mAppTransition.isTransitionSet(),
+                            dc.mOpeningApps.size(), dc.mClosingApps.size(),
+                            dc.mChangingContainers.size());
+
                 setTimeout();
                 mService.mWindowPlacerLocked.performSurfacePlacement();
             }
@@ -2324,6 +2315,25 @@ public class AppTransition implements Dump {
         try {
             ((IRemoteCallback) callback).sendResult(null);
         } catch (RemoteException e) {
+        }
+    }
+
+    private void setAppTransitionFinishedCallbackIfNeeded(Animation anim) {
+        final IRemoteCallback callback = mAnimationFinishedCallback;
+        if (callback != null && anim != null) {
+            anim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) { }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            AppTransition::doAnimationCallback, callback));
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
         }
     }
 

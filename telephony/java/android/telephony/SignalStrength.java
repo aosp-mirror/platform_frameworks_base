@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -95,8 +94,7 @@ public class SignalStrength implements Parcelable {
     /**
      * Create a new SignalStrength from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
-     * external applications.
+     * This method may be used by external applications.
      *
      * @param m Bundle from intent notifier
      * @return newly created SignalStrength
@@ -295,7 +293,6 @@ public class SignalStrength implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public SignalStrength(@NonNull SignalStrength s) {
         copyFrom(s);
     }

@@ -31,10 +31,4 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
     />
-
-    <com.android.systemui.BatteryMeterView
-        android:id="@+id/battery"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-    />
 </LinearLayout>

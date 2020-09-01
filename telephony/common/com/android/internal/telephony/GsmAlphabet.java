@@ -40,6 +40,8 @@ import java.util.List;
 public class GsmAlphabet {
     private static final String TAG = "GSM";
 
+    private GsmAlphabet() { }
+
     /**
      * This escapes extended characters, and when present indicates that the
      * following character should be looked up in the "extended" table.

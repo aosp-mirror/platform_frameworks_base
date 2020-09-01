@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -140,8 +141,8 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction deferTransactionUntil(SurfaceControl sc, IBinder handle,
-            long frameNumber) {
+    public SurfaceControl.Transaction deferTransactionUntil(SurfaceControl sc,
+            SurfaceControl barrier, long frameNumber) {
         return this;
     }
 
@@ -153,7 +154,8 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction reparentChildren(SurfaceControl sc, IBinder newParentHandle) {
+    public SurfaceControl.Transaction reparentChildren(SurfaceControl sc,
+            SurfaceControl newParent) {
         return this;
     }
 
@@ -175,11 +177,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction setColor(SurfaceControl sc, float[] color) {
-        return this;
-    }
-
-    @Override
-    public SurfaceControl.Transaction setGeometryAppliesWithResize(SurfaceControl sc) {
         return this;
     }
 
@@ -241,6 +238,43 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction remove(SurfaceControl sc) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction syncInputWindows() {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setColorSpaceAgnostic(SurfaceControl sc, boolean agnostic) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setFrameRateSelectionPriority(SurfaceControl sc,
+            int priority) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction unsetColor(SurfaceControl sc) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setShadowRadius(SurfaceControl sc, float shadowRadius) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setFixedTransformHint(SurfaceControl sc,
+            @Surface.Rotation int transformHint) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
         return this;
     }
 }

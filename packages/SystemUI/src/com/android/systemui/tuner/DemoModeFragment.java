@@ -158,7 +158,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
 
         String demoTime = "1010"; // 10:10, a classic choice of horologists
         try {
-            String[] versionParts = android.os.Build.VERSION.RELEASE.split("\\.");
+            String[] versionParts = android.os.Build.VERSION.RELEASE_OR_CODENAME.split("\\.");
             int majorVersion = Integer.valueOf(versionParts[0]);
             demoTime = String.format("%02d00", majorVersion % 24);
         } catch (IllegalArgumentException ex) {

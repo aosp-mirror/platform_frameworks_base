@@ -18,6 +18,9 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -50,6 +53,7 @@ public class DataChangedJournalTest {
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     @Mock private Consumer<String> mConsumer;
+    @Mock private File invalidFile;
 
     private File mFile;
     private DataChangedJournal mJournal;
@@ -130,5 +134,12 @@ public class DataChangedJournalTest {
     @Test
     public void toString_isSameAsFileToString() throws Exception {
         assertThat(mJournal.toString()).isEqualTo(mFile.toString());
+    }
+
+    @Test
+    public void listJournals_invalidJournalFile_returnsEmptyList() throws Exception {
+        when(invalidFile.listFiles()).thenReturn(null);
+
+        assertEquals(0, DataChangedJournal.listJournals(invalidFile).size());
     }
 }

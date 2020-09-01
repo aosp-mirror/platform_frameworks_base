@@ -38,6 +38,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 final class ContentProviderRecord implements ComponentName.WithComponentName {
+    // Maximum attempts to bring up the content provider before giving up.
+    static final int MAX_RETRY_COUNT = 3;
+
     final ActivityManagerService service;
     public final ProviderInfo info;
     final int uid;
@@ -54,6 +57,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
     ArrayMap<IBinder, ExternalProcessHandle> externalProcessTokenToHandle;
     // Count for external process for which we have no handles.
     int externalProcessNoHandleCount;
+    int mRestartCount; // number of times we tried before bringing up it successfully.
     ProcessRecord proc; // if non-null, hosting process.
     ProcessRecord launchingApp; // if non-null, waiting for this app to be launched.
     String stringName;

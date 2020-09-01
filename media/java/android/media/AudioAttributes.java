@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -97,6 +98,10 @@ public final class AudioAttributes implements Parcelable {
      */
     public final static int CONTENT_TYPE_SONIFICATION = 4;
 
+    /**
+     * Invalid value, only ever used for an uninitialized usage value
+     */
+    private static final int USAGE_INVALID = -1;
     /**
      * Usage value to use when the usage is unknown.
      */
@@ -178,6 +183,47 @@ public final class AudioAttributes implements Parcelable {
      * utterances.
      */
     public final static int USAGE_ASSISTANT = 16;
+    /**
+     * @hide
+     * Usage value to use for assistant voice interaction with remote caller on Cell and VoIP calls.
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
+    public static final int USAGE_CALL_ASSISTANT = 17;
+
+    private static final int SYSTEM_USAGE_OFFSET = 1000;
+
+    /**
+     * @hide
+     * Usage value to use when the usage is an emergency.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_EMERGENCY = SYSTEM_USAGE_OFFSET;
+    /**
+     * @hide
+     * Usage value to use when the usage is a safety sound.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_SAFETY = SYSTEM_USAGE_OFFSET + 1;
+    /**
+     * @hide
+     * Usage value to use when the usage is a vehicle status.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_VEHICLE_STATUS = SYSTEM_USAGE_OFFSET + 2;
+    /**
+     * @hide
+     * Usage value to use when the usage is an announcement.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_ANNOUNCEMENT = SYSTEM_USAGE_OFFSET + 3;
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
@@ -254,6 +300,7 @@ public final class AudioAttributes implements Parcelable {
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,    SUPPRESSIBLE_MEDIA);
         SUPPRESSIBLE_USAGES.put(USAGE_GAME,                              SUPPRESSIBLE_MEDIA);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANT,                         SUPPRESSIBLE_MEDIA);
+        SUPPRESSIBLE_USAGES.put(USAGE_CALL_ASSISTANT,                    SUPPRESSIBLE_NEVER);
         /** default volume assignment is STREAM_MUSIC, handle unknown usage as media */
         SUPPRESSIBLE_USAGES.put(USAGE_UNKNOWN,                           SUPPRESSIBLE_MEDIA);
         SUPPRESSIBLE_USAGES.put(USAGE_ASSISTANCE_SONIFICATION,           SUPPRESSIBLE_SYSTEM);
@@ -388,14 +435,27 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NO_SYSTEM_CAPTURE = 0x1 << 12;
 
+    /**
+     * @hide
+     * Flag requesting private audio capture. When set in audio attributes passed to an
+     * AudioRecord, this prevents a privileged Assistant from capturing audio while this
+     * AudioRecord is active.
+     */
+    public static final int FLAG_CAPTURE_PRIVATE = 0x1 << 13;
+
+
     // Note that even though FLAG_MUTE_HAPTIC is stored as a flag bit, it is not here since
     // it is known as a boolean value outside of AudioAttributes.
     private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
             | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
             | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
-            | FLAG_NO_SYSTEM_CAPTURE;
+            | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
+    /* mask of flags that can be set by SDK and System APIs through the Builder */
+    private static final int FLAG_ALL_API_SET = FLAG_ALL_PUBLIC
+            | FLAG_BYPASS_INTERRUPTION_POLICY
+            | FLAG_BYPASS_MUTE;
 
     /**
      * Indicates that the audio may be captured by any app.
@@ -471,6 +531,20 @@ public final class AudioAttributes implements Parcelable {
      * @return one of the values that can be set in {@link Builder#setUsage(int)}
      */
     public int getUsage() {
+        if (isSystemUsage(mUsage)) {
+            return USAGE_UNKNOWN;
+        }
+        return mUsage;
+    }
+
+    /**
+     * @hide
+     * Return the system usage.
+     * @return one of the values that can be set in {@link Builder#setUsage(int)} or
+     * {@link Builder#setSystemUsage(int)}
+     */
+    @SystemApi
+    public int getSystemUsage() {
         return mUsage;
     }
 
@@ -503,16 +577,6 @@ public final class AudioAttributes implements Parcelable {
     @SystemApi
     public int getAllFlags() {
         return (mFlags & FLAG_ALL);
-    }
-
-    /**
-     * @hide
-     * Return usage, even the non-public ones.
-     * Internal use only
-     * @return one of the values that can be set in {@link Builder#setUsage(int)}
-     */
-    public int getSystemUsage() {
-        return mUsage;
     }
 
     /**
@@ -583,13 +647,19 @@ public final class AudioAttributes implements Parcelable {
      * {@link MediaPlayer} will use a default usage of {@link AudioAttributes#USAGE_MEDIA}.
      */
     public static class Builder {
-        private int mUsage = USAGE_UNKNOWN;
+        private int mUsage = USAGE_INVALID;
+        private int mSystemUsage = USAGE_INVALID;
         private int mContentType = CONTENT_TYPE_UNKNOWN;
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
         private boolean mMuteHapticChannels = true;
         private HashSet<String> mTags = new HashSet<String>();
         private Bundle mBundle;
+        private int mPrivacySensitive = PRIVACY_SENSITIVE_DEFAULT;
+
+        private static final int PRIVACY_SENSITIVE_DEFAULT = -1;
+        private static final int PRIVACY_SENSITIVE_DISABLED = 0;
+        private static final int PRIVACY_SENSITIVE_ENABLED = 1;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -624,11 +694,41 @@ public final class AudioAttributes implements Parcelable {
         public AudioAttributes build() {
             AudioAttributes aa = new AudioAttributes();
             aa.mContentType = mContentType;
-            aa.mUsage = mUsage;
+
+            if (mUsage == USAGE_INVALID) {
+                if (mSystemUsage == USAGE_INVALID) {
+                    aa.mUsage = USAGE_UNKNOWN;
+                } else {
+                    aa.mUsage = mSystemUsage;
+                }
+            } else {
+                if (mSystemUsage == USAGE_INVALID) {
+                    aa.mUsage = mUsage;
+                } else {
+                    throw new IllegalArgumentException(
+                            "Cannot set both usage and system usage on same builder");
+                }
+            }
+
             aa.mSource = mSource;
             aa.mFlags = mFlags;
             if (mMuteHapticChannels) {
                 aa.mFlags |= FLAG_MUTE_HAPTIC;
+            }
+
+            if (mPrivacySensitive == PRIVACY_SENSITIVE_DEFAULT) {
+                // capturing for camcorder or communication is private by default to
+                // reflect legacy behavior
+                if (mSource == MediaRecorder.AudioSource.VOICE_COMMUNICATION
+                        || mSource == MediaRecorder.AudioSource.CAMCORDER) {
+                    aa.mFlags |= FLAG_CAPTURE_PRIVATE;
+                } else {
+                    aa.mFlags &= ~FLAG_CAPTURE_PRIVATE;
+                }
+            } else if (mPrivacySensitive == PRIVACY_SENSITIVE_ENABLED) {
+                aa.mFlags |= FLAG_CAPTURE_PRIVATE;
+            } else {
+                aa.mFlags &= ~FLAG_CAPTURE_PRIVATE;
             }
             aa.mTags = (HashSet<String>) mTags.clone();
             aa.mFormattedTags = TextUtils.join(";", mTags);
@@ -639,26 +739,26 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
-         * Sets the attribute describing what is the intended use of the the audio signal,
+         * Sets the attribute describing what is the intended use of the audio signal,
          * such as alarm or ringtone.
-         * @param usage one of {@link AudioAttributes#USAGE_UNKNOWN},
-         *     {@link AudioAttributes#USAGE_MEDIA},
-         *     {@link AudioAttributes#USAGE_VOICE_COMMUNICATION},
-         *     {@link AudioAttributes#USAGE_VOICE_COMMUNICATION_SIGNALLING},
-         *     {@link AudioAttributes#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
-         *     {@link AudioAttributes#USAGE_NOTIFICATION_EVENT},
-         *     {@link AudioAttributes#USAGE_ASSISTANT},
-         *     {@link AudioAttributes#USAGE_ASSISTANCE_ACCESSIBILITY},
-         *     {@link AudioAttributes#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
-         *     {@link AudioAttributes#USAGE_ASSISTANCE_SONIFICATION},
-         *     {@link AudioAttributes#USAGE_GAME}.
+         * @param usage one of {@link AttributeSdkUsage#USAGE_UNKNOWN},
+         *     {@link AttributeSdkUsage#USAGE_MEDIA},
+         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION},
+         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION_SIGNALLING},
+         *     {@link AttributeSdkUsage#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_RINGTONE},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
+         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_EVENT},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANT},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_ACCESSIBILITY},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
+         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_SONIFICATION},
+         *     {@link AttributeSdkUsage#USAGE_GAME}.
          * @return the same Builder instance.
          */
-        public Builder setUsage(@AttributeUsage int usage) {
+        public Builder setUsage(@AttributeSdkUsage int usage) {
             switch (usage) {
                 case USAGE_UNKNOWN:
                 case USAGE_MEDIA:
@@ -680,8 +780,30 @@ public final class AudioAttributes implements Parcelable {
                     mUsage = usage;
                     break;
                 default:
-                    mUsage = USAGE_UNKNOWN;
+                    throw new IllegalArgumentException("Invalid usage " + usage);
             }
+            return this;
+        }
+
+        /**
+         * @hide
+         * Sets the attribute describing what is the intended use of the audio signal for categories
+         * of sounds restricted to the system, such as vehicle status or emergency.
+         *
+         * <p>Note that the AudioAttributes have a single usage value, therefore it is illegal to
+         * call both this method and {@link #setUsage(int)}.
+         * @param systemUsage the system-restricted usage.
+         * @return the same Builder instance.
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @NonNull Builder setSystemUsage(@AttributeSystemUsage int systemUsage) {
+            if (isSystemUsage(systemUsage)) {
+                mSystemUsage = systemUsage;
+            } else {
+                throw new IllegalArgumentException("Invalid system usage " + systemUsage);
+            }
+
             return this;
         }
 
@@ -706,7 +828,7 @@ public final class AudioAttributes implements Parcelable {
                     mContentType = contentType;
                     break;
                 default:
-                    mContentType = CONTENT_TYPE_UNKNOWN;
+                    throw new IllegalArgumentException("Invalid content type " + contentType);
             }
             return this;
         }
@@ -720,7 +842,7 @@ public final class AudioAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public Builder setFlags(int flags) {
-            flags &= AudioAttributes.FLAG_ALL;
+            flags &= AudioAttributes.FLAG_ALL_API_SET;
             mFlags |= flags;
             return this;
         }
@@ -834,7 +956,7 @@ public final class AudioAttributes implements Parcelable {
                 if (attributes != null) {
                     mUsage = attributes.mUsage;
                     mContentType = attributes.mContentType;
-                    mFlags = attributes.mFlags;
+                    mFlags = attributes.getAllFlags();
                     mMuteHapticChannels = attributes.areHapticChannelsMuted();
                     mTags = attributes.mTags;
                     mBundle = attributes.mBundle;
@@ -950,6 +1072,20 @@ public final class AudioAttributes implements Parcelable {
          */
         public @NonNull Builder setHapticChannelsMuted(boolean muted) {
             mMuteHapticChannels = muted;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Indicates if an AudioRecord build with this AudioAttributes is privacy sensitive or not.
+         * See {@link AudioRecord.Builder#setPrivacySensitive(boolean)}.
+         * @param privacySensitive True if capture must be marked as privacy sensitive,
+         * false otherwise.
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setPrivacySensitive(boolean privacySensitive) {
+            mPrivacySensitive =
+                privacySensitive ? PRIVACY_SENSITIVE_ENABLED : PRIVACY_SENSITIVE_DISABLED;
             return this;
         }
     };
@@ -1072,7 +1208,7 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(AudioAttributesProto.USAGE, mUsage);
@@ -1130,6 +1266,16 @@ public final class AudioAttributes implements Parcelable {
                 return new String("USAGE_GAME");
             case USAGE_ASSISTANT:
                 return new String("USAGE_ASSISTANT");
+            case USAGE_CALL_ASSISTANT:
+                return new String("USAGE_CALL_ASSISTANT");
+            case USAGE_EMERGENCY:
+                return new String("USAGE_EMERGENCY");
+            case USAGE_SAFETY:
+                return new String("USAGE_SAFETY");
+            case USAGE_VEHICLE_STATUS:
+                return new String("USAGE_VEHICLE_STATUS");
+            case USAGE_ANNOUNCEMENT:
+                return new String("USAGE_ANNOUNCEMENT");
             default:
                 return new String("unknown usage " + usage);
         }
@@ -1173,6 +1319,25 @@ public final class AudioAttributes implements Parcelable {
             default:
                 return USAGE_UNKNOWN;
         }
+    }
+
+    /**
+     * @param usage one of {@link AttributeSystemUsage},
+     *     {@link AttributeSystemUsage#USAGE_CALL_ASSISTANT},
+     *     {@link AttributeSystemUsage#USAGE_EMERGENCY},
+     *     {@link AttributeSystemUsage#USAGE_SAFETY},
+     *     {@link AttributeSystemUsage#USAGE_VEHICLE_STATUS},
+     *     {@link AttributeSystemUsage#USAGE_ANNOUNCEMENT}
+     * @return boolean indicating if the usage is a system usage or not
+     * @hide
+     */
+    @SystemApi
+    public static boolean isSystemUsage(@AttributeSystemUsage int usage) {
+        return (usage == USAGE_CALL_ASSISTANT
+                || usage == USAGE_EMERGENCY
+                || usage == USAGE_SAFETY
+                || usage == USAGE_VEHICLE_STATUS
+                || usage == USAGE_ANNOUNCEMENT);
     }
 
     /**
@@ -1233,6 +1398,7 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_ASSISTANCE_SONIFICATION:
                 return AudioSystem.STREAM_SYSTEM;
             case USAGE_VOICE_COMMUNICATION:
+            case USAGE_CALL_ASSISTANT:
                 return AudioSystem.STREAM_VOICE_CALL;
             case USAGE_VOICE_COMMUNICATION_SIGNALLING:
                 return fromGetVolumeControlStream ?
@@ -1249,6 +1415,10 @@ public final class AudioAttributes implements Parcelable {
                 return AudioSystem.STREAM_NOTIFICATION;
             case USAGE_ASSISTANCE_ACCESSIBILITY:
                 return AudioSystem.STREAM_ACCESSIBILITY;
+            case USAGE_EMERGENCY:
+            case USAGE_SAFETY:
+            case USAGE_VEHICLE_STATUS:
+            case USAGE_ANNOUNCEMENT:
             case USAGE_UNKNOWN:
                 return AudioSystem.STREAM_MUSIC;
             default:
@@ -1284,6 +1454,39 @@ public final class AudioAttributes implements Parcelable {
 
     /** @hide */
     @IntDef({
+            USAGE_CALL_ASSISTANT,
+            USAGE_EMERGENCY,
+            USAGE_SAFETY,
+            USAGE_VEHICLE_STATUS,
+            USAGE_ANNOUNCEMENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttributeSystemUsage {}
+
+    /** @hide */
+    @IntDef({
+            USAGE_UNKNOWN,
+            USAGE_MEDIA,
+            USAGE_VOICE_COMMUNICATION,
+            USAGE_VOICE_COMMUNICATION_SIGNALLING,
+            USAGE_ALARM,
+            USAGE_NOTIFICATION,
+            USAGE_NOTIFICATION_RINGTONE,
+            USAGE_NOTIFICATION_COMMUNICATION_REQUEST,
+            USAGE_NOTIFICATION_COMMUNICATION_INSTANT,
+            USAGE_NOTIFICATION_COMMUNICATION_DELAYED,
+            USAGE_NOTIFICATION_EVENT,
+            USAGE_ASSISTANCE_ACCESSIBILITY,
+            USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
+            USAGE_ASSISTANCE_SONIFICATION,
+            USAGE_GAME,
+            USAGE_ASSISTANT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttributeSdkUsage {}
+
+    /** @hide */
+    @IntDef({
         USAGE_UNKNOWN,
         USAGE_MEDIA,
         USAGE_VOICE_COMMUNICATION,
@@ -1300,6 +1503,11 @@ public final class AudioAttributes implements Parcelable {
         USAGE_ASSISTANCE_SONIFICATION,
         USAGE_GAME,
         USAGE_ASSISTANT,
+        USAGE_CALL_ASSISTANT,
+        USAGE_EMERGENCY,
+        USAGE_SAFETY,
+        USAGE_VEHICLE_STATUS,
+        USAGE_ANNOUNCEMENT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeUsage {}

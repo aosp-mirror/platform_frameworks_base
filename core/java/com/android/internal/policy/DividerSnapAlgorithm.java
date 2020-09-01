@@ -69,6 +69,7 @@ public class DividerSnapAlgorithm {
     private final ArrayList<SnapTarget> mTargets = new ArrayList<>();
     private final Rect mInsets = new Rect();
     private final int mSnapMode;
+    private final boolean mFreeSnapMode;
     private final int mMinimalSizeResizableTask;
     private final int mTaskHeightInMinimizedMode;
     private final float mFixedRatio;
@@ -103,17 +104,18 @@ public class DividerSnapAlgorithm {
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
             boolean isHorizontalDivision, Rect insets) {
         this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
-                DOCKED_INVALID, false);
+                DOCKED_INVALID, false /* minimized */, true /* resizable */);
     }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
         boolean isHorizontalDivision, Rect insets, int dockSide) {
         this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
-            dockSide, false);
+            dockSide, false /* minimized */, true /* resizable */);
     }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
-            boolean isHorizontalDivision, Rect insets, int dockSide, boolean isMinimizedMode) {
+            boolean isHorizontalDivision, Rect insets, int dockSide, boolean isMinimizedMode,
+            boolean isHomeResizable) {
         mMinFlingVelocityPxPerSecond =
                 MIN_FLING_VELOCITY_DP_PER_SECOND * res.getDisplayMetrics().density;
         mMinDismissVelocityPxPerSecond =
@@ -125,12 +127,14 @@ public class DividerSnapAlgorithm {
         mInsets.set(insets);
         mSnapMode = isMinimizedMode ? SNAP_MODE_MINIMIZED :
                 res.getInteger(com.android.internal.R.integer.config_dockedStackDividerSnapMode);
+        mFreeSnapMode = res.getBoolean(
+                com.android.internal.R.bool.config_dockedStackDividerFreeSnapMode);
         mFixedRatio = res.getFraction(
                 com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
         mMinimalSizeResizableTask = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_resizable_task);
-        mTaskHeightInMinimizedMode = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.task_height_of_minimized_mode);
+        mTaskHeightInMinimizedMode = isHomeResizable ? res.getDimensionPixelSize(
+                com.android.internal.R.dimen.task_height_of_minimized_mode) : 0;
         calculateTargets(isHorizontalDivision, dockSide);
         mFirstSplitTarget = mTargets.get(1);
         mLastSplitTarget = mTargets.get(mTargets.size() - 2);
@@ -247,7 +251,20 @@ public class DividerSnapAlgorithm {
         }
     }
 
+    private boolean shouldApplyFreeSnapMode(int position) {
+        if (!mFreeSnapMode) {
+            return false;
+        }
+        if (!isFirstSplitTargetAvailable() || !isLastSplitTargetAvailable()) {
+            return false;
+        }
+        return mFirstSplitTarget.position < position && position < mLastSplitTarget.position;
+    }
+
     private SnapTarget snap(int position, boolean hardDismiss) {
+        if (shouldApplyFreeSnapMode(position)) {
+            return new SnapTarget(position, position, SnapTarget.FLAG_NONE);
+        }
         int minIndex = -1;
         float minDistance = Float.MAX_VALUE;
         int size = mTargets.size();
@@ -297,10 +314,10 @@ public class DividerSnapAlgorithm {
 
     private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,
             int bottomPosition, int dividerMax) {
-        maybeAddTarget(topPosition, topPosition - mInsets.top);
+        maybeAddTarget(topPosition, topPosition - getStartInset());
         addMiddleTarget(isHorizontalDivision);
-        maybeAddTarget(bottomPosition, dividerMax - mInsets.bottom
-                - (bottomPosition + mDividerSize));
+        maybeAddTarget(bottomPosition,
+                dividerMax - getEndInset() - (bottomPosition + mDividerSize));
     }
 
     private void addFixedDivisionTargets(boolean isHorizontalDivision, int dividerMax) {

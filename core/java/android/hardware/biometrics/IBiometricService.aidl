@@ -17,36 +17,40 @@
 package android.hardware.biometrics;
 
 import android.os.Bundle;
-import android.hardware.biometrics.IBiometricConfirmDeviceCredentialCallback;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricAuthenticator;
 
 /**
- * Communication channel from BiometricPrompt and BiometricManager to BiometricService. The
- * interface does not expose specific biometric modalities. The system will use the default
- * biometric for apps. On devices with more than one, the choice is dictated by user preference in
- * Settings.
+ * Communication channel from AuthService to BiometricService.
  * @hide
  */
 interface IBiometricService {
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
-    // TODO(b/123378871): Remove callback when moved.
     void authenticate(IBinder token, long sessionId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle,
-            IBiometricConfirmDeviceCredentialCallback callback);
+            int callingUid, int callingPid, int callingUserId);
 
-    // Cancel authentication for the given sessionId
-    void cancelAuthentication(IBinder token, String opPackageName);
+    // Cancel authentication for the given session.
+    void cancelAuthentication(IBinder token, String opPackageName, int callingUid, int callingPid,
+            int callingUserId);
 
     // Checks if biometrics can be used.
-    int canAuthenticate(String opPackageName, int userId);
+    int canAuthenticate(String opPackageName, int userId, int callingUserId, int authenticators);
 
     // Checks if any biometrics are enrolled.
-    boolean hasEnrolledBiometrics(int userId);
+    boolean hasEnrolledBiometrics(int userId, String opPackageName);
+
+    // Registers an authenticator (e.g. face, fingerprint, iris).
+    // Id must be unique, whereas strength and modality don't need to be.
+    // TODO(b/123321528): Turn strength and modality into enums.
+    void registerAuthenticator(int id, int modality, int strength,
+            IBiometricAuthenticator authenticator);
 
     // Register callback for when keyguard biometric eligibility changes.
-    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
+    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback,
+            int callingUserId);
 
     // Explicitly set the active user.
     void setActiveUser(int userId);
@@ -58,15 +62,8 @@ interface IBiometricService {
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(in byte [] token);
 
-    // TODO(b/123378871): Remove when moved.
-    // CDCA needs to send results to BiometricService if it was invoked using BiometricPrompt's
-    // setAllowDeviceCredential method, since there's no way for us to intercept onActivityResult.
-    // CDCA is launched from BiometricService (startActivityAsUser) instead of *ForResult.
-    void onConfirmDeviceCredentialSuccess();
-    // TODO(b/123378871): Remove when moved.
-    void onConfirmDeviceCredentialError(int error, String message);
-    // TODO(b/123378871): Remove when moved.
-    // When ConfirmLock* is invoked from BiometricPrompt, it needs to register a callback so that
-    // it can receive the cancellation signal.
-    void registerCancellationCallback(IBiometricConfirmDeviceCredentialCallback callback);
+    // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
+    // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
+    // land as SIDs, and are used during key generation.
+    long[] getAuthenticatorIds(int callingUserId);
 }

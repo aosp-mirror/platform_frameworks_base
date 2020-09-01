@@ -31,6 +31,7 @@ import android.util.MutableBoolean;
 import android.util.MutableInt;
 import android.util.Slog;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,6 +47,7 @@ class TunerSession extends ITuner.Stub {
     final android.hardware.radio.ITunerCallback mCallback;
     private boolean mIsClosed = false;
     private boolean mIsMuted = false;
+    private ProgramInfoCache mProgramInfoCache = null;
 
     // necessary only for older APIs compatibility
     private RadioManager.BandConfig mDummyConfig = null;
@@ -185,10 +187,59 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void startProgramListUpdates(ProgramList.Filter filter) throws RemoteException {
+        // If the AIDL client provides a null filter, it wants all updates, so use the most broad
+        // filter.
+        if (filter == null) {
+            filter = new ProgramList.Filter(new HashSet<Integer>(),
+                    new HashSet<android.hardware.radio.ProgramSelector.Identifier>(), true, false);
+        }
         synchronized (mLock) {
             checkNotClosedLocked();
-            int halResult = mHwSession.startProgramListUpdates(Convert.programFilterToHal(filter));
-            Convert.throwOnError("startProgramListUpdates", halResult);
+            mProgramInfoCache = new ProgramInfoCache(filter);
+        }
+        // Note: RadioModule.onTunerSessionProgramListFilterChanged() must be called without mLock
+        // held since it can call getProgramListFilter() and onHalProgramInfoUpdated().
+        mModule.onTunerSessionProgramListFilterChanged(this);
+    }
+
+    ProgramList.Filter getProgramListFilter() {
+        synchronized (mLock) {
+            return mProgramInfoCache == null ? null : mProgramInfoCache.getFilter();
+        }
+    }
+
+    void onMergedProgramListUpdateFromHal(ProgramList.Chunk mergedChunk) {
+        List<ProgramList.Chunk> clientUpdateChunks = null;
+        synchronized (mLock) {
+            if (mProgramInfoCache == null) {
+                return;
+            }
+            clientUpdateChunks = mProgramInfoCache.filterAndApplyChunk(mergedChunk);
+        }
+        dispatchClientUpdateChunks(clientUpdateChunks);
+    }
+
+    void updateProgramInfoFromHalCache(ProgramInfoCache halCache) {
+        List<ProgramList.Chunk> clientUpdateChunks = null;
+        synchronized (mLock) {
+            if (mProgramInfoCache == null) {
+                return;
+            }
+            clientUpdateChunks = mProgramInfoCache.filterAndUpdateFrom(halCache, true);
+        }
+        dispatchClientUpdateChunks(clientUpdateChunks);
+    }
+
+    private void dispatchClientUpdateChunks(@Nullable List<ProgramList.Chunk> chunks) {
+        if (chunks == null) {
+            return;
+        }
+        for (ProgramList.Chunk chunk : chunks) {
+            try {
+                mCallback.onProgramListUpdated(chunk);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "mCallback.onProgramListUpdated() failed: ", ex);
+            }
         }
     }
 
@@ -196,8 +247,11 @@ class TunerSession extends ITuner.Stub {
     public void stopProgramListUpdates() throws RemoteException {
         synchronized (mLock) {
             checkNotClosedLocked();
-            mHwSession.stopProgramListUpdates();
+            mProgramInfoCache = null;
         }
+        // Note: RadioModule.onTunerSessionProgramListFilterChanged() must be called without mLock
+        // held since it can call getProgramListFilter() and onHalProgramInfoUpdated().
+        mModule.onTunerSessionProgramListFilterChanged(this);
     }
 
     @Override

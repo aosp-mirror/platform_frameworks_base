@@ -137,7 +137,6 @@ static bool validateFile(const char* filename) {
     }
     }
 
-    log("No errors.\n\n");
     return true;
 }
 

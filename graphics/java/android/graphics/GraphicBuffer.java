@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -107,6 +108,14 @@ public class GraphicBuffer implements Parcelable {
             return new GraphicBuffer(width, height, format, usage, nativeObject);
         }
         return null;
+    }
+
+    /**
+     * For Bitmap until all usages are updated to AHB
+     * @hide
+     */
+    public static final GraphicBuffer createFromHardwareBuffer(HardwareBuffer buffer) {
+        return nCreateFromHardwareBuffer(buffer);
     }
 
     /**
@@ -305,4 +314,5 @@ public class GraphicBuffer implements Parcelable {
     private static native boolean nLockCanvas(long nativeObject, Canvas canvas, Rect dirty);
     private static native boolean nUnlockCanvasAndPost(long nativeObject, Canvas canvas);
     private static native long nWrapGraphicBuffer(long nativeObject);
+    private static native GraphicBuffer nCreateFromHardwareBuffer(HardwareBuffer buffer);
 }

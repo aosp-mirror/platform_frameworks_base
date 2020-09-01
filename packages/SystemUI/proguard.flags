@@ -16,6 +16,7 @@
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
+-keep class com.android.systemui.tv.TvSystemUIFactory
 -keep class * extends com.android.systemui.SystemUI
 -keep class * implements com.android.systemui.SystemUI$Injector
 
@@ -35,3 +36,7 @@
     *;
 }
 -keep class androidx.core.app.CoreComponentFactory
+
+-keep public class * extends com.android.systemui.SystemUI {
+    public <init>(android.content.Context);
+}

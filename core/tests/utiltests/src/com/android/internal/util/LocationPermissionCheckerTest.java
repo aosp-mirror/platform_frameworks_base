@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -98,13 +99,13 @@ public class LocationPermissionCheckerTest {
         when(mMockPkgMgr.getApplicationInfoAsUser(eq(TEST_PKG_NAME), eq(0), any()))
                 .thenReturn(mMockApplInfo);
         when(mMockContext.getPackageManager()).thenReturn(mMockPkgMgr);
-        when(mMockAppOps.noteOp(AppOpsManager.OPSTR_WIFI_SCAN, mUid, TEST_PKG_NAME))
-                .thenReturn(mWifiScanAllowApps);
+        when(mMockAppOps.noteOp(AppOpsManager.OPSTR_WIFI_SCAN, mUid, TEST_PKG_NAME,
+                TEST_FEATURE_ID, null)).thenReturn(mWifiScanAllowApps);
         when(mMockAppOps.noteOp(eq(AppOpsManager.OPSTR_COARSE_LOCATION), eq(mUid),
-                eq(TEST_PKG_NAME)))
+                eq(TEST_PKG_NAME), eq(TEST_FEATURE_ID), nullable(String.class)))
                 .thenReturn(mAllowCoarseLocationApps);
         when(mMockAppOps.noteOp(eq(AppOpsManager.OPSTR_FINE_LOCATION), eq(mUid),
-                eq(TEST_PKG_NAME)))
+                eq(TEST_PKG_NAME), eq(TEST_FEATURE_ID), nullable(String.class)))
                 .thenReturn(mAllowFineLocationApps);
         if (mThrowSecurityException) {
             doThrow(new SecurityException("Package " + TEST_PKG_NAME + " doesn't belong"
@@ -143,8 +144,8 @@ public class LocationPermissionCheckerTest {
         Binder.restoreCallingIdentity((((long) mUid) << 32) | Binder.getCallingPid());
         doAnswer(mReturnPermission).when(mMockContext).checkPermission(
                 anyString(), anyInt(), anyInt());
-        when(mMockUserManager.isSameProfileGroup(UserHandle.SYSTEM.getIdentifier(),
-                UserHandle.getUserHandleForUid(MANAGED_PROFILE_UID).getIdentifier()))
+        when(mMockUserManager.isSameProfileGroup(UserHandle.SYSTEM,
+                UserHandle.getUserHandleForUid(MANAGED_PROFILE_UID)))
                 .thenReturn(true);
         when(mMockContext.checkPermission(mManifestStringCoarse, -1, mUid))
                 .thenReturn(mCoarseLocationPermission);

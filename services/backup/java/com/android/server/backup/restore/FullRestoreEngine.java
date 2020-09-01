@@ -42,7 +42,6 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -62,6 +61,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Full restore engine, used by both adb restore and transport-based full restore.
@@ -88,7 +88,6 @@ public class FullRestoreEngine extends RestoreEngine {
     final PackageInfo mOnlyPackage;
 
     final boolean mAllowApks;
-    private final boolean mAllowObbs;
 
     // Which package are we currently handling data for?
     private String mAgentPackage;
@@ -113,9 +112,6 @@ public class FullRestoreEngine extends RestoreEngine {
     // Packages we've already wiped data on when restoring their first file
     private final HashSet<String> mClearedPackages = new HashSet<>();
 
-    // How much data have we moved?
-    private long mBytes;
-
     // Working buffer
     final byte[] mBuffer;
 
@@ -130,14 +126,14 @@ public class FullRestoreEngine extends RestoreEngine {
     final int mEphemeralOpToken;
 
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
-    final boolean mIsAdbRestore;
+    private final boolean mIsAdbRestore;
     @GuardedBy("mPipesLock")
     private boolean mPipesClosed;
 
     public FullRestoreEngine(UserBackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
-            boolean allowObbs, int ephemeralOpToken, boolean isAdbRestore) {
+            int ephemeralOpToken, boolean isAdbRestore) {
         mBackupManagerService = backupManagerService;
         mEphemeralOpToken = ephemeralOpToken;
         mMonitorTask = monitorTask;
@@ -145,10 +141,8 @@ public class FullRestoreEngine extends RestoreEngine {
         mMonitor = monitor;
         mOnlyPackage = onlyPackage;
         mAllowApks = allowApks;
-        mAllowObbs = allowObbs;
         mBuffer = new byte[32 * 1024];
-        mBytes = 0;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
+        mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
         mIsAdbRestore = isAdbRestore;
@@ -170,12 +164,7 @@ public class FullRestoreEngine extends RestoreEngine {
             return false;
         }
 
-        BytesReadListener bytesReadListener = new BytesReadListener() {
-            @Override
-            public void onBytesRead(long bytesRead) {
-                mBytes += bytesRead;
-            }
-        };
+        BytesReadListener bytesReadListener = bytesRead -> { };
 
         TarBackupReader tarBackupReader = new TarBackupReader(instream,
                 bytesReadListener, monitor);
@@ -378,9 +367,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                             ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
                                             : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                             mAgentPackage = pkg;
-                        } catch (IOException e) {
-                            // fall through to error handling
-                        } catch (NameNotFoundException e) {
+                        } catch (IOException | NameNotFoundException e) {
                             // fall through to error handling
                         }
 
@@ -485,9 +472,6 @@ public class FullRestoreEngine extends RestoreEngine {
                                 int toRead = (toCopy > buffer.length)
                                         ? buffer.length : (int) toCopy;
                                 int nRead = instream.read(buffer, 0, toRead);
-                                if (nRead >= 0) {
-                                    mBytes += nRead;
-                                }
                                 if (nRead <= 0) {
                                     break;
                                 }
@@ -548,9 +532,6 @@ public class FullRestoreEngine extends RestoreEngine {
                             int toRead = (bytesToConsume > buffer.length)
                                     ? buffer.length : (int) bytesToConsume;
                             long nRead = instream.read(buffer, 0, toRead);
-                            if (nRead >= 0) {
-                                mBytes += nRead;
-                            }
                             if (nRead <= 0) {
                                 break;
                             }

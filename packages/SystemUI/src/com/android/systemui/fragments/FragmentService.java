@@ -21,7 +21,7 @@ import android.util.ArrayMap;
 import android.view.View;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.SystemUIRootComponent;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;

@@ -216,6 +216,10 @@ public final class RollbackManager {
      * across device reboot, by simulating what happens on reboot without
      * actually rebooting the device.
      *
+     * Note rollbacks in the process of enabling will be lost after calling
+     * this method since they are not persisted yet. Don't call this method
+     * in the middle of the install process.
+     *
      * @throws SecurityException if the caller does not have appropriate permissions.
      *
      * @hide

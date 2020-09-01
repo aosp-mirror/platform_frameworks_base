@@ -35,7 +35,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     }
 
     @Override
-    public void onBatchedInputEventPending() {
+    public void onBatchedInputEventPending(int source) {
         scheduleBatchedInput();
     }
 

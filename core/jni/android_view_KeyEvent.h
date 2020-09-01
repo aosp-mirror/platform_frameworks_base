@@ -42,4 +42,4 @@ extern status_t android_view_KeyEvent_recycle(JNIEnv* env, jobject eventObj);
 
 } // namespace android
 
-#endif // _ANDROID_OS_KEYEVENT_H
+#endif // _ANDROID_VIEW_KEYEVENT_H

@@ -16,6 +16,7 @@
 
 package com.android.systemui.classifier;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -37,15 +38,16 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.util.AsyncSensorManager;
+import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * When the phone is locked, listens to touch, sensor and phone events and sends them to
@@ -77,7 +79,7 @@ public class FalsingManagerImpl implements FalsingManager {
     private final DataCollector mDataCollector;
     private final HumanInteractionClassifier mHumanInteractionClassifier;
     private final AccessibilityManager mAccessibilityManager;
-    private final UiOffloadThread mUiOffloadThread;
+    private final Executor mUiBgExecutor;
 
     private boolean mEnforceBouncer = false;
     private boolean mBouncerOn = false;
@@ -129,7 +131,8 @@ public class FalsingManagerImpl implements FalsingManager {
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType) {
+                        BiometricSourceType biometricSourceType,
+                        boolean isStrongBiometric) {
                     if (userId == KeyguardUpdateMonitor.getCurrentUser()
                             && biometricSourceType == BiometricSourceType.FACE) {
                         mJustUnlockedWithFace = true;
@@ -137,13 +140,13 @@ public class FalsingManagerImpl implements FalsingManager {
                 }
             };
 
-    FalsingManagerImpl(Context context) {
+    FalsingManagerImpl(Context context, @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mSensorManager = Dependency.get(AsyncSensorManager.class);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDataCollector = DataCollector.getInstance(mContext);
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
-        mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+        mUiBgExecutor = uiBgExecutor;
         mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
         mMetricsLogger = new MetricsLogger();
 
@@ -154,7 +157,7 @@ public class FalsingManagerImpl implements FalsingManager {
 
         updateConfiguration();
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(mKeyguardUpdateCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mKeyguardUpdateCallback);
     }
 
     private void updateConfiguration() {
@@ -196,7 +199,7 @@ public class FalsingManagerImpl implements FalsingManager {
             }
 
             // This can be expensive, and doesn't need to happen on the main thread.
-            mUiOffloadThread.submit(() -> {
+            mUiBgExecutor.execute(() -> {
                 mSensorManager.unregisterListener(mSensorEventListener);
             });
         }
@@ -212,7 +215,7 @@ public class FalsingManagerImpl implements FalsingManager {
 
     private void onSessionStart() {
         if (FalsingLog.ENABLED) {
-            FalsingLog.i("onSessionStart", "classifierEnabled=" + isClassiferEnabled());
+            FalsingLog.i("onSessionStart", "classifierEnabled=" + isClassifierEnabled());
             clearPendingWtf();
         }
         mBouncerOn = false;
@@ -237,7 +240,7 @@ public class FalsingManagerImpl implements FalsingManager {
             if (s != null) {
 
                 // This can be expensive, and doesn't need to happen on the main thread.
-                mUiOffloadThread.submit(() -> {
+                mUiBgExecutor.execute(() -> {
                     mSensorManager.registerListener(
                             mSensorEventListener, s, SensorManager.SENSOR_DELAY_GAME);
                 });
@@ -245,7 +248,7 @@ public class FalsingManagerImpl implements FalsingManager {
         }
     }
 
-    public boolean isClassiferEnabled() {
+    public boolean isClassifierEnabled() {
         return mHumanInteractionClassifier.isEnabled();
     }
 
@@ -293,6 +296,10 @@ public class FalsingManagerImpl implements FalsingManager {
                         .toString(), here);
                 mHandler.postDelayed(mPendingWtf, 1000);
             }
+        }
+        if (ActivityManager.isRunningInUserTestHarness()) {
+            // This is a test device running UiAutomator code.
+            return false;
         }
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
             // Touch exploration triggers false positives in the classifier and
@@ -374,7 +381,7 @@ public class FalsingManagerImpl implements FalsingManager {
         sessionExitpoint(false /* force */);
     }
 
-    public void onSucccessfulUnlock() {
+    public void onSuccessfulUnlock() {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("onSucccessfulUnlock", "");
         }
@@ -474,15 +481,15 @@ public class FalsingManagerImpl implements FalsingManager {
         mDataCollector.onNotificationDismissed();
     }
 
-    public void onNotificatonStartDismissing() {
+    public void onNotificationStartDismissing() {
         if (FalsingLog.ENABLED) {
-            FalsingLog.i("onNotificatonStartDismissing", "");
+            FalsingLog.i("onNotificationStartDismissing", "");
         }
         mHumanInteractionClassifier.setType(Classifier.NOTIFICATION_DISMISS);
         mDataCollector.onNotificatonStartDismissing();
     }
 
-    public void onNotificatonStopDismissing() {
+    public void onNotificationStopDismissing() {
         mDataCollector.onNotificatonStopDismissing();
     }
 
@@ -543,7 +550,7 @@ public class FalsingManagerImpl implements FalsingManager {
 
     public void dump(PrintWriter pw) {
         pw.println("FALSING MANAGER");
-        pw.print("classifierEnabled="); pw.println(isClassiferEnabled() ? 1 : 0);
+        pw.print("classifierEnabled="); pw.println(isClassifierEnabled() ? 1 : 0);
         pw.print("mSessionActive="); pw.println(mSessionActive ? 1 : 0);
         pw.print("mBouncerOn="); pw.println(mSessionActive ? 1 : 0);
         pw.print("mState="); pw.println(StatusBarState.toShortString(mState));
@@ -556,7 +563,7 @@ public class FalsingManagerImpl implements FalsingManager {
         mSensorManager.unregisterListener(mSensorEventListener);
         mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
         Dependency.get(StatusBarStateController.class).removeCallback(mStatusBarStateListener);
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mKeyguardUpdateCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mKeyguardUpdateCallback);
     }
 
     public Uri reportRejectedTouch() {

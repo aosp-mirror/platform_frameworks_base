@@ -71,6 +71,7 @@ import android.view.DisplayAdjustments;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
@@ -813,6 +814,26 @@ public abstract class Context {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
+    /**
+     * <p>Attribution can be used in complex apps to logically separate parts of the app. E.g. a
+     * blogging app might also have a instant messaging app built in. In this case two separate tags
+     * can for used each sub-feature.
+     *
+     * @return the attribution tag this context is for or {@code null} if this is the default.
+     */
+    public @Nullable String getAttributionTag() {
+        return null;
+    }
+
+    // TODO moltmann: Remove
+    /**
+     * @removed
+     */
+    @Deprecated
+    public @Nullable String getFeatureId() {
+        return getAttributionTag();
+    }
+
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
 
@@ -1048,6 +1069,31 @@ public abstract class Context {
      * @see #getDir
      */
     public abstract File getFilesDir();
+
+    /**
+     * Returns the absolute path to the directory that is related to the crate on the filesystem.
+     * <p>
+     *     The crateId require a validated file name. It can't contain any "..", ".",
+     *     {@link File#separatorChar} etc..
+     * </p>
+     * <p>
+     * The returned path may change over time if the calling app is moved to an
+     * adopted storage device, so only relative paths should be persisted.
+     * </p>
+     * <p>
+     * No additional permissions are required for the calling app to read or
+     * write files under the returned path.
+     *</p>
+     *
+     * @param crateId the relative validated file name under {@link Context#getDataDir()}/crates
+     * @return the crate directory file.
+     * @hide
+     */
+    @NonNull
+    @TestApi
+    public File getCrateDir(@NonNull String crateId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Returns the absolute path to the directory on the filesystem similar to
@@ -1562,7 +1608,14 @@ public abstract class Context {
      * @see Environment#getExternalStorageState(File)
      * @see Environment#isExternalStorageEmulated(File)
      * @see Environment#isExternalStorageRemovable(File)
+     * @deprecated These directories still exist and are scanned, but developers
+     *             are encouraged to migrate to inserting content into a
+     *             {@link MediaStore} collection directly, as any app can
+     *             contribute new media to {@link MediaStore} with no
+     *             permissions required, starting in
+     *             {@link android.os.Build.VERSION_CODES#Q}.
      */
+    @Deprecated
     public abstract File[] getExternalMediaDirs();
 
     /**
@@ -1783,8 +1836,9 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
+    @TestApi
     public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
             @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -1831,7 +1885,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @UnsupportedAppUsage
     public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
             UserHandle userId) {
@@ -1937,7 +1991,7 @@ public abstract class Context {
      * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public int startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -2055,7 +2109,7 @@ public abstract class Context {
      *               Intent will receive the broadcast.
      * @param receiverPermissions Array of names of permissions that a receiver must hold
      *                            in order to receive your broadcast.
-     *                            If null or empty, no permissions are required.
+     *                            If empty, no permissions are required.
      *
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
@@ -2064,8 +2118,37 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
-    public abstract void sendBroadcastMultiplePermissions(Intent intent,
-            String[] receiverPermissions);
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an array of required permissions to be enforced.  This call is asynchronous; it returns
+     * immediately, and you will continue executing while the receivers are run.  No results are
+     * propagated from receivers and receivers can not abort the broadcast. If you want to allow
+     * receivers to propagate results or abort the broadcast, you must send an ordered broadcast
+     * using {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If empty, no permissions are required.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public void sendBroadcastWithMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions);
+    }
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
@@ -3170,15 +3253,40 @@ public abstract class Context {
     }
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
-     * argument for use by system server and other multi-user aware code.
-     * @hide
+     * Binds to a service in the given {@code user} in the same manner as
+     * {@link #bindService(Intent, ServiceConnection, int)}.
+     *
+     * <p>If the given {@code user} is in the same profile group and the target package is the
+     * same as the caller, {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} is
+     * sufficient. Otherwise, requires {@code android.Manifest.permission.INTERACT_ACROSS_USERS}
+     * for interacting with other users.
+     *
+     * @param service Identifies the service to connect to.  The Intent must
+     *      specify an explicit component name.
+     * @param conn Receives information as the service is started and stopped.
+     *      This must be a valid ServiceConnection object; it must not be null.
+     * @param flags Operation options for the binding.  May be 0,
+     *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
+     *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
+     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
+     *          {@link #BIND_IMPORTANT}, or
+     *          {@link #BIND_ADJUST_WITH_ACTIVITY}.
+     * @return {@code true} if the system is in the process of bringing up a
+     *         service that your client has permission to bind to; {@code false}
+     *         if the system couldn't find the service. If this value is {@code true}, you
+     *         should later call {@link #unbindService} to release the
+     *         connection.
+     *
+     * @throws SecurityException if the client does not have the required permission to bind.
      */
-    @SystemApi
     @SuppressWarnings("unused")
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
-            int flags, UserHandle user) {
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+    })
+    public boolean bindServiceAsUser(
+            @NonNull @RequiresPermission Intent service, @NonNull ServiceConnection conn, int flags,
+            @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3313,6 +3421,7 @@ public abstract class Context {
             WIFI_RTT_RANGING_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
+            AUTH_SERVICE,
             FINGERPRINT_SERVICE,
             //@hide: FACE_SERVICE,
             BIOMETRIC_SERVICE,
@@ -3333,6 +3442,7 @@ public abstract class Context {
             ROLLBACK_SERVICE,
             DROPBOX_SERVICE,
             //@hide: DEVICE_IDLE_CONTROLLER,
+            //@hide: POWER_WHITELIST_MANAGER,
             DEVICE_POLICY_SERVICE,
             UI_MODE_SERVICE,
             DOWNLOAD_SERVICE,
@@ -3396,13 +3506,23 @@ public abstract class Context {
      * <dl>
      *  <dt> {@link #WINDOW_SERVICE} ("window")
      *  <dd> The top-level window manager in which you can place custom
-     *  windows.  The returned object is a {@link android.view.WindowManager}.
+     *  windows.  The returned object is a {@link android.view.WindowManager}. Must only be obtained
+     *  from a visual context such as Activity or a Context created with
+     *  {@link #createWindowContext(int, Bundle)}, which are adjusted to the configuration and
+     *  visual bounds of an area on screen.
      *  <dt> {@link #LAYOUT_INFLATER_SERVICE} ("layout_inflater")
      *  <dd> A {@link android.view.LayoutInflater} for inflating layout resources
-     *  in this context.
+     *  in this context. Must only be obtained from a visual context such as Activity or a Context
+     *  created with {@link #createWindowContext(int, Bundle)}, which are adjusted to the
+     *  configuration and visual bounds of an area on screen.
      *  <dt> {@link #ACTIVITY_SERVICE} ("activity")
      *  <dd> A {@link android.app.ActivityManager} for interacting with the
      *  global activity state of the system.
+     *  <dt> {@link #WALLPAPER_SERVICE} ("wallpaper")
+     *  <dd> A {@link android.service.wallpaper.WallpaperService} for accessing wallpapers in this
+     *  context. Must only be obtained from a visual context such as Activity or a Context created
+     *  with {@link #createWindowContext(int, Bundle)}, which are adjusted to the configuration and
+     *  visual bounds of an area on screen.
      *  <dt> {@link #POWER_SERVICE} ("power")
      *  <dd> A {@link android.os.PowerManager} for controlling power
      *  management.
@@ -3422,7 +3542,7 @@ public abstract class Context {
      *  <dt> {@link #VIBRATOR_SERVICE} ("vibrator")
      *  <dd> A {@link android.os.Vibrator} for interacting with the vibrator
      *  hardware.
-     *  <dt> {@link #CONNECTIVITY_SERVICE} ("connection")
+     *  <dt> {@link #CONNECTIVITY_SERVICE} ("connectivity")
      *  <dd> A {@link android.net.ConnectivityManager ConnectivityManager} for
      *  handling management of network connections.
      *  <dt> {@link #IPSEC_SERVICE} ("ipsec")
@@ -3959,6 +4079,19 @@ public abstract class Context {
     public static final String WIFI_SERVICE = "wifi";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.wifi.wificond.WifiNl80211Manager} for handling management of the
+     * Wi-Fi nl802.11 daemon (wificond).
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.wificond.WifiNl80211Manager
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ServiceName")
+    public static final String WIFI_NL80211_SERVICE = "wifinl80211";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.p2p.WifiP2pManager} for handling management of
      * Wi-Fi peer-to-peer connections.
@@ -4056,6 +4189,31 @@ public abstract class Context {
     public static final String AUDIO_SERVICE = "audio";
 
     /**
+     * AuthService orchestrates biometric and PIN/pattern/password authentication.
+     *
+     * BiometricService was split into two services, AuthService and BiometricService, where
+     * AuthService is the high level service that orchestrates all types of authentication, and
+     * BiometricService is a lower layer responsible only for biometric authentication.
+     *
+     * Ideally we should have renamed BiometricManager to AuthManager, because it logically
+     * corresponds to AuthService. However, because BiometricManager is a public API, we kept
+     * the old name but changed the internal implementation to use AuthService.
+     *
+     * As of now, the AUTH_SERVICE constant is only used to identify the service in
+     * SystemServiceRegistry and SELinux. To obtain the manager for AUTH_SERVICE, one should use
+     * BIOMETRIC_SERVICE with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.biometrics.BiometricManager}
+     *
+     * Map of the two services and their managers:
+     * [Service]            [Manager]
+     * AuthService          BiometricManager
+     * BiometricService     N/A
+     *
+     * @hide
+     */
+    public static final String AUTH_SERVICE = "auth";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
@@ -4089,8 +4247,8 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.hardware.biometrics.BiometricManager} for handling management
-     * of face authentication.
+     * {@link android.hardware.biometrics.BiometricManager} for handling
+     * biometric and PIN/pattern/password authentication.
      *
      * @see #getSystemService
      * @see android.hardware.biometrics.BiometricManager
@@ -4297,6 +4455,15 @@ public abstract class Context {
     public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
 
     /**
+     * Use with {@link #getSystemService(String)} to access the
+     * {@link com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService}.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    public static final String SOUND_TRIGGER_MIDDLEWARE_SERVICE = "soundtrigger_middleware";
+
+    /**
      * Official published name of the (internal) permission service.
      *
      * @see #getSystemService(String)
@@ -4349,7 +4516,19 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
+    @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to DEVICE_IDLE_SERVICE
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
+
+    /**
+     * System service name for the PowerWhitelistManager.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to POWER_WHITELIST_SERVICE
+    public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -4597,7 +4776,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.media.tv.tunerresourcemanager.TunerResourceManager} for interacting with TV
+     * {@link android.media.tv.TunerResourceManager} for interacting with TV
      * tuner resources on the device.
      *
      * @see #getSystemService(String)
@@ -4756,6 +4935,12 @@ public abstract class Context {
     public static final String INCIDENT_COMPANION_SERVICE = "incidentcompanion";
 
     /**
+     * Service to assist {@link android.app.StatsManager} that lives in system server.
+     * @hide
+     */
+    public static final String STATS_MANAGER_SERVICE = "statsmanager";
+
+    /**
      * Service to assist statsd in obtaining general stats.
      * @hide
      */
@@ -4881,6 +5066,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.SystemConfigManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String SYSTEM_CONFIG_SERVICE = "system_config";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.RcsMessageManager}.
      * @hide
      */
@@ -4894,12 +5087,61 @@ public abstract class Context {
     public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.app.blob.BlobStoreManager} for contributing and accessing data blobs
+     * from the blob store maintained by the system.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.blob.BlobStoreManager
+     */
+    public static final String BLOB_STORE_SERVICE = "blob_store";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link TelephonyRegistryManager}.
      * @hide
      */
-    @SystemApi
     public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.BatteryStatsManager}.
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ServiceName")
+    public static final String BATTERY_STATS_SERVICE = "batterystats";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.integrity.AppIntegrityManager}.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String APP_INTEGRITY_SERVICE = "app_integrity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.pm.DataLoaderManager}.
+     * @hide
+     */
+    public static final String DATA_LOADER_MANAGER_SERVICE = "dataloader_manager";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.incremental.IncrementalManager}.
+     * @hide
+     */
+    public static final String INCREMENTAL_SERVICE = "incremental";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.security.FileIntegrityManager}.
+     * @see #getSystemService(String)
+     * @see android.security.FileIntegrityManager
+     */
+    public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -4909,6 +5151,17 @@ public abstract class Context {
      * @hide
      */
     public static final String LIGHTS_SERVICE = "lights";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.DreamManager} for controlling Dream states.
+     *
+     * @see #getSystemService(String)
+
+     * @hide
+     */
+    @TestApi
+    public static final String DREAM_SERVICE = "dream";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -5506,18 +5759,107 @@ public abstract class Context {
      * shared, however common state (ClassLoader, other Resources for the
      * same configuration) may be so the Context itself can be fairly lightweight.
      *
-     * The returned display Context provides a {@link WindowManager}
-     * (see {@link #getSystemService(String)}) that is configured to show windows
-     * on the given display.  The WindowManager's {@link WindowManager#getDefaultDisplay}
-     * method can be used to retrieve the Display from the returned Context.
+     * To obtain an instance of a {@link WindowManager} (see {@link #getSystemService(String)}) that
+     * is configured to show windows on the given display call
+     * {@link #createWindowContext(int, Bundle)} on the returned display Context or use an
+     * {@link android.app.Activity}.
      *
-     * @param display A {@link Display} object specifying the display
-     * for whose metrics the Context's resources should be tailored and upon which
-     * new windows should be shown.
+     * @param display A {@link Display} object specifying the display for whose metrics the
+     * Context's resources should be tailored.
      *
      * @return A {@link Context} for the display.
      */
     public abstract Context createDisplayContext(@NonNull Display display);
+
+    /**
+     * Creates a Context for a non-activity window.
+     *
+     * <p>
+     * A window context is a context that can be used to add non-activity windows, such as
+     * {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY}. A window context
+     * must be created from a context that has an associated {@link Display}, such as
+     * {@link android.app.Activity Activity} or a context created with
+     * {@link #createDisplayContext(Display)}.
+     *
+     * <p>
+     * The window context is created with the appropriate {@link Configuration} for the area of the
+     * display that the windows created with it can occupy; it must be used when
+     * {@link android.view.LayoutInflater inflating} views, such that they can be inflated with
+     * proper {@link Resources}.
+     *
+     * Below is a sample code to <b>add an application overlay window on the primary display:</b>
+     * <pre class="prettyprint">
+     * ...
+     * final DisplayManager dm = anyContext.getSystemService(DisplayManager.class);
+     * final Display primaryDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+     * final Context windowContext = anyContext.createDisplayContext(primaryDisplay)
+     *         .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
+     * final View overlayView = Inflater.from(windowContext).inflate(someLayoutXml, null);
+     *
+     * // WindowManager.LayoutParams initialization
+     * ...
+     * mParams.type = TYPE_APPLICATION_OVERLAY;
+     * ...
+     *
+     * mWindowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
+     * </pre>
+     *
+     * <p>
+     * This context's configuration and resources are adjusted to a display area where the windows
+     * with provided type will be added. <b>Note that all windows associated with the same context
+     * will have an affinity and can only be moved together between different displays or areas on a
+     * display.</b> If there is a need to add different window types, or non-associated windows,
+     * separate Contexts should be used.
+     * </p>
+     * <p>
+     * Creating a window context is an expensive operation. Misuse of this API may lead to a huge
+     * performance drop. The best practice is to use the same window context when possible.
+     * An approach is to create one window context with specific window type and display and
+     * use it everywhere it's needed..
+     * </p>
+     *
+     * @param type Window type in {@link WindowManager.LayoutParams}
+     * @param options Bundle used to pass window-related options.
+     * @return A {@link Context} that can be used to create windows.
+     * @throws UnsupportedOperationException if this is called on a non-UI context, such as
+     *         {@link android.app.Application Application} or {@link android.app.Service Service}.
+     *
+     * @see #getSystemService(String)
+     * @see #getSystemService(Class)
+     * @see #WINDOW_SERVICE
+     * @see #LAYOUT_INFLATER_SERVICE
+     * @see #WALLPAPER_SERVICE
+     * @throws UnsupportedOperationException if this {@link Context} does not attach to a display or
+     * the current number of window contexts without adding any view by
+     * {@link WindowManager#addView} <b>exceeds five</b>.
+     */
+    public @NonNull Context createWindowContext(@WindowType int type, @Nullable Bundle options)  {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Return a new Context object for the current Context but attribute to a different tag.
+     * In complex apps attribution tagging can be used to distinguish between separate logical
+     * parts.
+     *
+     * @param attributionTag The tag or {@code null} to create a context for the default.
+     *
+     * @return A {@link Context} that is tagged for the new attribution
+     *
+     * @see #getAttributionTag()
+     */
+    public @NonNull Context createAttributionContext(@Nullable String attributionTag) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    // TODO moltmann: remove
+    /**
+     * @removed
+     */
+    @Deprecated
+    public @NonNull Context createFeatureContext(@Nullable String featureId) {
+        return createAttributionContext(featureId);
+    }
 
     /**
      * Return a new Context object for the current Context but whose storage
@@ -5589,17 +5931,35 @@ public abstract class Context {
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
+     * Get the display this context is associated with. Applications should use this method with
+     * {@link android.app.Activity} or a context associated with a {@link Display} via
+     * {@link #createDisplayContext(Display)} to get a display object associated with a Context, or
+     * {@link android.hardware.display.DisplayManager#getDisplay} to get a display object by id.
      * @return Returns the {@link Display} object this context is associated with.
-     * @hide
+     * @throws UnsupportedOperationException if the method is called on an instance that is not
+     *         associated with any display.
      */
-    @UnsupportedAppUsage
-    @TestApi
-    public abstract Display getDisplay();
+    @Nullable
+    public Display getDisplay() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
-     * Gets the display ID.
+     * A version of {@link #getDisplay()} that does not perform a Context misuse check to be used by
+     * legacy APIs.
+     * TODO(b/149790106): Fix usages and remove.
+     * @hide
+     */
+    @Nullable
+    public Display getDisplayNoVerify() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Gets the ID of the display this context is associated with.
      *
      * @return display ID associated with this {@link Context}.
+     * @see #getDisplay()
      * @hide
      */
     @TestApi
@@ -5749,5 +6109,14 @@ public abstract class Context {
             throw new IllegalArgumentException("Non-UI context used to display UI; "
                     + "get a UI context from ActivityThread#getSystemUiContext()");
         }
+    }
+
+    /**
+     * Indicates if this context is a visual context such as {@link android.app.Activity} or
+     * a context created from {@link #createWindowContext(int, Bundle)}.
+     * @hide
+     */
+    public boolean isUiContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 }

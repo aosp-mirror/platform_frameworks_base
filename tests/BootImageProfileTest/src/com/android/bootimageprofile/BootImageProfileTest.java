@@ -155,6 +155,8 @@ public class BootImageProfileTest implements IDeviceTest {
             for (String line : res.split("\n")) {
                 if (line.contains("framework.jar")) {
                     sawFramework = true;
+                } else if (line.contains("framework-minus-apex.jar")) {
+                    sawFramework = true;
                 } else if (line.contains("services.jar")) {
                     sawServices = true;
                 }

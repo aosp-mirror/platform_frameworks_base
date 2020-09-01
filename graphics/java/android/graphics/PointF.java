@@ -38,6 +38,18 @@ public class PointF implements Parcelable {
         this.x = p.x;
         this.y = p.y;
     }
+
+    /**
+     * Create a new PointF initialized with the values in the specified
+     * PointF (which is left unmodified).
+     *
+     * @param p The point whose values are copied into the new
+     *          point.
+     */
+    public PointF(@NonNull PointF p) {
+        this.x = p.x;
+        this.y = p.y;
+    }
     
     /**
      * Set the point's x and y coordinates

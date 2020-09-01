@@ -17,6 +17,7 @@
 
 <com.android.systemui.qs.PagedTileLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qs_pager"
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:layout_weight="1"

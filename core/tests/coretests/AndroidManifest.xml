@@ -56,6 +56,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.MANAGE_APP_PREDICTIONS"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
@@ -95,6 +96,7 @@
 
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.KILL_UID" />
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
 
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
 
@@ -136,6 +138,12 @@
 
     <!-- vr test permissions -->
     <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
+
+    <!-- WindowMetricsTest permissions -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Allow use of PendingIntent.getIntent() -->
+    <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
 
     <application android:theme="@style/Theme" android:supportsRtl="true">
         <uses-library android:name="android.test.runner" />
@@ -1159,7 +1167,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+                <category android:name="android.intent.category.ACCESSIBILITY_SHORTCUT_TARGET" />
             </intent-filter>
+            <meta-data android:name="android.accessibilityshortcut.target"
+                       android:resource="@xml/accessibility_shortcut_test_activity"/>
         </activity>
 
         <!-- Activity-level metadata -->
@@ -1274,28 +1285,14 @@
                 <action android:name="com.android.frameworks.coretests.activity.BROADCAST_REMOTE_DENIED" />
             </intent-filter>
         </receiver>
-        <service android:name="android.app.activity.LocalService">
-            <intent-filter>
-                <action android:name="com.android.frameworks.coretests.activity.SERVICE_LOCAL" />
-            </intent-filter>
+        <service android:name="android.app.activity.ServiceTest$RemoteService"
+                android:process=":RemoteService">
             <meta-data android:name="com.android.frameworks.coretests.string" android:value="foo" />
             <meta-data android:name="com.android.frameworks.coretests.boolean" android:value="true" />
             <meta-data android:name="com.android.frameworks.coretests.integer" android:value="100" />
             <meta-data android:name="com.android.frameworks.coretests.color" android:value="#ff000000" />
             <meta-data android:name="com.android.frameworks.coretests.float" android:value="100.1" />
             <meta-data android:name="com.android.frameworks.coretests.reference" android:resource="@xml/metadata" />
-        </service>
-        <service android:name="android.app.activity.LocalDeniedService"
-                android:permission="com.android.frameworks.coretests.permission.TEST_DENIED">
-            <intent-filter>
-                <action android:name="com.android.frameworks.coretests.activity.SERVICE_LOCAL_DENIED" />
-            </intent-filter>
-        </service>
-        <service android:name="android.app.activity.LocalGrantedService"
-                android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED">
-            <intent-filter>
-                <action android:name="com.android.frameworks.coretests.activity.SERVICE_LOCAL_GRANTED" />
-            </intent-filter>
         </service>
 
         <service
@@ -1327,6 +1324,23 @@
         <provider android:name="android.content.RedactingProvider"
                 android:authorities="android.content.RedactingProvider"
                 android:process=":RedactingProvider">
+        </provider>
+
+        <provider
+            android:name="android.content.FakeProviderLocal"
+            android:authorities="android.content.FakeProviderLocal">
+        </provider>
+
+        <provider
+            android:name="android.content.FakeProviderRemote"
+            android:authorities="android.content.FakeProviderRemote"
+            android:process=":FakeProvider">
+        </provider>
+
+        <provider
+            android:name="android.content.SlowProvider"
+            android:authorities="android.content.SlowProvider"
+            android:process=":SlowProvider">
         </provider>
 
         <!-- Application components used for os tests -->
@@ -1418,6 +1432,7 @@
         </activity>
 
         <activity android:name="android.app.activity.ActivityThreadTest$TestActivity"
+            android:supportsPictureInPicture="true"
             android:exported="true">
         </activity>
 
@@ -1446,7 +1461,10 @@
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
            </intent-filter>
        </activity>
-
+        <activity android:name="android.window.WindowMetricsHelperTest$TestActivity"
+                  android:resizeableActivity="true"
+                  android:exported="true">
+        </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
@@ -1455,7 +1473,7 @@
     <key-sets>
         <key-set android:name="A" >
           <public-key android:name="keyA"
-                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJoN1Nsgqf0V4C/bbN8wo8O2X/S5D76+5Mb9mlIsHkUTUTbHCNk+LxHIUYLm89YbP9zImrV0bUHLUAZUyoMUCiMCAwEAAQ=="/>
+                      android:value="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsMpNthdOxud7roPDZMMomOqXgJJdRfIWpkKEqmC61Mv+Nf6QY3TorEwJeghjSmqj7IbBKrtvfQq4E2XJO1HuspmQO4Ng2gvn+r+6EwNfKc9k55d6s+27SR867jKurBbHNtZMG+tjL1yH4r+tNzcuJCsgyAFqLmxFdcxEwzNvREyRpoYc5RDR0mmTwkMCUhJ6CId1EYEKiCEdNzxv+fWPEb21u+/MWpleGCILs8kglRVb2q/WOzAAvGr4FY5plfaE6N+lr7+UschQ+aMi1+uqewo2o0qPFVmZP5hnwj55K4UMzu/NhhDqQQsX4cSGES1KgHo5MTqRqZjN/I7emw5pFQIDAQAB"/>
         </key-set>
         <upgrade-key-set android:name="A"/>
     </key-sets>

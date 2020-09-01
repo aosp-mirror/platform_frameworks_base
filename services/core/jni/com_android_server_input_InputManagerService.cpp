@@ -27,8 +27,6 @@
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
 
-#include <nativehelper/JNIHelp.h>
-#include "jni.h"
 #include <atomic>
 #include <cinttypes>
 #include <limits.h>
@@ -41,7 +39,6 @@
 #include <utils/Looper.h>
 #include <utils/threads.h>
 #include <utils/Trace.h>
-#include <utils/SortedVector.h>
 
 #include <binder/IServiceManager.h>
 
@@ -52,12 +49,13 @@
 #include <inputflinger/InputManager.h>
 
 #include <android_os_MessageQueue.h>
+#include <android_view_InputChannel.h>
 #include <android_view_InputDevice.h>
 #include <android_view_KeyEvent.h>
 #include <android_view_MotionEvent.h>
-#include <android_view_InputChannel.h>
 #include <android_view_PointerIcon.h>
-#include <android/graphics/GraphicsJNI.h>
+#include <android_view_VerifiedKeyEvent.h>
+#include <android_view_VerifiedMotionEvent.h>
 
 #include <nativehelper/ScopedLocalFrame.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -160,12 +158,7 @@ static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextOb
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
             contextObj, style, outPointerIcon);
     if (!status) {
-        SkBitmap* bitmapCopy = &outSpriteIcon->bitmap;
-        SkImageInfo bitmapCopyInfo = outPointerIcon->bitmap.info().makeColorType(kN32_SkColorType);
-        if (bitmapCopy->tryAllocPixels(bitmapCopyInfo)) {
-            outPointerIcon->bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
-                    bitmapCopy->rowBytes(), 0, 0);
-        }
+        outSpriteIcon->bitmap = outPointerIcon->bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
         outSpriteIcon->style = outPointerIcon->style;
         outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
         outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
@@ -207,14 +200,13 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
-    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
-            int32_t displayId);
+    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
     status_t registerInputMonitor(JNIEnv* env, const sp<InputChannel>& inputChannel,
             int32_t displayId, bool isGestureMonitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
     status_t pilferPointers(const sp<IBinder>& token);
 
-    void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
+    void displayRemoved(JNIEnv* env, int32_t displayId);
     void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
     void setFocusedDisplay(JNIEnv* env, int32_t displayId);
     void setInputDispatchMode(bool enabled, bool frozen);
@@ -245,27 +237,28 @@ public:
     /* --- InputDispatcherPolicyInterface implementation --- */
 
     virtual void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
-            uint32_t policyFlags);
+                              uint32_t policyFlags) override;
     virtual void notifyConfigurationChanged(nsecs_t when);
-    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<IBinder>& token,
-            const std::string& reason);
+    virtual nsecs_t notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
+                              const sp<IBinder>& token, const std::string& reason) override;
     virtual void notifyInputChannelBroken(const sp<IBinder>& token);
-    virtual void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken);
-    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
-    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
-    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
+    virtual void notifyFocusChanged(const sp<IBinder>& oldToken,
+                                    const sp<IBinder>& newToken) override;
+    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
+    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
+    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
+                                            uint32_t& policyFlags) override;
     virtual void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
-            uint32_t& policyFlags);
-    virtual nsecs_t interceptKeyBeforeDispatching(
-            const sp<IBinder>& token,
-            const KeyEvent* keyEvent, uint32_t policyFlags);
-    virtual bool dispatchUnhandledKey(const sp<IBinder>& token,
-            const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent);
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
-    virtual bool checkInjectEventsPermissionNonReentrant(
-            int32_t injectorPid, int32_t injectorUid);
-    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken);
+                                               uint32_t& policyFlags) override;
+    virtual nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token,
+                                                  const KeyEvent* keyEvent,
+                                                  uint32_t policyFlags) override;
+    virtual bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
+                                      uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
+    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) override;
+    virtual bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid,
+                                                         int32_t injectorUid) override;
+    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -309,7 +302,7 @@ private:
         std::weak_ptr<PointerController> pointerController;
 
         // Input devices to be disabled
-        SortedVector<int32_t> disabledInputDevices;
+        std::set<int32_t> disabledInputDevices;
 
         // Associated Pointer controller display.
         int32_t pointerDisplayId;
@@ -410,7 +403,8 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
 
             DisplayViewport viewport;
             android_hardware_display_DisplayViewport_toNative(env, viewportObj, &viewport);
-            ALOGI("Viewport [%d] to add: %s", (int) i, viewport.uniqueId.c_str());
+            ALOGI("Viewport [%d] to add: %s, isActive: %s", (int)i, viewport.uniqueId.c_str(),
+                  toString(viewport.isActive));
             viewports.push_back(viewport);
 
             env->DeleteLocalRef(viewportObj);
@@ -435,10 +429,9 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
 }
 
 status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
-        const sp<InputChannel>& inputChannel, int32_t displayId) {
+        const sp<InputChannel>& inputChannel) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->registerInputChannel(
-            inputChannel, displayId);
+    return mInputManager->getDispatcher()->registerInputChannel(inputChannel);
 }
 
 status_t NativeInputManager::registerInputMonitor(JNIEnv* /* env */,
@@ -487,8 +480,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     // Received data: ['inputPort1', '1', 'inputPort2', '2']
     // So we unpack accordingly here.
     outConfig->portAssociations.clear();
-    jobjectArray portAssociations = jobjectArray(env->CallStaticObjectMethod(
-            gServiceClassInfo.clazz, gServiceClassInfo.getInputPortAssociations));
+    jobjectArray portAssociations = jobjectArray(env->CallObjectMethod(mServiceObj,
+            gServiceClassInfo.getInputPortAssociations));
     if (!checkAndClearExceptionFromCallback(env, "getInputPortAssociations") && portAssociations) {
         jsize length = env->GetArrayLength(portAssociations);
         for (jsize i = 0; i < length / 2; i++) {
@@ -695,8 +688,19 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
     checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
-nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-        const sp<IBinder>& token, const std::string& reason) {
+static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
+        const sp<InputApplicationHandle>& inputApplicationHandle) {
+    if (inputApplicationHandle == nullptr) {
+        return nullptr;
+    }
+    NativeInputApplicationHandle* handle =
+            static_cast<NativeInputApplicationHandle*>(inputApplicationHandle.get());
+
+    return handle->getInputApplicationHandleObjLocalRef(env);
+}
+
+nsecs_t NativeInputManager::notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
+                                      const sp<IBinder>& token, const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyANR");
 #endif
@@ -705,12 +709,15 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     JNIEnv* env = jniEnv();
     ScopedLocalFrame localFrame(env);
 
+    jobject inputApplicationHandleObj =
+            getInputApplicationHandleObjLocalRef(env, inputApplicationHandle);
+
     jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, tokenObj,
-                reasonObj);
+            gServiceClassInfo.notifyANR, inputApplicationHandleObj, tokenObj,
+                 reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
     } else {
@@ -770,54 +777,10 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
     }
 }
 
-void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray,
-         int32_t displayId) {
-    std::vector<sp<InputWindowHandle> > windowHandles;
-
-    if (windowHandleObjArray) {
-        jsize length = env->GetArrayLength(windowHandleObjArray);
-        for (jsize i = 0; i < length; i++) {
-            jobject windowHandleObj = env->GetObjectArrayElement(windowHandleObjArray, i);
-            if (! windowHandleObj) {
-                break; // found null element indicating end of used portion of the array
-            }
-
-            sp<InputWindowHandle> windowHandle =
-                    android_view_InputWindowHandle_getHandle(env, windowHandleObj);
-            if (windowHandle != nullptr) {
-                windowHandles.push_back(windowHandle);
-            }
-            env->DeleteLocalRef(windowHandleObj);
-        }
-    }
-
-    mInputManager->getDispatcher()->setInputWindows(windowHandles, displayId);
-
-    // Do this after the dispatcher has updated the window handle state.
-    bool newPointerGesturesEnabled = true;
-    size_t numWindows = windowHandles.size();
-    for (size_t i = 0; i < numWindows; i++) {
-        const sp<InputWindowHandle>& windowHandle = windowHandles[i];
-        const InputWindowInfo* windowInfo = windowHandle->getInfo();
-        if (windowInfo && windowInfo->hasFocus && (windowInfo->inputFeatures
-                & InputWindowInfo::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
-            newPointerGesturesEnabled = false;
-        }
-    }
-
-    uint32_t changes = 0;
-    { // acquire lock
-        AutoMutex _l(mLock);
-
-        if (mLocked.pointerGesturesEnabled != newPointerGesturesEnabled) {
-            mLocked.pointerGesturesEnabled = newPointerGesturesEnabled;
-            changes |= InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT;
-        }
-    } // release lock
-
-    if (changes) {
-        mInputManager->getReader()->requestRefreshConfiguration(changes);
-    }
+void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
+    // Set an empty list to remove all handles from the specific display.
+    std::vector<sp<InputWindowHandle>> windowHandles;
+    mInputManager->getDispatcher()->setInputWindows({{displayId, windowHandles}});
 }
 
 void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
@@ -875,13 +838,13 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
     { // acquire lock
         AutoMutex _l(mLock);
 
-        ssize_t index = mLocked.disabledInputDevices.indexOf(deviceId);
-        bool currentlyEnabled = index < 0;
+        auto it = mLocked.disabledInputDevices.find(deviceId);
+        bool currentlyEnabled = it == mLocked.disabledInputDevices.end();
         if (!enabled && currentlyEnabled) {
-            mLocked.disabledInputDevices.add(deviceId);
+            mLocked.disabledInputDevices.insert(deviceId);
         }
         if (enabled && !currentlyEnabled) {
-            mLocked.disabledInputDevices.remove(deviceId);
+            mLocked.disabledInputDevices.erase(deviceId);
         }
     } // release lock
 
@@ -1391,7 +1354,7 @@ static void handleInputChannelDisposed(JNIEnv* env,
 }
 
 static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobject inputChannelObj, jint displayId) {
+        jlong ptr, jobject inputChannelObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
@@ -1401,7 +1364,7 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    status_t status = im->registerInputChannel(env, inputChannel, displayId);
+    status_t status = im->registerInputChannel(env, inputChannel);
 
     if (status) {
         std::string message;
@@ -1475,6 +1438,13 @@ static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
     im->getInputManager()->getDispatcher()->setInputFilterEnabled(enabled);
 }
 
+static void nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */,
+        jlong ptr, jboolean inTouchMode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getDispatcher()->setInTouchMode(inTouchMode);
+}
+
 static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         jlong ptr, jobject inputEventObj, jint injectorPid, jint injectorUid,
         jint syncMode, jint timeoutMillis, jint policyFlags) {
@@ -1488,9 +1458,13 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
-                uint32_t(policyFlags));
+        const int32_t result =
+                im->getInputManager()->getDispatcher()->injectInputEvent(&keyEvent, injectorPid,
+                                                                         injectorUid, syncMode,
+                                                                         std::chrono::milliseconds(
+                                                                                 timeoutMillis),
+                                                                         uint32_t(policyFlags));
+        return static_cast<jint>(result);
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
         if (!motionEvent) {
@@ -1498,12 +1472,59 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
-                uint32_t(policyFlags));
+        const int32_t result =
+                (jint)im->getInputManager()
+                        ->getDispatcher()
+                        ->injectInputEvent(motionEvent, injectorPid, injectorUid, syncMode,
+                                           std::chrono::milliseconds(timeoutMillis),
+                                           uint32_t(policyFlags));
+        return static_cast<jint>(result);
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
         return INPUT_EVENT_INJECTION_FAILED;
+    }
+}
+
+static jobject nativeVerifyInputEvent(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                      jobject inputEventObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
+        KeyEvent keyEvent;
+        status_t status = android_view_KeyEvent_toNative(env, inputEventObj, &keyEvent);
+        if (status) {
+            jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
+            return nullptr;
+        }
+
+        std::unique_ptr<VerifiedInputEvent> verifiedEvent =
+                im->getInputManager()->getDispatcher()->verifyInputEvent(keyEvent);
+        if (verifiedEvent == nullptr) {
+            return nullptr;
+        }
+
+        return android_view_VerifiedKeyEvent(env,
+                                             static_cast<const VerifiedKeyEvent&>(*verifiedEvent));
+    } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
+        const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
+        if (!motionEvent) {
+            jniThrowRuntimeException(env, "Could not read contents of MotionEvent object.");
+            return nullptr;
+        }
+
+        std::unique_ptr<VerifiedInputEvent> verifiedEvent =
+                im->getInputManager()->getDispatcher()->verifyInputEvent(*motionEvent);
+
+        if (verifiedEvent == nullptr) {
+            return nullptr;
+        }
+
+        return android_view_VerifiedMotionEvent(env,
+                                                static_cast<const VerifiedMotionEvent&>(
+                                                        *verifiedEvent));
+    } else {
+        jniThrowRuntimeException(env, "Invalid input event type.");
+        return nullptr;
     }
 }
 
@@ -1514,11 +1535,10 @@ static void nativeToggleCapsLock(JNIEnv* env, jclass /* clazz */,
     im->getInputManager()->getReader()->toggleCapsLockState(deviceId);
 }
 
-static void nativeSetInputWindows(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobjectArray windowHandleObjArray, jint displayId) {
+static void nativeDisplayRemoved(JNIEnv* env, jclass /* clazz */, jlong ptr, jint displayId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->setInputWindows(env, windowHandleObjArray, displayId);
+    im->displayRemoved(env, displayId);
 }
 
 static void nativeSetFocusedApplication(JNIEnv* env, jclass /* clazz */,
@@ -1557,20 +1577,17 @@ static void nativeSetSystemUiVisibility(JNIEnv* /* env */,
 }
 
 static jboolean nativeTransferTouchFocus(JNIEnv* env,
-        jclass /* clazz */, jlong ptr, jobject fromChannelObj, jobject toChannelObj) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    sp<InputChannel> fromChannel =
-            android_view_InputChannel_getInputChannel(env, fromChannelObj);
-    sp<InputChannel> toChannel =
-            android_view_InputChannel_getInputChannel(env, toChannelObj);
-
-    if (fromChannel == nullptr || toChannel == nullptr) {
+        jclass /* clazz */, jlong ptr, jobject fromChannelTokenObj, jobject toChannelTokenObj) {
+    if (fromChannelTokenObj == nullptr || toChannelTokenObj == nullptr) {
         return JNI_FALSE;
     }
 
-    if (im->getInputManager()->getDispatcher()->
-            transferTouchFocus(fromChannel->getToken(), toChannel->getToken())) {
+    sp<IBinder> fromChannelToken = ibinderForJavaObject(env, fromChannelTokenObj);
+    sp<IBinder> toChannelToken = ibinderForJavaObject(env, toChannelTokenObj);
+
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    if (im->getInputManager()->getDispatcher()->transferTouchFocus(
+            fromChannelToken, toChannelToken)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -1711,15 +1728,8 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    SpriteIcon spriteIcon;
-    SkImageInfo spriteInfo = pointerIcon.bitmap.info().makeColorType(kN32_SkColorType);
-    if (spriteIcon.bitmap.tryAllocPixels(spriteInfo)) {
-        pointerIcon.bitmap.readPixels(spriteInfo, spriteIcon.bitmap.getPixels(),
-                spriteIcon.bitmap.rowBytes(), 0, 0);
-    }
-    spriteIcon.style = pointerIcon.style;
-    spriteIcon.hotSpotX = pointerIcon.hotSpotX;
-    spriteIcon.hotSpotY = pointerIcon.hotSpotY;
+    SpriteIcon spriteIcon(pointerIcon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888),
+                          pointerIcon.style, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
     im->setCustomPointerIcon(spriteIcon);
 }
 
@@ -1730,6 +1740,12 @@ static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jclass /* clazz */, jlon
     return im->getInputManager()->getReader()->canDispatchToDisplay(deviceId, displayId);
 }
 
+static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+}
+
 static void nativeSetMotionClassifierEnabled(JNIEnv* /* env */, jclass /* clazz */, jlong ptr,
                                              jboolean enabled) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1737,92 +1753,64 @@ static void nativeSetMotionClassifierEnabled(JNIEnv* /* env */, jclass /* clazz 
     im->setMotionClassifierEnabled(enabled);
 }
 
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeInit",
-            "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/MessageQueue;)J",
-            (void*) nativeInit },
-    { "nativeStart", "(J)V",
-            (void*) nativeStart },
-    { "nativeSetDisplayViewports", "(J[Landroid/hardware/display/DisplayViewport;)V",
-            (void*) nativeSetDisplayViewports },
-    { "nativeGetScanCodeState", "(JIII)I",
-            (void*) nativeGetScanCodeState },
-    { "nativeGetKeyCodeState", "(JIII)I",
-            (void*) nativeGetKeyCodeState },
-    { "nativeGetSwitchState", "(JIII)I",
-            (void*) nativeGetSwitchState },
-    { "nativeHasKeys", "(JII[I[Z)Z",
-            (void*) nativeHasKeys },
-    { "nativeRegisterInputChannel",
-            "(JLandroid/view/InputChannel;I)V",
-            (void*) nativeRegisterInputChannel },
-    { "nativeRegisterInputMonitor",
-            "(JLandroid/view/InputChannel;IZ)V",
-            (void*) nativeRegisterInputMonitor},
-    { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
-            (void*) nativeUnregisterInputChannel },
-    { "nativePilferPointers", "(JLandroid/os/IBinder;)V",
-            (void*) nativePilferPointers },
-    { "nativeSetInputFilterEnabled", "(JZ)V",
-            (void*) nativeSetInputFilterEnabled },
-    { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
-            (void*) nativeInjectInputEvent },
-    { "nativeToggleCapsLock", "(JI)V",
-            (void*) nativeToggleCapsLock },
-    { "nativeSetInputWindows", "(J[Landroid/view/InputWindowHandle;I)V",
-            (void*) nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
-            (void*) nativeSetFocusedApplication },
-    { "nativeSetFocusedDisplay", "(JI)V",
-            (void*) nativeSetFocusedDisplay },
-    { "nativeSetPointerCapture", "(JZ)V",
-            (void*) nativeSetPointerCapture },
-    { "nativeSetInputDispatchMode", "(JZZ)V",
-            (void*) nativeSetInputDispatchMode },
-    { "nativeSetSystemUiVisibility", "(JI)V",
-            (void*) nativeSetSystemUiVisibility },
-    { "nativeTransferTouchFocus", "(JLandroid/view/InputChannel;Landroid/view/InputChannel;)Z",
-            (void*) nativeTransferTouchFocus },
-    { "nativeSetPointerSpeed", "(JI)V",
-            (void*) nativeSetPointerSpeed },
-    { "nativeSetShowTouches", "(JZ)V",
-            (void*) nativeSetShowTouches },
-    { "nativeSetInteractive", "(JZ)V",
-            (void*) nativeSetInteractive },
-    { "nativeReloadCalibration", "(J)V",
-            (void*) nativeReloadCalibration },
-    { "nativeVibrate", "(JI[JII)V",
-            (void*) nativeVibrate },
-    { "nativeCancelVibrate", "(JII)V",
-            (void*) nativeCancelVibrate },
-    { "nativeReloadKeyboardLayouts", "(J)V",
-            (void*) nativeReloadKeyboardLayouts },
-    { "nativeReloadDeviceAliases", "(J)V",
-            (void*) nativeReloadDeviceAliases },
-    { "nativeDump", "(J)Ljava/lang/String;",
-            (void*) nativeDump },
-    { "nativeMonitor", "(J)V",
-            (void*) nativeMonitor },
-    { "nativeIsInputDeviceEnabled", "(JI)Z",
-            (void*) nativeIsInputDeviceEnabled },
-    { "nativeEnableInputDevice", "(JI)V",
-            (void*) nativeEnableInputDevice },
-    { "nativeDisableInputDevice", "(JI)V",
-            (void*) nativeDisableInputDevice },
-    { "nativeSetPointerIconType", "(JI)V",
-            (void*) nativeSetPointerIconType },
-    { "nativeReloadPointerIcons", "(J)V",
-            (void*) nativeReloadPointerIcons },
-    { "nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",
-            (void*) nativeSetCustomPointerIcon },
-    { "nativeCanDispatchToDisplay", "(JII)Z",
-            (void*) nativeCanDispatchToDisplay },
-    {"nativeSetMotionClassifierEnabled", "(JZ)V",
-            (void*) nativeSetMotionClassifierEnabled},
+        /* name, signature, funcPtr */
+        {"nativeInit",
+         "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/"
+         "MessageQueue;)J",
+         (void*)nativeInit},
+        {"nativeStart", "(J)V", (void*)nativeStart},
+        {"nativeSetDisplayViewports", "(J[Landroid/hardware/display/DisplayViewport;)V",
+         (void*)nativeSetDisplayViewports},
+        {"nativeGetScanCodeState", "(JIII)I", (void*)nativeGetScanCodeState},
+        {"nativeGetKeyCodeState", "(JIII)I", (void*)nativeGetKeyCodeState},
+        {"nativeGetSwitchState", "(JIII)I", (void*)nativeGetSwitchState},
+        {"nativeHasKeys", "(JII[I[Z)Z", (void*)nativeHasKeys},
+        {"nativeRegisterInputChannel", "(JLandroid/view/InputChannel;)V",
+         (void*)nativeRegisterInputChannel},
+        {"nativeRegisterInputMonitor", "(JLandroid/view/InputChannel;IZ)V",
+         (void*)nativeRegisterInputMonitor},
+        {"nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
+         (void*)nativeUnregisterInputChannel},
+        {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},
+        {"nativeSetInputFilterEnabled", "(JZ)V", (void*)nativeSetInputFilterEnabled},
+        {"nativeSetInTouchMode", "(JZ)V", (void*)nativeSetInTouchMode},
+        {"nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
+         (void*)nativeInjectInputEvent},
+        {"nativeVerifyInputEvent", "(JLandroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
+         (void*)nativeVerifyInputEvent},
+        {"nativeToggleCapsLock", "(JI)V", (void*)nativeToggleCapsLock},
+        {"nativeDisplayRemoved", "(JI)V", (void*)nativeDisplayRemoved},
+        {"nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
+         (void*)nativeSetFocusedApplication},
+        {"nativeSetFocusedDisplay", "(JI)V", (void*)nativeSetFocusedDisplay},
+        {"nativeSetPointerCapture", "(JZ)V", (void*)nativeSetPointerCapture},
+        {"nativeSetInputDispatchMode", "(JZZ)V", (void*)nativeSetInputDispatchMode},
+        {"nativeSetSystemUiVisibility", "(JI)V", (void*)nativeSetSystemUiVisibility},
+        {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
+         (void*)nativeTransferTouchFocus},
+        {"nativeSetPointerSpeed", "(JI)V", (void*)nativeSetPointerSpeed},
+        {"nativeSetShowTouches", "(JZ)V", (void*)nativeSetShowTouches},
+        {"nativeSetInteractive", "(JZ)V", (void*)nativeSetInteractive},
+        {"nativeReloadCalibration", "(J)V", (void*)nativeReloadCalibration},
+        {"nativeVibrate", "(JI[JII)V", (void*)nativeVibrate},
+        {"nativeCancelVibrate", "(JII)V", (void*)nativeCancelVibrate},
+        {"nativeReloadKeyboardLayouts", "(J)V", (void*)nativeReloadKeyboardLayouts},
+        {"nativeReloadDeviceAliases", "(J)V", (void*)nativeReloadDeviceAliases},
+        {"nativeDump", "(J)Ljava/lang/String;", (void*)nativeDump},
+        {"nativeMonitor", "(J)V", (void*)nativeMonitor},
+        {"nativeIsInputDeviceEnabled", "(JI)Z", (void*)nativeIsInputDeviceEnabled},
+        {"nativeEnableInputDevice", "(JI)V", (void*)nativeEnableInputDevice},
+        {"nativeDisableInputDevice", "(JI)V", (void*)nativeDisableInputDevice},
+        {"nativeSetPointerIconType", "(JI)V", (void*)nativeSetPointerIconType},
+        {"nativeReloadPointerIcons", "(J)V", (void*)nativeReloadPointerIcons},
+        {"nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",
+         (void*)nativeSetCustomPointerIcon},
+        {"nativeCanDispatchToDisplay", "(JII)Z", (void*)nativeCanDispatchToDisplay},
+        {"nativeNotifyPortAssociationsChanged", "(J)V", (void*)nativeNotifyPortAssociationsChanged},
+        {"nativeSetMotionClassifierEnabled", "(JZ)V", (void*)nativeSetMotionClassifierEnabled},
 };
 
 #define FIND_CLASS(var, className) \
@@ -1870,7 +1858,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Landroid/os/IBinder;Ljava/lang/String;)J");
+            "(Landroid/view/InputApplicationHandle;Landroid/os/IBinder;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
@@ -1901,7 +1889,7 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_STATIC_METHOD_ID(gServiceClassInfo.getExcludedDeviceNames, clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
-    GET_STATIC_METHOD_ID(gServiceClassInfo.getInputPortAssociations, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getInputPortAssociations, clazz,
             "getInputPortAssociations", "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,

@@ -18,6 +18,8 @@ package android.hardware.camera2.impl;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraOfflineSession;
+import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallback;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -29,6 +31,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -106,7 +109,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
          * Use the same handler as the device's StateCallback for all the internal coming events
          *
          * This ensures total ordering between CameraDevice.StateCallback and
-         * CameraDeviceImpl.CaptureCallback events.
+         * CaptureCallback events.
          */
         mSequenceDrainer = new TaskDrainer<>(mDeviceExecutor, new SequenceDrainListener(),
                 /*name*/"seq");
@@ -136,23 +139,35 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
     @Override
     public void prepare(Surface surface) throws CameraAccessException {
-        mDeviceImpl.prepare(surface);
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+            mDeviceImpl.prepare(surface);
+        }
     }
 
     @Override
     public void prepare(int maxCount, Surface surface) throws CameraAccessException {
-        mDeviceImpl.prepare(maxCount, surface);
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+            mDeviceImpl.prepare(maxCount, surface);
+        }
     }
 
     @Override
     public void tearDown(Surface surface) throws CameraAccessException {
-        mDeviceImpl.tearDown(surface);
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+            mDeviceImpl.tearDown(surface);
+        }
     }
 
     @Override
     public void finalizeOutputConfigurations(
             List<OutputConfiguration> outputConfigs) throws CameraAccessException {
-        mDeviceImpl.finalizeOutputConfigs(outputConfigs);
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+            mDeviceImpl.finalizeOutputConfigs(outputConfigs);
+        }
     }
 
     @Override
@@ -446,6 +461,24 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public CameraOfflineSession switchToOffline(Collection<Surface> offlineOutputs,
+            Executor executor, CameraOfflineSessionCallback listener) throws CameraAccessException {
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+        }
+        return mDeviceImpl.switchToOffline(offlineOutputs, executor, listener);
+    }
+
+
+    @Override
+    public boolean supportsOfflineProcessing(Surface surface) {
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+        }
+        return mDeviceImpl.supportsOfflineProcessing(surface);
+    }
+
+    @Override
     public boolean isReprocessable() {
         return mInput != null;
     }
@@ -497,6 +530,25 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             // since it won't get called again.
             mSkipUnconfigure = true;
             close();
+        }
+    }
+
+    @Override
+    public void closeWithoutDraining() {
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            if (mClosed) {
+                if (DEBUG) Log.v(TAG, mIdString + "close - reentering");
+                return;
+            }
+
+            if (DEBUG) Log.v(TAG, mIdString + "close - first time");
+
+            mClosed = true;
+            mStateCallback.onClosed(this);
+        }
+
+        if (mInput != null) {
+            mInput.release();
         }
     }
 
@@ -571,13 +623,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     /**
-     * Forward callbacks from
-     * CameraDeviceImpl.CaptureCallback to the CameraCaptureSession.CaptureCallback.
+     * Forward callbacks that usually originate from
+     * CameraDeviceImpl.CameraDeviceCallbacks to the CameraCaptureSession.CaptureCallback.
      *
      * <p>When a capture sequence finishes, update the pending checked sequences set.</p>
      */
     @SuppressWarnings("deprecation")
-    private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxy(
+    private android.hardware.camera2.impl.CaptureCallback createCaptureCallbackProxy(
             Handler handler, CaptureCallback callback) {
         final Executor executor = (callback != null) ? CameraDeviceImpl.checkAndWrapHandler(
                 handler) : null;
@@ -585,9 +637,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         return createCaptureCallbackProxyWithExecutor(executor, callback);
     }
 
-    private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxyWithExecutor(
+    private android.hardware.camera2.impl.CaptureCallback createCaptureCallbackProxyWithExecutor(
             Executor executor, CaptureCallback callback) {
-        return new CameraDeviceImpl.CaptureCallback() {
+        return new android.hardware.camera2.impl.CaptureCallback(executor, callback) {
             @Override
             public void onCaptureStarted(CameraDevice camera,
                     CaptureRequest request, long timestamp, long frameNumber) {

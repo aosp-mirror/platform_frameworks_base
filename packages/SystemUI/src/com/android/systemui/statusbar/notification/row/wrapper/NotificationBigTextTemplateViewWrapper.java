@@ -44,7 +44,7 @@ public class NotificationBigTextTemplateViewWrapper extends NotificationTemplate
     public void onContentUpdated(ExpandableNotificationRow row) {
         // Reinspect the notification. Before the super call, because the super call also updates
         // the transformation types and we need to have our values set by then.
-        resolveViews(row.getStatusBarNotification());
+        resolveViews(row.getEntry().getSbn());
         super.onContentUpdated(row);
     }
 

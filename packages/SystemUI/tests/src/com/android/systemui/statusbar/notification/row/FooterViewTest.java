@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -64,6 +65,22 @@ public class FooterViewTest extends SysuiTestCase {
     public void setManageOnClick() {
         mView.setManageButtonClickListener(mock(View.OnClickListener.class));
         assertTrue(mView.findViewById(R.id.manage_text).hasOnClickListeners());
+    }
+
+    @Test
+    public void setHistoryShown() {
+        mView.showHistory(true);
+        assertTrue(mView.isHistoryShown());
+        assertTrue(((TextView) mView.findViewById(R.id.manage_text))
+                .getText().toString().contains("History"));
+    }
+
+    @Test
+    public void setHistoryNotShown() {
+        mView.showHistory(false);
+        assertFalse(mView.isHistoryShown());
+        assertTrue(((TextView) mView.findViewById(R.id.manage_text))
+                .getText().toString().contains("Manage"));
     }
 
     @Test

@@ -229,6 +229,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      *                    default (undefined) change type or one or more of:
      *         <ul>
      *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}
      *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
      *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
      *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}

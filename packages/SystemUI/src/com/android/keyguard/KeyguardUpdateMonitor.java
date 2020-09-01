@@ -18,16 +18,10 @@ package com.android.keyguard;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.ACTION_USER_REMOVED;
+import static android.content.Intent.ACTION_USER_STOPPED;
 import static android.content.Intent.ACTION_USER_UNLOCKED;
-import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
-import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
-import static android.os.BatteryManager.EXTRA_HEALTH;
-import static android.os.BatteryManager.EXTRA_LEVEL;
-import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
-import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
-import static android.os.BatteryManager.EXTRA_PLUGGED;
-import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
@@ -35,13 +29,14 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
-import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
@@ -54,6 +49,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -62,8 +58,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
-import android.media.AudioManager;
-import android.os.BatteryManager;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -85,43 +80,64 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import androidx.lifecycle.Observer;
+
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
+import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.DejankUtils;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.util.Assert;
+import com.android.systemui.util.RingerModeTracker;
 
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Watches for updates that may be interesting to the keyguard, and provides
  * the up to date information as well as a registration for callbacks that care
  * to be updated.
  */
-public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
+@Singleton
+public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpable {
 
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
-    private static final boolean DEBUG_FACE = true;
+    private static final boolean DEBUG_FACE = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG_SPEW = false;
     private static final int LOW_BATTERY_THRESHOLD = 20;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
@@ -139,7 +155,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHING = 310;
     private static final int MSG_KEYGUARD_RESET = 312;
-    private static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
     private static final int MSG_USER_INFO_CHANGED = 317;
     private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
@@ -160,6 +175,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED = 337;
     private static final int MSG_TELEPHONY_CAPABLE = 338;
     private static final int MSG_TIMEZONE_UPDATE = 339;
+    private static final int MSG_USER_STOPPED = 340;
+    private static final int MSG_USER_REMOVED = 341;
+    private static final int MSG_KEYGUARD_GOING_AWAY = 342;
 
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
@@ -183,6 +201,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public static final int BIOMETRIC_HELP_FACE_NOT_RECOGNIZED = -2;
 
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
+    /**
+     * If no cancel signal has been received after this amount of time, set the biometric running
+     * state to stopped to allow Keyguard to retry authentication.
+     */
+    private static final int DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000;
 
     private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
             "com.android.settings", "com.android.settings.FallbackHome");
@@ -203,21 +226,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private static KeyguardUpdateMonitor sInstance;
-
     private final Context mContext;
     private final boolean mIsPrimaryUser;
-    HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
+    private final boolean mIsAutomotive;
+    private final StatusBarStateController mStatusBarStateController;
+    HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
+    private boolean mCredentialAttempted;
     private boolean mKeyguardGoingAway;
     private boolean mGoingToSleep;
     private boolean mBouncer;
     private boolean mAuthInterruptActive;
-    private boolean mBootCompleted;
     private boolean mNeedsSlowUnlockTransition;
     private boolean mHasLockscreenWallpaper;
     private boolean mAssistantVisible;
@@ -230,10 +253,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mDeviceProvisioned;
 
     // Battery status
-    private BatteryStatus mBatteryStatus;
-
     @VisibleForTesting
-    protected StrongAuthTracker mStrongAuthTracker;
+    BatteryStatus mBatteryStatus;
+
+    private StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -248,16 +271,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private TrustManager mTrustManager;
     private UserManager mUserManager;
     private KeyguardBypassController mKeyguardBypassController;
+    private RingerModeTracker mRingerModeTracker;
     private int mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
     private int mFaceRunningState = BIOMETRIC_STATE_STOPPED;
     private LockPatternUtils mLockPatternUtils;
     private final IDreamManager mDreamManager;
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private boolean mLogoutEnabled;
     // If the user long pressed the lock icon, disabling face auth for the current session.
     private boolean mLockIconPressed;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private final Executor mBackgroundExecutor;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -272,110 +298,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int HAL_ERROR_RETRY_TIMEOUT = 500; // ms
     private static final int HAL_ERROR_RETRY_MAX = 10;
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private final Runnable mCancelNotReceived = new Runnable() {
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_TIME_UPDATE:
-                    handleTimeUpdate();
-                    break;
-                case MSG_TIMEZONE_UPDATE:
-                    handleTimeZoneUpdate((String) msg.obj);
-                    break;
-                case MSG_BATTERY_UPDATE:
-                    handleBatteryUpdate((BatteryStatus) msg.obj);
-                    break;
-                case MSG_SIM_STATE_CHANGE:
-                    handleSimStateChange(msg.arg1, msg.arg2, (State) msg.obj);
-                    break;
-                case MSG_RINGER_MODE_CHANGED:
-                    handleRingerModeChange(msg.arg1);
-                    break;
-                case MSG_PHONE_STATE_CHANGED:
-                    handlePhoneStateChanged((String) msg.obj);
-                    break;
-                case MSG_DEVICE_PROVISIONED:
-                    handleDeviceProvisioned();
-                    break;
-                case MSG_DPM_STATE_CHANGED:
-                    handleDevicePolicyManagerStateChanged();
-                    break;
-                case MSG_USER_SWITCHING:
-                    handleUserSwitching(msg.arg1, (IRemoteCallback) msg.obj);
-                    break;
-                case MSG_USER_SWITCH_COMPLETE:
-                    handleUserSwitchComplete(msg.arg1);
-                    break;
-                case MSG_KEYGUARD_RESET:
-                    handleKeyguardReset();
-                    break;
-                case MSG_KEYGUARD_BOUNCER_CHANGED:
-                    handleKeyguardBouncerChanged(msg.arg1);
-                    break;
-                case MSG_BOOT_COMPLETED:
-                    handleBootCompleted();
-                    break;
-                case MSG_USER_INFO_CHANGED:
-                    handleUserInfoChanged(msg.arg1);
-                    break;
-                case MSG_REPORT_EMERGENCY_CALL_ACTION:
-                    handleReportEmergencyCallAction();
-                    break;
-                case MSG_STARTED_GOING_TO_SLEEP:
-                    handleStartedGoingToSleep(msg.arg1);
-                    break;
-                case MSG_FINISHED_GOING_TO_SLEEP:
-                    handleFinishedGoingToSleep(msg.arg1);
-                    break;
-                case MSG_STARTED_WAKING_UP:
-                    Trace.beginSection("KeyguardUpdateMonitor#handler MSG_STARTED_WAKING_UP");
-                    handleStartedWakingUp();
-                    Trace.endSection();
-                    break;
-                case MSG_FACE_UNLOCK_STATE_CHANGED:
-                    Trace.beginSection("KeyguardUpdateMonitor#handler MSG_FACE_UNLOCK_STATE_CHANGED");
-                    handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
-                    Trace.endSection();
-                    break;
-                case MSG_SIM_SUBSCRIPTION_INFO_CHANGED:
-                    handleSimSubscriptionInfoChanged();
-                    break;
-                case MSG_AIRPLANE_MODE_CHANGED:
-                    handleAirplaneModeChanged();
-                    break;
-                case MSG_SERVICE_STATE_CHANGE:
-                    handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
-                    break;
-                case MSG_SCREEN_TURNED_ON:
-                    handleScreenTurnedOn();
-                    break;
-                case MSG_SCREEN_TURNED_OFF:
-                    Trace.beginSection("KeyguardUpdateMonitor#handler MSG_SCREEN_TURNED_ON");
-                    handleScreenTurnedOff();
-                    Trace.endSection();
-                    break;
-                case MSG_DREAMING_STATE_CHANGED:
-                    handleDreamingStateChanged(msg.arg1);
-                    break;
-                case MSG_USER_UNLOCKED:
-                    handleUserUnlocked();
-                    break;
-                case MSG_ASSISTANT_STACK_CHANGED:
-                    setAssistantVisible((boolean) msg.obj);
-                    break;
-                case MSG_BIOMETRIC_AUTHENTICATION_CONTINUE:
-                    updateBiometricListeningState();
-                    break;
-                case MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED:
-                    updateLogoutEnabled();
-                    break;
-                case MSG_TELEPHONY_CAPABLE:
-                    updateTelephonyCapable((boolean) msg.obj);
-                    break;
-                default:
-                    super.handleMessage(msg);
-                    break;
-            }
+        public void run() {
+            Log.w(TAG, "Cancel not received, transitioning to STOPPED");
+            mFingerprintRunningState = mFaceRunningState = BIOMETRIC_STATE_STOPPED;
+            updateBiometricListeningState();
+        }
+    };
+
+    private final Handler mHandler;
+
+    private final Observer<Integer> mRingerModeObserver = new Observer<Integer>() {
+        @Override
+        public void onChanged(Integer ringer) {
+            mHandler.obtainMessage(MSG_RINGER_MODE_CHANGED, ringer, 0).sendToTarget();
         }
     };
 
@@ -383,15 +320,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private BiometricManager mBiometricManager;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledCallback =
             new IBiometricEnabledOnKeyguardCallback.Stub() {
-        @Override
-        public void onChanged(BiometricSourceType type, boolean enabled, int userId)
-                throws RemoteException {
-            if (type == BiometricSourceType.FACE) {
-                mFaceSettingEnabledForUser.put(userId, enabled);
-                updateFaceListeningState();
-            }
-        }
-    };
+                @Override
+                public void onChanged(BiometricSourceType type, boolean enabled, int userId)
+                        throws RemoteException {
+                    if (type == BiometricSourceType.FACE) {
+                        mFaceSettingEnabledForUser.put(userId, enabled);
+                        updateFaceListeningState();
+                    }
+                }
+            };
 
     @VisibleForTesting
     public PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
@@ -404,21 +341,41 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private OnSubscriptionsChangedListener mSubscriptionListener =
             new OnSubscriptionsChangedListener() {
-        @Override
-        public void onSubscriptionsChanged() {
-            mHandler.sendEmptyMessage(MSG_SIM_SUBSCRIPTION_INFO_CHANGED);
-        }
-    };
+                @Override
+                public void onSubscriptionsChanged() {
+                    mHandler.sendEmptyMessage(MSG_SIM_SUBSCRIPTION_INFO_CHANGED);
+                }
+            };
 
+    @VisibleForTesting
+    static class BiometricAuthenticated {
+        private final boolean mAuthenticated;
+        private final boolean mIsStrongBiometric;
+
+        BiometricAuthenticated(boolean authenticated, boolean isStrongBiometric) {
+            this.mAuthenticated = authenticated;
+            this.mIsStrongBiometric = isStrongBiometric;
+        }
+    }
+
+    private SparseBooleanArray mUserIsUnlocked = new SparseBooleanArray();
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
-    private SparseBooleanArray mUserFingerprintAuthenticated = new SparseBooleanArray();
-    private SparseBooleanArray mUserFaceAuthenticated = new SparseBooleanArray();
+    private SparseBooleanArray mUserTrustIsUsuallyManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
+    private Map<Integer, Intent> mSecondaryLockscreenRequirement = new HashMap<Integer, Intent>();
+
+    @VisibleForTesting
+    SparseArray<BiometricAuthenticated> mUserFingerprintAuthenticated = new SparseArray<>();
+    @VisibleForTesting
+    SparseArray<BiometricAuthenticated> mUserFaceAuthenticated = new SparseArray<>();
+
+    // Keep track of recent calls to shouldListenForFace() for debugging.
+    private static final int FACE_LISTEN_CALLS_QUEUE_SIZE = 20;
+    private ArrayDeque<KeyguardFaceListenModel> mFaceListenModels;
 
     private static int sCurrentUser;
     private Runnable mUpdateBiometricListeningState = this::updateBiometricListeningState;
-    private static boolean sDisableHandlerCheckForTesting;
 
     public synchronized static void setCurrentUser(int currentUser) {
         sCurrentUser = currentUser;
@@ -430,7 +387,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     @Override
     public void onTrustChanged(boolean enabled, int userId, int flags) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         mUserHasTrust.put(userId, enabled);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -449,9 +406,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleSimSubscriptionInfoChanged() {
+        Assert.isMainThread();
         if (DEBUG_SIM_STATES) {
             Log.v(TAG, "onSubscriptionInfoChanged()");
-            List<SubscriptionInfo> sil = mSubscriptionManager.getActiveSubscriptionInfoList(false);
+            List<SubscriptionInfo> sil = mSubscriptionManager
+                    .getCompleteActiveSubscriptionInfoList();
             if (sil != null) {
                 for (SubscriptionInfo subInfo : sil) {
                     Log.v(TAG, "SubInfo:" + subInfo);
@@ -482,17 +441,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 }
             }
         }
-        for (int j = 0; j < mCallbacks.size(); j++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
-            if (cb != null) {
-                cb.onRefreshCarrierInfo();
-            }
-        }
+        callbacksRefreshCarrierInfo();
     }
 
     private void handleAirplaneModeChanged() {
-        for (int j = 0; j < mCallbacks.size(); j++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+        callbacksRefreshCarrierInfo();
+    }
+
+    private void callbacksRefreshCarrierInfo() {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onRefreshCarrierInfo();
             }
@@ -505,10 +464,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
-            sil = mSubscriptionManager.getActiveSubscriptionInfoList(false);
+            sil = mSubscriptionManager.getCompleteActiveSubscriptionInfoList();
         }
         if (sil == null) {
-            // getActiveSubscriptionInfoList was null callers expect an empty list.
+            // getCompleteActiveSubscriptionInfoList was null callers expect an empty list.
             mSubscriptionInfo = new ArrayList<SubscriptionInfo>();
         } else {
             mSubscriptionInfo = sil;
@@ -553,9 +512,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     @Override
     public void onTrustManagedChanged(boolean managed, int userId) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         mUserTrustIsManaged.put(userId, managed);
-
+        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -565,17 +524,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is goingAway
-     * @param goingAway
+     * Updates KeyguardUpdateMonitor's internal state to know if credential was attempted on
+     * bouncer. Note that this does not care if the credential was correct/incorrect. This is
+     * cleared when the user leaves the bouncer (unlocked, screen off, back to lockscreen, etc)
+     */
+    public void setCredentialAttempted() {
+        mCredentialAttempted = true;
+        updateBiometricListeningState();
+    }
+
+    /**
+     * Updates KeyguardUpdateMonitor's internal state to know if keyguard is going away.
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
-        updateFingerprintListeningState();
+        updateBiometricListeningState();
     }
 
     /**
      * Updates KeyguardUpdateMonitor's internal state to know if keyguard is occluded
-     * @param occluded
      */
     public void setKeyguardOccluded(boolean occluded) {
         mKeyguardOccluded = occluded;
@@ -611,9 +578,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     @VisibleForTesting
-    protected void onFingerprintAuthenticated(int userId) {
+    protected void onFingerprintAuthenticated(int userId, boolean isStrongBiometric) {
+        Assert.isMainThread();
         Trace.beginSection("KeyGuardUpdateMonitor#onFingerPrintAuthenticated");
-        mUserFingerprintAuthenticated.put(userId, true);
+        mUserFingerprintAuthenticated.put(userId,
+                new BiometricAuthenticated(true, isStrongBiometric));
         // Update/refresh trust state only if user can skip bouncer
         if (getUserCanSkipBouncer(userId)) {
             mTrustManager.unlockedByBiometricForUser(userId, BiometricSourceType.FINGERPRINT);
@@ -623,7 +592,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onBiometricAuthenticated(userId, BiometricSourceType.FINGERPRINT);
+                cb.onBiometricAuthenticated(userId, BiometricSourceType.FINGERPRINT,
+                        isStrongBiometric);
             }
         }
 
@@ -633,10 +603,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // Only authenticate fingerprint once when assistant is visible
         mAssistantVisible = false;
 
+        // Report unlock with strong or non-strong biometric
+        reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+
         Trace.endSection();
     }
 
+    private void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId) {
+        mBackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mLockPatternUtils.reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+            }
+        });
+    }
+
     private void handleFingerprintAuthFailed() {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -648,6 +631,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintAcquired(int acquireInfo) {
+        Assert.isMainThread();
         if (acquireInfo != FingerprintManager.FINGERPRINT_ACQUIRED_GOOD) {
             return;
         }
@@ -659,7 +643,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void handleFingerprintAuthenticated(int authUserId) {
+    private void handleFingerprintAuthenticated(int authUserId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFingerPrintAuthenticated");
         try {
             final int userId;
@@ -677,7 +661,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
                 return;
             }
-            onFingerprintAuthenticated(userId);
+            onFingerprintAuthenticated(userId, isStrongBiometric);
         } finally {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
         }
@@ -685,6 +669,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintHelp(int msgId, String helpString) {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -703,12 +688,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     };
 
     private void handleFingerprintError(int msgId, String errString) {
+        Assert.isMainThread();
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED && mHandler.hasCallbacks(
+                mCancelNotReceived)) {
+            mHandler.removeCallbacks(mCancelNotReceived);
+        }
+
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
                 && mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
             updateFingerprintListeningState();
         } else {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
+            mFingerprintCancelSignal = null;
+            mFaceCancelSignal = null;
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
@@ -724,6 +717,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     getCurrentUser());
         }
 
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
+                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
+            mFingerprintLockedOut = true;
+        }
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -733,6 +731,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintLockoutReset() {
+        mFingerprintLockedOut = false;
         updateFingerprintListeningState();
     }
 
@@ -750,7 +749,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void notifyFingerprintRunningStateChanged() {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -761,9 +760,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     @VisibleForTesting
-    protected void onFaceAuthenticated(int userId) {
+    protected void onFaceAuthenticated(int userId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#onFaceAuthenticated");
-        mUserFaceAuthenticated.put(userId, true);
+        Assert.isMainThread();
+        mUserFaceAuthenticated.put(userId,
+                new BiometricAuthenticated(true, isStrongBiometric));
         // Update/refresh trust state only if user can skip bouncer
         if (getUserCanSkipBouncer(userId)) {
             mTrustManager.unlockedByBiometricForUser(userId, BiometricSourceType.FACE);
@@ -774,7 +775,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onBiometricAuthenticated(userId,
-                        BiometricSourceType.FACE);
+                        BiometricSourceType.FACE,
+                        isStrongBiometric);
             }
         }
 
@@ -784,10 +786,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // Only authenticate face once when assistant is visible
         mAssistantVisible = false;
 
+        // Report unlock with strong or non-strong biometric
+        reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+
         Trace.endSection();
     }
 
     private void handleFaceAuthFailed() {
+        Assert.isMainThread();
         setFaceRunningState(BIOMETRIC_STATE_STOPPED);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -800,6 +806,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceAcquired(int acquireInfo) {
+        Assert.isMainThread();
         if (acquireInfo != FaceManager.FACE_ACQUIRED_GOOD) {
             return;
         }
@@ -812,7 +819,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void handleFaceAuthenticated(int authUserId) {
+    private void handleFaceAuthenticated(int authUserId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFaceAuthenticated");
         try {
             if (mGoingToSleep) {
@@ -835,7 +842,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 return;
             }
             if (DEBUG_FACE) Log.d(TAG, "Face auth succeeded for user " + userId);
-            onFaceAuthenticated(userId);
+            onFaceAuthenticated(userId, isStrongBiometric);
         } finally {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
         }
@@ -843,6 +850,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceHelp(int msgId, String helpString) {
+        Assert.isMainThread();
         if (DEBUG_FACE) Log.d(TAG, "Face help received: " + helpString);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -862,7 +870,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     };
 
     private void handleFaceError(int msgId, String errString) {
+        Assert.isMainThread();
         if (DEBUG_FACE) Log.d(TAG, "Face error received: " + errString);
+        if (msgId == FaceManager.FACE_ERROR_CANCELED && mHandler.hasCallbacks(mCancelNotReceived)) {
+            mHandler.removeCallbacks(mCancelNotReceived);
+        }
+
         if (msgId == FaceManager.FACE_ERROR_CANCELED
                 && mFaceRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
@@ -912,6 +925,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void notifyFaceRunningStateChanged() {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -922,7 +936,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceUnlockStateChanged(boolean running, int userId) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         mUserFaceUnlockRunning.put(userId, running);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -956,16 +970,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         final DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
-                    & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0
+                & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) != 0
                 || isSimPinSecure();
     }
 
     private boolean isFaceDisabled(int userId) {
         final DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        return dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
+        // TODO(b/140035044)
+        return whitelistIpcs(() -> dpm != null && (dpm.getKeyguardDisabledFeatures(null, userId)
                 & DevicePolicyManager.KEYGUARD_DISABLE_FACE) != 0
-                || isSimPinSecure();
+                || isSimPinSecure());
     }
 
 
@@ -981,17 +996,75 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Returns whether the user is unlocked with biometrics.
      */
     public boolean getUserUnlockedWithBiometric(int userId) {
-        boolean fingerprintOrFace = mUserFingerprintAuthenticated.get(userId)
-                || mUserFaceAuthenticated.get(userId);
-        return fingerprintOrFace && isUnlockingWithBiometricAllowed();
+        BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
+        BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
+        boolean fingerprintAllowed = fingerprint != null && fingerprint.mAuthenticated
+                && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric);
+        boolean faceAllowed = face != null && face.mAuthenticated
+                && isUnlockingWithBiometricAllowed(face.mIsStrongBiometric);
+        return fingerprintAllowed || faceAllowed;
     }
 
     public boolean getUserTrustIsManaged(int userId) {
         return mUserTrustIsManaged.get(userId) && !isTrustDisabled(userId);
     }
 
-    public boolean isUnlockingWithBiometricAllowed() {
-        return mStrongAuthTracker.isUnlockingWithBiometricAllowed();
+    private void updateSecondaryLockscreenRequirement(int userId) {
+        Intent oldIntent = mSecondaryLockscreenRequirement.get(userId);
+        boolean enabled = mDevicePolicyManager.isSecondaryLockscreenEnabled(UserHandle.of(userId));
+        boolean changed = false;
+
+        if (enabled && (oldIntent == null)) {
+            ComponentName supervisorComponent =
+                    mDevicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                            UserHandle.of(userId));
+            if (supervisorComponent == null) {
+                Log.e(TAG, "No Profile Owner or Device Owner supervision app found for User "
+                        + userId);
+            } else {
+                Intent intent =
+                        new Intent(DevicePolicyManager.ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE)
+                                .setPackage(supervisorComponent.getPackageName());
+                ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent, 0);
+                if (resolveInfo != null && resolveInfo.serviceInfo != null) {
+                    Intent launchIntent =
+                            new Intent().setComponent(resolveInfo.serviceInfo.getComponentName());
+                    mSecondaryLockscreenRequirement.put(userId, launchIntent);
+                    changed = true;
+                }
+            }
+        } else if (!enabled && (oldIntent != null)) {
+            mSecondaryLockscreenRequirement.put(userId, null);
+            changed = true;
+        }
+        if (changed) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onSecondaryLockscreenRequirementChanged(userId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns an Intent by which to bind to a service that will provide additional security screen
+     * content that must be shown prior to dismissing the keyguard for this user.
+     */
+    public Intent getSecondaryLockscreenRequirement(int userId) {
+        return mSecondaryLockscreenRequirement.get(userId);
+    }
+
+    /**
+     * Cached version of {@link TrustManager#isTrustUsuallyManaged(int)}.
+     */
+    public boolean isTrustUsuallyManaged(int userId) {
+        Assert.isMainThread();
+        return mUserTrustIsUsuallyManaged.get(userId);
+    }
+
+    public boolean isUnlockingWithBiometricAllowed(boolean isStrongBiometric) {
+        return mStrongAuthTracker.isUnlockingWithBiometricAllowed(isStrongBiometric);
     }
 
     public boolean isUserInLockdown(int userId) {
@@ -1017,7 +1090,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void notifyStrongAuthStateChanged(int userId) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1031,6 +1104,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void dispatchErrorMessage(CharSequence message) {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1068,34 +1142,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
             } else if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                 final Message msg = mHandler.obtainMessage(
-                        MSG_TIMEZONE_UPDATE, intent.getStringExtra("time-zone"));
+                        MSG_TIMEZONE_UPDATE, intent.getStringExtra(Intent.EXTRA_TIMEZONE));
                 mHandler.sendMessage(msg);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-                final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
-                final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
-                final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
-                final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
 
-                final int maxChargingMicroAmp = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
-                int maxChargingMicroVolt = intent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
-                final int maxChargingMicroWatt;
-
-                if (maxChargingMicroVolt <= 0) {
-                    maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
-                }
-                if (maxChargingMicroAmp > 0) {
-                    // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
-                    // to maintain precision equally on both factors.
-                    maxChargingMicroWatt = (maxChargingMicroAmp / 1000)
-                            * (maxChargingMicroVolt / 1000);
-                } else {
-                    maxChargingMicroWatt = -1;
-                }
                 final Message msg = mHandler.obtainMessage(
-                        MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
-                                maxChargingMicroWatt));
+                        MSG_BATTERY_UPDATE, new BatteryStatus(intent));
                 mHandler.sendMessage(msg);
-            } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
+            } else if (Intent.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
                 // ACTION_SIM_STATE_CHANGED is rebroadcast after unlocking the device to
                 // keep compatibility with apps that aren't direct boot aware.
@@ -1103,29 +1157,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 // and processed previously.
                 if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                     // Guarantee mTelephonyCapable state after SysUI crash and restart
-                    if (args.simState == State.ABSENT) {
+                    if (args.simState == TelephonyManager.SIM_STATE_ABSENT) {
                         mHandler.obtainMessage(MSG_TELEPHONY_CAPABLE, true).sendToTarget();
                     }
                     return;
                 }
                 if (DEBUG_SIM_STATES) {
                     Log.v(TAG, "action " + action
-                        + " state: " + intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE)
-                        + " slotId: " + args.slotId + " subid: " + args.subId);
+                            + " state: " + intent.getStringExtra(
+                            Intent.EXTRA_SIM_STATE)
+                            + " slotId: " + args.slotId + " subid: " + args.subId);
                 }
                 mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, args.subId, args.slotId, args.simState)
                         .sendToTarget();
-            } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_RINGER_MODE_CHANGED,
-                        intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1), 0));
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
             } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_AIRPLANE_MODE_CHANGED);
-            } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                dispatchBootCompleted();
-            } else if (TelephonyIntents.ACTION_SERVICE_STATE_CHANGED.equals(action)) {
+            } else if (Intent.ACTION_SERVICE_STATE.equals(action)) {
                 ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
@@ -1135,7 +1185,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 }
                 mHandler.sendMessage(
                         mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
-            } else if (TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED.equals(action)) {
+            } else if (TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_SIM_SUBSCRIPTION_INFO_CHANGED);
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
                     action)) {
@@ -1156,7 +1206,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_INFO_CHANGED,
                         intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId()), 0));
             } else if (ACTION_FACE_UNLOCK_STARTED.equals(action)) {
-                Trace.beginSection("KeyguardUpdateMonitor.mBroadcastAllReceiver#onReceive ACTION_FACE_UNLOCK_STARTED");
+                Trace.beginSection(
+                        "KeyguardUpdateMonitor.mBroadcastAllReceiver#onReceive "
+                                + "ACTION_FACE_UNLOCK_STARTED");
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1,
                         getSendingUserId()));
                 Trace.endSection();
@@ -1165,9 +1217,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         getSendingUserId()));
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
-                mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED,
+                        getSendingUserId()));
             } else if (ACTION_USER_UNLOCKED.equals(action)) {
-                mHandler.sendEmptyMessage(MSG_USER_UNLOCKED);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_UNLOCKED,
+                        getSendingUserId(), 0));
+            } else if (ACTION_USER_STOPPED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_STOPPED,
+                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1), 0));
+            } else if (ACTION_USER_REMOVED.equals(action)) {
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
+                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1), 0));
             }
         }
     };
@@ -1199,7 +1259,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         @Override
         public void onAuthenticationSucceeded(AuthenticationResult result) {
             Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
-            handleFingerprintAuthenticated(result.getUserId());
+            handleFingerprintAuthenticated(result.getUserId(), result.isStrongBiometric());
             Trace.endSection();
         }
 
@@ -1231,7 +1291,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         @Override
         public void onAuthenticationSucceeded(FaceManager.AuthenticationResult result) {
             Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
-            handleFaceAuthenticated(result.getUserId());
+            handleFaceAuthenticated(result.getUserId(), result.isStrongBiometric());
             Trace.endSection();
         }
 
@@ -1255,6 +1315,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private CancellationSignal mFaceCancelSignal;
     private FingerprintManager mFpm;
     private FaceManager mFaceManager;
+    private boolean mFingerprintLockedOut;
+    private TelephonyManager mTelephonyManager;
 
     /**
      * When we receive a
@@ -1264,58 +1326,58 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * the intent and provide a {@link SimCard.State} result.
      */
     private static class SimData {
-        public State simState;
+        public int simState;
         public int slotId;
         public int subId;
 
-        SimData(State state, int slot, int id) {
+        SimData(int state, int slot, int id) {
             simState = state;
             slotId = slot;
             subId = id;
         }
 
         static SimData fromIntent(Intent intent) {
-            State state;
-            if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
+            int state;
+            if (!Intent.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
             String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
             int slotId = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
             int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-            if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
+            if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
-                    .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
+                        .getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
 
-                if (IccCardConstants.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
+                if (Intent.SIM_ABSENT_ON_PERM_DISABLED.equals(
                         absentReason)) {
-                    state = IccCardConstants.State.PERM_DISABLED;
+                    state = TelephonyManager.SIM_STATE_PERM_DISABLED;
                 } else {
-                    state = IccCardConstants.State.ABSENT;
+                    state = TelephonyManager.SIM_STATE_ABSENT;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
-                state = IccCardConstants.State.READY;
-            } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+            } else if (Intent.SIM_STATE_READY.equals(stateExtra)) {
+                state = TelephonyManager.SIM_STATE_READY;
+            } else if (Intent.SIM_STATE_LOCKED.equals(stateExtra)) {
                 final String lockedReason = intent
-                        .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
-                if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
-                    state = IccCardConstants.State.PIN_REQUIRED;
-                } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
-                    state = IccCardConstants.State.PUK_REQUIRED;
+                        .getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
+                if (Intent.SIM_LOCKED_ON_PIN.equals(lockedReason)) {
+                    state = TelephonyManager.SIM_STATE_PIN_REQUIRED;
+                } else if (Intent.SIM_LOCKED_ON_PUK.equals(lockedReason)) {
+                    state = TelephonyManager.SIM_STATE_PUK_REQUIRED;
                 } else {
-                    state = IccCardConstants.State.UNKNOWN;
+                    state = TelephonyManager.SIM_STATE_UNKNOWN;
                 }
-            } else if (IccCardConstants.INTENT_VALUE_LOCKED_NETWORK.equals(stateExtra)) {
-                state = IccCardConstants.State.NETWORK_LOCKED;
-            } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
-                state = IccCardConstants.State.CARD_IO_ERROR;
-            } else if (IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)
-                        || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)) {
+            } else if (Intent.SIM_LOCKED_NETWORK.equals(stateExtra)) {
+                state = TelephonyManager.SIM_STATE_NETWORK_LOCKED;
+            } else if (Intent.SIM_STATE_CARD_IO_ERROR.equals(stateExtra)) {
+                state = TelephonyManager.SIM_STATE_CARD_IO_ERROR;
+            } else if (Intent.SIM_STATE_LOADED.equals(stateExtra)
+                    || Intent.SIM_STATE_IMSI.equals(stateExtra)) {
                 // This is required because telephony doesn't return to "READY" after
                 // these state transitions. See bug 7197471.
-                state = IccCardConstants.State.READY;
+                state = TelephonyManager.SIM_STATE_READY;
             } else {
-                state = IccCardConstants.State.UNKNOWN;
+                state = TelephonyManager.SIM_STATE_UNKNOWN;
             }
             return new SimData(state, slotId, subId);
         }
@@ -1323,77 +1385,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         @Override
         public String toString() {
             return "SimData{state=" + simState + ",slotId=" + slotId + ",subId=" + subId + "}";
-        }
-    }
-
-    public static class BatteryStatus {
-        public static final int CHARGING_UNKNOWN = -1;
-        public static final int CHARGING_SLOWLY = 0;
-        public static final int CHARGING_REGULAR = 1;
-        public static final int CHARGING_FAST = 2;
-
-        public final int status;
-        public final int level;
-        public final int plugged;
-        public final int health;
-        public final int maxChargingWattage;
-        public BatteryStatus(int status, int level, int plugged, int health,
-                int maxChargingWattage) {
-            this.status = status;
-            this.level = level;
-            this.plugged = plugged;
-            this.health = health;
-            this.maxChargingWattage = maxChargingWattage;
-        }
-
-        /**
-         * Determine whether the device is plugged in (USB, power, or wireless).
-         * @return true if the device is plugged in.
-         */
-        public boolean isPluggedIn() {
-            return plugged == BatteryManager.BATTERY_PLUGGED_AC
-                    || plugged == BatteryManager.BATTERY_PLUGGED_USB
-                    || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
-        }
-
-        /**
-         * Determine whether the device is plugged in (USB, power).
-         * @return true if the device is plugged in wired (as opposed to wireless)
-         */
-        public boolean isPluggedInWired() {
-            return plugged == BatteryManager.BATTERY_PLUGGED_AC
-                    || plugged == BatteryManager.BATTERY_PLUGGED_USB;
-        }
-
-        /**
-         * Whether or not the device is charged. Note that some devices never return 100% for
-         * battery level, so this allows either battery level or status to determine if the
-         * battery is charged.
-         * @return true if the device is charged
-         */
-        public boolean isCharged() {
-            return status == BATTERY_STATUS_FULL || level >= 100;
-        }
-
-        /**
-         * Whether battery is low and needs to be charged.
-         * @return true if battery is low
-         */
-        public boolean isBatteryLow() {
-            return level < LOW_BATTERY_THRESHOLD;
-        }
-
-        public final int getChargingSpeed(int slowThreshold, int fastThreshold) {
-            return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
-                    maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
-                    maxChargingWattage > fastThreshold ? CHARGING_FAST :
-                    CHARGING_REGULAR;
-        }
-
-        @Override
-        public String toString() {
-            return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
-                    + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
         }
     }
 
@@ -1406,9 +1397,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             mStrongAuthRequiredChangedCallback = strongAuthRequiredChangedCallback;
         }
 
-        public boolean isUnlockingWithBiometricAllowed() {
+        public boolean isUnlockingWithBiometricAllowed(boolean isStrongBiometric) {
             int userId = getCurrentUser();
-            return isBiometricAllowedForUser(userId);
+            return isBiometricAllowedForUser(isStrongBiometric, userId);
         }
 
         public boolean hasUserAuthenticatedSinceBoot() {
@@ -1423,18 +1414,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    public static KeyguardUpdateMonitor getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new KeyguardUpdateMonitor(context);
-        }
-        return sInstance;
-    }
-
     protected void handleStartedWakingUp() {
         Trace.beginSection("KeyguardUpdateMonitor#handleStartedWakingUp");
+        Assert.isMainThread();
         updateBiometricListeningState();
-        final int count = mCallbacks.size();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onStartedWakingUp();
@@ -1444,10 +1428,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     protected void handleStartedGoingToSleep(int arg1) {
+        Assert.isMainThread();
         mLockIconPressed = false;
         clearBiometricRecognized();
-        final int count = mCallbacks.size();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onStartedGoingToSleep(arg1);
@@ -1458,9 +1442,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     protected void handleFinishedGoingToSleep(int arg1) {
+        Assert.isMainThread();
         mGoingToSleep = false;
-        final int count = mCallbacks.size();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onFinishedGoingToSleep(arg1);
@@ -1470,8 +1454,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOn() {
-        final int count = mCallbacks.size();
-        for (int i = 0; i < count; i++) {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onScreenTurnedOn();
@@ -1480,21 +1464,24 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOff() {
+        final String tag = "KeyguardUpdateMonitor#handleScreenTurnedOff";
+        DejankUtils.startDetectingBlockingIpcs(tag);
+        Assert.isMainThread();
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
-        final int count = mCallbacks.size();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onScreenTurnedOff();
             }
         }
+        DejankUtils.stopDetectingBlockingIpcs(tag);
     }
 
     private void handleDreamingStateChanged(int dreamStart) {
-        final int count = mCallbacks.size();
+        Assert.isMainThread();
         mIsDreaming = dreamStart == 1;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onDreamingStateChanged(mIsDreaming);
@@ -1504,6 +1491,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleUserInfoChanged(int userId) {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1512,7 +1500,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void handleUserUnlocked() {
+    private void handleUserUnlocked(int userId) {
+        Assert.isMainThread();
+        mUserIsUnlocked.put(userId, true);
         mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -1522,12 +1512,172 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    private void handleUserStopped(int userId) {
+        Assert.isMainThread();
+        mUserIsUnlocked.put(userId, mUserManager.isUserUnlocked(userId));
+    }
+
     @VisibleForTesting
-    protected KeyguardUpdateMonitor(Context context) {
+    void handleUserRemoved(int userId) {
+        Assert.isMainThread();
+        mUserIsUnlocked.delete(userId);
+        mUserTrustIsUsuallyManaged.delete(userId);
+    }
+
+    private void handleKeyguardGoingAway(boolean goingAway) {
+        Assert.isMainThread();
+        setKeyguardGoingAway(goingAway);
+    }
+
+    @VisibleForTesting
+    protected void setStrongAuthTracker(@NonNull StrongAuthTracker tracker) {
+        if (mStrongAuthTracker != null) {
+            mLockPatternUtils.unregisterStrongAuthTracker(mStrongAuthTracker);
+        }
+
+        mStrongAuthTracker = tracker;
+        mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
+    }
+
+    private void registerRingerTracker() {
+        mRingerModeTracker.getRingerMode().observeForever(mRingerModeObserver);
+    }
+
+    @VisibleForTesting
+    @Inject
+    protected KeyguardUpdateMonitor(
+            Context context,
+            @Main Looper mainLooper,
+            BroadcastDispatcher broadcastDispatcher,
+            DumpManager dumpManager,
+            RingerModeTracker ringerModeTracker,
+            @Background Executor backgroundExecutor,
+            StatusBarStateController statusBarStateController,
+            LockPatternUtils lockPatternUtils) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
+        mBackgroundExecutor = backgroundExecutor;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mRingerModeTracker = ringerModeTracker;
+        mStatusBarStateController = statusBarStateController;
+        mLockPatternUtils = lockPatternUtils;
+        dumpManager.registerDumpable(getClass().getName(), this);
+
+        mHandler = new Handler(mainLooper) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_TIME_UPDATE:
+                        handleTimeUpdate();
+                        break;
+                    case MSG_TIMEZONE_UPDATE:
+                        handleTimeZoneUpdate((String) msg.obj);
+                        break;
+                    case MSG_BATTERY_UPDATE:
+                        handleBatteryUpdate((BatteryStatus) msg.obj);
+                        break;
+                    case MSG_SIM_STATE_CHANGE:
+                        handleSimStateChange(msg.arg1, msg.arg2, (int) msg.obj);
+                        break;
+                    case MSG_RINGER_MODE_CHANGED:
+                        handleRingerModeChange(msg.arg1);
+                        break;
+                    case MSG_PHONE_STATE_CHANGED:
+                        handlePhoneStateChanged((String) msg.obj);
+                        break;
+                    case MSG_DEVICE_PROVISIONED:
+                        handleDeviceProvisioned();
+                        break;
+                    case MSG_DPM_STATE_CHANGED:
+                        handleDevicePolicyManagerStateChanged(msg.arg1);
+                        break;
+                    case MSG_USER_SWITCHING:
+                        handleUserSwitching(msg.arg1, (IRemoteCallback) msg.obj);
+                        break;
+                    case MSG_USER_SWITCH_COMPLETE:
+                        handleUserSwitchComplete(msg.arg1);
+                        break;
+                    case MSG_KEYGUARD_RESET:
+                        handleKeyguardReset();
+                        break;
+                    case MSG_KEYGUARD_BOUNCER_CHANGED:
+                        handleKeyguardBouncerChanged(msg.arg1);
+                        break;
+                    case MSG_USER_INFO_CHANGED:
+                        handleUserInfoChanged(msg.arg1);
+                        break;
+                    case MSG_REPORT_EMERGENCY_CALL_ACTION:
+                        handleReportEmergencyCallAction();
+                        break;
+                    case MSG_STARTED_GOING_TO_SLEEP:
+                        handleStartedGoingToSleep(msg.arg1);
+                        break;
+                    case MSG_FINISHED_GOING_TO_SLEEP:
+                        handleFinishedGoingToSleep(msg.arg1);
+                        break;
+                    case MSG_STARTED_WAKING_UP:
+                        Trace.beginSection("KeyguardUpdateMonitor#handler MSG_STARTED_WAKING_UP");
+                        handleStartedWakingUp();
+                        Trace.endSection();
+                        break;
+                    case MSG_FACE_UNLOCK_STATE_CHANGED:
+                        Trace.beginSection(
+                                "KeyguardUpdateMonitor#handler MSG_FACE_UNLOCK_STATE_CHANGED");
+                        handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
+                        Trace.endSection();
+                        break;
+                    case MSG_SIM_SUBSCRIPTION_INFO_CHANGED:
+                        handleSimSubscriptionInfoChanged();
+                        break;
+                    case MSG_AIRPLANE_MODE_CHANGED:
+                        handleAirplaneModeChanged();
+                        break;
+                    case MSG_SERVICE_STATE_CHANGE:
+                        handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
+                        break;
+                    case MSG_SCREEN_TURNED_ON:
+                        handleScreenTurnedOn();
+                        break;
+                    case MSG_SCREEN_TURNED_OFF:
+                        Trace.beginSection("KeyguardUpdateMonitor#handler MSG_SCREEN_TURNED_ON");
+                        handleScreenTurnedOff();
+                        Trace.endSection();
+                        break;
+                    case MSG_DREAMING_STATE_CHANGED:
+                        handleDreamingStateChanged(msg.arg1);
+                        break;
+                    case MSG_USER_UNLOCKED:
+                        handleUserUnlocked(msg.arg1);
+                        break;
+                    case MSG_USER_STOPPED:
+                        handleUserStopped(msg.arg1);
+                        break;
+                    case MSG_USER_REMOVED:
+                        handleUserRemoved(msg.arg1);
+                        break;
+                    case MSG_ASSISTANT_STACK_CHANGED:
+                        setAssistantVisible((boolean) msg.obj);
+                        break;
+                    case MSG_BIOMETRIC_AUTHENTICATION_CONTINUE:
+                        updateBiometricListeningState();
+                        break;
+                    case MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED:
+                        updateLogoutEnabled();
+                        break;
+                    case MSG_TELEPHONY_CAPABLE:
+                        updateTelephonyCapable((boolean) msg.obj);
+                        break;
+                    case MSG_KEYGUARD_GOING_AWAY:
+                        handleKeyguardGoingAway((boolean) msg.obj);
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                        break;
+                }
+            }
+        };
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -1545,18 +1695,34 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
+        filter.addAction(Intent.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(Intent.ACTION_SERVICE_STATE);
+        filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        context.registerReceiver(mBroadcastReceiver, filter, null, mHandler);
+        mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, mHandler);
+        // Since ACTION_SERVICE_STATE is being moved to a non-sticky broadcast, trigger the
+        // listener now with the service state from the default sub.
+        mBackgroundExecutor.execute(() -> {
+            int subId = SubscriptionManager.getDefaultSubscriptionId();
+            ServiceState serviceState = mContext.getSystemService(TelephonyManager.class)
+                    .getServiceStateForSubscriber(subId);
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
 
-        final IntentFilter bootCompleteFilter = new IntentFilter();
-        bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        context.registerReceiver(mBroadcastReceiver, bootCompleteFilter, null, mHandler);
+            // Get initial state. Relying on Sticky behavior until API for getting info.
+            if (mBatteryStatus == null) {
+                Intent intent = mContext.registerReceiver(
+                        null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                );
+                if (intent != null && mBatteryStatus == null) {
+                    mBroadcastReceiver.onReceive(mContext, intent);
+                }
+            }
+        });
+
+        mHandler.post(this::registerRingerTracker);
 
         final IntentFilter allUserFilter = new IntentFilter();
         allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
@@ -1565,32 +1731,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         allUserFilter.addAction(ACTION_FACE_UNLOCK_STOPPED);
         allUserFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         allUserFilter.addAction(ACTION_USER_UNLOCKED);
-        context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
-                null, mHandler);
+        allUserFilter.addAction(ACTION_USER_STOPPED);
+        allUserFilter.addAction(ACTION_USER_REMOVED);
+        mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastAllReceiver, allUserFilter,
+                mHandler, UserHandle.ALL);
 
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {
-            ActivityManager.getService().registerUserSwitchObserver(
-                    new UserSwitchObserver() {
-                        @Override
-                        public void onUserSwitching(int newUserId, IRemoteCallback reply) {
-                            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
-                                    newUserId, 0, reply));
-                        }
-                        @Override
-                        public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
-                                    newUserId, 0));
-                        }
-                    }, TAG);
+            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
 
-        mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
+        mTrustManager = context.getSystemService(TrustManager.class);
         mTrustManager.registerTrustListener(this);
-        mLockPatternUtils = new LockPatternUtils(context);
-        mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
+
+        setStrongAuthTracker(mStrongAuthTracker);
 
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
@@ -1615,19 +1771,55 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
         }
 
+        mIsAutomotive = isAutomotive();
+
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
+        int user = ActivityManager.getCurrentUser();
+        mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
+        updateSecondaryLockscreenRequirement(user);
+        List<UserInfo> allUsers = mUserManager.getUsers();
+        for (UserInfo userInfo : allUsers) {
+            mUserTrustIsUsuallyManaged.put(userInfo.id,
+                    mTrustManager.isTrustUsuallyManaged(userInfo.id));
+        }
         updateAirplaneModeState();
 
-        TelephonyManager telephony =
+        mTelephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (telephony != null) {
-            telephony.listen(mPhoneStateListener, LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+        if (mTelephonyManager != null) {
+            mTelephonyManager.listen(mPhoneStateListener,
+                    LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+            // Set initial sim states values.
+            for (int slot = 0; slot < mTelephonyManager.getActiveModemCount(); slot++) {
+                int state = mTelephonyManager.getSimState(slot);
+                int[] subIds = mSubscriptionManager.getSubscriptionIds(slot);
+                if (subIds != null) {
+                    for (int subId : subIds) {
+                        mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, subId, slot, state)
+                                .sendToTarget();
+                    }
+                }
+            }
         }
     }
+
+    private final UserSwitchObserver mUserSwitchObserver = new UserSwitchObserver() {
+        @Override
+        public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
+                    newUserId, 0, reply));
+        }
+
+        @Override
+        public void onUserSwitchComplete(int newUserId) throws RemoteException {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
+                    newUserId, 0));
+        }
+    };
 
     private void updateAirplaneModeState() {
         // ACTION_AIRPLANE_MODE_CHANGED do not broadcast if device set AirplaneMode ON and boot
@@ -1661,7 +1853,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
+     * If a user is encrypted or not.
+     * This is NOT related to the lock screen being visible or not.
+     *
+     * @param userId The user.
+     * @return {@code true} when encrypted.
+     * @see UserManager#isUserUnlocked()
+     * @see Intent#ACTION_USER_UNLOCKED
+     */
+    public boolean isUserUnlocked(int userId) {
+        return mUserIsUnlocked.get(userId);
+    }
+
+    /**
      * Called whenever passive authentication is requested or aborted by a sensor.
+     *
      * @param active If the interrupt started or ended.
      */
     public void onAuthInterruptDetected(boolean active) {
@@ -1699,32 +1905,37 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean shouldListenForFace = shouldListenForFace();
         if (mFaceRunningState == BIOMETRIC_STATE_RUNNING && !shouldListenForFace) {
             stopListeningForFace();
-        } else if (mFaceRunningState != BIOMETRIC_STATE_RUNNING
-                && shouldListenForFace) {
+        } else if (mFaceRunningState != BIOMETRIC_STATE_RUNNING && shouldListenForFace) {
             startListeningForFace();
         }
     }
 
     private boolean shouldListenForFingerprintAssistant() {
+        BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(getCurrentUser());
         return mAssistantVisible && mKeyguardOccluded
-                && !mUserFingerprintAuthenticated.get(getCurrentUser(), false)
+                && !(fingerprint != null && fingerprint.mAuthenticated)
                 && !mUserHasTrust.get(getCurrentUser(), false);
     }
 
     private boolean shouldListenForFaceAssistant() {
+        BiometricAuthenticated face = mUserFaceAuthenticated.get(getCurrentUser());
         return mAssistantVisible && mKeyguardOccluded
-                && !mUserFaceAuthenticated.get(getCurrentUser(), false)
+                && !(face != null && face.mAuthenticated)
                 && !mUserHasTrust.get(getCurrentUser(), false);
     }
 
     private boolean shouldListenForFingerprint() {
+        final boolean allowedOnBouncer =
+                !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
+
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser;
+                && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser
+                && allowedOnBouncer;
         return shouldListen;
     }
 
@@ -1732,12 +1943,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * If face auth is allows to scan on this exact moment.
      */
     public boolean shouldListenForFace() {
-        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
+        final boolean statusBarShadeLocked =
+                mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED;
+        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
+                && !statusBarShadeLocked;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
-        final boolean isLockOutOrLockDown =
-                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_LOCKOUT)
-                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+        final boolean isLockDown =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
                         || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
         final boolean isEncryptedOrTimedOut =
                 containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT)
@@ -1751,17 +1964,62 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
 
         // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
-        // Lockout/lockdown modes shouldn't scan, since they are more explicit.
+        // Lock-down mode shouldn't scan, since it is more explicit.
         boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer)
-                && !isLockOutOrLockDown;
+                && !isLockDown;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
-        return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
+        final boolean shouldListen =
+                (mBouncer || mAuthInterruptActive || awakeKeyguard
+                        || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && !mSecureCameraLaunched;
+
+        // Aggregate relevant fields for debug logging.
+        if (DEBUG_FACE || DEBUG_SPEW) {
+            final KeyguardFaceListenModel model = new KeyguardFaceListenModel(
+                    System.currentTimeMillis(),
+                    user,
+                    shouldListen,
+                    mBouncer,
+                    mAuthInterruptActive,
+                    awakeKeyguard,
+                    shouldListenForFaceAssistant(),
+                    mSwitchingUser,
+                    isFaceDisabled(user),
+                    becauseCannotSkipBouncer,
+                    mKeyguardGoingAway,
+                    mFaceSettingEnabledForUser.get(user),
+                    mLockIconPressed,
+                    strongAuthAllowsScanning,
+                    mIsPrimaryUser,
+                    mSecureCameraLaunched);
+            maybeLogFaceListenerModelData(model);
+        }
+
+        return shouldListen;
+    }
+
+    private void maybeLogFaceListenerModelData(KeyguardFaceListenModel model) {
+        // Too chatty, but very useful when debugging issues.
+        if (DEBUG_SPEW) {
+            Log.v(TAG, model.toString());
+        }
+
+        // Add model data to the historical buffer.
+        if (DEBUG_FACE && mFaceRunningState != BIOMETRIC_STATE_RUNNING
+                && model.isListeningForFace()) {
+            if (mFaceListenModels == null) {
+                mFaceListenModels = new ArrayDeque<>(FACE_LISTEN_CALLS_QUEUE_SIZE);
+            }
+            if (mFaceListenModels.size() >= FACE_LISTEN_CALLS_QUEUE_SIZE) {
+                mFaceListenModels.remove();
+            }
+            mFaceListenModels.add(model);
+        }
     }
 
     /**
@@ -1770,8 +2028,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public void onLockIconPressed() {
         mLockIconPressed = true;
-        mUserFaceAuthenticated.put(getCurrentUser(), false);
+        final int userId = getCurrentUser();
+        mUserFaceAuthenticated.put(userId, null);
         updateFaceListeningState();
+        mStrongAuthTracker.onStrongAuthRequiredChanged(userId);
     }
 
     private void startListeningForFingerprint() {
@@ -1838,9 +2098,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * If face hardware is available, user has enrolled and enabled auth via setting.
      */
     public boolean isFaceAuthEnabledForUser(int userId) {
-        return mFaceManager != null && mFaceManager.isHardwareDetected()
+        // TODO(b/140034352)
+        return whitelistIpcs(() -> mFaceManager != null && mFaceManager.isHardwareDetected()
                 && mFaceManager.hasEnrolledTemplates(userId)
-                && mFaceSettingEnabledForUser.get(userId);
+                && mFaceSettingEnabledForUser.get(userId));
     }
 
     private void stopListeningForFingerprint() {
@@ -1849,6 +2110,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
                 mFingerprintCancelSignal = null;
+                if (!mHandler.hasCallbacks(mCancelNotReceived)) {
+                    mHandler.postDelayed(mCancelNotReceived, DEFAULT_CANCEL_SIGNAL_TIMEOUT);
+                }
             }
             setFingerprintRunningState(BIOMETRIC_STATE_CANCELLING);
         }
@@ -1863,6 +2127,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (mFaceCancelSignal != null) {
                 mFaceCancelSignal.cancel();
                 mFaceCancelSignal = null;
+                if (!mHandler.hasCallbacks(mCancelNotReceived)) {
+                    mHandler.postDelayed(mCancelNotReceived, DEFAULT_CANCEL_SIGNAL_TIMEOUT);
+                }
             }
             setFaceRunningState(BIOMETRIC_STATE_CANCELLING);
         }
@@ -1910,10 +2177,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * @param hasLockscreenWallpaper Whether Keyguard has a lockscreen wallpaper.
      */
     public void setHasLockscreenWallpaper(boolean hasLockscreenWallpaper) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         if (hasLockscreenWallpaper != mHasLockscreenWallpaper) {
             mHasLockscreenWallpaper = hasLockscreenWallpaper;
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
                     cb.onHasLockscreenWallpaperChanged(hasLockscreenWallpaper);
@@ -1932,9 +2199,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_DPM_STATE_CHANGED}
      */
-    private void handleDevicePolicyManagerStateChanged() {
+    private void handleDevicePolicyManagerStateChanged(int userId) {
+        Assert.isMainThread();
         updateFingerprintListeningState();
-        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+        updateSecondaryLockscreenRequirement(userId);
+        for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onDevicePolicyManagerStateChanged();
@@ -1945,7 +2214,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Handle {@link #MSG_USER_SWITCHING}
      */
-    private void handleUserSwitching(int userId, IRemoteCallback reply) {
+    @VisibleForTesting
+    void handleUserSwitching(int userId, IRemoteCallback reply) {
+        Assert.isMainThread();
+        clearBiometricRecognized();
+        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1962,6 +2235,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_USER_SWITCH_COMPLETE}
      */
     private void handleUserSwitchComplete(int userId) {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1971,41 +2245,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * This is exposed since {@link Intent#ACTION_BOOT_COMPLETED} is not sticky. If
-     * keyguard crashes sometime after boot, then it will never receive this
-     * broadcast and hence not handle the event. This method is ultimately called by
-     * PhoneWindowManager in this case.
-     */
-    public void dispatchBootCompleted() {
-        mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
-    }
-
-    /**
-     * Handle {@link #MSG_BOOT_COMPLETED}
-     */
-    private void handleBootCompleted() {
-        if (mBootCompleted) return;
-        mBootCompleted = true;
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onBootCompleted();
-            }
-        }
-    }
-
-    /**
-     * We need to store this state in the KeyguardUpdateMonitor since this class will not be
-     * destroyed.
-     */
-    public boolean hasBootCompleted() {
-        return mBootCompleted;
-    }
-
-    /**
      * Handle {@link #MSG_DEVICE_PROVISIONED}
      */
     private void handleDeviceProvisioned() {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -2023,6 +2266,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_PHONE_STATE_CHANGED}
      */
     private void handlePhoneStateChanged(String newState) {
+        Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handlePhoneStateChanged(" + newState + ")");
         if (TelephonyManager.EXTRA_STATE_IDLE.equals(newState)) {
             mPhoneState = TelephonyManager.CALL_STATE_IDLE;
@@ -2043,6 +2287,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_RINGER_MODE_CHANGED}
      */
     private void handleRingerModeChange(int mode) {
+        Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handleRingerModeChange(" + mode + ")");
         mRingMode = mode;
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -2057,6 +2302,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_TIME_UPDATE}
      */
     private void handleTimeUpdate() {
+        Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handleTimeUpdate");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -2070,6 +2316,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle (@line #MSG_TIMEZONE_UPDATE}
      */
     private void handleTimeZoneUpdate(String timeZone) {
+        Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handleTimeZoneUpdate");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -2085,6 +2332,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_BATTERY_UPDATE}
      */
     private void handleBatteryUpdate(BatteryStatus status) {
+        Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handleBatteryUpdate");
         final boolean batteryUpdateInteresting = isBatteryUpdateInteresting(mBatteryStatus, status);
         mBatteryStatus = status;
@@ -2102,13 +2350,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle Telephony status during Boot for CarrierText display policy
      */
     @VisibleForTesting
-    void updateTelephonyCapable(boolean capable){
+    void updateTelephonyCapable(boolean capable) {
+        Assert.isMainThread();
         if (capable == mTelephonyCapable) {
             return;
         }
         mTelephonyCapable = capable;
-        for (WeakReference<KeyguardUpdateMonitorCallback> ref : mCallbacks) {
-            KeyguardUpdateMonitorCallback cb = ref.get();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onTelephonyCapable(mTelephonyCapable);
             }
@@ -2119,11 +2368,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
     @VisibleForTesting
-    void handleSimStateChange(int subId, int slotId, State state) {
-        checkIsHandlerThread();
+    void handleSimStateChange(int subId, int slotId, int state) {
+        Assert.isMainThread();
         if (DEBUG_SIM_STATES) {
             Log.d(TAG, "handleSimStateChange(subId=" + subId + ", slotId="
-                    + slotId + ", state=" + state +")");
+                    + slotId + ", state=" + state + ")");
         }
 
         boolean becameAbsent = false;
@@ -2131,7 +2380,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             Log.w(TAG, "invalid subId in handleSimStateChange()");
             /* Only handle No SIM(ABSENT) and Card Error(CARD_IO_ERROR) due to
              * handleServiceStateChange() handle other case */
-            if (state == State.ABSENT) {
+            if (state == TelephonyManager.SIM_STATE_ABSENT) {
                 updateTelephonyCapable(true);
                 // Even though the subscription is not valid anymore, we need to notify that the
                 // SIM card was removed so we can update the UI.
@@ -2140,10 +2389,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     // Set the SIM state of all SimData associated with that slot to ABSENT se we
                     // do not move back into PIN/PUK locked and not detect the change below.
                     if (data.slotId == slotId) {
-                        data.simState = State.ABSENT;
+                        data.simState = TelephonyManager.SIM_STATE_ABSENT;
                     }
                 }
-            } else if (state == State.CARD_IO_ERROR) {
+            } else if (state == TelephonyManager.SIM_STATE_CARD_IO_ERROR) {
                 updateTelephonyCapable(true);
             } else {
                 return;
@@ -2162,7 +2411,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             data.subId = subId;
             data.slotId = slotId;
         }
-        if ((changed || becameAbsent) && state != State.UNKNOWN) {
+        if ((changed || becameAbsent) && state != TelephonyManager.SIM_STATE_UNKNOWN) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
@@ -2191,12 +2440,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         mServiceStates.put(subId, serviceState);
 
-        for (int j = 0; j < mCallbacks.size(); j++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
-            if (cb != null) {
-                cb.onRefreshCarrierInfo();
-            }
-        }
+        callbacksRefreshCarrierInfo();
     }
 
     public boolean isKeyguardVisible() {
@@ -2209,7 +2453,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * <p>Needs to be called from the main thread.
      */
     public void onKeyguardVisibilityChanged(boolean showing) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         Log.d(TAG, "onKeyguardVisibilityChanged(" + showing + ")");
         mKeyguardIsVisible = showing;
 
@@ -2236,21 +2480,31 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean resolveNeedsSlowUnlockTransition() {
-        if (mUserManager.isUserUnlocked(getCurrentUser())) {
+        if (isUserUnlocked(getCurrentUser())) {
             return false;
         }
         Intent homeIntent = new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME);
         ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(homeIntent,
                 0 /* flags */);
+
+        // TODO(b/160971249): Replace in the future by resolving activity as user.
+        if (resolveInfo == null && mIsAutomotive) {
+            Log.w(TAG, "resolveNeedsSlowUnlockTransition: returning false since activity "
+                    + "could not be resolved.");
+            return false;
+        }
+
         return FALLBACK_HOME_COMPONENT.equals(resolveInfo.getComponentInfo().getComponentName());
     }
 
     /**
      * Handle {@link #MSG_KEYGUARD_BOUNCER_CHANGED}
+     *
      * @see #sendKeyguardBouncerChanged(boolean)
      */
     private void handleKeyguardBouncerChanged(int bouncer) {
+        Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handleKeyguardBouncerChanged(" + bouncer + ")");
         boolean isBouncer = (bouncer == 1);
         mBouncer = isBouncer;
@@ -2261,6 +2515,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             // camera requests dismiss keyguard (tapping on photos for example). When these happen,
             // face auth should resume.
             mSecureCameraLaunched = false;
+        } else {
+            mCredentialAttempted = false;
         }
 
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -2276,6 +2532,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_REPORT_EMERGENCY_CALL_ACTION}
      */
     private void handleReportEmergencyCallAction() {
+        Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -2288,7 +2545,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         final boolean nowPluggedIn = current.isPluggedIn();
         final boolean wasPluggedIn = old.isPluggedIn();
         final boolean stateChangedWhilePluggedIn = wasPluggedIn && nowPluggedIn
-            && (old.status != current.status);
+                && (old.status != current.status);
 
         // change in plug state is always interesting
         if (wasPluggedIn != nowPluggedIn || stateChangedWhilePluggedIn) {
@@ -2308,38 +2565,45 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return false;
     }
 
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     /**
      * Remove the given observer's callback.
      *
      * @param callback The callback to remove
      */
     public void removeCallback(KeyguardUpdateMonitorCallback callback) {
-        checkIsHandlerThread();
-        if (DEBUG) Log.v(TAG, "*** unregister callback for " + callback);
-        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-            if (mCallbacks.get(i).get() == callback) {
-                mCallbacks.remove(i);
-            }
+        Assert.isMainThread();
+        if (DEBUG) {
+            Log.v(TAG, "*** unregister callback for " + callback);
         }
+
+        mCallbacks.removeIf(el -> el.get() == callback);
     }
 
     /**
      * Register to receive notifications about general keyguard information
      * (see {@link InfoCallback}.
+     *
      * @param callback The callback to register
      */
     public void registerCallback(KeyguardUpdateMonitorCallback callback) {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         if (DEBUG) Log.v(TAG, "*** register callback for " + callback);
         // Prevent adding duplicate callbacks
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             if (mCallbacks.get(i).get() == callback) {
-                if (DEBUG) Log.e(TAG, "Object tried to add another callback",
-                        new Exception("Called by"));
+                if (DEBUG) {
+                    Log.e(TAG, "Object tried to add another callback",
+                            new Exception("Called by"));
+                }
                 return;
             }
         }
-        mCallbacks.add(new WeakReference<KeyguardUpdateMonitorCallback>(callback));
+        mCallbacks.add(new WeakReference<>(callback));
         removeCallback(null); // remove unused references
         sendUpdates(callback);
     }
@@ -2400,8 +2664,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     @MainThread
     public void reportSimUnlocked(int subId) {
         if (DEBUG_SIM_STATES) Log.v(TAG, "reportSimUnlocked(subId=" + subId + ")");
-        int slotId = SubscriptionManager.getSlotIndex(subId);
-        handleSimStateChange(subId, slotId, State.READY);
+        handleSimStateChange(subId, getSlotId(subId), TelephonyManager.SIM_STATE_READY);
     }
 
     /**
@@ -2410,20 +2673,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      *
      * @param bypassHandler runs immediately.
      *
-     * NOTE: Must be called from UI thread if bypassHandler == true.
+     *                      NOTE: Must be called from UI thread if bypassHandler == true.
      */
     public void reportEmergencyCallAction(boolean bypassHandler) {
         if (!bypassHandler) {
             mHandler.obtainMessage(MSG_REPORT_EMERGENCY_CALL_ACTION).sendToTarget();
         } else {
-            checkIsHandlerThread();
+            Assert.isMainThread();
             handleReportEmergencyCallAction();
         }
     }
 
     /**
      * @return Whether the device is provisioned (whether they have gone through
-     *   the setup wizard)
+     * the setup wizard)
      */
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
@@ -2434,6 +2697,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public void clearBiometricRecognized() {
+        Assert.isMainThread();
         mUserFingerprintAuthenticated.clear();
         mUserFaceAuthenticated.clear();
         mTrustManager.clearAllBiometricRecognized(BiometricSourceType.FINGERPRINT);
@@ -2454,6 +2718,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     /**
      * If any SIM cards are currently secure.
+     *
      * @see #isSimPinSecure(State)
      */
     public boolean isSimPinSecure() {
@@ -2464,12 +2729,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return false;
     }
 
-    public State getSimState(int subId) {
+    public int getSimState(int subId) {
         if (mSimDatas.containsKey(subId)) {
             return mSimDatas.get(subId).simState;
         } else {
-            return State.UNKNOWN;
+            return TelephonyManager.SIM_STATE_UNKNOWN;
         }
+    }
+
+    private int getSlotId(int subId) {
+        if (!mSimDatas.containsKey(subId)) {
+            refreshSimState(subId, SubscriptionManager.getSlotIndex(subId));
+        }
+        return mSimDatas.get(subId).slotId;
     }
 
     private final TaskStackChangeListener
@@ -2494,20 +2766,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * @return true if and only if the state has changed for the specified {@code slotId}
      */
     private boolean refreshSimState(int subId, int slotId) {
-
-        // This is awful. It exists because there are two APIs for getting the SIM status
-        // that don't return the complete set of values and have different types. In Keyguard we
-        // need IccCardConstants, but TelephonyManager would only give us
-        // TelephonyManager.SIM_STATE*, so we retrieve it manually.
-        final TelephonyManager tele = TelephonyManager.from(mContext);
-        int simState =  tele.getSimState(slotId);
-        State state;
-        try {
-            state = State.intToState(simState);
-        } catch(IllegalArgumentException ex) {
-            Log.w(TAG, "Unknown sim state: " + simState);
-            state = State.UNKNOWN;
-        }
+        final TelephonyManager tele =
+                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        int state = (tele != null) ?
+                tele.getSimState(slotId) : TelephonyManager.SIM_STATE_UNKNOWN;
         SimData data = mSimDatas.get(subId);
         final boolean changed;
         if (data == null) {
@@ -2524,10 +2786,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * If the {@code state} is currently requiring a SIM PIN, PUK, or is disabled.
      */
-    public static boolean isSimPinSecure(IccCardConstants.State state) {
-        return (state == IccCardConstants.State.PIN_REQUIRED
-                || state == IccCardConstants.State.PUK_REQUIRED
-                || state == IccCardConstants.State.PERM_DISABLED);
+    public static boolean isSimPinSecure(int state) {
+        return (state == TelephonyManager.SIM_STATE_PIN_REQUIRED
+                || state == TelephonyManager.SIM_STATE_PUK_REQUIRED
+                || state == TelephonyManager.SIM_STATE_PERM_DISABLED);
     }
 
     public DisplayClientState getCachedDisplayClientState() {
@@ -2548,7 +2810,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public void dispatchFinishedGoingToSleep(int why) {
-        synchronized(this) {
+        synchronized (this) {
             mDeviceInteractive = false;
         }
         mHandler.sendMessage(mHandler.obtainMessage(MSG_FINISHED_GOING_TO_SLEEP, why, 0));
@@ -2562,7 +2824,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public void dispatchScreenTurnedOff() {
-        synchronized(this) {
+        synchronized (this) {
             mScreenOn = false;
         }
         mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_OFF);
@@ -2576,6 +2838,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DREAMING_STATE_CHANGED, 0, 0));
     }
 
+    /**
+     * Sends a message to update the keyguard going away state on the main thread.
+     *
+     * @param goingAway Whether the keyguard is going away.
+     */
+    public void dispatchKeyguardGoingAway(boolean goingAway) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_KEYGUARD_GOING_AWAY, goingAway));
+    }
+
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
     }
@@ -2586,18 +2857,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     /**
      * Find the next SubscriptionId for a SIM in the given state, favoring lower slot numbers first.
-     * @param state
+     *
      * @return subid or {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if none found
      */
-    public int getNextSubIdForState(State state) {
+    public int getNextSubIdForState(int state) {
         List<SubscriptionInfo> list = getSubscriptionInfo(false /* forceReload */);
         int resultId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         int bestSlotId = Integer.MAX_VALUE; // Favor lowest slot first
         for (int i = 0; i < list.size(); i++) {
             final SubscriptionInfo info = list.get(i);
             final int id = info.getSubscriptionId();
-            int slotId = SubscriptionManager.getSlotIndex(id);
-            if (state == getSimState(id) && bestSlotId > slotId ) {
+            int slotId = getSlotId(id);
+            if (state == getSimState(id) && bestSlotId > slotId) {
                 resultId = id;
                 bestSlotId = slotId;
             }
@@ -2622,10 +2893,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void updateLogoutEnabled() {
-        checkIsHandlerThread();
+        Assert.isMainThread();
         boolean logoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         if (mLogoutEnabled != logoutEnabled) {
             mLogoutEnabled = logoutEnabled;
+
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
@@ -2635,36 +2907,42 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void checkIsHandlerThread() {
-        if (sDisableHandlerCheckForTesting) {
-            return;
-        }
-        if (!mHandler.getLooper().isCurrentThread()) {
-            Log.wtf(TAG, "must call on mHandler's thread "
-                    + mHandler.getLooper().getThread() + ", not " + Thread.currentThread());
-        }
-    }
-
     /**
-     * Turn off the handler check for testing.
-     *
-     * This is necessary because currently tests are not too careful about which thread they call
-     * into this class on.
-     *
-     * Note that this must be called before scheduling any work involving KeyguardUpdateMonitor
-     * instances.
-     *
-     * TODO: fix the tests and remove this.
+     * Unregister all listeners.
      */
-    @VisibleForTesting
-    public static void disableHandlerCheckForTesting(Instrumentation instrumentation) {
-        Preconditions.checkNotNull(instrumentation, "Must only call this method in tests!");
-        // Don't need synchronization here *if* the callers follow the contract and call this only
-        // before scheduling work for KeyguardUpdateMonitor on other threads, because the scheduling
-        // of that work forces a happens-before relationship.
-        sDisableHandlerCheckForTesting = true;
+    public void destroy() {
+        // TODO: inject these dependencies:
+        TelephonyManager telephony =
+                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephony != null) {
+            telephony.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+
+        mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionListener);
+
+        if (mDeviceProvisionedObserver != null) {
+            mContext.getContentResolver().unregisterContentObserver(mDeviceProvisionedObserver);
+        }
+
+        try {
+            ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
+        } catch (RemoteException e) {
+            Log.d(TAG, "RemoteException onDestroy. cannot unregister userSwitchObserver");
+        }
+
+        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+
+        mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
+        mBroadcastDispatcher.unregisterReceiver(mBroadcastAllReceiver);
+        mRingerModeTracker.getRingerMode().removeObserver(mRingerModeObserver);
+
+        mLockPatternUtils.unregisterStrongAuthTracker(mStrongAuthTracker);
+        mTrustManager.unregisterTrustListener(this);
+
+        mHandler.removeCallbacksAndMessages(null);
     }
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
         pw.println("  SIM States:");
@@ -2685,9 +2963,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (mFpm != null && mFpm.isHardwareDetected()) {
             final int userId = ActivityManager.getCurrentUser();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
+            BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
-            pw.println("    allowed=" + isUnlockingWithBiometricAllowed());
-            pw.println("    auth'd=" + mUserFingerprintAuthenticated.get(userId));
+            pw.println("    allowed="
+                    + (fingerprint != null
+                            && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric)));
+            pw.println("    auth'd=" + (fingerprint != null && fingerprint.mAuthenticated));
             pw.println("    authSinceBoot="
                     + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
             pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
@@ -2700,9 +2981,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
             final int userId = ActivityManager.getCurrentUser();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
+            BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
             pw.println("  Face authentication state (user=" + userId + ")");
-            pw.println("    allowed=" + isUnlockingWithBiometricAllowed());
-            pw.println("    auth'd=" + mUserFaceAuthenticated.get(userId));
+            pw.println("    allowed="
+                    + (face != null && isUnlockingWithBiometricAllowed(face.mIsStrongBiometric)));
+            pw.println("    auth'd="
+                    + (face != null && face.mAuthenticated));
             pw.println("    authSinceBoot="
                     + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
             pw.println("    disabled(DPM)=" + isFaceDisabled(userId));
@@ -2711,6 +2995,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    enabledByUser=" + mFaceSettingEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
+        }
+        if (mFaceListenModels != null && !mFaceListenModels.isEmpty()) {
+            final SimpleDateFormat dateFormat =
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+            pw.println("  Face listen results (last " + FACE_LISTEN_CALLS_QUEUE_SIZE + " calls):");
+            for (final KeyguardFaceListenModel model : mFaceListenModels) {
+                final String time = dateFormat.format(new Date(model.getTimeMillis()));
+                pw.println("    " + time + " " + model.toString());
+            }
+        }
+        if (mIsAutomotive) {
+            pw.println("  Running on Automotive build");
         }
     }
 }

@@ -31,6 +31,8 @@ public final class GateKeeperResponse implements Parcelable {
     public static final int RESPONSE_OK = 0;
     public static final int RESPONSE_RETRY = 1;
 
+    public static final GateKeeperResponse ERROR = createGenericResponse(RESPONSE_ERROR);
+
     private final int mResponseCode;
 
     private int mTimeout;

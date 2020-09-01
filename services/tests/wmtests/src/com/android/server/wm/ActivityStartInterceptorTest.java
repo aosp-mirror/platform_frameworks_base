@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -44,6 +45,7 @@ import android.testing.DexmakerShareClassLoaderRule;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.app.BlockedAppActivity;
 import com.android.internal.app.HarmfulAppWarningActivity;
 import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
@@ -51,6 +53,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageManagerService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -90,7 +93,7 @@ public class ActivityStartInterceptorTest {
     @Mock
     private ActivityTaskManagerService mService;
     @Mock
-    private RootActivityContainer mRootActivityContainer;
+    private RootWindowContainer mRootWindowContainer;
     @Mock
     private ActivityStackSupervisor mSupervisor;
     @Mock
@@ -105,6 +108,8 @@ public class ActivityStartInterceptorTest {
     private PackageManagerService mPackageManager;
     @Mock
     private ActivityManagerInternal mAmInternal;
+    @Mock
+    private LockTaskController mLockTaskController;
 
     private ActivityStartInterceptor mInterceptor;
     private ActivityInfo mAInfo = new ActivityInfo();
@@ -114,9 +119,9 @@ public class ActivityStartInterceptorTest {
         MockitoAnnotations.initMocks(this);
         mService.mAmInternal = mAmInternal;
         mInterceptor = new ActivityStartInterceptor(
-                mService, mSupervisor, mRootActivityContainer, mContext);
+                mService, mSupervisor, mRootWindowContainer, mContext);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,
-                TEST_START_FLAGS, TEST_CALLING_PACKAGE);
+                TEST_START_FLAGS, TEST_CALLING_PACKAGE, null);
 
         // Mock ActivityManagerInternal
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
@@ -137,17 +142,30 @@ public class ActivityStartInterceptorTest {
         // Mock KeyguardManager
         when(mContext.getSystemService(Context.KEYGUARD_SERVICE)).thenReturn(mKeyguardManager);
         when(mKeyguardManager.createConfirmDeviceCredentialIntent(
-                nullable(CharSequence.class), nullable(CharSequence.class), eq(TEST_USER_ID)))
-                .thenReturn(CONFIRM_CREDENTIALS_INTENT);
+                nullable(CharSequence.class), nullable(CharSequence.class), eq(TEST_USER_ID),
+                eq(true))).thenReturn(CONFIRM_CREDENTIALS_INTENT);
 
         // Mock PackageManager
         when(mService.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn(null);
 
+        // Mock LockTaskController
+        mAInfo.lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
+        when(mService.getLockTaskController()).thenReturn(mLockTaskController);
+        when(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT))
+                .thenReturn(true);
+
         // Initialise activity info
         mAInfo.applicationInfo = new ApplicationInfo();
         mAInfo.packageName = mAInfo.applicationInfo.packageName = TEST_PACKAGE_NAME;
+    }
+
+    @After
+    public void tearDown() {
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
     }
 
     @Test
@@ -167,16 +185,8 @@ public class ActivityStartInterceptorTest {
 
     @Test
     public void testSuspendedPackage() {
-        mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
         final String suspendingPackage = "com.test.suspending.package";
-        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
-                .setMessage("Test Message")
-                .setIcon(0x11110001)
-                .build();
-        when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(suspendingPackage);
-        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(dialogInfo);
+        final SuspendDialogInfo dialogInfo = suspendPackage(suspendingPackage);
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
 
@@ -188,6 +198,31 @@ public class ActivityStartInterceptorTest {
         assertEquals(TEST_PACKAGE_NAME,
                 mInterceptor.mIntent.getStringExtra(SuspendedAppActivity.EXTRA_SUSPENDED_PACKAGE));
         assertEquals(TEST_USER_ID, mInterceptor.mIntent.getIntExtra(Intent.EXTRA_USER_ID, -1000));
+    }
+
+    private SuspendDialogInfo suspendPackage(String suspendingPackage) {
+        mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
+        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
+                .setMessage("Test Message")
+                .setIcon(0x11110001)
+                .build();
+        when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(suspendingPackage);
+        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, suspendingPackage,
+                TEST_USER_ID)).thenReturn(dialogInfo);
+        return dialogInfo;
+    }
+
+    @Test
+    public void testInterceptLockTaskModeViolationPackage() {
+        when(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT))
+                .thenReturn(false);
+
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+
+        assertTrue(BlockedAppActivity.createIntent(TEST_USER_ID, TEST_PACKAGE_NAME)
+                .filterEquals(mInterceptor.mIntent));
     }
 
     @Test
@@ -204,7 +239,21 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testWorkChallenge() {
+    public void testInterceptQuietProfileWhenPackageSuspended() {
+        suspendPackage("com.test.suspending.package");
+        // GIVEN that the user the activity is starting as is currently in quiet mode
+        when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
+
+        // THEN calling intercept returns true
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+
+        // THEN the returned intent is the quiet mode intent
+        assertTrue(UnlaunchableAppActivity.createInQuietModeDialogIntent(TEST_USER_ID)
+                .filterEquals(mInterceptor.mIntent));
+    }
+
+    @Test
+    public void testLockedManagedProfile() {
         // GIVEN that the user the activity is starting as is currently locked
         when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
 

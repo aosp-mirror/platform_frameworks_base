@@ -16,7 +16,11 @@
 
 #include "ReliableSurface.h"
 
+#include <log/log_main.h>
 #include <private/android/AHardwareBufferHelpers.h>
+// TODO: this should be including apex instead.
+#include <system/window.h>
+#include <vndk/window.h>
 
 namespace android::uirenderer::renderthread {
 
@@ -26,80 +30,61 @@ namespace android::uirenderer::renderthread {
 // to propagate this error back to the caller
 constexpr bool DISABLE_BUFFER_PREFETCH = true;
 
-// TODO: Make surface less protected
-// This exists because perform is a varargs, and ANativeWindow has no va_list perform.
-// So wrapping/chaining that is hard. Telling the compiler to ignore protected is easy, so we do
-// that instead
-struct SurfaceExposer : Surface {
-    // Make warnings happy
-    SurfaceExposer() = delete;
-
-    using Surface::cancelBuffer;
-    using Surface::dequeueBuffer;
-    using Surface::lockBuffer_DEPRECATED;
-    using Surface::perform;
-    using Surface::queueBuffer;
-    using Surface::setBufferCount;
-    using Surface::setSwapInterval;
-};
-
-#define callProtected(surface, func, ...) ((*surface).*&SurfaceExposer::func)(__VA_ARGS__)
-
-ReliableSurface::ReliableSurface(sp<Surface>&& surface) : mSurface(std::move(surface)) {
-    LOG_ALWAYS_FATAL_IF(!mSurface, "Error, unable to wrap a nullptr");
-
-    ANativeWindow::setSwapInterval = hook_setSwapInterval;
-    ANativeWindow::dequeueBuffer = hook_dequeueBuffer;
-    ANativeWindow::cancelBuffer = hook_cancelBuffer;
-    ANativeWindow::queueBuffer = hook_queueBuffer;
-    ANativeWindow::query = hook_query;
-    ANativeWindow::perform = hook_perform;
-
-    ANativeWindow::dequeueBuffer_DEPRECATED = hook_dequeueBuffer_DEPRECATED;
-    ANativeWindow::cancelBuffer_DEPRECATED = hook_cancelBuffer_DEPRECATED;
-    ANativeWindow::lockBuffer_DEPRECATED = hook_lockBuffer_DEPRECATED;
-    ANativeWindow::queueBuffer_DEPRECATED = hook_queueBuffer_DEPRECATED;
+ReliableSurface::ReliableSurface(ANativeWindow* window) : mWindow(window) {
+    LOG_ALWAYS_FATAL_IF(!mWindow, "Error, unable to wrap a nullptr");
+    ANativeWindow_acquire(mWindow);
 }
 
 ReliableSurface::~ReliableSurface() {
     clearReservedBuffer();
+    // Clear out the interceptors for proper hygiene.
+    // As a concrete example, if the underlying ANativeWindow is associated with
+    // an EGLSurface that is still in use, then if we don't clear out the
+    // interceptors then we walk into undefined behavior.
+    ANativeWindow_setCancelBufferInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setDequeueBufferInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setQueueBufferInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setPerformInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setQueryInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_release(mWindow);
 }
 
-void ReliableSurface::perform(int operation, va_list args) {
-    std::lock_guard _lock{mMutex};
+void ReliableSurface::init() {
+    int result = ANativeWindow_setCancelBufferInterceptor(mWindow, hook_cancelBuffer, this);
+    LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set cancelBuffer interceptor: error = %d",
+                        result);
 
-    switch (operation) {
-        case NATIVE_WINDOW_SET_USAGE:
-            mUsage = va_arg(args, uint32_t);
-            break;
-        case NATIVE_WINDOW_SET_USAGE64:
-            mUsage = va_arg(args, uint64_t);
-            break;
-        case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
-            /* width */ va_arg(args, uint32_t);
-            /* height */ va_arg(args, uint32_t);
-            mFormat = va_arg(args, PixelFormat);
-            break;
-        case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
-            mFormat = va_arg(args, PixelFormat);
-            break;
-    }
+    result = ANativeWindow_setDequeueBufferInterceptor(mWindow, hook_dequeueBuffer, this);
+    LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set dequeueBuffer interceptor: error = %d",
+                        result);
+
+    result = ANativeWindow_setQueueBufferInterceptor(mWindow, hook_queueBuffer, this);
+    LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set queueBuffer interceptor: error = %d",
+                        result);
+
+    result = ANativeWindow_setPerformInterceptor(mWindow, hook_perform, this);
+    LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set perform interceptor: error = %d",
+                        result);
+
+    result = ANativeWindow_setQueryInterceptor(mWindow, hook_query, this);
+    LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set query interceptor: error = %d",
+                        result);
 }
 
 int ReliableSurface::reserveNext() {
+    if constexpr (DISABLE_BUFFER_PREFETCH) {
+        return OK;
+    }
     {
         std::lock_guard _lock{mMutex};
         if (mReservedBuffer) {
             ALOGW("reserveNext called but there was already a buffer reserved?");
             return OK;
         }
-        if (mInErrorState) {
+        if (mBufferQueueState != OK) {
             return UNKNOWN_ERROR;
         }
         if (mHasDequeuedBuffer) {
-            return OK;
-        }
-        if constexpr (DISABLE_BUFFER_PREFETCH) {
             return OK;
         }
     }
@@ -111,7 +96,9 @@ int ReliableSurface::reserveNext() {
 
     int fenceFd = -1;
     ANativeWindowBuffer* buffer = nullptr;
-    int result = callProtected(mSurface, dequeueBuffer, &buffer, &fenceFd);
+
+    // Note that this calls back into our own hooked method.
+    int result = ANativeWindow_dequeueBuffer(mWindow, &buffer, &fenceFd);
 
     {
         std::lock_guard _lock{mMutex};
@@ -138,58 +125,11 @@ void ReliableSurface::clearReservedBuffer() {
         mHasDequeuedBuffer = false;
     }
     if (buffer) {
-        callProtected(mSurface, cancelBuffer, buffer, releaseFd);
+        // Note that clearReservedBuffer may be reentrant here, so
+        // mReservedBuffer must be cleared once we reach here to avoid recursing
+        // forever.
+        ANativeWindow_cancelBuffer(mWindow, buffer, releaseFd);
     }
-}
-
-int ReliableSurface::cancelBuffer(ANativeWindowBuffer* buffer, int fenceFd) {
-    clearReservedBuffer();
-    if (isFallbackBuffer(buffer)) {
-        if (fenceFd > 0) {
-            close(fenceFd);
-        }
-        return OK;
-    }
-    int result = callProtected(mSurface, cancelBuffer, buffer, fenceFd);
-    return result;
-}
-
-int ReliableSurface::dequeueBuffer(ANativeWindowBuffer** buffer, int* fenceFd) {
-    {
-        std::lock_guard _lock{mMutex};
-        if (mReservedBuffer) {
-            *buffer = mReservedBuffer;
-            *fenceFd = mReservedFenceFd.release();
-            mReservedBuffer = nullptr;
-            return OK;
-        }
-    }
-
-    int result = callProtected(mSurface, dequeueBuffer, buffer, fenceFd);
-    if (result != OK) {
-        ALOGW("dequeueBuffer failed, error = %d; switching to fallback", result);
-        *buffer = acquireFallbackBuffer();
-        *fenceFd = -1;
-        return *buffer ? OK : INVALID_OPERATION;
-    } else {
-        std::lock_guard _lock{mMutex};
-        mHasDequeuedBuffer = true;
-    }
-    return OK;
-}
-
-int ReliableSurface::queueBuffer(ANativeWindowBuffer* buffer, int fenceFd) {
-    clearReservedBuffer();
-
-    if (isFallbackBuffer(buffer)) {
-        if (fenceFd > 0) {
-            close(fenceFd);
-        }
-        return OK;
-    }
-
-    int result = callProtected(mSurface, queueBuffer, buffer, fenceFd);
-    return result;
 }
 
 bool ReliableSurface::isFallbackBuffer(const ANativeWindowBuffer* windowBuffer) const {
@@ -201,9 +141,9 @@ bool ReliableSurface::isFallbackBuffer(const ANativeWindowBuffer* windowBuffer) 
     return windowBuffer == scratchBuffer;
 }
 
-ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer() {
+ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
     std::lock_guard _lock{mMutex};
-    mInErrorState = true;
+    mBufferQueueState = error;
 
     if (mScratchBuffer) {
         return AHardwareBuffer_to_ANativeWindowBuffer(mScratchBuffer.get());
@@ -228,82 +168,115 @@ ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer() {
     return AHardwareBuffer_to_ANativeWindowBuffer(newBuffer);
 }
 
-Surface* ReliableSurface::getWrapped(const ANativeWindow* window) {
-    return getSelf(window)->mSurface.get();
-}
+int ReliableSurface::hook_dequeueBuffer(ANativeWindow* window,
+                                        ANativeWindow_dequeueBufferFn dequeueBuffer, void* data,
+                                        ANativeWindowBuffer** buffer, int* fenceFd) {
+    ReliableSurface* rs = reinterpret_cast<ReliableSurface*>(data);
+    {
+        std::lock_guard _lock{rs->mMutex};
+        if (rs->mReservedBuffer) {
+            *buffer = rs->mReservedBuffer;
+            *fenceFd = rs->mReservedFenceFd.release();
+            rs->mReservedBuffer = nullptr;
+            return OK;
+        }
+    }
 
-int ReliableSurface::hook_setSwapInterval(ANativeWindow* window, int interval) {
-    return callProtected(getWrapped(window), setSwapInterval, interval);
-}
-
-int ReliableSurface::hook_dequeueBuffer(ANativeWindow* window, ANativeWindowBuffer** buffer,
-                                        int* fenceFd) {
-    return getSelf(window)->dequeueBuffer(buffer, fenceFd);
-}
-
-int ReliableSurface::hook_cancelBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer,
-                                       int fenceFd) {
-    return getSelf(window)->cancelBuffer(buffer, fenceFd);
-}
-
-int ReliableSurface::hook_queueBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer,
-                                      int fenceFd) {
-    return getSelf(window)->queueBuffer(buffer, fenceFd);
-}
-
-int ReliableSurface::hook_dequeueBuffer_DEPRECATED(ANativeWindow* window,
-                                                   ANativeWindowBuffer** buffer) {
-    ANativeWindowBuffer* buf;
-    int fenceFd = -1;
-    int result = window->dequeueBuffer(window, &buf, &fenceFd);
+    int result = dequeueBuffer(window, buffer, fenceFd);
     if (result != OK) {
-        return result;
+        ALOGW("dequeueBuffer failed, error = %d; switching to fallback", result);
+        *buffer = rs->acquireFallbackBuffer(result);
+        *fenceFd = -1;
+        return *buffer ? OK : INVALID_OPERATION;
+    } else {
+        std::lock_guard _lock{rs->mMutex};
+        rs->mHasDequeuedBuffer = true;
     }
-    sp<Fence> fence(new Fence(fenceFd));
-    int waitResult = fence->waitForever("dequeueBuffer_DEPRECATED");
-    if (waitResult != OK) {
-        ALOGE("dequeueBuffer_DEPRECATED: Fence::wait returned an error: %d", waitResult);
-        window->cancelBuffer(window, buf, -1);
-        return waitResult;
-    }
-    *buffer = buf;
-    return result;
-}
-
-int ReliableSurface::hook_cancelBuffer_DEPRECATED(ANativeWindow* window,
-                                                  ANativeWindowBuffer* buffer) {
-    return window->cancelBuffer(window, buffer, -1);
-}
-
-int ReliableSurface::hook_lockBuffer_DEPRECATED(ANativeWindow* window,
-                                                ANativeWindowBuffer* buffer) {
-    // This method is a no-op in Surface as well
     return OK;
 }
 
-int ReliableSurface::hook_queueBuffer_DEPRECATED(ANativeWindow* window,
-                                                 ANativeWindowBuffer* buffer) {
-    return window->queueBuffer(window, buffer, -1);
+int ReliableSurface::hook_cancelBuffer(ANativeWindow* window,
+                                       ANativeWindow_cancelBufferFn cancelBuffer, void* data,
+                                       ANativeWindowBuffer* buffer, int fenceFd) {
+    ReliableSurface* rs = reinterpret_cast<ReliableSurface*>(data);
+    rs->clearReservedBuffer();
+    if (rs->isFallbackBuffer(buffer)) {
+        if (fenceFd > 0) {
+            close(fenceFd);
+        }
+        return OK;
+    }
+    return cancelBuffer(window, buffer, fenceFd);
 }
 
-int ReliableSurface::hook_query(const ANativeWindow* window, int what, int* value) {
-    return getWrapped(window)->query(what, value);
+int ReliableSurface::hook_queueBuffer(ANativeWindow* window,
+                                      ANativeWindow_queueBufferFn queueBuffer, void* data,
+                                      ANativeWindowBuffer* buffer, int fenceFd) {
+    ReliableSurface* rs = reinterpret_cast<ReliableSurface*>(data);
+    rs->clearReservedBuffer();
+
+    if (rs->isFallbackBuffer(buffer)) {
+        if (fenceFd > 0) {
+            close(fenceFd);
+        }
+        return OK;
+    }
+
+    return queueBuffer(window, buffer, fenceFd);
 }
 
-int ReliableSurface::hook_perform(ANativeWindow* window, int operation, ...) {
+int ReliableSurface::hook_perform(ANativeWindow* window, ANativeWindow_performFn perform,
+                                  void* data, int operation, va_list args) {
     // Drop the reserved buffer if there is one since this (probably) mutated buffer dimensions
     // TODO: Filter to things that only affect the reserved buffer
     // TODO: Can we mutate the reserved buffer in some cases?
-    getSelf(window)->clearReservedBuffer();
-    va_list args;
-    va_start(args, operation);
-    int result = callProtected(getWrapped(window), perform, operation, args);
-    va_end(args);
+    ReliableSurface* rs = reinterpret_cast<ReliableSurface*>(data);
+    rs->clearReservedBuffer();
 
-    va_start(args, operation);
-    getSelf(window)->perform(operation, args);
-    va_end(args);
+    va_list argsCopy;
+    va_copy(argsCopy, args);
+    int result = perform(window, operation, argsCopy);
 
+    {
+        std::lock_guard _lock{rs->mMutex};
+
+        switch (operation) {
+            case ANATIVEWINDOW_PERFORM_SET_USAGE:
+                rs->mUsage = va_arg(args, uint32_t);
+                break;
+            case ANATIVEWINDOW_PERFORM_SET_USAGE64:
+                rs->mUsage = va_arg(args, uint64_t);
+                break;
+            case ANATIVEWINDOW_PERFORM_SET_BUFFERS_GEOMETRY:
+                /* width */ va_arg(args, uint32_t);
+                /* height */ va_arg(args, uint32_t);
+                rs->mFormat = static_cast<AHardwareBuffer_Format>(va_arg(args, int32_t));
+                break;
+            case ANATIVEWINDOW_PERFORM_SET_BUFFERS_FORMAT:
+                rs->mFormat = static_cast<AHardwareBuffer_Format>(va_arg(args, int32_t));
+                break;
+            case NATIVE_WINDOW_SET_BUFFER_COUNT:
+                size_t bufferCount = va_arg(args, size_t);
+                if (bufferCount >= rs->mExpectedBufferCount) {
+                    rs->mDidSetExtraBuffers = true;
+                } else {
+                    ALOGD("HOOK FAILED! Expected %zd got = %zd", rs->mExpectedBufferCount, bufferCount);
+                }
+                break;
+        }
+    }
+    return result;
+}
+
+int ReliableSurface::hook_query(const ANativeWindow *window, ANativeWindow_queryFn query,
+        void *data, int what, int *value) {
+    ReliableSurface* rs = reinterpret_cast<ReliableSurface*>(data);
+    int result = query(window, what, value);
+    if (what == ANATIVEWINDOW_QUERY_MIN_UNDEQUEUED_BUFFERS && result == OK) {
+        std::lock_guard _lock{rs->mMutex};
+        *value += rs->mExtraBuffers;
+        rs->mExpectedBufferCount = *value + 2;
+    }
     return result;
 }
 

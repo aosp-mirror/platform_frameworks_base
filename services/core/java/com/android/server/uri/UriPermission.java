@@ -16,6 +16,7 @@
 
 package com.android.server.uri;
 
+import android.annotation.Nullable;
 import android.app.GrantedUriPermission;
 import android.content.Intent;
 import android.os.Binder;
@@ -79,7 +80,7 @@ final class UriPermission {
      */
     long persistedCreateTime = INVALID_TIME;
 
-    private static final long INVALID_TIME = Long.MIN_VALUE;
+    static final long INVALID_TIME = Long.MIN_VALUE;
 
     private ArraySet<UriPermissionOwner> mReadOwners;
     private ArraySet<UriPermissionOwner> mWriteOwners;
@@ -96,7 +97,7 @@ final class UriPermission {
 
     private void updateModeFlags() {
         final int oldModeFlags = modeFlags;
-        modeFlags = ownedModeFlags | globalModeFlags | persistableModeFlags | persistedModeFlags;
+        modeFlags = ownedModeFlags | globalModeFlags | persistedModeFlags;
 
         if (Log.isLoggable(TAG, Log.VERBOSE) && (modeFlags != oldModeFlags)) {
             Slog.d(TAG,
@@ -123,7 +124,7 @@ final class UriPermission {
         updateModeFlags();
     }
 
-    void grantModes(int modeFlags, UriPermissionOwner owner) {
+    boolean grantModes(int modeFlags, @Nullable UriPermissionOwner owner) {
         final boolean persistable = (modeFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0;
         modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -144,6 +145,7 @@ final class UriPermission {
         }
 
         updateModeFlags();
+        return false;
     }
 
     /**
@@ -176,8 +178,6 @@ final class UriPermission {
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         final int before = persistedModeFlags;
-
-        persistableModeFlags &= ~modeFlags;
         persistedModeFlags &= ~modeFlags;
 
         if (persistedModeFlags == 0) {

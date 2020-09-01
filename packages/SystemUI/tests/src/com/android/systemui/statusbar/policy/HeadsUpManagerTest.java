@@ -73,7 +73,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
                 .getRecommendedTimeoutMillis(anyInt(), anyInt());
         mHeadsUpManager.showNotification(mEntry);
         Runnable pastNormalTimeRunnable =
-                () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.key);
+                () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.getKey());
         mTestHandler.postDelayed(pastNormalTimeRunnable,
                         (TEST_A11Y_AUTO_DISMISS_TIME + TEST_AUTO_DISMISS_TIME) / 2);
         mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_A11Y_TIMEOUT_TIME);
@@ -82,7 +82,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
 
         assertFalse("Test timed out", mTimedOut);
         assertTrue("Heads up should live long enough", mLivesPastNormalTime);
-        assertFalse(mHeadsUpManager.isAlerting(mEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(mEntry.getKey()));
     }
 }
 

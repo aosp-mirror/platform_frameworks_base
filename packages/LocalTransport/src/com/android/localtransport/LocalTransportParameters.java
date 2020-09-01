@@ -22,7 +22,7 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 
-class LocalTransportParameters extends KeyValueSettingObserver {
+public class LocalTransportParameters extends KeyValueSettingObserver {
     private static final String TAG = "LocalTransportParams";
     private static final String SETTING = Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS;
     private static final String KEY_FAKE_ENCRYPTION_FLAG = "fake_encryption_flag";
@@ -31,7 +31,7 @@ class LocalTransportParameters extends KeyValueSettingObserver {
     private boolean mFakeEncryptionFlag;
     private boolean mIsNonIncrementalOnly;
 
-    LocalTransportParameters(Handler handler, ContentResolver resolver) {
+    public LocalTransportParameters(Handler handler, ContentResolver resolver) {
         super(handler, resolver, Settings.Secure.getUriFor(SETTING));
     }
 

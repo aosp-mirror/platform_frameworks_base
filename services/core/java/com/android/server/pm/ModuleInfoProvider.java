@@ -57,9 +57,9 @@ public class ModuleInfoProvider {
      */
     private static final String MODULE_METADATA_KEY = "android.content.pm.MODULE_METADATA";
 
-
     private final Context mContext;
     private final IPackageManager mPackageManager;
+    private final ApexManager mApexManager;
     private final Map<String, ModuleInfo> mModuleInfo;
 
     // TODO: Move this to an earlier boot phase if anybody requires it then.
@@ -69,13 +69,16 @@ public class ModuleInfoProvider {
     ModuleInfoProvider(Context context, IPackageManager packageManager) {
         mContext = context;
         mPackageManager = packageManager;
+        mApexManager = ApexManager.getInstance();
         mModuleInfo = new ArrayMap<>();
     }
 
     @VisibleForTesting
-    public ModuleInfoProvider(XmlResourceParser metadata, Resources resources) {
+    public ModuleInfoProvider(
+            XmlResourceParser metadata, Resources resources, ApexManager apexManager) {
         mContext = null;
         mPackageManager = null;
+        mApexManager = apexManager;
         mModuleInfo = new ArrayMap<>();
         loadModuleMetadata(metadata, resources);
     }
@@ -150,6 +153,8 @@ public class ModuleInfoProvider {
                 mi.setHidden(isHidden);
                 mi.setPackageName(modulePackageName);
                 mi.setName(moduleName);
+                mi.setApexModuleName(
+                        mApexManager.getApexModuleNameForPackageName(modulePackageName));
 
                 mModuleInfo.put(modulePackageName, mi);
             }
@@ -167,7 +172,7 @@ public class ModuleInfoProvider {
      *
      * @param flags Use {@link PackageManager#MATCH_ALL} flag to get all modules.
      */
-    List<ModuleInfo> getInstalledModules(@PackageManager.ModuleInfoFlags int flags) {
+    List<ModuleInfo> getInstalledModules(@PackageManager.InstalledModulesFlags int flags) {
         if (!mMetadataLoaded) {
             throw new IllegalStateException("Call to getInstalledModules before metadata loaded");
         }
@@ -195,12 +200,19 @@ public class ModuleInfoProvider {
         return installedModules;
     }
 
-    ModuleInfo getModuleInfo(String packageName, int flags) {
+    ModuleInfo getModuleInfo(String name, @PackageManager.ModuleInfoFlags int flags) {
         if (!mMetadataLoaded) {
             throw new IllegalStateException("Call to getModuleInfo before metadata loaded");
         }
-
-        return mModuleInfo.get(packageName);
+        if ((flags & PackageManager.MODULE_APEX_NAME) != 0) {
+            for (ModuleInfo moduleInfo : mModuleInfo.values()) {
+                if (name.equals(moduleInfo.getApexModuleName())) {
+                    return moduleInfo;
+                }
+            }
+            return null;
+        }
+        return mModuleInfo.get(name);
     }
 
     String getPackageName() {

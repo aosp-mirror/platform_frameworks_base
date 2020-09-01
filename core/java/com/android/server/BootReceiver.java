@@ -35,29 +35,28 @@ import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
-import com.android.server.DropboxLogTags;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Performs a number of miscellaneous, non-system-critical actions
@@ -66,10 +65,15 @@ import org.xmlpull.v1.XmlSerializer;
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
+    private static final String TAG_TRUNCATED = "[[TRUNCATED]]\n";
+
     // Maximum size of a logged event (files get truncated if they're longer).
     // Give userdebug builds a larger max to capture extra debug, esp. for last_kmsg.
     private static final int LOG_SIZE =
         SystemProperties.getInt("ro.debuggable", 0) == 1 ? 98304 : 65536;
+    private static final int LASTK_LOG_SIZE =
+        SystemProperties.getInt("ro.debuggable", 0) == 1 ? 196608 : 65536;
+    private static final int GMSCORE_LASTK_LOG_SIZE = 196608;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
     private static final String TAG_TOMBSTONE = "SYSTEM_TOMBSTONE";
@@ -224,12 +228,12 @@ public class BootReceiver extends BroadcastReceiver {
             if (db != null) db.addText("SYSTEM_BOOT", headers);
 
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
-            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
-                    "/proc/last_kmsg", -LOG_SIZE, "SYSTEM_LAST_KMSG");
-            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
-                    "/sys/fs/pstore/console-ramoops", -LOG_SIZE, "SYSTEM_LAST_KMSG");
-            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
-                    "/sys/fs/pstore/console-ramoops-0", -LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addLastkToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/proc/last_kmsg", -LASTK_LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addLastkToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/sys/fs/pstore/console-ramoops", -LASTK_LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addLastkToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/sys/fs/pstore/console-ramoops-0", -LASTK_LOG_SIZE, "SYSTEM_LAST_KMSG");
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/log", -LOG_SIZE,
                     "SYSTEM_RECOVERY_LOG");
             addFileToDropBox(db, timestamps, headers, "/cache/recovery/last_kmsg",
@@ -278,6 +282,23 @@ public class BootReceiver extends BroadcastReceiver {
         sTombstoneObserver.startWatching();
     }
 
+    private static void addLastkToDropBox(
+            DropBoxManager db, HashMap<String, Long> timestamps,
+            String headers, String footers, String filename, int maxSize,
+            String tag) throws IOException {
+        int extraSize = headers.length() + TAG_TRUNCATED.length() + footers.length();
+        // GMSCore will do 2nd truncation to be 192KiB
+        // LASTK_LOG_SIZE + extraSize must be less than GMSCORE_LASTK_LOG_SIZE
+        if (LASTK_LOG_SIZE + extraSize > GMSCORE_LASTK_LOG_SIZE) {
+          if (GMSCORE_LASTK_LOG_SIZE > extraSize) {
+            maxSize = -(GMSCORE_LASTK_LOG_SIZE - extraSize);
+          } else {
+            maxSize = 0;
+          }
+        }
+        addFileWithFootersToDropBox(db, timestamps, headers, footers, filename, maxSize, tag);
+    }
+
     private static void addFileToDropBox(
             DropBoxManager db, HashMap<String, Long> timestamps,
             String headers, String filename, int maxSize, String tag) throws IOException {
@@ -301,14 +322,14 @@ public class BootReceiver extends BroadcastReceiver {
         timestamps.put(filename, fileTime);
 
 
-        String fileContents = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String fileContents = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         String text = headers + fileContents + footers;
         // Create an additional report for system server native crashes, with a special tag.
         if (tag.equals(TAG_TOMBSTONE) && fileContents.contains(">>> system_server <<<")) {
             addTextToDropBox(db, "system_server_native_crash", text, filename, maxSize);
         }
         if (tag.equals(TAG_TOMBSTONE)) {
-            StatsLog.write(StatsLog.TOMB_STONE_OCCURRED);
+            FrameworkStatsLog.write(FrameworkStatsLog.TOMB_STONE_OCCURRED);
         }
         addTextToDropBox(db, tag, text, filename, maxSize);
     }
@@ -345,7 +366,7 @@ public class BootReceiver extends BroadcastReceiver {
 
         timestamps.put(tag, fileTime);
 
-        String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String log = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         StringBuilder sb = new StringBuilder();
         for (String line : log.split("\n")) {
             if (line.contains("audit")) {
@@ -370,7 +391,7 @@ public class BootReceiver extends BroadcastReceiver {
         long fileTime = file.lastModified();
         if (fileTime <= 0) return;  // File does not exist
 
-        String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
+        String log = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         Pattern pattern = Pattern.compile(FS_STAT_PATTERN);
         String lines[] = log.split("\n");
         int lineNumber = 0;
@@ -402,7 +423,28 @@ public class BootReceiver extends BroadcastReceiver {
         for (String propPostfix : MOUNT_DURATION_PROPS_POSTFIX) {
             int duration = SystemProperties.getInt("ro.boottime.init.mount_all." + propPostfix, 0);
             if (duration != 0) {
-                MetricsLogger.histogram(null, "boot_mount_all_duration_" + propPostfix, duration);
+                int eventType;
+                switch (propPostfix) {
+                    case "early":
+                        eventType =
+                                FrameworkStatsLog
+                                        .BOOT_TIME_EVENT_DURATION__EVENT__MOUNT_EARLY_DURATION;
+                        break;
+                    case "default":
+                        eventType =
+                                FrameworkStatsLog
+                                        .BOOT_TIME_EVENT_DURATION__EVENT__MOUNT_DEFAULT_DURATION;
+                        break;
+                    case "late":
+                        eventType =
+                                FrameworkStatsLog
+                                        .BOOT_TIME_EVENT_DURATION__EVENT__MOUNT_LATE_DURATION;
+                        break;
+                    default:
+                        continue;
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                        eventType, duration);
             }
         }
     }
@@ -506,7 +548,8 @@ public class BootReceiver extends BroadcastReceiver {
             Slog.e(TAG, "No value received for shutdown duration");
         }
 
-        StatsLog.write(StatsLog.SHUTDOWN_SEQUENCE_REPORTED, reboot, reason, start, duration);
+        FrameworkStatsLog.write(FrameworkStatsLog.SHUTDOWN_SEQUENCE_REPORTED, reboot, reason, start,
+                duration);
     }
 
     private static void logFsShutdownTime() {
@@ -533,16 +576,19 @@ public class BootReceiver extends BroadcastReceiver {
         Pattern pattern = Pattern.compile(LAST_SHUTDOWN_TIME_PATTERN, Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(lines);
         if (matcher.find()) {
-            MetricsLogger.histogram(null, "boot_fs_shutdown_duration",
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                    FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__SHUTDOWN_DURATION,
                     Integer.parseInt(matcher.group(1)));
-            MetricsLogger.histogram(null, "boot_fs_shutdown_umount_stat",
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ERROR_CODE_REPORTED,
+                    FrameworkStatsLog.BOOT_TIME_EVENT_ERROR_CODE__EVENT__SHUTDOWN_UMOUNT_STAT,
                     Integer.parseInt(matcher.group(2)));
             Slog.i(TAG, "boot_fs_shutdown," + matcher.group(1) + "," + matcher.group(2));
         } else { // not found
             // This can happen when a device has too much kernel log after file system unmount
             // ,exceeding maxReadSize. And having that much kernel logging can affect overall
             // performance as well. So it is better to fix the kernel to reduce the amount of log.
-            MetricsLogger.histogram(null, "boot_fs_shutdown_umount_stat",
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ERROR_CODE_REPORTED,
+                    FrameworkStatsLog.BOOT_TIME_EVENT_ERROR_CODE__EVENT__SHUTDOWN_UMOUNT_STAT,
                     UMOUNT_STATUS_NOT_AVAILABLE);
             Slog.w(TAG, "boot_fs_shutdown, string not found");
         }
@@ -652,7 +698,12 @@ public class BootReceiver extends BroadcastReceiver {
             return;
         }
         stat = fixFsckFsStat(partition, stat, lines, startLineNumber, endLineNumber);
-        MetricsLogger.histogram(null, "boot_fs_stat_" + partition, stat);
+        if ("userdata".equals(partition) || "data".equals(partition)) {
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ERROR_CODE_REPORTED,
+                    FrameworkStatsLog
+                            .BOOT_TIME_EVENT_ERROR_CODE__EVENT__FS_MGR_FS_STAT_DATA_PARTITION,
+                    stat);
+        }
         Slog.i(TAG, "fs_stat, partition:" + partition + " stat:0x" + Integer.toHexString(stat));
     }
 

@@ -21,19 +21,21 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.ActionMode;
@@ -48,10 +50,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.policy.PhoneWindow;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.DumpUtils.Dump;
 
@@ -176,12 +176,12 @@ public class DreamService extends Service implements Window.Callback {
      */
     public static final String DREAM_META_DATA = "android.service.dream";
 
-    private final IDreamManager mSandman;
-    private final Handler mHandler = new Handler();
-    private IBinder mWindowToken;
+    private final IDreamManager mDreamManager;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private IBinder mDreamToken;
     private Window mWindow;
+    private Activity mActivity;
     private boolean mInteractive;
-    private boolean mLowProfile = true;
     private boolean mFullscreen;
     private boolean mScreenBright = true;
     private boolean mStarted;
@@ -195,8 +195,11 @@ public class DreamService extends Service implements Window.Callback {
 
     private boolean mDebug = false;
 
+    private DreamServiceWrapper mDreamServiceWrapper;
+    private Runnable mDispatchAfterOnAttachedToWindow;
+
     public DreamService() {
-        mSandman = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
+        mDreamManager = IDreamManager.Stub.asInterface(ServiceManager.getService(DREAM_SERVICE));
     }
 
     /**
@@ -526,32 +529,6 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Sets View.SYSTEM_UI_FLAG_LOW_PROFILE on the content view.
-     *
-     * @param lowProfile True to set View.SYSTEM_UI_FLAG_LOW_PROFILE
-     * @hide There is no reason to have this -- dreams can set this flag
-     * on their own content view, and from there can actually do the
-     * correct interactions with it (seeing when it is cleared etc).
-     */
-    public void setLowProfile(boolean lowProfile) {
-        if (mLowProfile != lowProfile) {
-            mLowProfile = lowProfile;
-            int flag = View.SYSTEM_UI_FLAG_LOW_PROFILE;
-            applySystemUiVisibilityFlags(mLowProfile ? flag : 0, flag);
-        }
-    }
-
-    /**
-     * Returns whether or not this dream is in low profile mode. Defaults to true.
-     *
-     * @see #setLowProfile(boolean)
-     * @hide
-     */
-    public boolean isLowProfile() {
-        return getSystemUiVisibilityFlagValue(View.SYSTEM_UI_FLAG_LOW_PROFILE, mLowProfile);
-    }
-
-    /**
      * Controls {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}
      * on the dream's window.
      *
@@ -602,8 +579,8 @@ public class DreamService extends Service implements Window.Callback {
      * Marks this dream as windowless.  Only available to doze dreams.
      *
      * @hide
+     *
      */
-    @UnsupportedAppUsage
     public void setWindowless(boolean windowless) {
         mWindowless = windowless;
     }
@@ -670,14 +647,14 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     private void updateDoze() {
-        if (mWindowToken == null) {
-            Slog.w(TAG, "Updating doze without a window token.");
+        if (mDreamToken == null) {
+            Slog.w(TAG, "Updating doze without a dream token.");
             return;
         }
 
         if (mDozing) {
             try {
-                mSandman.startDozing(mWindowToken, mDozeScreenState, mDozeScreenBrightness);
+                mDreamManager.startDozing(mDreamToken, mDozeScreenState, mDozeScreenBrightness);
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -700,7 +677,7 @@ public class DreamService extends Service implements Window.Callback {
         if (mDozing) {
             mDozing = false;
             try {
-                mSandman.stopDozing(mWindowToken);
+                mDreamManager.stopDozing(mDreamToken);
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -882,7 +859,8 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public final IBinder onBind(Intent intent) {
         if (mDebug) Slog.v(TAG, "onBind() intent = " + intent);
-        return new DreamServiceWrapper();
+        mDreamServiceWrapper = new DreamServiceWrapper();
+        return mDreamServiceWrapper;
     }
 
     /**
@@ -895,20 +873,32 @@ public class DreamService extends Service implements Window.Callback {
     public final void finish() {
         if (mDebug) Slog.v(TAG, "finish(): mFinished=" + mFinished);
 
-        if (!mFinished) {
-            mFinished = true;
-
-            if (mWindowToken == null) {
-                Slog.w(TAG, "Finish was called before the dream was attached.");
-            } else {
-                try {
-                    mSandman.finishSelf(mWindowToken, true /*immediate*/);
-                } catch (RemoteException ex) {
-                    // system server died
-                }
+        Activity activity = mActivity;
+        if (activity != null) {
+            if (!activity.isFinishing()) {
+                // In case the activity is not finished yet, do it now.
+                activity.finishAndRemoveTask();
             }
+            return;
+        }
 
-            stopSelf(); // if launched via any other means
+        if (mFinished) {
+            return;
+        }
+        mFinished = true;
+
+        if (mDreamToken == null) {
+            Slog.w(TAG, "Finish was called before the dream was attached.");
+            stopSelf();
+            return;
+        }
+
+        try {
+            // finishSelf will unbind the dream controller from the dream service. This will
+            // trigger DreamService.this.onDestroy and DreamService.this will die.
+            mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+        } catch (RemoteException ex) {
+            // system server died
         }
     }
 
@@ -938,11 +928,11 @@ public class DreamService extends Service implements Window.Callback {
             // Now tell the system we are waking gently, unless we already told
             // it we were finishing immediately.
             if (!fromSystem && !mFinished) {
-                if (mWindowToken == null) {
+                if (mActivity == null) {
                     Slog.w(TAG, "WakeUp was called before the dream was attached.");
                 } else {
                     try {
-                        mSandman.finishSelf(mWindowToken, false /*immediate*/);
+                        mDreamManager.finishSelf(mDreamToken, false /*immediate*/);
                     } catch (RemoteException ex) {
                         // system server died
                     }
@@ -977,20 +967,14 @@ public class DreamService extends Service implements Window.Callback {
             onDreamingStopped();
         }
 
-        if (mWindow != null) {
-            // force our window to be removed synchronously
-            if (mDebug) Slog.v(TAG, "detach(): Removing window from window manager");
-            mWindow.getWindowManager().removeViewImmediate(mWindow.getDecorView());
-            mWindow = null;
+        if (mActivity != null && !mActivity.isFinishing()) {
+            mActivity.finishAndRemoveTask();
+        } else {
+            finish();
         }
 
-        if (mWindowToken != null) {
-            // the following will print a log message if it finds any other leaked windows
-            WindowManagerGlobal.getInstance().closeAll(mWindowToken,
-                    this.getClass().getName(), "Dream");
-            mWindowToken = null;
-            mCanDoze = false;
-        }
+        mDreamToken = null;
+        mCanDoze = false;
     }
 
     /**
@@ -998,95 +982,107 @@ public class DreamService extends Service implements Window.Callback {
      *
      * Must run on mHandler.
      *
-     * @param windowToken A window token that will allow a window to be created in the correct layer.
+     * @param dreamToken Token for this dream service.
      * @param started A callback that will be invoked once onDreamingStarted has completed.
      */
-    private final void attach(IBinder windowToken, boolean canDoze, IRemoteCallback started) {
-        if (mWindowToken != null) {
-            Slog.e(TAG, "attach() called when already attached with token=" + mWindowToken);
+    private void attach(IBinder dreamToken, boolean canDoze, IRemoteCallback started) {
+        if (mDreamToken != null) {
+            Slog.e(TAG, "attach() called when dream with token=" + mDreamToken
+                    + " already attached");
             return;
         }
         if (mFinished || mWaking) {
             Slog.w(TAG, "attach() called after dream already finished");
             try {
-                mSandman.finishSelf(windowToken, true /*immediate*/);
+                mDreamManager.finishSelf(dreamToken, true /*immediate*/);
             } catch (RemoteException ex) {
                 // system server died
             }
             return;
         }
 
-        mWindowToken = windowToken;
+        mDreamToken = dreamToken;
         mCanDoze = canDoze;
         if (mWindowless && !mCanDoze) {
             throw new IllegalStateException("Only doze dreams can be windowless");
         }
-        if (!mWindowless) {
-            mWindow = new PhoneWindow(this);
-            mWindow.setCallback(this);
-            mWindow.requestFeature(Window.FEATURE_NO_TITLE);
-            mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
-            mWindow.setFormat(PixelFormat.OPAQUE);
 
-            if (mDebug) Slog.v(TAG, String.format("Attaching window token: %s to window of type %s",
-                    windowToken, WindowManager.LayoutParams.TYPE_DREAM));
-
-            WindowManager.LayoutParams lp = mWindow.getAttributes();
-            lp.type = WindowManager.LayoutParams.TYPE_DREAM;
-            lp.token = windowToken;
-            lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
-            lp.flags |= ( WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                        | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-                        | (mFullscreen ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0)
-                        | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
-                        );
-            mWindow.setAttributes(lp);
-            // Workaround: Currently low-profile and in-window system bar backgrounds don't go
-            // along well. Dreams usually don't need such bars anyways, so disable them by default.
-            mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            mWindow.setWindowManager(null, windowToken, "dream", true);
-
-            applySystemUiVisibilityFlags(
-                    (mLowProfile ? View.SYSTEM_UI_FLAG_LOW_PROFILE : 0),
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE);
-
-            try {
-                getWindowManager().addView(mWindow.getDecorView(), mWindow.getAttributes());
-            } catch (WindowManager.BadTokenException ex) {
-                // This can happen because the dream manager service will remove the token
-                // immediately without necessarily waiting for the dream to start.
-                // We should receive a finish message soon.
-                Slog.i(TAG, "attach() called after window token already removed, dream will "
-                        + "finish soon");
-                mWindow = null;
-                return;
-            }
-        }
-        // We need to defer calling onDreamingStarted until after onWindowAttached,
-        // which is posted to the handler by addView, so we post onDreamingStarted
-        // to the handler also.  Need to watch out here in case detach occurs before
-        // this callback is invoked.
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mWindow != null || mWindowless) {
-                    if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
-                    mStarted = true;
+        mDispatchAfterOnAttachedToWindow = () -> {
+            if (mWindow != null || mWindowless) {
+                mStarted = true;
+                try {
+                    onDreamingStarted();
+                } finally {
                     try {
-                        onDreamingStarted();
-                    } finally {
-                        try {
-                            started.sendResult(null);
-                        } catch (RemoteException e) {
-                            throw e.rethrowFromSystemServer();
-                        }
+                        started.sendResult(null);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
-        });
+        };
+
+        // We need to defer calling onDreamingStarted until after the activity is created.
+        // If the dream is windowless, we can call it immediately. Otherwise, we wait
+        // for the DreamActivity to report onActivityCreated via
+        // DreamServiceWrapper.onActivityCreated.
+        if (!mWindowless) {
+            Intent i = new Intent(this, DreamActivity.class);
+            i.setPackage(getApplicationContext().getPackageName());
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra(DreamActivity.EXTRA_CALLBACK, mDreamServiceWrapper);
+
+            try {
+                if (!ActivityTaskManager.getService().startDreamActivity(i)) {
+                    detach();
+                    return;
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Could not connect to activity task manager to start dream activity");
+                e.rethrowFromSystemServer();
+            }
+        } else {
+            mDispatchAfterOnAttachedToWindow.run();
+        }
+    }
+
+    private void onWindowCreated(Window w) {
+        mWindow = w;
+        mWindow.setCallback(this);
+        mWindow.requestFeature(Window.FEATURE_NO_TITLE);
+
+        WindowManager.LayoutParams lp = mWindow.getAttributes();
+        lp.flags |= (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                    | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                    | (mFullscreen ? WindowManager.LayoutParams.FLAG_FULLSCREEN : 0)
+                    | (mScreenBright ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON : 0)
+                    );
+        mWindow.setAttributes(lp);
+        // Workaround: Currently low-profile and in-window system bar backgrounds don't go
+        // along well. Dreams usually don't need such bars anyways, so disable them by default.
+        mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+        mWindow.getDecorView().addOnAttachStateChangeListener(
+                new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                        mDispatchAfterOnAttachedToWindow.run();
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+                        if (mActivity == null || !mActivity.isChangingConfigurations()) {
+                            // Only stop the dream if the view is not detached by relaunching
+                            // activity for configuration changes.
+                            mActivity = null;
+                            finish();
+                        }
+                    }
+                });
     }
 
     private boolean getWindowFlagValue(int flag, boolean defaultValue) {
@@ -1099,18 +1095,6 @@ public class DreamService extends Service implements Window.Callback {
             lp.flags = applyFlags(lp.flags, flags, mask);
             mWindow.setAttributes(lp);
             mWindow.getWindowManager().updateViewLayout(mWindow.getDecorView(), lp);
-        }
-    }
-
-    private boolean getSystemUiVisibilityFlagValue(int flag, boolean defaultValue) {
-        View v = mWindow == null ? null : mWindow.getDecorView();
-        return v == null ? defaultValue : (v.getSystemUiVisibility() & flag) != 0;
-    }
-
-    private void applySystemUiVisibilityFlags(int flags, int mask) {
-        View v = mWindow == null ? null : mWindow.getDecorView();
-        if (v != null) {
-            v.setSystemUiVisibility(applyFlags(v.getSystemUiVisibility(), flags, mask));
         }
     }
 
@@ -1131,15 +1115,14 @@ public class DreamService extends Service implements Window.Callback {
     /** @hide */
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print(TAG + ": ");
-        if (mWindowToken == null) {
+        if (mFinished) {
             pw.println("stopped");
         } else {
-            pw.println("running (token=" + mWindowToken + ")");
+            pw.println("running (dreamToken=" + mDreamToken + ")");
         }
         pw.println("  window: " + mWindow);
         pw.print("  flags:");
         if (isInteractive()) pw.print(" interactive");
-        if (isLowProfile()) pw.print(" lowprofile");
         if (isFullscreen()) pw.print(" fullscreen");
         if (isScreenBright()) pw.print(" bright");
         if (isWindowless()) pw.print(" windowless");
@@ -1156,36 +1139,32 @@ public class DreamService extends Service implements Window.Callback {
         return MathUtils.constrain(value, PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
     }
 
-    private final class DreamServiceWrapper extends IDreamService.Stub {
+    /**
+     * The DreamServiceWrapper is used as a gateway to the system_server, where DreamController
+     * uses it to control the DreamService. It is also used to receive callbacks from the
+     * DreamActivity.
+     */
+    final class DreamServiceWrapper extends IDreamService.Stub {
         @Override
-        public void attach(final IBinder windowToken, final boolean canDoze,
+        public void attach(final IBinder dreamToken, final boolean canDoze,
                 IRemoteCallback started) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    DreamService.this.attach(windowToken, canDoze, started);
-                }
-            });
+            mHandler.post(() -> DreamService.this.attach(dreamToken, canDoze, started));
         }
 
         @Override
         public void detach() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    DreamService.this.detach();
-                }
-            });
+            mHandler.post(DreamService.this::detach);
         }
 
         @Override
         public void wakeUp() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    DreamService.this.wakeUp(true /*fromSystem*/);
-                }
-            });
+            mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
+        }
+
+        /** @hide */
+        void onActivityCreated(DreamActivity a) {
+            mActivity = a;
+            onWindowCreated(a.getWindow());
         }
     }
 }

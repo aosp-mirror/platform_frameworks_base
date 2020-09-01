@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -48,7 +48,7 @@ public class PendingIntentPerfTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getTargetContext();
-        mIntent = StubActivity.createLaunchIntent(mContext);
+        mIntent = PerfTestActivity.createLaunchIntent(mContext);
     }
 
     /**

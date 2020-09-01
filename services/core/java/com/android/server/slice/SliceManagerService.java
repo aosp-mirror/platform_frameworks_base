@@ -106,7 +106,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     @VisibleForTesting
     SliceManagerService(Context context, Looper looper) {
         mContext = context;
-        mPackageManagerInternal = Preconditions.checkNotNull(
+        mPackageManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(PackageManagerInternal.class));
         mAppOps = context.getSystemService(AppOpsManager.class);
         mAssistUtils = new AssistUtils(context);
@@ -180,8 +180,13 @@ public class SliceManagerService extends ISliceManager.Stub {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
         uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
-        if (getPinnedSlice(uri).unpin(pkg, token)) {
-            removePinnedSlice(uri);
+        try {
+            PinnedSliceState slice = getPinnedSlice(uri);
+            if (slice != null && slice.unpin(pkg, token)) {
+                removePinnedSlice(uri);
+            }
+        } catch (IllegalStateException exception) {
+            Slog.w(TAG, exception.getMessage());
         }
     }
 

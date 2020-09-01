@@ -39,6 +39,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppIntentFilter;
 import android.content.pm.InstantAppRequest;
+import android.content.pm.InstantAppRequestInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.metrics.LogMaker;
@@ -47,6 +48,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -63,7 +66,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /** @hide */
 public abstract class InstantAppResolver {
@@ -117,26 +119,40 @@ public abstract class InstantAppResolver {
         return sanitizedIntent;
     }
 
+    /**
+     * Generate an {@link InstantAppDigest} from an {@link Intent} which contains hashes of the
+     * host. The object contains both secure and insecure hash array variants, and the secure
+     * version must be passed along to ensure the random data is consistent.
+     */
+    @NonNull
+    public static InstantAppDigest parseDigest(@NonNull Intent origIntent) {
+        if (origIntent.getData() != null && !TextUtils.isEmpty(origIntent.getData().getHost())) {
+            return new InstantAppResolveInfo.InstantAppDigest(origIntent.getData().getHost(),
+                    5 /*maxDigests*/);
+        } else {
+            return InstantAppResolveInfo.InstantAppDigest.UNDEFINED;
+        }
+    }
+
     public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(
             InstantAppResolverConnection connection, InstantAppRequest requestObj) {
         final long startTime = System.currentTimeMillis();
-        final String token = UUID.randomUUID().toString();
+        final String token = requestObj.token;
         if (DEBUG_INSTANT) {
             Log.d(TAG, "[" + token + "] Phase1; resolving");
         }
-        final Intent origIntent = requestObj.origIntent;
-        final Intent sanitizedIntent = sanitizeIntent(origIntent);
 
         AuxiliaryResolveInfo resolveInfo = null;
         @ResolutionStatus int resolutionStatus = RESOLUTION_SUCCESS;
+        Intent origIntent = requestObj.origIntent;
         try {
             final List<InstantAppResolveInfo> instantAppResolveInfoList =
-                    connection.getInstantAppResolveInfoList(sanitizedIntent,
-                            requestObj.digest.getDigestPrefixSecure(), requestObj.userId, token);
+                    connection.getInstantAppResolveInfoList(buildRequestInfo(requestObj));
             if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                 resolveInfo = InstantAppResolver.filterInstantAppIntent(
                         instantAppResolveInfoList, origIntent, requestObj.resolvedType,
-                        requestObj.userId, origIntent.getPackage(), requestObj.digest, token);
+                        requestObj.userId, origIntent.getPackage(), token,
+                        requestObj.hostDigestPrefixSecure);
             }
         } catch (ConnectionException e) {
             if (e.failure == ConnectionException.FAILURE_BIND) {
@@ -166,7 +182,7 @@ public abstract class InstantAppResolver {
         // if the match external flag is set, return an empty resolve info instead of a null result.
         if (resolveInfo == null && (origIntent.getFlags() & FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
             return new AuxiliaryResolveInfo(token, false, createFailureIntent(origIntent, token),
-                    null /* filters */);
+                    null /* filters */, requestObj.hostDigestPrefixSecure);
         }
         return resolveInfo;
     }
@@ -175,7 +191,7 @@ public abstract class InstantAppResolver {
             InstantAppResolverConnection connection, InstantAppRequest requestObj,
             ActivityInfo instantAppInstaller, Handler callbackHandler) {
         final long startTime = System.currentTimeMillis();
-        final String token = requestObj.responseObj.token;
+        final String token = requestObj.token;
         if (DEBUG_INSTANT) {
             Log.d(TAG, "[" + token + "] Phase2; resolving");
         }
@@ -191,8 +207,8 @@ public abstract class InstantAppResolver {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
                             InstantAppResolver.filterInstantAppIntent(
                                     instantAppResolveInfoList, origIntent, null /*resolvedType*/,
-                                    0 /*userId*/, origIntent.getPackage(), requestObj.digest,
-                                    token);
+                                    0 /*userId*/, origIntent.getPackage(),
+                                    token, requestObj.hostDigestPrefixSecure);
                     if (instantAppIntentInfo != null) {
                         failureIntent = instantAppIntentInfo.failureIntent;
                     } else {
@@ -206,6 +222,7 @@ public abstract class InstantAppResolver {
                         sanitizedIntent,
                         failureIntent,
                         requestObj.callingPackage,
+                        requestObj.callingFeatureId,
                         requestObj.verificationBundle,
                         requestObj.resolvedType,
                         requestObj.userId,
@@ -223,8 +240,7 @@ public abstract class InstantAppResolver {
             }
         };
         try {
-            connection.getInstantAppIntentFilterList(sanitizedIntent,
-                    requestObj.digest.getDigestPrefixSecure(), requestObj.userId, token, callback,
+            connection.getInstantAppIntentFilterList(buildRequestInfo(requestObj), callback,
                     callbackHandler, startTime);
         } catch (ConnectionException e) {
             @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
@@ -251,6 +267,7 @@ public abstract class InstantAppResolver {
             @NonNull Intent sanitizedIntent,
             @Nullable Intent failureIntent,
             @NonNull String callingPackage,
+            @Nullable String callingFeatureId,
             @Nullable Bundle verificationBundle,
             @NonNull String resolvedType,
             int userId,
@@ -293,9 +310,10 @@ public abstract class InstantAppResolver {
                         onFailureIntent = failureIntent;
                     }
                     final IIntentSender failureIntentTarget = ActivityManager.getService()
-                            .getIntentSender(
+                            .getIntentSenderWithFeature(
                                     ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                                    null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
+                                    callingFeatureId, null /*token*/, null /*resultWho*/,
+                                    1 /*requestCode*/,
                                     new Intent[] { onFailureIntent },
                                     new String[] { resolvedType },
                                     PendingIntent.FLAG_CANCEL_CURRENT
@@ -313,9 +331,10 @@ public abstract class InstantAppResolver {
             successIntent.setLaunchToken(token);
             try {
                 final IIntentSender successIntentTarget = ActivityManager.getService()
-                        .getIntentSender(
+                        .getIntentSenderWithFeature(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                                null /*token*/, null /*resultWho*/, 0 /*requestCode*/,
+                                callingFeatureId, null /*token*/, null /*resultWho*/,
+                                0 /*requestCode*/,
                                 new Intent[] { successIntent },
                                 new String[] { resolvedType },
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
@@ -356,10 +375,22 @@ public abstract class InstantAppResolver {
         return intent;
     }
 
+    private static InstantAppRequestInfo buildRequestInfo(InstantAppRequest request) {
+        return new InstantAppRequestInfo(
+                sanitizeIntent(request.origIntent),
+                // This must only expose the secured version of the host
+                request.hostDigestPrefixSecure,
+                UserHandle.getUserHandleForUid(request.userId),
+                request.isRequesterInstantApp,
+                request.token
+        );
+    }
+
     private static AuxiliaryResolveInfo filterInstantAppIntent(
-            List<InstantAppResolveInfo> instantAppResolveInfoList,
-            Intent origIntent, String resolvedType, int userId, String packageName,
-            InstantAppDigest digest, String token) {
+            List<InstantAppResolveInfo> instantAppResolveInfoList, Intent origIntent,
+            String resolvedType, int userId, String packageName, String token,
+            int[] hostDigestPrefixSecure) {
+        InstantAppDigest digest = InstantAppResolver.parseDigest(origIntent);
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
         boolean requiresSecondPhase = false;
@@ -404,7 +435,7 @@ public abstract class InstantAppResolver {
         }
         if (filters != null && !filters.isEmpty()) {
             return new AuxiliaryResolveInfo(token, requiresSecondPhase,
-                    createFailureIntent(origIntent, token), filters);
+                    createFailureIntent(origIntent, token), filters, hostDigestPrefixSecure);
         }
         // Hash or filter mis-match; no instant apps for this domain.
         return null;

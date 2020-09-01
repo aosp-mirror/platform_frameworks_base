@@ -101,6 +101,10 @@ class ContextWrapper : public IAaptContext {
         util::make_unique<SourcePathDiagnostics>(Source{source}, context_->GetDiagnostics());
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    return context_->GetSplitNameDependencies();
+  }
+
  private:
   IAaptContext* context_;
   std::unique_ptr<SourcePathDiagnostics> source_diag_;

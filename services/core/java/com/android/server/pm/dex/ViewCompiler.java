@@ -16,12 +16,16 @@
 
 package com.android.server.pm.dex;
 
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
+import android.os.UserHandle;
 import android.util.Log;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.Installer;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+
+import java.io.File;
 
 public class ViewCompiler {
     private final Object mInstallLock;
@@ -33,19 +37,20 @@ public class ViewCompiler {
         mInstaller = installer;
     }
 
-    public boolean compileLayouts(PackageParser.Package pkg) {
+    public boolean compileLayouts(AndroidPackage pkg) {
         try {
-            final String packageName = pkg.packageName;
-            final String apkPath = pkg.baseCodePath;
-            final ApplicationInfo appInfo = pkg.applicationInfo;
-            final String outDexFile = appInfo.dataDir + "/code_cache/compiled_view.dex";
+            final String packageName = pkg.getPackageName();
+            final String apkPath = pkg.getBaseCodePath();
+            // TODO(b/143971007): Use a cross-user directory
+            File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
+            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                 ") to " + outDexFile);
             long callingId = Binder.clearCallingIdentity();
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                        appInfo.uid);
+                        pkg.getUid());
                 }
             } finally {
                 Binder.restoreCallingIdentity(callingId);

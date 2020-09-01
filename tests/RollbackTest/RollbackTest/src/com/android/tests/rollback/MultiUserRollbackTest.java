@@ -17,7 +17,6 @@
 package com.android.tests.rollback;
 
 import static com.android.cts.rollback.lib.RollbackInfoSubject.assertThat;
-import static com.android.cts.rollback.lib.RollbackUtils.getUniqueRollbackInfoForPackage;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -56,6 +55,17 @@ public class MultiUserRollbackTest {
     }
 
     @Test
+    public void cleanUp() {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        rm.getRecentlyCommittedRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        assertThat(rm.getAvailableRollbacks()).isEmpty();
+        assertThat(rm.getRecentlyCommittedRollbacks()).isEmpty();
+    }
+
+    @Test
     public void testBasic() throws Exception {
         new RollbackTest().testBasic();
     }
@@ -77,13 +87,10 @@ public class MultiUserRollbackTest {
      */
     @Test
     public void testMultipleUsersUpgradeToV2() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         Install.single(TestApp.A2).setEnableRollback().commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
-        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                rm.getAvailableRollbacks(), TestApp.A);
-        assertThat(rollback).isNotNull();
+        RollbackInfo rollback = RollbackUtils.waitForAvailableRollback(TestApp.A);
         assertThat(rollback).packagesContainsExactly(
                 Rollback.from(TestApp.A2).to(TestApp.A1));
     }

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
@@ -32,6 +33,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.media.session.MediaSession;
 import android.os.Build;
+import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -139,7 +141,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MediaStyle()
-                        .setMediaSession(new MediaSession.Token(null)))
+                        .setMediaSession(new MediaSession.Token(Process.myUid(), null)))
                 .build();
         mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
@@ -268,6 +270,18 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         Collections.sort(actual, new NotificationComparator(mContext));
 
         assertThat(actual, contains(expected.toArray()));
+    }
+
+    @Test
+    public void testRankingScoreOverrides() {
+        NotificationComparator comp = new NotificationComparator(mContext);
+        NotificationRecord recordMinCallNonInterruptive = spy(mRecordMinCallNonInterruptive);
+        assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) < 0);
+
+        when(recordMinCallNonInterruptive.getRankingScore()).thenReturn(1f);
+        assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);
+        assertTrue(comp.compare(mRecordCheater, recordMinCallNonInterruptive) > 0);
+        assertTrue(comp.compare(mRecordColorizedCall, recordMinCallNonInterruptive) < 0);
     }
 
     @Test

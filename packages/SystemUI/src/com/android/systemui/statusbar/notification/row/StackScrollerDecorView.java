@@ -47,8 +47,21 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         }
     };
 
+    private boolean mSecondaryAnimating = false;
+    private final Runnable mSecondaryVisibilityEndRunnable = () -> {
+        mSecondaryAnimating = false;
+        // If we were on screen, become GONE to avoid touches
+        if (mSecondaryView == null) return;
+        if (getVisibility() != View.GONE
+                && mSecondaryView.getVisibility() != View.GONE
+                && !mIsSecondaryVisible) {
+            mSecondaryView.setVisibility(View.GONE);
+        }
+    };
+
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setClipChildren(false);
     }
 
     @Override
@@ -87,9 +100,11 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     private void setContentVisible(boolean contentVisible, boolean animate) {
         if (mContentVisible != contentVisible) {
             mContentAnimating = animate;
-            setViewVisible(mContent, contentVisible, animate, mContentVisibilityEndRunnable);
             mContentVisible = contentVisible;
-        } if (!mContentAnimating) {
+            setViewVisible(mContent, contentVisible, animate, mContentVisibilityEndRunnable);
+        }
+
+        if (!mContentAnimating) {
             mContentVisibilityEndRunnable.run();
         }
     }
@@ -135,8 +150,13 @@ public abstract class StackScrollerDecorView extends ExpandableView {
      */
     public void setSecondaryVisible(boolean nowVisible, boolean animate) {
         if (mIsSecondaryVisible != nowVisible) {
-            setViewVisible(mSecondaryView, nowVisible, animate, null /* endRunnable */);
+            mSecondaryAnimating = animate;
             mIsSecondaryVisible = nowVisible;
+            setViewVisible(mSecondaryView, nowVisible, animate, mSecondaryVisibilityEndRunnable);
+        }
+
+        if (!mSecondaryAnimating) {
+            mSecondaryVisibilityEndRunnable.run();
         }
     }
 
@@ -169,6 +189,12 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         if (view == null) {
             return;
         }
+
+        // Make sure we're visible so animations work
+        if (view.getVisibility() != View.VISIBLE) {
+            view.setVisibility(View.VISIBLE);
+        }
+
         // cancel any previous animations
         view.animate().cancel();
         float endValue = nowVisible ? 1.0f : 0.0f;
@@ -203,6 +229,11 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         // TODO: use delay and duration
         setContentVisible(true);
+    }
+
+    @Override
+    public boolean needsClippingToShelf() {
+        return false;
     }
 
     @Override

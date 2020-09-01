@@ -86,6 +86,82 @@ final class Constants {
     /** Logical address used to indicate the source comes from internal device. */
     public static final int ADDR_INTERNAL = HdmiDeviceInfo.ADDR_INTERNAL;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        MESSAGE_FEATURE_ABORT,
+        MESSAGE_IMAGE_VIEW_ON,
+        MESSAGE_TUNER_STEP_INCREMENT,
+        MESSAGE_TUNER_STEP_DECREMENT,
+        MESSAGE_TUNER_DEVICE_STATUS,
+        MESSAGE_GIVE_TUNER_DEVICE_STATUS,
+        MESSAGE_RECORD_ON,
+        MESSAGE_RECORD_STATUS,
+        MESSAGE_RECORD_OFF,
+        MESSAGE_TEXT_VIEW_ON,
+        MESSAGE_RECORD_TV_SCREEN,
+        MESSAGE_GIVE_DECK_STATUS,
+        MESSAGE_DECK_STATUS,
+        MESSAGE_SET_MENU_LANGUAGE,
+        MESSAGE_CLEAR_ANALOG_TIMER,
+        MESSAGE_SET_ANALOG_TIMER,
+        MESSAGE_TIMER_STATUS,
+        MESSAGE_STANDBY,
+        MESSAGE_PLAY,
+        MESSAGE_DECK_CONTROL,
+        MESSAGE_TIMER_CLEARED_STATUS,
+        MESSAGE_USER_CONTROL_PRESSED,
+        MESSAGE_USER_CONTROL_RELEASED,
+        MESSAGE_GIVE_OSD_NAME,
+        MESSAGE_SET_OSD_NAME,
+        MESSAGE_SET_OSD_STRING,
+        MESSAGE_SET_TIMER_PROGRAM_TITLE,
+        MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
+        MESSAGE_GIVE_AUDIO_STATUS,
+        MESSAGE_SET_SYSTEM_AUDIO_MODE,
+        MESSAGE_REPORT_AUDIO_STATUS,
+        MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS,
+        MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
+        MESSAGE_ROUTING_CHANGE,
+        MESSAGE_ROUTING_INFORMATION,
+        MESSAGE_ACTIVE_SOURCE,
+        MESSAGE_GIVE_PHYSICAL_ADDRESS,
+        MESSAGE_REPORT_PHYSICAL_ADDRESS,
+        MESSAGE_REQUEST_ACTIVE_SOURCE,
+        MESSAGE_SET_STREAM_PATH,
+        MESSAGE_DEVICE_VENDOR_ID,
+        MESSAGE_VENDOR_COMMAND,
+        MESSAGE_VENDOR_REMOTE_BUTTON_DOWN,
+        MESSAGE_VENDOR_REMOTE_BUTTON_UP,
+        MESSAGE_GIVE_DEVICE_VENDOR_ID,
+        MESSAGE_MENU_REQUEST,
+        MESSAGE_MENU_STATUS,
+        MESSAGE_GIVE_DEVICE_POWER_STATUS,
+        MESSAGE_REPORT_POWER_STATUS,
+        MESSAGE_GET_MENU_LANGUAGE,
+        MESSAGE_SELECT_ANALOG_SERVICE,
+        MESSAGE_SELECT_DIGITAL_SERVICE,
+        MESSAGE_SET_DIGITAL_TIMER,
+        MESSAGE_CLEAR_DIGITAL_TIMER,
+        MESSAGE_SET_AUDIO_RATE,
+        MESSAGE_INACTIVE_SOURCE,
+        MESSAGE_CEC_VERSION,
+        MESSAGE_GET_CEC_VERSION,
+        MESSAGE_VENDOR_COMMAND_WITH_ID,
+        MESSAGE_CLEAR_EXTERNAL_TIMER,
+        MESSAGE_SET_EXTERNAL_TIMER,
+        MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR,
+        MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
+        MESSAGE_INITIATE_ARC,
+        MESSAGE_REPORT_ARC_INITIATED,
+        MESSAGE_REPORT_ARC_TERMINATED,
+        MESSAGE_REQUEST_ARC_INITIATION,
+        MESSAGE_REQUEST_ARC_TERMINATION,
+        MESSAGE_TERMINATE_ARC,
+        MESSAGE_CDC_MESSAGE,
+        MESSAGE_ABORT,
+    })
+    public @interface FeatureOpcode {}
+
     static final int MESSAGE_FEATURE_ABORT = 0x00;
     static final int MESSAGE_IMAGE_VIEW_ON = 0x04;
     static final int MESSAGE_TUNER_STEP_INCREMENT = 0x05;
@@ -162,6 +238,18 @@ final class Constants {
 
     static final int TRUE = 1;
     static final int FALSE = 0;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        ABORT_NO_ERROR,
+        ABORT_UNRECOGNIZED_OPCODE,
+        ABORT_NOT_IN_CORRECT_MODE,
+        ABORT_CANNOT_PROVIDE_SOURCE,
+        ABORT_INVALID_OPERAND,
+        ABORT_REFUSED,
+        ABORT_UNABLE_TO_DETERMINE,
+    })
+    public @interface AbortReason {}
 
     // Internal abort error code. It's the same as success.
     static final int ABORT_NO_ERROR = -1;
@@ -306,6 +394,45 @@ final class Constants {
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
 
+    // TODO(OEM): Set this to false to keep the playback device in sleep upon hotplug event.
+    //            False by default.
+    static final String PROPERTY_WAKE_ON_HOTPLUG = "ro.hdmi.wake_on_hotplug";
+
+    /**
+     * Property to save the ARC port id on system audio device.
+     * <p>When ARC is initiated, this port will be used to turn on ARC.
+     */
+    static final String PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT =
+            "ro.hdmi.property_sytem_audio_device_arc_port";
+
+    /**
+     * Property to disable muting logic in System Audio Control handling. Default is true.
+     *
+     * <p>True means enabling muting logic.
+     * <p>False means never mute device.
+     */
+    static final String PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE =
+            "ro.hdmi.property_system_audio_mode_muting_enable";
+
+    /**
+     * When set to true the HdmiControlService will never request a Logical Address for the
+     * playback device type. Default is false.
+     *
+     * <p> This is useful when HDMI CEC multiple device types is not supported by the cec driver
+     */
+    static final String PROPERTY_HDMI_CEC_NEVER_CLAIM_PLAYBACK_LOGICAL_ADDRESS =
+            "ro.hdmi.property_hdmi_cec_never_claim_playback_logical_address";
+
+    /**
+     * A comma separated list of logical addresses that HdmiControlService
+     * will never assign local CEC devices to.
+     *
+     * <p> This is useful when HDMI CEC hardware module can't assign multiple logical addresses
+     * in the range same range of 0-7 or 8-15.
+     */
+    static final String PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES =
+            "ro.hdmi.property_hdmi_cec_never_assign_logical_addresses";
+
     // Set to false to allow playback device to go to suspend mode even
     // when it's an active source. True by default.
     static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";
@@ -355,6 +482,39 @@ final class Constants {
      */
     static final String PROPERTY_STRIP_AUDIO_TV_NO_SYSTEM_AUDIO =
         "persist.sys.hdmi.property_strip_audio_tv_no_system_audio";
+
+    /**
+     * Determines playback device action upon receiving routing control messages.
+     * <ul>
+     * <li><b>none</b> No action taken.
+     * <li><b>wake_up_only</b> PowerManager.wakeUp() is called.
+     * <li><b>wake_up_and_send_active_source</b> Same as above and
+     *     additionally <Active Source> is sent.
+     * </ul>
+     */
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL =
+            "ro.hdmi.cec.source.playback_device_action_on_routing_control";
+
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_NONE = "none";
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_WAKE_UP_ONLY = "wake_up_only";
+    static final String PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_WAKE_UP_AND_SEND_ACTIVE_SOURCE =
+            "wake_up_and_send_active_source";
+
+    /**
+     * Property to decide the device behaviour when <Active Source> is lost.
+     *
+     * <p>This property applies to playback devices.
+     * <p>Possible values are:
+     * <ul>
+     * <li><b>none</b> No power state change (default).
+     * <li><b>standby_now</b> PowerManager.goToSleep() is called.
+     * </ul>
+     */
+    static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
+            "ro.hdmi.cec.source.power_state_change_on_active_source_lost";
+
+    static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
+    static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
 
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;

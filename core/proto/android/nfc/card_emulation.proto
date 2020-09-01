@@ -1,0 +1,129 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.nfc.cardemulation;
+
+import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/core/proto/android/nfc/apdu_service_info.proto";
+import "frameworks/base/core/proto/android/nfc/nfc_fservice_info.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+// Debugging information for com.android.nfc.cardemulation.CardEmulationManager
+message CardEmulationManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional RegisteredServicesCacheProto registered_services_cache = 1;
+    optional RegisteredNfcFServicesCacheProto registered_nfc_f_services_cache = 2;
+    optional PreferredServicesProto preferred_services = 3;
+    optional EnabledNfcFServicesProto enabled_nfc_f_services = 4;
+    optional RegisteredAidCacheProto aid_cache = 5;
+    optional RegisteredT3tIdentifiersCacheProto t3t_identifiers_cache = 6;
+    optional HostEmulationManagerProto host_emulation_manager = 7;
+    optional HostNfcFEmulationManagerProto host_nfc_f_emulation_manager = 8;
+}
+
+// Debugging information for com.android.nfc.cardemulation.RegisteredServicesCache
+message RegisteredServicesCacheProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    repeated .android.nfc.cardemulation.ApduServiceInfoProto apdu_service_infos = 1;
+}
+
+// Debugging information for com.android.nfc.cardemulation.RegisteredNfcFServicesCache
+message RegisteredNfcFServicesCacheProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    repeated .android.nfc.cardemulation.NfcFServiceInfoProto nfc_fservice_info = 1;
+}
+
+// Debugging information for com.android.nfc.cardemulation.PreferredServices
+message PreferredServicesProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional .android.content.ComponentNameProto foreground_current = 1;
+    optional .android.content.ComponentNameProto current_preferred = 2;
+    optional .android.content.ComponentNameProto next_tap_default = 3;
+    optional int32 foreground_uid = 4;
+    optional .android.content.ComponentNameProto foreground_requested = 5;
+    optional .android.content.ComponentNameProto settings_default = 6;
+    optional bool prefer_foreground = 7;
+}
+
+// Debugging information for com.android.nfc.cardemulation.EnabledNfcFServices
+message EnabledNfcFServicesProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional .android.content.ComponentNameProto foreground_component = 1;
+    optional .android.content.ComponentNameProto foreground_requested = 2;
+    optional bool activated = 3;
+    optional bool compute_fg_requested = 4;
+    optional int32 foreground_uid = 5;
+}
+
+// Debugging information for com.android.nfc.cardemulation.RegisteredAidCache
+message RegisteredAidCacheProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message AidCacheEntry {
+        optional string key = 1 [(.android.privacy).dest = DEST_EXPLICIT];
+        optional string category = 2 [(.android.privacy).dest = DEST_EXPLICIT];
+        optional .android.content.ComponentNameProto default_component = 3;
+        repeated .android.nfc.cardemulation.ApduServiceInfoProto services = 4;
+    }
+    repeated AidCacheEntry aid_cache_entries = 1;
+    optional .android.content.ComponentNameProto preferred_foreground_service = 2;
+    optional .android.content.ComponentNameProto preferred_payment_service = 3;
+    optional AidRoutingManagerProto routing_manager = 4;
+}
+
+message AidRoutingManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message Route {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 id = 1;
+        repeated string aids = 2 [(.android.privacy).dest = DEST_EXPLICIT];
+    }
+    optional int32 default_route = 1;
+    repeated Route routes = 2;
+}
+
+// Debugging information for com.android.nfc.cardemulation.RegisteredT3tIdentifiersCache
+message RegisteredT3tIdentifiersCacheProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    repeated .android.nfc.cardemulation.NfcFServiceInfoProto t3t_identifier_cache_entries = 1;
+    optional SystemCodeRoutingManagerProto routing_manager = 2;
+}
+
+// Debugging information for com.android.nfc.cardemulation.SystemCodeRoutingManager
+message SystemCodeRoutingManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message T3tIdentifier {
+        option (.android.msg_privacy).dest = DEST_EXPLICIT;
+        optional string system_code = 1;
+        optional string nfcid2 = 2;
+    }
+    repeated T3tIdentifier t3t_identifiers = 1;
+}
+
+// Debugging information for com.android.nfc.cardemulation.HostEmulationManager
+message HostEmulationManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional .android.content.ComponentNameProto payment_service_name = 1;
+    optional .android.content.ComponentNameProto service_name = 2;
+}
+
+// Debugging information for com.android.nfc.cardemulation.HostNfcFEmulationManager
+message HostNfcFEmulationManagerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional .android.content.ComponentNameProto service_name = 1;
+}

@@ -80,6 +80,17 @@ public class DeviceFilter {
         mSerialNumber = device.getSerialNumber();
     }
 
+    public DeviceFilter(@NonNull DeviceFilter filter) {
+        mVendorId = filter.mVendorId;
+        mProductId = filter.mProductId;
+        mClass = filter.mClass;
+        mSubclass = filter.mSubclass;
+        mProtocol = filter.mProtocol;
+        mManufacturerName = filter.mManufacturerName;
+        mProductName = filter.mProductName;
+        mSerialNumber = filter.mSerialNumber;
+    }
+
     public static DeviceFilter read(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         int vendorId = -1;

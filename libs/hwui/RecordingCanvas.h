@@ -29,13 +29,16 @@
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkRect.h"
-#include "SkTDArray.h"
 #include "SkTemplates.h"
 
 #include <vector>
 
 namespace android {
 namespace uirenderer {
+
+namespace skiapipeline {
+class FunctorDrawable;
+}
 
 enum class DisplayListOpType : uint8_t {
 #define X(T) T,
@@ -66,6 +69,7 @@ public:
 
     bool hasText() const { return mHasText; }
     size_t usedSize() const { return fUsed; }
+    size_t allocatedSize() const { return fReserved; }
 
 private:
     friend class RecordingCanvas;
@@ -78,8 +82,10 @@ private:
     void saveBehind(const SkRect*);
     void restore();
 
+    void concat44(const SkScalar colMajor[16]);
     void concat(const SkMatrix&);
     void setMatrix(const SkMatrix&);
+    void scale(SkScalar, SkScalar);
     void translate(SkScalar, SkScalar);
     void translateZ(SkScalar);
 
@@ -120,6 +126,7 @@ private:
                    SkBlendMode, const SkRect*, const SkPaint*);
     void drawShadowRec(const SkPath&, const SkDrawShadowRec&);
     void drawVectorDrawable(VectorDrawableRoot* tree);
+    void drawWebView(skiapipeline::FunctorDrawable*);
 
     template <typename T, typename... Args>
     void* push(size_t, Args&&...);
@@ -148,8 +155,10 @@ public:
 
     void onFlush() override;
 
+    void didConcat44(const SkScalar[16]) override;
     void didConcat(const SkMatrix&) override;
     void didSetMatrix(const SkMatrix&) override;
+    void didScale(SkScalar, SkScalar) override;
     void didTranslate(SkScalar, SkScalar) override;
 
     void onClipRect(const SkRect&, SkClipOp, ClipEdgeStyle) override;
@@ -204,6 +213,7 @@ public:
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
     void drawVectorDrawable(VectorDrawableRoot* tree);
+    void drawWebView(skiapipeline::FunctorDrawable*);
 
     /**
      * If "isClipMayBeComplex" returns false, it is guaranteed the current clip is a rectangle.

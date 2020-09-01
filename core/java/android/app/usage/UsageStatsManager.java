@@ -29,8 +29,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Build;
+import android.os.PowerWhitelistManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.ArrayMap;
 
 import java.lang.annotation.Retention;
@@ -140,12 +142,22 @@ public final class UsageStatsManager {
 
     /**
      * The app has not be used for several days and/or is unlikely to be used for several days.
-     * Apps in this bucket will have the most restrictions, including network restrictions, except
+     * Apps in this bucket will have more restrictions, including network restrictions, except
      * during certain short periods (at a minimum, once a day) when they are allowed to execute
      * jobs, access the network, etc.
      * @see #getAppStandbyBucket()
      */
     public static final int STANDBY_BUCKET_RARE = 40;
+
+    /**
+     * The app has not be used for several days, is unlikely to be used for several days, and has
+     * been misbehaving in some manner.
+     * Apps in this bucket will have the most restrictions, including network restrictions and
+     * additional restrictions on jobs.
+     * <p> Note: this bucket is not enabled in {@link Build.VERSION_CODES#R}.
+     * @see #getAppStandbyBucket()
+     */
+    public static final int STANDBY_BUCKET_RESTRICTED = 45;
 
     /**
      * The app has never been used.
@@ -158,49 +170,154 @@ public final class UsageStatsManager {
     public static final int REASON_MAIN_MASK = 0xFF00;
     /** @hide */
     public static final int REASON_MAIN_DEFAULT =   0x0100;
-    /** @hide */
+    /**
+     * The app spent sufficient time in the old bucket without any substantial event so it reached
+     * the timeout threshold to have its bucket lowered.
+     * @hide
+     */
     public static final int REASON_MAIN_TIMEOUT =   0x0200;
-    /** @hide */
+    /**
+     * The app was used in some way. Look at the REASON_SUB_USAGE_ reason for more details.
+     * @hide
+     */
     public static final int REASON_MAIN_USAGE =     0x0300;
-    /** @hide */
-    public static final int REASON_MAIN_FORCED =    0x0400;
-    /** @hide */
+    /**
+     * Forced by the user/developer, either explicitly or implicitly through some action. If user
+     * action was not involved and this is purely due to the system,
+     * {@link #REASON_MAIN_FORCED_BY_SYSTEM} should be used instead.
+     * @hide
+     */
+    public static final int REASON_MAIN_FORCED_BY_USER = 0x0400;
+    /**
+     * Set by a privileged system app. This may be overridden by
+     * {@link #REASON_MAIN_FORCED_BY_SYSTEM} or user action.
+     * @hide
+     */
     public static final int REASON_MAIN_PREDICTED = 0x0500;
+    /**
+     * Forced by the system, independent of user action. If user action is involved,
+     * {@link #REASON_MAIN_FORCED_BY_USER} should be used instead. When this is used, only
+     * {@link #REASON_MAIN_FORCED_BY_SYSTEM} or user action can change the bucket.
+     * @hide
+     */
+    public static final int REASON_MAIN_FORCED_BY_SYSTEM = 0x0600;
 
     /** @hide */
     public static final int REASON_SUB_MASK = 0x00FF;
-    /** @hide */
+    /**
+     * The reason for using the default main reason is unknown or undefined.
+     * @hide
+     */
+    public static final int REASON_SUB_DEFAULT_UNDEFINED = 0x0000;
+    /**
+     * The app was updated.
+     * @hide
+     */
+    public static final int REASON_SUB_DEFAULT_APP_UPDATE = 0x0001;
+    /**
+     * The app was interacted with in some way by the system.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SYSTEM_INTERACTION = 0x0001;
-    /** @hide */
+    /**
+     * A notification was viewed by the user. This does not mean the user interacted with the
+     * notification.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_NOTIFICATION_SEEN  = 0x0002;
-    /** @hide */
+    /**
+     * The app was interacted with in some way by the user. This includes interacting with
+     * notification.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_USER_INTERACTION   = 0x0003;
-    /** @hide */
+    /**
+     * An {@link android.app.Activity} moved to the foreground.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_MOVE_TO_FOREGROUND = 0x0004;
-    /** @hide */
+    /**
+     * An {@link android.app.Activity} moved to the background.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_MOVE_TO_BACKGROUND = 0x0005;
-    /** @hide */
+    /**
+     * There was a system update.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SYSTEM_UPDATE      = 0x0006;
-    /** @hide */
+    /**
+     * An app is in an elevated bucket because of an active timeout preventing it from being placed
+     * in a lower bucket.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_ACTIVE_TIMEOUT     = 0x0007;
-    /** @hide */
+    /**
+     * This system package's sync adapter has been used for another package's content provider.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SYNC_ADAPTER       = 0x0008;
-    /** @hide */
+    /**
+     * A slice was pinned by an app.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SLICE_PINNED       = 0x0009;
-    /** @hide */
+    /** /**
+     * A slice was pinned by the default launcher or the default assistant.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_SLICE_PINNED_PRIV  = 0x000A;
-    /** @hide */
+    /**
+     * A sync operation that is exempt from app standby was scheduled when the device wasn't Dozing.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE = 0x000B;
-    /** @hide */
+    /**
+     * A sync operation that is exempt from app standby was scheduled while the device was Dozing.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_DOZE = 0x000C;
-    /** @hide */
+    /**
+     * A sync operation that is exempt from app standby started.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_START = 0x000D;
-    /** @hide */
+    /**
+     * A sync operation that is not exempt from app standby was scheduled.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_UNEXEMPTED_SYNC_SCHEDULED = 0x000E;
-    /** @hide */
+    /**
+     * A foreground service started.
+     * @hide
+     */
     public static final int REASON_SUB_USAGE_FOREGROUND_SERVICE_START = 0x000F;
-    /** @hide */
+    /**
+     * The predicted bucket was restored after the app's temporary elevation to the ACTIVE bucket
+     * ended.
+     * @hide
+     */
     public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
+    /**
+     * The reason the system forced the app into the bucket is unknown or undefined.
+     * @hide
+     */
+    public static final int REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED = 0;
+    /**
+     * The app was unnecessarily using system resources (battery, memory, etc) in the background.
+     * @hide
+     */
+    public static final int REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE = 1 << 0;
+    /**
+     * The app was deemed to be intentionally abusive.
+     * @hide
+     */
+    public static final int REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE = 1 << 1;
+    /**
+     * The app was displaying buggy behavior.
+     * @hide
+     */
+    public static final int REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY = 1 << 2;
 
 
     /** @hide */
@@ -210,10 +327,22 @@ public final class UsageStatsManager {
             STANDBY_BUCKET_WORKING_SET,
             STANDBY_BUCKET_FREQUENT,
             STANDBY_BUCKET_RARE,
+            STANDBY_BUCKET_RESTRICTED,
             STANDBY_BUCKET_NEVER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StandbyBuckets {}
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"REASON_SUB_FORCED_SYSTEM_FLAG_FLAG_"}, value = {
+            REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED,
+            REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE,
+            REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
+            REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemForcedReasons {
+    }
 
     /**
      * Observer id of the registered observer for the group of packages that reached the usage
@@ -290,6 +419,9 @@ public final class UsageStatsManager {
      * </p>
      *
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -324,6 +456,9 @@ public final class UsageStatsManager {
      * the specified interval. The results are ordered as in
      * {@link #queryUsageStats(int, long, long)}.
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -362,6 +497,9 @@ public final class UsageStatsManager {
      * </ul>
      *
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param intervalType The time interval by which the stats are aggregated.
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
@@ -395,6 +533,9 @@ public final class UsageStatsManager {
      * Query for events in the given time range. Events are only kept by the system for a few
      * days.
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
      *                 Defined in terms of "Unix time", see
@@ -418,6 +559,9 @@ public final class UsageStatsManager {
 
     /**
      * Like {@link #queryEvents(long, long)}, but only returns events for the calling package.
+     * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
+     * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
+     * then {@code null} will be returned.</em>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
      *                 Defined in terms of "Unix time", see
@@ -477,13 +621,19 @@ public final class UsageStatsManager {
     /**
      * Returns whether the specified app is currently considered inactive. This will be true if the
      * app hasn't been used directly or indirectly for a period of time defined by the system. This
-     * could be of the order of several hours or days.
+     * could be of the order of several hours or days. Apps are not considered inactive when the
+     * device is charging.
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} to query the
+     * inactive state of other apps</p>
+     *
      * @param packageName The package name of the app to query
-     * @return whether the app is currently considered inactive
+     * @return whether the app is currently considered inactive or false if querying another app
+     * without {@link android.Manifest.permission#PACKAGE_USAGE_STATS}
      */
     public boolean isAppInactive(String packageName) {
         try {
-            return mService.isAppInactive(packageName, mContext.getUserId());
+            return mService.isAppInactive(packageName, mContext.getUserId(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             // fall through and return default
         }
@@ -506,7 +656,7 @@ public final class UsageStatsManager {
      * state of the app based on app usage patterns. Standby buckets determine how much an app will
      * be restricted from running background tasks such as jobs and alarms.
      * <p>Restrictions increase progressively from {@link #STANDBY_BUCKET_ACTIVE} to
-     * {@link #STANDBY_BUCKET_RARE}, with {@link #STANDBY_BUCKET_ACTIVE} being the least
+     * {@link #STANDBY_BUCKET_RESTRICTED}, with {@link #STANDBY_BUCKET_ACTIVE} being the least
      * restrictive. The battery level of the device might also affect the restrictions.
      * <p>Apps in buckets &le; {@link #STANDBY_BUCKET_ACTIVE} have no standby restrictions imposed.
      * Apps in buckets &gt; {@link #STANDBY_BUCKET_FREQUENT} may have network access restricted when
@@ -550,7 +700,8 @@ public final class UsageStatsManager {
     /**
      * {@hide}
      * Changes an app's standby bucket to the provided value. The caller can only set the standby
-     * bucket for a different app than itself.
+     * bucket for a different app than itself. The caller will not be able to change an app's
+     * standby bucket if that app is in the {@link #STANDBY_BUCKET_RESTRICTED} bucket.
      * @param packageName the package name of the app to set the bucket for. A SecurityException
      *                    will be thrown if the package name is that of the caller.
      * @param bucket the standby bucket to set it to, which should be one of STANDBY_BUCKET_*.
@@ -596,7 +747,8 @@ public final class UsageStatsManager {
     /**
      * {@hide}
      * Changes the app standby bucket for multiple apps at once. The Map is keyed by the package
-     * name and the value is one of STANDBY_BUCKET_*.
+     * name and the value is one of STANDBY_BUCKET_*. The caller will not be able to change an
+     * app's standby bucket if that app is in the {@link #STANDBY_BUCKET_RESTRICTED} bucket.
      * @param appBuckets a map of package name to bucket value.
      */
     @SystemApi
@@ -785,8 +937,8 @@ public final class UsageStatsManager {
      *                       {@link #EXTRA_TIME_USED}. Cannot be {@code null} unless the observer is
      *                       being registered with a {@code timeUsed} equal to or greater than
      *                       {@code timeLimit}.
-     * @throws SecurityException if the caller doesn't have both SUSPEND_APPS and OBSERVE_APP_USAGE
-     *                           permissions.
+     * @throws SecurityException if the caller is neither the active supervision app nor does it
+     *                           have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions.
      * @hide
      */
     @SystemApi
@@ -811,8 +963,8 @@ public final class UsageStatsManager {
      * an observer that was already unregistered or never registered will have no effect.
      *
      * @param observerId The id of the observer that was previously registered.
-     * @throws SecurityException if the caller doesn't have both SUSPEND_APPS and OBSERVE_APP_USAGE
-     *                           permissions.
+     * @throws SecurityException if the caller is neither the active supervision app nor does it
+     *                         have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions.
      * @hide
      */
     @SystemApi
@@ -928,17 +1080,32 @@ public final class UsageStatsManager {
 
     /** @hide */
     public static String reasonToString(int standbyReason) {
+        final int subReason = standbyReason & REASON_SUB_MASK;
         StringBuilder sb = new StringBuilder();
         switch (standbyReason & REASON_MAIN_MASK) {
             case REASON_MAIN_DEFAULT:
                 sb.append("d");
+                switch (subReason) {
+                    case REASON_SUB_DEFAULT_UNDEFINED:
+                        // Historically, undefined didn't have a string, so don't add anything here.
+                        break;
+                    case REASON_SUB_DEFAULT_APP_UPDATE:
+                        sb.append("-au");
+                        break;
+                }
                 break;
-            case REASON_MAIN_FORCED:
+            case REASON_MAIN_FORCED_BY_SYSTEM:
+                sb.append("s");
+                if (subReason > 0) {
+                    sb.append("-").append(Integer.toBinaryString(subReason));
+                }
+                break;
+            case REASON_MAIN_FORCED_BY_USER:
                 sb.append("f");
                 break;
             case REASON_MAIN_PREDICTED:
                 sb.append("p");
-                switch (standbyReason & REASON_SUB_MASK) {
+                switch (subReason) {
                     case REASON_SUB_PREDICTED_RESTORED:
                         sb.append("-r");
                         break;
@@ -949,7 +1116,7 @@ public final class UsageStatsManager {
                 break;
             case REASON_MAIN_USAGE:
                 sb.append("u");
-                switch (standbyReason & REASON_SUB_MASK) {
+                switch (subReason) {
                     case REASON_SUB_USAGE_SYSTEM_INTERACTION:
                         sb.append("-si");
                         break;
@@ -1028,15 +1195,16 @@ public final class UsageStatsManager {
      * @param user The user for whom the package should be whitelisted. Passing in a user that is
      * not the same as the caller's process will require the INTERACT_ACROSS_USERS permission.
      * @see #isAppInactive(String)
+     *
+     * @deprecated Use
+     * {@link android.os.PowerWhitelistManager#whitelistAppTemporarily(String, long)} instead.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
+    @Deprecated
     public void whitelistAppTemporarily(String packageName, long duration, UserHandle user) {
-        try {
-            mService.whitelistAppTemporarily(packageName, duration, user.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        mContext.getSystemService(PowerWhitelistManager.class)
+                .whitelistAppTemporarily(packageName, duration);
     }
 
     /**

@@ -18,10 +18,10 @@ package com.android.server;
 
 import android.Manifest.permission;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -210,14 +210,9 @@ public class NetworkScorerAppManager {
     }
 
     private boolean canAccessLocation(int uid, String packageName) {
-        final PackageManager pm = mContext.getPackageManager();
-        final AppOpsManager appOpsManager =
-                (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-        return isLocationModeEnabled()
-                && pm.checkPermission(permission.ACCESS_COARSE_LOCATION, packageName)
-                == PackageManager.PERMISSION_GRANTED
-                && appOpsManager.noteOp(AppOpsManager.OP_COARSE_LOCATION, uid, packageName)
-                == AppOpsManager.MODE_ALLOWED;
+        return isLocationModeEnabled() && PermissionChecker.checkPermissionForPreflight(mContext,
+                permission.ACCESS_COARSE_LOCATION, PermissionChecker.PID_UNKNOWN, uid, packageName)
+                == PermissionChecker.PERMISSION_GRANTED;
     }
 
     private boolean isLocationModeEnabled() {

@@ -31,13 +31,15 @@ import android.os.Handler;
  * @hide
  */
 public abstract class CountryDetectorBase {
+    private static final String ATTRIBUTION_TAG = "CountryDetector";
+
     protected final Handler mHandler;
     protected final Context mContext;
     protected CountryListener mListener;
     protected Country mDetectedCountry;
 
-    public CountryDetectorBase(Context ctx) {
-        mContext = ctx;
+    public CountryDetectorBase(Context context) {
+        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mHandler = new Handler();
     }
 
@@ -45,7 +47,7 @@ public abstract class CountryDetectorBase {
      * Start detecting the country that the user is in.
      *
      * @return the country if it is available immediately, otherwise null should
-     *         be returned.
+     * be returned.
      */
     public abstract Country detectCountry();
 

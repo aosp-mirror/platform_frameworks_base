@@ -85,12 +85,6 @@ SimpleConditionTracker::SimpleConditionTracker(
         mInitialValue = ConditionState::kUnknown;
     }
 
-    mNonSlicedConditionState = mInitialValue;
-
-    if (!mSliced) {
-        mUnSlicedPart = mInitialValue;
-    }
-
     mInitialized = true;
 }
 
@@ -101,9 +95,11 @@ SimpleConditionTracker::~SimpleConditionTracker() {
 bool SimpleConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                   const vector<sp<ConditionTracker>>& allConditionTrackers,
                                   const unordered_map<int64_t, int>& conditionIdIndexMap,
-                                  vector<bool>& stack) {
+                                  vector<bool>& stack,
+                                  vector<ConditionState>& initialConditionCache) {
     // SimpleConditionTracker does not have dependency on other conditions, thus we just return
     // if the initialization was successful.
+    initialConditionCache[mIndex] = mInitialValue;
     return mInitialized;
 }
 
@@ -141,9 +137,6 @@ void SimpleConditionTracker::handleStopAll(std::vector<ConditionState>& conditio
     mInitialValue = ConditionState::kFalse;
     mSlicedConditionState.clear();
     conditionCache[mIndex] = ConditionState::kFalse;
-    if (!mSliced) {
-        mUnSlicedPart = ConditionState::kFalse;
-    }
 }
 
 bool SimpleConditionTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -305,9 +298,7 @@ void SimpleConditionTracker::evaluateCondition(
                 conditionCache[mIndex] =
                         itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
             }
-            mUnSlicedPart = conditionCache[mIndex];
         }
-
         return;
     }
 
@@ -333,18 +324,12 @@ void SimpleConditionTracker::evaluateCondition(
     }
     conditionCache[mIndex] = overallState;
     conditionChangedCache[mIndex] = overallChanged;
-    if (!mSliced) {
-        mUnSlicedPart = overallState;
-    }
 }
 
 void SimpleConditionTracker::isConditionMet(
         const ConditionKey& conditionParameters, const vector<sp<ConditionTracker>>& allConditions,
-        const vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
         const bool isPartialLink,
-        vector<ConditionState>& conditionCache,
-        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
+        vector<ConditionState>& conditionCache) const {
 
     if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
         // it has been evaluated.
@@ -356,18 +341,13 @@ void SimpleConditionTracker::isConditionMet(
 
     if (pair == conditionParameters.end()) {
         ConditionState conditionState = ConditionState::kNotEvaluated;
-        if (dimensionFields.size() > 0 && dimensionFields[0].mMatcher.getTag() == mDimensionTag) {
-            conditionState = conditionState | getMetConditionDimension(
-                allConditions, dimensionFields, isSubOutputDimensionFields, dimensionsKeySet);
-        } else {
-            conditionState = conditionState | mInitialValue;
-            if (!mSliced) {
-                const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
-                if (itr != mSlicedConditionState.end()) {
-                    ConditionState sliceState =
-                        itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
-                    conditionState = conditionState | sliceState;
-                }
+        conditionState = conditionState | mInitialValue;
+        if (!mSliced) {
+            const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
+            if (itr != mSlicedConditionState.end()) {
+                ConditionState sliceState =
+                    itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+                conditionState = conditionState | sliceState;
             }
         }
         conditionCache[mIndex] = conditionState;
@@ -385,15 +365,6 @@ void SimpleConditionTracker::isConditionMet(
                 slice.second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
             if (slice.first.contains(key)) {
                 conditionState = conditionState | sliceState;
-                if (sliceState == ConditionState::kTrue && dimensionFields.size() > 0) {
-                    if (isSubOutputDimensionFields) {
-                        HashableDimensionKey dimensionKey;
-                        filterValues(dimensionFields, slice.first.getValues(), &dimensionKey);
-                        dimensionsKeySet.insert(dimensionKey);
-                    } else {
-                        dimensionsKeySet.insert(slice.first);
-                    }
-                }
             }
         }
     } else {
@@ -403,55 +374,11 @@ void SimpleConditionTracker::isConditionMet(
             ConditionState sliceState =
                 startedCountIt->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
             conditionState = conditionState | sliceState;
-            if (sliceState == ConditionState::kTrue && dimensionFields.size() > 0) {
-                if (isSubOutputDimensionFields) {
-                    HashableDimensionKey dimensionKey;
-                    filterValues(dimensionFields, startedCountIt->first.getValues(), &dimensionKey);
-                    dimensionsKeySet.insert(dimensionKey);
-                } else {
-                    dimensionsKeySet.insert(startedCountIt->first);
-                }
-            }
         }
 
     }
     conditionCache[mIndex] = conditionState;
     VLOG("Predicate %lld return %d", (long long)mConditionId, conditionCache[mIndex]);
-}
-
-ConditionState SimpleConditionTracker::getMetConditionDimension(
-        const std::vector<sp<ConditionTracker>>& allConditions,
-        const vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
-        std::unordered_set<HashableDimensionKey>& dimensionsKeySet) const {
-    ConditionState conditionState = mInitialValue;
-    if (dimensionFields.size() == 0 || mOutputDimensions.size() == 0 ||
-        dimensionFields[0].mMatcher.getTag() != mOutputDimensions[0].mMatcher.getTag()) {
-        const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
-        if (itr != mSlicedConditionState.end()) {
-            ConditionState sliceState =
-                itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
-            conditionState = conditionState | sliceState;
-        }
-        return conditionState;
-    }
-
-    for (const auto& slice : mSlicedConditionState) {
-        ConditionState sliceState =
-            slice.second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
-        conditionState = conditionState | sliceState;
-
-        if (sliceState == ConditionState::kTrue && dimensionFields.size() > 0) {
-            if (isSubOutputDimensionFields) {
-                HashableDimensionKey dimensionKey;
-                filterValues(dimensionFields, slice.first.getValues(), &dimensionKey);
-                dimensionsKeySet.insert(dimensionKey);
-            } else {
-                dimensionsKeySet.insert(slice.first);
-            }
-        }
-    }
-    return conditionState;
 }
 
 }  // namespace statsd

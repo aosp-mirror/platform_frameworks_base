@@ -33,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
@@ -89,6 +90,8 @@ public class AudioSystem
     public static final int STREAM_TTS = 9;
     /** @hide Used to identify the volume of audio streams for accessibility prompts */
     public static final int STREAM_ACCESSIBILITY = 10;
+    /** @hide Used to identify the volume of audio streams for virtual assistant */
+    public static final int STREAM_ASSISTANT = 11;
     /**
      * @hide
      * @deprecated Use {@link #numStreamTypes() instead}
@@ -102,7 +105,7 @@ public class AudioSystem
     private static native int native_get_FCC_8();
 
     // Expose only the getter method publicly so we can change it in the future
-    private static final int NUM_STREAM_TYPES = 11;
+    private static final int NUM_STREAM_TYPES = 12;
 
     /**
      * @hide
@@ -124,7 +127,8 @@ public class AudioSystem
         "STREAM_SYSTEM_ENFORCED",
         "STREAM_DTMF",
         "STREAM_TTS",
-        "STREAM_ACCESSIBILITY"
+        "STREAM_ACCESSIBILITY",
+        "STREAM_ASSISTANT"
     };
 
     /**
@@ -161,7 +165,9 @@ public class AudioSystem
     /** @hide */
     public static final int MODE_IN_COMMUNICATION   = 3;
     /** @hide */
-    public static final int NUM_MODES               = 4;
+    public static final int MODE_CALL_SCREENING     = 4;
+    /** @hide */
+    public static final int NUM_MODES               = 5;
 
     /** @hide */
     public static String modeToString(int mode) {
@@ -172,6 +178,7 @@ public class AudioSystem
             case MODE_INVALID: return "MODE_INVALID";
             case MODE_NORMAL: return "MODE_NORMAL";
             case MODE_RINGTONE: return "MODE_RINGTONE";
+            case MODE_CALL_SCREENING: return "MODE_CALL_SCREENING";
             default: return "unknown mode (" + mode + ")";
         }
     }
@@ -192,18 +199,230 @@ public class AudioSystem
     /** @hide */
     public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
 
+    /** @hide */
+    @IntDef(flag = false, prefix = "AUDIO_FORMAT_", value = {
+            AUDIO_FORMAT_INVALID,
+            AUDIO_FORMAT_DEFAULT,
+            AUDIO_FORMAT_AAC,
+            AUDIO_FORMAT_SBC,
+            AUDIO_FORMAT_APTX,
+            AUDIO_FORMAT_APTX_HD,
+            AUDIO_FORMAT_LDAC }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioFormatNativeEnumForBtCodec {}
+
     /**
      * @hide
      * Convert audio format enum values to Bluetooth codec values
      */
-    public static int audioFormatToBluetoothSourceCodec(int audioFormat) {
+    public static int audioFormatToBluetoothSourceCodec(
+            @AudioFormatNativeEnumForBtCodec int audioFormat) {
         switch (audioFormat) {
             case AUDIO_FORMAT_AAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC;
             case AUDIO_FORMAT_SBC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC;
             case AUDIO_FORMAT_APTX: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX;
             case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
             case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
-            default: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
+            default:
+                Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
+                        + " for conversion to BT codec");
+                return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
+        }
+    }
+
+    /**
+     * @hide
+     * Convert a Bluetooth codec to an audio format enum
+     * @param btCodec the codec to convert.
+     * @return the audio format, or {@link #AUDIO_FORMAT_DEFAULT} if unknown
+     */
+    public static @AudioFormatNativeEnumForBtCodec int bluetoothCodecToAudioFormat(int btCodec) {
+        switch (btCodec) {
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
+                return AudioSystem.AUDIO_FORMAT_SBC;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC:
+                return AudioSystem.AUDIO_FORMAT_AAC;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX:
+                return AudioSystem.AUDIO_FORMAT_APTX;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD:
+                return AudioSystem.AUDIO_FORMAT_APTX_HD;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
+                return AudioSystem.AUDIO_FORMAT_LDAC;
+            default:
+                Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
+                        + " for conversion to audio format");
+                // TODO returning DEFAULT is the current behavior, should this return INVALID?
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
+        }
+    }
+
+    /**
+     * @hide
+     * Convert a native audio format integer constant to a string.
+     */
+    public static String audioFormatToString(int audioFormat) {
+        switch (audioFormat) {
+            case /* AUDIO_FORMAT_INVALID         */ 0xFFFFFFFF:
+                return "AUDIO_FORMAT_INVALID";
+            case /* AUDIO_FORMAT_DEFAULT         */ 0:
+                return "AUDIO_FORMAT_DEFAULT";
+            case /* AUDIO_FORMAT_MP3             */ 0x01000000:
+                return "AUDIO_FORMAT_MP3";
+            case /* AUDIO_FORMAT_AMR_NB          */ 0x02000000:
+                return "AUDIO_FORMAT_AMR_NB";
+            case /* AUDIO_FORMAT_AMR_WB          */ 0x03000000:
+                return "AUDIO_FORMAT_AMR_WB";
+            case /* AUDIO_FORMAT_AAC             */ 0x04000000:
+                return "AUDIO_FORMAT_AAC";
+            case /* AUDIO_FORMAT_HE_AAC_V1       */ 0x05000000:
+                return "AUDIO_FORMAT_HE_AAC_V1";
+            case /* AUDIO_FORMAT_HE_AAC_V2       */ 0x06000000:
+                return "AUDIO_FORMAT_HE_AAC_V2";
+            case /* AUDIO_FORMAT_VORBIS          */ 0x07000000:
+                return "AUDIO_FORMAT_VORBIS";
+            case /* AUDIO_FORMAT_OPUS            */ 0x08000000:
+                return "AUDIO_FORMAT_OPUS";
+            case /* AUDIO_FORMAT_AC3             */ 0x09000000:
+                return "AUDIO_FORMAT_AC3";
+            case /* AUDIO_FORMAT_E_AC3           */ 0x0A000000:
+                return "AUDIO_FORMAT_E_AC3";
+            case /* AUDIO_FORMAT_DTS             */ 0x0B000000:
+                return "AUDIO_FORMAT_DTS";
+            case /* AUDIO_FORMAT_DTS_HD          */ 0x0C000000:
+                return "AUDIO_FORMAT_DTS_HD";
+            case /* AUDIO_FORMAT_IEC61937        */ 0x0D000000:
+                return "AUDIO_FORMAT_IEC61937";
+            case /* AUDIO_FORMAT_DOLBY_TRUEHD    */ 0x0E000000:
+                return "AUDIO_FORMAT_DOLBY_TRUEHD";
+            case /* AUDIO_FORMAT_EVRC            */ 0x10000000:
+                return "AUDIO_FORMAT_EVRC";
+            case /* AUDIO_FORMAT_EVRCB           */ 0x11000000:
+                return "AUDIO_FORMAT_EVRCB";
+            case /* AUDIO_FORMAT_EVRCWB          */ 0x12000000:
+                return "AUDIO_FORMAT_EVRCWB";
+            case /* AUDIO_FORMAT_EVRCNW          */ 0x13000000:
+                return "AUDIO_FORMAT_EVRCNW";
+            case /* AUDIO_FORMAT_AAC_ADIF        */ 0x14000000:
+                return "AUDIO_FORMAT_AAC_ADIF";
+            case /* AUDIO_FORMAT_WMA             */ 0x15000000:
+                return "AUDIO_FORMAT_WMA";
+            case /* AUDIO_FORMAT_WMA_PRO         */ 0x16000000:
+                return "AUDIO_FORMAT_WMA_PRO";
+            case /* AUDIO_FORMAT_AMR_WB_PLUS     */ 0x17000000:
+                return "AUDIO_FORMAT_AMR_WB_PLUS";
+            case /* AUDIO_FORMAT_MP2             */ 0x18000000:
+                return "AUDIO_FORMAT_MP2";
+            case /* AUDIO_FORMAT_QCELP           */ 0x19000000:
+                return "AUDIO_FORMAT_QCELP";
+            case /* AUDIO_FORMAT_DSD             */ 0x1A000000:
+                return "AUDIO_FORMAT_DSD";
+            case /* AUDIO_FORMAT_FLAC            */ 0x1B000000:
+                return "AUDIO_FORMAT_FLAC";
+            case /* AUDIO_FORMAT_ALAC            */ 0x1C000000:
+                return "AUDIO_FORMAT_ALAC";
+            case /* AUDIO_FORMAT_APE             */ 0x1D000000:
+                return "AUDIO_FORMAT_APE";
+            case /* AUDIO_FORMAT_AAC_ADTS        */ 0x1E000000:
+                return "AUDIO_FORMAT_AAC_ADTS";
+            case /* AUDIO_FORMAT_SBC             */ 0x1F000000:
+                return "AUDIO_FORMAT_SBC";
+            case /* AUDIO_FORMAT_APTX            */ 0x20000000:
+                return "AUDIO_FORMAT_APTX";
+            case /* AUDIO_FORMAT_APTX_HD         */ 0x21000000:
+                return "AUDIO_FORMAT_APTX_HD";
+            case /* AUDIO_FORMAT_AC4             */ 0x22000000:
+                return "AUDIO_FORMAT_AC4";
+            case /* AUDIO_FORMAT_LDAC            */ 0x23000000:
+                return "AUDIO_FORMAT_LDAC";
+            case /* AUDIO_FORMAT_MAT             */ 0x24000000:
+                return "AUDIO_FORMAT_MAT";
+            case /* AUDIO_FORMAT_AAC_LATM        */ 0x25000000:
+                return "AUDIO_FORMAT_AAC_LATM";
+            case /* AUDIO_FORMAT_CELT            */ 0x26000000:
+                return "AUDIO_FORMAT_CELT";
+            case /* AUDIO_FORMAT_APTX_ADAPTIVE   */ 0x27000000:
+                return "AUDIO_FORMAT_APTX_ADAPTIVE";
+            case /* AUDIO_FORMAT_LHDC            */ 0x28000000:
+                return "AUDIO_FORMAT_LHDC";
+            case /* AUDIO_FORMAT_LHDC_LL         */ 0x29000000:
+                return "AUDIO_FORMAT_LHDC_LL";
+            case /* AUDIO_FORMAT_APTX_TWSP       */ 0x2A000000:
+                return "AUDIO_FORMAT_APTX_TWSP";
+
+            /* Aliases */
+            case /* AUDIO_FORMAT_PCM_16_BIT        */ 0x1:
+                return "AUDIO_FORMAT_PCM_16_BIT";        // (PCM | PCM_SUB_16_BIT)
+            case /* AUDIO_FORMAT_PCM_8_BIT         */ 0x2:
+                return "AUDIO_FORMAT_PCM_8_BIT";        // (PCM | PCM_SUB_8_BIT)
+            case /* AUDIO_FORMAT_PCM_32_BIT        */ 0x3:
+                return "AUDIO_FORMAT_PCM_32_BIT";        // (PCM | PCM_SUB_32_BIT)
+            case /* AUDIO_FORMAT_PCM_8_24_BIT      */ 0x4:
+                return "AUDIO_FORMAT_PCM_8_24_BIT";        // (PCM | PCM_SUB_8_24_BIT)
+            case /* AUDIO_FORMAT_PCM_FLOAT         */ 0x5:
+                return "AUDIO_FORMAT_PCM_FLOAT";        // (PCM | PCM_SUB_FLOAT)
+            case /* AUDIO_FORMAT_PCM_24_BIT_PACKED */ 0x6:
+                return "AUDIO_FORMAT_PCM_24_BIT_PACKED";        // (PCM | PCM_SUB_24_BIT_PACKED)
+            case /* AUDIO_FORMAT_AAC_MAIN          */ 0x4000001:
+                return "AUDIO_FORMAT_AAC_MAIN";  // (AAC | AAC_SUB_MAIN)
+            case /* AUDIO_FORMAT_AAC_LC            */ 0x4000002:
+                return "AUDIO_FORMAT_AAC_LC";  // (AAC | AAC_SUB_LC)
+            case /* AUDIO_FORMAT_AAC_SSR           */ 0x4000004:
+                return "AUDIO_FORMAT_AAC_SSR";  // (AAC | AAC_SUB_SSR)
+            case /* AUDIO_FORMAT_AAC_LTP           */ 0x4000008:
+                return "AUDIO_FORMAT_AAC_LTP";  // (AAC | AAC_SUB_LTP)
+            case /* AUDIO_FORMAT_AAC_HE_V1         */ 0x4000010:
+                return "AUDIO_FORMAT_AAC_HE_V1";  // (AAC | AAC_SUB_HE_V1)
+            case /* AUDIO_FORMAT_AAC_SCALABLE      */ 0x4000020:
+                return "AUDIO_FORMAT_AAC_SCALABLE";  // (AAC | AAC_SUB_SCALABLE)
+            case /* AUDIO_FORMAT_AAC_ERLC          */ 0x4000040:
+                return "AUDIO_FORMAT_AAC_ERLC";  // (AAC | AAC_SUB_ERLC)
+            case /* AUDIO_FORMAT_AAC_LD            */ 0x4000080:
+                return "AUDIO_FORMAT_AAC_LD";  // (AAC | AAC_SUB_LD)
+            case /* AUDIO_FORMAT_AAC_HE_V2         */ 0x4000100:
+                return "AUDIO_FORMAT_AAC_HE_V2";  // (AAC | AAC_SUB_HE_V2)
+            case /* AUDIO_FORMAT_AAC_ELD           */ 0x4000200:
+                return "AUDIO_FORMAT_AAC_ELD";  // (AAC | AAC_SUB_ELD)
+            case /* AUDIO_FORMAT_AAC_XHE           */ 0x4000300:
+                return "AUDIO_FORMAT_AAC_XHE";  // (AAC | AAC_SUB_XHE)
+            case /* AUDIO_FORMAT_AAC_ADTS_MAIN     */ 0x1e000001:
+                return "AUDIO_FORMAT_AAC_ADTS_MAIN"; // (AAC_ADTS | AAC_SUB_MAIN)
+            case /* AUDIO_FORMAT_AAC_ADTS_LC       */ 0x1e000002:
+                return "AUDIO_FORMAT_AAC_ADTS_LC"; // (AAC_ADTS | AAC_SUB_LC)
+            case /* AUDIO_FORMAT_AAC_ADTS_SSR      */ 0x1e000004:
+                return "AUDIO_FORMAT_AAC_ADTS_SSR"; // (AAC_ADTS | AAC_SUB_SSR)
+            case /* AUDIO_FORMAT_AAC_ADTS_LTP      */ 0x1e000008:
+                return "AUDIO_FORMAT_AAC_ADTS_LTP"; // (AAC_ADTS | AAC_SUB_LTP)
+            case /* AUDIO_FORMAT_AAC_ADTS_HE_V1    */ 0x1e000010:
+                return "AUDIO_FORMAT_AAC_ADTS_HE_V1"; // (AAC_ADTS | AAC_SUB_HE_V1)
+            case /* AUDIO_FORMAT_AAC_ADTS_SCALABLE */ 0x1e000020:
+                return "AUDIO_FORMAT_AAC_ADTS_SCALABLE"; // (AAC_ADTS | AAC_SUB_SCALABLE)
+            case /* AUDIO_FORMAT_AAC_ADTS_ERLC     */ 0x1e000040:
+                return "AUDIO_FORMAT_AAC_ADTS_ERLC"; // (AAC_ADTS | AAC_SUB_ERLC)
+            case /* AUDIO_FORMAT_AAC_ADTS_LD       */ 0x1e000080:
+                return "AUDIO_FORMAT_AAC_ADTS_LD"; // (AAC_ADTS | AAC_SUB_LD)
+            case /* AUDIO_FORMAT_AAC_ADTS_HE_V2    */ 0x1e000100:
+                return "AUDIO_FORMAT_AAC_ADTS_HE_V2"; // (AAC_ADTS | AAC_SUB_HE_V2)
+            case /* AUDIO_FORMAT_AAC_ADTS_ELD      */ 0x1e000200:
+                return "AUDIO_FORMAT_AAC_ADTS_ELD"; // (AAC_ADTS | AAC_SUB_ELD)
+            case /* AUDIO_FORMAT_AAC_ADTS_XHE      */ 0x1e000300:
+                return "AUDIO_FORMAT_AAC_ADTS_XHE"; // (AAC_ADTS | AAC_SUB_XHE)
+            case /* AUDIO_FORMAT_AAC_LATM_LC       */ 0x25000002:
+                return "AUDIO_FORMAT_AAC_LATM_LC"; // (AAC_LATM | AAC_SUB_LC)
+            case /* AUDIO_FORMAT_AAC_LATM_HE_V1    */ 0x25000010:
+                return "AUDIO_FORMAT_AAC_LATM_HE_V1"; // (AAC_LATM | AAC_SUB_HE_V1)
+            case /* AUDIO_FORMAT_AAC_LATM_HE_V2    */ 0x25000100:
+                return "AUDIO_FORMAT_AAC_LATM_HE_V2"; // (AAC_LATM | AAC_SUB_HE_V2)
+            case /* AUDIO_FORMAT_E_AC3_JOC         */ 0xA000001:
+                return "AUDIO_FORMAT_E_AC3_JOC";  // (E_AC3 | E_AC3_SUB_JOC)
+            case /* AUDIO_FORMAT_MAT_1_0           */ 0x24000001:
+                return "AUDIO_FORMAT_MAT_1_0"; // (MAT | MAT_SUB_1_0)
+            case /* AUDIO_FORMAT_MAT_2_0           */ 0x24000002:
+                return "AUDIO_FORMAT_MAT_2_0"; // (MAT | MAT_SUB_2_0)
+            case /* AUDIO_FORMAT_MAT_2_1           */ 0x24000003:
+                return "AUDIO_FORMAT_MAT_2_1"; // (MAT | MAT_SUB_2_1)
+            default:
+                return "AUDIO_FORMAT_(" + audioFormat + ")";
         }
     }
 
@@ -467,6 +686,23 @@ public class AudioSystem
         String effectName =  effects.length == 0 ? "None" : effects[0].name;
 
         if (cb != null) {
+            ArrayList<AudioPatch> audioPatches = new ArrayList<>();
+            if (AudioManager.listAudioPatches(audioPatches) == AudioManager.SUCCESS) {
+                boolean patchFound = false;
+                int patchHandle = recordingFormat[6];
+                for (AudioPatch patch : audioPatches) {
+                    if (patch.id() == patchHandle) {
+                        patchFound = true;
+                        break;
+                    }
+                }
+                if (!patchFound) {
+                    // The cached audio patches in AudioManager is not up-to-date.
+                    // Reset audio port generation to ensure callback side can
+                    // get up-to-date audio port information.
+                    AudioManager.resetAudioPortGeneration();
+                }
+            }
             // TODO receive package name from native
             cb.onRecordingConfigurationChanged(event, riid, uid, session, source, portId, silenced,
                                         recordingFormat, clientEffects, effects, activeSource, "");
@@ -846,6 +1082,9 @@ public class AudioSystem
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_HEADSET);
     }
 
+    /** @hide */
+    public static final String LEGACY_REMOTE_SUBMIX_ADDRESS = "0";
+
     // device states, must match AudioSystem::device_connection_state
     /** @hide */
     @UnsupportedAppUsage
@@ -1060,6 +1299,19 @@ public class AudioSystem
         }
     }
 
+    /**
+     * @hide
+     * Returns a human readable name for a given device type
+     * @param device a native device type, NOT an AudioDeviceInfo type
+     * @return a string describing the device type
+     */
+    public static @NonNull String getDeviceName(int device) {
+        if ((device & DEVICE_BIT_IN) != 0) {
+            return getInputDeviceName(device);
+        }
+        return getOutputDeviceName(device);
+    }
+
     // phone state, match audio_mode???
     /** @hide */ public static final int PHONE_STATE_OFFCALL = 0;
     /** @hide */ public static final int PHONE_STATE_RINGING = 1;
@@ -1166,7 +1418,18 @@ public class AudioSystem
                                                       int codecFormat);
     /** @hide */
     @UnsupportedAppUsage
-    public static native int setPhoneState(int state);
+    public static int setPhoneState(int state) {
+        Log.w(TAG, "Do not use this method! Use AudioManager.setMode() instead.");
+        return 0;
+    }
+    /**
+     * @hide
+     * Send the current audio mode to audio policy manager and audio HAL.
+     * @param state the audio mode
+     * @param uid the UID of the app owning the audio mode
+     * @return command completion status.
+     */
+    public static native int setPhoneState(int state, int uid);
     /** @hide */
     @UnsupportedAppUsage
     public static native int setForceUse(int usage, int config);
@@ -1228,6 +1491,42 @@ public class AudioSystem
     /** @hide */
     @UnsupportedAppUsage
     public static native int getDevicesForStream(int stream);
+
+    /**
+     * @hide
+     * Do not use directly, see {@link AudioManager#getDevicesForAttributes(AudioAttributes)}
+     * Get the audio devices that would be used for the routing of the given audio attributes.
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @return an empty list if there was an issue with the request, a list of audio devices
+     *   otherwise (typically one device, except for duplicated paths).
+     */
+    public static @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
+        final AudioDeviceAttributes[] devices = new AudioDeviceAttributes[MAX_DEVICE_ROUTING];
+        final int res = getDevicesForAttributes(attributes, devices);
+        final ArrayList<AudioDeviceAttributes> routeDevices = new ArrayList<>();
+        if (res != SUCCESS) {
+            Log.e(TAG, "error " + res + " in getDevicesForAttributes for " + attributes);
+            return routeDevices;
+        }
+
+        for (AudioDeviceAttributes device : devices) {
+            if (device != null) {
+                routeDevices.add(device);
+            }
+        }
+        return routeDevices;
+    }
+
+    /**
+     * Maximum number of audio devices a track is ever routed to, determines the size of the
+     * array passed to {@link #getDevicesForAttributes(AudioAttributes, AudioDeviceAttributes[])}
+     */
+    private static final int MAX_DEVICE_ROUTING = 4;
+
+    private static native int getDevicesForAttributes(@NonNull AudioAttributes aa,
+                                                      @NonNull AudioDeviceAttributes[] devices);
 
     /** @hide returns true if master mono is enabled. */
     public static native boolean getMasterMono();
@@ -1299,11 +1598,24 @@ public class AudioSystem
     /** @hide see AudioPolicy.removeUidDeviceAffinities() */
     public static native int removeUidDeviceAffinities(int uid);
 
+    /** @hide see AudioPolicy.setUserIdDeviceAffinities() */
+    public static native int setUserIdDeviceAffinities(int userId, @NonNull int[] types,
+            @NonNull String[] addresses);
+
+    /** @hide see AudioPolicy.removeUserIdDeviceAffinities() */
+    public static native int removeUserIdDeviceAffinities(int userId);
+
     /** @hide */
     public static native int systemReady();
 
     /** @hide */
     public static native float getStreamVolumeDB(int stream, int index, int device);
+
+    /**
+     * @hide
+     * Communicate supported system usages to audio policy service.
+     */
+    public static native int setSupportedSystemUsages(int[] systemUsages);
 
     /**
      * @hide
@@ -1351,6 +1663,13 @@ public class AudioSystem
 
     /**
      * @hide
+     * Communicate UID of current InputMethodService to audio policy service.
+     */
+    public static native int setCurrentImeUid(int uid);
+
+
+    /**
+     * @hide
      * @see AudioManager#isHapticPlaybackSupported()
      */
     public static native boolean isHapticPlaybackSupported();
@@ -1361,6 +1680,58 @@ public class AudioSystem
      * when generating audio HAL servers tombstones
      */
     public static native int setAudioHalPids(int[] pids);
+
+    /**
+     * @hide
+     * @see AudioManager#isCallScreeningModeSupported()
+     */
+    public static native boolean isCallScreeningModeSupported();
+
+    // use case routing by product strategy
+
+    /**
+     * @hide
+     * Sets the preferred device to use for a given audio strategy in the audio policy engine
+     * @param strategy the id of the strategy to configure
+     * @param device the device type and address to route to when available
+     * @return {@link #SUCCESS} if successfully set
+     */
+    public static int setPreferredDeviceForStrategy(
+            int strategy, @NonNull AudioDeviceAttributes device) {
+        return setPreferredDeviceForStrategy(strategy,
+                AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
+                device.getAddress());
+    }
+    /**
+     * @hide
+     * Set device routing per product strategy.
+     * @param strategy the id of the strategy to configure
+     * @param deviceType the native device type, NOT AudioDeviceInfo types
+     * @param deviceAddress the address of the device
+     * @return {@link #SUCCESS} if successfully set
+     */
+    private static native int setPreferredDeviceForStrategy(
+            int strategy, int deviceType, String deviceAddress);
+
+    /**
+     * @hide
+     * Remove preferred routing for the strategy
+     * @param strategy the id of the strategy to configure
+     * @return {@link #SUCCESS} if successfully removed
+     */
+    public static native int removePreferredDeviceForStrategy(int strategy);
+
+    /**
+     * @hide
+     * Query previously set preferred device for a strategy
+     * @param strategy the id of the strategy to query for
+     * @param device an array of size 1 that will contain the preferred device, or null if
+     *               none was set
+     * @return {@link #SUCCESS} if there is a preferred device and it was successfully retrieved
+     *     and written to the array
+     */
+    public static native int getPreferredDeviceForStrategy(int strategy,
+                                                           AudioDeviceAttributes[] device);
 
     // Items shared with audio service
 
@@ -1416,6 +1787,7 @@ public class AudioSystem
         5, // STREAM_DTMF
         5, // STREAM_TTS
         5, // STREAM_ACCESSIBILITY
+        5, // STREAM_ASSISTANT
     };
 
     /** @hide */
