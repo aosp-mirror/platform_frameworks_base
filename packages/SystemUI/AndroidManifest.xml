@@ -516,7 +516,7 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
-        <!-- started from PipUI -->
+        <!-- started from PipController -->
         <activity
             android:name=".pip.tv.PipMenuActivity"
             android:permission="com.android.systemui.permission.SELF"
