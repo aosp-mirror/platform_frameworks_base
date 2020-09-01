@@ -33,7 +33,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -91,7 +90,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder;
 import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
@@ -115,6 +113,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.wmshell.WindowManagerShellWrapper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -366,6 +365,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             INotificationManager notificationManager,
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
+            WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
@@ -441,7 +441,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
         try {
-            WindowManagerWrapper.getInstance().addPinnedStackListener(new BubblesImeListener());
+            windowManagerShellWrapper.addPinnedStackListener(new BubblesImeListener());
         } catch (RemoteException e) {
             e.printStackTrace();
         }

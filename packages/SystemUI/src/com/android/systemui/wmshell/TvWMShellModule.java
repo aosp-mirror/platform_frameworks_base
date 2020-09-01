@@ -20,7 +20,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.pip.Pip;
@@ -62,12 +61,11 @@ public class TvWMShellModule {
     @SysUISingleton
     @Provides
     static Pip providePipController(Context context,
-            BroadcastDispatcher broadcastDispatcher,
             PipBoundsHandler pipBoundsHandler,
-            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
-            PipTaskOrganizer pipTaskOrganizer) {
-        return new PipController(context, broadcastDispatcher, pipBoundsHandler,
-                pipSurfaceTransactionHelper, pipTaskOrganizer);
+            PipTaskOrganizer pipTaskOrganizer,
+            WindowManagerShellWrapper windowManagerShellWrapper) {
+        return new PipController(context, pipBoundsHandler, pipTaskOrganizer,
+                windowManagerShellWrapper);
     }
 
     @SysUISingleton
@@ -83,9 +81,8 @@ public class TvWMShellModule {
     @SysUISingleton
     @Provides
     static PipNotification providePipNotification(Context context,
-            BroadcastDispatcher broadcastDispatcher,
             PipController pipController) {
-        return new PipNotification(context, broadcastDispatcher, pipController);
+        return new PipNotification(context, pipController);
     }
 
     @SysUISingleton
