@@ -29,6 +29,7 @@ import com.android.test.silkfx.app.CommonDemoActivity
 import com.android.test.silkfx.app.EXTRA_LAYOUT
 import com.android.test.silkfx.app.EXTRA_TITLE
 import com.android.test.silkfx.hdr.GlowActivity
+import com.android.test.silkfx.materials.GlassActivity
 import kotlin.reflect.KClass
 
 class Demo(val name: String, val makeIntent: (Context) -> Intent) {
@@ -48,6 +49,9 @@ private val AllDemos = listOf(
         DemoGroup("HDR", listOf(
                 Demo("Glow", GlowActivity::class),
                 Demo("Blingy Notifications", R.layout.bling_notifications)
+        )),
+        DemoGroup("Materials", listOf(
+                Demo("Glass", GlassActivity::class)
         ))
 )
 
