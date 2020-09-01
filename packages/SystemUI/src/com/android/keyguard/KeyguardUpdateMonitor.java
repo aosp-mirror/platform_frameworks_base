@@ -2519,13 +2519,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (isUserUnlocked(getCurrentUser())) {
             return false;
         }
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN)
-                .addCategory(Intent.CATEGORY_HOME);
-        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(homeIntent,
-                0 /* flags */);
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivityAsUser(homeIntent,
+                0 /* flags */, getCurrentUser());
 
-        // TODO(b/160971249): Replace in the future by resolving activity as user.
-        if (resolveInfo == null && mIsAutomotive) {
+        if (resolveInfo == null) {
             Log.w(TAG, "resolveNeedsSlowUnlockTransition: returning false since activity "
                     + "could not be resolved.");
             return false;
