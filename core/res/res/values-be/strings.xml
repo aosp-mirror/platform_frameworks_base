@@ -91,7 +91,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Экстранныя выклікі ў сетцы Wi‑Fi недаступныя"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пераадрасацыя выкліку"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстраннага зваротнага выкліку"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстранных зваротных выклікаў"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Стан мабільнай перадачы даных"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-паведамленні"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Паведамленні галасавой пошты"</string>
@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Гэта праграма можа распазнаваць фізічную актыўнасць."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"рабіць фатаграфіі і відэа"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Гэта праграма можа рабіць фота і запісваць відэа з дапамогай камеры ў любы час."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дазволіць праграме ці сэрвісу атрымліваць зваротныя выклікі наконт адкрыцця ці закрыцця прылад камеры."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Гэта праграма можа атрымліваць зваротныя выклікі, калі адкрываецца (праграмай) або закрываецца прылада камеры."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"кіраванне вібрацыяй"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дазваляе прыкладанням кіраваць вібрацыяй."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"непасрэдна набіраць тэлефонныя нумары"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Дазваляе праграме працягваць выклік, які пачаўся ў іншай праграме."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"счытваць нумары тэлефонаў"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Дазваляе праграме атрымліваць доступ да нумароў тэлефонаў на прыладзе."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"пакідаць экран аўтамабіля ўключаным"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"прадухіленне пераходу тэлевізара ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дазваляе праграме пакідаць экран аўтамабіля ўключаным."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дазваляе прыкладанням прадухіляць пераход планшэта ў рэжым сну."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Дазваляе праграме прадухіляць пераход тэлевізара ў рэжым сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дазваляе прыкладанням прадухіляць тэлефон ад пераходу ў рэжым сну."</string>
@@ -1121,7 +1125,7 @@
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Уставіць як звычайны тэкст"</string>
     <string name="replace" msgid="7842675434546657444">"Замяніць..."</string>
     <string name="delete" msgid="1514113991712129054">"Выдаліць"</string>
-    <string name="copyUrl" msgid="6229645005987260230">"Скапіяваць URL"</string>
+    <string name="copyUrl" msgid="6229645005987260230">"Скапіраваць URL-адрас"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Выбраць тэкст"</string>
     <string name="undo" msgid="3175318090002654673">"Адрабіць"</string>
     <string name="redo" msgid="7231448494008532233">"Узнавіць"</string>
@@ -1283,7 +1287,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Не ўдалося падключыцца да сеткі \"<xliff:g id="SSID">%1$s</xliff:g>\""</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Націсніце, каб змяніць налады прыватнасці, і паўтарыце спробу"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Змяніць наладу прыватнасці?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> можа запытваць для падключэння выкарыстанне ўнікальнага ідэнтыфікатара вашай прылады - MAC-адраса. Гэта можа даць магчымасць прыладам паблізу адсочваць месцазнаходжанне вашай прылады. \n\nКалі вы працягнеце, <xliff:g id="SSID_1">%1$s</xliff:g> зменіць наладу прыватнасці і паўторыць спробу падключэння."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Для падключэння да сеткі \"<xliff:g id="SSID">%1$s</xliff:g>\" неабходна ўвесці ўнікальны ідэнтыфікатар – MAC-адрас вашай прылады. Цяпер у наладах прыватнасці гэтай сеткі выкарыстоўваецца выпадковы ідэнтыфікатар. \n\nПасля яго змянення прылады паблізу змогуць адсочваць месцазнаходжанне вашай прылады."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Змяніць наладу"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Налады абноўлены. Паспрабуйце падключыцца яшчэ раз."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Не ўдалося змяніць наладу прыватнасці"</string>

@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"பேட்டரி விவரங்களைத் திறக்கும்"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"பேட்டரி சக்தி <xliff:g id="NUMBER">%d</xliff:g> சதவிகிதம் உள்ளது."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"பேட்டரி: <xliff:g id="PERCENTAGE">%1$s</xliff:g> சதவீதம், உபயோகத்தின் அடிப்படையில் <xliff:g id="TIME">%2$s</xliff:g> மீதமுள்ளது"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"பேட்டரி சார்ஜ் செய்யப்படுகிறது, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> சதவீதம்."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"பேட்டரி சார்ஜ் ஆகிறது, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> சதவீதம் உள்ளது."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"கணினி அமைப்பு."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"அறிவிப்புகள்."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"எல்லா அறிவிப்புகளையும் காட்டும்"</string>
@@ -396,7 +396,7 @@
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> க்கு இடதுபக்கமாக இழுக்கவும்."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"அலாரங்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
-    <string name="zen_priority_customize_button" msgid="4119213187257195047">"தனிப்பயனாக்கு"</string>
+    <string name="zen_priority_customize_button" msgid="4119213187257195047">"பிரத்தியேகமாக்கு"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும். எனினும், உங்களால் ஃபோன் அழைப்புகளைச் செய்ய முடியும்."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும்."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
@@ -428,19 +428,19 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"சுயவிவரத்தைக் காட்டு"</string>
     <string name="user_add_user" msgid="4336657383006913022">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"புதியவர்"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"வேறொருவர்"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"வேறொருவரைச் சேர்"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"அழைக்கப்பட்டவரை அகற்று"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
+    <string name="guest_nickname" msgid="1863770639799615889">"கெஸ்ட்"</string>
+    <string name="guest_new_guest" msgid="962155336259570156">"கெஸ்ட்டைச் சேர்"</string>
+    <string name="guest_exit_guest" msgid="4030840507598850886">"கெஸ்ட்டை அகற்று"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"கெஸ்ட்டை அகற்றவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா பயன்பாடுகளும், தரவும் நீக்கப்படும்."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"மீண்டும் தொடங்கு"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"தொடரவும்"</string>
-    <string name="guest_notification_title" msgid="4434456703930764167">"வேறொருவர்"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"பயன்பாடுகளையும் தரவையும் நீக்க, விருந்தினர் பயனரை அகற்றவும்"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
+    <string name="guest_notification_title" msgid="4434456703930764167">"கெஸ்ட்"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"பயன்பாடுகளையும் தரவையும் நீக்க, கெஸ்ட் பயனரை அகற்றவும்"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"கெஸ்ட்டை அகற்றவா?"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"பயனரை வெளியேற்று"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"தற்போதைய பயனரிலிருந்து வெளியேறு"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"பயனரை வெளியேற்று"</string>
@@ -623,7 +623,7 @@
     <string name="clock_seconds_desc" msgid="2415312788902144817">"நிலைப் பட்டியில் கடிகார வினாடிகளைக் காட்டும். பேட்டரியின் ஆயுளைக் குறைக்கலாம்."</string>
     <string name="qs_rearrange" msgid="484816665478662911">"விரைவு அமைப்புகளை மறுவரிசைப்படுத்து"</string>
     <string name="show_brightness" msgid="6700267491672470007">"விரைவு அமைப்புகளில் ஒளிர்வுப் பட்டியைக் காட்டு"</string>
-    <string name="experimental" msgid="3549865454812314826">"சோதனை முயற்சி"</string>
+    <string name="experimental" msgid="3549865454812314826">"பரிசோதனை முயற்சி"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"புளூடூத்தை இயக்கவா?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"உங்கள் டேப்லெட்டுடன் விசைப்பலகையை இணைக்க, முதலில் புளூடூத்தை இயக்க வேண்டும்."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"இயக்கு"</string>
@@ -677,7 +677,7 @@
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் மூடப்பட்டன"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"இந்தச் சேனலிலிருந்து அறிவிப்புகளைப் பெறுவதை அனுமதிக்கும்"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"மேலும் அமைப்புகள்"</string>
-    <string name="notification_app_settings" msgid="8963648463858039377">"தனிப்பயனாக்கு"</string>
+    <string name="notification_app_settings" msgid="8963648463858039377">"பிரத்தியேகமாக்கு"</string>
     <string name="notification_done" msgid="6215117625922713976">"முடிந்தது"</string>
     <string name="inline_undo" msgid="9026953267645116526">"செயல்தவிர்"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -739,7 +739,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"மியூசிக்"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"கேலெண்டர்"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"ஒலிக் கட்டுப்பாடுகளுடன் காட்டு"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ஒலியளவுப் பொத்தான்களுக்கான ஷார்ட்கட்"</string>
@@ -777,7 +777,7 @@
     <string name="reset" msgid="8715144064608810383">"மீட்டமை"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"பட்டனின் அகலத்தை மாற்று"</string>
     <string name="clipboard" msgid="8517342737534284617">"கிளிப்போர்டு"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"தனிப்பயன் வழிசெலுத்தல் பட்டன்"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"பிரத்தியேக வழிசெலுத்தல் பட்டன்"</string>
     <string name="left_keycode" msgid="8211040899126637342">"இடப்புற விசைக்குறியீடு"</string>
     <string name="right_keycode" msgid="2480715509844798438">"வலப்புற விசைக்குறியீடு"</string>
     <string name="left_icon" msgid="5036278531966897006">"இடப்புற ஐகான்"</string>

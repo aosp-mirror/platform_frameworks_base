@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"See rakendus saab tuvastada teie füüsilised tegevused."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"piltide ja videote tegemine"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"See rakendus saab mis tahes ajal kaameraga pildistada ja videoid salvestada."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lubab rakendusel või teenusel kaameraseadmete avamise või sulgemise kohta tagasikutseid vastu võtta."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"See rakendus saab mis tahes kaameraseadme avamisel (vastava rakendusega) või sulgemisel tagasikutseid vastu võtta."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"juhtige vibreerimist"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Võimaldab rakendusel juhtida vibreerimist."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"helista otse telefoninumbritele"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Lubab rakendusel jätkata kõnet, mida alustati teises rakenduses."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lugeda telefoninumbreid"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Rakendusel lubatakse juurde pääseda seadme telefoninumbritele."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hoida auto ekraani sisselülitatuna"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"tahvelarvuti uinumise vältimine"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"teleri unerežiimi lülitumise takistamine"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"väldi telefoni uinumist"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lubab rakendusel auto ekraani sisselülitatuna hoida."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Võimaldab rakendusel vältida tahvelarvuti uinumist."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Lubab rakendusel takistada teleri unerežiimi lülitumist."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Võimaldab rakendusel vältida telefoni uinumist."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Võrguga <xliff:g id="SSID">%1$s</xliff:g> ei õnnestu ühendada"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Puudutage privaatsusseadete muutmiseks ja uuesti proovimiseks"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Kas muuta privaatsusseadet?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> võib soovida luua ühenduse teie seadme kordumatu identifikaatori ehk MAC-aadressi abil. See võib võimaldada läheduses asuvatel seadmetel jälgida teie seadme asukohta. \n\nKui jätkate, muudab <xliff:g id="SSID_1">%1$s</xliff:g> teie privaatsusseadet ja proovib uuesti ühendada."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Ühendamiseks peab <xliff:g id="SSID">%1$s</xliff:g> kasutama teie seadme MAC-aadressi, mis on teie kordumatu ID. Praegu kasutab teie privaatsusseade selle võrgu puhul juhuslikku ID-d. \n\nSee muudatus võib võimaldada läheduses asuvatel seadmetel jälgida teie seadme asukohta."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Muuda seadet"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Seadet muudeti. Proovige uuesti ühendada."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Privaatsusseadet ei saa muuta"</string>

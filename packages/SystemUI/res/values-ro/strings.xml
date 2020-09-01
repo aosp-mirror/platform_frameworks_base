@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Deschideți detaliile privind bateria"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> la sută."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Procentul rămas din baterie este <xliff:g id="PERCENTAGE">%1$s</xliff:g>. În baza utilizării, timpul rămas este de aproximativ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Se încarcă bateria, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Bateria se încarcă, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> la sută."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Setări de sistem."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificări."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Vedeți toate notificările"</string>

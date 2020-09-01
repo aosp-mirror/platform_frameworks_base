@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Diese App kann deine körperliche Aktivität erkennen."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"Bilder und Videos aufnehmen"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Diese App kann mit der Kamera jederzeit Bilder und Videos aufnehmen."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Einer App oder einem Dienst den Empfang von Callbacks erlauben, wenn eine Kamera geöffnet oder geschlossen wird."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Diese App kann Callbacks empfangen, wenn eine der Kameras des Geräts von einer Anwendung geöffnet oder geschlossen wird."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Telefonnummern direkt anrufen"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Ermöglicht der App, einen Anruf weiterzuführen, der in einer anderen App begonnen wurde."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"Telefonnummern vorlesen"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Ermöglicht der App, auf die Telefonnummern auf dem Gerät zuzugreifen."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"Autodisplay eingeschaltet lassen"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"Ruhezustand des Tablets deaktivieren"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"Ruhemodus des Fernsehers deaktivieren"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"Ruhezustand deaktivieren"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Ermöglicht der App, das Autodisplay eingeschaltet zu lassen."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Ermöglicht der App, den Ruhezustand des Tablets zu deaktivieren"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Ermöglicht der App, den Ruhemodus des Fernsehers zu deaktivieren"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Ermöglicht der App, den Ruhezustand des Telefons zu deaktivieren"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Verbindung zu <xliff:g id="SSID">%1$s</xliff:g> nicht möglich"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tippe, um die Datenschutzeinstellung zu ändern und es noch einmal zu versuchen"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Datenschutzeinstellung ändern?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> möchte möglicherweise eine Verbindung über die MAC-Adresse deines Geräts herstellen; die MAC-Adresse ist eine Kennung, mit der das Gerät eindeutig identifiziert werden kann. Das kann dazu führen, dass andere Geräte in der Nähe den Standort deines Geräts verfolgen können. \n\nWenn du fortfährst, wird <xliff:g id="SSID_1">%1$s</xliff:g> deine Datenschutzeinstellung ändern und den Verbindungsversuch wiederholen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Wenn du eine Verbindung herstellen möchtest, muss <xliff:g id="SSID">%1$s</xliff:g> die MAC-Adresse deines Geräts verwenden; die MAC-Adresse ist eine Kennung, mit der das Gerät eindeutig identifiziert werden kann. In deiner Datenschutzeinstellung für dieses Netzwerk wird momentan eine zufällige Kennung genutzt. \n\nDurch diese Änderung können andere Geräte in der Nähe den Standort deines Geräts möglicherweise verfolgen."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Einstellung ändern"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Einstellung aktualisiert. Versuch noch einmal, eine Verbindung herzustellen."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Datenschutzeinstellung kann nicht geändert werden"</string>

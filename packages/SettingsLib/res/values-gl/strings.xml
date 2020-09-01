@@ -309,7 +309,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desactivar encamiñamento audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desactiva o encamiñamento automático a periféricos de audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Mostrar límites de deseño"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes, etc."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forzar dirección do deseño RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forza a dirección de pantalla a RTL (dereita a esquerda) para todas as configuración rexionais"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forzar MSAA 4x"</string>

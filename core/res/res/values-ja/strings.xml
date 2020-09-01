@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"このアプリで身体活動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"このアプリは、カメラデバイスが（なんらかのアプリによって）起動するとき、または終了するときにコールバックを受け取ることができます。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"デバイスの電話番号へのアクセスをアプリに許可します。"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"車の画面を常にオンにする"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"テレビのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"デバイスのスリープを無効にする"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"車の画面を常にオンにすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"テレビのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"モバイル デバイスのスリープを無効にすることをアプリに許可します。"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> に接続できません"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"タップしてプライバシー設定を変更し、もう一度お試しください"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"プライバシー設定を変更しますか？"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> があなたのデバイスの MAC アドレス（固有の識別番号）を使用して接続できるようになります。これにより、付近のデバイスがあなたのデバイスの位置情報を追跡できるようになる可能性があります。\n\n続行すると、<xliff:g id="SSID_1">%1$s</xliff:g> があなたのプライバシー設定を変更し、もう一度接続を試みます。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> は接続のために、あなたのデバイスの MAC アドレス（固有の識別番号）を使用する必要があります。現在、このネットワークのプライバシー設定では、ランダム ID を使用しています。\n\nこの変更により、付近のデバイスがあなたのデバイスの位置情報を追跡できるようになる可能性があります。"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"設定を変更"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"設定を更新しました。もう一度接続してみてください。"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"プライバシー設定を変更できません"</string>
@@ -1817,8 +1821,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>

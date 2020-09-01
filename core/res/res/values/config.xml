@@ -1692,6 +1692,9 @@
          This feature should be disabled for most devices. -->
     <integer name="config_virtualKeyQuietTimeMillis">0</integer>
 
+    <!-- Flag indicating whether system user specific blacklist/whitelist is supported -->
+    <bool name="config_systemUserPackagesBlacklistSupported">false</bool>
+
     <!-- A list of potential packages, in priority order, that may contain an
          ephemeral resolver. Each package will be be queried for a component
          that has been granted the PACKAGE_EPHEMERAL_AGENT permission.
@@ -2567,6 +2570,12 @@
     <!-- Configure wifi tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_wifi_tcp_buffers" translatable="false">524288,1048576,2097152,262144,524288,1048576</string>
+
+    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
+         Default is carrier_config, but it should be set to modem if the modem is returning
+         predictive (instead of instantaneous) bandwidth estimate.
+         Values are carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">carrier_config</string>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -4270,4 +4279,11 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- Boolean indicating that the system will use autoSuspend. If set to false, autoSuspend
+         is not used and the system will only suspend upon an explicit request. -->
+    <bool translatable="false" name="config_enableAutoSuspend">true</bool>
+
+    <!-- Class name of the custom country detector to be used. -->
+    <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
 </resources>

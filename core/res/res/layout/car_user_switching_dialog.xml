@@ -16,25 +16,22 @@
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:fitsSystemWindows="true"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
   <ImageView
       android:id="@+id/user_loading_avatar"
       android:layout_width="@dimen/car_fullscreen_user_pod_image_avatar_width"
       android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height"
-      android:layout_centerHorizontal="true"
-  />
+      android:layout_centerHorizontal="true"/>
 
   <TextView android:id="@+id/user_loading"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="@dimen/car_padding_4"
       android:textSize="@dimen/car_body1_size"
-      android:textColor="@color/car_body1_light"
+      android:textColor="@color/car_body1"
       android:layout_below="@id/user_loading_avatar"
-      android:gravity="center"
-  />
+      android:gravity="center"/>
 
 </RelativeLayout>

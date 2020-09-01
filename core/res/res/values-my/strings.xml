@@ -224,11 +224,11 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_actions" product="tv" msgid="2020669784083287370">"တီဗွီ ရွေးချယ်စရာများ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"ဖန်သားပြင် လော့ခ်ချခြင်း"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"ဖန်သားပြင် လော့ခ်ချရန်"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"ပါဝါပိတ်ရန်"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"အရေးပေါ်"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
-    <string name="global_action_logout" msgid="6093581310002476511">"သတ်မှတ်ပေးထားသည့်အချိန် ပြီးဆုံးပြီ"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
+    <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"အမှားပြင် အစီရင်ခံစာ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ဤအက်ပ်က သင်၏ကိုယ်လက်လှုပ်ရှားမှုကို မှတ်သားနိုင်ပါသည်။"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ဓါတ်ပုံနှင့်ဗွီဒီယိုရိုက်ခြင်း"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ဤအက်ပ်သည် ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်ပါသည်။"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ကင်မရာစက်များ ပွင့်နေခြင်း သို့မဟုတ် ပိတ်နေခြင်းနှင့် ပတ်သက်ပြီး ပြန်လည်ခေါ်ဆိုမှုများ ရယူရန် အပလီကေးရှင်း သို့မဟုတ် ဝန်ဆောင်မှုကို ခွင့်ပြုခြင်း။"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"(မည်သည့် အပလီကေးရှင်းကြောင့်) ကင်မရာစက်တစ်ခုခု ပွင့်နေသည့်အခါ သို့မဟုတ် ပိတ်နေသည့်အခါ ဤအက်ပ်က ပြန်လည်ခေါ်ဆိုမှုများ ရယူနိုင်သည်။"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"တုန်ခုန်မှုအား ထိန်းချုပ်ခြင်း"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"အခြားအက်ပ်တွင် စတင်ထားသည့် ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ရန် ဤအက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ဖုန်းနံပါတ်များကို ဖတ်ရန်"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"အက်ပ်ကို စက်ပစ္စည်း၏ ဖုန်းနံပါတ်များအား အသုံးပြုခွင့်ပေးပါ။"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ကားဖန်သားပြင်ကို ဖွင့်ထားပါ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"တီဗွီအား နားနေခြင်းမှ ကာကွယ်ရန်"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ဖုန်းအနားယူခြင်းမပြုလုပ်စေရန်"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ကားဖန်သားပြင် ဖွင့်ထားနိုင်စေရန် အက်ပ်ကို ခွင့်ပြုပေးပါ။"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"အက်ပ်အား တက်ဘလက်ကို အနားမယူနိုင်အောင် ဟန့်တားခွင့် ပြုသည်။"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"တီဗွီ ရပ်နားသွားခြင်းအား ကာကွယ်ရန် အက်ပ်အား ခွင့်ပြုပါ။"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"အက်ပ်အား ဖုန်းကို အနားမယူနိုင်အောင် ဟန့်တားခွင့် ပြုသည်။"</string>
@@ -1235,7 +1239,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"မူရင်းမြည်သံ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"မူရင်း (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"တစ်ခုမှမဟုတ်"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"တစ်ခုမျှမဟုတ်"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"မြည်သံများ"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"နှိုးစက်သံ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"အကြောင်းကြားချက်အသံ"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"\'<xliff:g id="SSID">%1$s</xliff:g>\' နှင့် ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"သင့်ကိုယ်ရေးလုံခြုံမှုဆက်တင်ကို ပြောင်းရန် တို့ပြီးနောက် ပြန်၍ကြိုးစားကြည့်ပါ"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ကိုယ်ရေးလုံခြုံမှုဆက်တင်ကို ပြောင်းမလား။"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> သည် သင့်စက်ပစ္စည်း၏ သီးသန့်သတ်မှတ်မှုစနစ် ဖြစ်သည့် MAC လိပ်စာကို အသုံးပြု၍ ချိတ်ဆက်လိုသည်။ ဤသို့လုပ်ခြင်းဖြင့် သင့်စက်ပစ္စည်း၏ တည်နေရာကို ခြေရာခံရန် အနီးတစ်ဝိုက်ရှိ စက်ပစ္စည်းများကို ခွင့်ပြုနိုင်သည်။ \n\n သင် ရှေ့ဆက်လုပ်ပါက <xliff:g id="SSID_1">%1$s</xliff:g> သည် သင်၏ ကိုယ်ရေးလုံခြုံမှုဆက်တင်ကို ပြောင်းပြီး ပြန်လည်ချိတ်ဆက်ရန် ကြိုးစားလိမ့်မည်။"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ချိတ်ဆက်ရန်အတွက် <xliff:g id="SSID">%1$s</xliff:g> သည် သင့်စက်၏ သီးသန့်သတ်မှတ်မှုစနစ် ဖြစ်သည့် MAC လိပ်စာကို အသုံးပြုရန်လိုသည်။ လက်ရှိတွင် ဤကွန်ရက်အတွက် သင်၏ကိုယ်ရေးလုံခြုံမှုဆက်တင်က ကျပန်းသတ်မှတ်မှုစနစ်ကို အသုံးပြုပါသည်။ \n\nဤအပြောင်းအလဲက သင့်စက်၏တည်နေရာကို ခြေရာခံရန် အနီးတစ်ဝိုက်ရှိ စက်များအား ခွင့်ပြုနိုင်သည်။"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ဆက်တင် ပြောင်းရန်"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ဆက်တင်ကို အပ်ဒိတ်လုပ်ပြီးပါပြီ။ ထပ်ချိတ်ဆက်ကြည့်ပါ။"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"ကိုယ်ရေးလုံခြုံမှုဆက်တင်ကို ပြောင်းလဲ၍မရပါ"</string>

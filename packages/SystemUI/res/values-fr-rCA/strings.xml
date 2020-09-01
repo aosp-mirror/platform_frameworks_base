@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Ouvrir les détails de la pile"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Pile : <xliff:g id="NUMBER">%d</xliff:g> pour cent"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Pile chargée à <xliff:g id="PERCENTAGE">%1$s</xliff:g> pour cent (environ <xliff:g id="TIME">%2$s</xliff:g> d\'autonomie en fonction de votre usage)"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"La pile est en cours de charge : <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Pile en charge : <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Paramètres système"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notifications"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Afficher toutes les notifications"</string>
@@ -782,7 +782,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Code de touche droit"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icône à gauche"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Maint. doigt sur écran, puis glissez-le pour ajouter tuiles"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les tuiles pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Maint. doigt sur l\'écran, puis glissez-le pour réorg. tuiles"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Vous avez besoin d\'au moins <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles"</string>

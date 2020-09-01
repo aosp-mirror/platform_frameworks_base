@@ -137,6 +137,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             entry.updateIcons(mContext, sbn);
             entry.reset();
             updateNotification(entry, pmUser, sbn, entry.getRow());
+            entry.getRow().setOnDismissRunnable(onDismissRunnable);
         } else {
             entry.createIcons(mContext, sbn);
             new RowInflaterTask().inflate(mContext, parent, entry,

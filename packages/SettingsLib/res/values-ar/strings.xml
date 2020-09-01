@@ -56,7 +56,7 @@
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"اكتمل الاشتراك. جارٍ الاتصال…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"بطيئة جدًا"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"بطيئة"</string>
-    <string name="speed_label_okay" msgid="1253594383880810424">"موافق"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"حسنًا"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"متوسطة"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"سريعة"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"سريعة جدًا"</string>
@@ -122,7 +122,7 @@
     <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"سماعة رأس"</string>
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"هاتف"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"تصوير"</string>
-    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"سماعة أذن"</string>
+    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"السمّاعة"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"جهاز إدخال طرفي"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"بلوتوث"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"جارٍ إقران سماعة الأذن الطبية اليسرى…"</string>
@@ -155,7 +155,7 @@
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"تحويل النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"معدل سرعة الكلام"</string>
-    <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة نطق الكلام"</string>
+    <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة قول الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"درجة الصوت"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"للتأثير في نبرة الكلام المُرَكَّب"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"اللغة"</string>
@@ -179,7 +179,7 @@
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"المحرّك المفضّل"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"عامة"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"إعادة ضبط طبقة صوت الكلام"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"إعادة ضبط طبقة الصوت التي يتم نطق النص بها على الإعداد التلقائي."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"إعادة ضبط طبقة الصوت التي يتم قول النص بها على الإعداد التلقائي."</string>
   <string-array name="tts_rate_entries">
     <item msgid="9004239613505400644">"بطيء جدًا"</item>
     <item msgid="1815382991399815061">"بطيء"</item>
@@ -213,7 +213,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"فتح قفل المصنّع الأصلي للجهاز"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"‏السماح بإلغاء قفل برنامج bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تشغيل هذا الإعداد."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تفعيل هذا الإعداد."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"اختيار تطبيق الموقع الزائف"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم تعيين تطبيق موقع زائف"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"تطبيق الموقع الزائف: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -346,7 +346,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"نابض بالحياة (تلقائي)"</item>
     <item msgid="9112200311983078311">"طبيعي"</item>
-    <item msgid="6564241960833766170">"قياسي"</item>
+    <item msgid="6564241960833766170">"عادي"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"ألوان محسَّنة"</item>
@@ -362,11 +362,11 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏تطبيق WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"‏تعيين تطبيق WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"لم يعد هذا الاختيار صالحًا. أعد المحاولة."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"التحويل إلى تشفير ملفات"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"التحويل إلى ترميز ملفات"</string>
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"تحويل…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"تم استخدام تشفير ملفات من قبل"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"التحويل إلى تشفير على الملف"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تحويل قسم البيانات إلى تشفير على الملف.\n !!تحذير!! سيؤدي هذا إلى محو جميع بياناتك.\n لا تزال هذه الميزة في مرحلة ألفا، وقد لا تعمل على نحو سليم.\n للمتابعة، اضغط على \"مسح وتحويل…\"."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"تم استخدام ترميز ملفات من قبل"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"التحويل إلى ترميز على الملف"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تحويل قسم البيانات إلى ترميز على الملف.\n !!تحذير!! سيؤدي هذا إلى محو جميع بياناتك.\n لا تزال هذه الميزة في مرحلة ألفا، وقد لا تعمل على نحو سليم.\n للمتابعة، اضغط على \"مسح وتحويل…\"."</string>
     <string name="button_convert_fbe" msgid="1159861795137727671">"مسح وتحويل…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"نمط لون الصورة"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏استخدام sRGB"</string>
@@ -430,7 +430,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"أكبر مستوى"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"مخصص (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"القائمة"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"إدخال كلمة المرور لإعادة الضبط بحسب بيانات المصنع في الوضع التجريبي"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"إدخال كلمة المرور لإعادة الضبط على الإعدادات الأصلية في الوضع التجريبي"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"التالي"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"يلزم توفر كلمة مرور"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"طرق الإدخال النشطة"</string>
@@ -454,9 +454,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"وقت أكثر."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"وقت أقل."</string>
     <string name="cancel" msgid="5665114069455378395">"إلغاء"</string>
-    <string name="okay" msgid="949938843324579502">"موافق"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تشغيل"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تشغيل وضع \"الرجاء عدم الإزعاج\""</string>
+    <string name="okay" msgid="949938843324579502">"حسنًا"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل وضع \"الرجاء عدم الإزعاج\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"مطلقًا"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"الأولوية فقط"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ezin duzu egin larrialdi-deirik Wi-Fi bidez"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Dei-desbideratzea"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-deiak soilik jasotzeko modua"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-zerbitzuen deiak jasotzeko modua"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Datu-konexioaren egoera"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Erantzungailuko mezuak"</string>
@@ -145,7 +145,7 @@
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Deitu wifi bidez"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Deitu sare mugikorraren bidez"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wi-Fi sarea soilik"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wifi-sarea soilik"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> zenbakira <xliff:g id="TIME_DELAY">{2}</xliff:g> segundotan"</string>
@@ -375,7 +375,7 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"Beren zati batzuk memorian modu iraunkorrean aktibo uztea baimentzen die aplikazioei. Horrela, beste aplikazioek memoria gutxiago izan lezakete erabilgarri eta telebistak motelago funtziona lezake."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta telefonoa motel daiteke."</string>
-    <string name="permlab_foregroundService" msgid="1768855976818467491">"Abiarazi zerbitzuak aurreko planoan"</string>
+    <string name="permlab_foregroundService" msgid="1768855976818467491">"abiarazi zerbitzuak aurreko planoan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Aurreko planoko zerbitzuak erabiltzea baimentzen dio aplikazioari."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"neurtu aplikazioen biltegiratzeko tokia"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Bere kodea, datuak eta cache-tamainak eskuratzeko baimena ematen die aplikazioei."</string>
@@ -422,7 +422,7 @@
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Aplikazioa aurreko planoan dagoenean, zure kokapenaren berri izan dezake sareen iturburuak erabilita; adibidez, telefonia mugikorreko dorreak eta Wi-Fi sareak. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu telebistan, aplikazioak erabil ditzan."</string>
     <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Aplikazioak aurreko planoan funtzionatzen duenean bakarrik lor dezake zure gutxi gorabeherako kokapena. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu autoan, aplikazioak erabil ditzan."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Aplikazioa aurreko planoan dagoenean, zure kokapenaren berri izan dezake sareen iturburuak erabilita; adibidez, telefonia mugikorreko dorreak eta Wi-Fi sareak. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu telefonoan, aplikazioak erabil ditzan."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"Atzitu kokapena atzeko planoan"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"atzitu kokapena atzeko planoan"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Baimen hau ematen bada kokapen zehatz edo gutxi gorabeherakorako sarbideaz gain, atzeko planoan abian den bitartean atzitu ahalko du aplikazioak kokapena."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"aldatu audio-ezarpenak"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Audio-ezarpen orokorrak aldatzeko baimena ematen dio; besteak beste, bolumena eta irteerarako zer bozgorailu erabiltzen den."</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak ariketa fisikoa hauteman dezake."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikazioak edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"eman jakinarazpenak jasotzeko baimena aplikazioari edo zerbitzuari kamerak ireki edo ixten direnean."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Kamera ireki edo itxi dela (eta zer aplikaziorekin) dioten jakinarazpenak jaso ditzake aplikazio honek."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
@@ -446,13 +448,15 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Deiak sistemaren bidez bideratzea baimentzen die aplikazioei, deien zerbitzua ahal bezain ona izan dadin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ikusi eta kontrolatu deiak sistemaren bidez."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Gailuan abian diren deiak eta deion informazioa ikusi eta kontrolatzeko baimena ematen dio aplikazioari; besteak beste, deien zenbakiak eta deien egoera."</string>
-    <string name="permlab_acceptHandover" msgid="2925523073573116523">"Jarraitu beste aplikazio batean hasitako deia"</string>
+    <string name="permlab_acceptHandover" msgid="2925523073573116523">"jarraitu beste aplikazio batean hasitako deia"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Beste aplikazio batean hasitako dei bat jarraitzea baimentzen dio aplikazioari."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"irakurri telefono-zenbakiak"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Gailuaren telefono-zenbakiak atzitzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantendu piztuta autoko pantaila"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"eragotzi tableta inaktibo ezartzea"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"eragotzi telebista inaktibo geratzea"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"eragotzi telefonoa inaktibo ezartzea"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Autoko pantaila piztuta mantentzeko baimena ematen dio aplikazioari."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tableta inaktibo ezartzea galaraztea baimentzen die aplikazioei."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Telebista inaktibo ezar dadin eragoztea baimentzen die aplikazioei."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Telefonoa inaktibo ezartzea galaraztea baimentzen die aplikazioei."</string>
@@ -480,15 +484,15 @@
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Sarearen konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"aldatu telefono bidezko konektagarritasuna"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Partekatutako Interneterako konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi Wi-Fi konexioak"</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi wifi bidezko konexioak"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, Wi-Fi konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
-    <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu Wi-Fira edo deskonektatu bertatik"</string>
+    <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu wifira edo deskonektatu bertatik"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"onartu Wi-Fi Multicast harrera"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Wi-Fi sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Wifi-sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telefonoa soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetooth ezarpenak"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetooth-aren ezarpenak"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Tokiko Bluetooth tableta konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"Tokiko Bluetooth telebista konfiguratzea eta urruneko gailuak hautematea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Tokiko Bluetooth telefonoa konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
@@ -498,7 +502,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Tableta WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"Telebista WiMAX sareetara konektatzea edo haietatik deskonektatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Telefonoa WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"partekatu Bluetooth gailuekin"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"partekatu Bluetooth bidezko gailuekin"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Tabletaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"Telebistaren Bluetooth konexioaren konfigurazioa ikustea eta parekatutako gailuekin konexioak sortzea eta onartzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Telefonoaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
@@ -506,9 +510,9 @@
     <string name="permdesc_nfc" msgid="8352737680695296741">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzea baimentzen die aplikazioei."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desgaitu pantailaren blokeoa"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
-    <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Eskatu pantailaren blokeoa konplexua izatea"</string>
+    <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"eskatu pantailaren blokeoa konplexua izatea"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko aukera ematen dio aplikazioari. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaieke aplikazioak erabiltzaileei, baina horri ez ikusi egin eta aplikazioa erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioak ez du jakingo pasahitz zehatza zein den."</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"Erabili hardware biometrikoa"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kudeatu hatz-marken hardwarea"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Erreferentzia-gako digitalen txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
@@ -522,7 +526,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Argazki-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"multimedia-edukien bildumako kokapena irakurri"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Multimedia-edukien bildumako kokapena irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Egiaztatu zu zarela"</string>
+    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Egiaztatu zeu zarela"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrikoa ez dago erabilgarri"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Utzi da autentifikazioa"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ez da ezagutu"</string>
@@ -603,7 +607,7 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"Irakurri biltegiratze partekatuko edukia"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Biltegiratze partekatuko edukia irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegiratze partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"egin/jaso SIP deiak"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP deiak egitea eta jasotzeko baimena ematen die aplikazioei."</string>
@@ -1243,24 +1247,24 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Ezin da konektatu <xliff:g id="SSID">%1$s</xliff:g> sarera"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Sakatu hau pribatutasun-ezarpenak aldatzeko, eta saiatu berriro"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Pribatutasun-ezarpena aldatu nahi duzu?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Baliteke <xliff:g id="SSID_0">%1$s</xliff:g> sareak gailuaren MAC helbidea erabilita konektatu nahi izatea; izan ere, identifikatzaile esklusibo bat da hori. Hori eginez gero, bailiteke inguruko gailuek zure gailuaren kokapenaren jarraipena egitea. \n\nAurrera egiten baduzu, <xliff:g id="SSID_1">%1$s</xliff:g> sareak zure pribatutasun-ezarpena aldatuko du eta berriro saiatuko da konektatzen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Konektatzeko, <xliff:g id="SSID">%1$s</xliff:g> sareak gailuaren MAC helbidea (identifikatzaile esklusiboa) behar du. Sarearen uneko pribatutasun-ezarpenen arabera, ausazko identifikatzaile bat erabiltzen da. \n\nAldaketa horrekin, baliteke inguruko gailuek zure gailuaren kokapenaren jarraipena egin ahal izatea."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Aldatu ezarpena"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Eguneratu da ezarpena. Saiatu berriro konektatzen."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Ezin da aldatu pribatutasun-ezarpena"</string>
     <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Ez da aurkitu sarea"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
-      <item quantity="other">Wi-Fi sareak erabilgarri</item>
-      <item quantity="one">Wi-Fi sarea erabilgarri</item>
+      <item quantity="other">Wifi-sareak erabilgarri</item>
+      <item quantity="one">Wifi-sarea erabilgarri</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1104430011355500386">
-      <item quantity="other">Wi-Fi sare irekiak erabilgarri</item>
-      <item quantity="one">Wi-Fi sare irekia erabilgarri</item>
+      <item quantity="other">Wifi-sare irekiak erabilgarri</item>
+      <item quantity="one">Wifi-sare irekia erabilgarri</item>
     </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Konektatu Wi‑Fi sare irekira"</string>
+    <string name="wifi_available_title" msgid="722493260955778406">"Konektatu wifi-sare irekira"</string>
     <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"Konektatu operadorearen Wi‑Fi sarera"</string>
     <string name="wifi_available_title_connecting" msgid="5249247039230566878">"Wi‑Fi sarera konektatzen"</string>
     <string name="wifi_available_title_connected" msgid="5892203664604121475">"Wi‑Fi sare irekira konektatuta"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="5133141923288104331">"Ezin izan da konektatu Wi‑Fi sare irekira"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="5133141923288104331">"Ezin izan da konektatu wifi-sare irekira"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3555247614042954032">"Sakatu hau sare guztiak ikusteko"</string>
     <string name="wifi_available_action_connect" msgid="924369499736631716">"Konektatu"</string>
     <string name="wifi_available_action_all_networks" msgid="7759049005868147147">"Sare guztiak"</string>
@@ -1296,10 +1300,10 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"sare mota ezezaguna"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="588755196559781297">"Ezin izan da Wi-Fi sarera konektatu"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="588755196559781297">"Ezin izan da wifi-sarera konektatu"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5469207538636315968">" Interneteko konexio txarra du."</string>
     <string name="wifi_connect_alert_title" msgid="2377999802455909057">"Konektatzeko baimena eman nahi diozu?"</string>
-    <string name="wifi_connect_alert_message" msgid="169228218944976720">"%1$s aplikazioak %2$s Wi-Fi sarera konektatu nahi du"</string>
+    <string name="wifi_connect_alert_message" msgid="169228218944976720">"%1$s aplikazioak %2$s wifi-sarera konektatu nahi du"</string>
     <string name="wifi_connect_default_application" msgid="7577787709633050605">"Aplikazio bat"</string>
     <string name="wifi_p2p_dialog_title" msgid="6334579064086920198">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="804818801818052402">"Hasi Wi-Fi Direct. Wi-Fi bezeroa edo sare publikoa desaktibatuko da."</string>
@@ -1314,9 +1318,9 @@
     <string name="wifi_p2p_to_message" msgid="2841587668240064488">"Hartzailea:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="1020819021188731574">"Idatzi beharrezko PINa:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="3598694912050152976">"PINa:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"Tableta Wi-Fi saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"Telebista Wi-Fi saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"Telefonoa Wi-Fi saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="6006673840559201871">"Tableta wifi-saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="1081550817886390524">"Telebista wifi-saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="5357599796604438547">"Telefonoa wifi-saretik deskonektatuko da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailura konektatuta dagoen bitartean"</string>
     <string name="select_character" msgid="3352797107930786979">"Txertatu karakterea"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS mezuak bidaltzen"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS asko ari da bidaltzen. Mezuak bidaltzen jarrai dezan onartu nahi duzu?"</string>
@@ -1517,7 +1521,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ez egin ezer, oraingoz"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Aukeratu kontu bat"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Gehitu kontu bat"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Gehitu kontua"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Gehitu kontu bat"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Handitu"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Txikitu"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"Eduki sakatuta <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1604,7 +1608,7 @@
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefonoa"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Konektatu bozgorailuak oinarrira"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
-    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Aurikularrak"</string>
+    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Entzungailuak"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth bidezko audioa"</string>

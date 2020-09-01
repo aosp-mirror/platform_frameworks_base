@@ -422,9 +422,7 @@ public final class ProcessList {
 
         @GuardedBy("ProcessList.this.mService")
         void freeIsolatedUidLocked(int uid) {
-            // Strip out userId
-            final int appId = UserHandle.getAppId(uid);
-            mUidUsed.delete(appId);
+            mUidUsed.delete(uid);
         }
     };
 

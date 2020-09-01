@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Az alkalmazás képes felismerni a testmozgást."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotók és videók készítése"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és rögzíthet videókat."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ez az alkalmazás fogadhat visszahívásokat bármelyik kamera (adott alkalmazás általi) megnyitásakor vagy bezárásakor."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefonszámok közvetlen hívása"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Engedélyezi az alkalmazásnak, hogy folytassa a hívást, amelyet valamelyik másik alkalmazásban kezdtek meg."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefonszámok olvasása"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Engedélyezi az alkalmazás számára az eszköz telefonszámaihoz való hozzáférést."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"az autó képernyőjének bekapcsolva tartása"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"táblagép alvás üzemmódjának megakadályozása"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"a tévé alvó üzemmódba való lépésének megakadályozása"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"telefon alvó üzemmódjának megakadályozása"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lehetővé teszi az alkalmazás számára az autó képernyőjének bekapcsolva tartását."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a táblagép alvó üzemmódra váltson."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Lehetővé teszi az alkalmazás számára azt, hogy megakadályozza a tévé alvó üzemmódba való lépését."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a telefon alvó üzemmódra váltson."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Nem lehet csatlakozni a következőhöz: <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Koppintson az adatvédelmi beállítások módosításához, majd próbálja újra"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Módosítja az adatvédelmi beállítást?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Lehet, hogy a(z) <xliff:g id="SSID_0">%1$s</xliff:g> az eszköz egyedi azonosítójaként szolgáló MAC-címmel próbál kapcsolatot létrehozni. Így más közeli eszközök megfigyelhetik saját eszköze helyzetét. \n\nHa továbblép, a(z) <xliff:g id="SSID_1">%1$s</xliff:g> módosítja a vonatkozó adatvédelmi beállítást, majd ismét megkísérli a kapcsolódást."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"A kapcsolódáshoz a(z) <xliff:g id="SSID">%1$s</xliff:g> számára szükséges az eszköz egyedi azonosítójaként szolgáló MAC-cím használata. Az adatvédelmi beállításnak megfelelően a rendszer ehhez a hálózathoz jelenleg véletlenszerű azonosítót használ. \n\nEz a módosítás lehetővé teheti, hogy más közeli eszközök megfigyelhessék az Ön eszközének helyzetét."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Beállítás módosítása"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Beállítás frissítve. Próbáljon ismét csatlakozni."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nem lehet módosítani az adatvédelmi beállítást"</string>

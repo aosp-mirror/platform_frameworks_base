@@ -112,7 +112,7 @@
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Odblokuj bez używania odcisku palca"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skanowanie twarzy"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Wyślij"</string>
-    <string name="accessibility_manage_notification" msgid="582215815790143983">"Zarządzanie powiadomieniami"</string>
+    <string name="accessibility_manage_notification" msgid="582215815790143983">"Zarządzaj powiadomieniami"</string>
     <string name="phone_label" msgid="5715229948920451352">"otwórz telefon"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"otwórz pomoc głosową"</string>
     <string name="camera_label" msgid="8253821920931143699">"otwórz aparat"</string>
@@ -178,9 +178,7 @@
     <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
     <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for data_connection_5ge (6112464896607892932) -->
-    <skip />
+    <string name="data_connection_5ge" msgid="6112464896607892932">"5Ge"</string>
     <string name="data_connection_5g" msgid="6268379449490425462">"5G"</string>
     <string name="data_connection_5g_plus" msgid="2926653195193324466">"5G+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
@@ -886,7 +884,7 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Zrzuty ekranu"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Wiadomości"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"Pamięć"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"Pamięć wewnętrzna"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Wskazówki"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplikacje błyskawiczne"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa"</string>

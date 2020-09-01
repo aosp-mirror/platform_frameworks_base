@@ -188,7 +188,7 @@
     <item msgid="5664310435707146591">"Más rápida"</item>
     <item msgid="5491266922147715962">"Muy rápida"</item>
     <item msgid="7659240015901486196">"Superrápida"</item>
-    <item msgid="7147051179282410945">"Hiperrrápida"</item>
+    <item msgid="7147051179282410945">"Hiperrápida"</item>
     <item msgid="581904787661470707">"La más rápida"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Seleccionar perfil"</string>
@@ -200,7 +200,7 @@
     <string name="development_settings_not_available" msgid="355070198089140951">"Las opciones de desarrollador no están disponibles para este usuario"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Los ajustes de VPN no están disponibles para este usuario"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Los ajustes para compartir conexión no están disponibles para este usuario"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"Los ajustes del nombre de punto de acceso no están disponibles para este usuario"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"Los ajustes del nombre del punto de acceso no están disponibles para este usuario"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Depuración por USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Activar el modo de depuración cuando el dispositivo esté conectado por USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración USB"</string>

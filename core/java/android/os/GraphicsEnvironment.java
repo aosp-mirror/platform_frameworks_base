@@ -173,13 +173,6 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Check whether application is debuggable
-     */
-    private static boolean isDebuggable(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) > 0;
-    }
-
-    /**
      * Store the layer paths available to the loader.
      */
     public void setLayerPaths(ClassLoader classLoader,
@@ -233,7 +226,7 @@ public class GraphicsEnvironment {
         // 2. ENABLE_GPU_DEBUG_LAYERS is true
         // 3. Package name is equal to GPU_DEBUG_APP
 
-        if (isDebuggable(context) || (getCanLoadSystemLibraries() == 1)) {
+        if (isDebuggable()) {
 
             final int enable = coreSettings.getInt(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
 
@@ -414,9 +407,7 @@ public class GraphicsEnvironment {
      * Check for ANGLE debug package, but only for apps that can load them (dumpable)
      */
     private String getAngleDebugPackage(Context context, Bundle coreSettings) {
-        final boolean appIsDebuggable = isDebuggable(context);
-        final boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
-        if (appIsDebuggable || deviceIsDebuggable) {
+        if (isDebuggable()) {
             String debugPackage;
 
             if (coreSettings != null) {
@@ -451,12 +442,8 @@ public class GraphicsEnvironment {
          *  - devices that are running a userdebug build (ro.debuggable) or can inject libraries for
          *    debugging (PR_SET_DUMPABLE).
          */
-        final boolean appIsDebuggable = isDebuggable(context);
-        final boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
-        if (!(appIsDebuggable || deviceIsDebuggable)) {
-            Log.v(TAG, "Skipping loading temporary rules file: "
-                    + "appIsDebuggable = " + appIsDebuggable + ", "
-                    + "adbRootEnabled = " + deviceIsDebuggable);
+        if (!isDebuggable()) {
+            Log.v(TAG, "Skipping loading temporary rules file");
             return false;
         }
 
@@ -725,7 +712,7 @@ public class GraphicsEnvironment {
 
         final boolean enablePrereleaseDriver =
                 (ai.metaData != null && ai.metaData.getBoolean(METADATA_DEVELOPER_DRIVER_ENABLE))
-                || getCanLoadSystemLibraries() == 1;
+                || isDebuggable();
 
         // Priority for Game Driver settings global on confliction (Higher priority comes first):
         // 1. GAME_DRIVER_ALL_APPS
@@ -901,7 +888,7 @@ public class GraphicsEnvironment {
         return "";
     }
 
-    private static native int getCanLoadSystemLibraries();
+    private static native boolean isDebuggable();
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
     private static native void setDebugLayersGLES(String layers);

@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Esta app puede reconocer tu actividad física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tomar fotografías y grabar videos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta app puede tomar fotos y grabar videos con la cámara en cualquier momento."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite que una aplicación o un servicio reciba devoluciones de llamada cuando se abren o cierran dispositivos de cámara."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta app puede recibir devoluciones de llamada cuando se cierra o se abre cualquier dispositivo de cámara (y qué aplicación lo hace)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite que la app continúe con una llamada que se inició en otra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"leer números de teléfono"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Le permite a la app acceder a los números de teléfono del dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantener la pantalla del vehículo encendida"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"evitar que el tablet entre en estado de inactividad"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"evitar que la TV entre en suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"evitar que el dispositivo entre en estado de inactividad"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite que la app mantenga la pantalla del vehículo encendida."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite que la aplicación evite que la tablet entre en estado de inactividad."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Permite que la aplicación evite que la TV se suspenda."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite que la aplicación evite que el dispositivo entre en estado de inactividad."</string>
@@ -1220,7 +1224,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Tienes un volcado del montón del proceso de <xliff:g id="PROC">%1$s</xliff:g> disponible para compartir. Ten cuidado: Es posible que este volcado contenga información personal sensible (incluido el contenido que hayas escrito) a la que puede acceder el proceso."</string>
     <string name="sendText" msgid="493003724401350724">"Seleccionar una acción para el texto"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volumen del timbre"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volumen de los medios"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volumen multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Tono de silencio establecido"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volumen de llamadas entrantes"</string>
@@ -1231,7 +1235,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volumen de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volumen del tono de llamada"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volumen de la llamada"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen de los medios"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen multimedia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volumen de notificación"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Tono predeterminado"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"No se puede establecer conexión con <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Presiona para cambiar la configuración de privacidad y volver a intentarlo"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"¿Quieres cambiar la configuración de privacidad?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Es posible que <xliff:g id="SSID_0">%1$s</xliff:g> quiera conectarse mediante la dirección MAC (un identificador único) de tu dispositivo. Eso podría permitir que dispositivos cercanos registren la ubicación de tu dispositivo. \n\nSi continúas, <xliff:g id="SSID_1">%1$s</xliff:g> cambiará la configuración de privacidad e intentará volver a establecer conexión."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para conectarse, <xliff:g id="SSID">%1$s</xliff:g> necesita usar la dirección MAC (identificador único) de tu dispositivo. Actualmente, tu configuración de privacidad para esta red usa un identificador aleatorio. \n\nEste cambio podría permitir que dispositivos cercanos registren la ubicación del tuyo."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Cambiar configuración"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Se actualizó la configuración. Intenta conectarte de nuevo."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"No se puede cambiar la configuración de privacidad"</string>
@@ -1256,7 +1260,7 @@
       <item quantity="other">Abrir redes de Wi-Fi disponibles</item>
       <item quantity="one">Abrir red de Wi-Fi disponible</item>
     </plurals>
-    <string name="wifi_available_title" msgid="722493260955778406">"Conectarse a una red Wi-Fi abierta"</string>
+    <string name="wifi_available_title" msgid="722493260955778406">"Conéctate a una red Wi-Fi abierta"</string>
     <string name="wifi_available_carrier_network_title" msgid="7740328884692643968">"Conectarse a la red Wi-Fi del proveedor"</string>
     <string name="wifi_available_title_connecting" msgid="5249247039230566878">"Estableciendo conexión con la red Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="5892203664604121475">"Se conectó a la red Wi-Fi"</string>
@@ -1485,7 +1489,7 @@
     <string name="submit" msgid="862795280643405865">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Se está ejecutando la app de conducción"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Presiona para salir de la app de conducción."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Anclaje a red o zona activa conectados"</string>
+    <string name="tethered_notification_title" msgid="2700523927485687353">"Conexión a red o hotspot conectados"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"Presiona para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7158047514545848391">"Se inhabilitó la conexión mediante dispositivo móvil"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"Para obtener más información, comunícate con el administrador"</string>

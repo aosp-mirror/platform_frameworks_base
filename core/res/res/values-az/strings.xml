@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Bu tətbiq fiziki fəaliyyətinizi tanıya bilər."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"şəkil və video çəkmək"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Bu tətbiq istədiyiniz zaman kameranı istifadə edərək şəkil çəkə və video qeydə ala bilər."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tətbiqə və ya xidmətə kamera cihazlarının açılması və ya bağlanması haqqında geri zənglər qəbul etməyə icazə verin."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Hansısa kamera cihazı açıldıqda və ya bağlandıqda (hansısa tətbiq tərəfindən) bu tətbiq geri çağırışlar qəbul edə bilər."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"vibrasiyaya nəzarət edir"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon nömrələrinə birbaşa zəng edir"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tətbiqə digər tətbiqdə başlayan zəngə davam etmək icazəsi verilir."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefon nömrələrini oxuyun"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Tətbiqə cihazın telefon nömrələrinə daxil olmağa icazə verir."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"avtomobilin ekranını aktiv saxlamaq"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"planşetin yuxu rejiminin qarşısını almaq"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"TV-ni yuxu rejiminə keçməyə qoyma"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"telefonun yuxu rejiminə keçməsini əngəllə"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tətbiqə avtomobilin ekranını aktiv saxlamaq icazəsi verir."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tətbiqə planşetin yuxu rejimini qadağan etməyə imkan verir."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Proqrama TV-ni yuxulamağa qoymamaq imkanı verir."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tətbiqə telefonun yuxu rejimini qadağan etmək imkanı verir."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> şəbəkəsinə qoşulmaq mümkün deyil"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toxunaraq məxfilik ayarını dəyişin və yenidən cəhd edin"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Məxfilik ayarı dəyişdirilsin?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> unikal identifikator olan cihazınızın MAC ünvanını istifadə edərək qoşulmaq istəyə bilər. Bu, yaxın cihazların sizin cihazınızın məkanını izləməsinə imkan verə bilər. \n\nDavam etsəniz, <xliff:g id="SSID_1">%1$s</xliff:g> məxfilik ayarınızı dəyişəcək və yenidən qoşulmağa cəhd edəcək."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Qoşulmaq üçün <xliff:g id="SSID">%1$s</xliff:g> unikal identifikator olan cihazınızın MAC ünvanını istifadə etməlidir. Daha doğrusu, bu şəbəkə üçün məxfilik ayarınız təsadüfi identifikator istifadə edir. \n\nBu dəyişiklik yaxın cihazların cihazınızın məkanını izləməsinə imkan verə bilər."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ayarı dəyişin"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Ayar güncəlləndi. Yenidən qoşulmağa çalışın."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Məxfilik ayarını dəyişmək mümkün deyil"</string>

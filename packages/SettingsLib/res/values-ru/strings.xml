@@ -110,7 +110,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Используется для передачи файлов"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Использовать для ввода"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Использовать для слухового аппарата"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Добавить"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Подключить"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ДОБАВИТЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>

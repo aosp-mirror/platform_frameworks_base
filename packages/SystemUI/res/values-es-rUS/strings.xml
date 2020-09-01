@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalles de la batería"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batería <xliff:g id="NUMBER">%d</xliff:g> por ciento"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batería: <xliff:g id="PERCENTAGE">%1$s</xliff:g> por ciento; tiempo restante: aproximadamente <xliff:g id="TIME">%2$s</xliff:g> en función del uso"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Cargando batería: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batería cargando: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Configuración del sistema"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificaciones"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas las notificaciones"</string>
@@ -401,7 +401,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Esta acción bloquea TODOS los sonidos y las vibraciones, incluso los que provienen de alarmas, música, videos y juegos."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificaciones menos urgentes abajo"</string>
-    <string name="notification_tap_again" msgid="4477318164947497249">"Presionar de nuevo para abrir"</string>
+    <string name="notification_tap_again" msgid="4477318164947497249">"Presiona de nuevo para abrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
     <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"Vuelve a alinear el teléfono para cargarlo más rápido"</string>

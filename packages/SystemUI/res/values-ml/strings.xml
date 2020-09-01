@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ബാറ്ററി വിശദാംശങ്ങൾ തുറക്കുക"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ബാറ്ററി <xliff:g id="PERCENTAGE">%1$s</xliff:g> ശതമാനം, നിങ്ങളുടെ ഉപയോഗത്തിൻ്റെ അടിസ്ഥാനത്തിൽ ഏകദേശം <xliff:g id="TIME">%2$s</xliff:g> സമയം കൂടി ശേഷിക്കുന്നു"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ബാറ്ററി ചാർജ് ചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"അറിയിപ്പുകൾ."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"എല്ലാ അറിയിപ്പുകളും കാണുക"</string>
@@ -739,7 +739,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS:"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"സംഗീതം"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"കലണ്ടർ"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"വോളിയം നിയന്ത്രണങ്ങളോടൊപ്പം കാണിക്കുക"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"വോളിയം ബട്ടൺ കുറുക്കുവഴി"</string>

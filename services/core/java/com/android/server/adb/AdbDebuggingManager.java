@@ -413,6 +413,11 @@ public class AdbDebuggingManager {
                 case MESSAGE_ADB_CLEAR: {
                     Slog.d(TAG, "Received a request to clear the adb authorizations");
                     mConnectedKeys.clear();
+                    // If the key store has not yet been instantiated then do so now; this avoids
+                    // the unnecessary creation of the key store when adb is not enabled.
+                    if (mAdbKeyStore == null) {
+                        mAdbKeyStore = new AdbKeyStore();
+                    }
                     mAdbKeyStore.deleteKeyStore();
                     cancelJobToUpdateAdbKeyStore();
                     break;

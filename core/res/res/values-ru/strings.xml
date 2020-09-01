@@ -306,7 +306,7 @@
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физическая активность"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"доступ к данным о физической активности"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Открыть приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о физической активности?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о физической активности?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"снимать фото и видео"</string>
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снимать фото и видео?"</string>
@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Приложение может распознавать физическую активность."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"Фото- и видеосъемка"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Приложение может в любое время делать фотографии и снимать видео с помощью камеры."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Разрешить приложению или сервису получать обратные вызовы при открытии и закрытии камер"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Это приложение сможет получать обратные вызовы при открытии (с указанием открывающего приложения) и закрытии любых камер."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"Управление функцией вибросигнала"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Приложение сможет контролировать вибросигналы."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Осуществление телефонных вызовов"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Разрешает приложению продолжить вызов, начатый в другом приложении."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"чтение номеров телефонов"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Разрешает приложению доступ к телефонным номерам устройства."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"Не выключать экран автомобиля"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"Отключение спящего режима"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"запрещать переход в спящий режим"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"Отключение спящего режима"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Приложение сможет держать экран автомобиля включенным."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Приложение сможет запрещать перевод планшетного ПК в спящий режим."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Отключение перехода телевизора в спящий режим."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Приложение сможет запрещать перевод телефона в спящий режим."</string>
@@ -756,7 +760,7 @@
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"Особый"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"День рождения"</string>
-    <string name="eventTypeAnniversary" msgid="4684702412407916888">"Юбилей"</string>
+    <string name="eventTypeAnniversary" msgid="4684702412407916888">"Годовщина"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Другой"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Новый тип"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"Личный"</string>
@@ -1180,7 +1184,7 @@
     <string name="whichEditApplication" msgid="6191568491456092812">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Редактировать с помощью приложения \"%1$s\""</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Изменить"</string>
-    <string name="whichSendApplication" msgid="4143847974460792029">"Отправка данных"</string>
+    <string name="whichSendApplication" msgid="4143847974460792029">"Поделиться"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Поделиться через %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Поделиться"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Выберите приложение"</string>
@@ -1283,7 +1287,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Не удалось подключиться к сети <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Нажмите, чтобы изменить настройки конфиденциальности и повторить попытку."</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Изменить настройки конфиденциальности?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Сеть <xliff:g id="SSID_0">%1$s</xliff:g> может подключиться, используя MAC-адрес вашего устройства (уникальный идентификатор). Таким образом, устройствам поблизости будут доступны данные о вашем местоположении. \n\nЕсли вы продолжите, сеть <xliff:g id="SSID_1">%1$s</xliff:g> изменит настройки конфиденциальности и попробует подключиться ещё раз."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Для подключения сети <xliff:g id="SSID">%1$s</xliff:g> необходим MAC-адрес вашего устройства (уникальный идентификатор). Сейчас ваша настройка конфиденциальности для этой сети использует случайный идентификатор. \n\nЭто изменение может привести к тому, что устройства поблизости смогут отслеживать ваше местоположение."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Изменить настройки"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Настройки сохранены Попробуйте подключиться ещё раз."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Не удается изменить настройки конфиденциальности."</string>

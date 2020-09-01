@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalhes da bateria"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Bateria a <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateria a <xliff:g id="PERCENTAGE">%1$s</xliff:g> por cento, resta(m) cerca de <xliff:g id="TIME">%2$s</xliff:g> com base na sua utilização."</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"A bateria está a carregar, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> por cento."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Bateria a carregar (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%)."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Definições do sistema"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificações."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas as notificações"</string>
@@ -550,7 +550,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Vista geral."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Para soltar este ecrã, toque sem soltar nos botões Anterior e Página inicial."</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Para soltar este ecrã, deslize rapidamente para cima sem soltar."</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"Compreendi"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Não, obrigado"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Ecrã fixo"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"Ecrã solto"</string>
@@ -614,7 +614,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"O Sintonizador da interface do sistema disponibiliza-lhe formas adicionais ajustar e personalizar a interface do utilizador do Android. Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Estas funcionalidades experimentais podem ser alteradas, deixar de funcionar ou desaparecer em versões futuras. Prossiga com cuidado."</string>
-    <string name="got_it" msgid="477119182261892069">"Compreendi"</string>
+    <string name="got_it" msgid="477119182261892069">"OK"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Parabéns! O Sintonizador da interface do sistema foi adicionado às Definições"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Remover das Definições"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Pretende remover o Sintonizador da interface do sistema das Definições e deixar de utilizar todas as respetivas funcionalidades?"</string>
@@ -912,7 +912,7 @@
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Poupança de bateria agendada ativada"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"A Poupança de bateria é ativada automaticamente quando o nível de bateria está abaixo de <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Definições"</string>
-    <string name="auto_saver_okay_action" msgid="7815925750741935386">"Compreendi"</string>
+    <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar pilha SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"A aplicação <xliff:g id="APP">%1$s</xliff:g> está a utilizar o(a) <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>

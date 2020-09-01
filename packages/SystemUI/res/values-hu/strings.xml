@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Az akkumulátorral kapcsolatos részletek megnyitása"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Akkumulátor <xliff:g id="NUMBER">%d</xliff:g> százalék."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Az akkumulátor <xliff:g id="PERCENTAGE">%1$s</xliff:g> százalékon áll, a használati adatok alapján körülbelül <xliff:g id="TIME">%2$s</xliff:g> múlva merül le"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Akkumulátor töltése folyamatban, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> százalék."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Tölt az akkumulátor, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> százalék."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Rendszerbeállítások"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Értesítések"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Összes értesítés megtekintése"</string>

@@ -125,13 +125,19 @@ public class CarFacetButton extends LinearLayout {
 
     /** Defines the behavior of a button click. */
     protected OnClickListener getButtonClickListener(Intent toSend) {
-        return v -> mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+        return v ->  {
+            mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+            mContext.sendBroadcastAsUser(
+                    new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
+        };
     }
 
     /** Defines the behavior of a long click. */
     protected OnLongClickListener getButtonLongClickListener(Intent toSend) {
         return v -> {
             mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+            mContext.sendBroadcastAsUser(
+                    new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
             return true;
         };
     }

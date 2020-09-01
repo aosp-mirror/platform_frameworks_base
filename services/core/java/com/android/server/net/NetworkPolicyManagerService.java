@@ -385,6 +385,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_SUBSCRIPTION_OVERRIDE = 16;
     private static final int MSG_METERED_RESTRICTED_PACKAGES_CHANGED = 17;
     private static final int MSG_SET_NETWORK_TEMPLATE_ENABLED = 18;
+    private static final int MSG_SUBSCRIPTION_PLANS_CHANGED = 19;
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
@@ -3064,6 +3065,34 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(MANAGE_SUBSCRIPTION_PLANS, TAG);
     }
 
+    private void enforceSubscriptionPlanValidity(SubscriptionPlan[] plans) {
+        // nothing to check if no plans
+        if (plans.length == 0) {
+            return;
+        }
+
+        long applicableNetworkTypes = 0;
+        boolean allNetworks = false;
+        for (SubscriptionPlan plan : plans) {
+            if (plan.getNetworkTypes() == null) {
+                allNetworks = true;
+            } else {
+                if ((applicableNetworkTypes & plan.getNetworkTypesBitMask()) != 0) {
+                    throw new IllegalArgumentException(
+                            "Multiple subscription plans defined for a single network type.");
+                } else {
+                    applicableNetworkTypes |= plan.getNetworkTypesBitMask();
+                }
+            }
+        }
+
+        // ensure at least one plan applies for every network type
+        if (!allNetworks) {
+            throw new IllegalArgumentException(
+                    "No generic subscription plan that applies to all network types.");
+        }
+    }
+
     @Override
     public SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
@@ -3228,9 +3257,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
+        enforceSubscriptionPlanValidity(plans);
 
+        int count5GPlans = 0;
+        SubscriptionPlan plan5G = null;
         for (SubscriptionPlan plan : plans) {
             Preconditions.checkNotNull(plan);
+            // temporary workaround to allow 5G unmetered for March QPR
+            // TODO: remove once SubscriptionPlan.Builder#setNetworkTypes(int[]) is public in R
+            if (plan.getTitle() != null && plan.getTitle().toString().contains("NR 5G unmetered")
+                    && plan.getDataLimitBytes() == SubscriptionPlan.BYTES_UNLIMITED
+                    && (plan.getDataLimitBehavior() == SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN
+                    || plan.getDataLimitBehavior() == SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)) {
+                count5GPlans++;
+                plan5G = plan;
+            }
+        }
+
+        // TODO: remove once SubscriptionPlan.Builder#setNetworkTypes(int[]) is public in R
+        if (count5GPlans == 1 && plans.length > 1) {
+            plan5G.setNetworkTypes(new int[] {TelephonyManager.NETWORK_TYPE_NR});
         }
 
         final long token = Binder.clearCallingIdentity();
@@ -3256,6 +3302,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
             mContext.sendBroadcast(intent, android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS);
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_SUBSCRIPTION_PLANS_CHANGED, subId, 0, plans));
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -4449,6 +4497,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void dispatchSubscriptionPlansChanged(INetworkPolicyListener listener, int subId,
+            SubscriptionPlan[] plans) {
+        if (listener != null) {
+            try {
+                listener.onSubscriptionPlansChanged(subId, plans);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -4565,6 +4623,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final NetworkTemplate template = (NetworkTemplate) msg.obj;
                     final boolean enabled = msg.arg1 != 0;
                     setNetworkTemplateEnabledInner(template, enabled);
+                    return true;
+                }
+                case MSG_SUBSCRIPTION_PLANS_CHANGED: {
+                    final SubscriptionPlan[] plans = (SubscriptionPlan[]) msg.obj;
+                    final int subId = msg.arg1;
+                    final int length = mListeners.beginBroadcast();
+                    for (int i = 0; i < length; i++) {
+                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                        dispatchSubscriptionPlansChanged(listener, subId, plans);
+                    }
+                    mListeners.finishBroadcast();
                     return true;
                 }
                 default: {

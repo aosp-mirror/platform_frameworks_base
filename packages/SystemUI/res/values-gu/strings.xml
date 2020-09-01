@@ -37,7 +37,7 @@
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"બૅટરી સેવર વિશે"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ચાલુ કરો"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"બૅટરી સેવર ચાલુ કરો"</string>
-    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"સેટિંગ્સ"</string>
+    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"સેટિંગ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"વાઇ-ફાઇ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ઑટો રોટેટ સ્ક્રીન"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"મ્યૂટ કરો"</string>
@@ -217,7 +217,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"નોટિફિકેશન શેડ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ઝડપી સેટિંગ્સ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"લૉક સ્ક્રીન."</string>
-    <string name="accessibility_desc_settings" msgid="6728577365389151969">"સેટિંગ્સ"</string>
+    <string name="accessibility_desc_settings" msgid="6728577365389151969">"સેટિંગ"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ઝલક."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"કાર્ય લૉક સ્ક્રીન"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"બંધ કરો"</string>
@@ -288,7 +288,7 @@
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"સૂચનાઓની સેટિંગ્સ"</string>
-    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ્સ"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ"</string>
     <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"સ્ક્રીન આપમેળે ફરશે."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"સ્ક્રીન લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"સ્ક્રીન પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
@@ -326,7 +326,7 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"મીડિયા ઉપકરણ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ફક્ત કટોકટીના કૉલ્સ"</string>
-    <string name="quick_settings_settings_label" msgid="2214639529565474534">"સેટિંગ્સ"</string>
+    <string name="quick_settings_settings_label" msgid="2214639529565474534">"સેટિંગ"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"સમય"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"હું"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"વપરાશકર્તા"</string>
@@ -739,7 +739,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"સંગીત"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"કૅલેન્ડર"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"વૉલ્યૂમ નિયંત્રણ સાથે બતાવો"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ખલેલ પાડશો નહીં"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"વૉલ્યૂમ બટન્સ શૉર્ટકટ"</string>
@@ -876,7 +876,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"સામાન્ય સંદેશા"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"હિન્ટ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ઝટપટ ઍપ્લિકેશનો"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"ઝટપટ ઍપ્લિકેશન"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે. વધુ જાણવા માટે ટૅપ કરો."</string>

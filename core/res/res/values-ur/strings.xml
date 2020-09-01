@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"یہ ایپ آپ کی جسمانی سرگرمی کی شناخت کر سکتی ہے۔"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"تصاویر لیں اور ویڈیوز بنائیں"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"یہ ایپ کسی بھی وقت کیمرا استعمال کرتے ہوئے تصاویر لے سکتی ہے اور ویڈیوز ریکارڈ کر سکتی ہے۔"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ایپلیکیشن یا سروس کو کیمرا کے آلات کے کُھلنے یا بند ہونے سے متعلق کال بیکس موصول کرنے کی اجازت دیں۔"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"یہ ایپ کال بیکس موصول کر سکتی ہے جب کوئی بھی کیمرا کا آلہ (کسی ایپلیکیشن سے) کھولا جا رہا ہو یا بند کیا جا رہا ہو۔"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ارتعاش کو کنٹرول کریں"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"براہ راست فون نمبرز پر کال کریں"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ایپ کو دوسری ایپ میں شروع کردہ کال کو جاری رکھنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"فون نمبرز پڑھیں"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ایپ کو آلہ کے فون نمبرز تک رسائی کرنے دیتا ہے۔"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"کار کی اسکرین آن رکھیں"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ٹیبلیٹ کو سلیپ وضع میں جانے سے روکیں"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"‏TV کو سلیپ وضع میں جانے سے روکیں"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"فون کو سلیپ وضع میں جانے سے روکیں"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ایپ کو کار کی اسکرین آن رکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ایپ کو ٹیبلیٹ کو سلیپ وضع میں جانے سے روکنے کی اجازت دیتا ہے"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"‏ایپ کو TV کو سلیپ وضع میں جانے سے روکنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ایپ کو فون کو سلیپ وضع میں جانے سے روکنے کی اجازت دیتا ہے"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> سے منسلک نہیں کر سکتے"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"رازداری کی ترتیبات تبدیل کرنے اور دوبارہ کوشش کرنے کے لیے تھپتھپائیں"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"رازداری کی ترتیب تبدیل کریں؟"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"‏<xliff:g id="SSID_0">%1$s</xliff:g> آپ کے آلہ MAC پتہ، منفرد شناخت کار کے ذریعے منسلک ہونا چاہتا ہے۔ یہ آپ کے آلے کے مقام کو قریبی آلات کے ذریعہ ٹریک کرنے کی اجازت دے سکتا ہے۔ \n\nاگر آپ جاری رکھتے ہیں، تو <xliff:g id="SSID_1">%1$s</xliff:g> آپ کی رازداری کی ترتیب کو تبدیل کر دے گا اور دوبارہ منسلک ہونے کی کوشش کرے گا۔"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"‏منسلک کرنے کے ليے، <xliff:g id="SSID">%1$s</xliff:g> کو آپ کے آلہ کا MAC پتہ استعمال کرنے کی ضرورت ہے، ایک منفرد شناخت کار ہے۔ فی الحال، اس نیٹ ورک کے ليے آپ کی رازداری کی ترتیب بے ترتیب شناخت کار استعمال کرتی ہے۔ \n\nیہ تبدیلی آپ کے آلہ کے مقام کو قریبی آلات کے ذریعے ٹریک کرنے کی اجازت دے سکتی ہے۔"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ترتیب تبدیل کریں"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ترتیبات اپ ڈیٹ کر دی گئی۔ دوبارہ منسلک کرنے کی کوشش کریں۔"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"رازداری کی ترتیب تبدیل نہیں ہو سکتی"</string>

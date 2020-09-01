@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ແອັບນີ້ສາມາດຈັດລະບຽບການເຄື່ອນໄຫວທາງກາຍຂອງທ່ານໄດ້."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ຖ່າຍຮູບ ແລະວິດີໂອ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"This app can take pictures and record videos using the camera at any time."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ຫຼື ບໍລິການຮັບການເອີ້ນກັບກ່ຽວກັບອຸປະກອນກ້ອງຖືກເປີດ ຫຼື ປິດໄດ້."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ແອັບນີ້ສາມາດຮັບການເອີ້ນກັບໄດ້ເມື່ອມີອຸປະກອນກ້ອງໃດຖືກເປີດ (ໂດຍແພັກເກດແອັບພລິເຄຊັນຫຍັງ) ຫຼື ຖືກປິດ."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ຄວບຄຸມການສັ່ນ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ໂທຫາເບີໂທລະສັບໂດຍກົງ"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ອະນຸຍາດໃຫ້ແອັບສືບຕໍ່ການໂທເຊິ່ງອາດຖືກເລີ່ມຕົ້ນໃນແອັບອື່ນ."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ອ່ານເບີໂທລະສັບ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງເບີໂທລະສັບຂອງອຸປະກອນໄດ້."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ເປີດໜ້າຈໍລົດໄວ້ຕະຫຼອດ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ຂັດຂວາງບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ປ້ອງ​ກັນ​ບໍ່​ໃຫ້ໂທລະພາບຫຼັບ​ພັກ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ຂັດຂວາງບໍ່ໃຫ້ໂທລະສັບປິດໜ້າຈໍ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ອະນຸຍາດໃຫ້ແອັບເຮັດໃຫ້ໜ້າຈໍລົດເປີດໄວ້ຕະຫຼອດ."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ອະນຸຍາດໃຫ້ແອັບຯ ປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ປ້ອງ​ກັນ​ບໍ່​ໃຫ້ໂທລະພາບຫຼັບ​ພັກ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ອະນຸຍາດໃຫ້ແອັບຯປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍໂທລະສັບ."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາ <xliff:g id="SSID">%1$s</xliff:g> ໄດ້"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"ແຕະເພື່ອປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວແລ້ວລອງໃໝ່"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວບໍ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ອາດຕ້ອງການເຊື່ອມຕໍ່ໂດຍໃຊ້ທີ່ຢູ່ MAC ອຸປະກອນຂອງທ່ານ, ເຊິ່ງເປັນຕົວລະບຸທີ່ບໍ່ຊ້ຳກັນ. ນີ້ອາດອະນຸຍາດໃຫ້ອຸປະກອນໃກ້ຄຽງສາມາດຕິດຕາມສະຖານທີ່ຂອງອຸປະກອນທ່ານໄດ້. \n\nຫາກທ່ານສືບຕໍ່, <xliff:g id="SSID_1">%1$s</xliff:g> ຈະປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວຂອງທ່ານ ແລະ ລອງເຊື່ອມຕໍ່ອີກເທື່ອໜຶ່ງ."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ເພື່ອເຊື່ອມຕໍ່, <xliff:g id="SSID">%1$s</xliff:g> ຈຳເປັນຕ້ອງໃຊ້ທີ່ຢູ່ MAC ອຸປະກອນຂອງທ່ານ, ເຊິ່ງເປັນຕົວລະບຸແບບບໍ່ຊ້ຳກັນ. ຕອນນີ້, ການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວຂອງທ່ານສຳລັບເຄືອຂ່າຍນີ້ໃຊ້ຕົວລະບຸແບບສຸ່ມຢູ່. \n\nການປ່ຽນແປງນີ້ອາດຈະເຮັດໃຫ້ອຸປະກອນໃກ້ຄຽງສາມາດຕິດຕາມສະຖານທີ່ຂອງອຸປະກອນທ່ານໄດ້."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ປ່ຽນການຕັ້ງຄ່າ"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ອັບເດດການຕັ້ງຄ່າແລ້ວ ລອງເຊື່ອມຕໍ່ໃໝ່."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"ບໍ່ສາມາດປ່ຽນການຕັ້ງຄ່າຄວາມເປັນສ່ວນຕົວໄດ້"</string>

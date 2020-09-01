@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Táto aplikácia dokáže rozpoznať vašu fyzickú aktivitu."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotiť a nakrúcať videá"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Táto aplikácia môže kedykoľvek fotografovať a zaznamenávať videá pomocou fotoaparátu."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Povoliť aplikácii alebo službe prijímať spätné volanie, keď sú zariadenia s kamerou otvorené alebo zatvorené."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Táto aplikácia môže prijímať spätné volania pri otváraní alebo zatváraní ľubovoľného fotoaparátu (s infomáciou o aplikácii, ktorá to robí)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ovládať vibrovanie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"priamo volať na telefónne čísla"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Umožňuje aplikácii pokračovať v hovore začatom v inej aplikácii."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"čítanie telefónnych čísel"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Umožňuje aplikácii pristupovať k telefónnym číslam zariadenia."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"zabránenie vypnutiu obrazovky auta"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"zabránenie prechodu tabletu do režimu spánku"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"zabránenie televízoru v prechode do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"deaktivovať režim spánku"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Umožňuje aplikácii zabrániť vypnutiu obrazovky auta."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Umožňuje aplikácii zabrániť prechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Umožňuje aplikácii zabrániť televízoru v prechode do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Umožňuje aplikácii zabrániť prechodu telefónu do režimu spánku."</string>
@@ -1283,7 +1287,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"K sieti <xliff:g id="SSID">%1$s</xliff:g> sa nedá pripojiť"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Klepnutím zmeňte nastavenia ochrany súkromia a skúste to znova"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Chcete zmeniť nastavenie ochrany súkromia?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> sa môže pokúsiť pripojiť pomocou jedinečného identifikátora, ktorým je adresa MAC vášho zariadenia. Zariadenia v okolí tak budú môcť sledovať jeho polohu. \n\nAk budete pokračovať, <xliff:g id="SSID_1">%1$s</xliff:g> zmení vaše nastavenie ochrany súkromia a skúsi sa znova pripojiť."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> potrebuje na pripojenie jedinečný identifikátor, ktorým je adresa MAC vášho zariadenia. Vaše nastavenie ochrany súkromia pre túto sieť momentálne používa náhodný identifikátor. \n\nZariadenia v okolí tak budú môcť sledovať polohu vášho zariadenia."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Zmeniť nastavenie"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Nastavenie bolo aktualizované. Skúste sa znova pripojiť."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nastavenie ochrany súkromia sa nepodarilo zmeniť"</string>
@@ -2005,7 +2009,7 @@
     <string name="app_category_social" msgid="2278269325488344054">"Sociálne siete a komunikácia"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Noviny a časopisy"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mapy a navigácia"</string>
-    <string name="app_category_productivity" msgid="1844422703029557883">"Produktivita"</string>
+    <string name="app_category_productivity" msgid="1844422703029557883">"Kancelárske"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Úložisko zariadenia"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Ladenie cez USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"hodina"</string>

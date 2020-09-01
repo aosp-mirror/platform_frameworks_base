@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ta aplikacija lahko prepoznava vašo telesno dejavnost."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ta aplikacija lahko poljubno uporablja fotoaparat za snemanje fotografij ali videoposnetkov."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Aplikaciji ali storitvi dovoli prejemanje povratnih klicev o odpiranju ali zapiranju naprav s fotoaparati."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacija lahko prejema povratne klice, ko se odpira (s katero aplikacijo) ali zapira katera koli naprava s fotoaparatom."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"nadzor vibriranja"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Aplikaciji omogoča nadzor vibriranja."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"neposredno klicanje telefonskih številk"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Aplikaciji dovoljuje nadaljevanje klica, ki se je začel v drugi aplikaciji."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"branje telefonskih številk"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Aplikaciji dovoljuje dostop do telefonskih številk v napravi."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"Ohranjanje vklopljenega zaslona avtomobila"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"preprečitev prehoda tabličnega računalnika v stanje pripravljenosti"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"preprečevanje preklopa televizorja v stanje pripravljenosti"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"preprečevanje prehoda v stanje pripravljenosti telefona"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Aplikaciji omogoča, da zaslon avtomobila ohranja vklopljen."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Omogoča, da aplikacija prepreči prehod tabličnega računalnika v stanje pripravljenosti."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Aplikaciji dovoljuje, da prepreči preklop televizorja v stanje pripravljenosti."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Aplikaciji omogoča, da v telefonu prepreči prehod v stanje pripravljenosti."</string>
@@ -1283,7 +1287,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Povezava z omrežjem <xliff:g id="SSID">%1$s</xliff:g> ni mogoča"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Dotaknite se za spremembo nastavitev zasebnosti in poskusite znova"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Želite spremeniti nastavitev zasebnosti?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Omrežje <xliff:g id="SSID_0">%1$s</xliff:g> bo za vzpostavitev povezave morda želelo uporabiti naslov MAC naprave, ki je enolični identifikator. To lahko napravam v bližini omogoči spremljanje lokacije vaše naprave. \n\nČe nadaljujete, bo omrežje <xliff:g id="SSID_1">%1$s</xliff:g> spremenilo nastavitev zasebnosti in se poskusilo znova povezati."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Za vzpostavitev povezave mora omrežje <xliff:g id="SSID">%1$s</xliff:g> uporabiti naslov MAC naprave, ki je enolični identifikator. Glede na nastavitev zasebnosti za to omrežje se trenutno uporablja naključno določen identifikator. \n\nTa sprememba lahko napravam v bližini omogoči spremljanje lokacije vaše naprave."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Spremeni nastavitev"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Nastavitev je posodobljena. Poskusite znova vzpostaviti povezavo."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nastavitve zasebnosti ni mogoče spremeniti"</string>

@@ -10,6 +10,14 @@
                     "include-filter": "com.android.server.appop"
                 }
             ]
+        },
+        {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.appop"
+                }
+            ]
         }
     ]
 }

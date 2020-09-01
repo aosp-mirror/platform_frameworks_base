@@ -36,7 +36,7 @@
     <string name="recents_drag_hint_message" msgid="3309424039418402577">"\'திரைப் பிரிப்பைப்\' பயன்படுத்த இங்கே இழுக்கவும்"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"கிடைமட்டமாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="5525527159623478768">"செங்குத்தாகப் பிரி"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"தனிப்பயன் விருப்பத்தில் பிரி"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"பிரத்தியேக விருப்பத்தில் பிரி"</string>
     <string name="recents_accessibility_split_screen_top" msgid="4034331660613790457">"திரையை மேற்புறமாகப் பிரிக்கும்"</string>
     <string name="recents_accessibility_split_screen_left" msgid="6523694635909067802">"திரையை இடப்புறமாகப் பிரிக்கும்"</string>
     <string name="recents_accessibility_split_screen_right" msgid="559141375304415400">"திரையை வலப்புறமாகப் பிரிக்கும்"</string>

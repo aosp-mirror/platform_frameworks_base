@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"இந்த ஆப்ஸை நீங்கள் உபயோகிக்கும்போது மட்டுமே இருப்பிடத்தை அணுகும்"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸிற்கு &lt;b&gt;எப்போதும்&lt;/b&gt; இந்தச் சாதனத்தின் இருப்பிட அணுகலை அனுமதிக்கவா?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"நீங்கள் ஆப்ஸை உபயோகிக்கும்போது மட்டுமே அது இருப்பிடத்தை அணுக முடியும்"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"கேலெண்டர்"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"கேலெண்டரை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
@@ -377,7 +377,7 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் ஆப்ஸை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, மொபைலின் வேகத்தைக் குறைக்கலாம்"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"முன்புலத்தில் இயங்கும் சேவையை இயக்குதல்"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"முன்புலத்தில் இயங்கும் சேவைகளை உபயோகிக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
-    <string name="permlab_getPackageSize" msgid="375391550792886641">"பயன்பாட்டுச் சேமிப்பு இடத்தை அளவிடல்"</string>
+    <string name="permlab_getPackageSize" msgid="375391550792886641">"ஆப்ஸ் சேமிப்பு இடத்தை அளவிடல்"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ஆப்ஸ், அதன் குறியீடு, தரவு, மற்றும் தற்காலிகச் சேமிப்பு அளவுகளை மீட்டெடுக்க அனுமதிக்கிறது"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"சாதன அமைப்புகளை மாற்றுதல்"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"முறைமையின் அமைப்பு தரவைத் திருத்த, ஆப்ஸை அனுமதிக்கிறது. தீங்குவிளைவிக்கும் ஆப்ஸ், முறைமையின் உள்ளமைவைச் சிதைக்கலாம்."</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"உங்கள் உடல் செயல்பாட்டை இந்த ஆப்ஸால் கண்டறிய முடியும்."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"படங்கள் மற்றும் வீடியோக்களை எடுத்தல்"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"இந்த ஆப்ஸ் எப்போது வேண்டுமானாலும் கேமராவைப் பயன்படுத்தி படங்களை எடுக்கலாம், வீடியோக்களை ரெக்கார்டு செய்யலாம்."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"கேமரா சாதனங்கள் திறக்கப்படும்போதோ மூடப்படும்போதோ அது குறித்த கால்பேக்குகளைப் பெற ஒரு ஆப்ஸையோ சேவையையோ அனுமதிக்கவும்."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"எந்தக் கேமரா சாதனமும் (எந்த ஆப்ஸாலும்) திறக்கப்படும்போதோ மூடப்படும்போதோ இந்த ஆப்ஸால் கால்பேக்குகளைப் பெற முடியும்."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"மற்றொரு பயன்பாட்டில் தொடங்கப்பட்ட அழைப்பைத் தொடருவதற்கு, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ஃபோன் எண்களைப் படித்தல்"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"சாதனத்தின் ஃபோன் எண்களை அணுக, ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"கார் திரையை ஆன் செய்து வைத்திருத்தல்"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"டிவி உறக்கநிலைக்குச் செல்வதைத் தடுத்தல்"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"தொலைபேசி உறக்கநிலைக்குச் செல்வதைத் தடுத்தல்"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"கார் திரையை ஆன் செய்து வைத்திருப்பதற்கு இந்த ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"உறக்கநிலைக்குச் செல்லாமல் டேப்லெட்டைத் தடுக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"டிவி உறக்க நிலைக்குச் செல்வதைத் தடுக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"உறக்கநிலைக்குச் செல்லாமல் மொபைலைத் தடுக்க ஆப்ஸை அனுமதிக்கிறது."</string>
@@ -475,7 +479,7 @@
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"நெட்வொர்க் இணைப்புகளைக் காட்டு"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"தற்போது இருக்கும் நெட்வொர்க்குகள் எவை மற்றும் இணைக்கப்பட்டுள்ளவை எவை போன்ற நெட்வொர்க் இணைப்புகள் குறித்த தகவலைப் பார்க்கப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"முழுமையான நெட்வொர்க் அணுகலைக் கொண்டிருக்கும்"</string>
-    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"நெட்வொர்க் சாக்கெட்டுகளை உருவாக்கவும் மற்றும் தனிப்பயன் நெட்வொர்க் நெறிமுறைகளைப் பயன்படுத்தவும் ஆப்ஸை அனுமதிக்கிறது. இணையத்தில் தரவை அனுப்ப உலாவியும், பிற பயன்பாடுகளும் இருப்பதால், இணையத்திற்குத் தரவை அனுப்ப இந்த அனுமதி தேவையில்லை."</string>
+    <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"நெட்வொர்க் சாக்கெட்டுகளை உருவாக்கவும் மற்றும் பிரத்தியேக நெட்வொர்க் நெறிமுறைகளைப் பயன்படுத்தவும் ஆப்ஸை அனுமதிக்கிறது. இணையத்தில் தரவை அனுப்ப உலாவியும், பிற பயன்பாடுகளும் இருப்பதால், இணையத்திற்குத் தரவை அனுப்ப இந்த அனுமதி தேவையில்லை."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"பிணைய இணைப்புத்தன்மையை மாற்றுதல்"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"நெட்வொர்க் இணைப்பின் நிலையை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"இணைக்கப்பட்ட இணைப்புநிலையை மாற்றுதல்"</string>
@@ -692,30 +696,30 @@
     <item msgid="4537253139152229577">"வீட்டு தொலைநகல்"</item>
     <item msgid="6751245029698664340">"பேஜர்"</item>
     <item msgid="1692790665884224905">"மற்றவை"</item>
-    <item msgid="6216981255272016212">"தனிப்பயன்"</item>
+    <item msgid="6216981255272016212">"பிரத்தியேகம்"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"வீடு"</item>
     <item msgid="435564470865989199">"அலுவலகம்"</item>
     <item msgid="4199433197875490373">"மற்றவை"</item>
-    <item msgid="3233938986670468328">"தனிப்பயன்"</item>
+    <item msgid="3233938986670468328">"பிரத்தியேகம்"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"வீடு"</item>
     <item msgid="5472578890164979109">"அலுவலகம்"</item>
     <item msgid="5718921296646594739">"மற்றவை"</item>
-    <item msgid="5523122236731783179">"தனிப்பயன்"</item>
+    <item msgid="5523122236731783179">"பிரத்தியேகம்"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"வீடு"</item>
     <item msgid="5503060422020476757">"அலுவலகம்"</item>
     <item msgid="2530391194653760297">"மற்றவை"</item>
-    <item msgid="7640927178025203330">"தனிப்பயன்"</item>
+    <item msgid="7640927178025203330">"பிரத்தியேகம்"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="6144047813304847762">"அலுவலகம்"</item>
     <item msgid="7402720230065674193">"மற்றவை"</item>
-    <item msgid="808230403067569648">"தனிப்பயன்"</item>
+    <item msgid="808230403067569648">"பிரத்தியேகம்"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="7535761744432206400">"AIM"</item>
@@ -727,7 +731,7 @@
     <item msgid="4717545739447438044">"ICQ"</item>
     <item msgid="8293711853624033835">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="5120365721260686814">"தனிப்பயன்"</string>
+    <string name="phoneTypeCustom" msgid="5120365721260686814">"பிரத்தியேகம்"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"வீடு"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"மொபைல்"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"அலுவலகம்"</string>
@@ -746,26 +750,26 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"பணியிட மொபைல்"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"பணியிட பேஜர்"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"உதவியாளர்"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
-    <string name="eventTypeCustom" msgid="3257367158986466481">"தனிப்பயன்"</string>
+    <string name="eventTypeCustom" msgid="3257367158986466481">"பிரத்தியேகம்"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"பிறந்தநாள்"</string>
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"ஆண்டுவிழா"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"மற்றவை"</string>
-    <string name="emailTypeCustom" msgid="1809435350482181786">"தனிப்பயன்"</string>
+    <string name="emailTypeCustom" msgid="1809435350482181786">"பிரத்தியேகம்"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"வீடு"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"அலுவலகம்"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"மற்றவை"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"மொபைல்"</string>
-    <string name="postalTypeCustom" msgid="5645590470242939129">"தனிப்பயன்"</string>
+    <string name="postalTypeCustom" msgid="5645590470242939129">"பிரத்தியேகம்"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"வீடு"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"அலுவலகம்"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"மற்றவை"</string>
-    <string name="imTypeCustom" msgid="5653384545085765570">"தனிப்பயன்"</string>
+    <string name="imTypeCustom" msgid="5653384545085765570">"பிரத்தியேகம்"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"வீடு"</string>
     <string name="imTypeWork" msgid="2099668940169903123">"அலுவலகம்"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"மற்றவை"</string>
-    <string name="imProtocolCustom" msgid="4437878287653764692">"தனிப்பயன்"</string>
+    <string name="imProtocolCustom" msgid="4437878287653764692">"பிரத்தியேகம்"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
     <string name="imProtocolMsn" msgid="2257148557766499232">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="5373338758093392231">"Yahoo"</string>
@@ -777,9 +781,9 @@
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="8684458700669564172">"அலுவலகம்"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"மற்றவை"</string>
-    <string name="orgTypeCustom" msgid="1126322047677329218">"தனிப்பயன்"</string>
-    <string name="relationTypeCustom" msgid="282938315217441351">"தனிப்பயன்"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"உதவியாளர்"</string>
+    <string name="orgTypeCustom" msgid="1126322047677329218">"பிரத்தியேகம்"</string>
+    <string name="relationTypeCustom" msgid="282938315217441351">"பிரத்தியேகம்"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"சகோதரர்"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"குழந்தை"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"வாழ்வுத் துணை"</string>
@@ -793,7 +797,7 @@
     <string name="relationTypeRelative" msgid="3396498519818009134">"உறவினர்"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"சகோதரி"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"துணைவர்"</string>
-    <string name="sipAddressTypeCustom" msgid="6283889809842649336">"தனிப்பயன்"</string>
+    <string name="sipAddressTypeCustom" msgid="6283889809842649336">"பிரத்தியேகம்"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"வீடு"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"அலுவலகம்"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"மற்றவை"</string>
@@ -828,8 +832,8 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"சிம் கார்டு இல்லை அல்லது படிக்கக்கூடியதாக இல்லை. சிம் கார்டைச் செருகவும்."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"பயன்படுத்த முடியாத சிம் கார்டு."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"உங்கள் சிம் கார்டு நிரந்தரமாக முடக்கப்பட்டது.\n மற்றொரு சிம் கார்டிற்காக உங்கள் வயர்லெஸ் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்."</string>
-    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"முந்தைய ட்ராக்"</string>
-    <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"அடுத்த ட்ராக்"</string>
+    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"முந்தைய டிராக்"</string>
+    <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"அடுத்த டிராக்"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"இடைநிறுத்து"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"இயக்கு"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"நிறுத்து"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"தனியுரிமை அமைப்புகளை மாற்ற தட்டி மீண்டும் முயலவும்"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"தனியுரிமை அமைப்பை மாற்றவா?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"தனித்துவமான அடையாளங்காட்டியான MAC முகவரியைப் பயன்படுத்தி இணைக்க <xliff:g id="SSID_0">%1$s</xliff:g> விரும்பக்கூடும். இதனால் உங்கள் சாதனத்தின் இருப்பிடத்தை அருகில் இருக்கும் சாதனங்கள் டிராக் செய்ய அனுமதிக்கப்படும். \n\nநீங்கள் தொடரும்பட்சத்தில் <xliff:g id="SSID_1">%1$s</xliff:g> உங்கள் தனியுரிம அமைப்பை மாற்றி மீண்டும் இணைய முயலும்."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"இணைப்பதற்கு, பிரத்தியேக அடையாளங்காட்டியான உங்கள் சாதன MAC முகவரியை <xliff:g id="SSID">%1$s</xliff:g> பயன்படுத்த வேண்டும். தற்போது ரேண்டம் ஆக்கப்பட்ட அடையாளங்காட்டியை இந்த நெட்வொர்க்கிற்கான உங்கள் தனியுரிமை அமைப்பு பயன்படுத்துகிறது. \n\nஇதனால் அருகில் இருக்கும் சாதனங்கள் உங்கள் சாதனத்தின் இருப்பிடத்தை டிராக் செய்ய அனுமதிக்கப்படக்கூடும்."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"அமைப்பை மாற்று"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"அமைப்பு புதுப்பிக்கப்பட்டது. மீண்டும் இணைக்கவும்."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"தனியுரிமை அமைப்பை மாற்ற இயலவில்லை"</string>
@@ -1989,7 +1993,7 @@
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"ஆப்ஸ் முந்தையப் பதிப்பிற்கு மாற்றப்பட்டது, அல்லது இந்த ஷார்ட்கட் வேலை செய்யவில்லை"</string>
     <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"காப்புப் பிரதி மற்றும் மீட்டமைவைப் ஆப்ஸ் ஆதரிக்காத காரணத்தால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
-    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"பயன்பாட்டுச் சான்றுகள் பொருந்தாத காரணத்தினால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"ஆப்ஸ் சான்றுகள் பொருந்தாத காரணத்தினால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"ஷார்ட்கட் முடக்கப்பட்டுள்ளது"</string>
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"நிறுவல் நீக்கு"</string>

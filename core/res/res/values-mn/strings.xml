@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Энэ апп таны биеийн дасгал хөдөлгөөнийг таних боломжтой."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"зураг авах болон видео бичих"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Энэ апп ямар ч үед камер ашиглан зураг авж, видео хийх боломжтой."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Аппликэйшн эсвэл үйлчилгээнд камерын төхөөрөмжүүдийг нээж эсвэл хааж байгаа тухай залгасан дуудлага хүлээн авахыг зөвшөөрөх."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Энэ апп нь дурын камерын төхөөрөмжийг нээх (ямар аппликэйшнээр болох) эсвэл хаах үед буцааж залгасан дуудлага хүлээн авах боломжтой."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"чичиргээг удирдах"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"утасны дугаарт шууд дуудлага хийх"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Аппад өөр аппад эхлүүлсэн дуудлагыг үргэлжлүүлэхийг зөвшөөрдөг."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"утасны дугаарыг унших"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Төхөөрөмжийн утасны дугаарт хандах зөвшөөрлийг апп-д олгоно."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"машины дэлгэцийг асаалттай байлгах"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"таблетыг унтуулахгүй байлгах"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"Телевиз-ийн гэрэл унтрахаас сэргийл"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"утсыг унтуулахгүй байлгах"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Аппад машины дэлгэцийг асаалттай байлгахыг зөвшөөрдөг."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Апп нь таблетыг унтахаас сэргийлэх боломжтой"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Апп-д телевизийг унтраахгүй байлгахыг зөвшөөрдөг."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Апп нь утсыг унтахаас сэргийлэх боломжтой"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g>-д холбогдож чадсангүй"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Нууцлалын тохиргоог өөрчлөхийн тулд товшоод, дахин оролдоно уу"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Нууцлалын тохиргоог өөрчлөх үү?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> нь өвөрмөц таниулбар болох таны төхөөрөмжийн MAC хаягийг ашиглан холбогдохыг хүсэж болзошгүй. Энэ нь ойролцоох төхөөрөмжүүдэд таны төхөөрөмжийн байршлыг тандахыг зөвшөөрч болзошгүй. \n\nХэрэв та үргэлжлүүлбэл <xliff:g id="SSID_1">%1$s</xliff:g> нь таны нууцлалын тохиргоог өөрчилж, дахин холбогдохыг оролдоно."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Холбогдохын тулд <xliff:g id="SSID">%1$s</xliff:g> нь таны төхөөрөмжийн өвөрмөц таниулбар болох MAC хаягийг ашиглах хэрэгтэй байна. Одоогоор энэ сүлжээнд зориулсан таны нууцлалын тохиргоо нь санамсаргүй сонгосон таниулбарыг ашиглаж байна. \n\nЭнэ өөрчлөлт нь ойролцоох төхөөрөмжүүдэд таны төхөөрөмжийн байршлыг тандахыг зөвшөөрч болзошгүй."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Тохиргоог өөрчлөх"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Тохиргоог шинэчиллээ. Дахин холбогдохыг оролдоно уу."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Нууцлалын тохиргоог өөрчлөх боломжгүй байна"</string>

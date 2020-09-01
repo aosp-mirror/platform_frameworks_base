@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalles de la batería"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> por ciento de batería"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g> por ciento de batería (<xliff:g id="TIME">%2$s</xliff:g> aproximadamente según tu uso)"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batería cargando (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%)."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batería cargándose (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%)."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Ajustes del sistema"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Notificaciones"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas las notificaciones"</string>
@@ -381,8 +381,8 @@
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Al anochecer"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Hasta el amanecer"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
-    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"La conexión NFC está inhabilitada"</string>
-    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"La conexión NFC está habilitada"</string>
+    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"El NFC está desactivado"</string>
+    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"El NFC está activado"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Desliza el dedo hacia arriba para cambiar de aplicación"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra hacia la derecha para cambiar rápidamente de aplicación"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Mostrar u ocultar aplicaciones recientes"</string>

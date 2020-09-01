@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Tidak dapat melakukan panggilan darurat melalui Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Notifikasi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Penerusan panggilan"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode panggilan balik darurat"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode telepon balik darurat"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Status data seluler"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"Pesan SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Notifikasi pesan suara"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikasi ini dapat mengenali aktivitas fisik Anda."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikasi ini dapat mengambil foto dan merekam video menggunakan kamera kapan saja."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Izinkan aplikasi atau layanan untuk menerima callback tentang perangkat kamera yang sedang dibuka atau ditutup."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Aplikasi ini dapat menerima callback saat perangkat kamera dibuka (oleh aplikasi) atau ditutup."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrol getaran"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"panggil nomor telepon secara langsung"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Mengizinkan aplikasi melanjutkan panggilan yang dimulai di aplikasi lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"membaca nomor telepon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Mengizinkan aplikasi mengakses nomor telepon perangkat."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"tetap aktifkan layar mobil"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"cegah tablet dari tidur"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"cegah agar TV tidak tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"mencegah ponsel menjadi tidak aktif"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Mengizinkan aplikasi untuk menjaga agar layar mobil tetap aktif."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Mengizinkan apl mencegah tablet tidur."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Mengizinkan aplikasi untuk mencegah agar TV tidak tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Mengizinkan apl mencegah ponsel tidur."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Tidak dapat terhubung ke <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Ketuk untuk mengubah setelan privasi dan coba lagi"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Ubah setelan privasi?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> mungkin ingin terhubung menggunakan alamat MAC perangkat Anda, yaitu ID unik. Alamat ini memungkinkan lokasi perangkat dilacak oleh perangkat di sekitar. \n\nJika Anda melanjutkan, <xliff:g id="SSID_1">%1$s</xliff:g> akan mengubah setelan privasi dan mencoba terhubung lagi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Untuk terhubung, <xliff:g id="SSID">%1$s</xliff:g> perlu menggunakan alamat MAC perangkat, yaitu ID unik. Saat ini, setelan privasi untuk jaringan ini menggunakan ID yang diacak. \n\nPerubahan ini memungkinkan lokasi perangkat dilacak oleh perangkat di sekitar."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ganti setelan"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Setelan diperbarui. Coba hubungkan lagi."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Tidak dapat mengubah setelan privasi"</string>

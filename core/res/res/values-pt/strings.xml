@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Este app pode reconhecer sua atividade física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tirar fotos e gravar vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Este app pode tirar fotos e gravar vídeos usando a câmera a qualquer momento."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que um aplicativo ou serviço receba callbacks sobre dispositivos de câmera sendo abertos ou fechados."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esse app pode receber callbacks quando um dispositivo de câmera é aberto (por qualquer app) ou fechado."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que o app controle a vibração."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ligar diretamente para números de telefone"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite que o app continue uma chamada que foi iniciada em outro app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ler números de telefone"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Permite que o app acesse os número de telefone do dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"manter a tela do carro ativada"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"impedir modo de inatividade do tablet"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"impedir a suspensão da TV"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"impedir modo de inatividade do telefone"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite que o app mantenha a tela do carro ativada."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite que o app impeça a suspensão do tablet."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Permite que o app impeça a suspensão da TV."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite que o app impeça a suspensão do telefone."</string>
@@ -514,8 +518,8 @@
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permite que o app execute métodos para adicionar e excluir modelos de impressão digital para uso."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"usar hardware de impressão digital"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permite que o app use hardware de impressão digital para autenticação."</string>
-    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar sua coleção de músicas"</string>
-    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permite que o app modifique sua coleção de músicas."</string>
+    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar sua biblioteca de música"</string>
+    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permite que o app modifique sua biblioteca de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar sua coleção de vídeos"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Permite que o app modifique sua coleção de vídeos."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"modificar sua coleção de fotos"</string>
@@ -912,7 +916,7 @@
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Confirmar navegação"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Sair desta página"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Permanecer nesta página"</string>
-    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTem certeza que quer sair desta página?"</string>
+    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nVocê quer mesmo sair desta página?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Confirmar"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Dica: toque duas vezes para aumentar e diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"Preench. aut."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Não foi possível se conectar à rede <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toque para mudar as configurações de privacidade e tentar novamente"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Mudar configuração de privacidade?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> pode querer se conectar usando o endereço MAC do seu dispositivo, um identificador único. Isso pode permitir que o local do dispositivo seja monitorado por dispositivos próximos. \n\nSe você continuar, <xliff:g id="SSID_1">%1$s</xliff:g> mudará sua configuração de privacidade e tentará se conectar novamente."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para se conectar, <xliff:g id="SSID">%1$s</xliff:g> precisa usar o endereço MAC do seu dispositivo, um identificador exclusivo. Atualmente, sua configuração de privacidade para esta rede usa um identificador aleatório. \n\nEssa mudança pode permitir que o local do dispositivo seja monitorado por dispositivos próximos."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Mudar configuração"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Configuração atualizada. Tente conectar novamente."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Não foi possível mudar as configurações de privacidade"</string>

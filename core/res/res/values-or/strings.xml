@@ -201,7 +201,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"ୱେୟାରଲେସ୍‌କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"ୱେୟାରଲେସ୍‌କୁ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="screen_lock" msgid="2072642720826409809">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
-    <string name="power_off" msgid="4111692782492232778">"ପାୱାର୍ ଅଫ୍"</string>
+    <string name="power_off" msgid="4111692782492232778">"ପାୱାର୍ ବନ୍ଦ"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ରିଙ୍ଗର୍‍ ଅଫ୍‍ ଅଛି"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ରିଙ୍ଗର୍‍ କମ୍ପନ"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"ରିଙ୍ଗର୍‍ ଅନ୍‍ ଅଛି"</string>
@@ -225,11 +225,11 @@
     <string name="global_actions" product="tv" msgid="2020669784083287370">"ଟିଭିର ବିକଳ୍ପ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ଫୋନ ବିକଳ୍ପ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର୍ ଅଫ୍"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର୍ ବନ୍ଦ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ଜରୁରୀକାଳୀନ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ସେସନ୍‍ ଶେଷ କରନ୍ତୁ"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରୀନଶଟ୍‌"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ୍‌"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ଇ-ମେଲ୍ ମେସେଜ୍‍ ଭାବରେ ପଠାଇବାକୁ, ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଡିଭାଇସ୍‌ ବିଷୟରେ ଏହା ସୂଚନା ସଂଗ୍ରହ କରିବ। ବଗ୍ ରିପୋର୍ଟ ଆରମ୍ଭ ହେବାପରଠାରୁ ଏହାକୁ ପଠାଇବା ପାଇଁ କିଛି ସମୟ ଲାଗିବ, ଦୟାକରି ଧୈର୍ଯ୍ୟ ରଖନ୍ତୁ।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ଇଣ୍ଟରାକ୍ଟିଭ୍‍ ରିପୋର୍ଟ"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ଏହି ଆପ୍‍ଣ ଆପଣଙ୍କ ଶାରୀରିକ ଗତିବିଧିକୁ ଚିହ୍ନଟ କରିପାରେ"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକୁ ନିଅନ୍ତୁ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଫଟୋ ଉଠାଇପାରେ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିପାରେ।"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"କ୍ୟାମେରା ଡିଭାଇସଗୁଡ଼ିକ ଖୋଲିବା କିମ୍ବା ବନ୍ଦ କରିବା ବିଷୟରେ କଲବ୍ୟାକଗୁଡ଼ିକ ପାଇବାକୁ ଏକ ଆପ୍ଲିକେସନ୍ କିମ୍ବା ସେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ଯେ କୌଣସି କ୍ୟାମେରା ଡିଭାଇସ୍ ଖୋଲାଗଲେ (କେଉଁ ଆପ୍ଲିକେସନ୍ ଦ୍ୱାରା) କିମ୍ବା ବନ୍ଦ କରାଗଲେ ଏହି ଆପ୍ କଲବ୍ୟାକ୍ ପାଇପାରିବ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ସିଧାସଳଖ ଫୋନ୍ ନମ୍ବରଗୁଡ଼ିକୁ କଲ୍ କରନ୍ତୁ"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ଅନ୍ୟ ଆପ୍‌ରେ ଆରମ୍ଭ ହୋଇଥିବା ଗୋଟିଏ କଲ୍‌କୁ ଜାରି ରଖିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ଫୋନ୍‍ ନମ୍ବର ପଢ଼େ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ଏହି ଡିଭାଇସର ଫୋନ୍‍ ନମ୍ବର ଆକ୍ସେସ୍‍ କରିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"କାର ସ୍କ୍ରିନକୁ ଚାଲୁ ରଖନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ଟାବଲେଟ୍‌କୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌କୁ ଯିବାକୁ ରୋକନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ଟିଭିକୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌ରୁ ଯିବାକୁ ରୋକନ୍ତୁ।"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ଫୋନକୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌କୁ ଯିବାକୁ ରୋକନ୍ତୁ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"କାର ସ୍କ୍ରିନକୁ ଚାଲୁ ରଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ଆପ୍‍କୁ, ଟାବଲେଟ୍‍ଟିକୁ ସ୍ଲୀପ୍‍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"TVକୁ ଶୁଆଇବାକୁ ଯିବାରୁ ରୋକିବାକୁ ଆପ୍‌ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ଆପ୍‍କୁ, ଫୋନ୍‌ଟିକୁ ସ୍ଲୀପ୍‍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବାକୁ ଦେଇଥାଏ।"</string>
@@ -746,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ୱାର୍କ ମୋବାଇଲ୍"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ୱାର୍କ ପେଜର୍"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"ସହାୟକ"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"କଷ୍ଟମ୍‌"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ଜନ୍ମଦିନ"</string>
@@ -779,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"କଷ୍ଟମ୍‌"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"ସହାୟକ"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ଭାଇ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"ଶିଶୁ"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ଡୋମେଷ୍ଟିକ୍‌ ପାର୍ଟନର୍‌"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> ସହିତ ସଂଯୋଗ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"ଗୋପନୀୟତା ସେଟିଂସ୍ ବଦଳେଇବାକୁ ଟାପ୍ କରନ୍ତୁ ଏବଂ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ଗୋପନୀୟତା ସେଟିଂ ବଦଳେଇବେ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ଆପଣଙ୍କ ଡିଭାଇସ୍‌ର ଏକ ସ୍ୱତନ୍ତ୍ର ଚିହ୍ନଟକାରୀ MAC ଠିକଣା ବ୍ୟବହାର କରି ସଂଯୋଗ କରିବାକୁ ଚାହିଁପାରେ। ଏହା ଆପଣଙ୍କର ଡିଭାଇସ୍‌ର ଲୋକେସନ୍‌କୁ ଟ୍ରାକ୍ କରିବାକୁ ଆଖପାଖର ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ଅନୁମତି ଦେଇପାରେ। \n\nଯଦି ଆପଣ ଜାରି ରଖନ୍ତି, ତେବେ <xliff:g id="SSID_1">%1$s</xliff:g> ଆପଣଙ୍କର ଗୋପନୀୟତା ସେଟିଂକୁ ବଦଳାଇ ପୁଣି ସଂଯୋଗ କରିବାକୁ ଚେଷ୍ଟା କରିବ।"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ସଂଯୋଗ କରିବାକୁ, <xliff:g id="SSID">%1$s</xliff:g> ଏକ ସ୍ୱତନ୍ତ୍ର ଚିହ୍ନଟକାରୀ ଭାବେ ଆପଣଙ୍କ ଡିଭାଇସର MAC ଠିକଣା ଆବଶ୍ୟକ କରେ। ବର୍ତ୍ତମାନ, ଏହି ନେଟୱାର୍କ ପାଇଁ ଆପଣଙ୍କ ଗୋପନୀୟତା ସେଟିଂ ଏକ ରେଣ୍ଡମାଇଜ୍ ଚିହ୍ନଟକାରୀ ବ୍ୟବହାର କରେ। \n\nଏହି ପରିବର୍ତ୍ତନ ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକୁ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନକୁ ଟ୍ରାକ୍ କରିବାକୁ ଅନୁମତି ଦେଇପାରେ।"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ସେଟିଂକୁ ବଦଳାନ୍ତୁ"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ସେଟିଂକୁ ଅପଡେଟ୍ କରାଯାଇଛି। ପୁଣି ସଂଯୋଗ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"ଗୋପନୀୟତା ସେଟିଂ ବଦଳିପାରିବ ନାହିଁ"</string>
