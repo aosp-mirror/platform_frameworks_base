@@ -280,6 +280,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         PackageManager pm = context.getPackageManager();
         boolean supportsPip = pm.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         if (!supportsPip) {
+            Log.w(TAG, "Device not support PIP feature");
             return;
         }
 
