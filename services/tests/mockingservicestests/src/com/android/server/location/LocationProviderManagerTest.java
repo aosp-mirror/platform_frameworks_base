@@ -274,60 +274,55 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_Fine() {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
     }
 
     @Test
     public void testGetLastLocation_Coarse() {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        Location coarse = mManager.getLastLocation(request, IDENTITY, PERMISSION_COARSE);
+        Location coarse = mManager.getLastLocation(IDENTITY, PERMISSION_COARSE, false);
         assertThat(coarse).isNotEqualTo(loc);
         assertThat(coarse).isNearby(loc, 5000);
     }
 
     @Test
     public void testGetLastLocation_Bypass() {
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
-        LocationRequest bypassRequest = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0,
-                false).setLocationSettingsIgnored(true);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
-        assertThat(mManager.getLastLocation(bypassRequest, IDENTITY, PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isNull();
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc);
-        assertThat(mManager.getLastLocation(bypassRequest, IDENTITY, PERMISSION_FINE)).isEqualTo(
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
                 loc);
 
         mProvider.setProviderAllowed(false);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
-        assertThat(mManager.getLastLocation(bypassRequest, IDENTITY, PERMISSION_FINE)).isEqualTo(
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
                 loc);
 
         loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
-        assertThat(mManager.getLastLocation(bypassRequest, IDENTITY, PERMISSION_FINE)).isEqualTo(
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
                 loc);
 
         mProvider.setProviderAllowed(true);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
-        assertThat(mManager.getLastLocation(bypassRequest, IDENTITY, PERMISSION_FINE)).isEqualTo(
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
                 loc);
 
         loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc);
-        assertThat(mManager.getLastLocation(bypassRequest, IDENTITY, PERMISSION_FINE)).isEqualTo(
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
                 loc);
     }
 
@@ -337,13 +332,12 @@ public class LocationProviderManagerTest {
         mockProvider.setAllowed(true);
         mManager.setMockProvider(mockProvider);
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
         Location loc = createLocation(NAME, mRandom);
         mockProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
 
         mManager.setMockProvider(null);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
     }
 
     @Test
@@ -351,13 +345,12 @@ public class LocationProviderManagerTest {
         Location loc1 = createLocation(NAME, mRandom);
         mManager.injectLastLocation(loc1, CURRENT_USER);
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(NAME, 0, 0, false);
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc1);
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc1);
 
         Location loc2 = createLocation(NAME, mRandom);
         mManager.injectLastLocation(loc2, CURRENT_USER);
 
-        assertThat(mManager.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc1);
+        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc1);
     }
 
     @Test
@@ -381,9 +374,7 @@ public class LocationProviderManagerTest {
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
 
-        LocationRequest request = LocationRequest.createFromDeprecatedProvider(PASSIVE_PROVIDER, 0,
-                0, false);
-        assertThat(mPassive.getLastLocation(request, IDENTITY, PERMISSION_FINE)).isEqualTo(loc);
+        assertThat(mPassive.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
     }
 
     @Test
