@@ -80,6 +80,7 @@ public class PipResizeGestureHandler {
     private final Context mContext;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipMotionHelper mMotionHelper;
+    private final PipMenuActivityController mMenuController;
     private final int mDisplayId;
     private final Executor mMainExecutor;
     private final SysUiState mSysUiState;
@@ -117,13 +118,14 @@ public class PipResizeGestureHandler {
 
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
-            PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
-            Runnable updateMovementBoundsRunnable, SysUiState sysUiState,
-            PipUiEventLogger pipUiEventLogger) {
+            PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController pipMenuController,
+            Function<Rect, Rect> movementBoundsSupplier, Runnable updateMovementBoundsRunnable,
+            SysUiState sysUiState, PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mPipBoundsHandler = pipBoundsHandler;
+        mMenuController = pipMenuController;
         mMotionHelper = motionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMovementBoundsSupplier = movementBoundsSupplier;
@@ -322,6 +324,10 @@ public class PipResizeGestureHandler {
                         mInputMonitor.pilferPointers();
                     }
                     if (mThresholdCrossed) {
+                        if (mMenuController.isMenuActivityVisible()) {
+                            mMenuController.hideMenuWithoutResize();
+                            mMenuController.hideMenu();
+                        }
                         final Rect currentPipBounds = mMotionHelper.getBounds();
                         mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(x, y,
                                 mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
