@@ -518,8 +518,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseBooleanArray mRestrictBackgroundAllowlistRevokedUids =
             new SparseBooleanArray();
 
+    final Object mMeteredIfacesLock = new Object();
     /** Set of ifaces that are metered. */
-    @GuardedBy("mNetworkPoliciesSecondLock")
+    @GuardedBy("mMeteredIfacesLock")
     private ArraySet<String> mMeteredIfaces = new ArraySet<>();
     /** Set of over-limit templates that have been notified. */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -1972,13 +1973,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // Remove quota from any interfaces that are no longer metered.
-        for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
-            final String iface = mMeteredIfaces.valueAt(i);
-            if (!newMeteredIfaces.contains(iface)) {
-                removeInterfaceQuotaAsync(iface);
+        synchronized (mMeteredIfacesLock) {
+            for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
+                final String iface = mMeteredIfaces.valueAt(i);
+                if (!newMeteredIfaces.contains(iface)) {
+                    removeInterfaceQuotaAsync(iface);
+                }
             }
+            mMeteredIfaces = newMeteredIfaces;
         }
-        mMeteredIfaces = newMeteredIfaces;
 
         final ContentResolver cr = mContext.getContentResolver();
         final boolean quotaEnabled = Settings.Global.getInt(cr,
@@ -2030,7 +2033,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mSubscriptionOpportunisticQuota.put(subId, quotaBytes);
         }
 
-        final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
+        final String[] meteredIfaces;
+        synchronized (mMeteredIfacesLock) {
+            meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
+        }
         mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
 
         mHandler.obtainMessage(MSG_ADVISE_PERSIST_THRESHOLD, lowestRule).sendToTarget();
@@ -3436,7 +3442,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict background: "); fout.println(mRestrictBackground);
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
-                fout.print("Metered ifaces: "); fout.println(mMeteredIfaces);
+                synchronized (mMeteredIfacesLock) {
+                    fout.print("Metered ifaces: ");
+                    fout.println(mMeteredIfaces);
+                }
 
                 fout.println();
                 fout.print("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
@@ -4632,7 +4641,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_LIMIT_REACHED: {
                     final String iface = (String) msg.obj;
-                    synchronized (mNetworkPoliciesSecondLock) {
+                    synchronized (mMeteredIfacesLock) {
                         // fast return if not needed.
                         if (!mMeteredIfaces.contains(iface)) {
                             return true;
@@ -5274,7 +5283,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 isBackgroundRestricted = mRestrictBackground;
             }
             final boolean isNetworkMetered;
-            synchronized (mNetworkPoliciesSecondLock) {
+            synchronized (mMeteredIfacesLock) {
                 isNetworkMetered = mMeteredIfaces.contains(ifname);
             }
             final boolean ret = isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,

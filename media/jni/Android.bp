@@ -166,26 +166,3 @@ cc_library_shared {
     ],
 }
 
-cc_library_shared {
-    name: "libmediatranscodemanager_jni",
-    srcs: [
-        "android_media_MediaTranscodeManager.cpp",
-    ],
-
-    shared_libs: [
-        "libandroid_runtime",
-        "libcutils",
-        "liblog",
-        "libmedia",
-    ],
-
-    export_include_dirs: ["."],
-
-    cflags: [
-        "-Wall",
-        "-Werror",
-        "-Wno-error=deprecated-declarations",
-        "-Wunused",
-        "-Wunreachable-code",
-    ],
-}

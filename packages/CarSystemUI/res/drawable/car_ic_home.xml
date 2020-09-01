@@ -12,12 +12,14 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License
+  ~ limitations under the License.
   -->
-<resources>
-    <!-- The position of the volume dialog on the screen.
-         See com.android.systemui.volume.VolumeDialogImpl.
-         Value 81 corresponds to BOTTOM|CENTER_HORIZONTAL.
-         Value 21 corresponds to RIGHT|CENTER_VERTICAL. -->
-    <integer name="volume_dialog_gravity">21</integer>
-</resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="@dimen/system_bar_icon_drawing_size"
+        android:height="@dimen/system_bar_icon_drawing_size"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
+    <path
+        android:pathData="M10,20v-6h4v6h5v-8h3L12,3 2,12h3v8z"
+        android:fillColor="@color/car_nav_icon_fill_color" />
+</vector>

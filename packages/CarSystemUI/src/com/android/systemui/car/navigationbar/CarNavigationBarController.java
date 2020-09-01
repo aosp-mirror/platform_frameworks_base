@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.car.hvac.HvacController;
+import com.android.systemui.car.statusbar.UserNameViewController;
 import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ public class CarNavigationBarController {
     private final ButtonSelectionStateController mButtonSelectionStateController;
     private final ButtonRoleHolderController mButtonRoleHolderController;
     private final Lazy<HvacController> mHvacControllerLazy;
+    private final Lazy<UserNameViewController> mUserNameViewControllerLazy;
 
     private boolean mShowTop;
     private boolean mShowBottom;
@@ -60,12 +62,14 @@ public class CarNavigationBarController {
             NavigationBarViewFactory navigationBarViewFactory,
             ButtonSelectionStateController buttonSelectionStateController,
             Lazy<HvacController> hvacControllerLazy,
+            Lazy<UserNameViewController> userNameViewControllerLazy,
             ButtonRoleHolderController buttonRoleHolderController,
             SystemBarConfigs systemBarConfigs) {
         mContext = context;
         mNavigationBarViewFactory = navigationBarViewFactory;
         mButtonSelectionStateController = buttonSelectionStateController;
         mHvacControllerLazy = hvacControllerLazy;
+        mUserNameViewControllerLazy = userNameViewControllerLazy;
         mButtonRoleHolderController = buttonRoleHolderController;
 
         // Read configuration.
@@ -109,6 +113,7 @@ public class CarNavigationBarController {
         mHvacControllerLazy.get().removeAllComponents();
         mButtonSelectionStateController.removeAll();
         mButtonRoleHolderController.removeAll();
+        mUserNameViewControllerLazy.get().removeAll();
     }
 
     /** Gets the top window if configured to do so. */
@@ -218,6 +223,7 @@ public class CarNavigationBarController {
         mButtonSelectionStateController.addAllButtonsWithSelectionState(view);
         mButtonRoleHolderController.addAllButtonsWithRoleName(view);
         mHvacControllerLazy.get().addTemperatureViewToController(view);
+        mUserNameViewControllerLazy.get().addUserNameView(view);
     }
 
     /** Sets a touch listener for the top navigation bar. */
