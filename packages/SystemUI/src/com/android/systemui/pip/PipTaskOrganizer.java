@@ -47,6 +47,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Rational;
 import android.util.Size;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -684,13 +685,16 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
      * {@link PictureInPictureParams} would affect the bounds.
      */
     private boolean applyPictureInPictureParams(@NonNull PictureInPictureParams params) {
-        final boolean changed = (mPictureInPictureParams == null) || !Objects.equals(
-                mPictureInPictureParams.getAspectRatioRational(), params.getAspectRatioRational());
-        if (changed) {
-            mPictureInPictureParams = params;
+        final Rational currentAspectRatio =
+                mPictureInPictureParams != null ? mPictureInPictureParams.getAspectRatioRational()
+                        : null;
+        final boolean aspectRatioChanged = !Objects.equals(currentAspectRatio,
+                params.getAspectRatioRational());
+        mPictureInPictureParams = params;
+        if (aspectRatioChanged) {
             mPipBoundsHandler.onAspectRatioChanged(params.getAspectRatio());
         }
-        return changed;
+        return aspectRatioChanged;
     }
 
     /**

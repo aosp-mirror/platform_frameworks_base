@@ -821,7 +821,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             byte[] data = psdsDownloader.downloadPsdsData(psdsType);
             if (data != null) {
                 if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
-                native_inject_psds_data(data, data.length);
+                native_inject_psds_data(data, data.length, psdsType);
                 mPsdsBackOff.reset();
             }
 
@@ -2111,7 +2111,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private native boolean native_supports_psds();
 
-    private native void native_inject_psds_data(byte[] data, int length);
+    private native void native_inject_psds_data(byte[] data, int length, int psdsType);
 
     // DEBUG Support
     private native String native_get_internal_state();
