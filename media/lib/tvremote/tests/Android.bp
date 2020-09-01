@@ -1,0 +1,15 @@
+android_test {
+    name: "TvRemoteTests",
+    srcs: ["src/**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "com.android.media.tv.remoteprovider",
+    ],
+    static_libs: [
+        "mockito-target-minus-junit4",
+    ],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+}

@@ -24,13 +24,22 @@ import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.Surface;
+import android.view.ViewDebug;
 
+import com.android.internal.os.ByteTransferPipe;
+import com.android.server.protolog.ProtoLogImpl;
+
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * ShellCommands for WindowManagerService.
@@ -64,8 +73,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runDisplayDensity(pw);
                 case "folded-area":
                     return runDisplayFoldedArea(pw);
-                case "overscan":
-                    return runDisplayOverscan(pw);
                 case "scaling":
                     return runDisplayScaling(pw);
                 case "dismiss-keyguard":
@@ -75,10 +82,14 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // the output trace file, so the shell gets the correct semantics for where
                     // trace files can be written.
                     return mInternal.mWindowTracing.onShellCommand(this);
+                case "logging":
+                    return ProtoLogImpl.getSingleInstance().onShellCommand(this);
                 case "set-user-rotation":
                     return runSetDisplayUserRotation(pw);
                 case "set-fix-to-user-rotation":
                     return runSetFixToUserRotation(pw);
+                case "dump-visible-window-views":
+                    return runDumpVisibleWindowViews(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -243,30 +254,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runDisplayOverscan(PrintWriter pw) throws RemoteException {
-        String overscanStr = getNextArgRequired();
-        Rect rect = new Rect();
-        final int displayId = getDisplayId(overscanStr);
-        if ("reset".equals(overscanStr)) {
-            rect.set(0, 0, 0, 0);
-        } else {
-            final Pattern FLATTENED_PATTERN = Pattern.compile(
-                    "(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
-            Matcher matcher = FLATTENED_PATTERN.matcher(overscanStr);
-            if (!matcher.matches()) {
-                getErrPrintWriter().println("Error: bad rectangle arg: " + overscanStr);
-                return -1;
-            }
-            rect.left = Integer.parseInt(matcher.group(1));
-            rect.top = Integer.parseInt(matcher.group(2));
-            rect.right = Integer.parseInt(matcher.group(3));
-            rect.bottom = Integer.parseInt(matcher.group(4));
-        }
-
-        mInterface.setOverscan(displayId, rect.left, rect.top, rect.right, rect.bottom);
-        return 0;
-    }
-
     private int runDisplayScaling(PrintWriter pw) throws RemoteException {
         String scalingStr = getNextArgRequired();
         if ("auto".equals(scalingStr)) {
@@ -334,7 +321,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runSetFixToUserRotation(PrintWriter pw) {
+    private int runSetFixToUserRotation(PrintWriter pw) throws RemoteException {
         int displayId = Display.DEFAULT_DISPLAY;
         String arg = getNextArgRequired();
         if ("-d".equals(arg)) {
@@ -342,16 +329,16 @@ public class WindowManagerShellCommand extends ShellCommand {
             arg = getNextArgRequired();
         }
 
-        final @DisplayRotation.FixedToUserRotation  int fixedToUserRotation;
+        final int fixedToUserRotation;
         switch (arg) {
             case "enabled":
-                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
                 break;
             case "disabled":
-                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
                 break;
             case "default":
-                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
                 break;
             default:
                 getErrPrintWriter().println("Error: expecting enabled, disabled or default, but we "
@@ -359,7 +346,51 @@ public class WindowManagerShellCommand extends ShellCommand {
                 return -1;
         }
 
-        mInternal.setRotateForApp(displayId, fixedToUserRotation);
+        mInterface.setFixedToUserRotation(displayId, fixedToUserRotation);
+        return 0;
+    }
+
+    private int runDumpVisibleWindowViews(PrintWriter pw) {
+        if (!mInternal.checkCallingPermission(android.Manifest.permission.DUMP,
+                "runDumpVisibleWindowViews()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
+        try (ZipOutputStream out = new ZipOutputStream(getRawOutputStream())) {
+            ArrayList<Pair<String, ByteTransferPipe>> requestList = new ArrayList<>();
+            synchronized (mInternal.mGlobalLock) {
+                // Request dump from all windows parallelly before writing to disk.
+                mInternal.mRoot.forAllWindows(w -> {
+                    if (w.isVisible()) {
+                        ByteTransferPipe pipe = null;
+                        try {
+                            pipe = new ByteTransferPipe();
+                            w.mClient.executeCommand(ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null,
+                                    pipe.getWriteFd());
+                            requestList.add(Pair.create(w.getName(), pipe));
+                        } catch (IOException | RemoteException e) {
+                            // Skip this window
+                            if (pipe != null) {
+                                pipe.kill();
+                            }
+                        }
+                    }
+                }, false /* traverseTopToBottom */);
+            }
+            for (Pair<String, ByteTransferPipe> entry : requestList) {
+                byte[] data;
+                try {
+                    data = entry.second.get();
+                } catch (IOException e) {
+                    // Ignore this window
+                    continue;
+                }
+                out.putNextEntry(new ZipEntry(entry.first));
+                out.write(data);
+            }
+        } catch (IOException e) {
+            pw.println("Error fetching dump " + e.getMessage());
+        }
         return 0;
     }
 
@@ -376,19 +407,21 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Return or override display density.");
         pw.println("  folded-area [reset|LEFT,TOP,RIGHT,BOTTOM]");
         pw.println("    Return or override folded area.");
-        pw.println("  overscan [reset|LEFT,TOP,RIGHT,BOTTOM] [-d DISPLAY ID]");
-        pw.println("    Set overscan area for display.");
         pw.println("  scaling [off|auto] [-d DISPLAY_ID]");
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
         pw.println("  set-user-rotation [free|lock] [-d DISPLAY_ID] [rotation]");
         pw.println("    Set user rotation mode and user rotation.");
+        pw.println("  dump-visible-window-views");
+        pw.println("    Dumps the encoded view hierarchies of visible windows");
         pw.println("  set-fix-to-user-rotation [-d DISPLAY_ID] [enabled|disabled]");
         pw.println("    Enable or disable rotating display for app requested orientation.");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");
+            pw.println("  logging (start | stop | enable | disable | enable-text | disable-text)");
+            pw.println("    Logging settings.");
         }
     }
 }

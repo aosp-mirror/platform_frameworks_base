@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -140,7 +141,7 @@ public final class ServiceManager {
 
     /**
      * Returns a reference to a service with the given name, or throws
-     * {@link NullPointerException} if none is found.
+     * {@link ServiceNotFoundException} if none is found.
      *
      * @hide
      */
@@ -216,6 +217,44 @@ public final class ServiceManager {
             Log.e(TAG, "error in checkService", e);
             return null;
         }
+    }
+
+    /**
+     * Returns whether the specified service is declared.
+     *
+     * @return true if the service is declared somewhere (eg. VINTF manifest) and
+     * waitForService should always be able to return the service.
+     */
+    public static boolean isDeclared(@NonNull String name) {
+        try {
+            return getIServiceManager().isDeclared(name);
+        } catch (RemoteException e) {
+            Log.e(TAG, "error in isDeclared", e);
+            return false;
+        }
+    }
+
+    /**
+     * Returns the specified service from the service manager.
+     *
+     * If the service is not running, servicemanager will attempt to start it, and this function
+     * will wait for it to be ready.
+     *
+     * @return {@code null} only if there are permission problems or fatal errors.
+     */
+    public static native IBinder waitForService(@NonNull String name);
+
+    /**
+     * Returns the specified service from the service manager, if declared.
+     *
+     * If the service is not running, servicemanager will attempt to start it, and this function
+     * will wait for it to be ready.
+     *
+     * @return {@code null} if the service is not declared in the manifest, or if there are
+     * permission problems, or if there are fatal errors.
+     */
+    public static IBinder waitForDeclaredService(@NonNull String name) {
+        return isDeclared(name) ? waitForService(name) : null;
     }
 
     /**

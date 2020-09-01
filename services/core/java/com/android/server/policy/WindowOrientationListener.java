@@ -259,7 +259,7 @@ public abstract class WindowOrientationListener {
      */
     public abstract void onProposedRotationChanged(int rotation);
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         synchronized (mLock) {
             proto.write(ENABLED, mEnabled);

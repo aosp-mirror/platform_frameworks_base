@@ -219,7 +219,6 @@ public class Dialog implements DialogInterface, Window.Callback,
             @Nullable Message cancelCallback) {
         this(context);
         mCancelable = cancelable;
-        updateWindowForCancelable();
         mCancelMessage = cancelCallback;
     }
 
@@ -227,7 +226,6 @@ public class Dialog implements DialogInterface, Window.Callback,
             @Nullable OnCancelListener cancelListener) {
         this(context);
         mCancelable = cancelable;
-        updateWindowForCancelable();
         setOnCancelListener(cancelListener);
     }
 
@@ -1249,7 +1247,6 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void setCancelable(boolean flag) {
         mCancelable = flag;
-        updateWindowForCancelable();
     }
 
     /**
@@ -1263,7 +1260,6 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void setCanceledOnTouchOutside(boolean cancel) {
         if (cancel && !mCancelable) {
             mCancelable = true;
-            updateWindowForCancelable();
         }
         
         mWindow.setCloseOnTouchOutside(cancel);
@@ -1414,9 +1410,5 @@ public class Dialog implements DialogInterface, Window.Callback,
                     break;
             }
         }
-    }
-
-    private void updateWindowForCancelable() {
-        mWindow.setCloseOnSwipeEnabled(mCancelable);
     }
 }

@@ -19,10 +19,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.Build;
-import android.util.StatsLog;
 import android.view.View;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Writes sysui_multi_event records to the system event log.
@@ -55,8 +55,8 @@ public class MetricsLogger {
     protected void saveLog(LogMaker log) {
         // TODO(b/116684537): Flag guard logging to event log and statsd socket.
         EventLogTags.writeSysuiMultiAction(log.serialize());
-        StatsLog.write(StatsLog.KEY_VALUE_PAIRS_ATOM, /* UID is retrieved from statsd side */ 0,
-                log.getEntries());
+        FrameworkStatsLog.write(FrameworkStatsLog.KEY_VALUE_PAIRS_ATOM,
+                /* UID is retrieved from statsd side */ 0, log.getEntries());
     }
 
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;

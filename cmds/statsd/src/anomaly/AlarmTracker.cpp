@@ -23,7 +23,6 @@
 #include "stats_util.h"
 #include "storage/StorageManager.h"
 
-#include <statslog.h>
 #include <time.h>
 
 namespace android {

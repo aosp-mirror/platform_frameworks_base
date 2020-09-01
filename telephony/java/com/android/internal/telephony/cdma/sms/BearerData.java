@@ -47,10 +47,6 @@ import java.util.ArrayList;
 public final class BearerData {
     private final static String LOG_TAG = "BearerData";
 
-    @UnsupportedAppUsage
-    public BearerData() {
-    }
-
     /**
      * Bearer Data Subparameter Identifiers
      * (See 3GPP2 C.S0015-B, v2.0, table 4.5-1)
@@ -240,6 +236,10 @@ public final class BearerData {
      */
     public boolean userResponseCodeSet = false;
     public int userResponseCode;
+
+    @UnsupportedAppUsage
+    public BearerData() {
+    }
 
     /**
      * 6-byte-field, see 3GPP2 C.S0015-B, v2, 4.5.4

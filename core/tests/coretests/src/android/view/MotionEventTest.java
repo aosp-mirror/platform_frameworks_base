@@ -17,9 +17,13 @@
 package android.view;
 
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.TOOL_TYPE_FINGER;
 
+import static junit.framework.Assert.assertTrue;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import android.view.MotionEvent.PointerCoords;
@@ -31,9 +35,13 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MotionEventTest {
+    private static final int ID_SOURCE_MASK = 0x3 << 30;
 
     @Test
     public void testObtainWithDisplayId() {
@@ -76,5 +84,89 @@ public class MotionEventTest {
                 pointerCount, properties, coords,
                 0, 0, 0, 0, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, displayId, 0);
         assertNull(motionEvent);
+    }
+
+    @Test
+    public void testCalculatesCursorPositionForTouchscreenEvents() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+
+        assertTrue(Float.isNaN(event.getXCursorPosition()));
+        assertTrue(Float.isNaN(event.getYCursorPosition()));
+    }
+
+    @Test
+    public void testCalculatesCursorPositionForSimpleMouseEvents() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+
+        assertEquals(30, event.getXCursorPosition(), 0.1);
+        assertEquals(50, event.getYCursorPosition(), 0.1);
+    }
+
+    @Test
+    public void testCalculatesCursorPositionForSimpleMouseEventsWithOffset() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.offsetLocation(10 /* deltaX */, 20 /* deltaY */);
+        event.setSource(InputDevice.SOURCE_MOUSE);
+
+        assertEquals(40, event.getXCursorPosition(), 0.1);
+        assertEquals(70, event.getYCursorPosition(), 0.1);
+    }
+
+
+    @Test
+    public void testCalculatesCursorPositionForMultiTouchMouseEvents() {
+        final int pointerCount = 2;
+        final PointerProperties[] properties = new PointerProperties[pointerCount];
+        final PointerCoords[] coords = new PointerCoords[pointerCount];
+
+        for (int i = 0; i < pointerCount; ++i) {
+            properties[i] = new PointerProperties();
+            properties[i].id = i;
+            properties[i].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+            coords[i] = new PointerCoords();
+            coords[i].x = 20 + i * 20;
+            coords[i].y = 60 - i * 20;
+        }
+
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */,
+                0 /* eventTime */, ACTION_POINTER_DOWN, pointerCount, properties, coords,
+                0 /* metaState */, 0 /* buttonState */, 1 /* xPrecision */, 1 /* yPrecision */,
+                0 /* deviceId */, 0 /* edgeFlags */, InputDevice.SOURCE_MOUSE,
+                0 /* flags */);
+
+        assertEquals(30, event.getXCursorPosition(), 0.1);
+        assertEquals(50, event.getYCursorPosition(), 0.1);
+    }
+
+    /**
+     * Tests that it can generate 500 consecutive distinct numbers. This is a non-deterministic test
+     * but with 30 bits randomness the failure rate is roughly 4.52e-5, which is negligible enough.
+     * Probability formula: N * (N - 1) * ... * (N - n + 1) / N^n, where N = 2^30 and n = 500 for
+     * this test.
+     */
+    @Test
+    public void testObtainGeneratesUniqueId() {
+        Set<Integer> set = new HashSet<>();
+        for (int i = 0; i < 500; ++i) {
+            final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                    ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+            assertFalse("Found duplicate ID in round " + i, set.contains(event.getId()));
+            set.add(event.getSequenceNumber());
+        }
+    }
+
+    @Test
+    public void testObtainGeneratesIdWithRightSource() {
+        for (int i = 0; i < 500; ++i) {
+            final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                    ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+            assertEquals(0x3 << 30, ID_SOURCE_MASK & event.getId());
+        }
     }
 }

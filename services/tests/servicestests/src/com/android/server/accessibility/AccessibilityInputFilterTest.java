@@ -47,6 +47,8 @@ import android.view.MotionEvent;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.gestures.TouchExplorer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +80,7 @@ public class AccessibilityInputFilterTest {
     // The expected order of EventStreamTransformations.
     private final Class[] mExpectedEventHandlerTypes =
             {KeyboardInterceptor.class, MotionEventInjector.class,
-                    MagnificationGestureHandler.class, TouchExplorer.class,
+                    FullScreenMagnificationGestureHandler.class, TouchExplorer.class,
                     AutoclickController.class, AccessibilityInputFilter.class};
 
     private MagnificationController mMockMagnificationController;

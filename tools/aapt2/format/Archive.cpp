@@ -103,7 +103,13 @@ class DirectoryWriter : public IArchiveWriter {
         return false;
       }
     }
-    return !in->HadError();
+
+    if (in->HadError()) {
+      error_ = in->GetError();
+      return false;
+    }
+
+    return FinishEntry();
   }
 
   bool HadError() const override {
@@ -191,6 +197,7 @@ class ZipFileWriter : public IArchiveWriter {
       }
 
       if (in->HadError()) {
+        error_ = in->GetError();
         return false;
       }
 

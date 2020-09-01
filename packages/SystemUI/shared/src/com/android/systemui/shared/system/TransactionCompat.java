@@ -18,8 +18,7 @@ package com.android.systemui.shared.system;
 
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.os.IBinder;
-import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 public class TransactionCompat {
@@ -87,26 +86,35 @@ public class TransactionCompat {
         return this;
     }
 
-    public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
-            IBinder handle, long frameNumber) {
-        mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, handle, frameNumber);
+    public TransactionCompat setBackgroundBlurRadius(SurfaceControlCompat surfaceControl,
+            int radius) {
+        mTransaction.setBackgroundBlurRadius(surfaceControl.mSurfaceControl, radius);
         return this;
     }
 
     public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
-            Surface barrier, long frameNumber) {
-        mTransaction.deferTransactionUntilSurface(surfaceControl.mSurfaceControl, barrier,
+            SurfaceControl barrier, long frameNumber) {
+        mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, barrier,
                 frameNumber);
         return this;
     }
 
+    @Deprecated
     public TransactionCompat setEarlyWakeup() {
-        mTransaction.setEarlyWakeup();
         return this;
     }
 
     public TransactionCompat setColor(SurfaceControlCompat surfaceControl, float[] color) {
         mTransaction.setColor(surfaceControl.mSurfaceControl, color);
         return this;
+    }
+
+    public static void deferTransactionUntil(Transaction t, SurfaceControl surfaceControl,
+            SurfaceControl barrier, long frameNumber) {
+        t.deferTransactionUntil(surfaceControl, barrier, frameNumber);
+    }
+
+    @Deprecated
+    public static void setEarlyWakeup(Transaction t) {
     }
 }

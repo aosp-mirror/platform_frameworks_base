@@ -29,8 +29,10 @@ import android.annotation.ColorInt;
 import android.annotation.StyleRes;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.text.LineBreaker;
 import android.net.Uri;
 import android.os.Trace;
 import android.provider.Settings;
@@ -39,9 +41,9 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.View;
 import android.view.animation.Animation;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -62,6 +64,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -90,6 +93,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
     private final LayoutTransition mLayoutTransition;
+    private final TunerService mTunerService;
     private Uri mKeyguardSliceUri;
     @VisibleForTesting
     TextView mTitle;
@@ -114,16 +118,14 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     @Inject
     public KeyguardSliceView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ActivityStarter activityStarter, ConfigurationController configurationController) {
+            ActivityStarter activityStarter, ConfigurationController configurationController,
+            TunerService tunerService, @Main Resources resources) {
         super(context, attrs);
 
-        TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
-
+        mTunerService = tunerService;
         mClickActions = new HashMap<>();
-        mRowPadding = context.getResources().getDimensionPixelSize(R.dimen.subtitle_clock_padding);
-        mRowWithHeaderPadding = context.getResources()
-                .getDimensionPixelSize(R.dimen.header_subtitle_padding);
+        mRowPadding = resources.getDimensionPixelSize(R.dimen.subtitle_clock_padding);
+        mRowWithHeaderPadding = resources.getDimensionPixelSize(R.dimen.header_subtitle_padding);
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
 
@@ -152,15 +154,22 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         mRowWithHeaderTextSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.header_row_font_size);
         mTitle.setOnClickListener(this);
+        mTitle.setBreakStrategy(LineBreaker.BREAK_STRATEGY_BALANCED);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mDisplayId = getDisplay().getDisplayId();
+        Display display = getDisplay();
+        if (display != null) {
+            mDisplayId = display.getDisplayId();
+        }
+        mTunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
         // Make sure we always have the most current slice
-        mLiveData.observeForever(this);
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            mLiveData.observeForever(this);
+        }
         mConfigurationController.addCallback(this);
     }
 
@@ -172,6 +181,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         if (mDisplayId == DEFAULT_DISPLAY) {
             mLiveData.removeObserver(this);
         }
+        mTunerService.removeTunable(this);
         mConfigurationController.removeCallback(this);
     }
 
@@ -242,9 +252,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             SliceItem item = rc.getSliceItem();
             final Uri itemTag = item.getSlice().getUri();
             // Try to reuse the view if already exists in the layout
-            KeyguardSliceButton button = mRow.findViewWithTag(itemTag);
+            KeyguardSliceTextView button = mRow.findViewWithTag(itemTag);
             if (button == null) {
-                button = new KeyguardSliceButton(mContext);
+                button = new KeyguardSliceTextView(mContext);
                 button.setTextColor(blendedColor);
                 button.setTag(itemTag);
                 final int viewIndex = i - (mHasHeader ? 1 : 0);
@@ -307,8 +317,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         int childCount = mRow.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View v = mRow.getChildAt(i);
-            if (v instanceof Button) {
-                ((Button) v).setTextColor(blendedColor);
+            if (v instanceof TextView) {
+                ((TextView) v).setTextColor(blendedColor);
             }
         }
     }
@@ -491,8 +501,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
-                if (child instanceof KeyguardSliceButton) {
-                    ((KeyguardSliceButton) child).setMaxWidth(width / childCount);
+                if (child instanceof KeyguardSliceTextView) {
+                    ((KeyguardSliceTextView) child).setMaxWidth(width / 3);
                 }
             }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -518,13 +528,13 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
      * Representation of an item that appears under the clock on main keyguard message.
      */
     @VisibleForTesting
-    static class KeyguardSliceButton extends Button implements
+    static class KeyguardSliceTextView extends TextView implements
             ConfigurationController.ConfigurationListener {
 
         @StyleRes
         private static int sStyleId = R.style.TextAppearance_Keyguard_Secondary;
 
-        public KeyguardSliceButton(Context context) {
+        KeyguardSliceTextView(Context context) {
             super(context, null /* attrs */, 0 /* styleAttr */, sStyleId);
             onDensityOrFontScaleChanged();
             setEllipsize(TruncateAt.END);

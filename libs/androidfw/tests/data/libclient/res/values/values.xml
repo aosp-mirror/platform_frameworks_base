@@ -27,6 +27,12 @@
       <item name="bar">@com.android.lib_one:string/foo</item>
     </style>
 
+    <public type="style" name="ThemeMultiLib" id="0x7f020001" />
+    <style name="ThemeMultiLib" >
+      <item name="com.android.lib_one:attr1">@com.android.lib_one:string/foo</item>
+      <item name="com.android.lib_two:attr3">@com.android.lib_two:integer/bar</item>
+    </style>
+
     <public type="string" name="foo_one" id="0x7f030000" />
     <string name="foo_one">@com.android.lib_one:string/foo</string>
 

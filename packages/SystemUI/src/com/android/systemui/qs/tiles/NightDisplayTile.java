@@ -38,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.policy.LocationController;
 
 import java.text.DateFormat;
 import java.time.LocalTime;
@@ -60,12 +61,14 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
     private final ColorDisplayManager mManager;
+    private final LocationController mLocationController;
     private NightDisplayListener mListener;
     private boolean mIsListening;
 
     @Inject
-    public NightDisplayTile(QSHost host) {
+    public NightDisplayTile(QSHost host, LocationController locationController) {
         super(host);
+        mLocationController = locationController;
         mManager = mContext.getSystemService(ColorDisplayManager.class);
         mListener = new NightDisplayListener(mContext, new Handler(Looper.myLooper()));
     }
@@ -132,6 +135,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     private String getSecondaryLabel(boolean isNightLightActivated) {
         switch (mManager.getNightDisplayAutoMode()) {
             case ColorDisplayManager.AUTO_MODE_TWILIGHT:
+                if (!mLocationController.isLocationEnabled()) return null;
                 // Auto mode related to sunrise & sunset. If the light is on, it's guaranteed to be
                 // turned off at sunrise. If it's off, it's guaranteed to be turned on at sunset.
                 return isNightLightActivated
@@ -190,6 +194,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         mIsListening = listening;
         if (listening) {
             mListener.setCallback(this);

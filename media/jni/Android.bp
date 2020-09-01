@@ -1,6 +1,8 @@
 cc_library_shared {
     name: "libmedia_jni",
 
+    defaults: ["libcodec2-internal-defaults"],
+
     srcs: [
         "android_media_ImageWriter.cpp",
         "android_media_ImageReader.cpp",
@@ -18,8 +20,8 @@ cc_library_shared {
         "android_media_MediaPlayer.cpp",
         "android_media_MediaProfiles.cpp",
         "android_media_MediaRecorder.cpp",
-        "android_media_MediaScanner.cpp",
         "android_media_MediaSync.cpp",
+        "android_media_MediaTranscodeManager.cpp",
         "android_media_ResampleInputStream.cpp",
         "android_media_Streams.cpp",
         "android_media_SyncParams.cpp",
@@ -42,6 +44,7 @@ cc_library_shared {
         "libmedia_omx",
         "libmediametrics",
         "libmediadrm",
+        "libmediadrmmetrics_consumer",
         "libhwui",
         "libui",
         "liblog",
@@ -59,6 +62,7 @@ cc_library_shared {
         "libsonivox",
         "android.hardware.cas@1.0",
         "android.hardware.cas.native@1.0",
+        "android.hardware.drm@1.3",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
     ],
@@ -112,6 +116,44 @@ cc_library_shared {
 
     include_dirs: [
         "system/media/camera/include",
+    ],
+
+    export_include_dirs: ["."],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-error=deprecated-declarations",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}
+
+cc_library_shared {
+    name: "libmedia_tv_tuner",
+    srcs: [
+        "android_media_tv_Tuner.cpp",
+    ],
+
+    shared_libs: [
+        "android.hardware.graphics.bufferqueue@2.0",
+        "android.hardware.tv.tuner@1.0",
+        "libandroid_runtime",
+        "libcutils",
+        "libfmq",
+        "libhidlbase",
+        "liblog",
+        "libmedia",
+        "libnativehelper",
+        "libutils",
+    ],
+    defaults: [
+        "libcodec2-impl-defaults",
+    ],
+
+    header_libs: [
+        "libcodec2_internal",
+        "libstagefright_foundation_headers",
     ],
 
     export_include_dirs: ["."],

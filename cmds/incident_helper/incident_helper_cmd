@@ -1,0 +1,6 @@
+#!/system/bin/sh
+# Script to start "incident_helper_cmd" on the device
+#
+base=/system
+export CLASSPATH=$base/framework/incident-helper-cmd.jar
+exec app_process $base/bin com.android.commands.incident.IncidentHelper "$@"

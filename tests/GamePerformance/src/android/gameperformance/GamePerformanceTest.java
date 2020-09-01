@@ -17,14 +17,18 @@ package android.gameperformance;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Trace;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -83,5 +87,51 @@ public class GamePerformanceTest extends
         }
 
         getInstrumentation().sendStatus(Activity.RESULT_OK, status);
+    }
+
+    @SmallTest
+    public void testPerformanceMetricsWithoutExtraLoad() throws IOException, InterruptedException {
+        final Bundle status = runPerformanceTests("no_extra_load_");
+        getInstrumentation().sendStatus(Activity.RESULT_OK, status);
+    }
+
+    @SmallTest
+    public void testPerformanceMetricsWithExtraLoad() throws IOException, InterruptedException {
+        // Start CPU ballast threads first.
+        CPULoadThread[] cpuLoadThreads = new CPULoadThread[2];
+        for (int i = 0; i < cpuLoadThreads.length; ++i) {
+            cpuLoadThreads[i] = new CPULoadThread();
+            cpuLoadThreads[i].start();
+        }
+
+        final Bundle status = runPerformanceTests("extra_load_");
+
+        for (int i = 0; i < cpuLoadThreads.length; ++i) {
+            cpuLoadThreads[i].issueStopRequest();
+            cpuLoadThreads[i].join();
+        }
+
+        getInstrumentation().sendStatus(Activity.RESULT_OK, status);
+    }
+
+    @NonNull
+    private Bundle runPerformanceTests(@NonNull String prefix) {
+        final Bundle status = new Bundle();
+
+        final GamePerformanceActivity activity = getActivity();
+
+        final List<BaseTest> tests = new ArrayList<>();
+        tests.add(new TriangleCountOpenGLTest(activity));
+        tests.add(new FillRateOpenGLTest(activity, false /* testBlend */));
+        tests.add(new FillRateOpenGLTest(activity, true /* testBlend */));
+        tests.add(new DeviceCallsOpenGLTest(activity));
+        tests.add(new ControlsTest(activity));
+
+        for (BaseTest test : tests) {
+            final double result = test.run();
+            status.putDouble(prefix + test.getName(), result);
+        }
+
+        return status;
     }
 }

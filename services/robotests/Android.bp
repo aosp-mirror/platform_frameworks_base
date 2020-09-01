@@ -46,6 +46,9 @@ android_robolectric_test {
         "services.backup",
         "testng",
     ],
+    static_libs: [
+        "androidx.test.ext.truth",
+    ],
 
     instrumentation_for: "FrameworksServicesLib",
 }

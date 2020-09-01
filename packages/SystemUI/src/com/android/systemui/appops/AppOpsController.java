@@ -27,7 +27,9 @@ import java.util.List;
 public interface AppOpsController {
 
     /**
-     * Callback to notify when the state of active AppOps tracked by the controller has changed
+     * Callback to notify when the state of active AppOps tracked by the controller has changed.
+     * AppOps that are noted will not be notified every time, just when the tracked state changes
+     * between currently in use and not.
      */
     interface Callback {
         void onActiveStateChanged(int code, int uid, String packageName, boolean active);

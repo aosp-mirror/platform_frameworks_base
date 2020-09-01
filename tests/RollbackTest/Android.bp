@@ -19,15 +19,29 @@ android_test {
     static_libs: ["androidx.test.rules", "cts-rollback-lib", "cts-install-lib"],
     test_suites: ["general-tests"],
     test_config: "RollbackTest.xml",
-    // TODO: sdk_version: "test_current" when Intent#resolveSystemservice is TestApi
+    java_resources: [
+        ":com.android.apex.apkrollback.test_v2",
+        ":com.android.apex.apkrollback.test_v2Crashing"
+    ],
 }
 
 java_test_host {
     name: "StagedRollbackTest",
     srcs: ["StagedRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
+    static_libs: ["testng", "compatibility-tradefed", "RollbackTestLib"],
     test_suites: ["general-tests"],
     test_config: "StagedRollbackTest.xml",
+    data: [":com.android.apex.apkrollback.test_v1"],
+}
+
+java_test_host {
+    name: "NetworkStagedRollbackTest",
+    srcs: ["NetworkStagedRollbackTest/src/**/*.java"],
+    libs: ["tradefed"],
+    static_libs: ["RollbackTestLib"],
+    test_suites: ["general-tests"],
+    test_config: "NetworkStagedRollbackTest.xml",
 }
 
 java_test_host {
@@ -36,4 +50,61 @@ java_test_host {
     libs: ["tradefed"],
     test_suites: ["general-tests"],
     test_config: "MultiUserRollbackTest.xml",
+}
+
+java_library_host {
+    name: "RollbackTestLib",
+    srcs: ["lib/src/**/*.java"],
+    libs: ["tradefed"],
+}
+
+genrule {
+  name: "com.android.apex.apkrollback.test.pem",
+  out: ["com.android.apex.apkrollback.test.pem"],
+  cmd: "openssl genrsa -out $(out) 4096",
+}
+
+genrule {
+  name: "com.android.apex.apkrollback.test.pubkey",
+  srcs: [":com.android.apex.apkrollback.test.pem"],
+  out: ["com.android.apex.apkrollback.test.pubkey"],
+  tools: ["avbtool"],
+  cmd: "$(location avbtool) extract_public_key --key $(in) --output $(out)",
+}
+
+apex_key {
+  name: "com.android.apex.apkrollback.test.key",
+  private_key: ":com.android.apex.apkrollback.test.pem",
+  public_key: ":com.android.apex.apkrollback.test.pubkey",
+  installable: false,
+}
+
+apex {
+  name: "com.android.apex.apkrollback.test_v1",
+  manifest: "testdata/manifest_v1.json",
+  androidManifest: "testdata/AndroidManifest.xml",
+  file_contexts: ":apex.test-file_contexts",
+  key: "com.android.apex.apkrollback.test.key",
+  apps: ["TestAppAv1"],
+  installable: false,
+}
+
+apex {
+  name: "com.android.apex.apkrollback.test_v2",
+  manifest: "testdata/manifest_v2.json",
+  androidManifest: "testdata/AndroidManifest.xml",
+  file_contexts: ":apex.test-file_contexts",
+  key: "com.android.apex.apkrollback.test.key",
+  apps: ["TestAppAv2"],
+  installable: false,
+}
+
+apex {
+  name: "com.android.apex.apkrollback.test_v2Crashing",
+  manifest: "testdata/manifest_v2.json",
+  androidManifest: "testdata/AndroidManifest.xml",
+  file_contexts: ":apex.test-file_contexts",
+  key: "com.android.apex.apkrollback.test.key",
+  apps: ["TestAppACrashingV2"],
+  installable: false,
 }

@@ -1,13 +1,15 @@
 {
   "presubmit": [
     {
-      "name": "CtsUiRenderingTestCases"
-    },
-    {
       "name": "CtsGraphicsTestCases"
     },
     {
       "name": "CtsAccelerationTestCases"
+    }
+  ],
+  "imports": [
+    {
+      "path": "cts/tests/tests/uirendering"
     }
   ]
 }

@@ -34,8 +34,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,17 +56,16 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Before
     public void setup() {
-        mSysuiContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         StatusBar statusBar = mock(StatusBar.class);
-        mSysuiContext.putComponent(StatusBar.class, statusBar);
-        mSysuiContext.putComponent(TunerService.class, mock(TunerService.class));
+        mDependency.injectTestDependency(StatusBar.class, statusBar);
         mStatusBarStateController = mDependency
                 .injectMockDependency(StatusBarStateController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mMockNotificiationAreaController = mock(NotificationIconAreaController.class);
         mNotificationAreaInner = mock(View.class);
         mCenteredNotificationAreaView = mock(View.class);
-        when(statusBar.getPanel()).thenReturn(mock(NotificationPanelView.class));
+        when(statusBar.getPanelController()).thenReturn(
+                mock(NotificationPanelViewController.class));
         when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mMockNotificiationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);

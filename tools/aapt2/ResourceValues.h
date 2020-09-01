@@ -292,6 +292,7 @@ struct Attribute : public BaseValue<Attribute> {
   struct Symbol {
     Reference symbol;
     uint32_t value;
+    uint8_t type;
 
     friend std::ostream& operator<<(std::ostream& out, const Symbol& symbol);
   };

@@ -17,13 +17,13 @@
 package android.widget.focus;
 
 import android.app.Activity;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.util.InternalSelectionView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.window.WindowMetricsHelper;
 
 /**
  * A list of {@link InternalSelectionView}s paramatarized by the number of items,
@@ -112,9 +112,8 @@ public class ListOfInternalSelectionViews extends Activity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        Point size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        mScreenHeight = size.y;
+        mScreenHeight = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                getWindowManager().getCurrentWindowMetrics()).height();
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {

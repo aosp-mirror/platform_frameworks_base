@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="48dp"
+        android:height="48dp"
+        android:viewportWidth="48"
+        android:viewportHeight="48">
+
+    <path
+        android:pathData="M23.9998,10.667C16.6398,10.667 10.6665,16.6403 10.6665,24.0003C10.6665,31.3603 16.6398,37.3337 23.9998,37.3337C31.3598,37.3337 37.3332,31.3603 37.3332,24.0003C37.3332,16.6403 31.3598,10.667 23.9998,10.667ZM17.4265,32.3737C17.9998,31.1737 21.4932,30.0003 23.9998,30.0003C26.5065,30.0003 30.0132,31.1737 30.5732,32.3737C28.7598,33.8137 26.4798,34.667 23.9998,34.667C21.5198,34.667 19.2398,33.8137 17.4265,32.3737ZM23.9998,27.3337C25.9465,27.3337 30.5732,28.1203 32.4798,30.4403C33.8398,28.6537 34.6665,26.427 34.6665,24.0003C34.6665,18.1203 29.8798,13.3337 23.9998,13.3337C18.1198,13.3337 13.3332,18.1203 13.3332,24.0003C13.3332,26.427 14.1598,28.6537 15.5198,30.4403C17.4265,28.1203 22.0532,27.3337 23.9998,27.3337ZM23.9998,16.0003C21.4132,16.0003 19.3332,18.0803 19.3332,20.667C19.3332,23.2537 21.4132,25.3337 23.9998,25.3337C26.5865,25.3337 28.6665,23.2537 28.6665,20.667C28.6665,18.0803 26.5865,16.0003 23.9998,16.0003ZM21.9998,20.667C21.9998,21.7737 22.8932,22.667 23.9998,22.667C25.1065,22.667 25.9998,21.7737 25.9998,20.667C25.9998,19.5603 25.1065,18.667 23.9998,18.667C22.8932,18.667 21.9998,19.5603 21.9998,20.667Z"
+        android:fillColor="#ffffff"
+        android:fillType="evenOdd"/>
+
+</vector>

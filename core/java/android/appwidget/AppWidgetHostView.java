@@ -104,7 +104,7 @@ public class AppWidgetHostView extends FrameLayout {
      */
     public AppWidgetHostView(Context context, OnClickHandler handler) {
         this(context, android.R.anim.fade_in, android.R.anim.fade_out);
-        mOnClickHandler = handler;
+        mOnClickHandler = getHandler(handler);
     }
 
     /**
@@ -131,7 +131,7 @@ public class AppWidgetHostView extends FrameLayout {
      * @hide
      */
     public void setOnClickHandler(OnClickHandler handler) {
-        mOnClickHandler = handler;
+        mOnClickHandler = getHandler(handler);
     }
 
     /**
@@ -423,7 +423,6 @@ public class AppWidgetHostView extends FrameLayout {
             // inflate any requested LayoutParams.
             mRemoteContext = getRemoteContext();
             int layoutId = remoteViews.getLayoutId();
-
             // If our stale view has been prepared to match active, and the new
             // layout matches, try recycling it
             if (content == null && layoutId == mLayoutId) {
@@ -626,7 +625,10 @@ public class AppWidgetHostView extends FrameLayout {
                     }
                 }
                 defaultView = inflater.inflate(layoutId, this, false);
-                defaultView.setOnClickListener(this::onDefaultViewClicked);
+                if (!(defaultView instanceof AdapterView)) {
+                    // AdapterView does not support onClickListener
+                    defaultView.setOnClickListener(this::onDefaultViewClicked);
+                }
             } else {
                 Log.w(TAG, "can't inflate defaultView because mInfo is missing");
             }
@@ -710,5 +712,17 @@ public class AppWidgetHostView extends FrameLayout {
             return opts;
         }
         return null;
+    }
+
+    private OnClickHandler getHandler(OnClickHandler handler) {
+        return (view, pendingIntent, response) -> {
+            AppWidgetManager.getInstance(mContext).noteAppWidgetTapped(mAppWidgetId);
+            if (handler != null) {
+                return handler.onClickHandler(view, pendingIntent, response);
+            } else {
+                return RemoteViews.startPendingIntent(view, pendingIntent,
+                        response.getLaunchOptions(view));
+            }
+        };
     }
 }

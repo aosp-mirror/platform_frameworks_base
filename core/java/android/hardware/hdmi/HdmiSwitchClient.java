@@ -18,15 +18,15 @@ package android.hardware.hdmi;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.hardware.hdmi.HdmiControlManager.ControlCallbackResult;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -39,6 +39,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 public class HdmiSwitchClient extends HdmiClient {
 
     private static final String TAG = "HdmiSwitchClient";
@@ -70,7 +71,7 @@ public class HdmiSwitchClient extends HdmiClient {
      * @hide
      */
     public void selectDevice(int logicalAddress, @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.deviceSelect(logicalAddress, getCallbackWrapper(listener));
         } catch (RemoteException e) {
@@ -91,7 +92,7 @@ public class HdmiSwitchClient extends HdmiClient {
      */
     @SystemApi
     public void selectPort(int portId, @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.portSelect(portId, getCallbackWrapper(listener));
         } catch (RemoteException e) {
@@ -114,7 +115,7 @@ public class HdmiSwitchClient extends HdmiClient {
             int logicalAddress,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.deviceSelect(logicalAddress,
                     new IHdmiControlCallback.Stub() {
@@ -146,7 +147,7 @@ public class HdmiSwitchClient extends HdmiClient {
             int portId,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnSelectListener listener) {
-        Preconditions.checkNotNull(listener);
+        Objects.requireNonNull(listener);
         try {
             mService.portSelect(portId,
                     new IHdmiControlCallback.Stub() {
@@ -179,6 +180,23 @@ public class HdmiSwitchClient extends HdmiClient {
         } catch (RemoteException e) {
             Log.e("TAG", "Failed to call getDeviceList():", e);
             return Collections.<HdmiDeviceInfo>emptyList();
+        }
+    }
+
+    /**
+     * Get the list of the HDMI input port configuration.
+     *
+     * <p>This returns an empty list when the current device does not have HDMI input.
+     *
+     * @return a list of {@link HdmiPortInfo}
+     */
+    @NonNull
+    public List<HdmiPortInfo> getPortInfo() {
+        try {
+            return mService.getPortInfo();
+        } catch (RemoteException e) {
+            Log.e("TAG", "Failed to call getPortInfo():", e);
+            return Collections.<HdmiPortInfo>emptyList();
         }
     }
 

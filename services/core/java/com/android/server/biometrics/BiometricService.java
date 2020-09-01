@@ -16,40 +16,33 @@
 
 package com.android.server.biometrics;
 
-import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
-import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
-import android.app.AppOpsManager;
-import android.app.IActivityTaskManager;
-import android.app.KeyguardManager;
-import android.app.TaskStackListener;
+import android.app.IActivityManager;
 import android.app.UserSwitchObserver;
+import android.app.admin.DevicePolicyManager;
+import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.IBiometricConfirmDeviceCredentialCallback;
+import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
-import android.hardware.face.FaceManager;
-import android.hardware.face.IFaceService;
-import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintService;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -66,11 +59,12 @@ import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -85,12 +79,30 @@ import java.util.Random;
  */
 public class BiometricService extends SystemService {
 
-    private static final String TAG = "BiometricService";
+    static final String TAG = "BiometricService";
     private static final boolean DEBUG = true;
 
-    private static final int MSG_ON_TASK_STACK_CHANGED = 1;
+    private static final int BIOMETRIC_NO_HARDWARE = 0;
+    private static final int BIOMETRIC_OK = 1;
+    private static final int BIOMETRIC_DISABLED_BY_DEVICE_POLICY = 2;
+    private static final int BIOMETRIC_INSUFFICIENT_STRENGTH = 3;
+    private static final int BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE = 4;
+    private static final int BIOMETRIC_HARDWARE_NOT_DETECTED = 5;
+    private static final int BIOMETRIC_NOT_ENROLLED = 6;
+    private static final int BIOMETRIC_NOT_ENABLED_FOR_APPS = 7;
+
+    @IntDef({BIOMETRIC_NO_HARDWARE,
+            BIOMETRIC_OK,
+            BIOMETRIC_DISABLED_BY_DEVICE_POLICY,
+            BIOMETRIC_INSUFFICIENT_STRENGTH,
+            BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE,
+            BIOMETRIC_HARDWARE_NOT_DETECTED,
+            BIOMETRIC_NOT_ENROLLED,
+            BIOMETRIC_NOT_ENABLED_FOR_APPS})
+    @interface BiometricStatus {}
+
     private static final int MSG_ON_AUTHENTICATION_SUCCEEDED = 2;
-    private static final int MSG_ON_AUTHENTICATION_FAILED = 3;
+    private static final int MSG_ON_AUTHENTICATION_REJECTED = 3;
     private static final int MSG_ON_ERROR = 4;
     private static final int MSG_ON_ACQUIRED = 5;
     private static final int MSG_ON_DISMISSED = 6;
@@ -98,47 +110,55 @@ public class BiometricService extends SystemService {
     private static final int MSG_ON_READY_FOR_AUTHENTICATION = 8;
     private static final int MSG_AUTHENTICATE = 9;
     private static final int MSG_CANCEL_AUTHENTICATION = 10;
-    private static final int MSG_ON_CONFIRM_DEVICE_CREDENTIAL_SUCCESS = 11;
-    private static final int MSG_ON_CONFIRM_DEVICE_CREDENTIAL_ERROR = 12;
-    private static final int MSG_REGISTER_CANCELLATION_CALLBACK = 13;
-
-    private static final int[] FEATURE_ID = {
-        TYPE_FINGERPRINT,
-        TYPE_IRIS,
-        TYPE_FACE
-    };
+    private static final int MSG_ON_AUTHENTICATION_TIMED_OUT = 11;
+    private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
+    private static final int MSG_ON_SYSTEM_EVENT = 13;
+    private static final int MSG_CLIENT_DIED = 14;
 
     /**
      * Authentication either just called and we have not transitioned to the CALLED state, or
      * authentication terminated (success or error).
      */
-    private static final int STATE_AUTH_IDLE = 0;
+    static final int STATE_AUTH_IDLE = 0;
     /**
      * Authentication was called and we are waiting for the <Biometric>Services to return their
      * cookies before starting the hardware and showing the BiometricPrompt.
      */
-    private static final int STATE_AUTH_CALLED = 1;
+    static final int STATE_AUTH_CALLED = 1;
     /**
      * Authentication started, BiometricPrompt is showing and the hardware is authenticating.
      */
-    private static final int STATE_AUTH_STARTED = 2;
+    static final int STATE_AUTH_STARTED = 2;
     /**
      * Authentication is paused, waiting for the user to press "try again" button. Only
      * passive modalities such as Face or Iris should have this state. Note that for passive
      * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
      * fingerprint.
      */
-    private static final int STATE_AUTH_PAUSED = 3;
+    static final int STATE_AUTH_PAUSED = 3;
     /**
      * Authentication is successful, but we're waiting for the user to press "confirm" button.
      */
-    private static final int STATE_AUTH_PENDING_CONFIRM = 5;
+    static final int STATE_AUTH_PENDING_CONFIRM = 5;
     /**
-     * Biometric authentication was canceled, but the device is now showing ConfirmDeviceCredential
+     * Biometric authenticated, waiting for SysUI to finish animation
      */
-    private static final int STATE_BIOMETRIC_AUTH_CANCELED_SHOWING_CDC = 6;
+    static final int STATE_AUTHENTICATED_PENDING_SYSUI = 6;
+    /**
+     * Biometric error, waiting for SysUI to finish animation
+     */
+    static final int STATE_ERROR_PENDING_SYSUI = 7;
+    /**
+     * Device credential in AuthController is showing
+     */
+    static final int STATE_SHOWING_DEVICE_CREDENTIAL = 8;
+    /**
+     * The client binder died, and sensors were authenticating at the time. Cancel has been
+     * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
+     */
+    static final int STATE_CLIENT_DIED_CANCELLING = 9;
 
-    private final class AuthSession implements IBinder.DeathRecipient {
+    final class AuthSession implements IBinder.DeathRecipient {
         // Map of Authenticator/Cookie pairs. We expect to receive the cookies back from
         // <Biometric>Services before we can start authenticating. Pairs that have been returned
         // are moved to mModalitiesMatched.
@@ -156,6 +176,8 @@ public class BiometricService extends SystemService {
         final String mOpPackageName;
         // Info to be shown on BiometricDialog when all cookies are returned.
         final Bundle mBundle;
+        // Random id associated to this AuthSession
+        final int mSysUiSessionId;
         final int mCallingUid;
         final int mCallingPid;
         final int mCallingUserId;
@@ -165,24 +187,23 @@ public class BiometricService extends SystemService {
         final boolean mRequireConfirmation;
 
         // The current state, which can be either idle, called, or started
-        private int mState = STATE_AUTH_IDLE;
+        int mState = STATE_AUTH_IDLE;
         // For explicit confirmation, do not send to keystore until the user has confirmed
         // the authentication.
         byte[] mTokenEscrow;
+        // Waiting for SystemUI to complete animation
+        int mErrorEscrow;
+        int mVendorCodeEscrow;
 
         // Timestamp when authentication started
         private long mStartTimeMs;
         // Timestamp when hardware authentication occurred
         private long mAuthenticatedTimeMs;
 
-        // TODO(b/123378871): Remove when moved.
-        private IBiometricConfirmDeviceCredentialCallback mConfirmDeviceCredentialCallback;
-
         AuthSession(HashMap<Integer, Integer> modalities, IBinder token, long sessionId,
                 int userId, IBiometricServiceReceiver receiver, String opPackageName,
                 Bundle bundle, int callingUid, int callingPid, int callingUserId,
-                int modality, boolean requireConfirmation,
-                IBiometricConfirmDeviceCredentialCallback callback) {
+                int modality, boolean requireConfirmation) {
             mModalitiesWaiting = modalities;
             mToken = token;
             mSessionId = sessionId;
@@ -190,28 +211,24 @@ public class BiometricService extends SystemService {
             mClientReceiver = receiver;
             mOpPackageName = opPackageName;
             mBundle = bundle;
+            mSysUiSessionId = mRandom.nextInt();
             mCallingUid = callingUid;
             mCallingPid = callingPid;
             mCallingUserId = callingUserId;
             mModality = modality;
             mRequireConfirmation = requireConfirmation;
-            mConfirmDeviceCredentialCallback = callback;
 
-            if (isFromConfirmDeviceCredential()) {
-                try {
-                    token.linkToDeath(this, 0 /* flags */);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to link to death", e);
-                }
+            Slog.d(TAG, "New AuthSession, mSysUiSessionId: " + mSysUiSessionId);
+
+            try {
+                mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to link to death");
             }
         }
 
         boolean isCrypto() {
             return mSessionId != 0;
-        }
-
-        boolean isFromConfirmDeviceCredential() {
-            return mBundle.getBoolean(BiometricPrompt.KEY_FROM_CONFIRM_DEVICE_CREDENTIAL, false);
         }
 
         boolean containsCookie(int cookie) {
@@ -224,91 +241,63 @@ public class BiometricService extends SystemService {
             return false;
         }
 
-        // TODO(b/123378871): Remove when moved.
+        boolean isAllowDeviceCredential() {
+            return Utils.isCredentialRequested(mBundle);
+        }
+
         @Override
         public void binderDied() {
-            mHandler.post(() -> {
-                Slog.e(TAG, "Binder died, killing ConfirmDeviceCredential");
-                if (mConfirmDeviceCredentialCallback == null) {
-                    Slog.e(TAG, "Callback is null");
-                    return;
-                }
-
-                try {
-                    mConfirmDeviceCredentialCallback.cancel();
-                    mConfirmDeviceCredentialCallback = null;
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to send cancel", e);
-                }
-            });
+            Slog.e(TAG, "Binder died, sysUiSessionId: " + mSysUiSessionId);
+            mHandler.obtainMessage(MSG_CLIENT_DIED).sendToTarget();
         }
     }
 
-    private final class BiometricTaskStackListener extends TaskStackListener {
-        @Override
-        public void onTaskStackChanged() {
-            mHandler.sendEmptyMessage(MSG_ON_TASK_STACK_CHANGED);
-        }
-    }
-
-    private final AppOpsManager mAppOps;
-    private final boolean mHasFeatureFingerprint;
-    private final boolean mHasFeatureIris;
-    private final boolean mHasFeatureFace;
-    private final SettingObserver mSettingObserver;
+    private final Injector mInjector;
+    private final DevicePolicyManager mDevicePolicyManager;
+    @VisibleForTesting
+    final IBiometricService.Stub mImpl;
+    @VisibleForTesting
+    final SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
-    private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
     private final Random mRandom = new Random();
 
-    private IFingerprintService mFingerprintService;
-    private IFaceService mFaceService;
-    private IActivityTaskManager mActivityTaskManager;
-    private IStatusBarService mStatusBarService;
+    @VisibleForTesting
+    IStatusBarService mStatusBarService;
+    @VisibleForTesting
+    KeyStore mKeyStore;
+    @VisibleForTesting
+    ITrustManager mTrustManager;
 
     // Get and cache the available authenticator (manager) classes. Used since aidl doesn't support
     // polymorphism :/
-    final ArrayList<Authenticator> mAuthenticators = new ArrayList<>();
+    final ArrayList<AuthenticatorWrapper> mAuthenticators = new ArrayList<>();
 
-    // Cache the current service that's being used. This is the service which
-    // cancelAuthentication() must be forwarded to. This is just a cache, and the actual
-    // check (is caller the current client) is done in the <Biometric>Service.
-    // Since Settings/System (not application) is responsible for changing preference, this
-    // should be safe.
-    private int mCurrentModality;
+    BiometricStrengthController mBiometricStrengthController;
 
     // The current authentication session, null if idle/done. We need to track both the current
     // and pending sessions since errors may be sent to either.
-    private AuthSession mCurrentAuthSession;
-    private AuthSession mPendingAuthSession;
+    @VisibleForTesting
+    AuthSession mCurrentAuthSession;
+    @VisibleForTesting
+    AuthSession mPendingAuthSession;
 
-    // TODO(b/123378871): Remove when moved.
-    // When BiometricPrompt#setAllowDeviceCredentials is set to true, we need to store the
-    // client (app) receiver. BiometricService internally launches CDCA which invokes
-    // BiometricService to start authentication (normal path). When auth is success/rejected,
-    // CDCA will use an aidl method to poke BiometricService - the result will then be forwarded
-    // to this receiver.
-    private IBiometricServiceReceiver mConfirmDeviceCredentialReceiver;
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+    @VisibleForTesting
+    final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ON_TASK_STACK_CHANGED: {
-                    handleTaskStackChanged();
-                    break;
-                }
-
                 case MSG_ON_AUTHENTICATION_SUCCEEDED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticationSucceeded(
                             (boolean) args.arg1 /* requireConfirmation */,
-                            (byte[]) args.arg2 /* token */);
+                            (byte[]) args.arg2 /* token */,
+                            (boolean) args.arg3 /* isStrongBiometric */);
                     args.recycle();
                     break;
                 }
 
-                case MSG_ON_AUTHENTICATION_FAILED: {
-                    handleAuthenticationFailed((String) msg.obj /* failureReason */);
+                case MSG_ON_AUTHENTICATION_REJECTED: {
+                    handleAuthenticationRejected();
                     break;
                 }
 
@@ -316,8 +305,9 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleOnError(
                             args.argi1 /* cookie */,
-                            args.argi2 /* error */,
-                            (String) args.arg1 /* message */);
+                            args.argi2 /* modality */,
+                            args.argi3 /* error */,
+                            args.argi4 /* vendorCode */);
                     args.recycle();
                     break;
                 }
@@ -332,7 +322,7 @@ public class BiometricService extends SystemService {
                 }
 
                 case MSG_ON_DISMISSED: {
-                    handleOnDismissed(msg.arg1);
+                    handleOnDismissed(msg.arg1, (byte[]) msg.obj);
                     break;
                 }
 
@@ -362,8 +352,7 @@ public class BiometricService extends SystemService {
                             (Bundle) args.arg5 /* bundle */,
                             args.argi2 /* callingUid */,
                             args.argi3 /* callingPid */,
-                            args.argi4 /* callingUserId */,
-                            (IBiometricConfirmDeviceCredentialCallback) args.arg6 /* callback */);
+                            args.argi4 /* callingUserId */);
                     args.recycle();
                     break;
                 }
@@ -372,28 +361,36 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleCancelAuthentication(
                             (IBinder) args.arg1 /* token */,
-                            (String) args.arg2 /* opPackageName */);
+                            (String) args.arg2 /* opPackageName */,
+                            args.argi1 /* callingUid */,
+                            args.argi2 /* callingPid */,
+                            args.argi3 /* callingUserId */);
                     args.recycle();
                     break;
                 }
 
-                case MSG_ON_CONFIRM_DEVICE_CREDENTIAL_SUCCESS: {
-                    handleOnConfirmDeviceCredentialSuccess();
-                    break;
-                }
-
-                case MSG_ON_CONFIRM_DEVICE_CREDENTIAL_ERROR: {
+                case MSG_ON_AUTHENTICATION_TIMED_OUT: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    handleOnConfirmDeviceCredentialError(
-                            args.argi1 /* error */,
-                            (String) args.arg1 /* errorMsg */);
+                    handleAuthenticationTimedOut(
+                            args.argi1 /* modality */,
+                            args.argi2 /* error */,
+                            args.argi3 /* vendorCode */);
                     args.recycle();
                     break;
                 }
 
-                case MSG_REGISTER_CANCELLATION_CALLBACK: {
-                    handleRegisterCancellationCallback(
-                            (IBiometricConfirmDeviceCredentialCallback) msg.obj /* callback */);
+                case MSG_ON_DEVICE_CREDENTIAL_PRESSED: {
+                    handleOnDeviceCredentialPressed();
+                    break;
+                }
+
+                case MSG_ON_SYSTEM_EVENT: {
+                    handleOnSystemEvent((int) msg.obj);
+                    break;
+                }
+
+                case MSG_CLIENT_DIED: {
+                    handleClientDied();
                     break;
                 }
 
@@ -404,25 +401,65 @@ public class BiometricService extends SystemService {
         }
     };
 
-    private final class Authenticator {
-        int mType;
-        BiometricAuthenticator mAuthenticator;
+    /**
+     * Wraps IBiometricAuthenticator implementation and stores information about the authenticator.
+     * TODO(b/141025588): Consider refactoring the tests to not rely on this implementation detail.
+     */
+    @VisibleForTesting
+    public static final class AuthenticatorWrapper {
+        public final int id;
+        public final int OEMStrength; // strength as configured by the OEM
+        private int updatedStrength; // strength updated by BiometricStrengthController
+        public final int modality;
+        public final IBiometricAuthenticator impl;
 
-        Authenticator(int type, BiometricAuthenticator authenticator) {
-            mType = type;
-            mAuthenticator = authenticator;
+        AuthenticatorWrapper(int id, int modality, int strength,
+                IBiometricAuthenticator impl) {
+            this.id = id;
+            this.modality = modality;
+            this.OEMStrength = strength;
+            this.updatedStrength = strength;
+            this.impl = impl;
         }
 
-        int getType() {
-            return mType;
+        /**
+         * Returns the actual strength, taking any updated strengths into effect. Since more bits
+         * means lower strength, the resulting strength is never stronger than the OEM's configured
+         * strength.
+         * @return a bitfield, see {@link Authenticators}
+         */
+        int getActualStrength() {
+            return OEMStrength | updatedStrength;
         }
 
-        BiometricAuthenticator getAuthenticator() {
-            return mAuthenticator;
+        boolean isDowngraded() {
+            return OEMStrength != updatedStrength;
+        }
+
+        /**
+         * Stores the updated strength, which takes effect whenever {@link #getActualStrength()}
+         * is checked.
+         * @param newStrength
+         */
+        void updateStrength(int newStrength) {
+            String log = "updateStrength: Before(" + toString() + ")";
+            updatedStrength = newStrength;
+            log += " After(" + toString() + ")";
+            Slog.d(TAG, log);
+        }
+
+        @Override
+        public String toString() {
+            return "ID(" + id + ")"
+                    + " OEMStrength: " + OEMStrength
+                    + " updatedStrength: " + updatedStrength
+                    + " modality " + modality
+                    + " authenticator: " + impl;
         }
     }
 
-    private final class SettingObserver extends ContentObserver {
+    @VisibleForTesting
+    public static class SettingObserver extends ContentObserver {
 
         private static final boolean DEFAULT_KEYGUARD_ENABLED = true;
         private static final boolean DEFAULT_APP_ENABLED = true;
@@ -436,23 +473,26 @@ public class BiometricService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
 
         private final ContentResolver mContentResolver;
+        private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
 
-        private Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
-        private Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
-        private Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
 
         /**
          * Creates a content observer.
          *
          * @param handler The handler to run {@link #onChange} on, or null if none.
          */
-        SettingObserver(Handler handler) {
+        public SettingObserver(Context context, Handler handler,
+                List<BiometricService.EnabledOnKeyguardCallback> callbacks) {
             super(handler);
-            mContentResolver = getContext().getContentResolver();
+            mContentResolver = context.getContentResolver();
+            mCallbacks = callbacks;
             updateContentObserver();
         }
 
-        void updateContentObserver() {
+        public void updateContentObserver() {
             mContentResolver.unregisterContentObserver(this);
             mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
                     false /* notifyForDescendents */,
@@ -495,7 +535,7 @@ public class BiometricService extends SystemService {
             }
         }
 
-        boolean getFaceEnabledOnKeyguard() {
+        public boolean getFaceEnabledOnKeyguard() {
             final int user = ActivityManager.getCurrentUser();
             if (!mFaceEnabledOnKeyguard.containsKey(user)) {
                 onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED, user);
@@ -503,22 +543,22 @@ public class BiometricService extends SystemService {
             return mFaceEnabledOnKeyguard.get(user);
         }
 
-        boolean getFaceEnabledForApps(int userId) {
+        public boolean getFaceEnabledForApps(int userId) {
             if (!mFaceEnabledForApps.containsKey(userId)) {
                 onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED, userId);
             }
             return mFaceEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED);
         }
 
-        boolean getFaceAlwaysRequireConfirmation(int userId) {
+        public boolean getFaceAlwaysRequireConfirmation(int userId) {
             if (!mFaceAlwaysRequireConfirmation.containsKey(userId)) {
                 onChange(true /* selfChange */, FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, userId);
             }
             return mFaceAlwaysRequireConfirmation.get(userId);
         }
 
-        void notifyEnabledOnKeyguardCallbacks(int userId) {
-            List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
+        public void notifyEnabledOnKeyguardCallbacks(int userId) {
+            List<EnabledOnKeyguardCallback> callbacks = mCallbacks;
             for (int i = 0; i < callbacks.size(); i++) {
                 callbacks.get(i).notify(BiometricSourceType.FACE,
                         mFaceEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
@@ -527,7 +567,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private final class EnabledOnKeyguardCallback implements IBinder.DeathRecipient {
+    final class EnabledOnKeyguardCallback implements IBinder.DeathRecipient {
 
         private final IBiometricEnabledOnKeyguardCallback mCallback;
 
@@ -559,36 +599,43 @@ public class BiometricService extends SystemService {
     }
 
     // Wrap the client's receiver so we can do things with the BiometricDialog first
-    private final IBiometricServiceReceiverInternal mInternalReceiver =
+    @VisibleForTesting
+    final IBiometricServiceReceiverInternal mInternalReceiver =
             new IBiometricServiceReceiverInternal.Stub() {
         @Override
-        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token)
-                throws RemoteException {
+        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token,
+                boolean isStrongBiometric) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = requireConfirmation;
             args.arg2 = token;
+            args.arg3 = isStrongBiometric;
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_SUCCEEDED, args).sendToTarget();
         }
 
         @Override
-        public void onAuthenticationFailed(int cookie, boolean requireConfirmation)
-                throws RemoteException {
-            String failureReason = getContext().getString(R.string.biometric_not_recognized);
-            mHandler.obtainMessage(MSG_ON_AUTHENTICATION_FAILED, failureReason).sendToTarget();
+        public void onAuthenticationFailed() {
+            Slog.v(TAG, "onAuthenticationFailed");
+            mHandler.obtainMessage(MSG_ON_AUTHENTICATION_REJECTED).sendToTarget();
         }
 
         @Override
-        public void onError(int cookie, int error, String message) throws RemoteException {
+        public void onError(int cookie, int modality, int error, int vendorCode)
+                throws RemoteException {
             // Determine if error is hard or soft error. Certain errors (such as TIMEOUT) are
             // soft errors and we should allow the user to try authenticating again instead of
             // dismissing BiometricPrompt.
             if (error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT) {
-                mHandler.obtainMessage(MSG_ON_AUTHENTICATION_FAILED, message).sendToTarget();
+                SomeArgs args = SomeArgs.obtain();
+                args.argi1 = modality;
+                args.argi2 = error;
+                args.argi3 = vendorCode;
+                mHandler.obtainMessage(MSG_ON_AUTHENTICATION_TIMED_OUT, args).sendToTarget();
             } else {
                 SomeArgs args = SomeArgs.obtain();
                 args.argi1 = cookie;
-                args.argi2 = error;
-                args.arg1 = message;
+                args.argi2 = modality;
+                args.argi3 = error;
+                args.argi4 = vendorCode;
                 mHandler.obtainMessage(MSG_ON_ERROR, args).sendToTarget();
             }
         }
@@ -602,13 +649,27 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onDialogDismissed(int reason) throws RemoteException {
-            mHandler.obtainMessage(MSG_ON_DISMISSED, reason, 0 /* arg2 */).sendToTarget();
+        public void onDialogDismissed(int reason, @Nullable byte[] credentialAttestation)
+                throws RemoteException {
+            mHandler.obtainMessage(MSG_ON_DISMISSED,
+                    reason,
+                    0 /* arg2 */,
+                    credentialAttestation /* obj */).sendToTarget();
         }
 
         @Override
         public void onTryAgainPressed() {
             mHandler.sendEmptyMessage(MSG_ON_TRY_AGAIN_PRESSED);
+        }
+
+        @Override
+        public void onDeviceCredentialPressed() {
+            mHandler.sendEmptyMessage(MSG_ON_DEVICE_CREDENTIAL_PRESSED);
+        }
+
+        @Override
+        public void onSystemEvent(int event) {
+            mHandler.obtainMessage(MSG_ON_SYSTEM_EVENT, event).sendToTarget();
         }
     };
 
@@ -633,83 +694,26 @@ public class BiometricService extends SystemService {
         @Override // Binder call
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
-                IBiometricConfirmDeviceCredentialCallback callback)
-                throws RemoteException {
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int callingUserId = UserHandle.getCallingUserId();
-
-            // TODO(b/123378871): Remove when moved.
-            if (callback != null) {
-                checkInternalPermission();
-            }
-
-            // In the BiometricServiceBase, check do the AppOps and foreground check.
-            if (userId == callingUserId) {
-                // Check the USE_BIOMETRIC permission here.
-                checkPermission();
-            } else {
-                // Only allow internal clients to authenticate with a different userId
-                Slog.w(TAG, "User " + callingUserId + " is requesting authentication of userid: "
-                        + userId);
-                checkInternalPermission();
-            }
+                int callingUid, int callingPid, int callingUserId) {
+            checkInternalPermission();
 
             if (token == null || receiver == null || opPackageName == null || bundle == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
                 return;
             }
 
-            final boolean isFromConfirmDeviceCredential =
-                    bundle.getBoolean(BiometricPrompt.KEY_FROM_CONFIRM_DEVICE_CREDENTIAL, false);
-            if (isFromConfirmDeviceCredential) {
-                checkInternalPermission();
+            if (!Utils.isValidAuthenticatorConfig(bundle)) {
+                throw new SecurityException("Invalid authenticator configuration");
             }
 
-            // Check the usage of this in system server. Need to remove this check if it becomes
-            // a public API.
-            final boolean useDefaultTitle =
-                    bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false);
-            if (useDefaultTitle) {
-                checkInternalPermission();
-                // Set the default title if necessary
+            Utils.combineAuthenticatorBundles(bundle);
+
+            // Set the default title if necessary.
+            if (bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
                 if (TextUtils.isEmpty(bundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
                     bundle.putCharSequence(BiometricPrompt.KEY_TITLE,
                             getContext().getString(R.string.biometric_dialog_default_title));
                 }
-            }
-
-            // Launch CDC instead if necessary. CDC will return results through an AIDL call, since
-            // we can't get activity results. Store the receiver somewhere so we can forward the
-            // result back to the client.
-            // TODO(b/123378871): Remove when moved.
-            if (bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL)) {
-                mHandler.post(() -> {
-                    final KeyguardManager kgm = getContext().getSystemService(
-                            KeyguardManager.class);
-                    if (!kgm.isDeviceSecure()) {
-                        try {
-                            receiver.onError(
-                                    BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
-                                    getContext().getString(
-                                            R.string.biometric_error_device_not_secured));
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Remote exception", e);
-                        }
-                        return;
-                    }
-                    mConfirmDeviceCredentialReceiver = receiver;
-                    // Use this so we don't need to duplicate logic..
-                    final Intent intent = kgm.createConfirmDeviceCredentialIntent(null /* title */,
-                            null /* description */, userId);
-                    // Then give it the bundle to do magic behavior..
-                    intent.putExtra(KeyguardManager.EXTRA_BIOMETRIC_PROMPT_BUNDLE, bundle);
-                    // Create a new task with this activity located at the root.
-                    intent.setFlags(
-                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-                    getContext().startActivityAsUser(intent, UserHandle.CURRENT);
-                });
-                return;
             }
 
             SomeArgs args = SomeArgs.obtain();
@@ -722,99 +726,127 @@ public class BiometricService extends SystemService {
             args.argi2 = callingUid;
             args.argi3 = callingPid;
             args.argi4 = callingUserId;
-            args.arg6 = callback;
 
             mHandler.obtainMessage(MSG_AUTHENTICATE, args).sendToTarget();
         }
 
         @Override // Binder call
-        public void onConfirmDeviceCredentialSuccess() {
+        public void cancelAuthentication(IBinder token, String opPackageName,
+                int callingUid, int callingPid, int callingUserId) {
             checkInternalPermission();
-
-            mHandler.sendEmptyMessage(MSG_ON_CONFIRM_DEVICE_CREDENTIAL_SUCCESS);
-        }
-
-        @Override // Binder call
-        public void onConfirmDeviceCredentialError(int error, String message) {
-            checkInternalPermission();
-
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = error;
-            args.arg1 = message;
-            mHandler.obtainMessage(MSG_ON_CONFIRM_DEVICE_CREDENTIAL_ERROR, args).sendToTarget();
-        }
-
-        @Override // Binder call
-        public void registerCancellationCallback(
-                IBiometricConfirmDeviceCredentialCallback callback) {
-            // TODO(b/123378871): Remove when moved.
-            // This callback replaces the one stored in the current session. If the session is null
-            // we can ignore this, since it means ConfirmDeviceCredential was launched by something
-            // else (not BiometricPrompt)
-            checkInternalPermission();
-
-            mHandler.obtainMessage(MSG_REGISTER_CANCELLATION_CALLBACK, callback).sendToTarget();
-        }
-
-        @Override // Binder call
-        public void cancelAuthentication(IBinder token, String opPackageName)
-                throws RemoteException {
-            checkPermission();
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = token;
             args.arg2 = opPackageName;
+            args.argi1 = callingUid;
+            args.argi2 = callingPid;
+            args.argi3 = callingUserId;
             mHandler.obtainMessage(MSG_CANCEL_AUTHENTICATION, args).sendToTarget();
         }
 
         @Override // Binder call
-        public int canAuthenticate(String opPackageName, int userId) {
+        public int canAuthenticate(String opPackageName, int userId, int callingUserId,
+                @Authenticators.Types int authenticators) {
+            checkInternalPermission();
+
             Slog.d(TAG, "canAuthenticate: User=" + userId
-                    + ", Caller=" + UserHandle.getCallingUserId());
+                    + ", Caller=" + callingUserId
+                    + ", Authenticators=" + authenticators);
 
-            if (userId != UserHandle.getCallingUserId()) {
-                checkInternalPermission();
-            } else {
-                checkPermission();
+            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+                throw new SecurityException("Invalid authenticator configuration");
             }
 
-            final long ident = Binder.clearCallingIdentity();
-            int error;
+            final Bundle bundle = new Bundle();
+            bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+
+            int biometricConstantsResult = BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
             try {
-                final Pair<Integer, Integer> result = checkAndGetBiometricModality(userId);
-                error = result.second;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+                biometricConstantsResult = checkAndGetAuthenticators(userId, bundle, opPackageName,
+                        false /* checkDevicePolicyManager */).second;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
             }
-            return error;
+
+            return Utils.biometricConstantsToBiometricManager(biometricConstantsResult);
         }
 
         @Override
-        public boolean hasEnrolledBiometrics(int userId) {
+        public boolean hasEnrolledBiometrics(int userId, String opPackageName) {
             checkInternalPermission();
 
-            final long ident = Binder.clearCallingIdentity();
             try {
-                for (int i = 0; i < mAuthenticators.size(); i++) {
-                    if (mAuthenticators.get(i).mAuthenticator.hasEnrolledTemplates(userId)) {
+                for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                    if (authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
                         return true;
                     }
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
             }
+
             return false;
         }
 
-        @Override // Binder call
-        public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
-                throws RemoteException {
+        @Override
+        public void registerAuthenticator(int id, int modality, int strength,
+                IBiometricAuthenticator authenticator) {
             checkInternalPermission();
+
+            Slog.d(TAG, "Registering ID: " + id
+                    + " Modality: " + modality
+                    + " Strength: " + strength);
+
+            if (authenticator == null) {
+                throw new IllegalArgumentException("Authenticator must not be null."
+                        + " Did you forget to modify the core/res/res/values/xml overlay for"
+                        + " config_biometric_sensors?");
+            }
+
+            // Note that we allow BIOMETRIC_CONVENIENCE to register because BiometricService
+            // also does / will do other things such as keep track of lock screen timeout, etc.
+            // Just because a biometric is registered does not mean it can participate in
+            // the android.hardware.biometrics APIs.
+            if (strength != Authenticators.BIOMETRIC_STRONG
+                    && strength != Authenticators.BIOMETRIC_WEAK
+                    && strength != Authenticators.BIOMETRIC_CONVENIENCE) {
+                throw new IllegalStateException("Unsupported strength");
+            }
+
+            for (AuthenticatorWrapper wrapper : mAuthenticators) {
+                if (wrapper.id == id) {
+                    throw new IllegalStateException("Cannot register duplicate authenticator");
+                }
+            }
+
+            // This happens infrequently enough, not worth caching.
+            final String[] configs = mInjector.getConfiguration(getContext());
+            boolean idFound = false;
+            for (int i = 0; i < configs.length; i++) {
+                SensorConfig config = new SensorConfig(configs[i]);
+                if (config.mId == id) {
+                    idFound = true;
+                    break;
+                }
+            }
+            if (!idFound) {
+                throw new IllegalStateException("Cannot register unknown id");
+            }
+
+            mAuthenticators.add(new AuthenticatorWrapper(id, modality, strength, authenticator));
+
+            mBiometricStrengthController.updateStrengths();
+        }
+
+        @Override // Binder call
+        public void registerEnabledOnKeyguardCallback(
+                IBiometricEnabledOnKeyguardCallback callback, int callingUserId) {
+            checkInternalPermission();
+
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
                 callback.onChanged(BiometricSourceType.FACE,
-                        mSettingObserver.getFaceEnabledOnKeyguard(),
-                        UserHandle.getCallingUserId());
+                        mSettingObserver.getFaceEnabledOnKeyguard(), callingUserId);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }
@@ -823,40 +855,54 @@ public class BiometricService extends SystemService {
         @Override // Binder call
         public void setActiveUser(int userId) {
             checkInternalPermission();
-            final long ident = Binder.clearCallingIdentity();
+
             try {
-                for (int i = 0; i < mAuthenticators.size(); i++) {
-                    mAuthenticators.get(i).getAuthenticator().setActiveUser(userId);
+                for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                    authenticator.impl.setActiveUser(userId);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
             }
         }
 
         @Override // Binder call
         public void resetLockout(byte[] token) {
             checkInternalPermission();
-            final long ident = Binder.clearCallingIdentity();
+
             try {
-                if (mFingerprintService != null) {
-                    mFingerprintService.resetTimeout(token);
-                }
-                if (mFaceService != null) {
-                    mFaceService.resetLockout(token);
+                for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                    authenticator.impl.resetLockout(token);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
-    }
 
-    private void checkAppOp(String opPackageName, int callingUid) {
-        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, callingUid,
-                opPackageName) != AppOpsManager.MODE_ALLOWED) {
-            Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
-            throw new SecurityException("Permission denied");
+        @Override // Binder call
+        public long[] getAuthenticatorIds(int callingUserId) {
+            checkInternalPermission();
+
+            final List<Long> ids = new ArrayList<>();
+            for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                try {
+                    final long id = authenticator.impl.getAuthenticatorId(callingUserId);
+                    if (Utils.isAtLeastStrength(authenticator.getActualStrength(),
+                            Authenticators.BIOMETRIC_STRONG) && id != 0) {
+                        ids.add(id);
+                    } else {
+                        Slog.d(TAG, "Authenticator " + authenticator + ", authenticatorID " + id
+                                + " cannot participate in Keystore operations");
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "RemoteException", e);
+                }
+            }
+
+            long[] result = new long[ids.size()];
+            for (int i = 0; i < ids.size(); i++) {
+                result[i] = ids.get(i);
+            }
+            return result;
         }
     }
 
@@ -865,11 +911,76 @@ public class BiometricService extends SystemService {
                 "Must have USE_BIOMETRIC_INTERNAL permission");
     }
 
-    private void checkPermission() {
-        if (getContext().checkCallingOrSelfPermission(USE_FINGERPRINT)
-                != PackageManager.PERMISSION_GRANTED) {
-            getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC,
-                    "Must have USE_BIOMETRIC permission");
+    /**
+     * Class for injecting dependencies into BiometricService.
+     * TODO(b/141025588): Replace with a dependency injection framework (e.g. Guice, Dagger).
+     */
+    @VisibleForTesting
+    public static class Injector {
+
+        @VisibleForTesting
+        public IActivityManager getActivityManagerService() {
+            return ActivityManager.getService();
+        }
+
+        @VisibleForTesting
+        public ITrustManager getTrustManager() {
+            return ITrustManager.Stub.asInterface(ServiceManager.getService(Context.TRUST_SERVICE));
+        }
+
+        @VisibleForTesting
+        public IStatusBarService getStatusBarService() {
+            return IStatusBarService.Stub.asInterface(
+                    ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        }
+
+        /**
+         * Allows to mock SettingObserver for testing.
+         */
+        @VisibleForTesting
+        public SettingObserver getSettingObserver(Context context, Handler handler,
+                List<EnabledOnKeyguardCallback> callbacks) {
+            return new SettingObserver(context, handler, callbacks);
+        }
+
+        @VisibleForTesting
+        public KeyStore getKeyStore() {
+            return KeyStore.getInstance();
+        }
+
+        /**
+         * Allows to enable/disable debug logs.
+         */
+        @VisibleForTesting
+        public boolean isDebugEnabled(Context context, int userId) {
+            return Utils.isDebugEnabled(context, userId);
+        }
+
+        /**
+         * Allows to stub publishBinderService(...) for testing.
+         */
+        @VisibleForTesting
+        public void publishBinderService(BiometricService service, IBiometricService.Stub impl) {
+            service.publishBinderService(Context.BIOMETRIC_SERVICE, impl);
+        }
+
+        /**
+         * Allows to mock BiometricStrengthController for testing.
+         */
+        @VisibleForTesting
+        public BiometricStrengthController getBiometricStrengthController(
+                BiometricService service) {
+            return new BiometricStrengthController(service);
+        }
+
+        /**
+         * Allows to test with various device sensor configurations.
+         * @param context System Server context
+         * @return the sensor configuration from core/res/res/values/config.xml
+         */
+        @VisibleForTesting
+        public String[] getConfiguration(Context context) {
+            return context.getResources().getStringArray(R.array.config_biometric_sensors);
         }
     }
 
@@ -883,19 +994,23 @@ public class BiometricService extends SystemService {
      * @param context The system server context.
      */
     public BiometricService(Context context) {
+        this(context, new Injector());
+    }
+
+    @VisibleForTesting
+    BiometricService(Context context, Injector injector) {
         super(context);
 
-        mAppOps = context.getSystemService(AppOpsManager.class);
+        mInjector = injector;
+        mDevicePolicyManager = (DevicePolicyManager) context
+                .getSystemService(context.DEVICE_POLICY_SERVICE);
+        mImpl = new BiometricServiceWrapper();
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
-        mSettingObserver = new SettingObserver(mHandler);
-
-        final PackageManager pm = context.getPackageManager();
-        mHasFeatureFingerprint = pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
-        mHasFeatureIris = pm.hasSystemFeature(PackageManager.FEATURE_IRIS);
-        mHasFeatureFace = pm.hasSystemFeature(PackageManager.FEATURE_FACE);
+        mSettingObserver = mInjector.getSettingObserver(context, mHandler,
+                mEnabledOnKeyguardCallbacks);
 
         try {
-            ActivityManager.getService().registerUserSwitchObserver(
+            injector.getActivityManagerService().registerUserSwitchObserver(
                     new UserSwitchObserver() {
                         @Override
                         public void onUserSwitchComplete(int newUserId) {
@@ -911,107 +1026,225 @@ public class BiometricService extends SystemService {
 
     @Override
     public void onStart() {
-        // TODO: maybe get these on-demand
-        if (mHasFeatureFingerprint) {
-            mFingerprintService = IFingerprintService.Stub.asInterface(
-                    ServiceManager.getService(Context.FINGERPRINT_SERVICE));
-        }
-        if (mHasFeatureFace) {
-            mFaceService = IFaceService.Stub.asInterface(
-                    ServiceManager.getService(Context.FACE_SERVICE));
-        }
-
-        mActivityTaskManager = ActivityTaskManager.getService();
-        mStatusBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        // Cache the authenticators
-        for (int i = 0; i < FEATURE_ID.length; i++) {
-            if (hasFeature(FEATURE_ID[i])) {
-                Authenticator authenticator =
-                        new Authenticator(FEATURE_ID[i], getAuthenticator(FEATURE_ID[i]));
-                mAuthenticators.add(authenticator);
-            }
-        }
-
-        publishBinderService(Context.BIOMETRIC_SERVICE, new BiometricServiceWrapper());
+        mKeyStore = mInjector.getKeyStore();
+        mStatusBarService = mInjector.getStatusBarService();
+        mTrustManager = mInjector.getTrustManager();
+        mInjector.publishBinderService(this, mImpl);
+        mBiometricStrengthController = mInjector.getBiometricStrengthController(this);
+        mBiometricStrengthController.startListening();
     }
 
     /**
-     * Checks if there are any available biometrics, and returns the modality. This method also
-     * returns errors through the callback (no biometric feature, hardware not detected, no
-     * templates enrolled, etc). This service must not start authentication if errors are sent.
+     * @param modality one of {@link BiometricAuthenticator#TYPE_FINGERPRINT},
+     * {@link BiometricAuthenticator#TYPE_IRIS} or {@link BiometricAuthenticator#TYPE_FACE}
+     * @return
+     */
+    private int mapModalityToDevicePolicyType(int modality) {
+        switch (modality) {
+            case TYPE_FINGERPRINT:
+                return DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+            case TYPE_IRIS:
+                return DevicePolicyManager.KEYGUARD_DISABLE_IRIS;
+            case TYPE_FACE:
+                return DevicePolicyManager.KEYGUARD_DISABLE_FACE;
+            default:
+                Slog.e(TAG, "Error modality=" + modality);
+                return DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+        }
+    }
+
+    // TODO(joshmccloskey): Update this to throw an error if a new modality is added and this
+    // logic is not updated.
+    private boolean isBiometricDisabledByDevicePolicy(int modality, int effectiveUserId) {
+        final int biometricToCheck = mapModalityToDevicePolicyType(modality);
+        if (biometricToCheck == DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE) {
+            Slog.e(TAG, "Allowing unknown modality " + modality + " to pass Device Policy check");
+            return false;
+        }
+        final int devicePolicyDisabledFeatures =
+                mDevicePolicyManager.getKeyguardDisabledFeatures(null, effectiveUserId);
+        final boolean isBiometricDisabled =
+                (biometricToCheck & devicePolicyDisabledFeatures) != 0;
+        Slog.w(TAG, "isBiometricDisabledByDevicePolicy(" + modality + "," + effectiveUserId
+                + ")=" + isBiometricDisabled);
+        return isBiometricDisabled;
+    }
+
+    private static int biometricStatusToBiometricConstant(@BiometricStatus int status) {
+        switch (status) {
+            case BIOMETRIC_NO_HARDWARE:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+            case BIOMETRIC_OK:
+                return BiometricConstants.BIOMETRIC_SUCCESS;
+            case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            case BIOMETRIC_INSUFFICIENT_STRENGTH:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+            case BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE:
+                return BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+            case BIOMETRIC_HARDWARE_NOT_DETECTED:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            case BIOMETRIC_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            default:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+        }
+    }
+
+    /**
+     * Returns the status of the authenticator, with errors returned in a specific priority order.
+     * For example, {@link #BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE} is only returned
+     * if it has enrollments, and is enabled for apps.
      *
-     * @Returns A pair [Modality, Error] with Modality being one of
+     * We should only return the modality if the authenticator should be exposed. e.g.
+     * BIOMETRIC_NOT_ENROLLED_FOR_APPS should not expose the authenticator's type.
+     *
+     * @return A Pair with `first` being modality, and `second` being @BiometricStatus
+     */
+    private Pair<Integer, Integer> getStatusForBiometricAuthenticator(
+            AuthenticatorWrapper authenticator, int userId, String opPackageName,
+            boolean checkDevicePolicyManager, int requestedStrength) {
+        if (checkDevicePolicyManager) {
+            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
+                return new Pair<>(TYPE_NONE, BIOMETRIC_DISABLED_BY_DEVICE_POLICY);
+            }
+        }
+
+        final boolean wasStrongEnough =
+                Utils.isAtLeastStrength(authenticator.OEMStrength, requestedStrength);
+        final boolean isStrongEnough =
+                Utils.isAtLeastStrength(authenticator.getActualStrength(), requestedStrength);
+
+        if (wasStrongEnough && !isStrongEnough) {
+            return new Pair<>(authenticator.modality,
+                    BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE);
+        } else if (!wasStrongEnough) {
+            return new Pair<>(TYPE_NONE, BIOMETRIC_INSUFFICIENT_STRENGTH);
+        }
+
+        try {
+            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
+                return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+            }
+
+            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
+                return new Pair<>(authenticator.modality, BIOMETRIC_NOT_ENROLLED);
+            }
+        } catch (RemoteException e) {
+            return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+        }
+
+        if (!isEnabledForApp(authenticator.modality, userId)) {
+            return new Pair<>(TYPE_NONE, BIOMETRIC_NOT_ENABLED_FOR_APPS);
+        }
+
+        return new Pair<>(authenticator.modality, BIOMETRIC_OK);
+    }
+
+    /**
+     * Depending on the requested authentication (credential/biometric combination), checks their
+     * availability.
+     *
+     * @param userId the user to check for
+     * @param bundle passed from {@link BiometricPrompt}
+     * @param opPackageName see {@link android.app.AppOpsManager}
+     *
+     * @return A pair [Modality, Error] with Modality being one of
      * {@link BiometricAuthenticator#TYPE_NONE},
      * {@link BiometricAuthenticator#TYPE_FINGERPRINT},
      * {@link BiometricAuthenticator#TYPE_IRIS},
      * {@link BiometricAuthenticator#TYPE_FACE}
      * and the error containing one of the {@link BiometricConstants} errors.
+     *
+     * TODO(kchyn) should return Pair<Integer, Integer> with `first` being an actual bitfield
+     * taking BiometricAuthenticator#TYPE_CREDENTIAL as well.
+     *
      */
-    private Pair<Integer, Integer> checkAndGetBiometricModality(int userId) {
-        int modality = TYPE_NONE;
+    private Pair<Integer, Integer> checkAndGetAuthenticators(int userId, Bundle bundle,
+            String opPackageName, boolean checkDevicePolicyManager) throws RemoteException {
 
-        // No biometric features, send error
-        if (mAuthenticators.isEmpty()) {
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
-        }
+        final boolean biometricRequested = Utils.isBiometricRequested(bundle);
+        final boolean credentialRequested = Utils.isCredentialRequested(bundle);
 
-        // Assuming that authenticators are listed in priority-order, the rest of this function
-        // will go through and find the first authenticator that's available, enrolled, and enabled.
-        // The tricky part is returning the correct error. Error strings that are modality-specific
-        // should also respect the priority-order.
+        final boolean credentialOk = mTrustManager.isDeviceSecure(userId);
 
-        // Find first authenticator that's detected, enrolled, and enabled.
-        boolean isHardwareDetected = false;
-        boolean hasTemplatesEnrolled = false;
-        boolean enabledForApps = false;
+        // Assuming that biometric authenticators are listed in priority-order, the rest of this
+        // function will attempt to find the first authenticator that's as strong or stronger than
+        // the requested strength, available, enrolled, and enabled. The tricky part is returning
+        // the correct error. Error strings that are modality-specific should also respect the
+        // priority-order.
 
-        int firstHwAvailable = TYPE_NONE;
-        for (int i = 0; i < mAuthenticators.size(); i++) {
-            modality = mAuthenticators.get(i).getType();
-            BiometricAuthenticator authenticator = mAuthenticators.get(i).getAuthenticator();
-            if (authenticator.isHardwareDetected()) {
-                isHardwareDetected = true;
-                if (firstHwAvailable == TYPE_NONE) {
-                    // Store the first one since we want to return the error in correct priority
-                    // order.
-                    firstHwAvailable = modality;
-                }
-                if (authenticator.hasEnrolledTemplates(userId)) {
-                    hasTemplatesEnrolled = true;
-                    if (isEnabledForApp(modality, userId)) {
-                        // TODO(b/110907543): When face settings (and other settings) have both a
-                        // user toggle as well as a work profile settings page, this needs to be
-                        // updated to reflect the correct setting.
-                        enabledForApps = true;
-                        break;
-                    }
-                }
+        int firstBiometricModality = TYPE_NONE;
+        @BiometricStatus int firstBiometricStatus = BIOMETRIC_NO_HARDWARE;
+
+        int biometricModality = TYPE_NONE;
+        @BiometricStatus int biometricStatus = BIOMETRIC_NO_HARDWARE;
+
+        for (AuthenticatorWrapper authenticator : mAuthenticators) {
+            final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
+            Pair<Integer, Integer> result = getStatusForBiometricAuthenticator(
+                    authenticator, userId, opPackageName, checkDevicePolicyManager,
+                    requestedStrength);
+
+            biometricStatus = result.second;
+
+            Slog.d(TAG, "Package: " + opPackageName
+                    + " Authenticator ID: " + authenticator.id
+                    + " Modality: " + authenticator.modality
+                    + " Reported Modality: " + result.first
+                    + " Status: " + biometricStatus);
+
+            if (firstBiometricModality == TYPE_NONE) {
+                firstBiometricModality = result.first;
+                firstBiometricStatus = biometricStatus;
+            }
+
+            if (biometricStatus == BIOMETRIC_OK) {
+                biometricModality = result.first;
+                break;
             }
         }
 
-        Slog.d(TAG, "checkAndGetBiometricModality: user=" + userId
-                + " isHardwareDetected=" + isHardwareDetected
-                + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
-                + " enabledForApps=" + enabledForApps);
-
-        // Check error conditions
-        if (!isHardwareDetected) {
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
-        } else if (!hasTemplatesEnrolled) {
-            // Return the modality here so the correct error string can be sent. This error is
-            // preferred over !enabledForApps
-            return new Pair<>(firstHwAvailable, BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
-        } else if (!enabledForApps) {
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+        if (biometricRequested && credentialRequested) {
+            if (credentialOk || biometricStatus == BIOMETRIC_OK) {
+                if (biometricStatus != BIOMETRIC_OK) {
+                    // If there's a problem with biometrics but device credential is
+                    // allowed, only show credential UI.
+                    bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                            Authenticators.DEVICE_CREDENTIAL);
+                }
+                return new Pair<>(biometricModality, BiometricConstants.BIOMETRIC_SUCCESS);
+            } else {
+                return new Pair<>(firstBiometricModality,
+                        BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
+            }
+        } else if (biometricRequested) {
+            if (biometricStatus == BIOMETRIC_OK) {
+                return new Pair<>(biometricModality,
+                        biometricStatusToBiometricConstant(biometricStatus));
+            } else {
+                return new Pair<>(firstBiometricModality,
+                        biometricStatusToBiometricConstant(firstBiometricStatus));
+            }
+        } else if (credentialRequested) {
+            if (credentialOk) {
+                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_SUCCESS);
+            } else {
+                return new Pair<>(TYPE_NONE,
+                        BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL);
+            }
+        } else {
+            // This should not be possible via the public API surface and is here mainly for
+            // "correctness". An exception should have been thrown before getting here.
+            Slog.e(TAG, "No authenticators requested");
+            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
         }
-
-        return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
     }
 
     private boolean isEnabledForApp(int modality, int userId) {
-        switch(modality) {
+        switch (modality) {
             case TYPE_FINGERPRINT:
                 return true;
             case TYPE_IRIS:
@@ -1024,51 +1257,8 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private String getErrorString(int type, int error, int vendorCode) {
-        switch (type) {
-            case TYPE_FINGERPRINT:
-                return FingerprintManager.getErrorString(getContext(), error, vendorCode);
-            case TYPE_IRIS:
-                Slog.w(TAG, "Modality not supported");
-                return null; // not supported
-            case TYPE_FACE:
-                return FaceManager.getErrorString(getContext(), error, vendorCode);
-            default:
-                Slog.w(TAG, "Unable to get error string for modality: " + type);
-                return null;
-        }
-    }
-
-    private BiometricAuthenticator getAuthenticator(int type) {
-        switch (type) {
-            case TYPE_FINGERPRINT:
-                return (FingerprintManager)
-                        getContext().getSystemService(Context.FINGERPRINT_SERVICE);
-            case TYPE_IRIS:
-                return null;
-            case TYPE_FACE:
-                return (FaceManager)
-                        getContext().getSystemService(Context.FACE_SERVICE);
-            default:
-                return null;
-        }
-    }
-
-    private boolean hasFeature(int type) {
-        switch (type) {
-            case TYPE_FINGERPRINT:
-                return mHasFeatureFingerprint;
-            case TYPE_IRIS:
-                return mHasFeatureIris;
-            case TYPE_FACE:
-                return mHasFeatureFace;
-            default:
-                return false;
-        }
-    }
-
     private void logDialogDismissed(int reason) {
-        if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
+        if (reason == BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
             // Explicit auth, authentication confirmed.
             // Latency in this case is authenticated -> confirmed. <Biometric>Service
             // should have the first half (first acquired -> authenticated).
@@ -1082,19 +1272,19 @@ public class BiometricService extends SystemService {
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
                         + ", RequireConfirmation: "
                         + mCurrentAuthSession.mRequireConfirmation
-                        + ", State: " + StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
+                        + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
                         + ", Latency: " + latency);
             }
 
-            StatsLog.write(StatsLog.BIOMETRIC_AUTHENTICATED,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                     statsModality(),
                     mCurrentAuthSession.mUserId,
                     mCurrentAuthSession.isCrypto(),
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     mCurrentAuthSession.mRequireConfirmation,
-                    StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
+                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
                     latency,
-                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
+                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         } else {
 
             final long latency = System.currentTimeMillis() - mCurrentAuthSession.mStartTimeMs;
@@ -1114,7 +1304,7 @@ public class BiometricService extends SystemService {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            StatsLog.write(StatsLog.BIOMETRIC_ERROR_OCCURRED,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                     statsModality(),
                     mCurrentAuthSession.mUserId,
                     mCurrentAuthSession.isCrypto(),
@@ -1122,7 +1312,7 @@ public class BiometricService extends SystemService {
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     error,
                     0 /* vendorCode */,
-                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId),
+                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId),
                     latency);
         }
     }
@@ -1145,72 +1335,53 @@ public class BiometricService extends SystemService {
         return modality;
     }
 
-    private void handleTaskStackChanged() {
-        try {
-            final List<ActivityManager.RunningTaskInfo> runningTasks =
-                    mActivityTaskManager.getTasks(1);
-            if (!runningTasks.isEmpty()) {
-                final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                if (mCurrentAuthSession != null
-                        && !topPackage.contentEquals(mCurrentAuthSession.mOpPackageName)) {
-                    mStatusBarService.hideBiometricDialog();
-                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                    mCurrentAuthSession.mClientReceiver.onError(
-                            BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                            getContext().getString(
-                                    com.android.internal.R.string.biometric_error_canceled)
-                    );
-                    mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                    mCurrentAuthSession = null;
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to get running tasks", e);
-        }
-    }
-
-    private void handleAuthenticationSucceeded(boolean requireConfirmation, byte[] token) {
-
+    private void handleAuthenticationSucceeded(boolean requireConfirmation, byte[] token,
+            boolean isStrongBiometric) {
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
             if (mCurrentAuthSession == null) {
-                Slog.e(TAG, "onAuthenticationSucceeded(): Auth session is null");
+                Slog.e(TAG, "handleAuthenticationSucceeded: Auth session is null");
                 return;
             }
 
+            if (isStrongBiometric) {
+                // Store the auth token and submit it to keystore after the dialog is confirmed /
+                // animating away.
+                mCurrentAuthSession.mTokenEscrow = token;
+            } else {
+                if (token != null) {
+                    Slog.w(TAG, "Dropping authToken for non-strong biometric");
+                }
+            }
+
             if (!requireConfirmation) {
-                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                KeyStore.getInstance().addAuthToken(token);
-                mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded();
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                mCurrentAuthSession = null;
+                mCurrentAuthSession.mState = STATE_AUTHENTICATED_PENDING_SYSUI;
             } else {
                 mCurrentAuthSession.mAuthenticatedTimeMs = System.currentTimeMillis();
-                // Store the auth token and submit it to keystore after the confirmation
-                // button has been pressed.
-                mCurrentAuthSession.mTokenEscrow = token;
                 mCurrentAuthSession.mState = STATE_AUTH_PENDING_CONFIRM;
             }
 
             // Notify SysUI that the biometric has been authenticated. SysUI already knows
             // the implicit/explicit state and will react accordingly.
-            mStatusBarService.onBiometricAuthenticated(true, null /* failureReason */);
+            mStatusBarService.onBiometricAuthenticated();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
     }
 
-    private void handleAuthenticationFailed(String failureReason) {
+    private void handleAuthenticationRejected() {
+        Slog.v(TAG, "handleAuthenticationRejected()");
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
             if (mCurrentAuthSession == null) {
-                Slog.e(TAG, "onAuthenticationFailed(): Auth session is null");
+                Slog.e(TAG, "handleAuthenticationRejected: Auth session is null");
                 return;
             }
 
-            mStatusBarService.onBiometricAuthenticated(false, failureReason);
+            mStatusBarService.onBiometricError(TYPE_NONE,
+                    BiometricConstants.BIOMETRIC_PAUSED_REJECTED, 0 /* vendorCode */);
 
             // TODO: This logic will need to be updated if BP is multi-modal
             if ((mCurrentAuthSession.mModality & TYPE_FACE) != 0) {
@@ -1225,54 +1396,27 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnConfirmDeviceCredentialSuccess() {
-        if (mConfirmDeviceCredentialReceiver == null) {
-            Slog.w(TAG, "onCDCASuccess null!");
-            return;
-        }
+    private void handleAuthenticationTimedOut(int modality, int error, int vendorCode) {
+        Slog.v(TAG, String.format("handleAuthenticationTimedOut(%d, %d, %d)", modality, error,
+                vendorCode));
         try {
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-            mConfirmDeviceCredentialReceiver.onAuthenticationSucceeded();
-            if (mCurrentAuthSession != null) {
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                mCurrentAuthSession = null;
+            // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
+            // after user dismissed/canceled dialog).
+            if (mCurrentAuthSession == null) {
+                Slog.e(TAG, "handleAuthenticationTimedOut: Auth session is null");
+                return;
             }
+
+            mStatusBarService.onBiometricError(modality, error, vendorCode);
+            mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
         } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException", e);
+            Slog.e(TAG, "Remote exception", e);
         }
-        mConfirmDeviceCredentialReceiver = null;
     }
 
-    private void handleOnConfirmDeviceCredentialError(int error, String message) {
-        if (mConfirmDeviceCredentialReceiver == null) {
-            Slog.w(TAG, "onCDCAError null! Error: " + error + " " + message);
-            return;
-        }
-        try {
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-            mConfirmDeviceCredentialReceiver.onError(error, message);
-            if (mCurrentAuthSession != null) {
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                mCurrentAuthSession = null;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException", e);
-        }
-        mConfirmDeviceCredentialReceiver = null;
-    }
+    private void handleOnError(int cookie, int modality, int error, int vendorCode) {
 
-    private void handleRegisterCancellationCallback(
-            IBiometricConfirmDeviceCredentialCallback callback) {
-        if (mCurrentAuthSession == null) {
-            Slog.d(TAG, "Current auth session null");
-            return;
-        }
-        Slog.d(TAG, "Updating cancel callback");
-        mCurrentAuthSession.mConfirmDeviceCredentialCallback = callback;
-    }
-
-    private void handleOnError(int cookie, int error, String message) {
-        Slog.d(TAG, "Error: " + error + " cookie: " + cookie);
+        Slog.d(TAG, "handleOnError: " + error + " cookie: " + cookie);
         // Errors can either be from the current auth session or the pending auth session.
         // The pending auth session may receive errors such as ERROR_LOCKOUT before
         // it becomes the current auth session. Similarly, the current auth session may
@@ -1281,51 +1425,39 @@ public class BiometricService extends SystemService {
         // of their intended receivers.
         try {
             if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
+                mCurrentAuthSession.mErrorEscrow = error;
+                mCurrentAuthSession.mVendorCodeEscrow = vendorCode;
 
-                if (mCurrentAuthSession.isFromConfirmDeviceCredential()) {
-                    // If we were invoked by ConfirmDeviceCredential, do not delete the current
-                    // auth session since we still need to respond to cancel signal while
-                    if (DEBUG) Slog.d(TAG, "From CDC, transition to CANCELED_SHOWING_CDC state");
-
-                    // Send the error to ConfirmDeviceCredential so that it goes to Pin/Pattern/Pass
-                    // screen
-                    mCurrentAuthSession.mClientReceiver.onError(error, message);
-                    mCurrentAuthSession.mState = STATE_BIOMETRIC_AUTH_CANCELED_SHOWING_CDC;
-                    mStatusBarService.hideBiometricDialog();
-                } else if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
-                    mStatusBarService.onBiometricError(message);
-                    if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                        mActivityTaskManager.unregisterTaskStackListener(
-                                mTaskStackListener);
-                        mCurrentAuthSession.mClientReceiver.onError(error, message);
-                        mCurrentAuthSession.mState = STATE_AUTH_IDLE;
+                if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
+                    final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                            || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+                    if (mCurrentAuthSession.isAllowDeviceCredential() && errorLockout) {
+                        // SystemUI handles transition from biometric to device credential.
+                        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                        mStatusBarService.onBiometricError(modality, error, vendorCode);
+                    } else if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
+                        mStatusBarService.hideAuthenticationDialog();
+                        // TODO: If multiple authenticators are simultaneously running, this will
+                        // need to be modified. Send the error to the client here, instead of doing
+                        // a round trip to SystemUI.
+                        mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                         mCurrentAuthSession = null;
-                        mStatusBarService.hideBiometricDialog();
                     } else {
-                        // Send errors after the dialog is dismissed.
-                        mHandler.postDelayed(() -> {
-                            try {
-                                if (mCurrentAuthSession != null) {
-                                    mActivityTaskManager.unregisterTaskStackListener(
-                                            mTaskStackListener);
-                                    mCurrentAuthSession.mClientReceiver.onError(error,
-                                            message);
-                                    mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                                    mCurrentAuthSession = null;
-                                }
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Remote exception", e);
-                            }
-                        }, BiometricPrompt.HIDE_DIALOG_DELAY);
+                        mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
+                        mStatusBarService.onBiometricError(modality, error, vendorCode);
                     }
                 } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
                     // In the "try again" state, we should forward canceled errors to
-                    // the client and and clean up.
-                    mCurrentAuthSession.mClientReceiver.onError(error, message);
-                    mStatusBarService.onBiometricError(message);
-                    mActivityTaskManager.unregisterTaskStackListener(
-                            mTaskStackListener);
-                    mCurrentAuthSession.mState = STATE_AUTH_IDLE;
+                    // the client and and clean up. The only error we should get here is
+                    // ERROR_CANCELED due to another client kicking us out.
+                    mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
+                    mStatusBarService.hideAuthenticationDialog();
+                    mCurrentAuthSession = null;
+                } else if (mCurrentAuthSession.mState == STATE_SHOWING_DEVICE_CREDENTIAL) {
+                    Slog.d(TAG, "Biometric canceled, ignoring from state: "
+                            + mCurrentAuthSession.mState);
+                } else if (mCurrentAuthSession.mState == STATE_CLIENT_DIED_CANCELLING) {
+                    mStatusBarService.hideAuthenticationDialog();
                     mCurrentAuthSession = null;
                 } else {
                     Slog.e(TAG, "Impossible session error state: "
@@ -1334,13 +1466,41 @@ public class BiometricService extends SystemService {
             } else if (mPendingAuthSession != null
                     && mPendingAuthSession.containsCookie(cookie)) {
                 if (mPendingAuthSession.mState == STATE_AUTH_CALLED) {
-                    mPendingAuthSession.mClientReceiver.onError(error, message);
-                    mPendingAuthSession.mState = STATE_AUTH_IDLE;
-                    mPendingAuthSession = null;
+                    // If any error is received while preparing the auth session (lockout, etc),
+                    // and if device credential is allowed, just show the credential UI.
+                    if (mPendingAuthSession.isAllowDeviceCredential()) {
+                        @Authenticators.Types int authenticators =
+                                mPendingAuthSession.mBundle.getInt(
+                                        BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+                        // Disallow biometric and notify SystemUI to show the authentication prompt.
+                        authenticators &= ~Authenticators.BIOMETRIC_WEAK;
+                        mPendingAuthSession.mBundle.putInt(
+                                BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                                authenticators);
+
+                        mCurrentAuthSession = mPendingAuthSession;
+                        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                        mPendingAuthSession = null;
+
+                        mStatusBarService.showAuthenticationDialog(
+                                mCurrentAuthSession.mBundle,
+                                mInternalReceiver,
+                                0 /* biometricModality */,
+                                false /* requireConfirmation */,
+                                mCurrentAuthSession.mUserId,
+                                mCurrentAuthSession.mOpPackageName,
+                                mCurrentAuthSession.mSessionId,
+                                mCurrentAuthSession.mSysUiSessionId);
+                    } else {
+                        mPendingAuthSession.mClientReceiver.onError(modality, error, vendorCode);
+                        mPendingAuthSession = null;
+                    }
                 } else {
                     Slog.e(TAG, "Impossible pending session error state: "
                             + mPendingAuthSession.mState);
                 }
+            } else {
+                Slog.e(TAG, "Unknown cookie: " + cookie);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
@@ -1355,57 +1515,83 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-            if (message == null) {
-                Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
-                return;
-            }
-            try {
-                mStatusBarService.onBiometricHelp(message);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
+        if (message == null) {
+            Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
+            return;
+        }
+        try {
+            mStatusBarService.onBiometricHelp(message);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 
-    private void handleOnDismissed(int reason) {
+    private void handleOnDismissed(int reason, @Nullable byte[] credentialAttestation) {
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "onDialogDismissed: " + reason + ", auth session null");
+            Slog.e(TAG, "onDismissed: " + reason + ", auth session null");
             return;
         }
 
         logDialogDismissed(reason);
 
         try {
-            if (reason != BiometricPrompt.DISMISSED_REASON_POSITIVE) {
-                // Positive button is used by passive modalities as a "confirm" button,
-                // do not send to client
-                mCurrentAuthSession.mClientReceiver.onDialogDismissed(reason);
-                // Cancel authentication. Skip the token/package check since we are cancelling
-                // from system server. The interface is permission protected so this is fine.
-                cancelInternal(null /* token */, null /* package */, false /* fromClient */);
-            }
-            if (reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL) {
-                mCurrentAuthSession.mClientReceiver.onError(
-                        BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
-                        getContext().getString(
-                                com.android.internal.R.string.biometric_error_user_canceled));
-            } else if (reason == BiometricPrompt.DISMISSED_REASON_POSITIVE) {
-                // Have the service send the token to KeyStore, and send onAuthenticated
-                // to the application
-                KeyStore.getInstance().addAuthToken(mCurrentAuthSession.mTokenEscrow);
-                mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded();
+            switch (reason) {
+                case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
+                    if (credentialAttestation != null) {
+                        mKeyStore.addAuthToken(credentialAttestation);
+                    } else {
+                        Slog.e(TAG, "Credential confirmed but attestation is null");
+                    }
+                case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
+                case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
+                    if (mCurrentAuthSession.mTokenEscrow != null) {
+                        mKeyStore.addAuthToken(mCurrentAuthSession.mTokenEscrow);
+                    } else {
+                        Slog.e(TAG, "mTokenEscrow is null");
+                    }
+                    mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded(
+                            Utils.getAuthenticationTypeForResult(reason));
+                    break;
+
+                case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
+                    mCurrentAuthSession.mClientReceiver.onDialogDismissed(reason);
+                    // Cancel authentication. Skip the token/package check since we are cancelling
+                    // from system server. The interface is permission protected so this is fine.
+                    cancelInternal(null /* token */, null /* package */,
+                            mCurrentAuthSession.mCallingUid, mCurrentAuthSession.mCallingPid,
+                            mCurrentAuthSession.mCallingUserId, false /* fromClient */);
+                    break;
+
+                case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
+                    mCurrentAuthSession.mClientReceiver.onError(
+                            mCurrentAuthSession.mModality,
+                            BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
+                            0 /* vendorCode */
+                    );
+                    // Cancel authentication. Skip the token/package check since we are cancelling
+                    // from system server. The interface is permission protected so this is fine.
+                    cancelInternal(null /* token */, null /* package */, Binder.getCallingUid(),
+                            Binder.getCallingPid(), UserHandle.getCallingUserId(),
+                            false /* fromClient */);
+                    break;
+
+                case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
+                case BiometricPrompt.DISMISSED_REASON_ERROR:
+                    mCurrentAuthSession.mClientReceiver.onError(
+                            mCurrentAuthSession.mModality,
+                            mCurrentAuthSession.mErrorEscrow,
+                            mCurrentAuthSession.mVendorCodeEscrow
+                    );
+                    break;
+
+                default:
+                    Slog.w(TAG, "Unhandled reason: " + reason);
+                    break;
             }
 
-            // Do not clean up yet if we are from ConfirmDeviceCredential. We should be in the
-            // STATE_BIOMETRIC_AUTH_CANCELED_SHOWING_CDC. The session should only be removed when
-            // ConfirmDeviceCredential is confirmed or canceled.
-            // TODO(b/123378871): Remove when moved
-            if (!mCurrentAuthSession.isFromConfirmDeviceCredential()) {
-                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
-                mCurrentAuthSession = null;
-            }
+            // Dialog is gone, auth session is done.
+            mCurrentAuthSession = null;
+
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -1424,12 +1610,90 @@ public class BiometricService extends SystemService {
                 mCurrentAuthSession.mCallingUid,
                 mCurrentAuthSession.mCallingPid,
                 mCurrentAuthSession.mCallingUserId,
-                mCurrentAuthSession.mModality,
-                mCurrentAuthSession.mConfirmDeviceCredentialCallback);
+                mCurrentAuthSession.mModality);
     }
 
+    private void handleOnDeviceCredentialPressed() {
+        Slog.d(TAG, "onDeviceCredentialPressed");
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        // Cancel authentication. Skip the token/package check since we are cancelling
+        // from system server. The interface is permission protected so this is fine.
+        cancelInternal(null /* token */, null /* package */, Binder.getCallingUid(),
+                Binder.getCallingPid(), UserHandle.getCallingUserId(),
+                false /* fromClient */);
+
+        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+    }
+
+    private void handleOnSystemEvent(int event) {
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        final boolean shouldReceive = mCurrentAuthSession.mBundle
+                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
+        Slog.d(TAG, "onSystemEvent: " + event + ", shouldReceive: " + shouldReceive);
+
+        if (!shouldReceive) {
+            return;
+        }
+
+        try {
+            mCurrentAuthSession.mClientReceiver.onSystemEvent(event);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+        }
+    }
+
+    private void handleClientDied() {
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        Slog.e(TAG, "SysUiSessionId: " + mCurrentAuthSession.mSysUiSessionId
+                + " State: " + mCurrentAuthSession.mState);
+
+        try {
+            // Check if any sensors are authenticating. If so, need to cancel them. When
+            // ERROR_CANCELED is received from the HAL, we hide the dialog and cleanup the session.
+            if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
+                mCurrentAuthSession.mState = STATE_CLIENT_DIED_CANCELLING;
+                cancelInternal(mCurrentAuthSession.mToken,
+                        mCurrentAuthSession.mOpPackageName,
+                        mCurrentAuthSession.mCallingUid,
+                        mCurrentAuthSession.mCallingPid,
+                        mCurrentAuthSession.mCallingUserId,
+                        false /* fromClient */);
+            } else {
+                // If the sensors are not authenticating, set the auth session to null.
+                mStatusBarService.hideAuthenticationDialog();
+                mCurrentAuthSession = null;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception: " + e);
+        }
+    }
+
+    /**
+     * Invoked when each service has notified that its client is ready to be started. When
+     * all biometrics are ready, this invokes the SystemUI dialog through StatusBar.
+     */
     private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation,
             int userId) {
+        if (mPendingAuthSession == null) {
+            // Only should happen if a biometric was locked out when authenticate() was invoked.
+            // In that case, if device credentials are allowed, the UI is already showing. If not
+            // allowed, the error has already been returned to the caller.
+            Slog.w(TAG, "Pending auth session null");
+            return;
+        }
+
         Iterator it = mPendingAuthSession.mModalitiesWaiting.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> pair = (Map.Entry) it.next();
@@ -1453,209 +1717,189 @@ public class BiometricService extends SystemService {
             mPendingAuthSession = null;
 
             mCurrentAuthSession.mState = STATE_AUTH_STARTED;
-            try {
-                int modality = TYPE_NONE;
-                it = mCurrentAuthSession.mModalitiesMatched.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, Integer> pair = (Map.Entry) it.next();
-                    if (pair.getKey() == TYPE_FINGERPRINT) {
-                        mFingerprintService.startPreparedClient(pair.getValue());
-                    } else if (pair.getKey() == TYPE_IRIS) {
-                        Slog.e(TAG, "Iris unsupported");
-                    } else if (pair.getKey() == TYPE_FACE) {
-                        mFaceService.startPreparedClient(pair.getValue());
-                    } else {
-                        Slog.e(TAG, "Unknown modality: " + pair.getKey());
+            int modality = TYPE_NONE;
+            it = mCurrentAuthSession.mModalitiesMatched.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Integer, Integer> pair = (Map.Entry) it.next();
+                boolean foundAuthenticator = false;
+                for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                    if (authenticator.modality == pair.getKey()) {
+                        foundAuthenticator = true;
+                        try {
+                            authenticator.impl.startPreparedClient(pair.getValue());
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Remote exception", e);
+                        }
                     }
-                    modality |= pair.getKey();
                 }
+                if (!foundAuthenticator) {
+                    Slog.e(TAG, "Unknown modality: " + pair.getKey());
+                }
+                modality |= pair.getKey();
+            }
 
-                if (!continuing) {
-                    mStatusBarService.showBiometricDialog(mCurrentAuthSession.mBundle,
-                            mInternalReceiver, modality, requireConfirmation, userId);
-                    mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+            if (!continuing) {
+                try {
+                    mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
+                            mInternalReceiver, modality, requireConfirmation, userId,
+                            mCurrentAuthSession.mOpPackageName,
+                            mCurrentAuthSession.mSessionId,
+                            mCurrentAuthSession.mSysUiSessionId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
                 }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
             }
         }
     }
 
     private void handleAuthenticate(IBinder token, long sessionId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
-            int callingUid, int callingPid, int callingUserId,
-            IBiometricConfirmDeviceCredentialCallback callback) {
+            int callingUid, int callingPid, int callingUserId) {
 
         mHandler.post(() -> {
-            final Pair<Integer, Integer> result = checkAndGetBiometricModality(userId);
-            final int modality = result.first;
-            final int error = result.second;
+            try {
+                final boolean checkDevicePolicyManager = bundle.getBoolean(
+                        BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, false);
+                final Pair<Integer, Integer> pair = checkAndGetAuthenticators(userId, bundle,
+                        opPackageName, checkDevicePolicyManager);
+                final int modality = pair.first;
+                final int result = pair.second;
 
-            // Check for errors, notify callback, and return
-            if (error != BiometricConstants.BIOMETRIC_SUCCESS) {
-                try {
-                    final String hardwareUnavailable =
-                            getContext().getString(R.string.biometric_error_hw_unavailable);
-                    switch (error) {
-                        case BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT:
-                            receiver.onError(error, hardwareUnavailable);
-                            break;
-                        case BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE:
-                            receiver.onError(error, hardwareUnavailable);
-                            break;
-                        case BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS:
-                            receiver.onError(error,
-                                    getErrorString(modality, error, 0 /* vendorCode */));
-                            break;
-                        default:
-                            Slog.e(TAG, "Unhandled error");
-                            break;
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to send error", e);
+                if (result == BiometricConstants.BIOMETRIC_SUCCESS) {
+                    authenticateInternal(token, sessionId, userId, receiver, opPackageName,
+                            bundle, callingUid, callingPid, callingUserId, modality);
+                } else {
+                    receiver.onError(modality, result, 0 /* vendorCode */);
                 }
-                return;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
             }
-
-            mCurrentModality = modality;
-
-            // Start preparing for authentication. Authentication starts when
-            // all modalities requested have invoked onReadyForAuthentication.
-            authenticateInternal(token, sessionId, userId, receiver, opPackageName, bundle,
-                    callingUid, callingPid, callingUserId, modality, callback);
         });
     }
 
     /**
-     * authenticate() (above) which is called from BiometricPrompt determines which
+     * handleAuthenticate() (above) which is called from BiometricPrompt determines which
      * modality/modalities to start authenticating with. authenticateInternal() should only be
      * used for:
      * 1) Preparing <Biometric>Services for authentication when BiometricPrompt#authenticate is,
-     *    invoked, shortly after which BiometricPrompt is shown and authentication starts
+     * invoked, shortly after which BiometricPrompt is shown and authentication starts
      * 2) Preparing <Biometric>Services for authentication when BiometricPrompt is already shown
-     *    and the user has pressed "try again"
+     * and the user has pressed "try again"
      */
     private void authenticateInternal(IBinder token, long sessionId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
-            int callingUid, int callingPid, int callingUserId, int modality,
-            IBiometricConfirmDeviceCredentialCallback callback) {
+            int callingUid, int callingPid, int callingUserId, int modality) {
+        boolean requireConfirmation = bundle.getBoolean(
+                BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
+        if ((modality & TYPE_FACE) != 0) {
+            // Check if the user has forced confirmation to be required in Settings.
+            requireConfirmation = requireConfirmation
+                    || mSettingObserver.getFaceAlwaysRequireConfirmation(userId);
+        }
+        // Generate random cookies to pass to the services that should prepare to start
+        // authenticating. Store the cookie here and wait for all services to "ack"
+        // with the cookie. Once all cookies are received, we can show the prompt
+        // and let the services start authenticating. The cookie should be non-zero.
+        final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
+        final @Authenticators.Types int authenticators = bundle.getInt(
+                BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+        Slog.d(TAG, "Creating auth session. Modality: " + modality
+                + ", cookie: " + cookie
+                + ", authenticators: " + authenticators);
+        final HashMap<Integer, Integer> modalities = new HashMap<>();
+
+        // If it's only device credential, we don't need to wait - LockSettingsService is
+        // always ready to check credential (SystemUI invokes that path).
+        if ((authenticators & ~Authenticators.DEVICE_CREDENTIAL) != 0) {
+            modalities.put(modality, cookie);
+        }
+        mPendingAuthSession = new AuthSession(modalities, token, sessionId, userId,
+                receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
+                modality, requireConfirmation);
+
         try {
-            boolean requireConfirmation = bundle.getBoolean(
-                    BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
-            if ((modality & TYPE_FACE) != 0) {
-                // Check if the user has forced confirmation to be required in Settings.
-                requireConfirmation = requireConfirmation
-                        || mSettingObserver.getFaceAlwaysRequireConfirmation(userId);
-            }
-            // Generate random cookies to pass to the services that should prepare to start
-            // authenticating. Store the cookie here and wait for all services to "ack"
-            // with the cookie. Once all cookies are received, we can show the prompt
-            // and let the services start authenticating. The cookie should be non-zero.
-            final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-            Slog.d(TAG, "Creating auth session. Modality: " + modality
-                    + ", cookie: " + cookie);
-            final HashMap<Integer, Integer> authenticators = new HashMap<>();
-            authenticators.put(modality, cookie);
-            mPendingAuthSession = new AuthSession(authenticators, token, sessionId, userId,
-                    receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
-                    modality, requireConfirmation, callback);
-            mPendingAuthSession.mState = STATE_AUTH_CALLED;
-            // No polymorphism :(
-            if ((modality & TYPE_FINGERPRINT) != 0) {
-                mFingerprintService.prepareForAuthentication(token, sessionId, userId,
-                        mInternalReceiver, opPackageName, cookie,
-                        callingUid, callingPid, callingUserId);
-            }
-            if ((modality & TYPE_IRIS) != 0) {
-                Slog.w(TAG, "Iris unsupported");
-            }
-            if ((modality & TYPE_FACE) != 0) {
-                mFaceService.prepareForAuthentication(requireConfirmation,
-                        token, sessionId, userId, mInternalReceiver, opPackageName,
-                        cookie, callingUid, callingPid, callingUserId);
+            if (authenticators == Authenticators.DEVICE_CREDENTIAL) {
+                mPendingAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                mCurrentAuthSession = mPendingAuthSession;
+                mPendingAuthSession = null;
+
+                mStatusBarService.showAuthenticationDialog(
+                        mCurrentAuthSession.mBundle,
+                        mInternalReceiver,
+                        0 /* biometricModality */,
+                        false /* requireConfirmation */,
+                        mCurrentAuthSession.mUserId,
+                        mCurrentAuthSession.mOpPackageName,
+                        sessionId,
+                        mCurrentAuthSession.mSysUiSessionId);
+            } else {
+                mPendingAuthSession.mState = STATE_AUTH_CALLED;
+                for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                    // TODO(b/141025588): use ids instead of modalities to avoid ambiguity.
+                    if (authenticator.modality == modality) {
+                        authenticator.impl.prepareForAuthentication(requireConfirmation, token,
+                                sessionId, userId, mInternalReceiver, opPackageName, cookie,
+                                callingUid, callingPid, callingUserId);
+                        break;
+                    }
+                }
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to start authentication", e);
         }
     }
 
-    private void handleCancelAuthentication(IBinder token, String opPackageName) {
+    private void handleCancelAuthentication(IBinder token, String opPackageName, int callingUid,
+            int callingPid, int callingUserId) {
         if (token == null || opPackageName == null) {
             Slog.e(TAG, "Unable to cancel, one or more null arguments");
             return;
         }
 
-        if (mCurrentAuthSession != null
-                && mCurrentAuthSession.mState == STATE_BIOMETRIC_AUTH_CANCELED_SHOWING_CDC) {
-            if (DEBUG) Slog.d(TAG, "Cancel received while ConfirmDeviceCredential showing");
-            try {
-                mCurrentAuthSession.mConfirmDeviceCredentialCallback.cancel();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to cancel ConfirmDeviceCredential", e);
-            }
-
-            // TODO(b/123378871): Remove when moved. Piggy back on this for now to clean up.
-            handleOnConfirmDeviceCredentialError(BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                    getContext().getString(R.string.biometric_error_canceled));
-        } else if (mCurrentAuthSession != null
-                && mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
+        if (mCurrentAuthSession != null && mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
             // We need to check the current authenticators state. If we're pending confirm
             // or idle, we need to dismiss the dialog and send an ERROR_CANCELED to the client,
             // since we won't be getting an onError from the driver.
             try {
                 // Send error to client
                 mCurrentAuthSession.mClientReceiver.onError(
+                        mCurrentAuthSession.mModality,
                         BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                        getContext().getString(
-                                com.android.internal.R.string.biometric_error_user_canceled)
+                        0 /* vendorCode */
                 );
-
-                mCurrentAuthSession.mState = STATE_AUTH_IDLE;
                 mCurrentAuthSession = null;
-                mStatusBarService.hideBiometricDialog();
+                mStatusBarService.hideAuthenticationDialog();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             }
         } else {
-            boolean fromCDC = false;
-            if (mCurrentAuthSession != null) {
-                fromCDC = mCurrentAuthSession.mBundle.getBoolean(
-                        BiometricPrompt.KEY_FROM_CONFIRM_DEVICE_CREDENTIAL, false);
-            }
-
-            if (fromCDC) {
-                if (DEBUG) Slog.d(TAG, "Cancelling from CDC");
-                cancelInternal(token, opPackageName, false /* fromClient */);
-            } else {
-                cancelInternal(token, opPackageName, true /* fromClient */);
-            }
-
+            cancelInternal(token, opPackageName, callingUid, callingPid, callingUserId,
+                    true /* fromClient */);
         }
     }
 
-    void cancelInternal(IBinder token, String opPackageName, boolean fromClient) {
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
-        final int callingUserId = UserHandle.getCallingUserId();
-        mHandler.post(() -> {
-            try {
-                // TODO: For multiple modalities, send a single ERROR_CANCELED only when all
-                // drivers have canceled authentication.
-                if ((mCurrentModality & TYPE_FINGERPRINT) != 0) {
-                    mFingerprintService.cancelAuthenticationFromService(token, opPackageName,
-                            callingUid, callingPid, callingUserId, fromClient);
-                }
-                if ((mCurrentModality & TYPE_IRIS) != 0) {
-                    Slog.w(TAG, "Iris unsupported");
-                }
-                if ((mCurrentModality & TYPE_FACE) != 0) {
-                    mFaceService.cancelAuthenticationFromService(token, opPackageName,
-                            callingUid, callingPid, callingUserId, fromClient);
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to cancel authentication");
-            }
-        });
-    }
+    void cancelInternal(IBinder token, String opPackageName, int callingUid, int callingPid,
+            int callingUserId, boolean fromClient) {
+        if (mCurrentAuthSession == null) {
+            Slog.w(TAG, "Skipping cancelInternal");
+            return;
+        } else if (mCurrentAuthSession.mState != STATE_AUTH_STARTED
+                && mCurrentAuthSession.mState != STATE_CLIENT_DIED_CANCELLING) {
+            Slog.w(TAG, "Skipping cancelInternal, state: " + mCurrentAuthSession.mState);
+            return;
+        }
 
+        // TODO: For multiple modalities, send a single ERROR_CANCELED only when all
+        // drivers have canceled authentication.
+        for (AuthenticatorWrapper authenticator : mAuthenticators) {
+            if ((authenticator.modality & mCurrentAuthSession.mModality) != 0) {
+                try {
+                    authenticator.impl.cancelAuthenticationFromService(token, opPackageName,
+                            callingUid, callingPid, callingUserId, fromClient);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to cancel authentication");
+                }
+            }
+        }
+    }
 }

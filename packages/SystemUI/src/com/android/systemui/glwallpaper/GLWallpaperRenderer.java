@@ -27,6 +27,11 @@ import java.io.PrintWriter;
 public interface GLWallpaperRenderer {
 
     /**
+     * Check if the content to render is a WCG content.
+     */
+    boolean isWcgContent();
+
+    /**
      * Called when the surface is created or recreated.
      */
     void onSurfaceCreated();
@@ -42,20 +47,6 @@ public interface GLWallpaperRenderer {
      * Called to draw the current frame.
      */
     void onDrawFrame();
-
-    /**
-     * Notify ambient mode is changed.
-     * @param inAmbientMode true if in ambient mode.
-     * @param duration duration of transition.
-     */
-    void updateAmbientMode(boolean inAmbientMode, long duration);
-
-    /**
-     * Notify the wallpaper offsets changed.
-     * @param xOffset offset along x axis.
-     * @param yOffset offset along y axis.
-     */
-    void updateOffsets(float xOffset, float yOffset);
 
     /**
      * Ask renderer to report the surface size it needs.
@@ -76,24 +67,4 @@ public interface GLWallpaperRenderer {
      */
     void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args);
 
-    /**
-     * A proxy which owns surface holder.
-     */
-    interface SurfaceProxy {
-
-        /**
-         * Ask proxy to start rendering frame to surface.
-         */
-        void requestRender();
-
-        /**
-         * Ask proxy to prepare render context.
-         */
-        void preRender();
-
-        /**
-         * Ask proxy to destroy render context.
-         */
-        void postRender();
-    }
 }

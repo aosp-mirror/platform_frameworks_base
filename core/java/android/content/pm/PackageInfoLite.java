@@ -74,6 +74,11 @@ public class PackageInfoLite implements Parcelable {
     public boolean multiArch;
 
     /**
+     * The android:debuggable flag from the package manifest.
+     */
+    public boolean debuggable;
+
+    /**
      * Specifies the recommended install location. Can be one of
      * {@link PackageHelper#RECOMMEND_INSTALL_INTERNAL} to install on internal storage,
      * {@link PackageHelper#RECOMMEND_INSTALL_EXTERNAL} to install on external media,
@@ -108,6 +113,7 @@ public class PackageInfoLite implements Parcelable {
         dest.writeInt(recommendedInstallLocation);
         dest.writeInt(installLocation);
         dest.writeInt(multiArch ? 1 : 0);
+        dest.writeInt(debuggable ? 1 : 0);
 
         if (verifiers == null || verifiers.length == 0) {
             dest.writeInt(0);
@@ -139,6 +145,7 @@ public class PackageInfoLite implements Parcelable {
         recommendedInstallLocation = source.readInt();
         installLocation = source.readInt();
         multiArch = (source.readInt() != 0);
+        debuggable = (source.readInt() != 0);
 
         final int verifiersLength = source.readInt();
         if (verifiersLength == 0) {

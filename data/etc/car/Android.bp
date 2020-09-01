@@ -87,6 +87,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.car.secondaryhome",
+    sub_dir: "permissions",
+    src: "com.android.car.secondaryhome.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.car.settings",
     sub_dir: "permissions",
     src: "com.android.car.settings.xml",
@@ -141,4 +148,18 @@ prebuilt_etc {
     src: "com.android.car.developeroptions.xml",
     filename_from_src: true,
     system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.car.floatingcardslauncher",
+    sub_dir: "permissions",
+    src: "com.android.car.floatingcardslauncher.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.android.car.ui.paintbooth",
+    sub_dir: "permissions",
+    src: "com.android.car.ui.paintbooth.xml",
+    filename_from_src: true,
 }

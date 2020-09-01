@@ -26,8 +26,6 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * Utility class to load app drawables with appropriate badging.
  *
@@ -78,10 +76,10 @@ public class IconDrawableFactory {
                     com.android.internal.R.drawable.ic_instant_icon_badge_bolt,
                     badgeColor);
         }
-        if (mUm.isManagedProfile(userId)) {
+        if (mUm.hasBadge(userId)) {
             icon = mLauncherIcons.getBadgedDrawable(icon,
-                    com.android.internal.R.drawable.ic_corp_icon_badge_case,
-                    getUserBadgeColor(mUm, userId));
+                    mUm.getUserIconBadgeResId(userId),
+                    mUm.getUserBadgeColor(userId));
         }
         return icon;
     }
@@ -91,23 +89,6 @@ public class IconDrawableFactory {
      */
     public Drawable getShadowedIcon(Drawable icon) {
         return mLauncherIcons.wrapIconDrawableWithShadow(icon);
-    }
-
-    // Should have enough colors to cope with UserManagerService.getMaxManagedProfiles()
-    @VisibleForTesting
-    public static final int[] CORP_BADGE_COLORS = new int[] {
-            com.android.internal.R.color.profile_badge_1,
-            com.android.internal.R.color.profile_badge_2,
-            com.android.internal.R.color.profile_badge_3
-    };
-
-    public static int getUserBadgeColor(UserManager um, @UserIdInt int userId) {
-        int badge = um.getManagedProfileBadge(userId);
-        if (badge < 0) {
-            badge = 0;
-        }
-        int resourceId = CORP_BADGE_COLORS[badge % CORP_BADGE_COLORS.length];
-        return Resources.getSystem().getColor(resourceId, null);
     }
 
     @UnsupportedAppUsage

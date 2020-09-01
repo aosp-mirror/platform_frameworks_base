@@ -17,6 +17,7 @@
 package android.security.keystore;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
@@ -52,8 +53,9 @@ import javax.crypto.Mac;
  *
  * @hide
  */
+@SystemApi
 public class AndroidKeyStoreProvider extends Provider {
-    public static final String PROVIDER_NAME = "AndroidKeyStore";
+    private static final String PROVIDER_NAME = "AndroidKeyStore";
 
     // IMPLEMENTATION NOTE: Class names are hard-coded in this provider to avoid loading these
     // classes when this provider is instantiated and installed early on during each app's
@@ -68,6 +70,7 @@ public class AndroidKeyStoreProvider extends Provider {
     private static final String DESEDE_SYSTEM_PROPERTY =
             "ro.hardware.keystore_desede";
 
+    /** @hide **/
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
 
@@ -111,6 +114,7 @@ public class AndroidKeyStoreProvider extends Provider {
     /**
      * Installs a new instance of this provider (and the
      * {@link AndroidKeyStoreBCWorkaroundProvider}).
+     * @hide
      */
     public static void install() {
         Provider[] providers = Security.getProviders();
@@ -156,6 +160,7 @@ public class AndroidKeyStoreProvider extends Provider {
      * @throws IllegalArgumentException if the provided primitive is not supported or is not backed
      *         by AndroidKeyStore provider.
      * @throws IllegalStateException if the provided primitive is not initialized.
+     * @hide
      */
     @UnsupportedAppUsage
     public static long getKeyStoreOperationHandle(Object cryptoPrimitive) {
@@ -183,6 +188,7 @@ public class AndroidKeyStoreProvider extends Provider {
         return ((KeyStoreCryptoOperation) spi).getOperationHandle();
     }
 
+    /** @hide **/
     @NonNull
     public static AndroidKeyStorePublicKey getAndroidKeyStorePublicKey(
             @NonNull String alias,
@@ -279,6 +285,7 @@ public class AndroidKeyStoreProvider extends Provider {
                 privateKeyAlias, uid, jcaKeyAlgorithm, x509EncodedPublicKey);
     }
 
+    /** @hide **/
     @NonNull
     public static AndroidKeyStorePublicKey loadAndroidKeyStorePublicKeyFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
@@ -300,6 +307,7 @@ public class AndroidKeyStoreProvider extends Provider {
         return new KeyPair(publicKey, privateKey);
     }
 
+    /** @hide **/
     @NonNull
     public static KeyPair loadAndroidKeyStoreKeyPairFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
@@ -318,6 +326,7 @@ public class AndroidKeyStoreProvider extends Provider {
         return (AndroidKeyStorePrivateKey) keyPair.getPrivate();
     }
 
+    /** @hide **/
     @NonNull
     public static AndroidKeyStorePrivateKey loadAndroidKeyStorePrivateKeyFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
@@ -357,6 +366,7 @@ public class AndroidKeyStoreProvider extends Provider {
         return new AndroidKeyStoreSecretKey(secretKeyAlias, uid, keyAlgorithmString);
     }
 
+    /** @hide **/
     @NonNull
     public static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String userKeyAlias, int uid)
@@ -390,7 +400,15 @@ public class AndroidKeyStoreProvider extends Provider {
      *
      * <p>Note: the returned {@code KeyStore} is already initialized/loaded. Thus, there is
      * no need to invoke {@code load} on it.
+     *
+     * @param uid Uid for which the keystore provider is requested.
+     * @throws KeyStoreException if a KeyStoreSpi implementation for the specified type is not
+     * available from the specified provider.
+     * @throws NoSuchProviderException If the specified provider is not registered in the security
+     * provider list.
+     * @hide
      */
+    @SystemApi
     @NonNull
     public static java.security.KeyStore getKeyStoreForUid(int uid)
             throws KeyStoreException, NoSuchProviderException {

@@ -18,6 +18,7 @@ package android.hardware.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
@@ -44,6 +45,8 @@ interface IHdmiControlService {
     void queryDisplayStatus(IHdmiControlCallback callback);
     void addHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
     void removeHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
+    void addHdmiCecVolumeControlFeatureListener(IHdmiCecVolumeControlFeatureListener listener);
+    void removeHdmiCecVolumeControlFeatureListener(IHdmiCecVolumeControlFeatureListener listener);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
     void removeHotplugEventListener(IHdmiHotplugEventListener listener);
     void addDeviceEventListener(IHdmiDeviceEventListener listener);
@@ -80,6 +83,8 @@ interface IHdmiControlService {
     void sendMhlVendorCommand(int portId, int offset, int length, in byte[] data);
     void addHdmiMhlVendorCommandListener(IHdmiMhlVendorCommandListener listener);
     void setStandbyMode(boolean isStandbyModeOn);
+    void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled);
+    boolean isHdmiCecVolumeControlEnabled();
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
 }

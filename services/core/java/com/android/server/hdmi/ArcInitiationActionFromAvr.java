@@ -27,9 +27,6 @@ public class ArcInitiationActionFromAvr extends HdmiCecFeatureAction {
 
     // the required maximum response time specified in CEC 9.2
     private static final int TIMEOUT_MS = 1000;
-    private static final int MAX_RETRY_COUNT = 5;
-
-    private int mSendRequestActiveSourceRetryCount = 0;
 
     ArcInitiationActionFromAvr(HdmiCecLocalDevice source) {
         super(source);
@@ -64,12 +61,7 @@ public class ArcInitiationActionFromAvr extends HdmiCecFeatureAction {
                 return true;
             case Constants.MESSAGE_REPORT_ARC_INITIATED:
                 mState = STATE_ARC_INITIATED;
-                if (audioSystem().getActiveSource().physicalAddress != getSourcePath()
-                        && audioSystem().isSystemAudioActivated()) {
-                    sendRequestActiveSource();
-                } else {
-                    finish();
-                }
+                finish();
                 return true;
         }
         return false;
@@ -99,24 +91,8 @@ public class ArcInitiationActionFromAvr extends HdmiCecFeatureAction {
     }
 
     private void handleInitiateArcTimeout() {
+        // Keep ARC status as what it is when TV does not respond to ARC init
         HdmiLogger.debug("handleInitiateArcTimeout");
-        audioSystem().setArcStatus(false);
         finish();
-    }
-
-    protected void sendRequestActiveSource() {
-        sendCommand(HdmiCecMessageBuilder.buildRequestActiveSource(getSourceAddress()),
-                result -> {
-                    if (result != SendMessageResult.SUCCESS) {
-                        if (mSendRequestActiveSourceRetryCount < MAX_RETRY_COUNT) {
-                            mSendRequestActiveSourceRetryCount++;
-                            sendRequestActiveSource();
-                        } else {
-                            finish();
-                        }
-                    } else {
-                        finish();
-                    }
-                });
     }
 }

@@ -137,77 +137,74 @@ static void BM_DurationMetricNoLink(benchmark::State& state) {
     int64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
-
-    std::vector<AttributionNodeInternal> attributions1 = {
-            CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-            CreateAttribution(222, "GMSCoreModule2")};
-
-    std::vector<AttributionNodeInternal> attributions2 = {
-            CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
-            CreateAttribution(555, "GMSCoreModule2")};
-
     std::vector<std::unique_ptr<LogEvent>> events;
 
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + 11));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + 40));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 11,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(
+            CreateScreenStateChangedEvent(bucketStartTimeNs + 40, android::view::DISPLAY_STATE_ON));
 
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + 102));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + 450));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 102,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 450,
+                                                   android::view::DISPLAY_STATE_ON));
 
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + 650));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + bucketSizeNs + 100));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 650,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + bucketSizeNs + 100,
+                                                   android::view::DISPLAY_STATE_ON));
 
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + bucketSizeNs + 640));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + bucketSizeNs + 650));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + bucketSizeNs + 640,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + bucketSizeNs + 650,
+                                                   android::view::DISPLAY_STATE_ON));
 
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(9999, "")}, "job0", bucketStartTimeNs + 2));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(9999, "")}, "job0",bucketStartTimeNs + 101));
+    vector<int> attributionUids1 = {9999};
+    vector<string> attributionTags1 = {""};
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + 2, attributionUids1,
+                                                  attributionTags1, "job0"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + 101, attributionUids1,
+                                                   attributionTags1, "job0"));
 
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(9999, "")}, "job2", bucketStartTimeNs + 201));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(9999, "")}, "job2",bucketStartTimeNs + 500));
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + 201, attributionUids1,
+                                                  attributionTags1, "job2"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + 500, attributionUids1,
+                                                   attributionTags1, "job2"));
 
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(8888, "")}, "job2", bucketStartTimeNs + 600));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(8888, "")}, "job2",bucketStartTimeNs + bucketSizeNs + 850));
+    vector<int> attributionUids2 = {8888};
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + 600, attributionUids2,
+                                                  attributionTags1, "job2"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + bucketSizeNs + 850,
+                                                   attributionUids2, attributionTags1, "job2"));
 
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(8888, "")}, "job1", bucketStartTimeNs + bucketSizeNs + 600));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(8888, "")}, "job1", bucketStartTimeNs + bucketSizeNs + 900));
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + bucketSizeNs + 600,
+                                                  attributionUids2, attributionTags1, "job1"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + bucketSizeNs + 900,
+                                                   attributionUids2, attributionTags1, "job1"));
 
-    events.push_back(CreateSyncStartEvent(attributions1, "ReadEmail",
-                                          bucketStartTimeNs + 10));
-    events.push_back(CreateSyncEndEvent(attributions1, "ReadEmail",
-                                        bucketStartTimeNs + 50));
+    vector<int> attributionUids3 = {111, 222, 222};
+    vector<string> attributionTags3 = {"App1", "GMSCoreModule1", "GMSCoreModule2"};
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 10, attributionUids3,
+                                          attributionTags3, "ReadEmail"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + 50, attributionUids3, attributionTags3,
+                                        "ReadEmail"));
 
-    events.push_back(CreateSyncStartEvent(attributions1, "ReadEmail",
-                                          bucketStartTimeNs + 200));
-    events.push_back(CreateSyncEndEvent(attributions1, "ReadEmail",
-                                        bucketStartTimeNs + bucketSizeNs + 300));
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 200, attributionUids3,
+                                          attributionTags3, "ReadEmail"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + bucketSizeNs + 300, attributionUids3,
+                                        attributionTags3, "ReadEmail"));
 
-    events.push_back(CreateSyncStartEvent(attributions1, "ReadDoc",
-                                          bucketStartTimeNs + 400));
-    events.push_back(CreateSyncEndEvent(attributions1, "ReadDoc",
-                                        bucketStartTimeNs + bucketSizeNs - 1));
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 400, attributionUids3,
+                                          attributionTags3, "ReadDoc"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + bucketSizeNs - 1, attributionUids3,
+                                        attributionTags3, "ReadDoc"));
 
-    events.push_back(CreateSyncStartEvent(attributions2, "ReadEmail",
-                                          bucketStartTimeNs + 401));
-    events.push_back(CreateSyncEndEvent(attributions2, "ReadEmail",
-                                        bucketStartTimeNs + bucketSizeNs + 700));
-
+    vector<int> attributionUids4 = {333, 222, 555};
+    vector<string> attributionTags4 = {"App2", "GMSCoreModule1", "GMSCoreModule2"};
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 401, attributionUids4,
+                                          attributionTags4, "ReadEmail"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + bucketSizeNs + 700, attributionUids4,
+                                        attributionTags4, "ReadEmail"));
     sortLogEventsByTimestamp(&events);
 
     while (state.KeepRunning()) {
@@ -230,78 +227,75 @@ static void BM_DurationMetricLink(benchmark::State& state) {
     int64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
-    std::vector<AttributionNodeInternal> attributions1 = {
-            CreateAttribution(111, "App1"), CreateAttribution(222, "GMSCoreModule1"),
-            CreateAttribution(222, "GMSCoreModule2")};
-
-    std::vector<AttributionNodeInternal> attributions2 = {
-            CreateAttribution(333, "App2"), CreateAttribution(222, "GMSCoreModule1"),
-            CreateAttribution(555, "GMSCoreModule2")};
-
-    std::vector<AttributionNodeInternal> attributions3 = {
-            CreateAttribution(444, "App3"), CreateAttribution(222, "GMSCoreModule1"),
-            CreateAttribution(555, "GMSCoreModule2")};
-
     std::vector<std::unique_ptr<LogEvent>> events;
 
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + 55));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + 120));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + 121));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + 450));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 55,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 120,
+                                                   android::view::DISPLAY_STATE_ON));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 121,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 450,
+                                                   android::view::DISPLAY_STATE_ON));
 
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF,
-                                                   bucketStartTimeNs + 501));
-    events.push_back(CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
-                                                   bucketStartTimeNs + bucketSizeNs + 100));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + 501,
+                                                   android::view::DISPLAY_STATE_OFF));
+    events.push_back(CreateScreenStateChangedEvent(bucketStartTimeNs + bucketSizeNs + 100,
+                                                   android::view::DISPLAY_STATE_ON));
 
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(111, "App1")}, "job1", bucketStartTimeNs + 1));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(111, "App1")}, "job1",bucketStartTimeNs + 101));
+    vector<int> attributionUids1 = {111};
+    vector<string> attributionTags1 = {"App1"};
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + 1, attributionUids1,
+                                                  attributionTags1, "job1"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + 101, attributionUids1,
+                                                   attributionTags1, "job1"));
 
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(333, "App2")}, "job2", bucketStartTimeNs + 201));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(333, "App2")}, "job2",bucketStartTimeNs + 500));
-    events.push_back(CreateStartScheduledJobEvent(
-            {CreateAttribution(333, "App2")}, "job2", bucketStartTimeNs + 600));
-    events.push_back(CreateFinishScheduledJobEvent(
-            {CreateAttribution(333, "App2")}, "job2",
-            bucketStartTimeNs + bucketSizeNs + 850));
+    vector<int> attributionUids2 = {333};
+    vector<string> attributionTags2 = {"App2"};
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + 201, attributionUids2,
+                                                  attributionTags2, "job2"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + 500, attributionUids2,
+                                                   attributionTags2, "job2"));
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + 600, attributionUids2,
+                                                  attributionTags2, "job2"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + bucketSizeNs + 850,
+                                                   attributionUids2, attributionTags2, "job2"));
 
-    events.push_back(
-        CreateStartScheduledJobEvent({CreateAttribution(444, "App3")}, "job3",
-                                     bucketStartTimeNs + bucketSizeNs - 2));
-    events.push_back(
-        CreateFinishScheduledJobEvent({CreateAttribution(444, "App3")}, "job3",
-                                      bucketStartTimeNs + bucketSizeNs + 900));
+    vector<int> attributionUids3 = {444};
+    vector<string> attributionTags3 = {"App3"};
+    events.push_back(CreateStartScheduledJobEvent(bucketStartTimeNs + bucketSizeNs - 2,
+                                                  attributionUids3, attributionTags3, "job3"));
+    events.push_back(CreateFinishScheduledJobEvent(bucketStartTimeNs + bucketSizeNs + 900,
+                                                   attributionUids3, attributionTags3, "job3"));
 
-    events.push_back(CreateSyncStartEvent(attributions1, "ReadEmail",
-                                          bucketStartTimeNs + 50));
-    events.push_back(CreateSyncEndEvent(attributions1, "ReadEmail",
-                                        bucketStartTimeNs + 110));
+    vector<int> attributionUids4 = {111, 222, 222};
+    vector<string> attributionTags4 = {"App1", "GMSCoreModule1", "GMSCoreModule2"};
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 50, attributionUids4,
+                                          attributionTags4, "ReadEmail"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + 110, attributionUids4, attributionTags4,
+                                        "ReadEmail"));
 
-    events.push_back(CreateSyncStartEvent(attributions2, "ReadEmail",
-                                          bucketStartTimeNs + 300));
-    events.push_back(CreateSyncEndEvent(attributions2, "ReadEmail",
-                                        bucketStartTimeNs + bucketSizeNs + 700));
-    events.push_back(CreateSyncStartEvent(attributions2, "ReadDoc",
-                                          bucketStartTimeNs + 400));
-    events.push_back(CreateSyncEndEvent(attributions2, "ReadDoc",
-                                        bucketStartTimeNs + bucketSizeNs - 1));
+    vector<int> attributionUids5 = {333, 222, 555};
+    vector<string> attributionTags5 = {"App2", "GMSCoreModule1", "GMSCoreModule2"};
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 300, attributionUids5,
+                                          attributionTags5, "ReadEmail"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + bucketSizeNs + 700, attributionUids5,
+                                        attributionTags5, "ReadEmail"));
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 400, attributionUids5,
+                                          attributionTags5, "ReadDoc"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + bucketSizeNs - 1, attributionUids5,
+                                        attributionTags5, "ReadDoc"));
 
-    events.push_back(CreateSyncStartEvent(attributions3, "ReadDoc",
-                                          bucketStartTimeNs + 550));
-    events.push_back(CreateSyncEndEvent(attributions3, "ReadDoc",
-                                        bucketStartTimeNs + 800));
-    events.push_back(CreateSyncStartEvent(attributions3, "ReadDoc",
-                                          bucketStartTimeNs + bucketSizeNs - 1));
-    events.push_back(CreateSyncEndEvent(attributions3, "ReadDoc",
-                                        bucketStartTimeNs + bucketSizeNs + 700));
+    vector<int> attributionUids6 = {444, 222, 555};
+    vector<string> attributionTags6 = {"App3", "GMSCoreModule1", "GMSCoreModule2"};
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 550, attributionUids6,
+                                          attributionTags6, "ReadDoc"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + 800, attributionUids6, attributionTags6,
+                                        "ReadDoc"));
+    events.push_back(CreateSyncStartEvent(bucketStartTimeNs + bucketSizeNs - 1, attributionUids6,
+                                          attributionTags6, "ReadDoc"));
+    events.push_back(CreateSyncEndEvent(bucketStartTimeNs + bucketSizeNs + 700, attributionUids6,
+                                        attributionTags6, "ReadDoc"));
     sortLogEventsByTimestamp(&events);
 
     while (state.KeepRunning()) {

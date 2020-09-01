@@ -14,15 +14,23 @@
 
 package com.android.systemui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.testing.LeakCheck;
 import android.testing.TestableContext;
-import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Log;
 import android.view.Display;
 
-public class SysuiTestableContext extends TestableContext implements SysUiServiceProvider {
+import java.util.Set;
 
-    private ArrayMap<Class<?>, Object> mComponents;
+public class SysuiTestableContext extends TestableContext {
+
+    private Set<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
 
     public SysuiTestableContext(Context base) {
         super(base);
@@ -34,21 +42,6 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
         setTheme(R.style.Theme_SystemUI);
     }
 
-    public ArrayMap<Class<?>, Object> getComponents() {
-        if (mComponents == null) mComponents = new ArrayMap<>();
-        return mComponents;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
-    }
-
-    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
-        if (mComponents == null) mComponents = new ArrayMap<>();
-        mComponents.put(interfaceType, component);
-    }
-
     @Override
     public Context createDisplayContext(Display display) {
         if (display == null) {
@@ -58,5 +51,51 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
         SysuiTestableContext context =
                 new SysuiTestableContext(getBaseContext().createDisplayContext(display));
         return context;
+    }
+
+    public void cleanUpReceivers(String testName) {
+        Set<BroadcastReceiver> copy = new ArraySet<>(mRegisteredReceivers);
+        for (BroadcastReceiver r : copy) {
+            try {
+                unregisterReceiver(r);
+                Log.w(testName, "Receiver not unregistered from Context: " + r);
+            } catch (IllegalArgumentException e) {
+                // Nothing to do here. Somehow it got unregistered.
+            }
+        }
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        if (receiver != null) {
+            mRegisteredReceivers.add(receiver);
+        }
+        return super.registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler) {
+        if (receiver != null) {
+            mRegisteredReceivers.add(receiver);
+        }
+        return super.registerReceiver(receiver, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        if (receiver != null) {
+            mRegisteredReceivers.add(receiver);
+        }
+        return super.registerReceiverAsUser(receiver, user, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
+    public void unregisterReceiver(BroadcastReceiver receiver) {
+        if (receiver != null) {
+            mRegisteredReceivers.remove(receiver);
+        }
+        super.unregisterReceiver(receiver);
     }
 }

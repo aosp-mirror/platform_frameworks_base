@@ -21,7 +21,7 @@ import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Intent;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * A helper class to retrieve information about a Intent event received for a PendingIntent
@@ -89,7 +89,7 @@ public class ContextHubIntentEvent {
      */
     @NonNull
     public static ContextHubIntentEvent fromIntent(@NonNull Intent intent) {
-        Preconditions.checkNotNull(intent, "Intent cannot be null");
+        Objects.requireNonNull(intent, "Intent cannot be null");
 
         hasExtraOrThrow(intent, ContextHubManager.EXTRA_CONTEXT_HUB_INFO);
         ContextHubInfo info = intent.getParcelableExtra(ContextHubManager.EXTRA_CONTEXT_HUB_INFO);

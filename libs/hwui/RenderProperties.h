@@ -16,7 +16,10 @@
 
 #pragma once
 
+#ifdef __ANDROID__ // Layoutlib does not support device info
 #include "DeviceInfo.h"
+#endif // __ANDROID__
+
 #include "Outline.h"
 #include "Rect.h"
 #include "RevealClip.h"
@@ -526,9 +529,13 @@ public:
     }
 
     bool fitsOnLayer() const {
+#ifdef __ANDROID__ // Layoutlib does not support device info
         const DeviceInfo* deviceInfo = DeviceInfo::get();
         return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize() &&
                mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
+#else
+        return mPrimitiveFields.mWidth <= 4096 && mPrimitiveFields.mHeight <= 4096;
+#endif
     }
 
     bool promotedToLayer() const {

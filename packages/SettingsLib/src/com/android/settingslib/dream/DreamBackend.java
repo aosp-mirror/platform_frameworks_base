@@ -136,7 +136,7 @@ public class DreamBackend {
         if (mDreamManager == null)
             return null;
         try {
-            return mDreamManager.getDefaultDreamComponent();
+            return mDreamManager.getDefaultDreamComponentForUser(mContext.getUserId());
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get default dream", e);
             return null;
@@ -154,6 +154,25 @@ public class DreamBackend {
                 }
             } catch (PackageManager.NameNotFoundException exc) {
                 return null; // uninstalled?
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets an icon from active dream.
+     */
+    public Drawable getActiveIcon() {
+        final ComponentName cn = getActiveDream();
+        if (cn != null) {
+            final PackageManager pm = mContext.getPackageManager();
+            try {
+                final ServiceInfo ri = pm.getServiceInfo(cn, 0);
+                if (ri != null) {
+                    return ri.loadIcon(pm);
+                }
+            } catch (PackageManager.NameNotFoundException exc) {
+                return null;
             }
         }
         return null;
@@ -269,7 +288,7 @@ public class DreamBackend {
         if (mDreamManager == null || dreamInfo == null || dreamInfo.componentName == null)
             return;
         try {
-            mDreamManager.testDream(dreamInfo.componentName);
+            mDreamManager.testDream(mContext.getUserId(), dreamInfo.componentName);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to preview " + dreamInfo, e);
         }

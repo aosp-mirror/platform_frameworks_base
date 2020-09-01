@@ -408,23 +408,6 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
-     * Checks if {@link android.app.admin.DevicePolicyManager#setAutoTimeRequired} is enforced
-     * on the device.
-     *
-     * @return EnforcedAdmin Object containing the device owner component and
-     * userId the device owner is running as, or {@code null} setAutoTimeRequired is not enforced.
-     */
-    public static EnforcedAdmin checkIfAutoTimeRequired(Context context) {
-        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        if (dpm == null || !dpm.getAutoTimeRequired()) {
-            return null;
-        }
-        ComponentName adminComponent = dpm.getDeviceOwnerComponentOnCallingUser();
-        return new EnforcedAdmin(adminComponent, getUserHandleOf(UserHandle.myUserId()));
-    }
-
-    /**
      * Checks if an admin has enforced minimum password quality requirements on the given user.
      *
      * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
@@ -663,7 +646,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         final SpannableStringBuilder sb = new SpannableStringBuilder(textView.getText());
         removeExistingRestrictedSpans(sb);
         if (disabled) {
-            final int disabledColor = context.getColor(R.color.disabled_text_color);
+            final int disabledColor = Utils.getDisabled(context,
+                    textView.getCurrentTextColor());
             sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             textView.setCompoundDrawables(null, null, getRestrictedPadlock(context), null);

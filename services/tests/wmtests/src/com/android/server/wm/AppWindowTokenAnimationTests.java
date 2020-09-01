@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -33,26 +34,26 @@ import android.view.SurfaceControl;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.WindowTestUtils.TestAppWindowToken;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 
 /**
- * Animation related tests for the {@link AppWindowToken} class.
+ * Animation related tests for the {@link ActivityRecord} class.
  *
  * Build/Install/Run:
  *  atest AppWindowTokenAnimationTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
-    private TestAppWindowToken mToken;
+    private ActivityRecord mActivity;
 
     @Mock
     private AnimationAdapter mSpec;
@@ -61,71 +62,75 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mToken = createTestAppWindowToken(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
+        mActivity = createTestActivityRecord(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD);
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsCreated() {
-        mToken.mNeedsAnimationBoundsLayer = true;
+        mActivity.mNeedsAnimationBoundsLayer = true;
 
-        mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        verify(mTransaction).reparent(eq(mToken.getSurfaceControl()),
-                eq(mToken.mSurfaceAnimator.mLeash));
-        verify(mTransaction).reparent(eq(mToken.mSurfaceAnimator.mLeash),
-                eq(mToken.mAnimationBoundsLayer));
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        verify(mTransaction).reparent(eq(mActivity.getSurfaceControl()),
+                eq(mActivity.mSurfaceAnimator.mLeash));
+        verify(mTransaction).reparent(eq(mActivity.mSurfaceAnimator.mLeash),
+                eq(mActivity.mAnimationBoundsLayer));
     }
 
     @Test
     public void clipAfterAnim_boundsLayerZBoosted() {
-        mToken.mNeedsAnimationBoundsLayer = true;
-        mToken.mNeedsZBoost = true;
+        mActivity.mNeedsAnimationBoundsLayer = true;
+        mActivity.mNeedsZBoost = true;
 
-        mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        verify(mTransaction).setLayer(eq(mToken.mAnimationBoundsLayer),
-                intThat(layer -> layer >= AppWindowToken.Z_BOOST_BASE));
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        verify(mTransaction).setLayer(eq(mActivity.mAnimationBoundsLayer),
+                intThat(layer -> layer >= ActivityRecord.Z_BOOST_BASE));
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsDestroyed() {
-        mToken.mNeedsAnimationBoundsLayer = true;
-        mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        final SurfaceControl leash = mToken.mSurfaceAnimator.mLeash;
-        final SurfaceControl animationBoundsLayer = mToken.mAnimationBoundsLayer;
+        mActivity.mNeedsAnimationBoundsLayer = true;
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        final SurfaceControl leash = mActivity.mSurfaceAnimator.mLeash;
+        final SurfaceControl animationBoundsLayer = mActivity.mAnimationBoundsLayer;
         final ArgumentCaptor<SurfaceAnimator.OnAnimationFinishedCallback> callbackCaptor =
                 ArgumentCaptor.forClass(
                         SurfaceAnimator.OnAnimationFinishedCallback.class);
-        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
+        verify(mSpec).startAnimation(any(), any(), eq(ANIMATION_TYPE_APP_TRANSITION),
+                callbackCaptor.capture());
 
-        callbackCaptor.getValue().onAnimationFinished(mSpec);
+        callbackCaptor.getValue().onAnimationFinished(
+                ANIMATION_TYPE_APP_TRANSITION, mSpec);
         verify(mTransaction).remove(eq(leash));
         verify(mTransaction).remove(eq(animationBoundsLayer));
-        assertThat(mToken.mNeedsAnimationBoundsLayer).isFalse();
+        assertThat(mActivity.mNeedsAnimationBoundsLayer).isFalse();
     }
 
     @Test
     public void clipAfterAnimCancelled_boundsLayerIsDestroyed() {
-        mToken.mNeedsAnimationBoundsLayer = true;
-        mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        final SurfaceControl leash = mToken.mSurfaceAnimator.mLeash;
-        final SurfaceControl animationBoundsLayer = mToken.mAnimationBoundsLayer;
+        mActivity.mNeedsAnimationBoundsLayer = true;
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        final SurfaceControl leash = mActivity.mSurfaceAnimator.mLeash;
+        final SurfaceControl animationBoundsLayer = mActivity.mAnimationBoundsLayer;
 
-        mToken.mSurfaceAnimator.cancelAnimation();
+        mActivity.mSurfaceAnimator.cancelAnimation();
         verify(mTransaction).remove(eq(leash));
         verify(mTransaction).remove(eq(animationBoundsLayer));
-        assertThat(mToken.mNeedsAnimationBoundsLayer).isFalse();
+        assertThat(mActivity.mNeedsAnimationBoundsLayer).isFalse();
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void clipNoneAnim_boundsLayerIsNotCreated() {
-        mToken.mNeedsAnimationBoundsLayer = false;
+        mActivity.mNeedsAnimationBoundsLayer = false;
 
-        mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        verify(mTransaction).reparent(eq(mToken.getSurfaceControl()),
-                eq(mToken.mSurfaceAnimator.mLeash));
-        assertThat(mToken.mAnimationBoundsLayer).isNull();
+        mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        verify(mTransaction).reparent(eq(mActivity.getSurfaceControl()),
+                eq(mActivity.mSurfaceAnimator.mLeash));
+        assertThat(mActivity.mAnimationBoundsLayer).isNull();
     }
 }

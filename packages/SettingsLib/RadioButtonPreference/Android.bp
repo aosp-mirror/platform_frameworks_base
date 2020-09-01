@@ -1,0 +1,14 @@
+android_library {
+    name: "SettingsLibRadioButtonPreference",
+
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+
+    static_libs: [
+          "androidx.preference_preference",
+          "SettingsLibSettingsTheme",
+    ],
+
+    sdk_version: "system_current",
+    min_sdk_version: "21",
+}

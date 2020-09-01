@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -120,6 +121,20 @@ public final class Person implements Parcelable {
             return "name:" + mName;
         }
         return "";
+    }
+
+    /**
+     * @return the URI associated with the {@link #getIcon()} for this person, iff the icon exists
+     * and is URI based.
+     * @hide
+     */
+    @Nullable
+    public Uri getIconUri() {
+        if (mIcon != null && (mIcon.getType() == Icon.TYPE_URI
+                || mIcon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
+            return mIcon.getUri();
+        }
+        return null;
     }
 
     @Override

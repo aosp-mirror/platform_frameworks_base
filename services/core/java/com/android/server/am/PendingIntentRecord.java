@@ -17,14 +17,16 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.START_SUCCESS;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.content.IIntentSender;
-import android.content.IIntentReceiver;
 import android.app.PendingIntent;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -72,6 +74,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     final static class Key {
         final int type;
         final String packageName;
+        final String featureId;
         final IBinder activity;
         final String who;
         final int requestCode;
@@ -86,10 +89,11 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
         private static final int ODD_PRIME_NUMBER = 37;
 
-        Key(int _t, String _p, IBinder _a, String _w,
+        Key(int _t, String _p, @Nullable String _featureId, IBinder _a, String _w,
                 int _r, Intent[] _i, String[] _it, int _f, SafeActivityOptions _o, int _userId) {
             type = _t;
             packageName = _p;
+            featureId = _featureId;
             activity = _a;
             who = _w;
             requestCode = _r;
@@ -140,6 +144,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 if (!Objects.equals(packageName, other.packageName)) {
                     return false;
                 }
+                if (!Objects.equals(featureId, other.featureId)) {
+                    return false;
+                }
                 if (activity != other.activity) {
                     return false;
                 }
@@ -175,11 +182,13 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
 
         public String toString() {
-            return "Key{" + typeName() + " pkg=" + packageName
+            return "Key{" + typeName()
+                + " pkg=" + packageName + (featureId != null ? "/" + featureId : "")
                 + " intent="
                 + (requestIntent != null
                         ? requestIntent.toShortString(false, true, false, false) : "<null>")
-                + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}";
+                + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}"
+                + " requestCode=" + requestCode;
         }
 
         String typeName() {
@@ -403,19 +412,20 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
                         if (key.allIntents != null && key.allIntents.length > 1) {
                             res = controller.mAtmInternal.startActivitiesInPackage(
-                                    uid, callingPid, callingUid, key.packageName, allIntents,
-                                    allResolvedTypes, resultTo, mergedOptions, userId,
+                                    uid, callingPid, callingUid, key.packageName, key.featureId,
+                                    allIntents, allResolvedTypes, resultTo, mergedOptions, userId,
                                     false /* validateIncomingUser */,
                                     this /* originatingPendingIntent */,
                                     mAllowBgActivityStartsForActivitySender.contains(whitelistToken));
                         } else {
-                            res = controller.mAtmInternal.startActivityInPackage(
-                                    uid, callingPid, callingUid, key.packageName, finalIntent,
+                            res = controller.mAtmInternal.startActivityInPackage(uid, callingPid,
+                                    callingUid, key.packageName, key.featureId, finalIntent,
                                     resolvedType, resultTo, resultWho, requestCode, 0,
                                     mergedOptions, userId, null, "PendingIntentRecord",
                                     false /* validateIncomingUser */,
                                     this /* originatingPendingIntent */,
-                                    mAllowBgActivityStartsForActivitySender.contains(whitelistToken));
+                                    mAllowBgActivityStartsForActivitySender.contains(
+                                            whitelistToken));
                         }
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Unable to send startActivity intent", e);
@@ -430,11 +440,12 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                         // If a completion callback has been requested, require
                         // that the broadcast be delivered synchronously
                         int sent = controller.mAmInternal.broadcastIntentInPackage(key.packageName,
-                                uid, callingUid, callingPid, finalIntent, resolvedType,
-                                finishedReceiver, code, null, null, requiredPermission, options,
-                                (finishedReceiver != null), false, userId,
+                                key.featureId, uid, callingUid, callingPid, finalIntent,
+                                resolvedType, finishedReceiver, code, null, null,
+                                requiredPermission, options, (finishedReceiver != null), false,
+                                userId,
                                 mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken)
-                                || allowTrampoline);
+                                        || allowTrampoline);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }
@@ -447,7 +458,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                     try {
                         controller.mAmInternal.startServiceInPackage(uid, finalIntent, resolvedType,
                                 key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE,
-                                key.packageName, userId,
+                                key.packageName, key.featureId, userId,
                                 mAllowBgActivityStartsForServiceSender.contains(whitelistToken)
                                 || allowTrampoline);
                     } catch (RuntimeException e) {
@@ -489,6 +500,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             WeakReference<PendingIntentRecord> current = controller.mIntentSenderRecords.get(key);
             if (current == ref) {
                 controller.mIntentSenderRecords.remove(key);
+                controller.decrementUidStatLocked(this);
             }
         }
     }
@@ -496,6 +508,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("uid="); pw.print(uid);
                 pw.print(" packageName="); pw.print(key.packageName);
+                pw.print(" featureId="); pw.print(key.featureId);
                 pw.print(" type="); pw.print(key.typeName());
                 pw.print(" flags=0x"); pw.println(Integer.toHexString(key.flags));
         if (key.activity != null || key.who != null) {
@@ -508,7 +521,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
         if (key.requestIntent != null) {
             pw.print(prefix); pw.print("requestIntent=");
-                    pw.println(key.requestIntent.toShortString(false, true, true, true));
+                    pw.println(key.requestIntent.toShortString(false, true, true, false));
         }
         if (sent || canceled) {
             pw.print(prefix); pw.print("sent="); pw.print(sent);
@@ -545,6 +558,10 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
         sb.append(key.packageName);
+        if (key.featureId != null) {
+            sb.append('/');
+            sb.append(key.featureId);
+        }
         sb.append(' ');
         sb.append(key.typeName());
         if (whitelistDuration != null) {

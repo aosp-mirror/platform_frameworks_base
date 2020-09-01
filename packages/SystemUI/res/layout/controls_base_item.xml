@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="@dimen/control_height"
+    android:padding="@dimen/control_padding"
+    android:clickable="false"
+    android:focusable="true"
+    android:screenReaderFocusable="true"
+    android:stateListAnimator="@anim/control_state_list_animator"
+    android:layout_marginLeft="@dimen/control_base_item_margin"
+    android:layout_marginRight="@dimen/control_base_item_margin"
+    android:background="@drawable/control_background">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/control_icon_size"
+        android:layout_height="@dimen/control_icon_size"
+        android:paddingTop="@dimen/control_padding_adjustment"
+        android:clickable="false"
+        android:focusable="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Control.Status"
+        android:paddingTop="@dimen/control_padding_adjustment"
+        android:paddingStart="@dimen/control_status_padding"
+        android:screenReaderFocusable="false"
+        android:clickable="false"
+        android:focusable="false"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit = "marquee_forever"
+        android:textDirection="locale"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/icon"
+        app:layout_constraintStart_toEndOf="@+id/icon" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Control.Title"
+        android:paddingLeft="@dimen/control_padding_adjustment"
+        android:paddingRight="@dimen/control_padding_adjustment"
+        android:clickable="false"
+        android:focusable="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textDirection="locale"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/barrier"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="subtitle,favorite" />
+
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Control.Subtitle"
+        android:paddingLeft="@dimen/control_padding_adjustment"
+        android:paddingRight="@dimen/control_padding_adjustment"
+        android:paddingBottom="@dimen/control_padding_adjustment"
+        android:clickable="false"
+        android:focusable="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textDirection="locale"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/favorite"
+        app:layout_constraintTop_toTopOf="@id/favorite"
+    />
+
+    <CheckBox
+        android:id="@+id/favorite"
+        android:visibility="invisible"
+        android:layout_width="@dimen/controls_management_checkbox_size"
+        android:layout_height="@dimen/controls_management_checkbox_size"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:gravity="center"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:selectable="false"
+        android:importantForAccessibility="no"
+        app:layout_constraintStart_toEndOf="@id/subtitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

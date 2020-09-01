@@ -16,8 +16,10 @@
 
 package com.android.systemui.appops;
 
+import static junit.framework.TestCase.assertFalse;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -28,10 +30,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import static java.lang.Thread.sleep;
-
 import android.app.AppOpsManager;
-import android.content.pm.PackageManager;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,6 +39,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,11 +60,11 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Mock
     private AppOpsManager mAppOpsManager;
     @Mock
-    private PackageManager mPackageManager;
-    @Mock
     private AppOpsController.Callback mCallback;
     @Mock
     private AppOpsControllerImpl.H mMockHandler;
+    @Mock
+    private DumpManager mDumpManager;
 
     private AppOpsControllerImpl mController;
     private TestableLooper mTestableLooper;
@@ -75,7 +76,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
 
         getContext().addMockSystemService(AppOpsManager.class, mAppOpsManager);
 
-        mController = new AppOpsControllerImpl(mContext, mTestableLooper.getLooper());
+        mController =
+                new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mDumpManager);
     }
 
     @Test
@@ -227,12 +229,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Test
     public void testActiveOpNotRemovedAfterNoted() throws InterruptedException {
         // Replaces the timeout delay with 5 ms
-        AppOpsControllerImpl.H testHandler = mController.new H(mTestableLooper.getLooper()) {
-            @Override
-            public void scheduleRemoval(AppOpItem item, long timeToRemoval) {
-                super.scheduleRemoval(item, 5L);
-            }
-        };
+        TestHandler testHandler = new TestHandler(mTestableLooper.getLooper());
 
         mController.addCallback(new int[]{AppOpsManager.OP_FINE_LOCATION}, mCallback);
         mController.setBGHandler(testHandler);
@@ -243,6 +240,10 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
                 AppOpsManager.MODE_ALLOWED);
 
+        // Check that we "scheduled" the removal. Don't actually schedule until we are ready to
+        // process messages at a later time.
+        assertNotNull(testHandler.mDelayScheduled);
+
         mTestableLooper.processAllMessages();
         List<AppOpItem> list = mController.getActiveAppOps();
         verify(mCallback).onActiveStateChanged(
@@ -251,8 +252,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
         // Duplicates are not removed between active and noted
         assertEquals(2, list.size());
 
-        sleep(10L);
-
+        // Now is later, so we can schedule delayed messages.
+        testHandler.scheduleDelayed();
         mTestableLooper.processAllMessages();
 
         verify(mCallback, never()).onActiveStateChanged(
@@ -318,5 +319,25 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(mCallback).onActiveStateChanged(
                 AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME, true);
+    }
+
+    private class TestHandler extends AppOpsControllerImpl.H {
+        TestHandler(Looper looper) {
+            mController.super(looper);
+        }
+
+        Runnable mDelayScheduled;
+
+        void scheduleDelayed() {
+            if (mDelayScheduled != null) {
+                mDelayScheduled.run();
+                mDelayScheduled = null;
+            }
+        }
+
+        @Override
+        public void scheduleRemoval(AppOpItem item, long timeToRemoval) {
+            mDelayScheduled = () -> super.scheduleRemoval(item, 0L);
+        }
     }
 }

@@ -19,16 +19,17 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
@@ -54,6 +55,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Map;
 
@@ -65,6 +67,7 @@ import java.util.Map;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class LaunchParamsControllerTests extends ActivityTestsBase {
     private LaunchParamsController mController;
     private TestLaunchParamsPersister mPersister;
@@ -89,9 +92,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTaskRecord(), layout, record, source, options, PHASE_BOUNDS,
+        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
                 new LaunchParams());
-        verify(positioner, times(1)).onCalculate(eq(record.getTaskRecord()), eq(layout), eq(record),
+        verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
                 eq(source), eq(options), anyInt(), any(), any());
     }
 
@@ -108,13 +111,13 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setComponent(name)
                 .setUid(userId).build();
         final LaunchParams expected = new LaunchParams();
-        expected.mPreferredDisplayId = 3;
+        expected.mPreferredTaskDisplayArea = mock(TaskDisplayArea.class);
         expected.mWindowingMode = WINDOWING_MODE_PINNED;
         expected.mBounds.set(200, 300, 400, 500);
 
         mPersister.putLaunchParams(userId, name, expected);
 
-        mController.calculate(activity.getTaskRecord(), null /*layout*/, activity, null /*source*/,
+        mController.calculate(activity.getTask(), null /*layout*/, activity, null /*source*/,
                 null /*options*/, PHASE_BOUNDS, new LaunchParams());
         verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
                 eq(expected), any());
@@ -179,7 +182,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final LaunchParams params = new LaunchParams();
         params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(0, 0, 30, 20);
-        params.mPreferredDisplayId = 3;
+        params.mPreferredTaskDisplayArea = mock(TaskDisplayArea.class);
 
         final InstrumentedPositioner positioner2 = new InstrumentedPositioner(RESULT_CONTINUE,
                 params);
@@ -224,8 +227,8 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
      */
     @Test
     public void testVrPreferredDisplay() {
-        final int vr2dDisplayId = 1;
-        mService.mVr2dDisplayId = vr2dDisplayId;
+        final TestDisplayContent vrDisplay = createNewDisplayContent();
+        mService.mVr2dDisplayId = vrDisplay.mDisplayId;
 
         final LaunchParams result = new LaunchParams();
         final ActivityRecord vrActivity = new ActivityBuilder(mService).build();
@@ -234,16 +237,17 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         // VR activities should always land on default display.
         mController.calculate(null /*task*/, null /*layout*/, vrActivity /*activity*/,
                 null /*source*/, null /*options*/, PHASE_BOUNDS, result);
-        assertEquals(DEFAULT_DISPLAY, result.mPreferredDisplayId);
+        assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
+                result.mPreferredTaskDisplayArea);
 
         // Otherwise, always lands on VR 2D display.
         final ActivityRecord vr2dActivity = new ActivityBuilder(mService).build();
         mController.calculate(null /*task*/, null /*layout*/, vr2dActivity /*activity*/,
                 null /*source*/, null /*options*/, PHASE_BOUNDS, result);
-        assertEquals(vr2dDisplayId, result.mPreferredDisplayId);
+        assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
                 null /*options*/, PHASE_BOUNDS, result);
-        assertEquals(vr2dDisplayId, result.mPreferredDisplayId);
+        assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
 
         mService.mVr2dDisplayId = INVALID_DISPLAY;
     }
@@ -263,9 +267,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTaskRecord(), layout, record, source, options, PHASE_BOUNDS,
+        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
                 new LaunchParams());
-        verify(positioner, times(1)).onCalculate(eq(record.getTaskRecord()), eq(layout), eq(record),
+        verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
                 eq(source), eq(options), eq(PHASE_BOUNDS), any(), any());
     }
 
@@ -276,16 +280,19 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
     @Test
     public void testLayoutTaskPreferredDisplayChange() {
         final LaunchParams params = new LaunchParams();
-        params.mPreferredDisplayId = 2;
+        final TestDisplayContent display = createNewDisplayContent();
+        final TaskDisplayArea preferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
+        params.mPreferredTaskDisplayArea = preferredTaskDisplayArea;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
-        doNothing().when(mService).moveStackToDisplay(anyInt(), anyInt());
+        doNothing().when(mRootWindowContainer).moveStackToTaskDisplayArea(anyInt(), any(),
+                anyBoolean());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mService, times(1)).moveStackToDisplay(eq(task.getStackId()),
-                eq(params.mPreferredDisplayId));
+        verify(mRootWindowContainer, times(1)).moveStackToTaskDisplayArea(eq(task.getRootTaskId()),
+                eq(preferredTaskDisplayArea), anyBoolean());
     }
 
     /**
@@ -298,7 +305,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final int windowingMode = WINDOWING_MODE_FREEFORM;
         params.mWindowingMode = windowingMode;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -323,7 +330,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -331,7 +338,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mController.layoutTask(task, null /* windowLayout */);
 
-        assertEquals(expected, task.getBounds());
+        // Task will make adjustments to requested bounds. We only need to guarantee that the
+        // reuqested bounds are expected.
+        assertEquals(expected, task.getRequestedOverrideBounds());
     }
 
     /**
@@ -346,7 +355,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -369,7 +378,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        public int onCalculate(TaskRecord task, WindowLayout layout, ActivityRecord activity,
+        public int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
                    ActivityRecord source, ActivityOptions options, int phase,
                    LaunchParams currentParams, LaunchParams outParams) {
             outParams.set(mParams);
@@ -419,10 +428,10 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        void saveTask(TaskRecord task) {
-            final int userId = task.userId;
+        void saveTask(Task task, DisplayContent display) {
+            final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
-            mTmpParams.mPreferredDisplayId = task.getStack().mDisplayId;
+            mTmpParams.mPreferredTaskDisplayArea = task.getDisplayArea();
             mTmpParams.mWindowingMode = task.getWindowingMode();
             if (task.mLastNonFullscreenBounds != null) {
                 mTmpParams.mBounds.set(task.mLastNonFullscreenBounds);
@@ -433,8 +442,8 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams params) {
-            final int userId = task != null ? task.userId : activity.mUserId;
+        void getLaunchParams(Task task, ActivityRecord activity, LaunchParams params) {
+            final int userId = task != null ? task.mUserId : activity.mUserId;
             final ComponentName name = task != null
                     ? task.realActivity : activity.mActivityComponent;
 
@@ -449,5 +458,15 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
                 params.set(paramsRecord);
             }
         }
+    }
+
+    private TestDisplayContent createNewDisplayContent() {
+        final TestDisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        spyOn(display.mDisplayContent.mDisplayFrames);
+
+        // We didn't set up the overall environment for this test, so we need to mute the side
+        // effect of layout passes that loosen the stable frame.
+        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
+        return display;
     }
 }

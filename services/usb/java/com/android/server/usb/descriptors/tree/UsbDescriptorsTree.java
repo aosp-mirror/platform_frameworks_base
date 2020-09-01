@@ -126,11 +126,13 @@ public final class UsbDescriptorsTree {
                 //
                 // Audio Class Descriptors
                 //
-                case UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE:
-                    addACInterface((UsbACInterface) descriptor);
+                case UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_INTERFACE:
+                    //TODO: This needs to be parsed out to Audio/Video...
+                    // addACInterface((UsbACInterface) descriptor);
                     break;
 
-                case UsbDescriptor.DESCRIPTORTYPE_AUDIO_ENDPOINT:
+                case UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_ENDPOINT:
+                    //TODO: This needs to be parsed out to Audio/Video...
                     break;
             }
         }

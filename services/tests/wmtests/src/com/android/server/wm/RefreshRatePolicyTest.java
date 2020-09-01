@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,6 +33,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
@@ -38,6 +41,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 @FlakyTest
 public class RefreshRatePolicyTest extends WindowTestsBase {
 
@@ -106,9 +110,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 "overrideWindow");
         overrideWindow.mAttrs.packageName = "com.android.test";
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
-        overrideWindow.mAppToken.mSurfaceAnimator.startAnimation(
+        overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */);
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
     }
@@ -122,9 +126,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(cameraUsingWindow));
 
-        cameraUsingWindow.mAppToken.mSurfaceAnimator.startAnimation(
+        cameraUsingWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 cameraUsingWindow.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */);
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
     }
 }

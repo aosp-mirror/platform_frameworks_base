@@ -60,6 +60,10 @@ public class StorageNotification extends SystemUI {
     private NotificationManager mNotificationManager;
     private StorageManager mStorageManager;
 
+    public StorageNotification(Context context) {
+        super(context);
+    }
+
     private static class MoveInfo {
         public int moveId;
         public Bundle extras;
@@ -183,8 +187,9 @@ public class StorageNotification extends SystemUI {
     }
 
     private void updateMissingPrivateVolumes() {
-        if (isTv()) {
+        if (isTv() || isAutomotive()) {
             // On TV, TvSettings displays a modal full-screen activity in this case.
+            // Not applicable for automotive.
             return;
         }
 
@@ -289,6 +294,16 @@ public class StorageNotification extends SystemUI {
     private void onPublicVolumeStateChangedInternal(VolumeInfo vol) {
         Log.d(TAG, "Notifying about public volume: " + vol.toString());
 
+        // Volume state change event may come from removed user, in this case, mountedUserId will
+        // equals to UserHandle.USER_NULL (-10000) which will do nothing when call cancelAsUser(),
+        // but cause crash when call notifyAsUser(). Here we return directly for USER_NULL, and
+        // leave all notifications belong to removed user to NotificationManagerService, the latter
+        // will remove all notifications of the removed user when handles user stopped broadcast.
+        if (isAutomotive() && vol.getMountUserId() == UserHandle.USER_NULL) {
+            Log.d(TAG, "Ignore public volume state change event of removed user");
+            return;
+        }
+
         final Notification notif;
         switch (vol.getState()) {
             case VolumeInfo.STATE_UNMOUNTED:
@@ -364,16 +379,24 @@ public class StorageNotification extends SystemUI {
                     R.string.ext_media_new_notification_message, disk.getDescription());
 
             final PendingIntent initIntent = buildInitPendingIntent(vol);
-            return buildNotificationBuilder(vol, title, text)
-                    .addAction(new Action(R.drawable.ic_settings_24dp,
-                            mContext.getString(R.string.ext_media_init_action), initIntent))
-                    .addAction(new Action(R.drawable.ic_eject_24dp,
-                            mContext.getString(R.string.ext_media_unmount_action),
-                            buildUnmountPendingIntent(vol)))
-                    .setContentIntent(initIntent)
-                    .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
-                    .build();
+            final PendingIntent unmountIntent = buildUnmountPendingIntent(vol);
 
+            if (isAutomotive()) {
+                return buildNotificationBuilder(vol, title, text)
+                        .setContentIntent(unmountIntent)
+                        .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
+                        .build();
+            } else {
+                return buildNotificationBuilder(vol, title, text)
+                        .addAction(new Action(R.drawable.ic_settings_24dp,
+                                mContext.getString(R.string.ext_media_init_action), initIntent))
+                        .addAction(new Action(R.drawable.ic_eject_24dp,
+                                mContext.getString(R.string.ext_media_unmount_action),
+                                unmountIntent))
+                        .setContentIntent(initIntent)
+                        .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
+                        .build();
+            }
         } else {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
@@ -422,9 +445,15 @@ public class StorageNotification extends SystemUI {
                 R.string.ext_media_unmountable_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
                 R.string.ext_media_unmountable_notification_message, disk.getDescription());
+        PendingIntent action;
+        if (isAutomotive()) {
+            action = buildUnmountPendingIntent(vol);
+        } else {
+            action = buildInitPendingIntent(vol);
+        }
 
         return buildNotificationBuilder(vol, title, text)
-                .setContentIntent(buildInitPendingIntent(vol))
+                .setContentIntent(action)
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
     }
@@ -591,6 +620,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.NEW_STORAGE");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add intent to handle unsupported usb
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardInit");
@@ -607,6 +639,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.NEW_STORAGE");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add intent to handle unmountable usb
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardInit");
@@ -665,6 +700,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add volume settings intent for automotive
+            return null;
         } else {
             switch (vol.getType()) {
                 case VolumeInfo.TYPE_PRIVATE:
@@ -696,7 +734,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private PendingIntent buildForgetPendingIntent(VolumeRecord rec) {
-        // Not used on TV
+        // Not used on TV and Automotive
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
                 "com.android.settings.Settings$PrivateVolumeForgetActivity");
@@ -712,6 +750,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.MIGRATE_STORAGE");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add storage migrate intent for automotive
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardMigrateProgress");
@@ -731,6 +772,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction("com.android.tv.settings.action.MOVE_APP");
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add storage move intent for automotive
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardMoveProgress");
@@ -746,6 +790,9 @@ public class StorageNotification extends SystemUI {
         if (isTv()) {
             intent.setPackage("com.android.tv.settings");
             intent.setAction(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+        } else if (isAutomotive()) {
+            // TODO(b/151671685): add storage ready intent for automotive
+            return null;
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageWizardReady");

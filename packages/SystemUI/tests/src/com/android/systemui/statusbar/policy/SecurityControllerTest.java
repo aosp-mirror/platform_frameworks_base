@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +39,6 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.NetworkRequest;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.UserManager;
 import android.security.IKeyChainService;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -45,34 +46,31 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class SecurityControllerTest extends SysuiTestCase implements SecurityControllerCallback {
+public class SecurityControllerTest extends SysuiTestCase {
     private final DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
     private final IKeyChainService.Stub mKeyChainService = mock(IKeyChainService.Stub.class);
     private final UserManager mUserManager = mock(UserManager.class);
+    private final BroadcastDispatcher mBroadcastDispatcher = mock(BroadcastDispatcher.class);
+    private final Handler mHandler = mock(Handler.class);
     private SecurityControllerImpl mSecurityController;
-    private CountDownLatch mStateChangedLatch;
     private ConnectivityManager mConnectivityManager = mock(ConnectivityManager.class);
-
-    // implementing SecurityControllerCallback
-    @Override
-    public void onStateChanged() {
-        mStateChangedLatch.countDown();
-    }
+    private FakeExecutor mBgExecutor;
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Before
     public void setUp() throws Exception {
@@ -85,6 +83,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mContext.addMockService(comp, mKeyChainService);
 
         when(mUserManager.getUserInfo(anyInt())).thenReturn(new UserInfo());
+        when(mUserManager.isUserUnlocked(any())).thenReturn(true);
 
         when(mKeyChainService.getUserCaAliases())
                 .thenReturn(new StringParceledListSlice(new ArrayList<String>()));
@@ -93,18 +92,23 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         when(mKeyChainService.queryLocalInterface("android.security.IKeyChainService"))
                 .thenReturn(mKeyChainService);
 
-        // Wait for callbacks from 1) the CACertLoader and 2) the onUserSwitched() function in the
-        // constructor of mSecurityController
-        mStateChangedLatch = new CountDownLatch(2);
-        // TODO: Migrate this test to TestableLooper and use a handler attached
-        // to that.
-        mSecurityController = new SecurityControllerImpl(mContext,
-                new Handler(Looper.getMainLooper()), this);
-    }
+        ArgumentCaptor<BroadcastReceiver> brCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
 
-    @After
-    public void tearDown() {
-        mSecurityController.removeCallback(this);
+        mBgExecutor = new FakeExecutor(new FakeSystemClock());
+        mSecurityController = new SecurityControllerImpl(
+                mContext,
+                mHandler,
+                mBroadcastDispatcher,
+                mBgExecutor);
+
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(
+                brCaptor.capture(),
+                anyObject(),
+                anyObject(),
+                anyObject());
+
+        mBroadcastReceiver = brCaptor.getValue();
     }
 
     @Test
@@ -124,8 +128,6 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
 
     @Test
     public void testWorkAccount() throws Exception {
-        // Wait for the callbacks from setUp()
-        assertTrue(mStateChangedLatch.await(1, TimeUnit.SECONDS));
         assertFalse(mSecurityController.hasCACertInCurrentUser());
 
         final int PRIMARY_USER_ID = 0;
@@ -138,52 +140,42 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         assertTrue(mSecurityController.hasWorkProfile());
         assertFalse(mSecurityController.hasCACertInWorkProfile());
 
-        mStateChangedLatch = new CountDownLatch(1);
-
         when(mKeyChainService.getUserCaAliases())
                 .thenReturn(new StringParceledListSlice(Arrays.asList("One CA Alias")));
 
-        mSecurityController.new CACertLoader()
-                           .execute(MANAGED_USER_ID);
+        refreshCACerts(MANAGED_USER_ID);
+        mBgExecutor.runAllReady();
 
-        assertTrue(mStateChangedLatch.await(3, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInWorkProfile());
     }
 
     @Test
     public void testCaCertLoader() throws Exception {
-        // Wait for the callbacks from setUp()
-        assertTrue(mStateChangedLatch.await(1, TimeUnit.SECONDS));
         assertFalse(mSecurityController.hasCACertInCurrentUser());
 
         // With a CA cert
-        mStateChangedLatch = new CountDownLatch(1);
-
         when(mKeyChainService.getUserCaAliases())
                 .thenReturn(new StringParceledListSlice(Arrays.asList("One CA Alias")));
 
-        mSecurityController.new CACertLoader()
-                           .execute(0);
+        refreshCACerts(0);
+        mBgExecutor.runAllReady();
 
-        assertTrue(mStateChangedLatch.await(3, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
 
         // Exception
-
-        mStateChangedLatch = new CountDownLatch(1);
-
         when(mKeyChainService.getUserCaAliases())
                 .thenThrow(new AssertionError("Test AssertionError"))
                 .thenReturn(new StringParceledListSlice(new ArrayList<String>()));
 
-        mSecurityController.new CACertLoader()
-                           .execute(0);
+        refreshCACerts(0);
+        mBgExecutor.runAllReady();
 
-        assertFalse(mStateChangedLatch.await(1, TimeUnit.SECONDS));
         assertTrue(mSecurityController.hasCACertInCurrentUser());
-        // The retry takes 30s
-        //assertTrue(mStateChangedLatch.await(31, TimeUnit.SECONDS));
-        //assertFalse(mSecurityController.hasCACertInCurrentUser());
+
+        refreshCACerts(0);
+        mBgExecutor.runAllReady();
+
+        assertFalse(mSecurityController.hasCACertInCurrentUser());
     }
 
     @Test
@@ -192,5 +184,14 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
                 (NetworkRequest request) -> request.networkCapabilities.getUids() == null
                         && request.networkCapabilities.getCapabilities().length == 0
                 ), any(NetworkCallback.class));
+    }
+
+    /**
+     * refresh CA certs by sending a user unlocked broadcast for the desired user
+     */
+    private void refreshCACerts(int userId) {
+        Intent intent = new Intent(Intent.ACTION_USER_UNLOCKED);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        mBroadcastReceiver.onReceive(mContext, intent);
     }
 }

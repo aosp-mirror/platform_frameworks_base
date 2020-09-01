@@ -218,7 +218,7 @@ public class TransactionExecutor {
                             null /* customIntent */);
                     break;
                 case ON_START:
-                    mTransactionHandler.handleStartActivity(r, mPendingActions);
+                    mTransactionHandler.handleStartActivity(r.token, mPendingActions);
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r.token, false /* finalStateRequest */,
@@ -230,8 +230,8 @@ public class TransactionExecutor {
                             "LIFECYCLER_PAUSE_ACTIVITY");
                     break;
                 case ON_STOP:
-                    mTransactionHandler.handleStopActivity(r.token, false /* show */,
-                            0 /* configChanges */, mPendingActions, false /* finalStateRequest */,
+                    mTransactionHandler.handleStopActivity(r.token, 0 /* configChanges */,
+                            mPendingActions, false /* finalStateRequest */,
                             "LIFECYCLER_STOP_ACTIVITY");
                     break;
                 case ON_DESTROY:

@@ -140,6 +140,14 @@ class LinkContext : public IAaptContext {
     min_sdk_version_ = minSdk;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    return split_name_dependencies_;
+  }
+
+  void SetSplitNameDependencies(const std::set<std::string>& split_name_dependencies) {
+    split_name_dependencies_ = split_name_dependencies;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
@@ -151,6 +159,7 @@ class LinkContext : public IAaptContext {
   SymbolTable symbols_;
   bool verbose_ = false;
   int min_sdk_version_ = 0;
+  std::set<std::string> split_name_dependencies_;
 };
 
 // A custom delegate that generates compatible pre-O IDs for use with feature splits.
@@ -269,6 +278,7 @@ struct ResourceFileFlattenerOptions {
   bool keep_raw_values = false;
   bool do_not_compress_anything = false;
   bool update_proguard_spec = false;
+  bool do_not_fail_on_missing_resources = false;
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
   Maybe<std::regex> regex_to_not_compress;
@@ -297,6 +307,25 @@ struct R {
   };
 };
 
+template <typename T>
+uint32_t GetCompressionFlags(const StringPiece& str, T options) {
+  if (options.do_not_compress_anything) {
+    return 0;
+  }
+
+  if (options.regex_to_not_compress
+      && std::regex_search(str.to_string(), options.regex_to_not_compress.value())) {
+    return 0;
+  }
+
+  for (const std::string& extension : options.extensions_to_not_compress) {
+    if (util::EndsWith(str, extension)) {
+      return 0;
+    }
+  }
+  return ArchiveEntry::kCompress;
+}
+
 class ResourceFileFlattener {
  public:
   ResourceFileFlattener(const ResourceFileFlattenerOptions& options, IAaptContext* context,
@@ -320,8 +349,6 @@ class ResourceFileFlattener {
     // The destination to write this file to.
     std::string dst_path;
   };
-
-  uint32_t GetCompressionFlags(const StringPiece& str);
 
   std::vector<std::unique_ptr<xml::XmlResource>> LinkAndVersionXmlFile(ResourceTable* table,
                                                                        FileOperation* file_op);
@@ -381,26 +408,6 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   }
 }
 
-// TODO(rtmitchell): turn this function into a variable that points to a method that retrieves the
-// compression flag
-uint32_t ResourceFileFlattener::GetCompressionFlags(const StringPiece& str) {
-  if (options_.do_not_compress_anything) {
-    return 0;
-  }
-
-  if (options_.regex_to_not_compress
-      && std::regex_search(str.to_string(), options_.regex_to_not_compress.value())) {
-    return 0;
-  }
-
-  for (const std::string& extension : options_.extensions_to_not_compress) {
-    if (util::EndsWith(str, extension)) {
-      return 0;
-    }
-  }
-  return ArchiveEntry::kCompress;
-}
-
 static bool IsTransitionElement(const std::string& name) {
   return name == "fade" || name == "changeBounds" || name == "slide" || name == "explode" ||
          name == "changeImageTransform" || name == "changeTransform" ||
@@ -438,7 +445,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   xml::StripAndroidStudioAttributes(doc->root.get());
 
   XmlReferenceLinker xml_linker;
-  if (!xml_linker.Consume(context_, doc)) {
+  if (!options_.do_not_fail_on_missing_resources && !xml_linker.Consume(context_, doc)) {
     return {};
   }
 
@@ -640,7 +647,8 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           }
         } else {
           error |= !io::CopyFileToArchive(context_, file_op.file_to_copy, file_op.dst_path,
-                                          GetCompressionFlags(file_op.dst_path), archive_writer);
+                                          GetCompressionFlags(file_op.dst_path, options_),
+                                          archive_writer);
         }
       }
     }
@@ -887,7 +895,7 @@ class Linker {
           // android:versionCode from the framework AndroidManifest.xml.
           ExtractCompileSdkVersions(asset_source->GetAssetManager());
         }
-      } else if (asset_source->IsPackageDynamic(entry.first)) {
+      } else if (asset_source->IsPackageDynamic(entry.first, entry.second)) {
         final_table_.included_packages_[entry.first] = entry.second;
       }
     }
@@ -963,6 +971,17 @@ class Linker {
       if (xml::Attribute* min_sdk =
               uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
         app_info.min_sdk_version = ResourceUtils::ParseSdkVersion(min_sdk->value);
+      }
+    }
+
+    for (const xml::Element* child_el : manifest_el->GetChildElements()) {
+      if (child_el->namespace_uri.empty() && child_el->name == "uses-split") {
+        if (const xml::Attribute* split_name =
+            child_el->FindAttribute(xml::kSchemaAndroid, "name")) {
+          if (!split_name->value.empty()) {
+            app_info.split_name_dependencies.insert(split_name->value);
+          }
+        }
       }
     }
     return app_info;
@@ -1065,7 +1084,8 @@ class Linker {
 
       case OutputFormat::kProto: {
         pb::ResourceTable pb_table;
-        SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics());
+        SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics(),
+                           options_.proto_table_flattener_options);
         return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
                                       ArchiveEntry::kCompress, writer);
       } break;
@@ -1278,7 +1298,8 @@ class Linker {
       return false;
     }
 
-    proguard::WriteKeepSet(keep_set, &fout, options_.generate_minimal_proguard_rules);
+    proguard::WriteKeepSet(keep_set, &fout, options_.generate_minimal_proguard_rules,
+                           options_.no_proguard_location_reference);
     fout.Flush();
 
     if (fout.HadError()) {
@@ -1548,22 +1569,100 @@ class Linker {
     }
 
     for (auto& entry : merged_assets) {
-      uint32_t compression_flags = ArchiveEntry::kCompress;
-      std::string extension = file::GetExtension(entry.first).to_string();
-
-      if (options_.do_not_compress_anything
-          || options_.extensions_to_not_compress.count(extension) > 0
-          || (options_.regex_to_not_compress
-              && std::regex_search(extension, options_.regex_to_not_compress.value()))) {
-        compression_flags = 0u;
-      }
-
+      uint32_t compression_flags = GetCompressionFlags(entry.first, options_);
       if (!io::CopyFileToArchive(context_, entry.second.get(), entry.first, compression_flags,
                                  writer)) {
         return false;
       }
     }
     return true;
+  }
+
+  void AliasAdaptiveIcon(xml::XmlResource* manifest, ResourceTable* table) {
+    xml::Element* application = manifest->root->FindChild("", "application");
+    if (!application) {
+      return;
+    }
+
+    xml::Attribute* icon = application->FindAttribute(xml::kSchemaAndroid, "icon");
+    xml::Attribute* round_icon = application->FindAttribute(xml::kSchemaAndroid, "roundIcon");
+    if (!icon || !round_icon) {
+      return;
+    }
+
+    // Find the icon resource defined within the application.
+    auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
+    if (!icon_reference || !icon_reference->name) {
+      return;
+    }
+    auto package = table->FindPackageById(icon_reference->id.value().package_id());
+    if (!package) {
+      return;
+    }
+    auto type = package->FindType(icon_reference->name.value().type);
+    if (!type) {
+      return;
+    }
+    auto icon_entry = type->FindEntry(icon_reference->name.value().entry);
+    if (!icon_entry) {
+      return;
+    }
+
+    int icon_max_sdk = 0;
+    for (auto& config_value : icon_entry->values) {
+      icon_max_sdk = (icon_max_sdk < config_value->config.sdkVersion)
+          ? config_value->config.sdkVersion : icon_max_sdk;
+    }
+    if (icon_max_sdk < SDK_O) {
+      // Adaptive icons must be versioned with v26 qualifiers, so this is not an adaptive icon.
+      return;
+    }
+
+    // Find the roundIcon resource defined within the application.
+    auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
+    if (!round_icon_reference || !round_icon_reference->name) {
+      return;
+    }
+    package = table->FindPackageById(round_icon_reference->id.value().package_id());
+    if (!package) {
+      return;
+    }
+    type = package->FindType(round_icon_reference->name.value().type);
+    if (!type) {
+      return;
+    }
+    auto round_icon_entry = type->FindEntry(round_icon_reference->name.value().entry);
+    if (!round_icon_entry) {
+      return;
+    }
+
+    int round_icon_max_sdk = 0;
+    for (auto& config_value : round_icon_entry->values) {
+      round_icon_max_sdk = (round_icon_max_sdk < config_value->config.sdkVersion)
+                     ? config_value->config.sdkVersion : round_icon_max_sdk;
+    }
+    if (round_icon_max_sdk >= SDK_O) {
+      // The developer explicitly used a v26 compatible drawable as the roundIcon, meaning we should
+      // not generate an alias to the icon drawable.
+      return;
+    }
+
+    // Add an equivalent v26 entry to the roundIcon for each v26 variant of the regular icon.
+    for (auto& config_value : icon_entry->values) {
+      if (config_value->config.sdkVersion < SDK_O) {
+        continue;
+      }
+
+      context_->GetDiagnostics()->Note(DiagMessage() << "generating "
+                                                     << round_icon_reference->name.value()
+                                                     << " with config \"" << config_value->config
+                                                     << "\" for round icon compatibility");
+
+      auto value = icon_reference->Clone(&table->string_pool);
+      auto round_config_value = round_icon_entry->FindOrCreateValue(
+          config_value->config, config_value->product);
+      round_config_value->value.reset(value);
+    }
   }
 
   // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
@@ -1579,6 +1678,14 @@ class Linker {
       return false;
     }
 
+    // When a developer specifies an adaptive application icon, and a non-adaptive round application
+    // icon, create an alias from the round icon to the regular icon for v26 APIs and up. We do this
+    // because certain devices prefer android:roundIcon over android:icon regardless of the API
+    // levels of the drawables set for either. This auto-aliasing behaviour allows an app to prefer
+    // the android:roundIcon on API 25 devices, and prefer the adaptive icon on API 26 devices.
+    // See (b/34829129)
+    AliasAdaptiveIcon(manifest, table);
+
     ResourceFileFlattenerOptions file_flattener_options;
     file_flattener_options.keep_raw_values = keep_raw_values;
     file_flattener_options.do_not_compress_anything = options_.do_not_compress_anything;
@@ -1591,9 +1698,9 @@ class Linker {
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
     file_flattener_options.output_format = options_.output_format;
+    file_flattener_options.do_not_fail_on_missing_resources = options_.merge_only;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
-
     if (!file_flattener.Flatten(table, writer)) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed linking file resources");
       return false;
@@ -1660,10 +1767,9 @@ class Linker {
       return 1;
     }
 
-    // First extract the package name without modifying it (via --rename-manifest-package).
+    // First extract the Package name without modifying it (via --rename-manifest-package).
     if (Maybe<AppInfo> maybe_app_info =
             ExtractAppInfoFromManifest(manifest_xml.get(), context_->GetDiagnostics())) {
-      // Extract the package name from the manifest ignoring the value of --rename-manifest-package.
       const AppInfo& app_info = maybe_app_info.value();
       context_->SetCompilationPackage(app_info.package);
     }
@@ -1699,6 +1805,7 @@ class Linker {
     context_->SetMinSdkVersion(app_info_.min_sdk_version.value_or_default(0));
 
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
+    context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
 
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
@@ -1714,6 +1821,8 @@ class Linker {
 
     TableMergerOptions table_merger_options;
     table_merger_options.auto_add_overlay = options_.auto_add_overlay;
+    table_merger_options.override_styles_instead_of_overlaying =
+        options_.override_styles_instead_of_overlaying;
     table_merger_options.strict_visibility = options_.strict_visibility;
     table_merger_ = util::make_unique<TableMerger>(context_, &final_table_, table_merger_options);
 
@@ -1828,7 +1937,7 @@ class Linker {
     }
 
     ReferenceLinker linker;
-    if (!linker.Consume(context_, &final_table_)) {
+    if (!options_.merge_only && !linker.Consume(context_, &final_table_)) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed linking references");
       return 1;
     }
@@ -1980,7 +2089,7 @@ class Linker {
       manifest_xml->file.name.package = context_->GetCompilationPackage();
 
       XmlReferenceLinker manifest_linker;
-      if (manifest_linker.Consume(context_, manifest_xml.get())) {
+      if (options_.merge_only || manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
             !proguard::CollectProguardRulesForManifest(manifest_xml.get(), &proguard_keep_set)) {
           error = true;
@@ -2111,6 +2220,12 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     context.GetDiagnostics()->Error(
         DiagMessage()
             << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
+    return 1;
+  }
+
+  if (options_.merge_only && !static_lib_) {
+    context.GetDiagnostics()->Error(
+        DiagMessage() << "the --merge-only flag can be only used when building a static library");
     return 1;
   }
 

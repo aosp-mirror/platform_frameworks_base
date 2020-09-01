@@ -969,7 +969,7 @@ public class CameraErrorCollector extends ErrorCollector {
      */
     private static class IntInMatcher extends InMatcher<Integer> {
         public IntInMatcher(int[] values) {
-            Preconditions.checkNotNull("values", values);
+            Objects.requireNonNull(values, "values");
             mValues = new ArrayList<>(values.length);
             for (int i : values) {
                 mValues.add(i);
@@ -1005,7 +1005,7 @@ public class CameraErrorCollector extends ErrorCollector {
      */
     private static class BooleanInMatcher extends InMatcher<Boolean> {
         public BooleanInMatcher(boolean[] values) {
-            Preconditions.checkNotNull("values", values);
+            Objects.requireNonNull(values, "values");
             mValues = new ArrayList<>(values.length);
             for (boolean i : values) {
                 mValues.add(i);

@@ -138,7 +138,8 @@ public class KeyguardAffordanceView extends ImageView {
         mMinBackgroundRadius = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_affordance_min_background_radius);
         mColorInterpolator = new ArgbEvaluator();
-        mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.3f);
+        mFlingAnimationUtils = new FlingAnimationUtils(mContext.getResources().getDisplayMetrics(),
+                0.3f);
 
         a.recycle();
     }

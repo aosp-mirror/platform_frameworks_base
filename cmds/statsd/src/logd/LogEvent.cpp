@@ -17,11 +17,13 @@
 #define DEBUG false  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
-#include "stats_log_util.h"
-#include "statslog.h"
-
-#include <binder/IPCThreadState.h>
+#include <android-base/stringprintf.h>
+#include <android/binder_ibinder.h>
 #include <private/android_filesystem_config.h>
+
+#include "annotations.h"
+#include "stats_log_util.h"
+#include "statslog_statsd.h"
 
 namespace android {
 namespace os {
@@ -31,160 +33,41 @@ namespace statsd {
 const int FIELD_ID_EXPERIMENT_ID = 1;
 
 using namespace android::util;
+using android::base::StringPrintf;
 using android::util::ProtoOutputStream;
 using std::string;
 using std::vector;
 
-LogEvent::LogEvent(log_msg& msg) {
-    mContext =
-            create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
-    mLogdTimestampNs = msg.entry.sec * NS_PER_SEC + msg.entry.nsec;
-    mLogUid = msg.entry.uid;
-    init(mContext);
-    if (mContext) {
-        // android_log_destroy will set mContext to NULL
-        android_log_destroy(&mContext);
-    }
-}
+// stats_event.h socket types. Keep in sync.
+/* ERRORS */
+#define ERROR_NO_TIMESTAMP 0x1
+#define ERROR_NO_ATOM_ID 0x2
+#define ERROR_OVERFLOW 0x4
+#define ERROR_ATTRIBUTION_CHAIN_TOO_LONG 0x8
+#define ERROR_TOO_MANY_KEY_VALUE_PAIRS 0x10
+#define ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD 0x20
+#define ERROR_INVALID_ANNOTATION_ID 0x40
+#define ERROR_ANNOTATION_ID_TOO_LARGE 0x80
+#define ERROR_TOO_MANY_ANNOTATIONS 0x100
+#define ERROR_TOO_MANY_FIELDS 0x200
+#define ERROR_INVALID_VALUE_TYPE 0x400
+#define ERROR_STRING_NOT_NULL_TERMINATED 0x800
 
-LogEvent::LogEvent(const LogEvent& event) {
-    mTagId = event.mTagId;
-    mLogUid = event.mLogUid;
-    mElapsedTimestampNs = event.mElapsedTimestampNs;
-    mLogdTimestampNs = event.mLogdTimestampNs;
-    mValues = event.mValues;
-}
+/* TYPE IDS */
+#define INT32_TYPE 0x00
+#define INT64_TYPE 0x01
+#define STRING_TYPE 0x02
+#define LIST_TYPE 0x03
+#define FLOAT_TYPE 0x04
+#define BOOL_TYPE 0x05
+#define BYTE_ARRAY_TYPE 0x06
+#define OBJECT_TYPE 0x07
+#define KEY_VALUE_PAIRS_TYPE 0x08
+#define ATTRIBUTION_CHAIN_TYPE 0x09
+#define ERROR_TYPE 0x0F
 
-LogEvent::LogEvent(const StatsLogEventWrapper& statsLogEventWrapper, int workChainIndex) {
-    mTagId = statsLogEventWrapper.getTagId();
-    mLogdTimestampNs = statsLogEventWrapper.getWallClockTimeNs();
-    mElapsedTimestampNs = statsLogEventWrapper.getElapsedRealTimeNs();
-    mLogUid = 0;
-    int workChainPosOffset = 0;
-    if (workChainIndex != -1) {
-        const WorkChain& wc = statsLogEventWrapper.getWorkChains()[workChainIndex];
-        // chains are at field 1, level 2
-        int depth = 2;
-        for (int i = 0; i < (int)wc.uids.size(); i++) {
-            int pos[] = {1, i + 1, 1};
-            mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(wc.uids[i])));
-            pos[2]++;
-            mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(wc.tags[i])));
-            mValues.back().mField.decorateLastPos(2);
-        }
-        mValues.back().mField.decorateLastPos(1);
-        workChainPosOffset = 1;
-    }
-    for (int i = 0; i < (int)statsLogEventWrapper.getElements().size(); i++) {
-        Field field(statsLogEventWrapper.getTagId(), getSimpleField(i + 1 + workChainPosOffset));
-        switch (statsLogEventWrapper.getElements()[i].type) {
-            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::INT:
-                mValues.push_back(
-                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].int_value)));
-                break;
-            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::LONG:
-                mValues.push_back(
-                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].long_value)));
-                break;
-            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::FLOAT:
-                mValues.push_back(FieldValue(
-                        field, Value(statsLogEventWrapper.getElements()[i].float_value)));
-                break;
-            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::DOUBLE:
-                mValues.push_back(FieldValue(
-                        field, Value(statsLogEventWrapper.getElements()[i].double_value)));
-                break;
-            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::STRING:
-                mValues.push_back(
-                        FieldValue(field, Value(statsLogEventWrapper.getElements()[i].str_value)));
-                break;
-            case android::os::StatsLogValue::STATS_LOG_VALUE_TYPE::STORAGE:
-                mValues.push_back(FieldValue(
-                        field, Value(statsLogEventWrapper.getElements()[i].storage_value)));
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-void LogEvent::createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
-                               std::vector<std::shared_ptr<LogEvent>>& logEvents) {
-    if (statsLogEventWrapper.getWorkChains().size() == 0) {
-        logEvents.push_back(std::make_shared<LogEvent>(statsLogEventWrapper, -1));
-    } else {
-        for (size_t i = 0; i < statsLogEventWrapper.getWorkChains().size(); i++) {
-            logEvents.push_back(std::make_shared<LogEvent>(statsLogEventWrapper, i));
-        }
-    }
-}
-
-LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = tagId;
-    mLogUid = 0;
-    mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
-    if (mContext) {
-        android_log_write_int64(mContext, elapsedTimestampNs);
-        android_log_write_int32(mContext, tagId);
-    }
-}
-
-LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   int32_t uid,
-                   const std::map<int32_t, int32_t>& int_map,
-                   const std::map<int32_t, int64_t>& long_map,
-                   const std::map<int32_t, std::string>& string_map,
-                   const std::map<int32_t, float>& float_map) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::KEY_VALUE_PAIRS_ATOM;
-    mLogUid = uid;
-
-    int pos[] = {1, 1, 1};
-
-    mValues.push_back(FieldValue(Field(mTagId, pos, 0 /* depth */), Value(uid)));
-    pos[0]++;
-    for (const auto&itr : int_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 2;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-
-    for (const auto&itr : long_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 3;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-
-    for (const auto&itr : string_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 4;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-
-    for (const auto&itr : float_map) {
-        pos[2] = 1;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
-        pos[2] = 5;
-        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
-        mValues.back().mField.decorateLastPos(2);
-        pos[1]++;
-    }
-    if (!mValues.empty()) {
-        mValues.back().mField.decorateLastPos(1);
-        mValues.at(mValues.size() - 2).mField.decorateLastPos(1);
-    }
+LogEvent::LogEvent(int32_t uid, int32_t pid)
+    : mLogdTimestampNs(time(nullptr)), mLogUid(uid), mLogPid(pid) {
 }
 
 LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requiresStaging,
@@ -192,8 +75,9 @@ LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requi
                    const std::vector<uint8_t>& experimentIds, int32_t userId) {
     mLogdTimestampNs = getWallClockNs();
     mElapsedTimestampNs = getElapsedRealtimeNs();
-    mTagId = android::util::BINARY_PUSH_STATE_CHANGED;
-    mLogUid = android::IPCThreadState::self()->getCallingUid();
+    mTagId = util::BINARY_PUSH_STATE_CHANGED;
+    mLogUid = AIBinder_getCallingUid();
+    mLogPid = AIBinder_getCallingPid();
 
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)), Value(trainName)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainVersionCode)));
@@ -210,7 +94,7 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    const InstallTrainInfo& trainInfo) {
     mLogdTimestampNs = wallClockTimestampNs;
     mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::TRAIN_INFO;
+    mTagId = util::TRAIN_INFO;
 
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));
@@ -221,309 +105,320 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, timestampNs) {
+void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    int32_t value = readNextValue<int32_t>();
+    addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
-    mLogdTimestampNs = timestampNs;
-    mTagId = tagId;
-    mLogUid = uid;
-    mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
-    if (mContext) {
-        android_log_write_int64(mContext, timestampNs);
-        android_log_write_int32(mContext, tagId);
+void LogEvent::parseInt64(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    int64_t value = readNextValue<int64_t>();
+    addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
+}
+
+void LogEvent::parseString(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    int32_t numBytes = readNextValue<int32_t>();
+    if ((uint32_t)numBytes > mRemainingLen) {
+        mValid = false;
+        return;
     }
+
+    string value = string((char*)mBuf, numBytes);
+    mBuf += numBytes;
+    mRemainingLen -= numBytes;
+    addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::init() {
-    if (mContext) {
-        const char* buffer;
-        size_t len = android_log_write_list_buffer(mContext, &buffer);
-        // turns to reader mode
-        android_log_context contextForRead = create_android_log_parser(buffer, len);
-        if (contextForRead) {
-            init(contextForRead);
-            // destroy the context to save memory.
-            // android_log_destroy will set mContext to NULL
-            android_log_destroy(&contextForRead);
-        }
-        android_log_destroy(&mContext);
+void LogEvent::parseFloat(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    float value = readNextValue<float>();
+    addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
+}
+
+void LogEvent::parseBool(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    // cast to int32_t because FieldValue does not support bools
+    int32_t value = (int32_t)readNextValue<uint8_t>();
+    addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
+}
+
+void LogEvent::parseByteArray(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    int32_t numBytes = readNextValue<int32_t>();
+    if ((uint32_t)numBytes > mRemainingLen) {
+        mValid = false;
+        return;
     }
+
+    vector<uint8_t> value(mBuf, mBuf + numBytes);
+    mBuf += numBytes;
+    mRemainingLen -= numBytes;
+    addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-LogEvent::~LogEvent() {
-    if (mContext) {
-        // This is for the case when LogEvent is created using the test interface
-        // but init() isn't called.
-        android_log_destroy(&mContext);
-    }
-}
+void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
+    int32_t numPairs = readNextValue<uint8_t>();
 
-bool LogEvent::write(int32_t value) {
-    if (mContext) {
-        return android_log_write_int32(mContext, value) >= 0;
-    }
-    return false;
-}
+    for (pos[1] = 1; pos[1] <= numPairs; pos[1]++) {
+        last[1] = (pos[1] == numPairs);
 
-bool LogEvent::write(uint32_t value) {
-    if (mContext) {
-        return android_log_write_int32(mContext, value) >= 0;
-    }
-    return false;
-}
+        // parse key
+        pos[2] = 1;
+        parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
 
-bool LogEvent::write(int64_t value) {
-    if (mContext) {
-        return android_log_write_int64(mContext, value) >= 0;
-    }
-    return false;
-}
+        // parse value
+        last[2] = true;
 
-bool LogEvent::write(uint64_t value) {
-    if (mContext) {
-        return android_log_write_int64(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(const string& value) {
-    if (mContext) {
-        return android_log_write_string8_len(mContext, value.c_str(), value.length()) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::write(float value) {
-    if (mContext) {
-        return android_log_write_float32(mContext, value) >= 0;
-    }
-    return false;
-}
-
-bool LogEvent::writeKeyValuePairs(int32_t uid,
-                                  const std::map<int32_t, int32_t>& int_map,
-                                  const std::map<int32_t, int64_t>& long_map,
-                                  const std::map<int32_t, std::string>& string_map,
-                                  const std::map<int32_t, float>& float_map) {
-    if (mContext) {
-         if (android_log_write_list_begin(mContext) < 0) {
-            return false;
-         }
-         write(uid);
-         for (const auto& itr : int_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second);
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         for (const auto& itr : long_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second);
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         for (const auto& itr : string_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second.c_str());
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         for (const auto& itr : float_map) {
-             if (android_log_write_list_begin(mContext) < 0) {
-                return false;
-             }
-             write(itr.first);
-             write(itr.second);
-             if (android_log_write_list_end(mContext) < 0) {
-                return false;
-             }
-         }
-
-         if (android_log_write_list_end(mContext) < 0) {
-            return false;
-         }
-         return true;
-    }
-    return false;
-}
-
-bool LogEvent::write(const std::vector<AttributionNodeInternal>& nodes) {
-    if (mContext) {
-         if (android_log_write_list_begin(mContext) < 0) {
-            return false;
-         }
-         for (size_t i = 0; i < nodes.size(); ++i) {
-             if (!write(nodes[i])) {
-                return false;
-             }
-         }
-         if (android_log_write_list_end(mContext) < 0) {
-            return false;
-         }
-         return true;
-    }
-    return false;
-}
-
-bool LogEvent::write(const AttributionNodeInternal& node) {
-    if (mContext) {
-         if (android_log_write_list_begin(mContext) < 0) {
-            return false;
-         }
-         if (android_log_write_int32(mContext, node.uid()) < 0) {
-            return false;
-         }
-         if (android_log_write_string8(mContext, node.tag().c_str()) < 0) {
-            return false;
-         }
-         if (android_log_write_list_end(mContext) < 0) {
-            return false;
-         }
-         return true;
-    }
-    return false;
-}
-
-/**
- * The elements of each log event are stored as a vector of android_log_list_elements.
- * The goal is to do as little preprocessing as possible, because we read a tiny fraction
- * of the elements that are written to the log.
- *
- * The idea here is to read through the log items once, we get as much information we need for
- * matching as possible. Because this log will be matched against lots of matchers.
- */
-void LogEvent::init(android_log_context context) {
-    android_log_list_element elem;
-    int i = 0;
-    int depth = -1;
-    int pos[] = {1, 1, 1};
-    bool isKeyValuePairAtom = false;
-    do {
-        elem = android_log_read_next(context);
-        switch ((int)elem.type) {
-            case EVENT_TYPE_INT:
-                // elem at [0] is EVENT_TYPE_LIST, [1] is the timestamp, [2] is tag id.
-                if (i == 2) {
-                    mTagId = elem.data.int32;
-                    isKeyValuePairAtom = (mTagId == android::util::KEY_VALUE_PAIRS_ATOM);
-                } else {
-                    if (depth < 0 || depth > 2) {
-                        return;
-                    }
-
-                    mValues.push_back(
-                            FieldValue(Field(mTagId, pos, depth), Value((int32_t)elem.data.int32)));
-
-                    pos[depth]++;
-                }
+        uint8_t typeInfo = readNextValue<uint8_t>();
+        switch (getTypeId(typeInfo)) {
+            case INT32_TYPE:
+                pos[2] = 2;  // pos[2] determined by index of type in KeyValuePair in atoms.proto
+                parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
-            case EVENT_TYPE_FLOAT: {
-                if (depth < 0 || depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
-                }
-
-                // Handles the oneof field in KeyValuePair atom.
-                if (isKeyValuePairAtom && depth == 2) {
-                    pos[depth] = 5;
-                }
-
-                mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(elem.data.float32)));
-
-                pos[depth]++;
-
-            } break;
-            case EVENT_TYPE_STRING: {
-                if (depth < 0 || depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
-                }
-
-                // Handles the oneof field in KeyValuePair atom.
-                if (isKeyValuePairAtom && depth == 2) {
-                    pos[depth] = 4;
-                }
-                mValues.push_back(FieldValue(Field(mTagId, pos, depth),
-                                             Value(string(elem.data.string, elem.len))));
-
-                pos[depth]++;
-
-            } break;
-            case EVENT_TYPE_LONG: {
-                if (i == 1) {
-                    mElapsedTimestampNs = elem.data.int64;
-                } else {
-                    if (depth < 0 || depth > 2) {
-                        ALOGE("Depth > 2. Not supported!");
-                        return;
-                    }
-                    // Handles the oneof field in KeyValuePair atom.
-                    if (isKeyValuePairAtom && depth == 2) {
-                        pos[depth] = 3;
-                    }
-                    mValues.push_back(
-                            FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));
-
-                    pos[depth]++;
-                }
-            } break;
-            case EVENT_TYPE_LIST:
-                depth++;
-                if (depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
-                }
-                pos[depth] = 1;
-
+            case INT64_TYPE:
+                pos[2] = 3;
+                parseInt64(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
-            case EVENT_TYPE_LIST_STOP: {
-                int prevDepth = depth;
-                depth--;
-                if (depth >= 0 && depth < 2) {
-                    // Now go back to decorate the previous items that are last at prevDepth.
-                    // So that we can later easily match them with Position=Last matchers.
-                    pos[prevDepth]--;
-                    int path = getEncodedField(pos, prevDepth, false);
-                    for (auto it = mValues.rbegin(); it != mValues.rend(); ++it) {
-                        if (it->mField.getDepth() >= prevDepth &&
-                            it->mField.getPath(prevDepth) == path) {
-                            it->mField.decorateLastPos(prevDepth);
-                        } else {
-                            // Safe to break, because the items are in DFS order.
-                            break;
-                        }
-                    }
-                    pos[depth]++;
-                }
+            case STRING_TYPE:
+                pos[2] = 4;
+                parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
-            }
-            case EVENT_TYPE_UNKNOWN:
+            case FLOAT_TYPE:
+                pos[2] = 5;
+                parseFloat(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             default:
+                mValid = false;
+        }
+    }
+
+    parseAnnotations(numAnnotations);
+
+    pos[1] = pos[2] = 1;
+    last[1] = last[2] = false;
+}
+
+void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
+                                     uint8_t numAnnotations) {
+    const unsigned int firstUidInChainIndex = mValues.size();
+    const int32_t numNodes = readNextValue<uint8_t>();
+    for (pos[1] = 1; pos[1] <= numNodes; pos[1]++) {
+        last[1] = (pos[1] == numNodes);
+
+        // parse uid
+        pos[2] = 1;
+        parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
+
+        // parse tag
+        pos[2] = 2;
+        last[2] = true;
+        parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
+    }
+    // Check if at least one node was successfully parsed.
+    if (mValues.size() - 1 > firstUidInChainIndex) {
+        mAttributionChainStartIndex = static_cast<int8_t>(firstUidInChainIndex);
+        mAttributionChainEndIndex = static_cast<int8_t>(mValues.size() - 1);
+    }
+
+    parseAnnotations(numAnnotations, firstUidInChainIndex);
+
+    pos[1] = pos[2] = 1;
+    last[1] = last[2] = false;
+}
+
+// Assumes that mValues is not empty
+bool LogEvent::checkPreviousValueType(Type expected) {
+    return mValues[mValues.size() - 1].mValue.getType() == expected;
+}
+
+void LogEvent::parseIsUidAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || !checkPreviousValueType(INT) || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    bool isUid = readNextValue<uint8_t>();
+    if (isUid) mUidFieldIndex = static_cast<int8_t>(mValues.size() - 1);
+    mValues[mValues.size() - 1].mAnnotations.setUidField(isUid);
+}
+
+void LogEvent::parseTruncateTimestampAnnotation(uint8_t annotationType) {
+    if (!mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    mTruncateTimestamp = readNextValue<uint8_t>();
+}
+
+void LogEvent::parsePrimaryFieldAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    const bool primaryField = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setPrimaryField(primaryField);
+}
+
+void LogEvent::parsePrimaryFieldFirstUidAnnotation(uint8_t annotationType,
+                                                   int firstUidInChainIndex) {
+    if (mValues.empty() || annotationType != BOOL_TYPE || -1 == firstUidInChainIndex) {
+        mValid = false;
+        return;
+    }
+
+    const bool primaryField = readNextValue<uint8_t>();
+    mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(primaryField);
+}
+
+void LogEvent::parseExclusiveStateAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    const bool exclusiveState = readNextValue<uint8_t>();
+    mExclusiveStateFieldIndex = static_cast<int8_t>(mValues.size() - 1);
+    mValues[getExclusiveStateFieldIndex()].mAnnotations.setExclusiveState(exclusiveState);
+}
+
+void LogEvent::parseTriggerStateResetAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != INT32_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    mResetState = readNextValue<int32_t>();
+}
+
+void LogEvent::parseStateNestedAnnotation(uint8_t annotationType) {
+    if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    bool nested = readNextValue<uint8_t>();
+    mValues[mValues.size() - 1].mAnnotations.setNested(nested);
+}
+
+// firstUidInChainIndex is a default parameter that is only needed when parsing
+// annotations for attribution chains.
+void LogEvent::parseAnnotations(uint8_t numAnnotations, int firstUidInChainIndex) {
+    for (uint8_t i = 0; i < numAnnotations; i++) {
+        uint8_t annotationId = readNextValue<uint8_t>();
+        uint8_t annotationType = readNextValue<uint8_t>();
+
+        switch (annotationId) {
+            case ANNOTATION_ID_IS_UID:
+                parseIsUidAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_TRUNCATE_TIMESTAMP:
+                parseTruncateTimestampAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_PRIMARY_FIELD:
+                parsePrimaryFieldAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_PRIMARY_FIELD_FIRST_UID:
+                parsePrimaryFieldFirstUidAnnotation(annotationType, firstUidInChainIndex);
+                break;
+            case ANNOTATION_ID_EXCLUSIVE_STATE:
+                parseExclusiveStateAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_TRIGGER_STATE_RESET:
+                parseTriggerStateResetAnnotation(annotationType);
+                break;
+            case ANNOTATION_ID_STATE_NESTED:
+                parseStateNestedAnnotation(annotationType);
+                break;
+            default:
+                mValid = false;
+                return;
+        }
+    }
+}
+
+// This parsing logic is tied to the encoding scheme used in StatsEvent.java and
+// stats_event.c
+bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
+    mBuf = buf;
+    mRemainingLen = (uint32_t)len;
+
+    int32_t pos[] = {1, 1, 1};
+    bool last[] = {false, false, false};
+
+    // Beginning of buffer is OBJECT_TYPE | NUM_FIELDS | TIMESTAMP | ATOM_ID
+    uint8_t typeInfo = readNextValue<uint8_t>();
+    if (getTypeId(typeInfo) != OBJECT_TYPE) mValid = false;
+
+    uint8_t numElements = readNextValue<uint8_t>();
+    if (numElements < 2 || numElements > 127) mValid = false;
+
+    typeInfo = readNextValue<uint8_t>();
+    if (getTypeId(typeInfo) != INT64_TYPE) mValid = false;
+    mElapsedTimestampNs = readNextValue<int64_t>();
+    numElements--;
+
+    typeInfo = readNextValue<uint8_t>();
+    if (getTypeId(typeInfo) != INT32_TYPE) mValid = false;
+    mTagId = readNextValue<int32_t>();
+    numElements--;
+    parseAnnotations(getNumAnnotations(typeInfo));  // atom-level annotations
+
+    for (pos[0] = 1; pos[0] <= numElements && mValid; pos[0]++) {
+        last[0] = (pos[0] == numElements);
+
+        typeInfo = readNextValue<uint8_t>();
+        uint8_t typeId = getTypeId(typeInfo);
+
+        switch (typeId) {
+            case BOOL_TYPE:
+                parseBool(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case INT32_TYPE:
+                parseInt32(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case INT64_TYPE:
+                parseInt64(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case FLOAT_TYPE:
+                parseFloat(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case BYTE_ARRAY_TYPE:
+                parseByteArray(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case STRING_TYPE:
+                parseString(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case KEY_VALUE_PAIRS_TYPE:
+                parseKeyValuePairs(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case ATTRIBUTION_CHAIN_TYPE:
+                parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
+                break;
+            case ERROR_TYPE:
+                /* mErrorBitmask =*/ readNextValue<int32_t>();
+                mValid = false;
+                break;
+            default:
+                mValid = false;
                 break;
         }
-        i++;
-    } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
-    if (isKeyValuePairAtom && mValues.size() > 0) {
-        mValues[0] = FieldValue(Field(android::util::KEY_VALUE_PAIRS_ATOM, getSimpleField(1)),
-                                Value((int32_t)mLogUid));
     }
+
+    if (mRemainingLen != 0) mValid = false;
+    mBuf = nullptr;
+    return mValid;
+}
+
+uint8_t LogEvent::getTypeId(uint8_t typeInfo) {
+    return typeInfo & 0x0F;  // type id in lower 4 bytes
+}
+
+uint8_t LogEvent::getNumAnnotations(uint8_t typeInfo) {
+    return (typeInfo >> 4) & 0x0F;  // num annotations in upper 4 bytes
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
@@ -631,6 +526,26 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
     return 0.0;
 }
 
+std::vector<uint8_t> LogEvent::GetStorage(size_t key, status_t* err) const {
+    int field = getSimpleField(key);
+    for (const auto& value : mValues) {
+        if (value.mField.getField() == field) {
+            if (value.mValue.getType() == STORAGE) {
+                return value.mValue.storage_value;
+            } else {
+                *err = BAD_TYPE;
+                return vector<uint8_t>();
+            }
+        }
+        if ((size_t)value.mField.getPosAtDepth(0) > key) {
+            break;
+        }
+    }
+
+    *err = BAD_INDEX;
+    return vector<uint8_t>();
+}
+
 string LogEvent::ToString() const {
     string result;
     result += StringPrintf("{ uid(%d) %lld %lld (%d)", mLogUid, (long long)mLogdTimestampNs,
@@ -645,6 +560,19 @@ string LogEvent::ToString() const {
 
 void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {
     writeFieldValueTreeToStream(mTagId, getValues(), &protoOutput);
+}
+
+bool LogEvent::hasAttributionChain(std::pair<int, int>* indexRange) const {
+    if (mAttributionChainStartIndex == -1 || mAttributionChainEndIndex == -1) {
+        return false;
+    }
+
+    if (nullptr != indexRange) {
+        indexRange->first = static_cast<int>(mAttributionChainStartIndex);
+        indexRange->second = static_cast<int>(mAttributionChainEndIndex);
+    }
+
+    return true;
 }
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds,

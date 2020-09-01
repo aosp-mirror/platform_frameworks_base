@@ -24,12 +24,13 @@ import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
 import android.view.RemoteAnimationAdapter;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.AnimationThread;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -41,7 +42,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
-public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
+public class PendingRemoteAnimationRegistryTest {
 
     @Mock RemoteAnimationAdapter mAdapter;
     private PendingRemoteAnimationRegistry mRegistry;
@@ -51,10 +52,15 @@ public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mService.mH.runWithScissors(() -> {
+        AnimationThread.getHandler().runWithScissors(() -> {
             mHandler = new TestHandler(null, mClock);
         }, 0);
-        mRegistry = new PendingRemoteAnimationRegistry(mService, mHandler);
+        mRegistry = new PendingRemoteAnimationRegistry(new WindowManagerGlobalLock(), mHandler);
+    }
+
+    @After
+    public void teadDown() {
+        AnimationThread.dispose();
     }
 
     @Test
@@ -74,7 +80,6 @@ public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testTimeout() {
         mRegistry.addPendingAnimation("com.android.test", mAdapter);
         mClock.fastForward(5000);

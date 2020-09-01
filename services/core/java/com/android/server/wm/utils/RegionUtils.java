@@ -50,6 +50,20 @@ public class RegionUtils {
     /**
      * Applies actions on each rect contained within a {@code Region}.
      *
+     * @param region the given region.
+     * @param rectConsumer the action holder.
+     */
+    public static void forEachRect(Region region, Consumer<Rect> rectConsumer) {
+        final RegionIterator it = new RegionIterator(region);
+        final Rect rect = new Rect();
+        while (it.next(rect)) {
+            rectConsumer.accept(rect);
+        }
+    }
+
+    /**
+     * Applies actions on each rect contained within a {@code Region}.
+     *
      * Order is bottom to top, then right to left.
      *
      * @param region the given region.

@@ -23,12 +23,16 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
+import java.util.ArrayList;
+
 /**
  * A LinearLayout that sets it's height again after the last measure pass. This is needed for
  * MessagingLayouts where groups need to be able to snap it's height to.
  */
 @RemoteViews.RemoteView
 public class RemeasuringLinearLayout extends LinearLayout {
+
+    private ArrayList<View> mMatchParentViews = new ArrayList<>();
 
     public RemeasuringLinearLayout(Context context) {
         super(context);
@@ -53,6 +57,8 @@ public class RemeasuringLinearLayout extends LinearLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int count = getChildCount();
         int height = 0;
+        boolean isVertical = getOrientation() == LinearLayout.VERTICAL;
+        boolean isWrapContent = getLayoutParams().height == LayoutParams.WRAP_CONTENT;
         for (int i = 0; i < count; ++i) {
             final View child = getChildAt(i);
             if (child == null || child.getVisibility() == View.GONE) {
@@ -60,9 +66,25 @@ public class RemeasuringLinearLayout extends LinearLayout {
             }
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            height = Math.max(height, height + child.getMeasuredHeight() + lp.topMargin +
-                    lp.bottomMargin);
+            if (!isWrapContent || lp.height != LayoutParams.MATCH_PARENT || isVertical) {
+                int childHeight = child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+                height = Math.max(height, isVertical ? height + childHeight : childHeight);
+            } else {
+                // We have match parent children in a wrap content view, let's measure the
+                // view properly
+                mMatchParentViews.add(child);
+            }
         }
+        if (mMatchParentViews.size() > 0) {
+            int exactHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+            for (View child : mMatchParentViews) {
+                child.measure(getChildMeasureSpec(
+                        widthMeasureSpec, getPaddingStart() + getPaddingEnd(),
+                        child.getLayoutParams().width),
+                        exactHeightSpec);
+            }
+        }
+        mMatchParentViews.clear();
         setMeasuredDimension(getMeasuredWidth(), height);
     }
 }

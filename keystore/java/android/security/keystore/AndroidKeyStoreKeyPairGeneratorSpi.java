@@ -457,6 +457,9 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         if (mSpec.isStrongBoxBacked()) {
             flags |= KeyStore.FLAG_STRONGBOX;
         }
+        if (mSpec.isCriticalToDeviceEncryption()) {
+            flags |= KeyStore.FLAG_CRITICAL_TO_DEVICE_ENCRYPTION;
+        }
 
         byte[] additionalEntropy =
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(

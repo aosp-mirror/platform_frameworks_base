@@ -56,10 +56,12 @@ public class MmsManager {
      *                        sending the message.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is broadcast when the message
      *                   is successfully sent, or failed
+     * @param messageId an id that uniquely identifies the message requested to be sent.
+     *                  Used for logging and diagnostics purposes. The id may be 0.
      */
     public void sendMultimediaMessage(int subId, @NonNull Uri contentUri,
             @Nullable String locationUrl, @Nullable Bundle configOverrides,
-            @Nullable PendingIntent sentIntent) {
+            @Nullable PendingIntent sentIntent, long messageId) {
         try {
             final IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
             if (iMms == null) {
@@ -67,7 +69,7 @@ public class MmsManager {
             }
 
             iMms.sendMessage(subId, ActivityThread.currentPackageName(), contentUri,
-                    locationUrl, configOverrides, sentIntent);
+                    locationUrl, configOverrides, sentIntent, messageId);
         } catch (RemoteException e) {
             // Ignore it
         }
@@ -84,18 +86,22 @@ public class MmsManager {
      *  downloading the message.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
+     * @param messageId an id that uniquely identifies the message requested to be downloaded.
+     *                  Used for logging and diagnostics purposes. The id may be 0.
+     *  downloaded.
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(int subId, @NonNull String locationUrl,
             @NonNull Uri contentUri, @Nullable Bundle configOverrides,
-            @Nullable PendingIntent downloadedIntent) {
+            @Nullable PendingIntent downloadedIntent, long messageId) {
         try {
             final IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
             if (iMms == null) {
                 return;
             }
             iMms.downloadMessage(subId, ActivityThread.currentPackageName(),
-                    locationUrl, contentUri, configOverrides, downloadedIntent);
+                    locationUrl, contentUri, configOverrides, downloadedIntent,
+                    messageId);
         } catch (RemoteException e) {
             // Ignore it
         }

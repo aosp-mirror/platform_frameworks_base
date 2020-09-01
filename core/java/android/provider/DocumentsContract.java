@@ -22,7 +22,9 @@ import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +48,7 @@ import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.Parcelable;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -362,15 +365,22 @@ public final class DocumentsContract {
          * <p>
          * Type: INTEGER (int)
          *
-         * @see #FLAG_SUPPORTS_WRITE
-         * @see #FLAG_SUPPORTS_DELETE
-         * @see #FLAG_SUPPORTS_THUMBNAIL
+         * @see #FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
-         * @see #FLAG_VIRTUAL_DOCUMENT
+         * @see #FLAG_DIR_SUPPORTS_CREATE
+         * @see #FLAG_PARTIAL
          * @see #FLAG_SUPPORTS_COPY
+         * @see #FLAG_SUPPORTS_DELETE
+         * @see #FLAG_SUPPORTS_METADATA
          * @see #FLAG_SUPPORTS_MOVE
          * @see #FLAG_SUPPORTS_REMOVE
+         * @see #FLAG_SUPPORTS_RENAME
+         * @see #FLAG_SUPPORTS_SETTINGS
+         * @see #FLAG_SUPPORTS_THUMBNAIL
+         * @see #FLAG_SUPPORTS_WRITE
+         * @see #FLAG_VIRTUAL_DOCUMENT
+         * @see #FLAG_WEB_LINKABLE
          */
         public static final String COLUMN_FLAGS = "flags";
 
@@ -541,6 +551,25 @@ public final class DocumentsContract {
          * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
          */
         public static final int FLAG_SUPPORTS_METADATA = 1 << 14;
+
+        /**
+         * Flag indicating that a document is a directory that wants to block itself
+         * from being selected when the user launches an {@link Intent#ACTION_OPEN_DOCUMENT_TREE}
+         * intent. Individual files can still be selected when launched via other intents
+         * like {@link Intent#ACTION_OPEN_DOCUMENT} and {@link Intent#ACTION_GET_CONTENT}.
+         * Only valid when {@link #COLUMN_MIME_TYPE} is {@link #MIME_TYPE_DIR}.
+         * <p>
+         * Note that this flag <em>only</em> applies to the single directory to which it is
+         * applied. It does <em>not</em> block the user from selecting either a parent or
+         * child directory during an {@link Intent#ACTION_OPEN_DOCUMENT_TREE} request.
+         * In particular, the only way to guarantee that a specific directory can never
+         * be granted via an {@link Intent#ACTION_OPEN_DOCUMENT_TREE} request is to ensure
+         * that both it and <em>all of its parent directories</em> have set this flag.
+         *
+         * @see Intent#ACTION_OPEN_DOCUMENT_TREE
+         * @see #COLUMN_FLAGS
+         */
+        public static final int FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE = 1 << 15;
     }
 
     /**
@@ -918,6 +947,20 @@ public final class DocumentsContract {
         return getBaseDocumentUriBuilder(authority).appendPath(documentId).build();
     }
 
+    /**
+     * Builds URI as described in {@link #buildDocumentUri(String, String)}, but such that it will
+     * be associated with the given user.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public static Uri buildDocumentUriAsUser(
+            @NonNull String authority, @NonNull String documentId, @NonNull UserHandle user) {
+        return ContentProvider.maybeAddUserId(
+                buildDocumentUri(authority, documentId), user.getIdentifier());
+    }
+
     /** {@hide} */
     public static Uri buildBaseDocumentUri(String authority) {
         return getBaseDocumentUriBuilder(authority).build();
@@ -1260,6 +1303,7 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
+    @TestApi
     public static @NonNull Uri setManageMode(@NonNull Uri uri) {
         Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
@@ -1271,6 +1315,7 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
+    @TestApi
     public static boolean isManageMode(@NonNull Uri uri) {
         Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.getBooleanQueryParameter(PARAM_MANAGE, false);

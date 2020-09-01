@@ -93,7 +93,7 @@ public class PropertyAnimatorTest extends SysuiTestCase {
         }
 
         @Override
-        public AnimatorListenerAdapter getAnimationFinishListener() {
+        public AnimatorListenerAdapter getAnimationFinishListener(Property property) {
             return mFinishListener;
         }
     }.setDuration(200);

@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import android.telephony.Annotation.NetworkType;
+
 import java.util.Objects;
 
 /**
@@ -130,14 +130,14 @@ public final class CallAttributes implements Parcelable {
     /**
      * {@link Parcelable#describeContents}
      */
-    public @Parcelable.ContentsFlags int describeContents() {
+    public int describeContents() {
         return 0;
     }
 
     /**
      * {@link Parcelable#writeToParcel}
      */
-    public void writeToParcel(Parcel dest, @Parcelable.WriteFlags int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(mPreciseCallState, flags);
         dest.writeInt(mNetworkType);
         dest.writeParcelable(mCallQuality, flags);

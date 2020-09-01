@@ -178,14 +178,6 @@ public final class SystemClock {
     native public static long uptimeMillis();
 
     /**
-     * @removed
-     */
-    @Deprecated
-    public static @NonNull Clock uptimeMillisClock() {
-        return uptimeClock();
-    }
-
-    /**
      * Return {@link Clock} that starts at system boot, not counting time spent
      * in deep sleep.
      *

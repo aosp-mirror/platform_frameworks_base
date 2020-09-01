@@ -24,6 +24,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.content.pm.PackageInstaller;
+import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -57,6 +58,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
+@Presubmit
 public class PackageInstallerSessionTest {
     @Rule
     public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
@@ -156,6 +158,8 @@ public class PackageInstallerSessionTest {
         if (isMultiPackage) {
             params.isMultiPackage = true;
         }
+        InstallSource installSource = InstallSource.create("testInstallInitiator",
+                "testInstallOriginator", "testInstaller");
         return new PackageInstallerSession(
                 /* callback */ null,
                 /* context */null,
@@ -165,14 +169,16 @@ public class PackageInstallerSessionTest {
                 /* stagingManager */ null,
                 /* sessionId */ sessionId,
                 /* userId */  456,
-                /* installerPackageName */ "testInstaller",
                 /* installerUid */ -1,
+                /* installSource */ installSource,
                 /* sessionParams */ params,
                 /* createdMillis */ 0L,
                 /* stageDir */ mTmpDir,
                 /* stageCid */ null,
+                /* files */ null,
                 /* prepared */ true,
                 /* committed */ true,
+                /* destroyed */ staged ? true : false,
                 /* sealed */ false,  // Setting to true would trigger some PM logic.
                 /* childSessionIds */ childSessionIds != null ? childSessionIds : new int[0],
                 /* parentSessionId */ parentSessionId,
@@ -295,6 +301,8 @@ public class PackageInstallerSessionTest {
         assertEquals(expected.userId, actual.userId);
         assertSessionParamsEquivalent(expected.params, actual.params);
         assertEquals(expected.getInstallerUid(), actual.getInstallerUid());
+        assertEquals(expected.getInstallerPackageName(), actual.getInstallerPackageName());
+        assertInstallSourcesEquivalent(expected.getInstallSource(), actual.getInstallSource());
         assertEquals(expected.stageDir.getAbsolutePath(), actual.stageDir.getAbsolutePath());
         assertEquals(expected.stageCid, actual.stageCid);
         assertEquals(expected.isPrepared(), actual.isPrepared());
@@ -307,10 +315,17 @@ public class PackageInstallerSessionTest {
                 actual.getStagedSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isCommitted(), actual.isCommitted());
+        assertEquals(expected.createdMillis, actual.createdMillis);
         assertEquals(expected.isSealed(), actual.isSealed());
         assertEquals(expected.isMultiPackage(), actual.isMultiPackage());
         assertEquals(expected.hasParentSessionId(), actual.hasParentSessionId());
         assertEquals(expected.getParentSessionId(), actual.getParentSessionId());
         assertArrayEquals(expected.getChildSessionIds(), actual.getChildSessionIds());
+    }
+
+    private void assertInstallSourcesEquivalent(InstallSource expected, InstallSource actual) {
+        assertEquals(expected.installerPackageName, actual.installerPackageName);
+        assertEquals(expected.initiatingPackageName, actual.initiatingPackageName);
+        assertEquals(expected.originatingPackageName, actual.originatingPackageName);
     }
 }

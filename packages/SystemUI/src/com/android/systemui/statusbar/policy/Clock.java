@@ -35,7 +35,6 @@ import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
@@ -45,7 +44,7 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -67,7 +66,6 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         DarkReceiver, ConfigurationListener {
 
     public static final String CLOCK_SECONDS = "clock_seconds";
-    private static final String TAG = "StatusBarClock";
     private static final String CLOCK_SUPER_PARCELABLE = "clock_super_parcelable";
     private static final String CURRENT_USER_ID = "current_user_id";
     private static final String VISIBLE_BY_POLICY = "visible_by_policy";
@@ -76,6 +74,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private static final String VISIBILITY = "visibility";
 
     private final CurrentUserTracker mCurrentUserTracker;
+    private final CommandQueue mCommandQueue;
     private int mCurrentUserId;
 
     private boolean mClockVisibleByPolicy = true;
@@ -108,9 +107,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
      */
     private int mNonAdaptedColor;
 
-    public Clock(Context context) {
-        this(context, null);
-    }
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     public Clock(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -118,6 +115,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
     public Clock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mCommandQueue = Dependency.get(CommandQueue.class);
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.Clock,
@@ -129,7 +127,8 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         } finally {
             a.recycle();
         }
-        mCurrentUserTracker = new CurrentUserTracker(context) {
+        mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
+        mCurrentUserTracker = new CurrentUserTracker(mBroadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
                 mCurrentUserId = newUserId;
@@ -185,11 +184,14 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
 
-            getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
-                    null, Dependency.get(Dependency.TIME_TICK_HANDLER));
+            // NOTE: This receiver could run before this method returns, as it's not dispatching
+            // on the main thread and BroadcastDispatcher may not need to register with Context.
+            // The receiver will return immediately if the view does not have a Handler yet.
+            mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter,
+                    Dependency.get(Dependency.TIME_TICK_HANDLER), UserHandle.ALL);
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
+            mCommandQueue.addCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
             }
@@ -197,11 +199,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             mCurrentUserId = mCurrentUserTracker.getCurrentUserId();
         }
 
-        // NOTE: It's safe to do these after registering the receiver since the receiver always runs
-        // in the main thread, therefore the receiver can't run before this method returns.
-
         // The time zone may have changed while the receiver wasn't registered, so update the Time
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
+        mClockFormatString = "";
 
         // Make sure we update to the current time
         updateClock();
@@ -213,11 +213,10 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (mAttached) {
-            getContext().unregisterReceiver(mIntentReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mIntentReceiver);
             mAttached = false;
             Dependency.get(TunerService.class).removeTunable(this);
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class)
-                    .removeCallback(this);
+            mCommandQueue.removeCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
             }
@@ -228,18 +227,15 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+            // If the handler is null, it means we received a broadcast while the view has not
+            // finished being attached or in the process of being detached.
+            // In that case, do not post anything.
             Handler handler = getHandler();
-            if (handler == null) {
-                Log.e(TAG,
-                        "Received intent, but handler is null - still attached to window? Window "
-                                + "token: "
-                                + getWindowToken());
-                return;
-            }
+            if (handler == null) return;
 
+            String action = intent.getAction();
             if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
-                String tz = intent.getStringExtra("time-zone");
+                String tz = intent.getStringExtra(Intent.EXTRA_TIMEZONE);
                 handler.post(() -> {
                     mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
                     if (mClockFormat != null) {
@@ -301,7 +297,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             mShowSeconds = TunerService.parseIntegerSwitch(newValue, false);
             updateShowSeconds();
         } else {
-            setClockVisibleByUser(!StatusBarIconController.getIconBlacklist(newValue)
+            setClockVisibleByUser(!StatusBarIconController.getIconBlacklist(getContext(), newValue)
                     .contains("clock"));
             updateClockVisibility();
         }
@@ -368,11 +364,11 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 }
                 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
                 filter.addAction(Intent.ACTION_SCREEN_ON);
-                mContext.registerReceiver(mScreenReceiver, filter);
+                mBroadcastDispatcher.registerReceiver(mScreenReceiver, filter);
             }
         } else {
             if (mSecondsHandler != null) {
-                mContext.unregisterReceiver(mScreenReceiver);
+                mBroadcastDispatcher.unregisterReceiver(mScreenReceiver);
                 mSecondsHandler.removeCallbacks(mSecondTick);
                 mSecondsHandler = null;
                 updateClock();

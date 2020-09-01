@@ -34,8 +34,8 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
-class NotificationSwipeHelper extends SwipeHelper
-        implements NotificationSwipeActionHelper {
+class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeActionHelper {
+
     @VisibleForTesting
     protected static final long COVER_MENU_DELAY = 4000;
     private static final String TAG = "NotificationSwipeHelper";
@@ -58,12 +58,7 @@ class NotificationSwipeHelper extends SwipeHelper
         super(swipeDirection, callback, context, falsingManager);
         mMenuListener = menuListener;
         mCallback = callback;
-        mFalsingCheck = new Runnable() {
-            @Override
-            public void run() {
-                resetExposedMenuView(true /* animate */, true /* force */);
-            }
-        };
+        mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
     }
 
     public View getTranslatingParentView() {
@@ -126,14 +121,14 @@ class NotificationSwipeHelper extends SwipeHelper
         // Slide back any notifications that might be showing a menu
         resetExposedMenuView(true /* animate */, false /* force */);
 
-        if (currView instanceof ExpandableNotificationRow) {
-            initializeRow((ExpandableNotificationRow) currView);
+        if (currView instanceof SwipeableView) {
+            initializeRow((SwipeableView) currView);
         }
     }
 
     @VisibleForTesting
-    protected void initializeRow(ExpandableNotificationRow row) {
-        if (row.getEntry().hasFinishedInitialization()) {
+    protected void initializeRow(SwipeableView row) {
+        if (row.hasFinishedInitialization()) {
             mCurrMenuRow = row.createMenu();
             if (mCurrMenuRow != null) {
                 mCurrMenuRow.setMenuClickListener(mMenuListener);
@@ -287,6 +282,11 @@ class NotificationSwipeHelper extends SwipeHelper
         mCallback.onSnooze(sbn, snoozeOption);
     }
 
+    @Override
+    public void snooze(StatusBarNotification sbn, int hours) {
+        mCallback.onSnooze(sbn, hours);
+    }
+
     @VisibleForTesting
     protected void handleMenuCoveredOrDismissed() {
         View exposedMenuView = getExposedMenuView();
@@ -313,15 +313,15 @@ class NotificationSwipeHelper extends SwipeHelper
 
     @Override
     public void setTranslation(View v, float translate) {
-        if (v instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) v).setTranslation(translate);
+        if (v instanceof SwipeableView) {
+            ((SwipeableView) v).setTranslation(translate);
         }
     }
 
     @Override
     public float getTranslation(View v) {
-        if (v instanceof ExpandableNotificationRow) {
-            return ((ExpandableNotificationRow) v).getTranslation();
+        if (v instanceof SwipeableView) {
+            return ((SwipeableView) v).getTranslation();
         }
         else {
             return 0f;
@@ -410,8 +410,8 @@ class NotificationSwipeHelper extends SwipeHelper
             if (anim != null) {
                 anim.start();
             }
-        } else if (prevMenuExposedView instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) prevMenuExposedView;
+        } else if (prevMenuExposedView instanceof SwipeableView) {
+            SwipeableView row = (SwipeableView) prevMenuExposedView;
             if (!row.isRemoved()) {
                 row.resetTranslation();
             }
@@ -426,8 +426,8 @@ class NotificationSwipeHelper extends SwipeHelper
         final int height = (view instanceof ExpandableView)
                 ? ((ExpandableView) view).getActualHeight()
                 : view.getHeight();
-        final int rx = (int) ev.getRawX();
-        final int ry = (int) ev.getRawY();
+        final int rx = (int) ev.getX();
+        final int ry = (int) ev.getY();
         int[] temp = new int[2];
         view.getLocationOnScreen(temp);
         final int x = temp[0];
@@ -451,6 +451,8 @@ class NotificationSwipeHelper extends SwipeHelper
         void handleChildViewDismissed(View view);
 
         void onSnooze(StatusBarNotification sbn, SnoozeOption snoozeOption);
+
+        void onSnooze(StatusBarNotification sbn, int hours);
 
         void onDismiss();
     }

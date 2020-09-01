@@ -19,6 +19,7 @@ package com.android.server.compat;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -28,12 +29,14 @@ import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Build;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeInfo;
+import com.android.server.LocalServices;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +53,8 @@ public class PlatformCompatTest {
     @Mock
     private PackageManager mPackageManager;
     @Mock
+    private PackageManagerInternal mPackageManagerInternal;
+    @Mock
     CompatChange.ChangeListener mListener1, mListener2;
     PlatformCompat mPlatformCompat;
     CompatConfig mCompatConfig;
@@ -59,14 +64,19 @@ public class PlatformCompatTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        android.app.compat.ChangeIdStateCache.disable();
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getPackageUid(eq(PACKAGE_NAME), eq(0))).thenThrow(
                 new PackageManager.NameNotFoundException());
+        when(mPackageManagerInternal.getPackageUid(eq(PACKAGE_NAME), eq(0), anyInt()))
+            .thenReturn(-1);
         mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         // Assume userdebug/eng non-final build
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
         when(mBuildClassifier.isFinalBuild()).thenReturn(false);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
     }
 
     @Test

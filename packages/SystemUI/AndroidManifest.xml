@@ -28,11 +28,6 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
-    <!-- SysUI must be the one to define this permission; its name is
-         referenced by the core OS. -->
-    <permission android:name="android.permission.systemui.IDENTITY"
-        android:protectionLevel="signature" />
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Used to read wallpaper -->
@@ -40,6 +35,7 @@
 
     <!-- Used to read storage for all users -->
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
@@ -159,6 +155,7 @@
     <!-- Screen Recording -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
 
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -179,6 +176,14 @@
 
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
+
+    <!-- Access Quick Access Wallet cards -->
+    <uses-permission android:name="android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE" />
+
+    <!-- Adding Controls to SystemUI -->
+    <uses-permission android:name="android.permission.BIND_CONTROLS" />
+    <!-- Check foreground controls applications -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- Quick Settings tile: Night Mode / Dark Theme -->
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE" />
@@ -207,10 +212,15 @@
     <!-- shortcut manager -->
     <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
 
+    <!-- launcher apps -->
+    <uses-permission android:name="android.permission.ACCESS_SHORTCUTS" />
+
     <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
 
     <!-- accessibility -->
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
+    <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
+    <uses-permission android:name="android.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY" />
 
     <!-- to control accessibility volume -->
     <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
@@ -233,9 +243,6 @@
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 
-    <!-- to be able to detect the driving state in a car-->
-    <uses-permission android:name="android.car.permission.CAR_DRIVING_STATE" />
-
     <!-- Permission necessary to change car audio volume through CarAudioManager -->
     <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
 
@@ -247,6 +254,18 @@
     <!-- Permission to change the display color -->
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
 
+    <!-- Query all packages on device on R+ -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <!-- Permission to register process observer -->
+    <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
+
+    <!-- Restore settings (used by QS) even if they have been modified -->
+    <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
+
+    <!-- Permission to make accessibility service access Bubbles -->
+    <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -255,7 +274,8 @@
         android:name=".SystemUIApplication"
         android:persistent="true"
         android:allowClearUserData="false"
-        android:allowBackup="false"
+        android:backupAgent=".backup.BackupHelper"
+        android:killAfterRestore="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
         android:icon="@drawable/icon"
@@ -269,13 +289,19 @@
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
-
+        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIWTZsUG100coeb3xbEoTWKd3ZL3R79JshRDZfYQ" />
         <!-- Broadcast receiver that gets the broadcast at boot time and starts
              up everything else.
              TODO: Should have an android:permission attribute
              -->
         <service android:name="SystemUIService"
             android:exported="true"
+        />
+
+        <!-- Service for dumping extremely verbose content during a bug report -->
+        <service android:name=".dump.SystemUIAuxiliaryDumpService"
+             android:exported="false"
+             android:permission="com.android.systemui.permission.SELF"
         />
 
         <!-- On user switch, this service is started to ensure that the associated SystemUI
@@ -302,7 +328,9 @@
         </receiver>
 
         <activity android:name=".screenrecord.ScreenRecordDialog"
-            android:theme="@style/ScreenRecord" />
+            android:theme="@style/ScreenRecord"
+            android:showForAllUsers="true"
+            android:excludeFromRecents="true" />
         <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"
@@ -317,6 +345,14 @@
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
+
+        <activity
+            android:name=".bubbles.BubbleOverflowActivity"
+            android:theme="@style/BubbleOverflow"
+            android:excludeFromRecents="true"
+            android:documentLaunchMode="always"
+            android:resizeableActivity="true">
+        </activity>
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
@@ -575,7 +611,7 @@
                   android:excludeFromRecents="true"
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"
-                  android:theme="@android:style/Theme.Black.NoTitleBar">
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.app.action.CONFIRM_DEVICE_CREDENTIAL_WITH_USER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -641,6 +677,61 @@
                 <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".controls.management.ControlsProviderSelectorActivity"
+                  android:label="@string/controls_providers_title"
+                  android:theme="@style/Theme.ControlsManagement"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
+                  android:excludeFromRecents="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".controls.management.ControlsEditingActivity"
+                  android:label="@string/controls_menu_edit"
+                  android:theme="@style/Theme.ControlsManagement"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".controls.management.ControlsFavoritingActivity"
+                  android:label="@string/controls_favorite_default_title"
+                  android:theme="@style/Theme.ControlsManagement"
+                  android:excludeFromRecents="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <receiver android:name=".controls.management.ControlsRequestReceiver">
+            <intent-filter>
+                <action android:name="android.service.controls.action.ADD_CONTROL" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".controls.controller.AuxiliaryPersistenceWrapper$DeletionJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <!-- started from ControlsFavoritingActivity -->
+        <activity
+            android:name=".controls.management.ControlsRequestDialog"
+            android:exported="true"
+            android:theme="@style/Theme.ControlsRequestDialog"
+            android:finishOnCloseSystemDialogs="true"
+            android:showForAllUsers="true"
+            android:clearTaskOnLaunch="true"
+            android:launchMode="singleInstance"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:visibleToInstantApps="true"/>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service

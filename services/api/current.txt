@@ -1,1 +1,86 @@
 // Signature format: 2.0
+package com.android.permission.persistence {
+
+  public interface RuntimePermissionsPersistence {
+    method @NonNull public static com.android.permission.persistence.RuntimePermissionsPersistence createInstance();
+    method public void deleteForUser(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.permission.persistence.RuntimePermissionsState readForUser(@NonNull android.os.UserHandle);
+    method public void writeForUser(@NonNull com.android.permission.persistence.RuntimePermissionsState, @NonNull android.os.UserHandle);
+  }
+
+  public final class RuntimePermissionsState {
+    ctor public RuntimePermissionsState(int, @Nullable String, @NonNull java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>>, @NonNull java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>>);
+    method @Nullable public String getFingerprint();
+    method @NonNull public java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>> getPackagePermissions();
+    method @NonNull public java.util.Map<java.lang.String,java.util.List<com.android.permission.persistence.RuntimePermissionsState.PermissionState>> getSharedUserPermissions();
+    method public int getVersion();
+    field public static final int NO_VERSION = -1; // 0xffffffff
+  }
+
+  public static final class RuntimePermissionsState.PermissionState {
+    ctor public RuntimePermissionsState.PermissionState(@NonNull String, boolean, int);
+    method public int getFlags();
+    method @NonNull public String getName();
+    method public boolean isGranted();
+  }
+
+}
+
+package com.android.role.persistence {
+
+  public interface RolesPersistence {
+    method @NonNull public static com.android.role.persistence.RolesPersistence createInstance();
+    method public void deleteForUser(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.role.persistence.RolesState readForUser(@NonNull android.os.UserHandle);
+    method public void writeForUser(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
+  }
+
+  public final class RolesState {
+    ctor public RolesState(int, @Nullable String, @NonNull java.util.Map<java.lang.String,java.util.Set<java.lang.String>>);
+    method @Nullable public String getPackagesHash();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getRoles();
+    method public int getVersion();
+  }
+
+}
+
+package com.android.server {
+
+  public abstract class SystemService {
+    ctor public SystemService(@NonNull android.content.Context);
+    method @NonNull public final android.content.Context getContext();
+    method public boolean isUserSupported(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onBootPhase(int);
+    method public abstract void onStart();
+    method public void onUserStarting(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStopped(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStopping(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserSwitching(@Nullable com.android.server.SystemService.TargetUser, @NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserUnlocked(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserUnlocking(@NonNull com.android.server.SystemService.TargetUser);
+    method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder);
+    method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder, boolean);
+    field public static final int PHASE_ACTIVITY_MANAGER_READY = 550; // 0x226
+    field public static final int PHASE_BOOT_COMPLETED = 1000; // 0x3e8
+    field public static final int PHASE_DEVICE_SPECIFIC_SERVICES_READY = 520; // 0x208
+    field public static final int PHASE_LOCK_SETTINGS_READY = 480; // 0x1e0
+    field public static final int PHASE_SYSTEM_SERVICES_READY = 500; // 0x1f4
+    field public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600; // 0x258
+    field public static final int PHASE_WAIT_FOR_DEFAULT_DISPLAY = 100; // 0x64
+  }
+
+  public static final class SystemService.TargetUser {
+    method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
+}
+
+package com.android.server.wifi {
+
+  public class SupplicantManager {
+    method public static void start();
+    method public static void stop();
+  }
+
+}
+

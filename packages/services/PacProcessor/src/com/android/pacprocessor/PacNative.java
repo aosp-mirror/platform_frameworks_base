@@ -20,7 +20,7 @@ import android.util.Log;
 /**
  * @hide
  */
-public class PacNative {
+public class PacNative implements LibpacInterface {
     private static final String TAG = "PacProxy";
 
     private static final PacNative sInstance = new PacNative();
@@ -49,34 +49,38 @@ public class PacNative {
         return sInstance;
     }
 
+    @Override
     public synchronized boolean startPacSupport() {
         if (createV8ParserNativeLocked()) {
             Log.e(TAG, "Unable to Create v8 Proxy Parser.");
-            return true;
+            return false;
         }
         mIsActive = true;
-        return false;
+        return true;
     }
 
+    @Override
     public synchronized boolean stopPacSupport() {
         if (mIsActive) {
             if (destroyV8ParserNativeLocked()) {
                 Log.e(TAG, "Unable to Destroy v8 Proxy Parser.");
-                return true;
+                return false;
             }
             mIsActive = false;
         }
-        return false;
+        return true;
     }
 
+    @Override
     public synchronized boolean setCurrentProxyScript(String script) {
         if (setProxyScriptNativeLocked(script)) {
             Log.e(TAG, "Unable to parse proxy script.");
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
+    @Override
     public synchronized String makeProxyRequest(String url, String host) {
         String ret = makeProxyRequestNativeLocked(url, host);
         if ((ret == null) || (ret.length() == 0)) {

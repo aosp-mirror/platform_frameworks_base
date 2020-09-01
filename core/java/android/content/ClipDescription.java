@@ -64,6 +64,16 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
 
     /**
+     * The MIME type for data whose type is otherwise unknown.
+     * <p>
+     * Per RFC 2046, the "application" media type is to be used for discrete
+     * data which do not fit in any of the other categories, and the
+     * "octet-stream" subtype is used to indicate that a body contains arbitrary
+     * binary data.
+     */
+    public static final String MIMETYPE_UNKNOWN = "application/octet-stream";
+
+    /**
      * The name of the extra used to define a component name when copying/dragging
      * an app icon from Launcher.
      * <p>
@@ -339,7 +349,7 @@ public class ClipDescription implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         final int size = mMimeTypes.size();
@@ -351,7 +361,7 @@ public class ClipDescription implements Parcelable {
             proto.write(ClipDescriptionProto.LABEL, mLabel.toString());
         }
         if (mExtras != null) {
-            mExtras.writeToProto(proto, ClipDescriptionProto.EXTRAS);
+            mExtras.dumpDebug(proto, ClipDescriptionProto.EXTRAS);
         }
         if (mTimeStamp > 0) {
             proto.write(ClipDescriptionProto.TIMESTAMP_MS, mTimeStamp);

@@ -35,7 +35,10 @@ public class AccessibilityCache {
 
     private static final String LOG_TAG = "AccessibilityCache";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
+
+    private static final boolean VERBOSE =
+            Log.isLoggable(LOG_TAG, Log.VERBOSE) && Build.IS_DEBUGGABLE;
 
     private static final boolean CHECK_INTEGRITY = Build.IS_ENG;
 
@@ -66,9 +69,13 @@ public class AccessibilityCache {
     private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
+    private int mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+
     private boolean mIsAllWindowsCached;
 
-    private final SparseArray<AccessibilityWindowInfo> mWindowCache =
+    // The SparseArray of all {@link AccessibilityWindowInfo}s on all displays.
+    // The key of outer SparseArray is display ID and the key of inner SparseArray is window ID.
+    private final SparseArray<SparseArray<AccessibilityWindowInfo>> mWindowCacheByDisplay =
             new SparseArray<>();
 
     private final SparseArray<LongSparseArray<AccessibilityNodeInfo>> mNodeCache =
@@ -81,34 +88,66 @@ public class AccessibilityCache {
         mAccessibilityNodeRefresher = nodeRefresher;
     }
 
-    public void setWindows(List<AccessibilityWindowInfo> windows) {
+    /**
+     * Sets all {@link AccessibilityWindowInfo}s of all displays into the cache.
+     * The key of SparseArray is display ID.
+     *
+     * @param windowsOnAllDisplays The accessibility windows of all displays.
+     */
+    public void setWindowsOnAllDisplays(
+            SparseArray<List<AccessibilityWindowInfo>> windowsOnAllDisplays) {
         synchronized (mLock) {
             if (DEBUG) {
                 Log.i(LOG_TAG, "Set windows");
             }
-            clearWindowCache();
-            if (windows == null) {
+            clearWindowCacheLocked();
+            if (windowsOnAllDisplays == null) {
                 return;
             }
-            final int windowCount = windows.size();
-            for (int i = 0; i < windowCount; i++) {
-                final AccessibilityWindowInfo window = windows.get(i);
-                addWindow(window);
+
+            final int displayCounts = windowsOnAllDisplays.size();
+            for (int i = 0; i < displayCounts; i++) {
+                final List<AccessibilityWindowInfo> windowsOfDisplay =
+                        windowsOnAllDisplays.valueAt(i);
+
+                if (windowsOfDisplay == null) {
+                    continue;
+                }
+
+                final int displayId = windowsOnAllDisplays.keyAt(i);
+                final int windowCount = windowsOfDisplay.size();
+                for (int j = 0; j < windowCount; j++) {
+                    addWindowByDisplayLocked(displayId, windowsOfDisplay.get(j));
+                }
             }
             mIsAllWindowsCached = true;
         }
     }
 
+    /**
+     * Sets an {@link AccessibilityWindowInfo} into the cache.
+     *
+     * @param window The accessibility window.
+     */
     public void addWindow(AccessibilityWindowInfo window) {
         synchronized (mLock) {
             if (DEBUG) {
-                Log.i(LOG_TAG, "Caching window: " + window.getId());
+                Log.i(LOG_TAG, "Caching window: " + window.getId() + " at display Id [ "
+                        + window.getDisplayId() + " ]");
             }
-            final int windowId = window.getId();
-            mWindowCache.put(windowId, new AccessibilityWindowInfo(window));
+            addWindowByDisplayLocked(window.getDisplayId(), window);
         }
     }
 
+    private void addWindowByDisplayLocked(int displayId, AccessibilityWindowInfo window) {
+        SparseArray<AccessibilityWindowInfo> windows = mWindowCacheByDisplay.get(displayId);
+        if (windows == null) {
+            windows = new SparseArray<>();
+            mWindowCacheByDisplay.put(displayId, windows);
+        }
+        final int windowId = window.getId();
+        windows.put(windowId, new AccessibilityWindowInfo(window));
+    }
     /**
      * Notifies the cache that the something in the UI changed. As a result
      * the cache will either refresh some nodes or evict some nodes.
@@ -120,20 +159,26 @@ public class AccessibilityCache {
      */
     public void onAccessibilityEvent(AccessibilityEvent event) {
         synchronized (mLock) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "onAccessibilityEvent(" + event + ")");
+            }
             final int eventType = event.getEventType();
             switch (eventType) {
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
                     if (mAccessibilityFocus != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                        refreshCachedNodeLocked(mAccessibilityFocusedWindow, mAccessibilityFocus);
                     }
                     mAccessibilityFocus = event.getSourceNodeId();
-                    refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                    mAccessibilityFocusedWindow = event.getWindowId();
+                    refreshCachedNodeLocked(mAccessibilityFocusedWindow, mAccessibilityFocus);
                 } break;
 
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
-                    if (mAccessibilityFocus == event.getSourceNodeId()) {
-                        refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                    if (mAccessibilityFocus == event.getSourceNodeId()
+                            && mAccessibilityFocusedWindow == event.getWindowId()) {
+                        refreshCachedNodeLocked(mAccessibilityFocusedWindow, mAccessibilityFocus);
                         mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                        mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
                     }
                 } break;
 
@@ -170,6 +215,13 @@ public class AccessibilityCache {
                 } break;
 
                 case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+                    if (event.getWindowChanges()
+                            == AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED) {
+                        // Don't need to clear all cache. Unless the changes are related to
+                        // content, we won't clear all cache here.
+                        refreshCachedWindowLocked(event.getWindowId());
+                        break;
+                    }
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
                     clear();
                 } break;
@@ -203,6 +255,34 @@ public class AccessibilityCache {
         clearSubTreeLocked(windowId, sourceId);
     }
 
+    private void refreshCachedWindowLocked(int windowId) {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "Refreshing cached window.");
+        }
+
+        if (windowId == AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+            return;
+        }
+
+        final int displayCounts = mWindowCacheByDisplay.size();
+        for (int i = 0; i < displayCounts; i++) {
+            final SparseArray<AccessibilityWindowInfo> windowsOfDisplay =
+                    mWindowCacheByDisplay.valueAt(i);
+            if (windowsOfDisplay == null) {
+                continue;
+            }
+            final AccessibilityWindowInfo window = windowsOfDisplay.get(windowId);
+            if (window == null) {
+                continue;
+            }
+            if (!mAccessibilityNodeRefresher.refreshWindow(window)) {
+                // If we fail to refresh the window, clear all windows.
+                clearWindowCacheLocked();
+            }
+            return;
+        }
+    }
+
     /**
      * Gets a cached {@link AccessibilityNodeInfo} given the id of the hosting
      * window and the accessibility id of the node.
@@ -223,51 +303,89 @@ public class AccessibilityCache {
                 // will wipe the data of the cached info.
                 info = new AccessibilityNodeInfo(info);
             }
-            if (DEBUG) {
-                Log.i(LOG_TAG, "get(" + accessibilityNodeId + ") = " + info);
+            if (VERBOSE) {
+                Log.i(LOG_TAG, "get(0x" + Long.toHexString(accessibilityNodeId) + ") = " + info);
             }
             return info;
         }
     }
 
-    public List<AccessibilityWindowInfo> getWindows() {
+    /**
+     * Gets all {@link AccessibilityWindowInfo}s of all displays from the cache.
+     *
+     * @return All cached {@link AccessibilityWindowInfo}s of all displays
+     *         or null if such not found. The key of SparseArray is display ID.
+     */
+    public SparseArray<List<AccessibilityWindowInfo>> getWindowsOnAllDisplays() {
         synchronized (mLock) {
             if (!mIsAllWindowsCached) {
                 return null;
             }
+            final SparseArray<List<AccessibilityWindowInfo>> returnWindows = new SparseArray<>();
+            final int displayCounts = mWindowCacheByDisplay.size();
 
-            final int windowCount = mWindowCache.size();
-            if (windowCount > 0) {
-                // Careful to return the windows in a decreasing layer order.
-                SparseArray<AccessibilityWindowInfo> sortedWindows = mTempWindowArray;
-                sortedWindows.clear();
+            if (displayCounts > 0) {
+                for (int i = 0; i < displayCounts; i++) {
+                    final int displayId = mWindowCacheByDisplay.keyAt(i);
+                    final SparseArray<AccessibilityWindowInfo> windowsOfDisplay =
+                            mWindowCacheByDisplay.valueAt(i);
 
-                for (int i = 0; i < windowCount; i++) {
-                    AccessibilityWindowInfo window = mWindowCache.valueAt(i);
-                    sortedWindows.put(window.getLayer(), window);
+                    if (windowsOfDisplay == null) {
+                        continue;
+                    }
+
+                    final int windowCount = windowsOfDisplay.size();
+                    if (windowCount > 0) {
+                        // Careful to return the windows in a decreasing layer order.
+                        SparseArray<AccessibilityWindowInfo> sortedWindows = mTempWindowArray;
+                        sortedWindows.clear();
+
+                        for (int j = 0; j < windowCount; j++) {
+                            AccessibilityWindowInfo window = windowsOfDisplay.valueAt(j);
+                            sortedWindows.put(window.getLayer(), window);
+                        }
+
+                        // It's possible in transient conditions for two windows to share the same
+                        // layer, which results in sortedWindows being smaller than
+                        // mWindowCacheByDisplay
+                        final int sortedWindowCount = sortedWindows.size();
+                        List<AccessibilityWindowInfo> windows =
+                                new ArrayList<>(sortedWindowCount);
+                        for (int j = sortedWindowCount - 1; j >= 0; j--) {
+                            AccessibilityWindowInfo window = sortedWindows.valueAt(j);
+                            windows.add(new AccessibilityWindowInfo(window));
+                            sortedWindows.removeAt(j);
+                        }
+                        returnWindows.put(displayId, windows);
+                    }
                 }
-
-                // It's possible in transient conditions for two windows to share the same
-                // layer, which results in sortedWindows being smaller than mWindowCache
-                final int sortedWindowCount = sortedWindows.size();
-                List<AccessibilityWindowInfo> windows = new ArrayList<>(sortedWindowCount);
-                for (int i = sortedWindowCount - 1; i >= 0; i--) {
-                    AccessibilityWindowInfo window = sortedWindows.valueAt(i);
-                    windows.add(new AccessibilityWindowInfo(window));
-                    sortedWindows.removeAt(i);
-                }
-
-                return windows;
+                return returnWindows;
             }
             return null;
         }
     }
 
+    /**
+     * Gets an {@link AccessibilityWindowInfo} by windowId.
+     *
+     * @param windowId The id of the window.
+     *
+     * @return The {@link AccessibilityWindowInfo} or null if such not found.
+     */
     public AccessibilityWindowInfo getWindow(int windowId) {
         synchronized (mLock) {
-            AccessibilityWindowInfo window = mWindowCache.get(windowId);
-            if (window != null) {
-                return new AccessibilityWindowInfo(window);
+            final int displayCounts = mWindowCacheByDisplay.size();
+            for (int i = 0; i < displayCounts; i++) {
+                final SparseArray<AccessibilityWindowInfo> windowsOfDisplay =
+                        mWindowCacheByDisplay.valueAt(i);
+                if (windowsOfDisplay == null) {
+                    continue;
+                }
+
+                AccessibilityWindowInfo window = windowsOfDisplay.get(windowId);
+                if (window != null) {
+                    return new AccessibilityWindowInfo(window);
+                }
             }
             return null;
         }
@@ -280,7 +398,7 @@ public class AccessibilityCache {
      */
     public void add(AccessibilityNodeInfo info) {
         synchronized(mLock) {
-            if (DEBUG) {
+            if (VERBOSE) {
                 Log.i(LOG_TAG, "add(" + info + ")");
             }
 
@@ -335,8 +453,10 @@ public class AccessibilityCache {
                     refreshCachedNodeLocked(windowId, mAccessibilityFocus);
                 }
                 mAccessibilityFocus = sourceId;
+                mAccessibilityFocusedWindow = windowId;
             } else if (mAccessibilityFocus == sourceId) {
                 mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             }
             if (clone.isFocused()) {
                 mInputFocus = sourceId;
@@ -352,7 +472,7 @@ public class AccessibilityCache {
             if (DEBUG) {
                 Log.i(LOG_TAG, "clear()");
             }
-            clearWindowCache();
+            clearWindowCacheLocked();
             final int nodesForWindowCount = mNodeCache.size();
             for (int i = nodesForWindowCount - 1; i >= 0; i--) {
                 final int windowId = mNodeCache.keyAt(i);
@@ -361,11 +481,28 @@ public class AccessibilityCache {
 
             mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
             mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+
+            mAccessibilityFocusedWindow = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         }
     }
 
-    private void clearWindowCache() {
-        mWindowCache.clear();
+    private void clearWindowCacheLocked() {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "clearWindowCacheLocked");
+        }
+        final int displayCounts = mWindowCacheByDisplay.size();
+
+        if (displayCounts > 0) {
+            for (int i = displayCounts - 1; i >= 0; i--) {
+                final int displayId = mWindowCacheByDisplay.keyAt(i);
+                final SparseArray<AccessibilityWindowInfo> windows =
+                        mWindowCacheByDisplay.get(displayId);
+                if (windows != null) {
+                    windows.clear();
+                }
+                mWindowCacheByDisplay.remove(displayId);
+            }
+        }
         mIsAllWindowsCached = false;
     }
 
@@ -438,32 +575,41 @@ public class AccessibilityCache {
     public void checkIntegrity() {
         synchronized (mLock) {
             // Get the root.
-            if (mWindowCache.size() <= 0 && mNodeCache.size() == 0) {
+            if (mWindowCacheByDisplay.size() <= 0 && mNodeCache.size() == 0) {
                 return;
             }
 
             AccessibilityWindowInfo focusedWindow = null;
             AccessibilityWindowInfo activeWindow = null;
 
-            final int windowCount = mWindowCache.size();
-            for (int i = 0; i < windowCount; i++) {
-                AccessibilityWindowInfo window = mWindowCache.valueAt(i);
+            final int displayCounts = mWindowCacheByDisplay.size();
+            for (int i = 0; i < displayCounts; i++) {
+                final SparseArray<AccessibilityWindowInfo> windowsOfDisplay =
+                        mWindowCacheByDisplay.valueAt(i);
 
-                // Check for one active window.
-                if (window.isActive()) {
-                    if (activeWindow != null) {
-                        Log.e(LOG_TAG, "Duplicate active window:" + window);
-                    } else {
-                        activeWindow = window;
-                    }
+                if (windowsOfDisplay == null) {
+                    continue;
                 }
 
-                // Check for one focused window.
-                if (window.isFocused()) {
-                    if (focusedWindow != null) {
-                        Log.e(LOG_TAG, "Duplicate focused window:" + window);
-                    } else {
-                        focusedWindow = window;
+                final int windowCount = windowsOfDisplay.size();
+                for (int j = 0; j < windowCount; j++) {
+                    final AccessibilityWindowInfo window = windowsOfDisplay.valueAt(j);
+
+                    // Check for one active window.
+                    if (window.isActive()) {
+                        if (activeWindow != null) {
+                            Log.e(LOG_TAG, "Duplicate active window:" + window);
+                        } else {
+                            activeWindow = window;
+                        }
+                    }
+                    // Check for one focused window.
+                    if (window.isFocused()) {
+                        if (focusedWindow != null) {
+                            Log.e(LOG_TAG, "Duplicate focused window:" + window);
+                        } else {
+                            focusedWindow = window;
+                        }
                     }
                 }
             }
@@ -551,8 +697,14 @@ public class AccessibilityCache {
 
     // Layer of indirection included to break dependency chain for testing
     public static class AccessibilityNodeRefresher {
+        /** Refresh the given AccessibilityNodeInfo object. */
         public boolean refreshNode(AccessibilityNodeInfo info, boolean bypassCache) {
             return info.refresh(null, bypassCache);
+        }
+
+        /** Refresh the given AccessibilityWindowInfo object. */
+        public boolean refreshWindow(AccessibilityWindowInfo info) {
+            return info.refresh();
         }
     }
 }

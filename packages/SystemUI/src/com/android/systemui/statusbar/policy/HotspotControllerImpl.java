@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
+import static android.net.TetheringManager.TETHERING_WIFI;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.TetheringManager;
+import android.net.TetheringManager.TetheringRequest;
 import android.net.wifi.WifiClient;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -28,13 +30,16 @@ import android.os.HandlerExecutor;
 import android.os.UserManager;
 import android.util.Log;
 
+import com.android.internal.util.ConcurrentUtils;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -47,36 +52,71 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
-    private final ConnectivityManager mConnectivityManager;
+    private final TetheringManager mTetheringManager;
     private final WifiManager mWifiManager;
     private final Handler mMainHandler;
     private final Context mContext;
 
     private int mHotspotState;
     private volatile int mNumConnectedDevices;
+    // Assume tethering is available until told otherwise
+    private volatile boolean mIsTetheringSupported = true;
+    private volatile boolean mHasTetherableWifiRegexs = true;
     private boolean mWaitingForTerminalState;
+
+    private TetheringManager.TetheringEventCallback mTetheringCallback =
+            new TetheringManager.TetheringEventCallback() {
+                @Override
+                public void onTetheringSupported(boolean supported) {
+                    if (mIsTetheringSupported != supported) {
+                        mIsTetheringSupported = supported;
+                        fireHotspotAvailabilityChanged();
+                    }
+                }
+
+                @Override
+                public void onTetherableInterfaceRegexpsChanged(
+                        TetheringManager.TetheringInterfaceRegexps reg) {
+                    final boolean newValue = reg.getTetherableWifiRegexs().size() != 0;
+                    if (mHasTetherableWifiRegexs != newValue) {
+                        mHasTetherableWifiRegexs = newValue;
+                        fireHotspotAvailabilityChanged();
+                    }
+                }
+            };
 
     /**
      * Controller used to retrieve information related to a hotspot.
      */
     @Inject
-    public HotspotControllerImpl(Context context, @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+    public HotspotControllerImpl(Context context, @Main Handler mainHandler,
+            @Background Handler backgroundHandler) {
         mContext = context;
-        mConnectivityManager =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mTetheringManager = context.getSystemService(TetheringManager.class);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mMainHandler = mainHandler;
+        mTetheringManager.registerTetheringEventCallback(
+                new HandlerExecutor(backgroundHandler), mTetheringCallback);
     }
 
+    /**
+     * Whether hotspot is currently supported.
+     *
+     * This will return {@code true} immediately on creation of the controller, but may be updated
+     * later. Callbacks from this controllers will notify if the state changes.
+     *
+     * @return {@code true} if hotspot is supported (or we haven't been told it's not)
+     * @see #addCallback
+     */
     @Override
     public boolean isHotspotSupported() {
-        return mConnectivityManager.isTetheringSupported()
-                && mConnectivityManager.getTetherableWifiRegexs().length != 0
+        return mIsTetheringSupported && mHasTetherableWifiRegexs
                 && UserManager.get(mContext).isUserAdmin(ActivityManager.getCurrentUser());
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("HotspotController state:");
+        pw.print("  available="); pw.println(isHotspotSupported());
         pw.print("  mHotspotState="); pw.println(stateToString(mHotspotState));
         pw.print("  mNumConnectedDevices="); pw.println(mNumConnectedDevices);
         pw.print("  mWaitingForTerminalState="); pw.println(mWaitingForTerminalState);
@@ -112,14 +152,11 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                 if (mCallbacks.size() == 1) {
                     mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler), this);
                 } else {
-                    // mWifiManager#registerSoftApCallback triggers a call to
-                    // onConnectedClientsChanged on the Main Handler. In order to always update
-                    // the callback on added, we make this call when adding callbacks after the
-                    // first.
+                    // mWifiManager#registerSoftApCallback triggers a call to onNumClientsChanged
+                    // on the Main Handler. In order to always update the callback on added, we
+                    // make this call when adding callbacks after the first.
                     mMainHandler.post(() ->
-                            callback.onHotspotChanged(isHotspotEnabled(),
-                                    mNumConnectedDevices));
-
+                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
                 }
             }
         }
@@ -156,17 +193,18 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (enabled) {
             mWaitingForTerminalState = true;
             if (DEBUG) Log.d(TAG, "Starting tethering");
-            mConnectivityManager.startTethering(ConnectivityManager.TETHERING_WIFI, false,
-                    new ConnectivityManager.OnStartTetheringCallback() {
+            mTetheringManager.startTethering(new TetheringRequest.Builder(TETHERING_WIFI).build(),
+                    ConcurrentUtils.DIRECT_EXECUTOR,
+                    new TetheringManager.StartTetheringCallback() {
                         @Override
-                        public void onTetheringFailed() {
+                        public void onTetheringFailed(final int result) {
                             if (DEBUG) Log.d(TAG, "onTetheringFailed");
                             maybeResetSoftApState();
                             fireHotspotChangedCallback();
                         }
                     });
         } else {
-            mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
+            mTetheringManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
         }
     }
 
@@ -181,10 +219,25 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
      * (as it can be blocked).
      */
     private void fireHotspotChangedCallback() {
+        List<Callback> list;
         synchronized (mCallbacks) {
-            for (Callback callback : mCallbacks) {
-                callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices);
-            }
+            list = new ArrayList<>(mCallbacks);
+        }
+        for (Callback callback : list) {
+            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices);
+        }
+    }
+
+    /**
+     * Sends a hotspot available changed callback.
+     */
+    private void fireHotspotAvailabilityChanged() {
+        List<Callback> list;
+        synchronized (mCallbacks) {
+            list = new ArrayList<>(mCallbacks);
+        }
+        for (Callback callback : list) {
+            callback.onHotspotAvailabilityChanged(isHotspotSupported());
         }
     }
 
@@ -210,7 +263,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         switch (mHotspotState) {
             case WifiManager.WIFI_AP_STATE_FAILED:
                 // TODO(b/110697252): must be called to reset soft ap state after failure
-                mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
+                mTetheringManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
                 // Fall through
             case WifiManager.WIFI_AP_STATE_ENABLED:
             case WifiManager.WIFI_AP_STATE_DISABLED:

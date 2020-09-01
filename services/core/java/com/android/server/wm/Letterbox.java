@@ -20,7 +20,7 @@ import static android.view.SurfaceControl.HIDDEN;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Binder;
+import android.os.IBinder;
 import android.os.Process;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
@@ -41,7 +41,8 @@ public class Letterbox {
     private static final Rect EMPTY_RECT = new Rect();
     private static final Point ZERO_POINT = new Point(0, 0);
 
-    private final Supplier<SurfaceControl.Builder> mFactory;
+    private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
+    private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
     private final Rect mOuter = new Rect();
     private final Rect mInner = new Rect();
     private final LetterboxSurface mTop = new LetterboxSurface("top");
@@ -55,8 +56,10 @@ public class Letterbox {
      *
      * @param surfaceControlFactory a factory for creating the managed {@link SurfaceControl}s
      */
-    public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory) {
-        mFactory = surfaceControlFactory;
+    public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            Supplier<SurfaceControl.Transaction> transactionFactory) {
+        mSurfaceControlFactory = surfaceControlFactory;
+        mTransactionFactory = transactionFactory;
     }
 
     /**
@@ -74,10 +77,10 @@ public class Letterbox {
         mOuter.set(outer);
         mInner.set(inner);
 
-        mTop.layout(outer.left, outer.top, inner.right, inner.top, surfaceOrigin);
-        mLeft.layout(outer.left, inner.top, inner.left, outer.bottom, surfaceOrigin);
-        mBottom.layout(inner.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
-        mRight.layout(inner.right, outer.top, outer.right, inner.bottom, surfaceOrigin);
+        mTop.layout(outer.left, outer.top, outer.right, inner.top, surfaceOrigin);
+        mLeft.layout(outer.left, outer.top, inner.left, outer.bottom, surfaceOrigin);
+        mBottom.layout(outer.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
+        mRight.layout(inner.right, outer.top, outer.right, outer.bottom, surfaceOrigin);
     }
 
 
@@ -95,6 +98,31 @@ public class Letterbox {
     /** @return The frame that used to place the content. */
     Rect getInnerFrame() {
         return mInner;
+    }
+
+    /**
+     * Returns {@code true} if the letterbox does not overlap with the bar, or the letterbox can
+     * fully cover the window frame.
+     *
+     * @param rect The area of the window frame.
+     */
+    boolean notIntersectsOrFullyContains(Rect rect) {
+        int emptyCount = 0;
+        int noOverlappingCount = 0;
+        for (LetterboxSurface surface : mSurfaces) {
+            final Rect surfaceRect = surface.mLayoutFrameGlobal;
+            if (surfaceRect.isEmpty()) {
+                // empty letterbox
+                emptyCount++;
+            } else if (!Rect.intersects(surfaceRect, rect)) {
+                // no overlapping
+                noOverlappingCount++;
+            } else if (surfaceRect.contains(rect)) {
+                // overlapping and covered
+                return true;
+            }
+        }
+        return (emptyCount + noOverlappingCount) == mSurfaces.length;
     }
 
     /**
@@ -167,20 +195,21 @@ public class Letterbox {
         final InputWindowHandle mWindowHandle;
         final InputEventReceiver mInputEventReceiver;
         final WindowManagerService mWmService;
-        final Binder mToken = new Binder();
+        final IBinder mToken;
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
-            final String name = namePrefix + (win.mAppToken != null ? win.mAppToken : win);
+            final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
             final InputChannel[] channels = InputChannel.openInputChannelPair(name);
             mServerChannel = channels[0];
             mClientChannel = channels[1];
             mInputEventReceiver = new SimpleInputReceiver(mClientChannel);
 
-            mWmService.mInputManager.registerInputChannel(mServerChannel, mToken);
+            mWmService.mInputManager.registerInputChannel(mServerChannel);
+            mToken = mServerChannel.getToken();
 
             mWindowHandle = new InputWindowHandle(null /* inputApplicationHandle */,
-                    null /* clientWindow */, win.getDisplayId());
+                    win.getDisplayId());
             mWindowHandle.name = name;
             mWindowHandle.token = mToken;
             mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -244,12 +273,16 @@ public class Letterbox {
             mLayoutFrameRelative.offset(-surfaceOrigin.x, -surfaceOrigin.y);
         }
 
-        private void createSurface() {
-            mSurface = mFactory.get().setName("Letterbox - " + mType)
-                    .setFlags(HIDDEN).setColorLayer().build();
-            mSurface.setLayer(-1);
-            mSurface.setColor(new float[]{0, 0, 0});
-            mSurface.setColorSpaceAgnostic(true);
+        private void createSurface(SurfaceControl.Transaction t) {
+            mSurface = mSurfaceControlFactory.get()
+                    .setName("Letterbox - " + mType)
+                    .setFlags(HIDDEN)
+                    .setColorLayer()
+                    .setCallsite("LetterboxSurface.createSurface")
+                    .build();
+            t.setLayer(mSurface, -1)
+                    .setColor(mSurface, new float[]{0, 0, 0})
+                    .setColorSpaceAgnostic(mSurface, true);
         }
 
         void attachInput(WindowState win) {
@@ -261,7 +294,7 @@ public class Letterbox {
 
         public void remove() {
             if (mSurface != null) {
-                new SurfaceControl.Transaction().remove(mSurface).apply();
+                mTransactionFactory.get().remove(mSurface).apply();
                 mSurface = null;
             }
             if (mInputInterceptor != null) {
@@ -297,7 +330,7 @@ public class Letterbox {
             mSurfaceFrameRelative.set(mLayoutFrameRelative);
             if (!mSurfaceFrameRelative.isEmpty()) {
                 if (mSurface == null) {
-                    createSurface();
+                    createSurface(t);
                 }
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
                 t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),

@@ -26,28 +26,34 @@ namespace statsd {
 
 class MockConditionWizard : public ConditionWizard {
 public:
-    MOCK_METHOD6(query,
+    MOCK_METHOD3(query,
                  ConditionState(const int conditionIndex, const ConditionKey& conditionParameters,
-                                const vector<Matcher>& dimensionFields,
-                                const bool isSubsetDim, const bool isPartialLink,
-                                std::unordered_set<HashableDimensionKey>* dimensionKeySet));
+                                const bool isPartialLink));
 };
 
 class MockStatsPullerManager : public StatsPullerManager {
 public:
-    MOCK_METHOD4(RegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver,
-                                        int64_t nextPulltimeNs, int64_t intervalNs));
-    MOCK_METHOD2(UnRegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver));
-    MOCK_METHOD2(Pull, bool(const int pullCode, vector<std::shared_ptr<LogEvent>>* data));
-};
-
-class MockUidMap : public UidMap {
- public:
-  MOCK_CONST_METHOD1(getHostUidOrSelf, int(int uid));
+    MOCK_METHOD5(RegisterReceiver,
+                 void(int tagId, const ConfigKey& key, wp<PullDataReceiver> receiver,
+                      int64_t nextPulltimeNs, int64_t intervalNs));
+    MOCK_METHOD3(UnRegisterReceiver,
+                 void(int tagId, const ConfigKey& key, wp<PullDataReceiver> receiver));
+    MOCK_METHOD5(Pull, bool(const int pullCode, const ConfigKey& key, const int64_t eventTimeNs,
+                            vector<std::shared_ptr<LogEvent>>* data, bool useUids));
+    MOCK_METHOD5(Pull,
+                 bool(const int pullCode, const vector<int32_t>& uids, const int64_t eventTimeNs,
+                      vector<std::shared_ptr<LogEvent>>* data, bool useUids));
+    MOCK_METHOD2(RegisterPullUidProvider,
+                 void(const ConfigKey& configKey, wp<PullUidProvider> provider));
+    MOCK_METHOD2(UnregisterPullUidProvider,
+                 void(const ConfigKey& configKey, wp<PullUidProvider> provider));
 };
 
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
 MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, std::string value);
+
+HashableDimensionKey getMockedDimensionKeyLongValue(int tagId, int key, int64_t value);
+MetricDimensionKey getMockedStateDimensionKey(int tagId, int key, int64_t value);
 
 // Utils to build FieldMatcher proto for simple one-depth atoms.
 void buildSimpleAtomFieldMatcher(const int tagId, const int atomFieldNum, FieldMatcher* matcher);

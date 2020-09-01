@@ -16,8 +16,10 @@
 
 #include "JankTracker.h"
 
+#include <cutils/ashmem.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <statslog.h>
 #include <sys/mman.h>
 
@@ -25,11 +27,9 @@
 #include <cmath>
 #include <cstdio>
 #include <limits>
-
-#include <cutils/ashmem.h>
-#include <log/log.h>
 #include <sstream>
 
+#include "DeviceInfo.h"
 #include "Properties.h"
 #include "utils/TimeUtils.h"
 #include "utils/Trace.h"
@@ -79,11 +79,11 @@ static const int64_t EXEMPT_FRAMES_FLAGS = FrameInfoFlags::SurfaceCanvas;
 // and filter it out of the frame profile data
 static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 
-JankTracker::JankTracker(ProfileDataContainer* globalData, const DisplayInfo& displayInfo) {
+JankTracker::JankTracker(ProfileDataContainer* globalData) {
     mGlobalData = globalData;
-    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1_s / displayInfo.fps);
-    nsecs_t sfOffset = frameIntervalNanos - (displayInfo.presentationDeadline - 1_ms);
-    nsecs_t offsetDelta = sfOffset - displayInfo.appVsyncOffset;
+    nsecs_t frameIntervalNanos = DeviceInfo::getVsyncPeriod();
+    nsecs_t sfOffset = DeviceInfo::getCompositorOffset();
+    nsecs_t offsetDelta = sfOffset - DeviceInfo::getAppOffset();
     // There are two different offset cases. If the offsetDelta is positive
     // and small, then the intention is to give apps extra time by leveraging
     // pipelining between the UI & RT threads. If the offsetDelta is large or
@@ -230,6 +230,14 @@ void JankTracker::reset() {
     (*mGlobalData)->reset();
     sFrameStart = Properties::filterOutTestOverhead ? FrameInfoIndex::HandleInputStart
                                                     : FrameInfoIndex::IntendedVsync;
+}
+
+void JankTracker::finishGpuDraw(const FrameInfo& frame) {
+    int64_t totalGPUDrawTime = frame.gpuDrawTime();
+    if (totalGPUDrawTime >= 0) {
+        mData->reportGPUFrame(totalGPUDrawTime);
+        (*mGlobalData)->reportGPUFrame(totalGPUDrawTime);
+    }
 }
 
 } /* namespace uirenderer */

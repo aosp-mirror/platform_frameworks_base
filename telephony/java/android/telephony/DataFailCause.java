@@ -30,10 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Returned as the reason for a data connection failure as defined by modem and some local errors.
- * @hide
+ * DataFailCause collects data connection failure causes code from different sources.
  */
-@SystemApi
 public final class DataFailCause {
     /** There is no failure */
     public static final int NONE = 0;
@@ -841,8 +839,19 @@ public final class DataFailCause {
     /**
      * Data call bring up fails in the VSNCP phase due to a network rejection of the VSNCP
      * configuration request because the requested APN is unauthorized.
+     *
+     * @deprecated Use {@link #VSNCP_APN_UNAUTHORIZED} instead.
+     *
+     * @hide
      */
-    public static final int VSNCP_APN_UNATHORIZED = 0x8BE;
+    @SystemApi
+    @Deprecated
+    public static final int VSNCP_APN_UNATHORIZED = 0x8BE; // NOTYPO
+    /**
+     * Data call bring up fails in the VSNCP phase due to a network rejection of the VSNCP
+     * configuration request because the requested APN is unauthorized.
+     */
+    public static final int VSNCP_APN_UNAUTHORIZED = 0x8BE;
     /**
      * Data call bring up fails in the VSNCP phase due to a network rejection of the VSNCP
      * configuration request because the PDN limit has been exceeded.
@@ -1318,6 +1327,7 @@ public final class DataFailCause {
         sFailCauseMap.put(VSNCP_TIMEOUT, "VSNCP_TIMEOUT");
         sFailCauseMap.put(VSNCP_GEN_ERROR, "VSNCP_GEN_ERROR");
         sFailCauseMap.put(VSNCP_APN_UNATHORIZED, "VSNCP_APN_UNATHORIZED");
+        sFailCauseMap.put(VSNCP_APN_UNAUTHORIZED, "VSNCP_APN_UNAUTHORIZED");
         sFailCauseMap.put(VSNCP_PDN_LIMIT_EXCEEDED, "VSNCP_PDN_LIMIT_EXCEEDED");
         sFailCauseMap.put(VSNCP_NO_PDN_GATEWAY_ADDRESS, "VSNCP_NO_PDN_GATEWAY_ADDRESS");
         sFailCauseMap.put(VSNCP_PDN_GATEWAY_UNREACHABLE, "VSNCP_PDN_GATEWAY_UNREACHABLE");
@@ -1423,8 +1433,8 @@ public final class DataFailCause {
                 if (configManager != null) {
                     PersistableBundle b = configManager.getConfigForSubId(subId);
                     if (b != null) {
-                        String[] permanentFailureStrings = b.getStringArray(CarrierConfigManager.
-                                KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS);
+                        String[] permanentFailureStrings = b.getStringArray(CarrierConfigManager
+                                .KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS);
                         if (permanentFailureStrings != null) {
                             permanentFailureSet = new HashSet<>();
                             for (Map.Entry<Integer, String> e : sFailCauseMap.entrySet()) {

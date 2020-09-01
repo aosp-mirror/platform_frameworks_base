@@ -157,21 +157,21 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
-        dest.writeString(targetPackage);
-        dest.writeString(targetProcesses);
-        dest.writeString(sourceDir);
-        dest.writeString(publicSourceDir);
-        dest.writeStringArray(splitNames);
-        dest.writeStringArray(splitSourceDirs);
-        dest.writeStringArray(splitPublicSourceDirs);
+        dest.writeString8(targetPackage);
+        dest.writeString8(targetProcesses);
+        dest.writeString8(sourceDir);
+        dest.writeString8(publicSourceDir);
+        dest.writeString8Array(splitNames);
+        dest.writeString8Array(splitSourceDirs);
+        dest.writeString8Array(splitPublicSourceDirs);
         dest.writeSparseArray((SparseArray) splitDependencies);
-        dest.writeString(dataDir);
-        dest.writeString(deviceProtectedDataDir);
-        dest.writeString(credentialProtectedDataDir);
-        dest.writeString(primaryCpuAbi);
-        dest.writeString(secondaryCpuAbi);
-        dest.writeString(nativeLibraryDir);
-        dest.writeString(secondaryNativeLibraryDir);
+        dest.writeString8(dataDir);
+        dest.writeString8(deviceProtectedDataDir);
+        dest.writeString8(credentialProtectedDataDir);
+        dest.writeString8(primaryCpuAbi);
+        dest.writeString8(secondaryCpuAbi);
+        dest.writeString8(nativeLibraryDir);
+        dest.writeString8(secondaryNativeLibraryDir);
         dest.writeInt((handleProfiling == false) ? 0 : 1);
         dest.writeInt((functionalTest == false) ? 0 : 1);
     }
@@ -189,21 +189,21 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     @SuppressWarnings("unchecked")
     private InstrumentationInfo(Parcel source) {
         super(source);
-        targetPackage = source.readString();
-        targetProcesses = source.readString();
-        sourceDir = source.readString();
-        publicSourceDir = source.readString();
-        splitNames = source.readStringArray();
-        splitSourceDirs = source.readStringArray();
-        splitPublicSourceDirs = source.readStringArray();
+        targetPackage = source.readString8();
+        targetProcesses = source.readString8();
+        sourceDir = source.readString8();
+        publicSourceDir = source.readString8();
+        splitNames = source.createString8Array();
+        splitSourceDirs = source.createString8Array();
+        splitPublicSourceDirs = source.createString8Array();
         splitDependencies = source.readSparseArray(null);
-        dataDir = source.readString();
-        deviceProtectedDataDir = source.readString();
-        credentialProtectedDataDir = source.readString();
-        primaryCpuAbi = source.readString();
-        secondaryCpuAbi = source.readString();
-        nativeLibraryDir = source.readString();
-        secondaryNativeLibraryDir = source.readString();
+        dataDir = source.readString8();
+        deviceProtectedDataDir = source.readString8();
+        credentialProtectedDataDir = source.readString8();
+        primaryCpuAbi = source.readString8();
+        secondaryCpuAbi = source.readString8();
+        nativeLibraryDir = source.readString8();
+        secondaryNativeLibraryDir = source.readString8();
         handleProfiling = source.readInt() != 0;
         functionalTest = source.readInt() != 0;
     }

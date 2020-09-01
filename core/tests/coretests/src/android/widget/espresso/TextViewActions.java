@@ -199,6 +199,86 @@ public final class TextViewActions {
     }
 
     /**
+     * Returns an action that long presses then drags on handle from the current position to
+     * endIndex on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     * @param handleType Type of the handle
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction longPressAndDragHandle(TextView textView, Handle handleType,
+            int endIndex) {
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.LONG_PRESS,
+                        new CurrentHandleCoordinates(textView),
+                        new HandleCoordinates(textView, handleType, endIndex, true),
+                        Press.FINGER,
+                        Editor.HandleView.class));
+    }
+
+    /**
+     * Returns an action that long presses on the current handle.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     */
+    public static ViewAction longPressHandle(TextView textView) {
+        return actionWithAssertions(
+                new ViewClickAction(Tap.LONG, new CurrentHandleCoordinates(textView),
+                        Press.FINGER));
+    }
+
+    /**
+     * Returns an action that double tap then drags on handle from the current position to
+     * endIndex on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     * @param handleType Type of the handle
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction doubleTapAndDragHandle(TextView textView, Handle handleType,
+            int endIndex) {
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.DOUBLE_TAP,
+                        new CurrentHandleCoordinates(textView),
+                        new HandleCoordinates(textView, handleType, endIndex, true),
+                        Press.FINGER,
+                        Editor.HandleView.class));
+    }
+
+    /**
+     * Returns an action that double tap on the current handle.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     */
+    public static ViewAction doubleTapHandle(TextView textView) {
+        return actionWithAssertions(
+                new ViewClickAction(Tap.DOUBLE, new CurrentHandleCoordinates(textView),
+                        Press.FINGER));
+    }
+
+    /**
      * Returns an action that double taps then drags on text from startIndex to endIndex on the
      * TextView.<br>
      * <br>
@@ -355,6 +435,27 @@ public final class TextViewActions {
                         new HandleCoordinates(textView, handleType, endIndex, primary),
                         Press.FINGER,
                         Editor.HandleView.class));
+    }
+
+    /**
+     * Returns an action that drags on text from startIndex to endIndex on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction dragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.TAP,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.FINGER,
+                        TextView.class));
     }
 
     /**

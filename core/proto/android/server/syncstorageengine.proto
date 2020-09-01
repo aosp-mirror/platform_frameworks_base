@@ -1,0 +1,86 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.content;
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+/**
+ * Stores relevant information from a DayStats object in SyncStorageEngine.
+ */
+message SyncStatisticsProto {
+
+  message DayStats {
+    optional int32 day = 1; // day of the year - defined by SyncStorageEngine#getCurrentDayLocked()
+    optional int32 success_count = 2;
+    optional int64 success_time = 3; // time since epoch
+    optional int32 failure_count = 4;
+    optional int64 failure_time = 5; // time since epoch
+  }
+
+  repeated DayStats stats = 1;
+}
+
+/**
+ * Stores relevant information from a SyncStatusInfo object.
+ */
+message SyncStatusProto {
+
+  message StatusInfo {
+
+    message Stats {
+      optional int64 total_elapsed_time = 1; // time since epoch
+      optional int32 num_syncs = 2;
+      optional int32 num_failures = 3;
+      optional int32 num_cancels = 4;
+      optional int32 num_source_other = 5;
+      optional int32 num_source_local = 6;
+      optional int32 num_source_poll = 7;
+      optional int32 num_source_user = 8;
+      optional int32 num_source_periodic = 9;
+      optional int32 num_source_feed = 10;
+    }
+
+    message LastEventInfo {
+      optional int64 last_event_time = 1; // time since epoch
+      optional string last_event = 2 [(.android.privacy).dest = DEST_EXPLICIT];
+    }
+
+    // Note: version doesn't need to be stored in proto because of how protos store information but
+    // leaving field number 1 open in case we find a usage for it in the future.
+    optional int32 authority_id = 2;
+    optional int64 last_success_time = 3; // time since epoch
+    optional int32 last_success_source = 4;
+    optional int64 last_failure_time = 5; // time since epoch
+    optional int32 last_failure_source = 6;
+    optional string last_failure_message = 7 [(.android.privacy).dest = DEST_EXPLICIT];
+    optional int64 initial_failure_time = 8; // time since epoch
+    optional bool pending = 9;
+    optional bool initialize = 10;
+    repeated int64 periodic_sync_times = 11; // times since epoch
+    repeated LastEventInfo last_event_info = 12;
+    optional int64 last_today_reset_time = 13; // time since epoch
+    optional Stats total_stats = 14;
+    optional Stats today_stats = 15;
+    optional Stats yesterday_stats = 16;
+    repeated int64 per_source_last_success_times = 17; // times since epoch
+    repeated int64 per_source_last_failure_times = 18; // times since epoch
+  }
+
+  repeated StatusInfo status = 1;
+}

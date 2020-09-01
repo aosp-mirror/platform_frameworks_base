@@ -61,7 +61,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
     public void onTuningChanged(String key, String newValue) {
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             mReceivedClock = true;
-            mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
+            mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
             mClockEnabled = !mBlacklist.contains(mClock);
         } else if (Clock.CLOCK_SECONDS.equals(key)) {
             mReceivedSeconds = true;

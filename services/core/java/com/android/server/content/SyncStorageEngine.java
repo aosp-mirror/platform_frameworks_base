@@ -51,6 +51,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -64,6 +66,9 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -132,7 +137,7 @@ public class SyncStorageEngine {
     /**
      * String names for the sync source types.
      *
-     * KEEP THIS AND {@link SyncStatusInfo#SOURCE_COUNT} IN SYNC.
+     * KEEP THIS AND {@link SyncStatusInfo}.SOURCE_COUNT IN SYNC.
      */
     public static final String[] SOURCES = {
             "OTHER",
@@ -428,7 +433,8 @@ public class SyncStorageEngine {
     }
 
     // Primary list of all syncable authorities.  Also our global lock.
-    private final SparseArray<AuthorityInfo> mAuthorities =
+    @VisibleForTesting
+    final SparseArray<AuthorityInfo> mAuthorities =
             new SparseArray<AuthorityInfo>();
 
     private final HashMap<AccountAndUser, AccountInfo> mAccounts
@@ -437,7 +443,8 @@ public class SyncStorageEngine {
     private final SparseArray<ArrayList<SyncInfo>> mCurrentSyncs
             = new SparseArray<ArrayList<SyncInfo>>();
 
-    private final SparseArray<SyncStatusInfo> mSyncStatus =
+    @VisibleForTesting
+    final SparseArray<SyncStatusInfo> mSyncStatus =
             new SparseArray<SyncStatusInfo>();
 
     private final ArrayList<SyncHistoryItem> mSyncHistory =
@@ -453,7 +460,8 @@ public class SyncStorageEngine {
     private int mNextAuthorityId = 0;
 
     // We keep 4 weeks of stats.
-    private final DayStats[] mDayStats = new DayStats[7*4];
+    @VisibleForTesting
+    final DayStats[] mDayStats = new DayStats[7*4];
     private final Calendar mCal;
     private int mYear;
     private int mYearInDays;
@@ -463,6 +471,17 @@ public class SyncStorageEngine {
     private static volatile SyncStorageEngine sSyncStorageEngine = null;
 
     private int mSyncRandomOffset;
+
+    private static final boolean DELETE_LEGACY_PARCEL_FILES = true;
+    private static final String LEGACY_STATUS_FILE_NAME = "status.bin";
+    private static final String LEGACY_STATISTICS_FILE_NAME = "stats.bin";
+
+    private static final String SYNC_DIR_NAME = "sync";
+    private static final String ACCOUNT_INFO_FILE_NAME = "accounts.xml";
+    private static final String STATUS_FILE_NAME = "status";
+    private static final String STATISTICS_FILE_NAME = "stats";
+
+    private File mSyncDir;
 
     /**
      * This file contains the core engine state: all accounts and the
@@ -508,14 +527,15 @@ public class SyncStorageEngine {
                 com.android.internal.R.bool.config_syncstorageengine_masterSyncAutomatically);
 
         File systemDir = new File(dataDir, "system");
-        File syncDir = new File(systemDir, "sync");
-        syncDir.mkdirs();
+        mSyncDir = new File(systemDir, SYNC_DIR_NAME);
+        mSyncDir.mkdirs();
 
-        maybeDeleteLegacyPendingInfoLocked(syncDir);
+        maybeDeleteLegacyPendingInfoLocked(mSyncDir);
 
-        mAccountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"), "sync-accounts");
-        mStatusFile = new AtomicFile(new File(syncDir, "status.bin"), "sync-status");
-        mStatisticsFile = new AtomicFile(new File(syncDir, "stats.bin"), "sync-stats");
+        mAccountInfoFile = new AtomicFile(new File(mSyncDir, ACCOUNT_INFO_FILE_NAME),
+                "sync-accounts");
+        mStatusFile = new AtomicFile(new File(mSyncDir, STATUS_FILE_NAME), "sync-status");
+        mStatisticsFile = new AtomicFile(new File(mSyncDir, STATISTICS_FILE_NAME), "sync-stats");
 
         readAccountInfoLocked();
         readStatusLocked();
@@ -1096,7 +1116,7 @@ public class SyncStorageEngine {
                 Slog.v(TAG, "setActiveSync: account="
                         + " auth=" + activeSyncContext.mSyncOperation.target
                         + " src=" + activeSyncContext.mSyncOperation.syncSource
-                        + " extras=" + activeSyncContext.mSyncOperation.extras);
+                        + " extras=" + activeSyncContext.mSyncOperation.getExtrasAsString());
             }
             final EndPoint info = activeSyncContext.mSyncOperation.target;
             AuthorityInfo authorityInfo = getOrCreateAuthorityLocked(
@@ -1158,7 +1178,7 @@ public class SyncStorageEngine {
             item.eventTime = now;
             item.source = op.syncSource;
             item.reason = op.reason;
-            item.extras = op.extras;
+            item.extras = op.getClonedExtras();
             item.event = EVENT_START;
             item.syncExemptionFlag = op.syncExemptionFlag;
             mSyncHistory.add(0, item);
@@ -1717,7 +1737,7 @@ public class SyncStorageEngine {
 
     /**
      * Ensure the old pending.bin is deleted, as it has been changed to pending.xml.
-     * pending.xml was used starting in KLP.
+     * pending.xml was used starting in KitKat.
      * @param syncDir directory where the sync files are located.
      */
     private void maybeDeleteLegacyPendingInfoLocked(File syncDir) {
@@ -2017,28 +2037,24 @@ public class SyncStorageEngine {
     public static final int STATUS_FILE_END = 0;
     public static final int STATUS_FILE_ITEM = 100;
 
-    /**
-     * Read all sync status back in to the initial engine state.
-     */
-    private void readStatusLocked() {
-        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-            Slog.v(TAG_FILE, "Reading " + mStatusFile.getBaseFile());
-        }
+    private void readStatusParcelLocked(File parcel) {
         try {
-            byte[] data = mStatusFile.readFully();
+            final AtomicFile parcelFile = new AtomicFile(parcel);
+            byte[] data = parcelFile.readFully();
             Parcel in = Parcel.obtain();
             in.unmarshall(data, 0, data.length);
             in.setDataPosition(0);
             int token;
             while ((token=in.readInt()) != STATUS_FILE_END) {
                 if (token == STATUS_FILE_ITEM) {
-                    SyncStatusInfo status = new SyncStatusInfo(in);
-                    if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
-                        status.pending = false;
-                        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                            Slog.v(TAG_FILE, "Adding status for id " + status.authorityId);
+                    try {
+                        SyncStatusInfo status = new SyncStatusInfo(in);
+                        if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
+                            status.pending = false;
+                            mSyncStatus.put(status.authorityId, status);
                         }
-                        mSyncStatus.put(status.authorityId, status);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Unable to parse some sync status.", e);
                     }
                 } else {
                     // Ooops.
@@ -2046,15 +2062,247 @@ public class SyncStorageEngine {
                     break;
                 }
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             Slog.i(TAG, "No initial status");
+        }
+    }
+
+    private void upgradeStatusIfNeededLocked() {
+        final File parcelStatus = new File(mSyncDir, LEGACY_STATUS_FILE_NAME);
+        if (parcelStatus.exists() && !mStatusFile.exists()) {
+            readStatusParcelLocked(parcelStatus);
+            writeStatusLocked();
+        }
+
+        // if upgrade to proto was successful, delete parcel file
+        if (DELETE_LEGACY_PARCEL_FILES && parcelStatus.exists() && mStatusFile.exists()) {
+            parcelStatus.delete();
+        }
+    }
+
+    /**
+     * Read all sync status back in to the initial engine state.
+     */
+    @VisibleForTesting
+    void readStatusLocked() {
+        upgradeStatusIfNeededLocked();
+
+        if (!mStatusFile.exists()) {
+            return;
+        }
+        try {
+            try (FileInputStream in = mStatusFile.openRead()) {
+                readStatusInfoLocked(in);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to read status info file.", e);
+        }
+    }
+
+    private void readStatusInfoLocked(InputStream in) throws IOException {
+        final ProtoInputStream proto = new ProtoInputStream(in);
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) SyncStatusProto.STATUS:
+                    final long token = proto.start(SyncStatusProto.STATUS);
+                    final SyncStatusInfo status = readSyncStatusInfoLocked(proto);
+                    proto.end(token);
+                    if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
+                        status.pending = false;
+                        mSyncStatus.put(status.authorityId, status);
+                    }
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return;
+            }
+        }
+    }
+
+    private SyncStatusInfo readSyncStatusInfoLocked(ProtoInputStream proto) throws IOException {
+        SyncStatusInfo status;
+        if (proto.nextField(SyncStatusProto.StatusInfo.AUTHORITY_ID)) {
+            //fast-path; this should work for most cases since the authority id is written first
+            status = new SyncStatusInfo(proto.readInt(SyncStatusProto.StatusInfo.AUTHORITY_ID));
+        } else {
+            // placeholder to read other data; assume the default authority id as 0
+            status = new SyncStatusInfo(0);
+        }
+
+        int successTimesCount = 0;
+        int failureTimesCount = 0;
+        ArrayList<Pair<Long, String>> lastEventInformation = new ArrayList<>();
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) SyncStatusProto.StatusInfo.AUTHORITY_ID:
+                    // fast-path failed for some reason, rebuild the status from placeholder object
+                    Slog.w(TAG, "Failed to read the authority id via fast-path; "
+                            + "some data might not have been read.");
+                    status = new SyncStatusInfo(
+                            proto.readInt(SyncStatusProto.StatusInfo.AUTHORITY_ID), status);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_SUCCESS_TIME:
+                    status.lastSuccessTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.LAST_SUCCESS_TIME);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_SUCCESS_SOURCE:
+                    status.lastSuccessSource = proto.readInt(
+                            SyncStatusProto.StatusInfo.LAST_SUCCESS_SOURCE);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_FAILURE_TIME:
+                    status.lastFailureTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.LAST_FAILURE_TIME);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_FAILURE_SOURCE:
+                    status.lastFailureSource = proto.readInt(
+                            SyncStatusProto.StatusInfo.LAST_FAILURE_SOURCE);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_FAILURE_MESSAGE:
+                    status.lastFailureMesg = proto.readString(
+                            SyncStatusProto.StatusInfo.LAST_FAILURE_MESSAGE);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.INITIAL_FAILURE_TIME:
+                    status.initialFailureTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.INITIAL_FAILURE_TIME);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.PENDING:
+                    status.pending = proto.readBoolean(SyncStatusProto.StatusInfo.PENDING);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.INITIALIZE:
+                    status.initialize = proto.readBoolean(SyncStatusProto.StatusInfo.INITIALIZE);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.PERIODIC_SYNC_TIMES:
+                    status.addPeriodicSyncTime(
+                            proto.readLong(SyncStatusProto.StatusInfo.PERIODIC_SYNC_TIMES));
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_EVENT_INFO:
+                    final long eventToken = proto.start(SyncStatusProto.StatusInfo.LAST_EVENT_INFO);
+                    final Pair<Long, String> lastEventInfo = parseLastEventInfoLocked(proto);
+                    if (lastEventInfo != null) {
+                        lastEventInformation.add(lastEventInfo);
+                    }
+                    proto.end(eventToken);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LAST_TODAY_RESET_TIME:
+                    status.lastTodayResetTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.LAST_TODAY_RESET_TIME);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.TOTAL_STATS:
+                    final long totalStatsToken = proto.start(
+                            SyncStatusProto.StatusInfo.TOTAL_STATS);
+                    readSyncStatusStatsLocked(proto, status.totalStats);
+                    proto.end(totalStatsToken);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.TODAY_STATS:
+                    final long todayStatsToken = proto.start(
+                            SyncStatusProto.StatusInfo.TODAY_STATS);
+                    readSyncStatusStatsLocked(proto, status.todayStats);
+                    proto.end(todayStatsToken);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.YESTERDAY_STATS:
+                    final long yesterdayStatsToken = proto.start(
+                            SyncStatusProto.StatusInfo.YESTERDAY_STATS);
+                    readSyncStatusStatsLocked(proto, status.yesterdayStats);
+                    proto.end(yesterdayStatsToken);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.PER_SOURCE_LAST_SUCCESS_TIMES:
+                    final long successTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.PER_SOURCE_LAST_SUCCESS_TIMES);
+                    if (successTimesCount == status.perSourceLastSuccessTimes.length) {
+                        Slog.w(TAG, "Attempted to read more per source last success times "
+                                + "than expected; data might be corrupted.");
+                        break;
+                    }
+                    status.perSourceLastSuccessTimes[successTimesCount] = successTime;
+                    successTimesCount++;
+                    break;
+                case (int) SyncStatusProto.StatusInfo.PER_SOURCE_LAST_FAILURE_TIMES:
+                    final long failureTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.PER_SOURCE_LAST_FAILURE_TIMES);
+                    if (failureTimesCount == status.perSourceLastFailureTimes.length) {
+                        Slog.w(TAG, "Attempted to read more per source last failure times "
+                                + "than expected; data might be corrupted.");
+                        break;
+                    }
+                    status.perSourceLastFailureTimes[failureTimesCount] = failureTime;
+                    failureTimesCount++;
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    status.populateLastEventsInformation(lastEventInformation);
+                    return status;
+            }
+        }
+    }
+
+    private Pair<Long, String> parseLastEventInfoLocked(ProtoInputStream proto) throws IOException {
+        long time = 0;
+        String message = null;
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) SyncStatusProto.StatusInfo.LastEventInfo.LAST_EVENT_TIME:
+                    time = proto.readLong(SyncStatusProto.StatusInfo.LastEventInfo.LAST_EVENT_TIME);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.LastEventInfo.LAST_EVENT:
+                    message = proto.readString(SyncStatusProto.StatusInfo.LastEventInfo.LAST_EVENT);
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return message == null ? null : new Pair<>(time, message);
+            }
+        }
+    }
+
+    private void readSyncStatusStatsLocked(ProtoInputStream proto, SyncStatusInfo.Stats stats)
+            throws IOException {
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) SyncStatusProto.StatusInfo.Stats.TOTAL_ELAPSED_TIME:
+                    stats.totalElapsedTime = proto.readLong(
+                            SyncStatusProto.StatusInfo.Stats.TOTAL_ELAPSED_TIME);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SYNCS:
+                    stats.numSyncs = proto.readInt(SyncStatusProto.StatusInfo.Stats.NUM_SYNCS);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_FAILURES:
+                    stats.numFailures = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_FAILURES);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_CANCELS:
+                    stats.numCancels = proto.readInt(SyncStatusProto.StatusInfo.Stats.NUM_CANCELS);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_OTHER:
+                    stats.numSourceOther = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_OTHER);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_LOCAL:
+                    stats.numSourceLocal = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_LOCAL);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_POLL:
+                    stats.numSourcePoll = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_POLL);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_USER:
+                    stats.numSourceUser = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_USER);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_PERIODIC:
+                    stats.numSourcePeriodic = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_PERIODIC);
+                    break;
+                case (int) SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_FEED:
+                    stats.numSourceFeed = proto.readInt(
+                            SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_FEED);
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return;
+            }
         }
     }
 
     /**
      * Write all sync status to the sync status file.
      */
-    private void writeStatusLocked() {
+    @VisibleForTesting
+    void writeStatusLocked() {
         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
             Slog.v(TAG_FILE, "Writing new " + mStatusFile.getBaseFile());
         }
@@ -2066,24 +2314,85 @@ public class SyncStorageEngine {
         FileOutputStream fos = null;
         try {
             fos = mStatusFile.startWrite();
-            Parcel out = Parcel.obtain();
-            final int N = mSyncStatus.size();
-            for (int i=0; i<N; i++) {
-                SyncStatusInfo status = mSyncStatus.valueAt(i);
-                out.writeInt(STATUS_FILE_ITEM);
-                status.writeToParcel(out, 0);
-            }
-            out.writeInt(STATUS_FILE_END);
-            fos.write(out.marshall());
-            out.recycle();
-
+            writeStatusInfoLocked(fos);
             mStatusFile.finishWrite(fos);
-        } catch (java.io.IOException e1) {
-            Slog.w(TAG, "Error writing status", e1);
-            if (fos != null) {
-                mStatusFile.failWrite(fos);
-            }
+            fos = null;
+        } catch (IOException | IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write sync status to proto.", e);
+        } finally {
+            // when fos is null (successful write), this is a no-op.
+            mStatusFile.failWrite(fos);
         }
+    }
+
+    private void writeStatusInfoLocked(OutputStream out) {
+        final ProtoOutputStream proto = new ProtoOutputStream(out);
+        final int size = mSyncStatus.size();
+        for (int i = 0; i < size; i++) {
+            final SyncStatusInfo info = mSyncStatus.valueAt(i);
+            final long token = proto.start(SyncStatusProto.STATUS);
+            // authority id should be written first to take advantage of the fast path in read
+            proto.write(SyncStatusProto.StatusInfo.AUTHORITY_ID, info.authorityId);
+            proto.write(SyncStatusProto.StatusInfo.LAST_SUCCESS_TIME, info.lastSuccessTime);
+            proto.write(SyncStatusProto.StatusInfo.LAST_SUCCESS_SOURCE, info.lastSuccessSource);
+            proto.write(SyncStatusProto.StatusInfo.LAST_FAILURE_TIME, info.lastFailureTime);
+            proto.write(SyncStatusProto.StatusInfo.LAST_FAILURE_SOURCE, info.lastFailureSource);
+            proto.write(SyncStatusProto.StatusInfo.LAST_FAILURE_MESSAGE, info.lastFailureMesg);
+            proto.write(SyncStatusProto.StatusInfo.INITIAL_FAILURE_TIME, info.initialFailureTime);
+            proto.write(SyncStatusProto.StatusInfo.PENDING, info.pending);
+            proto.write(SyncStatusProto.StatusInfo.INITIALIZE, info.initialize);
+            final int periodicSyncTimesSize = info.getPeriodicSyncTimesSize();
+            for (int j = 0; j < periodicSyncTimesSize; j++) {
+                proto.write(SyncStatusProto.StatusInfo.PERIODIC_SYNC_TIMES,
+                        info.getPeriodicSyncTime(j));
+            }
+            final int lastEventsSize = info.getEventCount();
+            for (int j = 0; j < lastEventsSize; j++) {
+                final long eventToken = proto.start(SyncStatusProto.StatusInfo.LAST_EVENT_INFO);
+                proto.write(SyncStatusProto.StatusInfo.LastEventInfo.LAST_EVENT_TIME,
+                        info.getEventTime(j));
+                proto.write(SyncStatusProto.StatusInfo.LastEventInfo.LAST_EVENT, info.getEvent(j));
+                proto.end(eventToken);
+            }
+            proto.write(SyncStatusProto.StatusInfo.LAST_TODAY_RESET_TIME, info.lastTodayResetTime);
+
+            final long totalStatsToken = proto.start(SyncStatusProto.StatusInfo.TOTAL_STATS);
+            writeStatusStatsLocked(proto, info.totalStats);
+            proto.end(totalStatsToken);
+            final long todayStatsToken = proto.start(SyncStatusProto.StatusInfo.TODAY_STATS);
+            writeStatusStatsLocked(proto, info.todayStats);
+            proto.end(todayStatsToken);
+            final long yesterdayStatsToken = proto.start(
+                    SyncStatusProto.StatusInfo.YESTERDAY_STATS);
+            writeStatusStatsLocked(proto, info.yesterdayStats);
+            proto.end(yesterdayStatsToken);
+
+            final int lastSuccessTimesSize = info.perSourceLastSuccessTimes.length;
+            for (int j = 0; j < lastSuccessTimesSize; j++) {
+                proto.write(SyncStatusProto.StatusInfo.PER_SOURCE_LAST_SUCCESS_TIMES,
+                        info.perSourceLastSuccessTimes[j]);
+            }
+            final int lastFailureTimesSize = info.perSourceLastFailureTimes.length;
+            for (int j = 0; j < lastFailureTimesSize; j++) {
+                proto.write(SyncStatusProto.StatusInfo.PER_SOURCE_LAST_FAILURE_TIMES,
+                        info.perSourceLastFailureTimes[j]);
+            }
+            proto.end(token);
+        }
+        proto.flush();
+    }
+
+    private void writeStatusStatsLocked(ProtoOutputStream proto, SyncStatusInfo.Stats stats) {
+        proto.write(SyncStatusProto.StatusInfo.Stats.TOTAL_ELAPSED_TIME, stats.totalElapsedTime);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SYNCS, stats.numSyncs);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_FAILURES, stats.numFailures);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_CANCELS, stats.numCancels);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_OTHER, stats.numSourceOther);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_LOCAL, stats.numSourceLocal);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_POLL, stats.numSourcePoll);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_USER, stats.numSourceUser);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_PERIODIC, stats.numSourcePeriodic);
+        proto.write(SyncStatusProto.StatusInfo.Stats.NUM_SOURCE_FEED, stats.numSourceFeed);
     }
 
     private void requestSync(AuthorityInfo authorityInfo, int reason, Bundle extras,
@@ -2122,20 +2431,17 @@ public class SyncStorageEngine {
     public static final int STATISTICS_FILE_ITEM_OLD = 100;
     public static final int STATISTICS_FILE_ITEM = 101;
 
-    /**
-     * Read all sync statistics back in to the initial engine state.
-     */
-    private void readStatisticsLocked() {
+    private void readStatsParcelLocked(File parcel) {
         try {
-            byte[] data = mStatisticsFile.readFully();
+            final AtomicFile parcelFile = new AtomicFile(parcel);
+            byte[] data = parcelFile.readFully();
             Parcel in = Parcel.obtain();
             in.unmarshall(data, 0, data.length);
             in.setDataPosition(0);
             int token;
             int index = 0;
             while ((token=in.readInt()) != STATISTICS_FILE_END) {
-                if (token == STATISTICS_FILE_ITEM
-                        || token == STATISTICS_FILE_ITEM_OLD) {
+                if (token == STATISTICS_FILE_ITEM || token == STATISTICS_FILE_ITEM_OLD) {
                     int day = in.readInt();
                     if (token == STATISTICS_FILE_ITEM_OLD) {
                         day = day - 2009 + 14245;  // Magic!
@@ -2155,15 +2461,110 @@ public class SyncStorageEngine {
                     break;
                 }
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             Slog.i(TAG, "No initial statistics");
+        }
+    }
+
+    private void upgradeStatisticsIfNeededLocked() {
+        final File parcelStats = new File(mSyncDir, LEGACY_STATISTICS_FILE_NAME);
+        if (parcelStats.exists() && !mStatisticsFile.exists()) {
+            readStatsParcelLocked(parcelStats);
+            writeStatisticsLocked();
+        }
+
+        // if upgrade to proto was successful, delete parcel file
+        if (DELETE_LEGACY_PARCEL_FILES && parcelStats.exists() && mStatisticsFile.exists()) {
+            parcelStats.delete();
+        }
+    }
+
+    /**
+     * Read all sync statistics back in to the initial engine state.
+     */
+    private void readStatisticsLocked() {
+        upgradeStatisticsIfNeededLocked();
+
+        if (!mStatisticsFile.exists()) {
+            return;
+        }
+        try {
+            try (FileInputStream in = mStatisticsFile.openRead()) {
+                readDayStatsLocked(in);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to read day stats file.", e);
+        }
+    }
+
+    private void readDayStatsLocked(InputStream in) throws IOException {
+        final ProtoInputStream proto = new ProtoInputStream(in);
+        int statsCount = 0;
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) SyncStatisticsProto.STATS:
+                    final long token = proto.start(SyncStatisticsProto.STATS);
+                    final DayStats stats = readIndividualDayStatsLocked(proto);
+                    proto.end(token);
+                    mDayStats[statsCount] = stats;
+                    statsCount++;
+                    if (statsCount == mDayStats.length) {
+                        return;
+                    }
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return;
+            }
+        }
+    }
+
+    private DayStats readIndividualDayStatsLocked(ProtoInputStream proto) throws IOException {
+        DayStats stats;
+        if (proto.nextField(SyncStatisticsProto.DayStats.DAY)) {
+            // fast-path; this should work for most cases since the day is written first
+            stats = new DayStats(proto.readInt(SyncStatisticsProto.DayStats.DAY));
+        } else {
+            // placeholder to read other data; assume the default day as 0
+            stats = new DayStats(0);
+        }
+
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) SyncStatisticsProto.DayStats.DAY:
+                    // fast-path failed for some reason, rebuild stats from placeholder object
+                    Slog.w(TAG, "Failed to read the day via fast-path; some data "
+                            + "might not have been read.");
+                    final DayStats temp = new DayStats(
+                            proto.readInt(SyncStatisticsProto.DayStats.DAY));
+                    temp.successCount = stats.successCount;
+                    temp.successTime = stats.successTime;
+                    temp.failureCount = stats.failureCount;
+                    temp.failureTime = stats.failureTime;
+                    stats = temp;
+                    break;
+                case (int) SyncStatisticsProto.DayStats.SUCCESS_COUNT:
+                    stats.successCount = proto.readInt(SyncStatisticsProto.DayStats.SUCCESS_COUNT);
+                    break;
+                case (int) SyncStatisticsProto.DayStats.SUCCESS_TIME:
+                    stats.successTime = proto.readLong(SyncStatisticsProto.DayStats.SUCCESS_TIME);
+                    break;
+                case (int) SyncStatisticsProto.DayStats.FAILURE_COUNT:
+                    stats.failureCount = proto.readInt(SyncStatisticsProto.DayStats.FAILURE_COUNT);
+                    break;
+                case (int) SyncStatisticsProto.DayStats.FAILURE_TIME:
+                    stats.failureTime = proto.readLong(SyncStatisticsProto.DayStats.FAILURE_TIME);
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return stats;
+            }
         }
     }
 
     /**
      * Write all sync statistics to the sync status file.
      */
-    private void writeStatisticsLocked() {
+    @VisibleForTesting
+    void writeStatisticsLocked() {
         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
             Slog.v(TAG, "Writing new " + mStatisticsFile.getBaseFile());
         }
@@ -2175,31 +2576,36 @@ public class SyncStorageEngine {
         FileOutputStream fos = null;
         try {
             fos = mStatisticsFile.startWrite();
-            Parcel out = Parcel.obtain();
-            final int N = mDayStats.length;
-            for (int i=0; i<N; i++) {
-                DayStats ds = mDayStats[i];
-                if (ds == null) {
-                    break;
-                }
-                out.writeInt(STATISTICS_FILE_ITEM);
-                out.writeInt(ds.day);
-                out.writeInt(ds.successCount);
-                out.writeLong(ds.successTime);
-                out.writeInt(ds.failureCount);
-                out.writeLong(ds.failureTime);
-            }
-            out.writeInt(STATISTICS_FILE_END);
-            fos.write(out.marshall());
-            out.recycle();
-
+            writeDayStatsLocked(fos);
             mStatisticsFile.finishWrite(fos);
-        } catch (java.io.IOException e1) {
-            Slog.w(TAG, "Error writing stats", e1);
-            if (fos != null) {
-                mStatisticsFile.failWrite(fos);
-            }
+            fos = null;
+        } catch (IOException | IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to write day stats to proto.", e);
+        } finally {
+            // when fos is null (successful write), this is a no-op.
+            mStatisticsFile.failWrite(fos);
         }
+    }
+
+    private void writeDayStatsLocked(OutputStream out)
+            throws IOException, IllegalArgumentException {
+        final ProtoOutputStream proto = new ProtoOutputStream(out);
+        final int size = mDayStats.length;
+        for (int i = 0; i < size; i++) {
+            final DayStats stats = mDayStats[i];
+            if (stats == null) {
+                break;
+            }
+            final long token = proto.start(SyncStatisticsProto.STATS);
+            // day should be written first to take advantage of the fast path in read
+            proto.write(SyncStatisticsProto.DayStats.DAY, stats.day);
+            proto.write(SyncStatisticsProto.DayStats.SUCCESS_COUNT, stats.successCount);
+            proto.write(SyncStatisticsProto.DayStats.SUCCESS_TIME, stats.successTime);
+            proto.write(SyncStatisticsProto.DayStats.FAILURE_COUNT, stats.failureCount);
+            proto.write(SyncStatisticsProto.DayStats.FAILURE_TIME, stats.failureTime);
+            proto.end(token);
+        }
+        proto.flush();
     }
 
     /**

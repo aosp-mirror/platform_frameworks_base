@@ -43,7 +43,6 @@ import android.service.textservice.SpellCheckerService;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.inputmethod.InputMethodSystemProperty;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.SpellCheckerSubtype;
 
@@ -85,10 +84,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     @NonNull
     private final UserManager mUserManager;
     private final Object mLock = new Object();
-
-    @NonNull
-    @GuardedBy("mLock")
-    private final LazyIntToIntMap mSpellCheckerOwnerUserIdMap;
 
     private static class TextServicesData {
         @UserIdInt
@@ -312,9 +307,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     void onStopUser(@UserIdInt int userId) {
         synchronized (mLock) {
-            // Clear user ID mapping table.
-            mSpellCheckerOwnerUserIdMap.delete(userId);
-
             // Clean per-user data
             TextServicesData tsd = mUserData.get(userId);
             if (tsd == null) return;
@@ -334,33 +326,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     public TextServicesManagerService(Context context) {
         mContext = context;
         mUserManager = mContext.getSystemService(UserManager.class);
-        mSpellCheckerOwnerUserIdMap = new LazyIntToIntMap(callingUserId -> {
-            if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    final UserInfo parent = mUserManager.getProfileParent(callingUserId);
-                    return (parent != null) ? parent.id : callingUserId;
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            } else {
-                return callingUserId;
-            }
-        });
-
         mMonitor = new TextServicesMonitor();
         mMonitor.register(context, null, UserHandle.ALL, true);
     }
 
     @GuardedBy("mLock")
     private void initializeInternalStateLocked(@UserIdInt int userId) {
-        // When DISABLE_PER_PROFILE_SPELL_CHECKER is true, we make sure here that work profile users
-        // will never have non-null TextServicesData for their user ID.
-        if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED
-                && userId != mSpellCheckerOwnerUserIdMap.get(userId)) {
-            return;
-        }
-
         TextServicesData tsd = mUserData.get(userId);
         if (tsd == null) {
             tsd = new TextServicesData(userId, mContext);
@@ -506,8 +477,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     @Nullable
     private SpellCheckerInfo getCurrentSpellCheckerForUser(@UserIdInt int userId) {
         synchronized (mLock) {
-            final int spellCheckerOwnerUserId = mSpellCheckerOwnerUserIdMap.get(userId);
-            final TextServicesData data = mUserData.get(spellCheckerOwnerUserId);
+            final TextServicesData data = mUserData.get(userId);
             return data != null ? data.getCurrentSpellChecker() : null;
         }
     }
@@ -790,27 +760,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     @GuardedBy("mLock")
     @Nullable
     private TextServicesData getDataFromCallingUserIdLocked(@UserIdInt int callingUserId) {
-        final int spellCheckerOwnerUserId = mSpellCheckerOwnerUserIdMap.get(callingUserId);
-        final TextServicesData data = mUserData.get(spellCheckerOwnerUserId);
-        if (!InputMethodSystemProperty.PER_PROFILE_IME_ENABLED) {
-            if (spellCheckerOwnerUserId != callingUserId) {
-                // Calling process is running under child profile.
-                if (data == null) {
-                    return null;
-                }
-                final SpellCheckerInfo info = data.getCurrentSpellChecker();
-                if (info == null) {
-                    return null;
-                }
-                final ServiceInfo serviceInfo = info.getServiceInfo();
-                if ((serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    // To be conservative, non pre-installed spell checker services are not allowed
-                    // to be used for child profiles.
-                    return null;
-                }
-            }
-        }
-        return data;
+        return mUserData.get(callingUserId);
     }
 
     private static final class SessionRequest {

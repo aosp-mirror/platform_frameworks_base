@@ -26,6 +26,7 @@
 
 #include <utils/Vector.h>
 
+#include <mutex>
 #include <vector>
 
 #include "android_runtime/AndroidRuntime.h"

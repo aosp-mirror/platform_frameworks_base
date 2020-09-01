@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 import java.util.Locale;
@@ -85,7 +86,7 @@ public class CarrierText extends TextView {
                 com.android.internal.R.string.kg_text_message_separator);
         mCarrierTextController = new CarrierTextController(mContext, mSeparator, mShowAirplaneMode,
                 mShowMissingSim);
-        mShouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
+        mShouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
         setSelected(mShouldMarquee); // Allow marquee to work.
     }
 

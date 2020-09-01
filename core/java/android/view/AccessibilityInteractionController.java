@@ -21,6 +21,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_A
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -38,7 +39,6 @@ import android.text.style.AccessibilityClickableSpan;
 import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
 import android.util.Slog;
-import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeIdManager;
@@ -110,6 +110,7 @@ public final class AccessibilityInteractionController {
     private final Rect mTempRect = new Rect();
     private final Rect mTempRect1 = new Rect();
     private final Rect mTempRect2 = new Rect();
+    private final RectF mTempRectF = new RectF();
 
     private AddNodeInfosForViewId mAddNodeInfosForViewId;
 
@@ -856,6 +857,68 @@ public final class AccessibilityInteractionController {
         return mViewRootImpl.mAttachInfo.mLocationInParentDisplay.equals(0, 0);
     }
 
+    private void applyScreenMatrixIfNeeded(List<AccessibilityNodeInfo> infos) {
+        if (infos == null || shouldBypassApplyScreenMatrix()) {
+            return;
+        }
+        final int infoCount = infos.size();
+        for (int i = 0; i < infoCount; i++) {
+            final AccessibilityNodeInfo info = infos.get(i);
+            applyScreenMatrixIfNeeded(info);
+        }
+    }
+
+    private void applyScreenMatrixIfNeeded(AccessibilityNodeInfo info) {
+        if (info == null || shouldBypassApplyScreenMatrix()) {
+            return;
+        }
+        final Rect boundsInScreen = mTempRect;
+        final RectF transformedBounds = mTempRectF;
+        final Matrix screenMatrix = mViewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy;
+
+        info.getBoundsInScreen(boundsInScreen);
+        transformedBounds.set(boundsInScreen);
+        screenMatrix.mapRect(transformedBounds);
+        boundsInScreen.set((int) transformedBounds.left, (int) transformedBounds.top,
+                (int) transformedBounds.right, (int) transformedBounds.bottom);
+        info.setBoundsInScreen(boundsInScreen);
+    }
+
+    private boolean shouldBypassApplyScreenMatrix() {
+        final Matrix screenMatrix = mViewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy;
+        return screenMatrix == null || screenMatrix.isIdentity();
+    }
+
+    private void associateLeashedParentIfNeeded(List<AccessibilityNodeInfo> infos) {
+        if (infos == null || shouldBypassAssociateLeashedParent()) {
+            return;
+        }
+        final int infoCount = infos.size();
+        for (int i = 0; i < infoCount; i++) {
+            final AccessibilityNodeInfo info = infos.get(i);
+            associateLeashedParentIfNeeded(info);
+        }
+    }
+
+    private void associateLeashedParentIfNeeded(AccessibilityNodeInfo info) {
+        if (info == null || shouldBypassAssociateLeashedParent()) {
+            return;
+        }
+        // The node id of root node in embedded maybe not be ROOT_NODE_ID so we compare the id
+        // with root view.
+        if (mViewRootImpl.mView.getAccessibilityViewId()
+                != AccessibilityNodeInfo.getAccessibilityViewId(info.getSourceNodeId())) {
+            return;
+        }
+        info.setLeashedParent(mViewRootImpl.mAttachInfo.mLeashedParentToken,
+                mViewRootImpl.mAttachInfo.mLeashedParentAccessibilityViewId);
+    }
+
+    private boolean shouldBypassAssociateLeashedParent() {
+        return (mViewRootImpl.mAttachInfo.mLeashedParentToken == null
+                && mViewRootImpl.mAttachInfo.mLeashedParentAccessibilityViewId == View.NO_ID);
+    }
+
     private void applyAppScaleAndMagnificationSpecIfNeeded(AccessibilityNodeInfo info,
             MagnificationSpec spec) {
         if (info == null) {
@@ -903,38 +966,6 @@ public final class AccessibilityInteractionController {
                 }
             }
         }
-
-        if (spec != null) {
-            AttachInfo attachInfo = mViewRootImpl.mAttachInfo;
-            if (attachInfo.mDisplay == null) {
-                return;
-            }
-
-            final float scale = attachInfo.mApplicationScale * spec.scale;
-
-            Rect visibleWinFrame = mTempRect1;
-            visibleWinFrame.left = (int) (attachInfo.mWindowLeft * scale + spec.offsetX);
-            visibleWinFrame.top = (int) (attachInfo.mWindowTop * scale + spec.offsetY);
-            visibleWinFrame.right = (int) (visibleWinFrame.left + mViewRootImpl.mWidth * scale);
-            visibleWinFrame.bottom = (int) (visibleWinFrame.top + mViewRootImpl.mHeight * scale);
-
-            attachInfo.mDisplay.getRealSize(mTempPoint);
-            final int displayWidth = mTempPoint.x;
-            final int displayHeight = mTempPoint.y;
-
-            Rect visibleDisplayFrame = mTempRect2;
-            visibleDisplayFrame.set(0, 0, displayWidth, displayHeight);
-
-            if (!visibleWinFrame.intersect(visibleDisplayFrame)) {
-                // If there's no intersection with display, set visibleWinFrame empty.
-                visibleDisplayFrame.setEmpty();
-            }
-
-            if (!visibleWinFrame.intersects(boundsInScreen.left, boundsInScreen.top,
-                    boundsInScreen.right, boundsInScreen.bottom)) {
-                info.setVisibleToUser(false);
-            }
-        }
     }
 
     private boolean shouldApplyAppScaleAndMagnificationSpec(float appScale,
@@ -947,9 +978,13 @@ public final class AccessibilityInteractionController {
             MagnificationSpec spec, Region interactiveRegion) {
         try {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+            associateLeashedParentIfNeeded(infos);
+            applyScreenMatrixIfNeeded(infos);
             adjustBoundsInScreenIfNeeded(infos);
-            applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
+            // To avoid applyAppScaleAndMagnificationSpecIfNeeded changing the bounds of node,
+            // then impact the visibility result, we need to adjust visibility before apply scale.
             adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
+            applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
             callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             if (infos != null) {
                 infos.clear();
@@ -966,9 +1001,13 @@ public final class AccessibilityInteractionController {
             MagnificationSpec spec, Region interactiveRegion) {
         try {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+            associateLeashedParentIfNeeded(info);
+            applyScreenMatrixIfNeeded(info);
             adjustBoundsInScreenIfNeeded(info);
-            applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
+            // To avoid applyAppScaleAndMagnificationSpecIfNeeded changing the bounds of node,
+            // then impact the visibility result, we need to adjust visibility before apply scale.
             adjustIsVisibleToUserIfNeeded(info, interactiveRegion);
+            applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
             callback.setFindAccessibilityNodeInfoResult(info, interactionId);
         } catch (RemoteException re) {
                 /* ignore - the other side will time out */

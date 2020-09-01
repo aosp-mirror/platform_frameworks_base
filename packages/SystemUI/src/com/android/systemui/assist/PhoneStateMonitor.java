@@ -27,8 +27,9 @@ import android.content.pm.ResolveInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.BootCompleteCache;
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -38,46 +39,57 @@ import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /** Class to monitor and report the state of the phone. */
-final class PhoneStateMonitor {
+@Singleton
+public final class PhoneStateMonitor {
 
-    private static final int PHONE_STATE_AOD1 = 1;
-    private static final int PHONE_STATE_AOD2 = 2;
-    private static final int PHONE_STATE_BOUNCER = 3;
-    private static final int PHONE_STATE_UNLOCKED_LOCKSCREEN = 4;
-    private static final int PHONE_STATE_HOME = 5;
-    private static final int PHONE_STATE_OVERVIEW = 6;
-    private static final int PHONE_STATE_ALL_APPS = 7;
-    private static final int PHONE_STATE_APP_DEFAULT = 8;
-    private static final int PHONE_STATE_APP_IMMERSIVE = 9;
-    private static final int PHONE_STATE_APP_FULLSCREEN = 10;
+    public static final int PHONE_STATE_AOD1 = 1;
+    public static final int PHONE_STATE_AOD2 = 2;
+    public static final int PHONE_STATE_BOUNCER = 3;
+    public static final int PHONE_STATE_UNLOCKED_LOCKSCREEN = 4;
+    public static final int PHONE_STATE_HOME = 5;
+    public static final int PHONE_STATE_OVERVIEW = 6;
+    public static final int PHONE_STATE_ALL_APPS = 7;
+    public static final int PHONE_STATE_APP_DEFAULT = 8;
+    public static final int PHONE_STATE_APP_IMMERSIVE = 9;
+    public static final int PHONE_STATE_APP_FULLSCREEN = 10;
 
     private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
             PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
-            Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_PACKAGE_ADDED,
             Intent.ACTION_PACKAGE_CHANGED,
             Intent.ACTION_PACKAGE_REMOVED
     };
 
     private final Context mContext;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final StatusBarStateController mStatusBarStateController;
 
     private boolean mLauncherShowing;
     @Nullable private ComponentName mDefaultHome;
 
-    PhoneStateMonitor(Context context) {
+    @Inject
+    PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache) {
         mContext = context;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
         ActivityManagerWrapper activityManagerWrapper = ActivityManagerWrapper.getInstance();
         mDefaultHome = getCurrentDefaultHome();
+        bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());
         IntentFilter intentFilter = new IntentFilter();
         for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
             intentFilter.addAction(action);
         }
-        mContext.registerReceiver(new BroadcastReceiver() {
+        broadcastDispatcher.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mDefaultHome = getCurrentDefaultHome();
@@ -92,7 +104,7 @@ final class PhoneStateMonitor {
         });
     }
 
-    int getPhoneState() {
+    public int getPhoneState() {
         int phoneState;
         if (isShadeFullscreen()) {
             phoneState = getPhoneLockscreenState();
@@ -177,16 +189,16 @@ final class PhoneStateMonitor {
     }
 
     private boolean isAppImmersive() {
-        return SysUiServiceProvider.getComponent(mContext, StatusBar.class).inImmersiveMode();
+        return mStatusBarOptionalLazy.get().get().inImmersiveMode();
     }
 
     private boolean isAppFullscreen() {
-        return SysUiServiceProvider.getComponent(mContext, StatusBar.class).inFullscreenMode();
+        return mStatusBarOptionalLazy.get().get().inFullscreenMode();
     }
 
     private boolean isBouncerShowing() {
-        StatusBar statusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-        return statusBar != null && statusBar.isBouncerShowing();
+        return mStatusBarOptionalLazy.map(
+                statusBarLazy -> statusBarLazy.get().isBouncerShowing()).orElse(false);
     }
 
     private boolean isKeyguardLocked() {

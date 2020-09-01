@@ -16,9 +16,7 @@
 
 package com.android.systemui.doze;
 
-import android.content.Context;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -35,23 +33,19 @@ public class DozeDockHandler implements DozeMachine.Part {
     private static final String TAG = "DozeDockHandler";
     private static final boolean DEBUG = DozeService.DEBUG;
 
-    private final DozeMachine mMachine;
-    private final DozeHost mDozeHost;
     private final AmbientDisplayConfiguration mConfig;
-    private final Handler mHandler;
-    private final DockEventListener mDockEventListener = new DockEventListener();
+    private final DozeMachine mMachine;
     private final DockManager mDockManager;
+    private final DockEventListener mDockEventListener;
 
     private int mDockState = DockManager.STATE_NONE;
-    private boolean mPulsePending;
 
-    public DozeDockHandler(Context context, DozeMachine machine, DozeHost dozeHost,
-            AmbientDisplayConfiguration config, Handler handler, DockManager dockManager) {
+    DozeDockHandler(AmbientDisplayConfiguration config, DozeMachine machine,
+            DockManager dockManager) {
         mMachine = machine;
-        mDozeHost = dozeHost;
         mConfig = config;
-        mHandler = handler;
         mDockManager = dockManager;
+        mDockEventListener = new DockEventListener();
     }
 
     @Override
@@ -59,18 +53,6 @@ public class DozeDockHandler implements DozeMachine.Part {
         switch (newState) {
             case INITIALIZED:
                 mDockEventListener.register();
-                break;
-            case DOZE_AOD:
-                if (mDockState == DockManager.STATE_DOCKED_HIDE) {
-                    mMachine.requestState(State.DOZE);
-                    break;
-                }
-                // continue below
-            case DOZE:
-                if (mDockState == DockManager.STATE_DOCKED && !mPulsePending) {
-                    mPulsePending = true;
-                    mHandler.post(() -> requestPulse(newState));
-                }
                 break;
             case FINISH:
                 mDockEventListener.unregister();
@@ -80,64 +62,52 @@ public class DozeDockHandler implements DozeMachine.Part {
         }
     }
 
-    private void requestPulse(State dozeState) {
-        if (!mDozeHost.isPulsingBlocked() && dozeState.canPulse()) {
-            mMachine.requestPulse(DozeLog.PULSE_REASON_DOCKING);
-        }
-        mPulsePending = false;
-    }
-
-    private void requestPulseOutNow(State dozeState) {
-        if (dozeState == State.DOZE_REQUEST_PULSE || dozeState == State.DOZE_PULSING
-                || dozeState == State.DOZE_PULSING_BRIGHT) {
-            final int pulseReason = mMachine.getPulseReason();
-            if (pulseReason == DozeLog.PULSE_REASON_DOCKING) {
-                mDozeHost.stopPulsing();
-            }
-        }
-    }
-
-    private boolean isDocked() {
-        return mDockState == DockManager.STATE_DOCKED
-                || mDockState == DockManager.STATE_DOCKED_HIDE;
-    }
-
     @Override
     public void dump(PrintWriter pw) {
-        pw.print(" DozeDockTriggers docking="); pw.println(isDocked());
+        pw.println("DozeDockHandler:");
+        pw.println(" dockState=" + mDockState);
     }
 
     private class DockEventListener implements DockManager.DockEventListener {
         private boolean mRegistered;
 
         @Override
-        public void onEvent(int event) {
-            if (DEBUG) Log.d(TAG, "dock event = " + event);
-            final DozeMachine.State dozeState = mMachine.getState();
-            mDockState = event;
+        public void onEvent(int dockState) {
+            if (DEBUG) Log.d(TAG, "dock event = " + dockState);
+
+            // Only act upon state changes, otherwise we might overwrite other transitions,
+            // like proximity sensor initialization.
+            if (mDockState == dockState) {
+                return;
+            }
+
+            mDockState = dockState;
+            if (isPulsing()) {
+                return;
+            }
+
+            DozeMachine.State nextState;
             switch (mDockState) {
                 case DockManager.STATE_DOCKED:
-                    requestPulse(dozeState);
+                    nextState = State.DOZE_AOD_DOCKED;
                     break;
                 case DockManager.STATE_NONE:
-                    if (dozeState == State.DOZE
-                            && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
-                        mMachine.requestState(State.DOZE_AOD);
-                    }
-                    else {
-                        requestPulseOutNow(dozeState);
-                    }
+                    nextState = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) ? State.DOZE_AOD
+                            : State.DOZE;
                     break;
                 case DockManager.STATE_DOCKED_HIDE:
-                    if (dozeState == State.DOZE_AOD) {
-                        mMachine.requestState(State.DOZE);
-                    } else {
-                        requestPulseOutNow(dozeState);
-                    }
+                    nextState = State.DOZE;
                     break;
                 default:
-                    // no-op
+                    return;
             }
+            mMachine.requestState(nextState);
+        }
+
+        private boolean isPulsing() {
+            DozeMachine.State state = mMachine.getState();
+            return state == State.DOZE_REQUEST_PULSE || state == State.DOZE_PULSING
+                    || state == State.DOZE_PULSING_BRIGHT;
         }
 
         void register() {

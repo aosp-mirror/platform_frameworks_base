@@ -18,17 +18,20 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.component.ParsedProcess;
 import android.service.pm.PackageServiceDumpProto;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Settings data for a particular shared user ID we know about.
@@ -46,10 +49,12 @@ public final class SharedUserSetting extends SettingBase {
     // that all apps within the sharedUser run in the same selinux context.
     int seInfoTargetSdkVersion;
 
-    final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
+    final ArraySet<PackageSetting> packages = new ArraySet<>();
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
+
+    ArrayMap<String, ParsedProcess> processes;
 
     SharedUserSetting(String _name, int _pkgFlags, int _pkgPrivateFlags) {
         super(_pkgFlags, _pkgPrivateFlags);
@@ -65,11 +70,30 @@ public final class SharedUserSetting extends SettingBase {
                 + name + "/" + userId + "}";
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(PackageServiceDumpProto.SharedUserProto.UID, userId);
         proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);
         proto.end(token);
+    }
+
+    void addProcesses(Map<String, ParsedProcess> newProcs) {
+        if (newProcs != null) {
+            final int numProcs = newProcs.size();
+            if (processes == null) {
+                processes = new ArrayMap<>(numProcs);
+            }
+            for (String key : newProcs.keySet()) {
+                ParsedProcess newProc = newProcs.get(key);
+                ParsedProcess proc = processes.get(newProc.getName());
+                if (proc == null) {
+                    proc = new ParsedProcess(newProc);
+                    processes.put(newProc.getName(), proc);
+                } else {
+                    proc.addStateFrom(newProc);
+                }
+            }
+        }
     }
 
     boolean removePackage(PackageSetting packageSetting) {
@@ -91,6 +115,8 @@ public final class SharedUserSetting extends SettingBase {
             }
             setPrivateFlags(aggregatedPrivateFlags);
         }
+        // recalculate processes.
+        updateProcesses();
         return true;
     }
 
@@ -98,19 +124,22 @@ public final class SharedUserSetting extends SettingBase {
         // If this is the first package added to this shared user, temporarily (until next boot) use
         // its targetSdkVersion when assigning seInfo for the shared user.
         if ((packages.size() == 0) && (packageSetting.pkg != null)) {
-            seInfoTargetSdkVersion = packageSetting.pkg.applicationInfo.targetSdkVersion;
+            seInfoTargetSdkVersion = packageSetting.pkg.getTargetSdkVersion();
         }
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
         }
+        if (packageSetting.pkg != null) {
+            addProcesses(packageSetting.pkg.getProcesses());
+        }
     }
 
-    public @Nullable List<PackageParser.Package> getPackages() {
+    public @Nullable List<AndroidPackage> getPackages() {
         if (packages == null || packages.size() == 0) {
             return null;
         }
-        final ArrayList<PackageParser.Package> pkgList = new ArrayList<>(packages.size());
+        final ArrayList<AndroidPackage> pkgList = new ArrayList<>(packages.size());
         for (PackageSetting ps : packages) {
             if ((ps == null) || (ps.pkg == null)) {
                 continue;
@@ -131,20 +160,38 @@ public final class SharedUserSetting extends SettingBase {
      * restrictive selinux domain.
      */
     public void fixSeInfoLocked() {
-        final List<PackageParser.Package> pkgList = getPackages();
-        if (pkgList == null || pkgList.size() == 0) {
+        if (packages == null || packages.size() == 0) {
             return;
         }
-
-        for (PackageParser.Package pkg : pkgList) {
-            if (pkg.applicationInfo.targetSdkVersion < seInfoTargetSdkVersion) {
-                seInfoTargetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+        for (PackageSetting ps : packages) {
+            if ((ps == null) || (ps.pkg == null)) {
+                continue;
+            }
+            if (ps.pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = ps.pkg.getTargetSdkVersion();
             }
         }
-        for (PackageParser.Package pkg : pkgList) {
-            final boolean isPrivileged = isPrivileged() | pkg.isPrivileged();
-            pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                seInfoTargetSdkVersion);
+
+        for (PackageSetting ps : packages) {
+            if ((ps == null) || (ps.pkg == null)) {
+                continue;
+            }
+            final boolean isPrivileged = isPrivileged() | ps.pkg.isPrivileged();
+            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.pkg, isPrivileged,
+                    seInfoTargetSdkVersion));
+        }
+    }
+
+    /**
+     * Update tracked data about processes based on all known packages in the shared user ID.
+     */
+    public void updateProcesses() {
+        processes = null;
+        for (int i = packages.size() - 1; i >= 0; i--) {
+            final AndroidPackage pkg = packages.valueAt(i).pkg;
+            if (pkg != null) {
+                addProcesses(pkg.getProcesses());
+            }
         }
     }
 
@@ -176,6 +223,17 @@ public final class SharedUserSetting extends SettingBase {
         this.packages.clear();
         this.packages.addAll(sharedUser.packages);
         this.signaturesChanged = sharedUser.signaturesChanged;
+        if (sharedUser.processes != null) {
+            final int numProcs = sharedUser.processes.size();
+            this.processes = new ArrayMap<>(numProcs);
+            for (int i = 0; i < numProcs; i++) {
+                ParsedProcess proc =
+                        new ParsedProcess(sharedUser.processes.valueAt(i));
+                this.processes.put(proc.getName(), proc);
+            }
+        } else {
+            this.processes = null;
+        }
         return this;
     }
 }

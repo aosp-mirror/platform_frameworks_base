@@ -75,9 +75,15 @@ public class TransactionExecutorHelper {
 
         mLifecycleSequence.clear();
         if (finish >= start) {
-            // just go there
-            for (int i = start + 1; i <= finish; i++) {
-                mLifecycleSequence.add(i);
+            if (start == ON_START && finish == ON_STOP) {
+                // A case when we from start to stop state soon, we don't need to go
+                // through the resumed, paused state.
+                mLifecycleSequence.add(ON_STOP);
+            } else {
+                // just go there
+                for (int i = start + 1; i <= finish; i++) {
+                    mLifecycleSequence.add(i);
+                }
             }
         } else { // finish < start, can't just cycle down
             if (start == ON_PAUSE && finish == ON_RESUME) {
@@ -183,8 +189,7 @@ public class TransactionExecutorHelper {
                 lifecycleItem = PauseActivityItem.obtain();
                 break;
             case ON_STOP:
-                lifecycleItem = StopActivityItem.obtain(r.isVisibleFromServer(),
-                        0 /* configChanges */);
+                lifecycleItem = StopActivityItem.obtain(0 /* configChanges */);
                 break;
             default:
                 lifecycleItem = ResumeActivityItem.obtain(false /* isForward */);

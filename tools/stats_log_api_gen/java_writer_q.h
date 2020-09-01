@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include "Collation.h"
+#include <stdio.h>
+#include <string.h>
 
 #include <map>
 #include <set>
 #include <vector>
 
-#include <stdio.h>
-#include <string.h>
+#include "Collation.h"
 
 namespace android {
 namespace stats_log_api_gen {
@@ -32,26 +32,15 @@ using namespace std;
 
 void write_java_q_logging_constants(FILE* out, const string& indent);
 
-int write_java_methods_q_schema(
-        FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const AtomDecl &attributionDecl,
-        const string& moduleName,
-        const string& indent);
+int write_java_methods_q_schema(FILE* out, const SignatureInfoMap& signatureInfoMap,
+                                const AtomDecl& attributionDecl, const string& indent);
 
-void write_java_helpers_for_q_schema_methods(
-        FILE * out,
-        const AtomDecl &attributionDecl,
-        const int requiredHelpers,
-        const string& indent);
+void write_java_helpers_for_q_schema_methods(FILE* out, const AtomDecl& attributionDecl,
+                                             const int requiredHelpers, const string& indent);
 
 int write_stats_log_java_q_for_module(FILE* out, const Atoms& atoms,
-        const AtomDecl &attributionDecl, const string& moduleName, const string& javaClass,
-        const string& javaPackage, const bool supportWorkSource);
+                                      const AtomDecl& attributionDecl, const string& javaClass,
+                                      const string& javaPackage, const bool supportWorkSource);
 
-#if defined(STATS_SCHEMA_LEGACY)
-int write_stats_log_java_q(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-                           const bool supportWorkSource);
-#endif
 }  // namespace stats_log_api_gen
 }  // namespace android

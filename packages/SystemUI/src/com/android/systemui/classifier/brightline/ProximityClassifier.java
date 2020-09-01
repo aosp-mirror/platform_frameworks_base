@@ -22,7 +22,10 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
-import com.android.systemui.util.ProximitySensor;
+import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.sensors.ProximitySensor;
+
+import java.util.Locale;
 
 
 /**
@@ -44,11 +47,11 @@ class ProximityClassifier extends FalsingClassifier {
     private float mPercentNear;
 
     ProximityClassifier(DistanceClassifier distanceClassifier,
-            FalsingDataProvider dataProvider) {
+            FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
         this.mDistanceClassifier = distanceClassifier;
 
-        mPercentCoveredThreshold = DeviceConfig.getFloat(
+        mPercentCoveredThreshold = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD,
                 PERCENT_COVERED_THRESHOLD);
@@ -118,6 +121,16 @@ class ProximityClassifier extends FalsingClassifier {
         }
 
         return false;
+    }
+
+    @Override
+    String getReason() {
+        return String.format(
+                (Locale) null,
+                "{percentInProximity=%f, threshold=%f, distanceClassifier=%s}",
+                mPercentNear,
+                mPercentCoveredThreshold,
+                mDistanceClassifier.getReason());
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
 import android.view.Display;
@@ -77,7 +78,7 @@ final class LogicalDisplay {
      * needs to be updated.
      * @see #getDisplayInfoLocked()
      */
-    private DisplayInfo mInfo;
+    private final DisplayInfoProxy mInfo = new DisplayInfoProxy(null);
 
     // The display device that this logical display is based on and which
     // determines the base metrics that it uses.
@@ -87,12 +88,20 @@ final class LogicalDisplay {
     // True if the logical display has unique content.
     private boolean mHasContent;
 
-    private int[] mAllowedDisplayModes = new int[0];
     private int mRequestedColorMode;
+    private boolean mRequestedMinimalPostProcessing;
+
+    private DisplayModeDirector.DesiredDisplayModeSpecs mDesiredDisplayModeSpecs =
+            new DisplayModeDirector.DesiredDisplayModeSpecs();
 
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
     private int mDisplayOffsetY;
+
+    /**
+     * The position of the display projection sent to SurfaceFlinger
+     */
+    private final Point mDisplayPosition = new Point();
 
     /**
      * {@code true} if display scaling is disabled, or {@code false} if the default scaling mode
@@ -138,30 +147,27 @@ final class LogicalDisplay {
      * the data changes.
      */
     public DisplayInfo getDisplayInfoLocked() {
-        if (mInfo == null) {
-            mInfo = new DisplayInfo();
-            mInfo.copyFrom(mBaseDisplayInfo);
+        if (mInfo.get() == null) {
+            DisplayInfo info = new DisplayInfo();
+            info.copyFrom(mBaseDisplayInfo);
             if (mOverrideDisplayInfo != null) {
-                mInfo.appWidth = mOverrideDisplayInfo.appWidth;
-                mInfo.appHeight = mOverrideDisplayInfo.appHeight;
-                mInfo.smallestNominalAppWidth = mOverrideDisplayInfo.smallestNominalAppWidth;
-                mInfo.smallestNominalAppHeight = mOverrideDisplayInfo.smallestNominalAppHeight;
-                mInfo.largestNominalAppWidth = mOverrideDisplayInfo.largestNominalAppWidth;
-                mInfo.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
-                mInfo.logicalWidth = mOverrideDisplayInfo.logicalWidth;
-                mInfo.logicalHeight = mOverrideDisplayInfo.logicalHeight;
-                mInfo.overscanLeft = mOverrideDisplayInfo.overscanLeft;
-                mInfo.overscanTop = mOverrideDisplayInfo.overscanTop;
-                mInfo.overscanRight = mOverrideDisplayInfo.overscanRight;
-                mInfo.overscanBottom = mOverrideDisplayInfo.overscanBottom;
-                mInfo.rotation = mOverrideDisplayInfo.rotation;
-                mInfo.displayCutout = mOverrideDisplayInfo.displayCutout;
-                mInfo.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
-                mInfo.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
-                mInfo.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
+                info.appWidth = mOverrideDisplayInfo.appWidth;
+                info.appHeight = mOverrideDisplayInfo.appHeight;
+                info.smallestNominalAppWidth = mOverrideDisplayInfo.smallestNominalAppWidth;
+                info.smallestNominalAppHeight = mOverrideDisplayInfo.smallestNominalAppHeight;
+                info.largestNominalAppWidth = mOverrideDisplayInfo.largestNominalAppWidth;
+                info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
+                info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
+                info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
+                info.rotation = mOverrideDisplayInfo.rotation;
+                info.displayCutout = mOverrideDisplayInfo.displayCutout;
+                info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
+                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
+                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
             }
+            mInfo.set(info);
         }
-        return mInfo;
+        return mInfo.get();
     }
 
     /**
@@ -182,17 +188,16 @@ final class LogicalDisplay {
         if (info != null) {
             if (mOverrideDisplayInfo == null) {
                 mOverrideDisplayInfo = new DisplayInfo(info);
-                mInfo = null;
+                mInfo.set(null);
                 return true;
-            }
-            if (!mOverrideDisplayInfo.equals(info)) {
+            } else if (!mOverrideDisplayInfo.equals(info)) {
                 mOverrideDisplayInfo.copyFrom(info);
-                mInfo = null;
+                mInfo.set(null);
                 return true;
             }
         } else if (mOverrideDisplayInfo != null) {
             mOverrideDisplayInfo = null;
-            mInfo = null;
+            mInfo.set(null);
             return true;
         }
         return false;
@@ -264,12 +269,16 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TRUSTED) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_TRUSTED;
+            }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
 
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
+            mBaseDisplayInfo.deviceProductInfo = deviceInfo.deviceProductInfo;
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.uniqueId = deviceInfo.uniqueId;
             mBaseDisplayInfo.appWidth = maskedWidth;
@@ -286,6 +295,8 @@ final class LogicalDisplay {
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.minimalPostProcessingSupported =
+                    deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
             mBaseDisplayInfo.physicalYDpi = deviceInfo.yDpi;
@@ -304,7 +315,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.displayId = mDisplayId;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
-            mInfo = null;
+            mInfo.set(null);
         }
     }
 
@@ -325,10 +336,21 @@ final class LogicalDisplay {
     private static Rect getMaskingInsets(DisplayDeviceInfo deviceInfo) {
         boolean maskCutout = (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
         if (maskCutout && deviceInfo.displayCutout != null) {
+            // getSafeInsets is fixed at creation time and cannot change
             return deviceInfo.displayCutout.getSafeInsets();
         } else {
             return new Rect();
         }
+    }
+
+    /**
+     * Returns the position of the display's projection.
+     *
+     * @return The x, y coordinates of the display. The return object must be treated as immutable.
+     */
+    Point getDisplayPosition() {
+        // Allocate a new object to avoid a data race.
+        return new Point(mDisplayPosition);
     }
 
     /**
@@ -356,13 +378,17 @@ final class LogicalDisplay {
 
         // Set the color mode and allowed display mode.
         if (device == mPrimaryDisplayDevice) {
-            device.setAllowedDisplayModesLocked(mAllowedDisplayModes);
+            device.setDesiredDisplayModeSpecsLocked(mDesiredDisplayModeSpecs);
             device.setRequestedColorModeLocked(mRequestedColorMode);
         } else {
             // Reset to default for non primary displays
-            device.setAllowedDisplayModesLocked(new int[] {0});
+            device.setDesiredDisplayModeSpecsLocked(
+                    new DisplayModeDirector.DesiredDisplayModeSpecs());
             device.setRequestedColorModeLocked(0);
         }
+
+        device.setAutoLowLatencyModeLocked(mRequestedMinimalPostProcessing);
+        device.setGameContentTypeLocked(mRequestedMinimalPostProcessing);
 
         // Only grab the display info now as it may have been changed based on the requests above.
         final DisplayInfo displayInfo = getDisplayInfoLocked();
@@ -438,6 +464,8 @@ final class LogicalDisplay {
         } else {  // Surface.ROTATION_270
             mTempDisplayRect.offset(-mDisplayOffsetY, mDisplayOffsetX);
         }
+
+        mDisplayPosition.set(mTempDisplayRect.left, mTempDisplayRect.top);
         device.setProjectionLocked(t, orientation, mTempLayerStackRect, mTempDisplayRect);
     }
 
@@ -465,17 +493,18 @@ final class LogicalDisplay {
     }
 
     /**
-     * Sets the display modes the system is free to switch between.
+     * Sets the display configs the system can use.
      */
-    public void setAllowedDisplayModesLocked(int[] modes) {
-        mAllowedDisplayModes = modes;
+    public void setDesiredDisplayModeSpecsLocked(
+            DisplayModeDirector.DesiredDisplayModeSpecs specs) {
+        mDesiredDisplayModeSpecs = specs;
     }
 
     /**
-     * Returns the display modes the system is free to switch between.
+     * Returns the display configs the system can choose.
      */
-    public int[] getAllowedDisplayModesLocked() {
-        return mAllowedDisplayModes;
+    public DisplayModeDirector.DesiredDisplayModeSpecs getDesiredDisplayModeSpecsLocked() {
+        return mDesiredDisplayModeSpecs;
     }
 
     /**
@@ -483,6 +512,23 @@ final class LogicalDisplay {
      */
     public void setRequestedColorModeLocked(int colorMode) {
         mRequestedColorMode = colorMode;
+    }
+
+    /**
+     * Returns the last requested minimal post processing setting.
+     */
+    public boolean getRequestedMinimalPostProcessingLocked() {
+        return mRequestedMinimalPostProcessing;
+    }
+
+    /**
+     * Instructs the connected display to do minimal post processing. This is implemented either
+     * via HDMI 2.1 ALLM or HDMI 1.4 ContentType=Game.
+     *
+     * @param on Whether to set minimal post processing on/off on the connected display.
+     */
+    public void setRequestedMinimalPostProcessingLocked(boolean on) {
+        mRequestedMinimalPostProcessing = on;
     }
 
     /** Returns the pending requested color mode. */
@@ -534,7 +580,7 @@ final class LogicalDisplay {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
-        pw.println("mAllowedDisplayModes=" + Arrays.toString(mAllowedDisplayModes));
+        pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
         pw.println("mRequestedColorMode=" + mRequestedColorMode);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mDisplayScalingDisabled=" + mDisplayScalingDisabled);
@@ -542,5 +588,6 @@ final class LogicalDisplay {
                 mPrimaryDisplayDevice.getNameLocked() : "null"));
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
         pw.println("mOverrideDisplayInfo=" + mOverrideDisplayInfo);
+        pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
     }
 }

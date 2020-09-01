@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Handler;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
@@ -33,8 +32,9 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.widget.Button;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
@@ -46,24 +46,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 public class TileQueryHelper {
     private static final String TAG = "TileQueryHelper";
 
     private final ArrayList<TileInfo> mTiles = new ArrayList<>();
     private final ArraySet<String> mSpecs = new ArraySet<>();
-    private final Handler mBgHandler;
-    private final Handler mMainHandler;
+    private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
     private final Context mContext;
-    private final TileStateListener mListener;
+    private TileStateListener mListener;
 
     private boolean mFinished;
 
-    public TileQueryHelper(Context context, TileStateListener listener) {
+    @Inject
+    public TileQueryHelper(Context context,
+            @Main Executor mainExecutor, @Background Executor bgExecutor) {
         mContext = context;
+        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
+    }
+
+    public void setListener(TileStateListener listener) {
         mListener = listener;
-        mBgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-        mMainHandler = Dependency.get(Dependency.MAIN_HANDLER);
     }
 
     public void queryTiles(QSTileHost host) {
@@ -110,6 +118,7 @@ public class TileQueryHelper {
             if (tile == null) {
                 continue;
             } else if (!tile.isAvailable()) {
+                tile.setTileSpec(spec);
                 tile.destroy();
                 continue;
             }
@@ -120,7 +129,7 @@ public class TileQueryHelper {
             tilesToAdd.add(tile);
         }
 
-        mBgHandler.post(() -> {
+        mBgExecutor.execute(() -> {
             for (QSTile tile : tilesToAdd) {
                 final QSTile.State state = tile.getState().copy();
                 // Ignore the current state and get the generic label instead.
@@ -133,7 +142,7 @@ public class TileQueryHelper {
     }
 
     private void addPackageTiles(final QSTileHost host) {
-        mBgHandler.post(() -> {
+        mBgExecutor.execute(() -> {
             Collection<QSTile> params = host.getTiles();
             PackageManager pm = mContext.getPackageManager();
             List<ResolveInfo> services = pm.queryIntentServicesAsUser(
@@ -179,8 +188,10 @@ public class TileQueryHelper {
 
     private void notifyTilesChanged(final boolean finished) {
         final ArrayList<TileInfo> tilesToReturn = new ArrayList<>(mTiles);
-        mMainHandler.post(() -> {
-            mListener.onTilesChanged(tilesToReturn);
+        mMainExecutor.execute(() -> {
+            if (mListener != null) {
+                mListener.onTilesChanged(tilesToReturn);
+            }
             mFinished = finished;
         });
     }

@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.hardware.cas.V1_0.Status;
+import android.hardware.cas.V1_2.Status;
 
 /**
  * Base class for MediaCas exceptions
@@ -82,6 +82,17 @@ public class MediaCasException extends Exception {
     public static final class ResourceBusyException extends MediaCasException {
         /** @hide */
         public ResourceBusyException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
+    /**
+     * Exception thrown when an operation on a MediaCas object is attempted
+     * and hardware resources are not sufficient to allocate, due to client's lower priority.
+     */
+    public static final class InsufficientResourceException extends MediaCasException {
+        /** @hide */
+        public InsufficientResourceException(String detailMessage) {
             super(detailMessage);
         }
     }

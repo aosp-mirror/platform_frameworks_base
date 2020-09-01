@@ -16,20 +16,38 @@
 
 #include <cstdio>  // fclose
 #include <memory>
+#include <regex>
 #include <sstream>
 #include <string>
 
+#include "TestConstants.h"
 #include "TestHelpers.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/RawPrintVisitor.h"
 
+using android::base::StringPrintf;
 using ::testing::NotNull;
+
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {
 
+#define ASSERT_CONTAINS_REGEX(pattern, str)                       \
+  do {                                                            \
+    ASSERT_TRUE(std::regex_search(str, std::regex(pattern)))      \
+        << "pattern '" << pattern << "' not found in\n--------\n" \
+        << str << "--------";                                     \
+  } while (0)
+
+#define ADDRESS "[0-9a-f]{8}: "
+
 TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
+  fclose(stderr);  // silence expected warnings
+
   const std::string target_apk_path(GetTestDataPath() + "/target/target.apk");
   std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
   ASSERT_THAT(target_apk, NotNull());
@@ -38,21 +56,36 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
+                                          /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap);
 
   std::stringstream stream;
   RawPrintVisitor visitor(stream);
   (*idmap)->accept(&visitor);
 
-  ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000004: 00000001  version\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000008: 76a20829  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: 8635c2ed  overlay crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021c: 00000000  0x7f010000 -> 0x7f010000 integer/int1\n"),
-            std::string::npos);
+  ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(
+      StringPrintf(ADDRESS "%s  target crc\n", android::idmap2::TestConstants::TARGET_CRC_STRING),
+      stream.str());
+  ASSERT_CONTAINS_REGEX(
+      StringPrintf(ADDRESS "%s  overlay crc\n", android::idmap2::TestConstants::OVERLAY_CRC_STRING),
+      stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000001  fulfilled policies: public\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      01  enforce overlayable\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      7f  target package id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      7f  overlay package id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  target entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  overlay entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  overlay entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000008  string pool index offset\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "000000b4  string pool byte length\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  target id: integer/int1\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      07  type: reference \\(dynamic\\)\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  value: integer/int1\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  overlay id: integer/int1\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  target id: integer/int1\n", stream.str());
 }
 
 TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
@@ -68,11 +101,23 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
   RawPrintVisitor visitor(stream);
   (*idmap)->accept(&visitor);
 
-  ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000004: 00000001  version\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000008: 00001234  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: 00005678  overlay crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021c: 00000000  0x7f020000 -> 0x7f020000\n"), std::string::npos);
+  ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00001234  target crc\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00005678  overlay crc\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000011  fulfilled policies: public|signature\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      01  enforce overlayable\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      7f  target package id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      7f  overlay package id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000003  target entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000003  overlay entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000000  string pool index offset\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000000  string pool byte length\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  target id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      01  type: reference\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  value\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  overlay id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  target id\n", stream.str());
 }
 
 }  // namespace android::idmap2

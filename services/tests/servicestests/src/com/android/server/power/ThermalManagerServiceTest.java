@@ -17,6 +17,7 @@
 package com.android.server.power;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,10 +29,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.thermal.V2_0.TemperatureThreshold;
+import android.hardware.thermal.V2_0.ThrottlingSeverity;
 import android.os.CoolingDevice;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.IThermalStatusListener;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -72,6 +76,8 @@ public class ThermalManagerServiceTest {
     @Mock
     private IPowerManager mIPowerManagerMock;
     @Mock
+    private IThermalService mIThermalServiceMock;
+    @Mock
     private IThermalEventListener mEventListener1;
     @Mock
     private IThermalEventListener mEventListener2;
@@ -87,6 +93,7 @@ public class ThermalManagerServiceTest {
         private static final int INIT_STATUS = Temperature.THROTTLING_NONE;
         private ArrayList<Temperature> mTemperatureList = new ArrayList<>();
         private ArrayList<CoolingDevice> mCoolingDeviceList = new ArrayList<>();
+        private ArrayList<TemperatureThreshold> mTemperatureThresholdList = initializeThresholds();
 
         private Temperature mSkin1 = new Temperature(0, Temperature.TYPE_SKIN, "skin1",
                 INIT_STATUS);
@@ -98,6 +105,35 @@ public class ThermalManagerServiceTest {
                 INIT_STATUS);
         private CoolingDevice mCpu = new CoolingDevice(0, CoolingDevice.TYPE_BATTERY, "cpu");
         private CoolingDevice mGpu = new CoolingDevice(0, CoolingDevice.TYPE_BATTERY, "gpu");
+
+        private ArrayList<TemperatureThreshold> initializeThresholds() {
+            ArrayList<TemperatureThreshold> thresholds = new ArrayList<>();
+
+            TemperatureThreshold skinThreshold = new TemperatureThreshold();
+            skinThreshold.type = Temperature.TYPE_SKIN;
+            skinThreshold.name = "skin1";
+            skinThreshold.hotThrottlingThresholds = new float[7 /*ThrottlingSeverity#len*/];
+            for (int i = 0; i < skinThreshold.hotThrottlingThresholds.length; ++i) {
+                // Sets NONE to 25.0f, SEVERE to 40.0f, and SHUTDOWN to 55.0f
+                skinThreshold.hotThrottlingThresholds[i] = 25.0f + 5.0f * i;
+            }
+            thresholds.add(skinThreshold);
+
+            TemperatureThreshold cpuThreshold = new TemperatureThreshold();
+            cpuThreshold.type = Temperature.TYPE_CPU;
+            cpuThreshold.name = "cpu";
+            cpuThreshold.hotThrottlingThresholds = new float[7 /*ThrottlingSeverity#len*/];
+            for (int i = 0; i < cpuThreshold.hotThrottlingThresholds.length; ++i) {
+                if (i == ThrottlingSeverity.SEVERE) {
+                    cpuThreshold.hotThrottlingThresholds[i] = 95.0f;
+                } else {
+                    cpuThreshold.hotThrottlingThresholds[i] = Float.NaN;
+                }
+            }
+            thresholds.add(cpuThreshold);
+
+            return thresholds;
+        }
 
         ThermalHalFake() {
             mTemperatureList.add(mSkin1);
@@ -133,6 +169,19 @@ public class ThermalManagerServiceTest {
         }
 
         @Override
+        protected List<TemperatureThreshold> getTemperatureThresholds(boolean shouldFilter,
+                int type) {
+            List<TemperatureThreshold> ret = new ArrayList<>();
+            for (TemperatureThreshold threshold : mTemperatureThresholdList) {
+                if (shouldFilter && type != threshold.type) {
+                    continue;
+                }
+                ret.add(threshold);
+            }
+            return ret;
+        }
+
+        @Override
         protected boolean connectToHal() {
             return true;
         }
@@ -153,7 +202,7 @@ public class ThermalManagerServiceTest {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mFakeHal = new ThermalHalFake();
-        mPowerManager = new PowerManager(mContext, mIPowerManagerMock, null);
+        mPowerManager = new PowerManager(mContext, mIPowerManagerMock, mIThermalServiceMock, null);
         when(mContext.getSystemServiceName(PowerManager.class)).thenReturn(Context.POWER_SERVICE);
         when(mContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         resetListenerMock();
@@ -167,11 +216,11 @@ public class ThermalManagerServiceTest {
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).notifyThrottling(any(Temperature.class));
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(anyInt());
+                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).notifyThrottling(any(Temperature.class));
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(anyInt());
+                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
         resetListenerMock();
         mService.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
         ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
@@ -179,7 +228,7 @@ public class ThermalManagerServiceTest {
                 .times(4)).notifyThrottling(captor.capture());
         assertListEqualsIgnoringOrder(mFakeHal.mTemperatureList, captor.getAllValues());
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+                .times(0)).onStatusChange(Temperature.THROTTLING_NONE);
         captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(2)).notifyThrottling(captor.capture());
@@ -187,7 +236,7 @@ public class ThermalManagerServiceTest {
                 new ArrayList<>(Arrays.asList(mFakeHal.mSkin1, mFakeHal.mSkin2)),
                 captor.getAllValues());
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+                .times(0)).onStatusChange(Temperature.THROTTLING_NONE);
     }
 
     private void resetListenerMock() {
@@ -287,9 +336,11 @@ public class ThermalManagerServiceTest {
     @Test
     public void testGetCurrentTemperatures() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(false, 0),
-                mService.mService.getCurrentTemperatures());
-        assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
-                mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN));
+                Arrays.asList(mService.mService.getCurrentTemperatures()));
+        assertListEqualsIgnoringOrder(
+                mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
+                Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
+                        Temperature.TYPE_SKIN)));
     }
 
     @Test
@@ -321,21 +372,85 @@ public class ThermalManagerServiceTest {
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
         assertTrue(mService.mService.unregisterThermalEventListener(mEventListener1));
         assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener1));
-        assertEquals(0, mService.mService.getCurrentTemperatures().size());
-        assertEquals(0,
-                mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN).size());
+        assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperatures()).size());
+        assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
+                        Temperature.TYPE_SKIN)).size());
         assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
     }
 
     @Test
     public void testGetCurrentCoolingDevices() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentCoolingDevices(false, 0),
-                mService.mService.getCurrentCoolingDevices());
+                Arrays.asList(mService.mService.getCurrentCoolingDevices()));
         assertListEqualsIgnoringOrder(
                 mFakeHal.getCurrentCoolingDevices(false, CoolingDevice.TYPE_BATTERY),
-                mService.mService.getCurrentCoolingDevices());
+                Arrays.asList(mService.mService.getCurrentCoolingDevices()));
         assertListEqualsIgnoringOrder(
                 mFakeHal.getCurrentCoolingDevices(true, CoolingDevice.TYPE_CPU),
-                mService.mService.getCurrentCoolingDevicesWithType(CoolingDevice.TYPE_CPU));
+                Arrays.asList(mService.mService.getCurrentCoolingDevicesWithType(
+                        CoolingDevice.TYPE_CPU)));
+    }
+
+    @Test
+    public void testTemperatureWatcherUpdateSevereThresholds() throws RemoteException {
+        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        watcher.mSevereThresholds.erase();
+        watcher.updateSevereThresholds();
+        assertEquals(1, watcher.mSevereThresholds.size());
+        assertEquals("skin1", watcher.mSevereThresholds.keyAt(0));
+        Float threshold = watcher.mSevereThresholds.get("skin1");
+        assertNotNull(threshold);
+        assertEquals(40.0f, threshold, 0.0f);
+    }
+
+    @Test
+    public void testTemperatureWatcherGetSlopeOf() throws RemoteException {
+        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        List<ThermalManagerService.TemperatureWatcher.Sample> samples = new ArrayList<>();
+        for (int i = 0; i < 30; ++i) {
+            samples.add(watcher.createSampleForTesting(i, (float) (i / 2 * 2)));
+        }
+        assertEquals(1.0f, watcher.getSlopeOf(samples), 0.01f);
+    }
+
+    @Test
+    public void testTemperatureWatcherNormalizeTemperature() throws RemoteException {
+        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        assertEquals(0.5f, watcher.normalizeTemperature(25.0f, 40.0f), 0.0f);
+
+        // Temperatures more than 30 degrees below the SEVERE threshold should be clamped to 0.0f
+        assertEquals(0.0f, watcher.normalizeTemperature(0.0f, 40.0f), 0.0f);
+
+        // Temperatures above the SEVERE threshold should not be clamped
+        assertEquals(2.0f, watcher.normalizeTemperature(70.0f, 40.0f), 0.0f);
+    }
+
+    @Test
+    public void testTemperatureWatcherGetForecast() throws RemoteException {
+        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+
+        ArrayList<ThermalManagerService.TemperatureWatcher.Sample> samples = new ArrayList<>();
+
+        // Add a single sample
+        samples.add(watcher.createSampleForTesting(0, 25.0f));
+        watcher.mSamples.put("skin1", samples);
+
+        // Because there are not enough samples to compute the linear regression,
+        // no matter how far ahead we forecast, we should receive the same value
+        assertEquals(0.5f, watcher.getForecast(0), 0.0f);
+        assertEquals(0.5f, watcher.getForecast(5), 0.0f);
+
+        // Add some time-series data
+        for (int i = 1; i < 20; ++i) {
+            samples.add(0, watcher.createSampleForTesting(1000 * i, 25.0f + 0.5f * i));
+        }
+
+        // Now the forecast should vary depending on how far ahead we are trying to predict
+        assertEquals(0.9f, watcher.getForecast(4), 0.02f);
+        assertEquals(1.0f, watcher.getForecast(10), 0.02f);
+
+        // If there are no thresholds, then we shouldn't receive a headroom value
+        watcher.mSevereThresholds.erase();
+        assertTrue(Float.isNaN(watcher.getForecast(0)));
     }
 }

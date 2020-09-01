@@ -59,6 +59,10 @@ public class RingtonePlayer extends SystemUI {
     private final NotificationPlayer mAsyncPlayer = new NotificationPlayer(TAG);
     private final HashMap<IBinder, Client> mClients = new HashMap<IBinder, Client>();
 
+    public RingtonePlayer(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         mAsyncPlayer.setUsesWakeLock(mContext);

@@ -37,6 +37,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 
 import com.android.settingslib.R;
+import com.android.settingslib.drawer.ActivityTile;
 import com.android.settingslib.drawer.CategoryKey;
 import com.android.settingslib.drawer.Tile;
 
@@ -84,7 +85,7 @@ public class AdaptiveIconTest {
 
     @Test
     public void setBackgroundColor_externalTileWithBackgroundColorRawValue_shouldUpdateIcon() {
-        final Tile tile = spy(new Tile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
+        final Tile tile = spy(new ActivityTile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
         mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON_BACKGROUND_ARGB, 0xff0000);
         doReturn(Icon.createWithResource(mContext, R.drawable.ic_system_update))
                 .when(tile).getIcon(mContext);
@@ -97,7 +98,7 @@ public class AdaptiveIconTest {
 
     @Test
     public void setBackgroundColor_tileWithoutBackgroundColor_shouldSetDefaultBackgroundColor() {
-        final Tile tile = spy(new Tile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
+        final Tile tile = spy(new ActivityTile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
         doReturn(Icon.createWithResource(mContext, R.drawable.ic_system_update))
             .when(tile).getIcon(mContext);
         final AdaptiveIcon icon = new AdaptiveIcon(mContext, new ColorDrawable(Color.BLACK));
@@ -110,7 +111,7 @@ public class AdaptiveIconTest {
 
     @Test
     public void onBindTile_externalTileWithBackgroundColorHint_shouldUpdateIcon() {
-        final Tile tile = spy(new Tile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
+        final Tile tile = spy(new ActivityTile(mActivityInfo, CategoryKey.CATEGORY_HOMEPAGE));
         mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON_BACKGROUND_HINT,
                 R.color.bt_outline_color);
         doReturn(Icon.createWithResource(mContext, R.drawable.ic_system_update))

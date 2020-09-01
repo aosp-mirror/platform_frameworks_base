@@ -172,7 +172,7 @@ public final class DirectAction implements Parcelable {
          *     current application state.
          */
         public Builder(@NonNull String id) {
-            Preconditions.checkNotNull(id);
+            Objects.requireNonNull(id);
             mId = id;
         }
 

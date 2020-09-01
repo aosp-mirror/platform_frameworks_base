@@ -1,0 +1,18 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsBlobStoreTestCases"
+    },
+    {
+      "name": "CtsBlobStoreHostTestCases"
+    },
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.blob"
+        }
+      ]
+    }
+  ]
+}

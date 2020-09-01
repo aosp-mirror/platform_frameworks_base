@@ -43,7 +43,9 @@ import java.lang.ref.WeakReference;
 @RunWith(AndroidJUnit4.class)
 public class AppSaturationControllerTest {
 
-    private static final String TEST_PACKAGE_NAME = "com.android.test";
+    private static final String TEST_CALLER_PACKAGE_NAME = "com.android.test.caller";
+    private static final String TEST_CALLER_PACKAGE_NAME_TWO = "com.android.test.caller.two";
+    private static final String TEST_AFFECTED_PACKAGE_NAME = "com.android.test.affected";
 
     private int mUserId;
     private AppSaturationController mAppSaturationController;
@@ -70,8 +72,11 @@ public class AppSaturationControllerTest {
     public void addColorTransformController_appliesExistingSaturation() {
         final WeakReference<ColorTransformController> ref = new WeakReference<>(
                 mColorTransformController);
-        mAppSaturationController.setSaturationLevel(TEST_PACKAGE_NAME, mUserId, 30);
-        mAppSaturationController.addColorTransformController(TEST_PACKAGE_NAME, mUserId, ref);
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        30);
+        mAppSaturationController
+                .addColorTransformController(TEST_AFFECTED_PACKAGE_NAME, mUserId, ref);
         AppSaturationController.computeGrayscaleTransformMatrix(.3f, mMatrix);
         verify(mColorTransformController).applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
     }
@@ -80,14 +85,19 @@ public class AppSaturationControllerTest {
     public void setSaturationLevel_resetToDefault() {
         final WeakReference<ColorTransformController> ref = new WeakReference<>(
                 mColorTransformController);
-        mAppSaturationController.addColorTransformController(TEST_PACKAGE_NAME, mUserId, ref);
+        mAppSaturationController
+                .addColorTransformController(TEST_AFFECTED_PACKAGE_NAME, mUserId, ref);
         verify(mColorTransformController, never())
                 .applyAppSaturation(any(), eq(TRANSLATION_VECTOR));
-        mAppSaturationController.setSaturationLevel(TEST_PACKAGE_NAME, mUserId, 30);
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        30);
         AppSaturationController.computeGrayscaleTransformMatrix(.3f, mMatrix);
         verify(mColorTransformController, times(1))
                 .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
-        mAppSaturationController.setSaturationLevel(TEST_PACKAGE_NAME, mUserId, 100);
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        100);
         AppSaturationController.computeGrayscaleTransformMatrix(1.0f, mMatrix);
         verify(mColorTransformController, times(2))
                 .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
@@ -97,19 +107,76 @@ public class AppSaturationControllerTest {
     public void setSaturationLevel_updateLevel() {
         final WeakReference<ColorTransformController> ref = new WeakReference<>(
                 mColorTransformController);
-        mAppSaturationController.addColorTransformController(TEST_PACKAGE_NAME, mUserId, ref);
+        mAppSaturationController
+                .addColorTransformController(TEST_AFFECTED_PACKAGE_NAME, mUserId, ref);
         verify(mColorTransformController, never())
                 .applyAppSaturation(any(), eq(TRANSLATION_VECTOR));
-        mAppSaturationController.setSaturationLevel(TEST_PACKAGE_NAME, mUserId, 30);
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        30);
         AppSaturationController.computeGrayscaleTransformMatrix(.3f, mMatrix);
         verify(mColorTransformController).applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
-        mAppSaturationController.setSaturationLevel(TEST_PACKAGE_NAME, mUserId, 70);
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        70);
         AppSaturationController.computeGrayscaleTransformMatrix(.7f, mMatrix);
         verify(mColorTransformController, times(2))
                 .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
-        mAppSaturationController.setSaturationLevel(TEST_PACKAGE_NAME, mUserId, 100);
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        100);
         AppSaturationController.computeGrayscaleTransformMatrix(1.0f, mMatrix);
         verify(mColorTransformController, times(3))
                 .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
+    }
+
+    @Test
+    public void setSaturationLevel_multipleCallers_appliesStrongest() {
+        final WeakReference<ColorTransformController> ref = new WeakReference<>(
+                mColorTransformController);
+        mAppSaturationController
+                .addColorTransformController(TEST_AFFECTED_PACKAGE_NAME, mUserId, ref);
+        verify(mColorTransformController, never())
+                .applyAppSaturation(any(), eq(TRANSLATION_VECTOR));
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        30);
+        AppSaturationController.computeGrayscaleTransformMatrix(0.3f, mMatrix);
+        verify(mColorTransformController, times(1))
+                .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME_TWO, TEST_AFFECTED_PACKAGE_NAME,
+                        mUserId,
+                        70);
+        verify(mColorTransformController, times(2))
+                .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
+    }
+
+    @Test
+    public void setSaturationLevel_multipleCallers_removingOneDoesNotAffectTheOther() {
+        final WeakReference<ColorTransformController> ref = new WeakReference<>(
+                mColorTransformController);
+        mAppSaturationController
+                .addColorTransformController(TEST_AFFECTED_PACKAGE_NAME, mUserId, ref);
+        verify(mColorTransformController, never())
+                .applyAppSaturation(any(), eq(TRANSLATION_VECTOR));
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME, TEST_AFFECTED_PACKAGE_NAME, mUserId,
+                        70);
+        AppSaturationController.computeGrayscaleTransformMatrix(0.7f, mMatrix);
+        verify(mColorTransformController, times(1))
+                .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME_TWO, TEST_AFFECTED_PACKAGE_NAME,
+                        mUserId,
+                        30);
+        AppSaturationController.computeGrayscaleTransformMatrix(0.3f, mMatrix);
+        verify(mColorTransformController, times(2))
+                .applyAppSaturation(eq(mMatrix), eq(TRANSLATION_VECTOR));
+        mAppSaturationController
+                .setSaturationLevel(TEST_CALLER_PACKAGE_NAME_TWO, TEST_AFFECTED_PACKAGE_NAME,
+                        mUserId,
+                        100);
+        AppSaturationController.computeGrayscaleTransformMatrix(0.7f, mMatrix);
     }
 }

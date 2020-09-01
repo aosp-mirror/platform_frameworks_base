@@ -1,0 +1,13 @@
+{
+    "presubmit": [
+        {
+            "file_patterns": ["(/|^)platform.xml"],
+            "name": "CtsPermission2TestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission2.cts.RuntimePermissionProperties"
+                }
+            ]
+        }
+    ]
+}

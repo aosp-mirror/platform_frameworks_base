@@ -28,7 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -428,7 +427,7 @@ public final class Slice implements Parcelable {
          * @see SliceItem#getSubType()
          */
         public Builder addSubSlice(@NonNull Slice slice, @Nullable @SliceSubtype String subType) {
-            Preconditions.checkNotNull(slice);
+            Objects.requireNonNull(slice);
             mItems.add(new SliceItem(slice, SliceItem.FORMAT_SLICE, subType,
                     slice.getHints().toArray(new String[slice.getHints().size()])));
             return this;
@@ -441,8 +440,8 @@ public final class Slice implements Parcelable {
          */
         public Slice.Builder addAction(@NonNull PendingIntent action, @NonNull Slice s,
                 @Nullable @SliceSubtype String subType) {
-            Preconditions.checkNotNull(action);
-            Preconditions.checkNotNull(s);
+            Objects.requireNonNull(action);
+            Objects.requireNonNull(s);
             List<String> hints = s.getHints();
             s.mSpec = null;
             mItems.add(new SliceItem(action, s, SliceItem.FORMAT_ACTION, subType, hints.toArray(
@@ -468,7 +467,7 @@ public final class Slice implements Parcelable {
          */
         public Builder addIcon(Icon icon, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
-            Preconditions.checkNotNull(icon);
+            Objects.requireNonNull(icon);
             mItems.add(new SliceItem(icon, SliceItem.FORMAT_IMAGE, subType, hints));
             return this;
         }
@@ -481,7 +480,7 @@ public final class Slice implements Parcelable {
         public Slice.Builder addRemoteInput(RemoteInput remoteInput,
                 @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
-            Preconditions.checkNotNull(remoteInput);
+            Objects.requireNonNull(remoteInput);
             mItems.add(new SliceItem(remoteInput, SliceItem.FORMAT_REMOTE_INPUT,
                     subType, hints));
             return this;
@@ -529,7 +528,7 @@ public final class Slice implements Parcelable {
          */
         public Slice.Builder addBundle(Bundle bundle, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
-            Preconditions.checkNotNull(bundle);
+            Objects.requireNonNull(bundle);
             mItems.add(new SliceItem(bundle, SliceItem.FORMAT_BUNDLE, subType,
                     hints));
             return this;

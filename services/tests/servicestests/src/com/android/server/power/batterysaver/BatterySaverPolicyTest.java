@@ -78,6 +78,11 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             return mDeviceSpecificConfigResId;
         }
 
+        @Override
+        void invalidatePowerSaveModeCaches() {
+            // Avoids an SELinux denial.
+        }
+
         @VisibleForTesting
         void onChange() {
             onChange(true, null);
@@ -112,7 +117,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_WithAccessibilityEnabled() {
-        mBatterySaverPolicy.setAccessibilityEnabledForTest(true);
+        mBatterySaverPolicy.setAccessibilityEnabled(true);
         testServiceDefaultValue_Off(ServiceType.VIBRATION);
     }
 
@@ -333,5 +338,58 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         mBatterySaverPolicy.setAdaptivePolicyLocked(
                 Policy.fromSettings(BATTERY_SAVER_CONSTANTS, ""));
         verifyBatterySaverConstantsUpdated();
+    }
+
+    public void testCarModeChanges_Full() {
+        mBatterySaverPolicy.updateConstantsLocked(
+                "gps_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
+                        + ",enable_night_mode=true", "");
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+        assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE).batterySaverEnabled);
+
+        mBatterySaverPolicy.setCarModeEnabled(true);
+
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isAnyOf(PowerManager.LOCATION_MODE_NO_CHANGE,
+                        PowerManager.LOCATION_MODE_FOREGROUND_ONLY);
+        assertFalse(mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE).batterySaverEnabled);
+
+        mBatterySaverPolicy.setCarModeEnabled(false);
+
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+        assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE).batterySaverEnabled);
+    }
+
+    public void testCarModeChanges_Adaptive() {
+        mBatterySaverPolicy.setAdaptivePolicyLocked(
+                Policy.fromSettings(
+                        "gps_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
+                                + ",enable_night_mode=true", ""));
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_ADAPTIVE);
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+        assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE).batterySaverEnabled);
+
+        mBatterySaverPolicy.setCarModeEnabled(true);
+
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isAnyOf(PowerManager.LOCATION_MODE_NO_CHANGE,
+                        PowerManager.LOCATION_MODE_FOREGROUND_ONLY);
+        assertFalse(mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE).batterySaverEnabled);
+
+        mBatterySaverPolicy.setCarModeEnabled(false);
+
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+        assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE).batterySaverEnabled);
     }
 }

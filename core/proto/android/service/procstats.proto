@@ -104,7 +104,7 @@ message ProcessStatsAvailablePagesProto {
     repeated int32 pages_per_order = 4;
 }
 
-// Next Tag: 10
+// Next Tag: 13
 message ProcessStatsStateProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -114,13 +114,20 @@ message ProcessStatsStateProto {
 
     // this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
     // and not frameworks/base/core/java/android/app/ActivityManager.java
-    optional ProcessState process_state = 3;
+    optional ProcessState process_state = 3 [deprecated = true];
+
+    // the AggregatedProcessState needs to keep sync with ProcessStateAggregated
+    optional AggregatedProcessState process_state_aggregated = 10;
 
     // Millisecond uptime duration spent in this state
-    optional int64 duration_ms = 4;
+    optional int64 duration_ms = 4 [deprecated = true];
+    // Same as above, but with minute resolution so it fits into an int32.
+    optional int32 duration_minutes = 11;
 
     // Millisecond elapsed realtime duration spent in this state
-    optional int64 realtime_duration_ms = 9;
+    optional int64 realtime_duration_ms = 9 [deprecated = true];
+    // Same as above, but with minute resolution so it fits into an int32.
+    optional int32 realtime_duration_minutes = 12;
 
     // # of samples taken
     optional int32 sample_size = 5;
@@ -135,7 +142,7 @@ message ProcessStatsStateProto {
     optional android.util.AggStats rss = 8;
 }
 
-// Next Tag: 7
+// Next Tag: 8
 message ProcessStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -166,6 +173,28 @@ message ProcessStatsProto {
     // Total time process has been running...  screen_state, memory_state, and process_state
     // will not be set.
     optional ProcessStatsStateProto total_running_state = 6;
+
+    // Association data for this process in this state;
+    // each entry here is one association.
+    repeated ProcessStatsAssociationProto assocs = 7;
+}
+
+// Next Tag: 6
+message ProcessStatsAssociationProto {
+    // Procss Name of the associated process/package
+    optional string assoc_process_name = 1;
+
+    // Package Name of the associated process/package
+    optional string assoc_package_name = 2 [deprecated = true];
+
+    // UID of the associated process/package
+    optional int32 assoc_uid = 5;
+
+    // Total count of the times this association appeared.
+    optional int32 total_count = 3;
+
+    // Uptime total duration in seconds this association was around.
+    optional int32 total_duration_secs = 4;
 }
 
 // Next Tag: 4
@@ -241,12 +270,25 @@ message PackageAssociationSourceProcessStatsProto {
     repeated StateStats active_state_stats = 6;
 }
 
-// Next Tag: 3
+// Next Tag: 7
 message PackageAssociationProcessStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Name of the target component.
     optional string component_name = 1;
+
+    // Total count of the times this association appeared.
+    optional int32 total_count = 3;
+
+    // Millisecond uptime total duration this association was around.
+    optional int64 total_duration_ms = 4;
+
+    // Total count of the times this association became actively impacting its target process.
+    optional int32 active_count = 5;
+
+    // Millisecond uptime total duration this association was around.
+    optional int64 active_duration_ms = 6;
+
     // Information on one source in this association.
     repeated PackageAssociationSourceProcessStatsProto sources = 2;
 }

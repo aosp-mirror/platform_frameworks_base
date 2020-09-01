@@ -52,21 +52,13 @@ private:
         return TestUtils::createNode(
                 x, y, x + width, y + height,
                 [width, height](RenderProperties& props, Canvas& canvas) {
-                    SkPaint paint;
-                    float matrix[20] = {0};
-
+                    Paint paint;
                     // Simple scale/translate case where R, G, and B are all treated equivalently
-                    matrix[SkColorMatrix::kR_Scale] = 1.1f;
-                    matrix[SkColorMatrix::kG_Scale] = 1.1f;
-                    matrix[SkColorMatrix::kB_Scale] = 1.1f;
-                    matrix[SkColorMatrix::kA_Scale] = 0.5f;
+                    SkColorMatrix cm;
+                    cm.setScale(1.1f, 1.1f, 1.1f, 0.5f);
+                    cm.postTranslate(5.0f/255, 5.0f/255, 5.0f/255, 10.0f/255);
 
-                    matrix[SkColorMatrix::kR_Trans] = 5.0f;
-                    matrix[SkColorMatrix::kG_Trans] = 5.0f;
-                    matrix[SkColorMatrix::kB_Trans] = 5.0f;
-                    matrix[SkColorMatrix::kA_Trans] = 10.0f;
-
-                    paint.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
+                    paint.setColorFilter(SkColorFilters::Matrix(cm));
 
                     // set a shader so it's not likely for the matrix to be optimized away (since a
                     // clever
@@ -75,7 +67,7 @@ private:
                     SkPoint pts[] = {SkPoint::Make(0, 0), SkPoint::Make(width, height)};
                     SkColor colors[2] = {Color::DeepPurple_500, Color::DeepOrange_500};
                     paint.setShader(SkGradientShader::MakeLinear(pts, colors, pos, 2,
-                                                                 SkShader::kClamp_TileMode));
+                                                                 SkTileMode::kClamp));
 
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {

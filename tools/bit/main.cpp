@@ -708,10 +708,12 @@ run_phases(vector<Target*> targets, const Options& options)
         }
     }
 
+
     // Figure out whether we need to sync the system and which apks to install
     string deviceTargetPath = buildOut + "/target/product/" + buildDevice;
     string systemPath = deviceTargetPath + "/system/";
     string dataPath = deviceTargetPath + "/data/";
+    string testPath = deviceTargetPath + "/testcases/";
     bool syncSystem = false;
     bool alwaysSyncSystem = false;
     vector<string> systemFiles;
@@ -734,7 +736,8 @@ run_phases(vector<Target*> targets, const Options& options)
                     continue;
                 }
                 // Apk in the data partition
-                if (starts_with(file, dataPath) && ends_with(file, ".apk")) {
+                if (ends_with(file, ".apk")
+                        && (starts_with(file, dataPath) || starts_with(file, testPath))) {
                     // Always install it if we didn't build it because otherwise
                     // it will never have changed.
                     installApks.push_back(InstallApk(file, !target->build));
@@ -966,8 +969,9 @@ run_phases(vector<Target*> targets, const Options& options)
             for (size_t j=0; j<target->module.installed.size(); j++) {
                 string filename = target->module.installed[j];
 
-                // Apk in the data partition
-                if (!starts_with(filename, dataPath) || !ends_with(filename, ".apk")) {
+                // Skip of not apk in the data partition or test
+                if (!(ends_with(filename, ".apk")
+                        && (starts_with(filename, dataPath) || starts_with(filename, testPath)))) {
                     continue;
                 }
 

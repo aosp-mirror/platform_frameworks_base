@@ -15,7 +15,6 @@
  */
 package com.android.server.camera;
 
-import android.annotation.IntDef;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,18 +39,19 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * CameraServiceProxy is the system_server analog to the camera service running in cameraserver.
@@ -78,7 +78,7 @@ public class CameraServiceProxy extends SystemService
     private static final int MSG_SWITCH_USER = 1;
 
     private static final int RETRY_DELAY_TIME = 20; //ms
-    private static final int RETRY_TIMES = 30;
+    private static final int RETRY_TIMES = 60;
 
     // Maximum entries to keep in usage history before dumping out
     private static final int MAX_USAGE_HISTORY = 100;
@@ -103,26 +103,10 @@ public class CameraServiceProxy extends SystemService
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
 
-    // Valid values for NFC_NOTIFICATION_PROP
-    // Do not disable active NFC for any camera use
-    private static final int NFC_NOTIFY_NONE = 0;
-    // Always disable active NFC for any camera use
-    private static final int NFC_NOTIFY_ALL = 1;
-     // Disable active NFC only for back-facing cameras
-    private static final int NFC_NOTIFY_BACK = 2;
-    // Disable active NFC only for front-facing cameras
-    private static final int NFC_NOTIFY_FRONT = 3;
+    private final boolean mNotifyNfc;
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"NFC_"}, value =
-         {NFC_NOTIFY_NONE,
-          NFC_NOTIFY_ALL,
-          NFC_NOTIFY_BACK,
-          NFC_NOTIFY_FRONT})
-    private @interface NfcNotifyState {};
-
-    private final @NfcNotifyState int mNotifyNfc;
-    private boolean mLastNfcPollState = true;
+    private ScheduledThreadPoolExecutor mLogWriterService = new ScheduledThreadPoolExecutor(
+            /*corePoolSize*/ 1);
 
     /**
      * Structure to track camera usage
@@ -224,12 +208,11 @@ public class CameraServiceProxy extends SystemService
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper(), this);
 
-        int notifyNfc = SystemProperties.getInt(NFC_NOTIFICATION_PROP, 0);
-        if (notifyNfc < NFC_NOTIFY_NONE || notifyNfc > NFC_NOTIFY_FRONT) {
-            notifyNfc = NFC_NOTIFY_NONE;
-        }
-        mNotifyNfc = notifyNfc;
-        if (DEBUG) Slog.v(TAG, "Notify NFC state is " + nfcNotifyToString(mNotifyNfc));
+        mNotifyNfc = SystemProperties.getInt(NFC_NOTIFICATION_PROP, 0) > 0;
+        if (DEBUG) Slog.v(TAG, "Notify NFC behavior is " + (mNotifyNfc ? "active" : "disabled"));
+        // Don't keep any extra logging threads if not needed
+        mLogWriterService.setKeepAliveTime(1, TimeUnit.SECONDS);
+        mLogWriterService.allowCoreThreadTimeOut(true);
     }
 
     @Override
@@ -296,10 +279,57 @@ public class CameraServiceProxy extends SystemService
             mCameraServiceRaw = null;
 
             // All cameras reset to idle on camera service death
+            boolean wasEmpty = mActiveCameraUsage.isEmpty();
             mActiveCameraUsage.clear();
 
-            // Ensure NFC is back on
-            notifyNfcService(/*enablePolling*/ true);
+            if ( mNotifyNfc && !wasEmpty ) {
+                notifyNfcService(/*enablePolling*/ true);
+            }
+        }
+    }
+
+    private class EventWriterTask implements Runnable {
+        private ArrayList<CameraUsageEvent> mEventList;
+        private static final long WRITER_SLEEP_MS = 100;
+
+        public EventWriterTask(ArrayList<CameraUsageEvent> eventList) {
+            mEventList = eventList;
+        }
+
+        @Override
+        public void run() {
+            if (mEventList != null) {
+                for (CameraUsageEvent event : mEventList) {
+                    logCameraUsageEvent(event);
+                    try {
+                        Thread.sleep(WRITER_SLEEP_MS);
+                    } catch (InterruptedException e) {}
+                }
+                mEventList.clear();
+            }
+        }
+
+        /**
+         * Write camera usage events to stats log.
+         * Package-private
+         */
+        private void logCameraUsageEvent(CameraUsageEvent e) {
+            int facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
+            switch(e.mCameraFacing) {
+                case ICameraServiceProxy.CAMERA_FACING_BACK:
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
+                    break;
+                case ICameraServiceProxy.CAMERA_FACING_FRONT:
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
+                    break;
+                case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown camera facing: " + e.mCameraFacing);
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_ACTION_EVENT, e.getDuration(),
+                    e.mAPILevel, e.mClientName, facing);
         }
     }
 
@@ -339,6 +369,10 @@ public class CameraServiceProxy extends SystemService
                         .setPackageName(e.mClientName);
                 mLogger.write(l);
             }
+
+            mLogWriterService.execute(new EventWriterTask(
+                        new ArrayList<CameraUsageEvent>(mCameraUsageHistory)));
+
             mCameraUsageHistory.clear();
         }
         final long ident = Binder.clearCallingIdentity();
@@ -498,32 +532,14 @@ public class CameraServiceProxy extends SystemService
 
                     break;
             }
-            switch (mNotifyNfc) {
-                case NFC_NOTIFY_NONE:
-                    break;
-                case NFC_NOTIFY_ALL:
-                    notifyNfcService(mActiveCameraUsage.isEmpty());
-                    break;
-                case NFC_NOTIFY_BACK:
-                case NFC_NOTIFY_FRONT:
-                    boolean enablePolling = true;
-                    int targetFacing = mNotifyNfc == NFC_NOTIFY_BACK
-                            ? ICameraServiceProxy.CAMERA_FACING_BACK :
-                              ICameraServiceProxy.CAMERA_FACING_FRONT;
-                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
-                        if (mActiveCameraUsage.valueAt(i).mCameraFacing == targetFacing) {
-                            enablePolling = false;
-                            break;
-                        }
-                    }
-                    notifyNfcService(enablePolling);
-                    break;
+            boolean isEmpty = mActiveCameraUsage.isEmpty();
+            if ( mNotifyNfc && (wasEmpty != isEmpty) ) {
+                notifyNfcService(isEmpty);
             }
         }
     }
 
     private void notifyNfcService(boolean enablePolling) {
-        if (enablePolling == mLastNfcPollState) return;
 
         IBinder nfcServiceBinder = getBinderService(NFC_SERVICE_BINDER_NAME);
         if (nfcServiceBinder == null) {
@@ -532,14 +548,9 @@ public class CameraServiceProxy extends SystemService
         }
         INfcAdapter nfcAdapterRaw = INfcAdapter.Stub.asInterface(nfcServiceBinder);
         int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
-        if (DEBUG) {
-            Slog.v(TAG, "Setting NFC reader mode to flags " + flags
-                    + " to turn polling " + enablePolling);
-        }
-
+        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode to flags " + flags);
         try {
             nfcAdapterRaw.setReaderMode(nfcInterfaceToken, null, flags, null);
-            mLastNfcPollState = enablePolling;
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not notify NFC service, remote exception: " + e);
         }
@@ -576,13 +587,4 @@ public class CameraServiceProxy extends SystemService
         return "CAMERA_FACING_UNKNOWN";
     }
 
-    private static String nfcNotifyToString(@NfcNotifyState int nfcNotifyState) {
-        switch (nfcNotifyState) {
-            case NFC_NOTIFY_NONE: return "NFC_NOTIFY_NONE";
-            case NFC_NOTIFY_ALL: return "NFC_NOTIFY_ALL";
-            case NFC_NOTIFY_BACK: return "NFC_NOTIFY_BACK";
-            case NFC_NOTIFY_FRONT: return "NFC_NOTIFY_FRONT";
-        }
-        return "UNKNOWN_NFC_NOTIFY";
-    }
 }

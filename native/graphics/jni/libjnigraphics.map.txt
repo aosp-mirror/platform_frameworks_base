@@ -1,8 +1,30 @@
 LIBJNIGRAPHICS {
   global:
+    AImageDecoder_createFromAAsset; # introduced=30
+    AImageDecoder_createFromFd; # introduced=30
+    AImageDecoder_createFromBuffer; # introduced=30
+    AImageDecoder_delete; # introduced=30
+    AImageDecoder_setAndroidBitmapFormat; # introduced=30
+    AImageDecoder_setUnpremultipliedRequired; # introduced=30
+    AImageDecoder_setDataSpace; # introduced=30
+    AImageDecoder_getHeaderInfo; # introduced=30
+    AImageDecoder_getMinimumStride; # introduced=30
+    AImageDecoder_decodeImage; # introduced=30
+    AImageDecoder_setTargetSize; # introduced=30
+    AImageDecoder_computeSampledSize; # introduced=30
+    AImageDecoder_setCrop; # introduced=30
+    AImageDecoderHeaderInfo_getWidth; # introduced=30
+    AImageDecoderHeaderInfo_getHeight; # introduced=30
+    AImageDecoderHeaderInfo_getMimeType; # introduced=30
+    AImageDecoderHeaderInfo_getAlphaFlags; # introduced=30
+    AImageDecoderHeaderInfo_getAndroidBitmapFormat; # introduced=30
+    AImageDecoderHeaderInfo_getDataSpace; # introduced=30
     AndroidBitmap_getInfo;
+    AndroidBitmap_getDataSpace;
     AndroidBitmap_lockPixels;
     AndroidBitmap_unlockPixels;
+    AndroidBitmap_compress; # introduced=30
+    AndroidBitmap_getHardwareBuffer; #introduced=30
   local:
     *;
 };

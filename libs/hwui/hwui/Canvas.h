@@ -131,20 +131,6 @@ public:
      */
     static void setCompatibilityVersion(int apiLevel);
 
-    /**
-     *  Provides a Skia SkCanvas interface that acts as a proxy to this Canvas.
-     *  It is useful for testing and clients (e.g. Picture/Movie) that expect to
-     *  draw their contents into an SkCanvas.
-     *
-     *  The SkCanvas returned is *only* valid until another Canvas call is made
-     *  that would change state (e.g. matrix or clip). Clients of asSkCanvas()
-     *  are responsible for *not* persisting this pointer.
-     *
-     *  Further, the returned SkCanvas should NOT be unref'd and is valid until
-     *  this canvas is destroyed or a new bitmap is set.
-     */
-    virtual SkCanvas* asSkCanvas() = 0;
-
     virtual void setBitmap(const SkBitmap& bitmap) = 0;
 
     virtual bool isOpaque() = 0;
@@ -231,48 +217,40 @@ public:
     virtual void drawPaint(const SkPaint& paint) = 0;
 
     // Geometry
-    virtual void drawPoint(float x, float y, const SkPaint& paint) = 0;
-    virtual void drawPoints(const float* points, int floatCount, const SkPaint& paint) = 0;
+    virtual void drawPoint(float x, float y, const Paint& paint) = 0;
+    virtual void drawPoints(const float* points, int floatCount, const Paint& paint) = 0;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-                          const SkPaint& paint) = 0;
-    virtual void drawLines(const float* points, int floatCount, const SkPaint& paint) = 0;
+                          const Paint& paint) = 0;
+    virtual void drawLines(const float* points, int floatCount, const Paint& paint) = 0;
     virtual void drawRect(float left, float top, float right, float bottom,
-                          const SkPaint& paint) = 0;
-    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) = 0;
+                          const Paint& paint) = 0;
+    virtual void drawRegion(const SkRegion& region, const Paint& paint) = 0;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
-                               const SkPaint& paint) = 0;
+                               const Paint& paint) = 0;
     virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
-                                const SkPaint& paint) = 0;
-    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) = 0;
+                                const Paint& paint) = 0;
+    virtual void drawCircle(float x, float y, float radius, const Paint& paint) = 0;
     virtual void drawOval(float left, float top, float right, float bottom,
-                          const SkPaint& paint) = 0;
+                          const Paint& paint) = 0;
     virtual void drawArc(float left, float top, float right, float bottom, float startAngle,
-                         float sweepAngle, bool useCenter, const SkPaint& paint) = 0;
-    virtual void drawPath(const SkPath& path, const SkPaint& paint) = 0;
-    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) = 0;
+                         float sweepAngle, bool useCenter, const Paint& paint) = 0;
+    virtual void drawPath(const SkPath& path, const Paint& paint) = 0;
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) = 0;
 
     // Bitmap-based
-    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) = 0;
-    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) = 0;
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) = 0;
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) = 0;
     virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
                             float srcBottom, float dstLeft, float dstTop, float dstRight,
-                            float dstBottom, const SkPaint* paint) = 0;
+                            float dstBottom, const Paint* paint) = 0;
     virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
-                                const float* vertices, const int* colors, const SkPaint* paint) = 0;
+                                const float* vertices, const int* colors, const Paint* paint) = 0;
     virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk, float dstLeft,
                                float dstTop, float dstRight, float dstBottom,
-                               const SkPaint* paint) = 0;
+                               const Paint* paint) = 0;
 
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) = 0;
-
-    /**
-     * Specifies if the positions passed to ::drawText are absolute or relative
-     * to the (x,y) value provided.
-     *
-     * If true the (x,y) values are ignored. Otherwise, those (x,y) values need
-     * to be added to each glyph's position to get its absolute position.
-     */
-    virtual bool drawTextAbsolutePos() const = 0;
+    virtual void drawPicture(const SkPicture& picture) = 0;
 
     /**
      * Draws a VectorDrawable onto the canvas.
@@ -294,12 +272,12 @@ public:
     void drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
                                 float outerBottom, float outerRx, float outerRy, float innerLeft,
                                 float innerTop, float innerRight, float innerBottom, float innerRx,
-                                float innerRy, const SkPaint& paint);
+                                float innerRy, const Paint& paint);
 
     void drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
                                 float outerBottom, const float* outerRadii, float innerLeft,
                                 float innerTop, float innerRight, float innerBottom,
-                                const float* innerRadii, const SkPaint& paint);
+                                const float* innerRadii, const Paint& paint);
 
     static int GetApiLevel() { return sApiLevel; }
 

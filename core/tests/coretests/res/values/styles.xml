@@ -31,6 +31,9 @@
     <style name="LayoutInDisplayCutoutModeNever">
         <item name="android:windowLayoutInDisplayCutoutMode">never</item>
     </style>
+    <style name="LayoutInDisplayCutoutModeAlways">
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+    </style>
     <style name="WindowBackgroundColorLiteral">
         <item name="android:windowBackground">#00FF00</item>
     </style>
@@ -38,5 +41,8 @@
         <item name="android:windowBackground">@null</item>
         <item name="android:colorBackground">@null</item>
         <item name="android:windowBackgroundFallback">#0000FF</item>
+    </style>
+    <style name="ViewDefaultBackground">
+        <item name="android:background">#00000000</item>
     </style>
 </resources>

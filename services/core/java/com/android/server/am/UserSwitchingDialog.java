@@ -82,7 +82,7 @@ class UserSwitchingDialog extends AlertDialog
 
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
-            WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
     }
 
@@ -116,6 +116,7 @@ class UserSwitchingDialog extends AlertDialog
                 viewMessage = res.getString(R.string.user_switching_message, mNewUser.name);
             }
         }
+        view.setAccessibilityPaneTitle(viewMessage);
         ((TextView) view.findViewById(R.id.message)).setText(viewMessage);
         setView(view);
     }

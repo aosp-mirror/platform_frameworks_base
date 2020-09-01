@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "FunctorDrawable.h"
 #include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
@@ -34,6 +33,7 @@ class CanvasContext;
 }
 
 class Outline;
+struct WebViewSyncData;
 
 namespace VectorDrawable {
 class Tree;
@@ -42,9 +42,12 @@ typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 namespace skiapipeline {
 
+class FunctorDrawable;
+
 class SkiaDisplayList {
 public:
     size_t getUsedSize() { return allocator.usedSize() + mDisplayList.usedSize(); }
+    size_t getAllocatedSize() { return allocator.allocatedSize() + mDisplayList.allocatedSize(); }
 
     ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the

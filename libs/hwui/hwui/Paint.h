@@ -21,6 +21,7 @@
 
 #include <cutils/compiler.h>
 
+#include <SkDrawLooper.h>
 #include <SkFont.h>
 #include <SkPaint.h>
 #include <string>
@@ -58,11 +59,16 @@ public:
     SkFont& getSkFont() { return mFont; }
     const SkFont& getSkFont() const { return mFont; }
 
+    SkDrawLooper* getLooper() const { return mLooper.get(); }
+    void setLooper(sk_sp<SkDrawLooper> looper) { mLooper = std::move(looper); }
+
     // These shadow the methods on SkPaint, but we need to so we can keep related
     // attributes in-sync.
 
     void reset();
     void setAntiAlias(bool);
+
+    bool nothingToDraw() const { return !mLooper && SkPaint::nothingToDraw(); }
 
     // End method shadowing
 
@@ -146,6 +152,7 @@ public:
  
 private:
     SkFont mFont;
+    sk_sp<SkDrawLooper> mLooper;
 
     float mLetterSpacing = 0;
     float mWordSpacing = 0;

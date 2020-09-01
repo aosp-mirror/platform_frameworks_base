@@ -84,9 +84,9 @@ public class SearchIndexablesContract {
     /**
      * Last path segment for Preference Key, Slice Uri pair.
      * <p>
-     *     The (Key, Slice Uri) pairs are a mapping between the primary key of the search result and
-     *     a Uri for a Slice that represents the same data. Thus, an app can specify a list of Uris
-     *     for Slices that replace regular intent-based search results with inline content.
+     * The (Key, Slice Uri) pairs are a mapping between the primary key of the search result and
+     * a Uri for a Slice that represents the same data. Thus, an app can specify a list of Uris
+     * for Slices that replace regular intent-based search results with inline content.
      * </p>
      */
     public static final String SLICE_URI_PAIRS = "slice_uri_pairs";
@@ -95,6 +95,20 @@ public class SearchIndexablesContract {
      * ContentProvider path for Slice Uri pairs.
      */
     public static final String SLICE_URI_PAIRS_PATH = SETTINGS + "/" + SLICE_URI_PAIRS;
+
+
+    /**
+     * The raw data name of dynamic index. This is used to compose the index path of provider
+     * for dynamic index.
+     */
+    public static final String DYNAMIC_INDEXABLES_RAW = "dynamic_indexables_raw";
+
+    /**
+     * ContentProvider path for dynamic index. This is used to get the raw data of dynamic index
+     * from provider.
+     */
+    public static final String DYNAMIC_INDEXABLES_RAW_PATH =
+            SETTINGS + "/" + DYNAMIC_INDEXABLES_RAW;
 
     /**
      * Indexable xml resources columns.
@@ -212,7 +226,7 @@ public class SearchIndexablesContract {
      * Cursor schema for SliceUriPairs.
      */
     @NonNull
-    public static final String[] SLICE_URI_PAIRS_COLUMNS = new String[]{
+    public static final String[] SLICE_URI_PAIRS_COLUMNS = new String[] {
             SliceUriPairColumns.KEY,
             SliceUriPairColumns.SLICE_URI
     };

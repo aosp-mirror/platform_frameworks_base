@@ -23,6 +23,7 @@ import android.graphics.PathMeasure;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Display;
 
 import com.android.internal.util.Preconditions;
 
@@ -33,13 +34,13 @@ import java.util.List;
  * Accessibility services with the
  * {@link android.R.styleable#AccessibilityService_canPerformGestures} property can dispatch
  * gestures. This class describes those gestures. Gestures are made up of one or more strokes.
- * Gestures are immutable once built.
+ * Gestures are immutable once built and will be dispatched to the specified display.
  * <p>
  * Spatial dimensions throughout are in screen pixels. Time is measured in milliseconds.
  */
 public final class GestureDescription {
     /** Gestures may contain no more than this many strokes */
-    private static final int MAX_STROKE_COUNT = 10;
+    private static final int MAX_STROKE_COUNT = 20;
 
     /**
      * Upper bound on total gesture duration. Nearly all gestures will be much shorter.
@@ -48,6 +49,7 @@ public final class GestureDescription {
 
     private final List<StrokeDescription> mStrokes = new ArrayList<>();
     private final float[] mTempPos = new float[2];
+    private final int mDisplayId;
 
     /**
      * Get the upper limit for the number of strokes a gesture may contain.
@@ -67,10 +69,17 @@ public final class GestureDescription {
         return MAX_GESTURE_DURATION_MS;
     }
 
-    private GestureDescription() {}
+    private GestureDescription() {
+       this(new ArrayList<>());
+    }
 
     private GestureDescription(List<StrokeDescription> strokes) {
+        this(strokes, Display.DEFAULT_DISPLAY);
+    }
+
+    private GestureDescription(List<StrokeDescription> strokes, int displayId) {
         mStrokes.addAll(strokes);
+        mDisplayId = displayId;
     }
 
     /**
@@ -91,6 +100,16 @@ public final class GestureDescription {
      */
     public StrokeDescription getStroke(@IntRange(from = 0) int index) {
         return mStrokes.get(index);
+    }
+
+    /**
+     * Returns the ID of the display this gesture is sent on, for use with
+     * {@link android.hardware.display.DisplayManager#getDisplay(int)}.
+     *
+     * @return The logical display id.
+     */
+    public int getDisplayId() {
+        return mDisplayId;
     }
 
     /**
@@ -160,9 +179,10 @@ public final class GestureDescription {
     public static class Builder {
 
         private final List<StrokeDescription> mStrokes = new ArrayList<>();
+        private int mDisplayId = Display.DEFAULT_DISPLAY;
 
         /**
-         * Add a stroke to the gesture description. Up to
+         * Adds a stroke to the gesture description. Up to
          * {@link GestureDescription#getMaxStrokeCount()} paths may be
          * added to a gesture, and the total gesture duration (earliest path start time to latest
          * path end time) may not exceed {@link GestureDescription#getMaxGestureDuration()}.
@@ -174,7 +194,10 @@ public final class GestureDescription {
         public Builder addStroke(@NonNull StrokeDescription strokeDescription) {
             if (mStrokes.size() >= MAX_STROKE_COUNT) {
                 throw new IllegalStateException(
-                        "Attempting to add too many strokes to a gesture");
+                        "Attempting to add too many strokes to a gesture. Maximum is "
+                                + MAX_STROKE_COUNT
+                                + ", got "
+                                + mStrokes.size());
             }
 
             mStrokes.add(strokeDescription);
@@ -187,11 +210,23 @@ public final class GestureDescription {
             return this;
         }
 
+        /**
+         * Sets the id of the display to dispatch gestures.
+         *
+         * @param displayId The logical display id
+         *
+         * @return this
+         */
+        public @NonNull Builder setDisplayId(int displayId) {
+            mDisplayId = displayId;
+            return this;
+        }
+
         public GestureDescription build() {
             if (mStrokes.size() == 0) {
                 throw new IllegalStateException("Gestures must have at least one stroke");
             }
-            return new GestureDescription(mStrokes);
+            return new GestureDescription(mStrokes, mDisplayId);
         }
     }
 

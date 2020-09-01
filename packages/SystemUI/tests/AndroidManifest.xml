@@ -18,7 +18,7 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system"
-    package="com.android.systemui.tests">
+    package="com.android.systemui" >
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -53,13 +53,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
 
-    <application android:debuggable="true">
+    <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner" />
-        <activity android:name="com.android.systemui.screenshot.ScreenshotStubActivity" />
-
-        <service
-            android:name="com.android.systemui.qs.external.TileLifecycleManagerTests$FakeTileService"
-            android:process=":killable" />
 
         <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver">
             <intent-filter>
@@ -73,6 +68,16 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:resizeableActivity="true" />
+
+        <activity
+            android:name="com.android.systemui.globalactions.GlobalActionsImeTest$TestActivity"
+            android:excludeFromRecents="true"
+            android:exported="false" />
+
+        <activity android:name="com.android.systemui.controls.management.TestControlsRequestDialog"
+                  android:exported="false"
+                  android:excludeFromRecents="true"
+                  />
 
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"

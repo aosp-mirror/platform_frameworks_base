@@ -33,14 +33,14 @@ import android.graphics.ImageDecoder;
 import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.Source;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.MediaMetadataRetriever.BitmapParams;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore.ThumbnailConstants;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
 
@@ -77,15 +77,7 @@ public class ThumbnailUtils {
     public static final int OPTIONS_RECYCLE_INPUT = 0x2;
 
     private static Size convertKind(int kind) {
-        if (kind == ThumbnailConstants.MICRO_KIND) {
-            return Point.convert(ThumbnailConstants.MICRO_SIZE);
-        } else if (kind == ThumbnailConstants.FULL_SCREEN_KIND) {
-            return Point.convert(ThumbnailConstants.FULL_SCREEN_SIZE);
-        } else if (kind == ThumbnailConstants.MINI_KIND) {
-            return Point.convert(ThumbnailConstants.MINI_SIZE);
-        } else {
-            throw new IllegalArgumentException("Unsupported kind: " + kind);
-        }
+        return MediaStore.Images.Thumbnails.getKindSize(kind);
     }
 
     private static class Resizer implements ImageDecoder.OnHeaderDecodedListener {
@@ -139,6 +131,12 @@ public class ThumbnailUtils {
 
     /**
      * Create a thumbnail for given audio file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with media hosted outside your app, consider using
+     * {@link ContentResolver#loadThumbnail(Uri, Size, CancellationSignal)}
+     * which enables remote providers to efficiently cache and invalidate
+     * thumbnails.
      *
      * @param file The audio file.
      * @param size The desired thumbnail size.
@@ -231,6 +229,12 @@ public class ThumbnailUtils {
 
     /**
      * Create a thumbnail for given image file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with media hosted outside your app, consider using
+     * {@link ContentResolver#loadThumbnail(Uri, Size, CancellationSignal)}
+     * which enables remote providers to efficiently cache and invalidate
+     * thumbnails.
      *
      * @param file The audio file.
      * @param size The desired thumbnail size.
@@ -334,6 +338,12 @@ public class ThumbnailUtils {
 
     /**
      * Create a thumbnail for given video file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with media hosted outside your app, consider using
+     * {@link ContentResolver#loadThumbnail(Uri, Size, CancellationSignal)}
+     * which enables remote providers to efficiently cache and invalidate
+     * thumbnails.
      *
      * @param file The video file.
      * @param size The desired thumbnail size.
@@ -356,20 +366,25 @@ public class ThumbnailUtils {
                 return ImageDecoder.decodeBitmap(ImageDecoder.createSource(raw), resizer);
             }
 
-            // Fall back to middle of video
+            final BitmapParams params = new BitmapParams();
+            params.setPreferredConfig(Bitmap.Config.ARGB_8888);
+
             final int width = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_WIDTH));
             final int height = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_HEIGHT));
-            final long duration = Long.parseLong(mmr.extractMetadata(METADATA_KEY_DURATION));
+            // Fall back to middle of video
+            // Note: METADATA_KEY_DURATION unit is in ms, not us.
+            final long thumbnailTimeUs =
+                    Long.parseLong(mmr.extractMetadata(METADATA_KEY_DURATION)) * 1000 / 2;
 
             // If we're okay with something larger than native format, just
             // return a frame without up-scaling it
             if (size.getWidth() > width && size.getHeight() > height) {
                 return Objects.requireNonNull(
-                        mmr.getFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC));
+                        mmr.getFrameAtTime(thumbnailTimeUs, OPTION_CLOSEST_SYNC, params));
             } else {
                 return Objects.requireNonNull(
-                        mmr.getScaledFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC,
-                        size.getWidth(), size.getHeight()));
+                        mmr.getScaledFrameAtTime(thumbnailTimeUs, OPTION_CLOSEST_SYNC,
+                        size.getWidth(), size.getHeight(), params));
             }
         } catch (RuntimeException e) {
             throw new IOException("Failed to create thumbnail", e);

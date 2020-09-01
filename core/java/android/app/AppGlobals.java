@@ -18,6 +18,7 @@ package android.app;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.IPackageManager;
+import android.permission.IPermissionManager;
 
 /**
  * Special private access for certain globals related to a process.
@@ -52,6 +53,14 @@ public class AppGlobals {
     }
 
     /**
+     * Return the raw interface to the permission manager.
+     * @return The permission manager.
+     */
+    public static IPermissionManager getPermissionManager() {
+        return ActivityThread.getPermissionManager();
+    }
+
+    /**
      * Gets the value of an integer core setting.
      *
      * @param key The setting key.
@@ -62,6 +71,22 @@ public class AppGlobals {
         ActivityThread currentActivityThread = ActivityThread.currentActivityThread();
         if (currentActivityThread != null) {
             return currentActivityThread.getIntCoreSetting(key, defaultValue);
+        } else {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Gets the value of a float core setting.
+     *
+     * @param key The setting key.
+     * @param defaultValue The setting default value.
+     * @return The core settings.
+     */
+    public static float getFloatCoreSetting(String key, float defaultValue) {
+        ActivityThread currentActivityThread = ActivityThread.currentActivityThread();
+        if (currentActivityThread != null) {
+            return currentActivityThread.getFloatCoreSetting(key, defaultValue);
         } else {
             return defaultValue;
         }

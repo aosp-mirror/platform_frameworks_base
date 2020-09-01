@@ -56,7 +56,7 @@ interface IThermalService {
       * @return list of {@link android.os.Temperature}.
       * {@hide}
       */
-    List<Temperature> getCurrentTemperatures();
+    Temperature[] getCurrentTemperatures();
 
     /**
       * Get current temperature with its throttling status on given temperature type.
@@ -64,7 +64,7 @@ interface IThermalService {
       * @return list of {@link android.os.Temperature}.
       * {@hide}
       */
-    List<Temperature> getCurrentTemperaturesWithType(in int type);
+    Temperature[] getCurrentTemperaturesWithType(in int type);
 
     /**
       * Register a listener for thermal status change.
@@ -94,7 +94,7 @@ interface IThermalService {
       * @return list of {@link android.os.CoolingDevice}.
       * {@hide}
       */
-    List<CoolingDevice> getCurrentCoolingDevices();
+    CoolingDevice[] getCurrentCoolingDevices();
 
     /**
       * Get current cooling devices on given type.
@@ -102,5 +102,13 @@ interface IThermalService {
       * @return list of {@link android.os.CoolingDevice}.
       * {@hide}
       */
-    List<CoolingDevice> getCurrentCoolingDevicesWithType(in int type);
+
+    CoolingDevice[] getCurrentCoolingDevicesWithType(in int type);
+
+    /**
+     * @param forecastSeconds how many seconds ahead to forecast the provided headroom
+     * @return forecasted thermal headroom, normalized such that 1.0 indicates that throttling will
+     *     occur; returns NaN if the headroom or forecast is unavailable
+     */
+    float getThermalHeadroom(int forecastSeconds);
 }

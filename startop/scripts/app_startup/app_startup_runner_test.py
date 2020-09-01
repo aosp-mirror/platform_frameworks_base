@@ -31,18 +31,17 @@ Usage:
 See also https://docs.pytest.org/en/latest/usage.html
 """
 
-# global imports
-from contextlib import contextmanager
 import io
 import shlex
 import sys
 import typing
-
-# pip imports
-import pytest
+# global imports
+from contextlib import contextmanager
 
 # local imports
 import app_startup_runner as asr
+# pip imports
+import pytest
 
 #
 # Argument Parsing Helpers
@@ -91,7 +90,9 @@ def default_dict_for_parsed_args(**kwargs):
   """
   # Combine it with all of the "optional" parameters' default values.
   """
-  d = {'compiler_filters': None, 'simulate': False, 'debug': False, 'output': None, 'timeout': None, 'loop_count': 1, 'inodes': None}
+  d = {'compiler_filters': None, 'simulate': False, 'debug': False,
+       'output': None, 'timeout': 10, 'loop_count': 1, 'inodes': None,
+       'trace_duration': None, 'compiler_type': asr.CompilerType.DEVICE}
   d.update(kwargs)
   return d
 
@@ -111,7 +112,7 @@ def parse_optional_args(str):
   in default_mock_dict_for_parsed_args.
   """
   req = "--package com.fake.package --readahead warm"
-  return parse_args("%s %s" %(req, str))
+  return parse_args("%s %s" % (req, str))
 
 def test_argparse():
   # missing arguments
@@ -124,15 +125,22 @@ def test_argparse():
   # required arguments are parsed correctly
   ad = default_dict_for_parsed_args  # assert dict
 
-  assert parse_args("--package xyz --readahead warm") == ad(packages=['xyz'], readaheads=['warm'])
-  assert parse_args("-p xyz -r warm") == ad(packages=['xyz'], readaheads=['warm'])
+  assert parse_args("--package xyz --readahead warm") == ad(packages=['xyz'],
+                                                            readaheads=['warm'])
+  assert parse_args("-p xyz -r warm") == ad(packages=['xyz'],
+                                            readaheads=['warm'])
 
-  assert parse_args("-p xyz -r warm -s") == ad(packages=['xyz'], readaheads=['warm'], simulate=True)
-  assert parse_args("-p xyz -r warm --simulate") == ad(packages=['xyz'], readaheads=['warm'], simulate=True)
+  assert parse_args("-p xyz -r warm -s") == ad(packages=['xyz'],
+                                               readaheads=['warm'],
+                                               simulate=True)
+  assert parse_args("-p xyz -r warm --simulate") == ad(packages=['xyz'],
+                                                       readaheads=['warm'],
+                                                       simulate=True)
 
   # optional arguments are parsed correctly.
   mad = default_mock_dict_for_parsed_args  # mock assert dict
-  assert parse_optional_args("--output filename.csv") == mad(output='filename.csv')
+  assert parse_optional_args("--output filename.csv") == mad(
+    output='filename.csv')
   assert parse_optional_args("-o filename.csv") == mad(output='filename.csv')
 
   assert parse_optional_args("--timeout 123") == mad(timeout=123)
@@ -145,36 +153,6 @@ def test_argparse():
   assert parse_optional_args("-in baz") == mad(inodes="baz")
 
 
-def generate_run_combinations(*args):
-  # expand out the generator values so that assert x == y works properly.
-  return [i for i in asr.generate_run_combinations(*args)]
-
-def test_generate_run_combinations():
-  blank_nd = typing.NamedTuple('Blank')
-  assert generate_run_combinations(blank_nd, {}) == [()], "empty"
-  assert generate_run_combinations(blank_nd, {'a' : ['a1', 'a2']}) == [()], "empty filter"
-  a_nd = typing.NamedTuple('A', [('a', str)])
-  assert generate_run_combinations(a_nd, {'a': None}) == [(None,)], "None"
-  assert generate_run_combinations(a_nd, {'a': ['a1', 'a2']}) == [('a1',), ('a2',)], "one item"
-  assert generate_run_combinations(a_nd,
-                                   {'a' : ['a1', 'a2'], 'b': ['b1', 'b2']}) == [('a1',), ('a2',)],\
-      "one item filter"
-  ab_nd = typing.NamedTuple('AB', [('a', str), ('b', str)])
-  assert generate_run_combinations(ab_nd,
-                                   {'a': ['a1', 'a2'],
-                                    'b': ['b1', 'b2']}) == [ab_nd('a1', 'b1'),
-                                                            ab_nd('a1', 'b2'),
-                                                            ab_nd('a2', 'b1'),
-                                                            ab_nd('a2', 'b2')],\
-      "two items"
-
-  assert generate_run_combinations(ab_nd,
-                                   {'as': ['a1', 'a2'],
-                                    'bs': ['b1', 'b2']}) == [ab_nd('a1', 'b1'),
-                                                             ab_nd('a1', 'b2'),
-                                                             ab_nd('a2', 'b1'),
-                                                             ab_nd('a2', 'b2')],\
-      "two items plural"
 
 def test_key_to_cmdline_flag():
   assert asr.key_to_cmdline_flag("abc") == "--abc"
@@ -182,29 +160,17 @@ def test_key_to_cmdline_flag():
   assert asr.key_to_cmdline_flag("ba_r") == "--ba-r"
   assert asr.key_to_cmdline_flag("ba_zs") == "--ba-z"
 
-
-def test_make_script_command_with_temp_output():
-  cmd_str, tmp_file = asr.make_script_command_with_temp_output("fake_script", args=[], count=1)
-  with tmp_file:
-    assert cmd_str == ["fake_script", "--count", "1", "--output", tmp_file.name]
-
-  cmd_str, tmp_file = asr.make_script_command_with_temp_output("fake_script", args=['a', 'b'], count=2)
-  with tmp_file:
-    assert cmd_str == ["fake_script", "a", "b", "--count", "2", "--output", tmp_file.name]
-
 def test_parse_run_script_csv_file():
   # empty file -> empty list
   f = io.StringIO("")
-  assert asr.parse_run_script_csv_file(f) == []
+  assert asr.parse_run_script_csv_file(f) == None
 
   # common case
-  f = io.StringIO("1,2,3")
-  assert asr.parse_run_script_csv_file(f) == [1,2,3]
+  f = io.StringIO("TotalTime_ms,Displayed_ms\n1,2")
+  df = asr.DataFrame({'TotalTime_ms': [1], 'Displayed_ms': [2]})
 
-  # ignore trailing comma
-  f = io.StringIO("1,2,3,4,5,")
-  assert asr.parse_run_script_csv_file(f) == [1,2,3,4,5]
-
+  pf = asr.parse_run_script_csv_file(f)
+  assert pf == df
 
 if __name__ == '__main__':
   pytest.main()

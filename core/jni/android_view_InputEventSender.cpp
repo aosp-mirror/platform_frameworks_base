@@ -113,10 +113,13 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
     }
 
     uint32_t publishedSeq = mNextPublishedSeq++;
-    status_t status = mInputPublisher.publishKeyEvent(publishedSeq,
-            event->getDeviceId(), event->getSource(), event->getDisplayId(), event->getAction(),
-            event->getFlags(), event->getKeyCode(), event->getScanCode(), event->getMetaState(),
-            event->getRepeatCount(), event->getDownTime(), event->getEventTime());
+    status_t status =
+            mInputPublisher.publishKeyEvent(publishedSeq, event->getId(), event->getDeviceId(),
+                                            event->getSource(), event->getDisplayId(),
+                                            event->getHmac(), event->getAction(), event->getFlags(),
+                                            event->getKeyCode(), event->getScanCode(),
+                                            event->getMetaState(), event->getRepeatCount(),
+                                            event->getDownTime(), event->getEventTime());
     if (status) {
         ALOGW("Failed to send key event on channel '%s'.  status=%d",
                 getInputChannelName().c_str(), status);
@@ -134,16 +137,24 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
     uint32_t publishedSeq;
     for (size_t i = 0; i <= event->getHistorySize(); i++) {
         publishedSeq = mNextPublishedSeq++;
-        status_t status = mInputPublisher.publishMotionEvent(publishedSeq,
-                event->getDeviceId(), event->getSource(), event->getDisplayId(),
-                event->getAction(), event->getActionButton(), event->getFlags(),
-                event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
-                event->getClassification(),
-                event->getXOffset(), event->getYOffset(),
-                event->getXPrecision(), event->getYPrecision(),
-                event->getDownTime(), event->getHistoricalEventTime(i),
-                event->getPointerCount(), event->getPointerProperties(),
-                event->getHistoricalRawPointerCoords(0, i));
+        status_t status =
+                mInputPublisher.publishMotionEvent(publishedSeq, event->getId(),
+                                                   event->getDeviceId(), event->getSource(),
+                                                   event->getDisplayId(), event->getHmac(),
+                                                   event->getAction(), event->getActionButton(),
+                                                   event->getFlags(), event->getEdgeFlags(),
+                                                   event->getMetaState(), event->getButtonState(),
+                                                   event->getClassification(), event->getXScale(),
+                                                   event->getYScale(), event->getXOffset(),
+                                                   event->getYOffset(), event->getXPrecision(),
+                                                   event->getYPrecision(),
+                                                   event->getRawXCursorPosition(),
+                                                   event->getRawYCursorPosition(),
+                                                   event->getDownTime(),
+                                                   event->getHistoricalEventTime(i),
+                                                   event->getPointerCount(),
+                                                   event->getPointerProperties(),
+                                                   event->getHistoricalRawPointerCoords(0, i));
         if (status) {
             ALOGW("Failed to send motion event sample on channel '%s'.  status=%d",
                     getInputChannelName().c_str(), status);

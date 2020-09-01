@@ -43,8 +43,8 @@ public class PmPermissionsTests extends AndroidTestCase {
         try {
             mPm.getPackageSizeInfo(mPkgName, null);
             fail("PackageManager.getPackageSizeInfo" +
-                    "did not throw SecurityException as expected");
-        } catch (SecurityException e) {
+                    "did not throw UnsupportedOperationException as expected");
+        } catch (UnsupportedOperationException e) {
             // expected
         }
     }

@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
+import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,10 +30,15 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
+import android.app.RemoteAction;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.Binder;
@@ -56,6 +62,9 @@ import android.view.accessibility.AccessibilityEvent.EventType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -93,6 +102,12 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 0x00000004;
 
     /** @hide */
+    public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 0x00000008;
+
+    /** @hide */
+    public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
+
+    /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
 
     /** @hide */
@@ -120,6 +135,33 @@ public final class AccessibilityManager {
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
+
+    /**
+     * Used as an int value for accessibility chooser activity to represent the accessibility button
+     * shortcut type.
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_BUTTON = 0;
+
+    /**
+     * Used as an int value for accessibility chooser activity to represent hardware key shortcut,
+     * such as volume key button.
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_SHORTCUT_KEY = 1;
+
+    /**
+     * Annotations for the shortcut type.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            ACCESSIBILITY_BUTTON,
+            ACCESSIBILITY_SHORTCUT_KEY
+    })
+    public @interface ShortcutType {}
 
     /**
      * Annotations for content flag of UI.
@@ -699,10 +741,10 @@ public final class AccessibilityManager {
         try {
             services = service.getEnabledAccessibilityServiceList(feedbackTypeFlags, userId);
             if (DEBUG) {
-                Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+                Log.i(LOG_TAG, "Enabled AccessibilityServices " + services);
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
+            Log.e(LOG_TAG, "Error while obtaining the enabled AccessibilityServices. ", re);
         }
         if (mAccessibilityPolicy != null) {
             services = mAccessibilityPolicy.getEnabledAccessibilityServiceList(
@@ -1035,6 +1077,50 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Associate the connection between the host View and the embedded SurfaceControlViewHost.
+     *
+     * @hide
+     */
+    public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.associateEmbeddedHierarchy(host, embedded);
+        } catch (RemoteException e) {
+            return;
+        }
+    }
+
+    /**
+     * Disassociate the connection between the host View and the embedded SurfaceControlViewHost.
+     * The given token could be either from host side or embedded side.
+     *
+     * @hide
+     */
+    public void disassociateEmbeddedHierarchy(@NonNull IBinder token) {
+        if (token == null) {
+            return;
+        }
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.disassociateEmbeddedHierarchy(token);
+        } catch (RemoteException e) {
+            return;
+        }
+    }
+
+    /**
      * Sets the current state and notifies listeners, if necessary.
      *
      * @param stateFlags The state flags.
@@ -1096,11 +1182,12 @@ public final class AccessibilityManager {
     /**
      * Adds an accessibility interaction connection interface for a given window.
      * @param windowToken The window token to which a connection is added.
+     * @param leashToken The leash token to which a connection is added.
      * @param connection The connection.
      *
      * @hide
      */
-    public int addAccessibilityInteractionConnection(IWindow windowToken,
+    public int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             String packageName, IAccessibilityInteractionConnection connection) {
         final IAccessibilityManager service;
         final int userId;
@@ -1112,8 +1199,8 @@ public final class AccessibilityManager {
             userId = mUserId;
         }
         try {
-            return service.addAccessibilityInteractionConnection(windowToken, connection,
-                    packageName, userId);
+            return service.addAccessibilityInteractionConnection(windowToken, leashToken,
+                    connection, packageName, userId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while adding an accessibility interaction connection. ", re);
         }
@@ -1150,6 +1237,19 @@ public final class AccessibilityManager {
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void performAccessibilityShortcut() {
+        performAccessibilityShortcut(null);
+    }
+
+    /**
+     * Perform the accessibility shortcut for the given target which is assigned to the shortcut.
+     *
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void performAccessibilityShortcut(@Nullable String targetName) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1158,9 +1258,73 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.performAccessibilityShortcut();
+            service.performAccessibilityShortcut(targetName);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
+        }
+    }
+
+    /**
+     * Register the provided {@link RemoteAction} with the given actionId
+     * <p>
+     * To perform established system actions, an accessibility service uses the GLOBAL_ACTION
+     * constants in {@link android.accessibilityservice.AccessibilityService}. To provide a
+     * customized implementation for one of these actions, the id of the registered system action
+     * must match that of the corresponding GLOBAL_ACTION constant. For example, to register a
+     * Back action, {@code actionId} must be
+     * {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK}
+     * </p>
+     * @param action The remote action to be registered with the given actionId as system action.
+     * @param actionId The id uniquely identify the system action.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void registerSystemAction(@NonNull RemoteAction action, int actionId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.registerSystemAction(action, actionId);
+
+            if (DEBUG) {
+                Log.i(LOG_TAG, "System action " + action.getTitle() + " is registered.");
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error registering system action " + action.getTitle() + " ", re);
+        }
+    }
+
+   /**
+     * Unregister a system action with the given actionId
+     *
+     * @param actionId The id uniquely identify the system action to be unregistered.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void unregisterSystemAction(int actionId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.unregisterSystemAction(actionId);
+
+            if (DEBUG) {
+                Log.i(LOG_TAG, "System action with actionId " + actionId + " is unregistered.");
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error unregistering system action with actionId " + actionId + " ", re);
         }
     }
 
@@ -1170,7 +1334,22 @@ public final class AccessibilityManager {
      * @param displayId The logical display id.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonClicked(int displayId) {
+        notifyAccessibilityButtonClicked(displayId, null);
+    }
+
+    /**
+     * Perform the accessibility button for the given target which is assigned to the button.
+     *
+     * @param displayId displayId The logical display id.
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyAccessibilityButtonClicked(int displayId, @Nullable String targetName) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1179,7 +1358,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.notifyAccessibilityButtonClicked(displayId);
+            service.notifyAccessibilityButtonClicked(displayId, targetName);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
         }
@@ -1234,27 +1413,109 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Get the component name of the service currently assigned to the accessibility shortcut.
+     * Returns the list of shortcut target names currently assigned to the given shortcut.
      *
-     * @return The flattened component name
+     * @param shortcutType The shortcut type.
+     * @return The list of shortcut target names.
      * @hide
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-    @Nullable
-    public String getAccessibilityShortcutService() {
+    @NonNull
+    public List<String> getAccessibilityShortcutTargets(@ShortcutType int shortcutType) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
         }
         if (service != null) {
             try {
-                return service.getAccessibilityShortcutService();
+                return service.getAccessibilityShortcutTargets(shortcutType);
             } catch (RemoteException re) {
                 re.rethrowFromSystemServer();
             }
         }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Returns the {@link AccessibilityShortcutInfo}s of the installed accessibility shortcut
+     * targets, for specific user.
+     *
+     * @param context The context of the application.
+     * @param userId The user id.
+     * @return A list with {@link AccessibilityShortcutInfo}s.
+     * @hide
+     */
+    @NonNull
+    public List<AccessibilityShortcutInfo> getInstalledAccessibilityShortcutListAsUser(
+            @NonNull Context context, @UserIdInt int userId) {
+        final List<AccessibilityShortcutInfo> shortcutInfos = new ArrayList<>();
+        final int flags = PackageManager.GET_ACTIVITIES
+                | PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        final Intent actionMain = new Intent(Intent.ACTION_MAIN);
+        actionMain.addCategory(Intent.CATEGORY_ACCESSIBILITY_SHORTCUT_TARGET);
+
+        final PackageManager packageManager = context.getPackageManager();
+        final List<ResolveInfo> installedShortcutList =
+                packageManager.queryIntentActivitiesAsUser(actionMain, flags, userId);
+        for (int i = 0; i < installedShortcutList.size(); i++) {
+            final AccessibilityShortcutInfo shortcutInfo =
+                    getShortcutInfo(context, installedShortcutList.get(i));
+            if (shortcutInfo != null) {
+                shortcutInfos.add(shortcutInfo);
+            }
+        }
+        return shortcutInfos;
+    }
+
+    /**
+     * Returns an {@link AccessibilityShortcutInfo} according to the given {@link ResolveInfo} of
+     * an activity.
+     *
+     * @param context The context of the application.
+     * @param resolveInfo The resolve info of an activity.
+     * @return The AccessibilityShortcutInfo.
+     */
+    @Nullable
+    private AccessibilityShortcutInfo getShortcutInfo(@NonNull Context context,
+            @NonNull ResolveInfo resolveInfo) {
+        final ActivityInfo activityInfo = resolveInfo.activityInfo;
+        if (activityInfo == null || activityInfo.metaData == null
+                || activityInfo.metaData.getInt(AccessibilityShortcutInfo.META_DATA) == 0) {
+            return null;
+        }
+        try {
+            return new AccessibilityShortcutInfo(context, activityInfo);
+        } catch (XmlPullParserException | IOException exp) {
+            Log.e(LOG_TAG, "Error while initializing AccessibilityShortcutInfo", exp);
+        }
         return null;
+    }
+
+    /**
+     *
+     * Sets an {@link IWindowMagnificationConnection} that manipulates window magnification.
+     *
+     * @param connection The connection that manipulates window magnification.
+     * @hide
+     */
+    public void setWindowMagnificationConnection(@Nullable
+            IWindowMagnificationConnection connection) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setWindowMagnificationConnection(connection);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting window magnfication connection", re);
+        }
     }
 
     private IAccessibilityManager getServiceLocked() {

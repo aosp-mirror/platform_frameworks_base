@@ -1,0 +1,38 @@
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
+    <string translatable="false" name="config_mainBuiltInDisplayCutoutRectApproximation"></string>
+
+    <!-- Height of the status bar in portrait. The height should be
+         Max((status bar content height + waterfall top size), top cutout size) -->
+    <dimen name="status_bar_height_portrait">28dp</dimen>
+    <!-- Max((28 + 20), 0) = 48 -->
+    <dimen name="status_bar_height_landscape">48dp</dimen>
+    <!-- Height of area above QQS where battery/time go (equal to status bar height if > 48dp) -->
+    <dimen name="quick_qs_offset_height">28dp</dimen>
+    <!-- Total height of QQS (quick_qs_offset_height + 128) -->
+    <dimen name="quick_qs_total_height">156dp</dimen>
+
+    <dimen name="waterfall_display_left_edge_size">20dp</dimen>
+    <dimen name="waterfall_display_top_edge_size">0dp</dimen>
+    <dimen name="waterfall_display_right_edge_size">20dp</dimen>
+    <dimen name="waterfall_display_bottom_edge_size">0dp</dimen>
+</resources>
+
+

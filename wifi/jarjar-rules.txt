@@ -1,0 +1,126 @@
+## used by service-wifi ##
+
+# Network Stack AIDL interface.
+rule android.net.DataStallReportParcelable* com.android.wifi.x.@0
+rule android.net.DhcpResultsParcelable* com.android.wifi.x.@0
+rule android.net.IIpMemoryStore* com.android.wifi.x.@0
+rule android.net.IIpMemoryStoreCallbacks* com.android.wifi.x.@0
+rule android.net.INetd* com.android.wifi.x.@0
+rule android.net.INetdUnsolicitedEventListener* com.android.wifi.x.@0
+rule android.net.INetworkStackConnector* com.android.wifi.x.@0
+rule android.net.InformationElementParcelable* com.android.wifi.x.@0
+rule android.net.InitialConfigurationParcelable* com.android.wifi.x.@0
+rule android.net.InterfaceConfigurationParcel* com.android.wifi.x.@0
+rule android.net.Layer2InformationParcelable* com.android.wifi.x.@0
+rule android.net.Layer2PacketParcelable* com.android.wifi.x.@0
+rule android.net.MarkMaskParcel* com.android.wifi.x.@0
+rule android.net.NattKeepalivePacketDataParcelable* com.android.wifi.x.@0
+rule android.net.NetworkTestResultParcelable* com.android.wifi.x.@0
+rule android.net.PrivateDnsConfigParcel* com.android.wifi.x.@0
+rule android.net.ProvisioningConfigurationParcelable* com.android.wifi.x.@0
+rule android.net.ResolverParamsParcel* com.android.wifi.x.@0
+rule android.net.RouteInfoParcel* com.android.wifi.x.@0
+rule android.net.ScanResultInfoParcelable* com.android.wifi.x.@0
+rule android.net.TetherConfigParcel* com.android.wifi.x.@0
+rule android.net.TetherOffloadRuleParcel* com.android.wifi.x.@0
+rule android.net.TetherStatsParcel* com.android.wifi.x.@0
+rule android.net.UidRangeParcel* com.android.wifi.x.@0
+rule android.net.dhcp.DhcpLeaseParcelable* com.android.wifi.x.@0
+rule android.net.dhcp.DhcpServingParamsParcel* com.android.wifi.x.@0
+rule android.net.ip.IIpClient* com.android.wifi.x.@0
+rule android.net.ip.IIpClientCallbacks* com.android.wifi.x.@0
+rule android.net.ipmemorystore.Blob* com.android.wifi.x.@0
+rule android.net.ipmemorystore.IOnBlobRetrievedListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.IOnStatusAndCountListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.IOnStatusListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.NetworkAttributesParcelable* com.android.wifi.x.@0
+rule android.net.ipmemorystore.SameL3NetworkResponseParcelable* com.android.wifi.x.@0
+rule android.net.ipmemorystore.StatusParcelable* com.android.wifi.x.@0
+
+# Net utils (includes Network Stack helper classes).
+rule android.net.DhcpResults* com.android.wifi.x.@0
+rule android.net.InterfaceConfiguration* com.android.wifi.x.@0
+rule android.net.IpMemoryStore* com.android.wifi.x.@0
+rule android.net.NetworkMonitorManager* com.android.wifi.x.@0
+rule android.net.TcpKeepalivePacketData* com.android.wifi.x.@0
+rule android.net.NetworkFactory* com.android.wifi.x.@0
+rule android.net.ip.IpClientCallbacks* com.android.wifi.x.@0
+rule android.net.ip.IpClientManager* com.android.wifi.x.@0
+rule android.net.ip.IpClientUtil* com.android.wifi.x.@0
+rule android.net.ipmemorystore.NetworkAttributes* com.android.wifi.x.@0
+rule android.net.ipmemorystore.OnBlobRetrievedListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.OnDeleteStatusListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.OnStatusListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.Status* com.android.wifi.x.@0
+rule android.net.networkstack.ModuleNetworkStackClient* com.android.wifi.x.@0
+rule android.net.networkstack.NetworkStackClientBase* com.android.wifi.x.@0
+rule android.net.shared.InetAddressUtils* com.android.wifi.x.@0
+rule android.net.shared.InitialConfiguration* com.android.wifi.x.@0
+rule android.net.shared.IpConfigurationParcelableUtil* com.android.wifi.x.@0
+rule android.net.shared.Layer2Information* com.android.wifi.x.@0
+rule android.net.shared.LinkPropertiesParcelableUtil* com.android.wifi.x.@0
+rule android.net.shared.NetdUtils* com.android.wifi.x.@0
+rule android.net.shared.NetworkMonitorUtils* com.android.wifi.x.@0
+rule android.net.shared.ParcelableUtil* com.android.wifi.x.@0
+rule android.net.shared.PrivateDnsConfig* com.android.wifi.x.@0
+rule android.net.shared.ProvisioningConfiguration* com.android.wifi.x.@0
+rule android.net.shared.RouteUtils* com.android.wifi.x.@0
+rule android.net.util.KeepalivePacketDataUtil* com.android.wifi.x.@0
+rule android.net.util.NetworkConstants* com.android.wifi.x.@0
+rule android.net.util.InterfaceParams* com.android.wifi.x.@0
+rule android.net.util.SharedLog* com.android.wifi.x.@0
+rule android.net.util.NetUtils* com.android.wifi.x.@0
+rule android.net.util.IpUtils* com.android.wifi.x.@0
+
+rule androidx.annotation.** com.android.wifi.x.@0
+
+# We don't jar-jar the entire package because, we still use some classes (like
+# AsyncChannel in com.android.internal.util) from these packages which are not
+# inside our jar (currently in framework.jar, but will be in wifisdk.jar in the future).
+rule com.android.internal.util.FastXmlSerializer* com.android.wifi.x.@0
+rule com.android.internal.util.HexDump* com.android.wifi.x.@0
+rule com.android.internal.util.IState* com.android.wifi.x.@0
+rule com.android.internal.util.MessageUtils* com.android.wifi.x.@0
+rule com.android.internal.util.State* com.android.wifi.x.@0
+rule com.android.internal.util.StateMachine* com.android.wifi.x.@0
+rule com.android.internal.util.WakeupMessage* com.android.wifi.x.@0
+
+rule android.util.BackupUtils* com.android.wifi.x.@0
+rule android.util.LocalLog* com.android.wifi.x.@0
+rule android.util.Rational* com.android.wifi.x.@0
+
+rule android.os.BasicShellCommandHandler* com.android.wifi.x.@0
+
+# Use our statically linked bouncy castle library
+rule org.bouncycastle.** com.android.wifi.x.@0
+# Use our statically linked protobuf library
+rule com.google.protobuf.** com.android.wifi.x.@0
+# use statically linked SystemMessageProto
+rule com.android.internal.messages.SystemMessageProto* com.android.wifi.x.@0
+# Use our statically linked PlatformProperties library
+rule android.sysprop.** com.android.wifi.x.@0
+# Use our statically linked HIDL stubs
+# Note: android.hardware.wifi.** is used by various wifi feature flags. This unfortunately is also the namespace
+# used by vendor HAL stubs. So, this rule is intentionally weird to try and filter the vendor HAL stubs only.
+rule android.hardware.wifi.V** com.android.wifi.x.@0
+rule android.hardware.wifi.supplicant.** com.android.wifi.x.@0
+rule android.hardware.wifi.hostapd.** com.android.wifi.x.@0
+rule android.hidl.** com.android.wifi.x.@0
+# Use our statically linked ksoap2
+rule org.ksoap2.** com.android.wifi.x.@0
+# Use our statically linked nanohttpd
+rule fi.iki.elonen.** com.android.wifi.x.@0
+
+## used by both framework-wifi and service-wifi ##
+rule android.content.pm.BaseParceledListSlice* com.android.wifi.x.@0
+rule android.content.pm.ParceledListSlice* com.android.wifi.x.@0
+rule android.net.util.MacAddressUtils* com.android.wifi.x.@0
+rule android.net.util.nsd.DnsSdTxtRecord* com.android.wifi.x.@0
+rule android.os.HandlerExecutor* com.android.wifi.x.@0
+rule android.telephony.Annotation* com.android.wifi.x.@0
+rule com.android.internal.util.AsyncChannel* com.android.wifi.x.@0
+rule com.android.internal.util.AsyncService* com.android.wifi.x.@0
+rule com.android.internal.util.Preconditions* com.android.wifi.x.@0
+rule com.android.internal.util.Protocol* com.android.wifi.x.@0
+
+rule com.android.net.module.util.** com.android.wifi.x.@0

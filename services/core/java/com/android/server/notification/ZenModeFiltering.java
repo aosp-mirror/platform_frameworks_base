@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
+import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_ANYONE;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -106,8 +107,8 @@ public class ZenModeFiltering {
     }
 
     private static Bundle extras(NotificationRecord record) {
-        return record != null && record.sbn != null && record.sbn.getNotification() != null
-                ? record.sbn.getNotification().extras : null;
+        return record != null && record.getSbn() != null && record.getSbn().getNotification() != null
+                ? record.getSbn().getNotification().extras : null;
     }
 
     protected void recordCall(NotificationRecord record) {
@@ -125,8 +126,8 @@ public class ZenModeFiltering {
         }
         // Make an exception to policy for the notification saying that policy has changed
         if (NotificationManager.Policy.areAllVisualEffectsSuppressed(policy.suppressedVisualEffects)
-                && "android".equals(record.sbn.getPackageName())
-                && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.sbn.getId()) {
+                && "android".equals(record.getSbn().getPackageName())
+                && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.getSbn().getId()) {
             ZenLog.traceNotIntercepted(record, "systemDndChangedNotification");
             return false;
         }
@@ -156,25 +157,6 @@ public class ZenModeFiltering {
                     }
                     return false;
                 }
-                if (isCall(record)) {
-                    if (policy.allowRepeatCallers()
-                            && REPEAT_CALLERS.isRepeat(mContext, extras(record))) {
-                        ZenLog.traceNotIntercepted(record, "repeatCaller");
-                        return false;
-                    }
-                    if (!policy.allowCalls()) {
-                        ZenLog.traceIntercepted(record, "!allowCalls");
-                        return true;
-                    }
-                    return shouldInterceptAudience(policy.allowCallsFrom(), record);
-                }
-                if (isMessage(record)) {
-                    if (!policy.allowMessages()) {
-                        ZenLog.traceIntercepted(record, "!allowMessages");
-                        return true;
-                    }
-                    return shouldInterceptAudience(policy.allowMessagesFrom(), record);
-                }
                 if (isEvent(record)) {
                     if (!policy.allowEvents()) {
                         ZenLog.traceIntercepted(record, "!allowEvents");
@@ -203,6 +185,41 @@ public class ZenModeFiltering {
                     }
                     return false;
                 }
+                if (isConversation(record)) {
+                    if (policy.allowConversations()) {
+                        if (policy.priorityConversationSenders == CONVERSATION_SENDERS_ANYONE) {
+                            ZenLog.traceNotIntercepted(record, "conversationAnyone");
+                            return false;
+                        } else if (policy.priorityConversationSenders
+                                == NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT
+                                && record.getChannel().isImportantConversation()) {
+                            ZenLog.traceNotIntercepted(record, "conversationMatches");
+                            return false;
+                        }
+                    }
+                    // if conversations aren't allowed record might still be allowed thanks
+                    // to call or message metadata, so don't return yet
+                }
+                if (isCall(record)) {
+                    if (policy.allowRepeatCallers()
+                            && REPEAT_CALLERS.isRepeat(mContext, extras(record))) {
+                        ZenLog.traceNotIntercepted(record, "repeatCaller");
+                        return false;
+                    }
+                    if (!policy.allowCalls()) {
+                        ZenLog.traceIntercepted(record, "!allowCalls");
+                        return true;
+                    }
+                    return shouldInterceptAudience(policy.allowCallsFrom(), record);
+                }
+                if (isMessage(record)) {
+                    if (!policy.allowMessages()) {
+                        ZenLog.traceIntercepted(record, "!allowMessages");
+                        return true;
+                    }
+                    return shouldInterceptAudience(policy.allowMessagesFrom(), record);
+                }
+
                 ZenLog.traceIntercepted(record, "!priority");
                 return true;
             default:
@@ -245,7 +262,7 @@ public class ZenModeFiltering {
     }
 
     public boolean isCall(NotificationRecord record) {
-        return record != null && (isDefaultPhoneApp(record.sbn.getPackageName())
+        return record != null && (isDefaultPhoneApp(record.getSbn().getPackageName())
                 || record.isCategory(Notification.CATEGORY_CALL));
     }
 
@@ -273,7 +290,11 @@ public class ZenModeFiltering {
     }
 
     protected boolean isMessage(NotificationRecord record) {
-        return mMessagingUtil.isMessaging(record.sbn);
+        return mMessagingUtil.isMessaging(record.getSbn());
+    }
+
+    protected boolean isConversation(NotificationRecord record) {
+        return record.isConversation();
     }
 
     private static boolean audienceMatches(int source, float contactAffinity) {

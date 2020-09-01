@@ -16,17 +16,17 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
@@ -37,10 +37,12 @@ public class AppIdleHistoryTests extends AndroidTestCase {
 
     File mStorageDir;
 
-    final static String PACKAGE_1 = "com.android.testpackage1";
-    final static String PACKAGE_2 = "com.android.testpackage2";
+    private static final String PACKAGE_1 = "com.android.testpackage1";
+    private static final String PACKAGE_2 = "com.android.testpackage2";
+    private static final String PACKAGE_3 = "com.android.testpackage3";
+    private static final String PACKAGE_4 = "com.android.testpackage4";
 
-    final static int USER_ID = 0;
+    private static final int USER_ID = 0;
 
     @Override
     protected void setUp() throws Exception {
@@ -100,16 +102,29 @@ public class AppIdleHistoryTests extends AndroidTestCase {
 
         aih.setAppStandbyBucket(PACKAGE_2, USER_ID, 2000, STANDBY_BUCKET_ACTIVE,
                 REASON_MAIN_USAGE);
+        aih.setAppStandbyBucket(PACKAGE_3, USER_ID, 2500, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+        aih.setAppStandbyBucket(PACKAGE_4, USER_ID, 2750, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
         aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 3000, STANDBY_BUCKET_RARE,
                 REASON_MAIN_TIMEOUT);
 
         assertEquals(aih.getAppStandbyBucket(PACKAGE_1, USER_ID, 3000), STANDBY_BUCKET_RARE);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_2, USER_ID, 3000), STANDBY_BUCKET_ACTIVE);
         assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000), REASON_MAIN_TIMEOUT);
+        assertEquals(aih.getAppStandbyBucket(PACKAGE_3, USER_ID, 3000), STANDBY_BUCKET_RESTRICTED);
+        assertEquals(aih.getAppStandbyReason(PACKAGE_3, USER_ID, 3000),
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+        assertEquals(aih.getAppStandbyReason(PACKAGE_4, USER_ID, 3000),
+                REASON_MAIN_FORCED_BY_USER);
 
-        // RARE is considered idle
+        // RARE and RESTRICTED are considered idle
         assertTrue(aih.isIdle(PACKAGE_1, USER_ID, 3000));
         assertFalse(aih.isIdle(PACKAGE_2, USER_ID, 3000));
+        assertTrue(aih.isIdle(PACKAGE_3, USER_ID, 3000));
+        assertTrue(aih.isIdle(PACKAGE_4, USER_ID, 3000));
 
         // Check persistence
         aih.writeAppIdleDurations();
@@ -118,6 +133,12 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         assertEquals(aih.getAppStandbyBucket(PACKAGE_1, USER_ID, 5000), STANDBY_BUCKET_RARE);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_2, USER_ID, 5000), STANDBY_BUCKET_ACTIVE);
         assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000), REASON_MAIN_TIMEOUT);
+        assertEquals(aih.getAppStandbyBucket(PACKAGE_3, USER_ID, 3000), STANDBY_BUCKET_RESTRICTED);
+        assertEquals(aih.getAppStandbyReason(PACKAGE_3, USER_ID, 3000),
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+        assertEquals(aih.getAppStandbyReason(PACKAGE_4, USER_ID, 3000),
+                REASON_MAIN_FORCED_BY_USER);
 
         assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
         assertFalse(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));

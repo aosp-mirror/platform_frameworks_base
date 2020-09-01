@@ -70,6 +70,28 @@
     <item type="id" name="panel_alpha_animator_end_tag"/>
     <item type="id" name="cross_fade_layer_type_changed_tag"/>
 
+    <item type="id" name="absolute_x_animator_tag"/>
+    <item type="id" name="absolute_x_animator_start_tag"/>
+    <item type="id" name="absolute_x_animator_end_tag"/>
+    <item type="id" name="absolute_x_current_value"/>
+
+    <item type="id" name="absolute_y_animator_tag"/>
+    <item type="id" name="absolute_y_animator_start_tag"/>
+    <item type="id" name="absolute_y_animator_end_tag"/>
+    <item type="id" name="absolute_y_current_value"/>
+
+    <item type="id" name="view_height_animator_tag"/>
+    <item type="id" name="view_height_animator_start_tag"/>
+    <item type="id" name="view_height_animator_end_tag"/>
+    <item type="id" name="view_height_current_value"/>
+
+    <item type="id" name="view_width_animator_tag"/>
+    <item type="id" name="view_width_animator_start_tag"/>
+    <item type="id" name="view_width_animator_end_tag"/>
+    <item type="id" name="view_width_current_value"/>
+
+    <item type="id" name="requires_remeasuring"/>
+
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>
 
@@ -141,5 +163,19 @@
 
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />
+
+    <!-- NotificationPanelView -->
+    <item type="id" name="notification_panel" />
+
+    <!-- Screen Recording -->
+    <item type="id" name="screen_recording_options" />
+    <item type="id" name="screen_recording_dialog_source_text" />
+    <item type="id" name="screen_recording_dialog_source_description" />
+
+    <item type="id" name="accessibility_action_controls_move_before" />
+    <item type="id" name="accessibility_action_controls_move_after" />
+
+    <!-- Accessibility actions for PIP -->
+    <item type="id" name="action_pip_resize" />
 </resources>
 

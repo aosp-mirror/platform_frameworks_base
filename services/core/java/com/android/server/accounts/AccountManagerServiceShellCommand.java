@@ -78,7 +78,18 @@ final class AccountManagerServiceShellCommand extends ShellCommand {
         final String option = getNextOption();
         if (option != null) {
             if (option.equals("--user")) {
-                return UserHandle.parseUserArg(getNextArgRequired());
+                int userId = UserHandle.parseUserArg(getNextArgRequired());
+                if (userId == UserHandle.USER_CURRENT) {
+                    return ActivityManager.getCurrentUser();
+                } else if (userId == UserHandle.USER_ALL) {
+                    getErrPrintWriter().println("USER_ALL not supported. Specify a user.");
+                    return null;
+                } else if (userId < 0) {
+                    getErrPrintWriter().println("Invalid user: " + userId);
+                    return null;
+                } else {
+                    return userId;
+                }
             } else {
                 getErrPrintWriter().println("Unknown option: " + option);
                 return null;

@@ -231,6 +231,7 @@ usage(FILE* out)
     fprintf(out, "  -l           list available sections\n");
     fprintf(out, "  -p           privacy spec, LOCAL, EXPLICIT or AUTOMATIC. Default AUTOMATIC.\n");
     fprintf(out, "  -r REASON    human readable description of why the report is taken.\n");
+    fprintf(out, "  -z           gzip the incident report, i.e. pipe the output through gzip.\n");
     fprintf(out, "\n");
     fprintf(out, "and one of these destinations:\n");
     fprintf(out, "  -b           (default) print the report to stdout (in proto format)\n");
@@ -255,7 +256,7 @@ main(int argc, char** argv)
 
     // Parse the args
     int opt;
-    while ((opt = getopt(argc, argv, "bhdlp:r:s:u")) != -1) {
+    while ((opt = getopt(argc, argv, "bhdlp:r:s:uz")) != -1) {
         switch (opt) {
             case 'h':
                 usage(stdout);
@@ -301,6 +302,9 @@ main(int argc, char** argv)
                 }
                 destination = DEST_BROADCAST;
                 receiverArg = optarg;
+                break;
+            case 'z':
+                args.setGzip(true);
                 break;
             default:
                 usage(stderr);

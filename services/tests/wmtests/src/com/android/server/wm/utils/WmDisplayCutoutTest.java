@@ -47,6 +47,7 @@ import org.junit.Test;
 @SmallTest
 @Presubmit
 public class WmDisplayCutoutTest {
+    private static final Rect ZERO_RECT = new Rect();
     private final DisplayCutout mCutoutTop = new DisplayCutout(
             Insets.of(0, 100, 0, 0),
             null /* boundLeft */, new Rect(50, 0, 75, 100) /* boundTop */,
@@ -99,41 +100,204 @@ public class WmDisplayCutoutTest {
     }
 
     @Test
-    public void computeSafeInsets_top() {
+    public void computeSafeInsets_cutoutTop() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 100, 20, BOUNDS_POSITION_TOP), 200, 400);
+                fromBoundingRect(80, 0, 120, 20, BOUNDS_POSITION_TOP), 200, 400);
 
         assertEquals(new Rect(0, 20, 0, 0), cutout.getDisplayCutout().getSafeInsets());
     }
 
     @Test
-    public void computeSafeInsets_left() {
+    public void computeSafeInsets_cutoutLeft() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 20, 100, BOUNDS_POSITION_LEFT), 400, 200);
+                fromBoundingRect(0, 180, 20, 220, BOUNDS_POSITION_LEFT), 200, 400);
 
         assertEquals(new Rect(20, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
     }
 
     @Test
-    public void computeSafeInsets_bottom() {
+    public void computeSafeInsets_cutoutBottom() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 180, 100, 200, BOUNDS_POSITION_BOTTOM), 100, 200);
+                fromBoundingRect(80, 380, 120, 400, BOUNDS_POSITION_BOTTOM), 200, 400);
 
         assertEquals(new Rect(0, 0, 0, 20), cutout.getDisplayCutout().getSafeInsets());
     }
 
     @Test
-    public void computeSafeInsets_right() {
+    public void computeSafeInsets_cutoutRight() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(180, 0, 200, 100, BOUNDS_POSITION_RIGHT), 200, 100);
+                fromBoundingRect(180, 180, 200, 220, BOUNDS_POSITION_RIGHT), 200, 400);
 
         assertEquals(new Rect(0, 0, 20, 0), cutout.getDisplayCutout().getSafeInsets());
     }
 
     @Test
+    public void computeSafeInsets_topLeftCornerCutout_portrait() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(0, 0, 20, 20, BOUNDS_POSITION_TOP), 200, 400);
+
+        assertEquals(new Rect(0, 20, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_topRightCornerCutout_portrait() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(180, 0, 200, 20, BOUNDS_POSITION_TOP), 200, 400);
+
+        assertEquals(new Rect(0, 20, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_bottomLeftCornerCutout_portrait() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(0, 380, 20, 400, BOUNDS_POSITION_BOTTOM), 200, 400);
+
+        assertEquals(new Rect(0, 0, 0, 20), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_bottomRightCornerCutout_portrait() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(180, 380, 200, 400, BOUNDS_POSITION_BOTTOM), 200, 400);
+
+        assertEquals(new Rect(0, 0, 0, 20), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_topLeftCornerCutout_landscape() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(0, 0, 20, 20, BOUNDS_POSITION_LEFT), 400, 200);
+
+        assertEquals(new Rect(20, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_topRightCornerCutout_landscape() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(380, 0, 400, 20, BOUNDS_POSITION_RIGHT), 400, 200);
+
+        assertEquals(new Rect(0, 0, 20, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_bottomLeftCornerCutout_landscape() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(0, 180, 20, 200, BOUNDS_POSITION_LEFT), 400, 200);
+
+        assertEquals(new Rect(20, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_bottomRightCornerCutout_landscape() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                fromBoundingRect(380, 180, 400, 200, BOUNDS_POSITION_RIGHT), 400, 200);
+
+        assertEquals(new Rect(0, 0, 20, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_waterfall() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT},
+                        Insets.of(1, 2, 3, 4)),
+                200, 400);
+
+        assertEquals(new Rect(1, 2, 3, 4), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutTop_greaterThan_waterfallTop() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, new Rect(80, 0, 120, 30), ZERO_RECT, ZERO_RECT},
+                        Insets.of(0, 20, 0, 0)),
+                200, 400);
+
+        assertEquals(new Rect(0, 30, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutTop_lessThan_waterfallTop() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, new Rect(80, 0, 120, 30), ZERO_RECT, ZERO_RECT},
+                        Insets.of(0, 40, 0, 0)),
+                200, 400);
+
+        assertEquals(new Rect(0, 40, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutLeft_greaterThan_waterfallLeft() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {new Rect(0, 180, 30, 220), ZERO_RECT, ZERO_RECT, ZERO_RECT},
+                        Insets.of(20, 0, 0, 0)),
+                200, 400);
+
+        assertEquals(new Rect(30, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutLeft_lessThan_waterfallLeft() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {new Rect(0, 180, 30, 220), ZERO_RECT, ZERO_RECT, ZERO_RECT},
+                        Insets.of(40, 0, 0, 0)),
+                200, 400);
+
+        assertEquals(new Rect(40, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutBottom_greaterThan_waterfallBottom() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, ZERO_RECT, ZERO_RECT, new Rect(80, 370, 120, 400)},
+                        Insets.of(0, 0, 0, 20)),
+                200, 400);
+
+        assertEquals(new Rect(0, 0, 0, 30), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutBottom_lessThan_waterfallBottom() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, ZERO_RECT, ZERO_RECT, new Rect(80, 370, 120, 400)},
+                        Insets.of(0, 0, 0, 40)),
+                200, 400);
+
+        assertEquals(new Rect(0, 0, 0, 40), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutRight_greaterThan_waterfallRight() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, ZERO_RECT, new Rect(170, 180, 200, 220), ZERO_RECT},
+                        Insets.of(0, 0, 20, 0)),
+                200, 400);
+
+        assertEquals(new Rect(0, 0, 30, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
+    public void computeSafeInsets_cutoutRight_lessThan_waterfallRight() {
+        WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
+                DisplayCutout.fromBoundsAndWaterfall(
+                        new Rect[] {ZERO_RECT, ZERO_RECT, new Rect(170, 180, 200, 220), ZERO_RECT},
+                        Insets.of(0, 0, 40, 0)),
+                200, 400);
+
+        assertEquals(new Rect(0, 0, 40, 0), cutout.getDisplayCutout().getSafeInsets());
+    }
+
+    @Test
     public void computeSafeInsets_bounds() {
-        DisplayCutout cutout = WmDisplayCutout.computeSafeInsets(mCutoutTop, 1000,
-                2000).getDisplayCutout();
+        DisplayCutout cutout =
+                WmDisplayCutout.computeSafeInsets(mCutoutTop, 1000, 2000).getDisplayCutout();
 
         assertEquals(mCutoutTop.getBoundingRects(), cutout.getBoundingRects());
     }

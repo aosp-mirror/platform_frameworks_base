@@ -77,7 +77,16 @@ import java.util.stream.Collectors;
 
 /**
  * Tracks saved or available wifi networks and their state.
+ *
+ * @deprecated WifiTracker/AccessPoint is no longer supported, and will be removed in a future
+ * release. Clients that need a dynamic list of available wifi networks should migrate to one of the
+ * newer tracker classes,
+ * {@link com.android.wifitrackerlib.WifiPickerTracker},
+ * {@link com.android.wifitrackerlib.SavedNetworkTracker},
+ * {@link com.android.wifitrackerlib.NetworkDetailsTracker},
+ * in conjunction with {@link com.android.wifitrackerlib.WifiEntry} to represent each wifi network.
  */
+@Deprecated
 public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestroy {
     /**
      * Default maximum age in millis of cached scored networks in
@@ -182,7 +191,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
-        filter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
+        filter.addAction(WifiManager.ACTION_LINK_CONFIGURATION_CHANGED);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
 
@@ -226,7 +235,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging developer option has been turned on or off
-        sVerboseLogging = mWifiManager != null && (mWifiManager.getVerboseLoggingLevel() > 0);
+        sVerboseLogging = mWifiManager != null && mWifiManager.isVerboseLoggingEnabled();
 
         mFilter = filter;
 
@@ -518,8 +527,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             int networkId, final List<WifiConfiguration> configs) {
         if (configs != null) {
             for (WifiConfiguration config : configs) {
-                if (mLastInfo != null && networkId == config.networkId &&
-                        !(config.selfAdded && config.numAssociation == 0)) {
+                if (mLastInfo != null && networkId == config.networkId) {
                     return config;
                 }
             }
@@ -607,7 +615,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
             List<ScanResult> cachedScanResults = new ArrayList<>(mScanResultCache.values());
 
-            // Add a unique Passpoint AccessPoint for each Passpoint profile's FQDN.
+            // Add a unique Passpoint AccessPoint for each Passpoint profile's unique identifier.
             accessPoints.addAll(updatePasspointAccessPoints(
                     mWifiManager.getAllMatchingWifiConfigs(cachedScanResults), cachedAccessPoints));
 
@@ -883,7 +891,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION.equals(action)
-                    || WifiManager.LINK_CONFIGURATION_CHANGED_ACTION.equals(action)) {
+                    || WifiManager.ACTION_LINK_CONFIGURATION_CHANGED.equals(action)) {
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 // TODO(sghuman): Refactor these methods so they cannot result in duplicate
@@ -892,9 +900,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 updateNetworkInfo(info);
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.RSSI_CHANGED_ACTION.equals(action)) {
-                NetworkInfo info =
-                        mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
-                updateNetworkInfo(info);
+                updateNetworkInfo(/* networkInfo= */ null);
             }
         }
     };
@@ -940,7 +946,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 // We don't send a NetworkInfo object along with this message, because even if we
                 // fetch one from ConnectivityManager, it might be older than the most recent
                 // NetworkInfo message we got via a WIFI_STATE_CHANGED broadcast.
-                updateNetworkInfo(null);
+                updateNetworkInfo(/* networkInfo= */ null);
             }
         }
     }

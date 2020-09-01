@@ -17,14 +17,18 @@
 package android.os.storage;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.util.DebugUtils;
 import android.util.TimeUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -90,6 +94,27 @@ public class VolumeRecord implements Parcelable {
 
     public boolean isSnoozed() {
         return (userFlags & USER_FLAG_SNOOZED) != 0;
+    }
+
+    public StorageVolume buildStorageVolume(Context context) {
+        final String id = "unknown:" + fsUuid;
+        final File userPath = new File("/dev/null");
+        final File internalPath = new File("/dev/null");
+        final boolean primary = false;
+        final boolean removable = true;
+        final boolean emulated = false;
+        final boolean allowMassStorage = false;
+        final long maxFileSize = 0;
+        final UserHandle user = new UserHandle(UserHandle.USER_NULL);
+        final String envState = Environment.MEDIA_UNKNOWN;
+
+        String description = nickname;
+        if (description == null) {
+            description = context.getString(android.R.string.unknownName);
+        }
+
+        return new StorageVolume(id, userPath, internalPath, description, primary, removable,
+                emulated, allowMassStorage, maxFileSize, user, fsUuid, envState);
     }
 
     public void dump(IndentingPrintWriter pw) {

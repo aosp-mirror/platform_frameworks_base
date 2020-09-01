@@ -85,6 +85,10 @@ void setDebugLayersGLES_native(JNIEnv* env, jobject clazz, jstring layers) {
     }
 }
 
+bool setInjectLayersPrSetDumpable_native() {
+    return android::GraphicsEnv::getInstance().setInjectLayersPrSetDumpable();
+}
+
 void hintActivityLaunch_native(JNIEnv* env, jobject clazz) {
     android::GraphicsEnv::getInstance().hintActivityLaunch();
 }
@@ -93,6 +97,7 @@ const JNINativeMethod g_methods[] = {
     { "isDebuggable", "()Z", reinterpret_cast<void*>(isDebuggable_native) },
     { "setDriverPathAndSphalLibraries", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPathAndSphalLibraries_native) },
     { "setGpuStats", "(Ljava/lang/String;Ljava/lang/String;JJLjava/lang/String;I)V", reinterpret_cast<void*>(setGpuStats_native) },
+    { "setInjectLayersPrSetDumpable", "()Z", reinterpret_cast<void*>(setInjectLayersPrSetDumpable_native) },
     { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/FileDescriptor;JJ)V", reinterpret_cast<void*>(setAngleInfo_native) },
     { "getShouldUseAngle", "(Ljava/lang/String;)Z", reinterpret_cast<void*>(shouldUseAngle_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },

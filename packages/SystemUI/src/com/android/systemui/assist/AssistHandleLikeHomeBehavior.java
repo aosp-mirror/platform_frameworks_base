@@ -22,8 +22,8 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.io.PrintWriter;
@@ -69,17 +69,13 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
                     handleWakefullnessChanged(/* isAwake = */ false);
                 }
             };
-    private final OverviewProxyService.OverviewProxyListener mOverviewProxyListener =
-            new OverviewProxyService.OverviewProxyListener() {
-        @Override
-        public void onSystemUiStateChanged(int sysuiStateFlags) {
-            handleSystemUiStateChange(sysuiStateFlags);
-        }
-    };
+
+    private final SysUiState.SysUiStateCallback mSysUiStateCallback =
+            this::handleSystemUiStateChange;
 
     private final Lazy<StatusBarStateController> mStatusBarStateController;
     private final Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
-    private final Lazy<OverviewProxyService> mOverviewProxyService;
+    private final Lazy<SysUiState> mSysUiFlagContainer;
 
     private boolean mIsDozing;
     private boolean mIsAwake;
@@ -91,10 +87,10 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
     AssistHandleLikeHomeBehavior(
             Lazy<StatusBarStateController> statusBarStateController,
             Lazy<WakefulnessLifecycle> wakefulnessLifecycle,
-            Lazy<OverviewProxyService> overviewProxyService) {
+            Lazy<SysUiState> sysUiFlagContainer) {
         mStatusBarStateController = statusBarStateController;
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mOverviewProxyService = overviewProxyService;
+        mSysUiFlagContainer = sysUiFlagContainer;
     }
 
     @Override
@@ -105,7 +101,7 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
         mIsAwake = mWakefulnessLifecycle.get().getWakefulness()
                 == WakefulnessLifecycle.WAKEFULNESS_AWAKE;
         mWakefulnessLifecycle.get().addObserver(mWakefulnessLifecycleObserver);
-        mOverviewProxyService.get().addCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.get().addCallback(mSysUiStateCallback);
         callbackForCurrentState();
     }
 
@@ -114,7 +110,7 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
         mAssistHandleCallbacks = null;
         mStatusBarStateController.get().removeCallback(mStatusBarStateListener);
         mWakefulnessLifecycle.get().removeObserver(mWakefulnessLifecycleObserver);
-        mOverviewProxyService.get().removeCallback(mOverviewProxyListener);
+        mSysUiFlagContainer.get().removeCallback(mSysUiStateCallback);
     }
 
     private static boolean isHomeHandleHiding(int sysuiStateFlags) {

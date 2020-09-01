@@ -19,7 +19,6 @@ package android.view;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.graphics.Rect;
-import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -35,7 +34,7 @@ public class CompositionSamplingListenerTest {
 
     @Test
     public void testRegisterUnregister() {
-        CompositionSamplingListener.register(mListener, DEFAULT_DISPLAY, new Binder(),
+        CompositionSamplingListener.register(mListener, DEFAULT_DISPLAY, new SurfaceControl(),
                 new Rect(1, 1, 10, 10));
         CompositionSamplingListener.unregister(mListener);
     }

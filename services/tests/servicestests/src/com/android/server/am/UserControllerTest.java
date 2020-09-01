@@ -31,6 +31,7 @@ import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
 
 import static com.google.android.collect.Lists.newArrayList;
 import static com.google.android.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
@@ -54,6 +55,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.IUserSwitchObserver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -74,11 +76,10 @@ import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
-
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.FgThread;
+import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -108,6 +109,7 @@ public class UserControllerTest {
     private static final int TEST_USER_ID = 100;
     private static final int TEST_USER_ID1 = 101;
     private static final int TEST_USER_ID2 = 102;
+    private static final int TEST_USER_ID3 = 103;
     private static final int NONEXIST_USER_ID = 2;
     private static final int TEST_PRE_CREATED_USER_ID = 103;
 
@@ -120,6 +122,8 @@ public class UserControllerTest {
     private UserController mUserController;
     private TestInjector mInjector;
     private final HashMap<Integer, UserState> mUserStates = new HashMap<>();
+
+    private final KeyEvictedCallback mKeyEvictedCallback = (userId) -> { /* ignore */ };
 
     private static final List<String> START_FOREGROUND_USER_ACTIONS = newArrayList(
             Intent.ACTION_USER_STARTED,
@@ -154,6 +158,7 @@ public class UserControllerTest {
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).stackSupervisorRemoveUser(anyInt());
+            // All UserController params are set to default.
             mUserController = new UserController(mInjector);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
             setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated=*/ true);
@@ -177,7 +182,6 @@ public class UserControllerTest {
         startForegroundUserAssertions();
     }
 
-    @FlakyTest(bugId = 118932054)
     @Test
     public void testStartUser_background() {
         mUserController.startUser(TEST_USER_ID, false /* foreground */);
@@ -189,7 +193,9 @@ public class UserControllerTest {
 
     @Test
     public void testStartUserUIDisabled() {
-        mUserController.mUserSwitchUiEnabled = false;
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+
         mUserController.startUser(TEST_USER_ID, true /* foreground */);
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
@@ -247,7 +253,9 @@ public class UserControllerTest {
 
     @Test
     public void testFailedStartUserInForeground() {
-        mUserController.mUserSwitchUiEnabled = false;
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+
         mUserController.startUserInForeground(NONEXIST_USER_ID);
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         verify(mInjector.getWindowManager()).setSwitchingUser(false);
@@ -328,7 +336,9 @@ public class UserControllerTest {
 
     @Test
     public void testContinueUserSwitchUIDisabled() throws RemoteException {
-        mUserController.mUserSwitchUiEnabled = false;
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -391,11 +401,13 @@ public class UserControllerTest {
      * Test stopping of user from max running users limit.
      */
     @Test
-    public void testUserStoppingForMultipleUsersNormalMode()
+    public void testUserLockingFromUserSwitchingForMultipleUsersNonDelayedLocking()
             throws InterruptedException, RemoteException {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+
         setUpUser(TEST_USER_ID1, 0);
         setUpUser(TEST_USER_ID2, 0);
-        mUserController.mMaxRunningUsers = 3;
         int numerOfUserSwitches = 1;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
                 numerOfUserSwitches, false);
@@ -432,12 +444,13 @@ public class UserControllerTest {
      * all middle steps which takes too much work to mock.
      */
     @Test
-    public void testUserStoppingForMultipleUsersDelayedLockingMode()
+    public void testUserLockingFromUserSwitchingForMultipleUsersDelayedLockingMode()
             throws InterruptedException, RemoteException {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true);
+
         setUpUser(TEST_USER_ID1, 0);
         setUpUser(TEST_USER_ID2, 0);
-        mUserController.mMaxRunningUsers = 3;
-        mUserController.mDelayUserDataLocking = true;
         int numerOfUserSwitches = 1;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
                 numerOfUserSwitches, false);
@@ -458,7 +471,7 @@ public class UserControllerTest {
         // Skip all other steps and test unlock delaying only
         UserState uss = mUserStates.get(TEST_USER_ID);
         uss.setState(UserState.STATE_SHUTDOWN); // necessary state change from skipped part
-        mUserController.finishUserStopped(uss);
+        mUserController.finishUserStopped(uss, /* allowDelayedLocking= */ true);
         // Cannot mock FgThread handler, so confirm that there is no posted message left before
         // checking.
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
@@ -475,10 +488,85 @@ public class UserControllerTest {
                 mUserController.getRunningUsersLU());
         UserState ussUser1 = mUserStates.get(TEST_USER_ID1);
         ussUser1.setState(UserState.STATE_SHUTDOWN);
-        mUserController.finishUserStopped(ussUser1);
+        mUserController.finishUserStopped(ussUser1, /* allowDelayedLocking= */ true);
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
         verify(mInjector.mStorageManagerMock, times(1))
                 .lockUserKey(TEST_USER_ID);
+    }
+
+    /**
+     * Test locking user with mDelayUserDataLocking false.
+     */
+    @Test
+    public void testUserLockingWithStopUserForNonDelayedLockingMode() throws Exception {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* delayedLocking= */ true,
+                /* keyEvictedCallback= */ null, /* expectLocking= */ true);
+
+        setUpAndStartUserInBackground(TEST_USER_ID1);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+                /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
+
+        setUpAndStartUserInBackground(TEST_USER_ID2);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* delayedLocking= */ false,
+                /* keyEvictedCallback= */ null, /* expectLocking= */ true);
+
+        setUpAndStartUserInBackground(TEST_USER_ID3);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* delayedLocking= */ false,
+                /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
+    }
+
+    /**
+     * Test conditional delayed locking with mDelayUserDataLocking true.
+     */
+    @Test
+    public void testUserLockingForDelayedLockingMode() throws Exception {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true);
+
+        // delayedLocking set and no KeyEvictedCallback, so it should not lock.
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* delayedLocking= */ true,
+                /* keyEvictedCallback= */ null, /* expectLocking= */ false);
+
+        setUpAndStartUserInBackground(TEST_USER_ID1);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* delayedLocking= */ true,
+                /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
+
+        setUpAndStartUserInBackground(TEST_USER_ID2);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* delayedLocking= */ false,
+                /* keyEvictedCallback= */ null, /* expectLocking= */ true);
+
+        setUpAndStartUserInBackground(TEST_USER_ID3);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* delayedLocking= */ false,
+                /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
+    }
+
+    private void setUpAndStartUserInBackground(int userId) throws Exception {
+        setUpUser(userId, 0);
+        mUserController.startUser(userId, /* foreground= */ false);
+        verify(mInjector.mStorageManagerMock, times(1))
+                .unlockUserKey(TEST_USER_ID, 0, null, null);
+        mUserStates.put(userId, mUserController.getStartedUserState(userId));
+    }
+
+    private void assertUserLockedOrUnlockedAfterStopping(int userId, boolean delayedLocking,
+            KeyEvictedCallback keyEvictedCallback, boolean expectLocking)  throws Exception {
+        int r = mUserController.stopUser(userId, /* force= */ true, /* delayedLocking= */
+                delayedLocking, null, keyEvictedCallback);
+        assertThat(r).isEqualTo(ActivityManager.USER_OP_SUCCESS);
+        // fake all interim steps
+        UserState ussUser = mUserStates.get(userId);
+        ussUser.setState(UserState.STATE_SHUTDOWN);
+        // Passing delayedLocking invalidates incorrect internal data passing but currently there is
+        // no easy way to get that information passed through lambda.
+        mUserController.finishUserStopped(ussUser, delayedLocking);
+        waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
+        verify(mInjector.mStorageManagerMock, times(expectLocking ? 1 : 0))
+                .lockUserKey(userId);
     }
 
     private void addForegroundUserAndContinueUserSwitch(int newUserId, int expectedOldUserId,

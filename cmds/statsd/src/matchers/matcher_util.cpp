@@ -81,18 +81,17 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-bool tryMatchString(const UidMap& uidMap, const Field& field, const Value& value,
-                    const string& str_match) {
-    if (isAttributionUidField(field, value)) {
-        int uid = value.int_value;
+bool tryMatchString(const UidMap& uidMap, const FieldValue& fieldValue, const string& str_match) {
+    if (isAttributionUidField(fieldValue) || isUidField(fieldValue)) {
+        int uid = fieldValue.mValue.int_value;
         auto aidIt = UidMap::sAidToUidMapping.find(str_match);
         if (aidIt != UidMap::sAidToUidMapping.end()) {
             return ((int)aidIt->second) == uid;
         }
         std::set<string> packageNames = uidMap.getAppNamesFromUid(uid, true /* normalize*/);
         return packageNames.find(str_match) != packageNames.end();
-    } else if (value.getType() == STRING) {
-        return value.str_value == str_match;
+    } else if (fieldValue.mValue.getType() == STRING) {
+        return fieldValue.mValue.str_value == str_match;
     }
     return false;
 }
@@ -228,8 +227,7 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
         }
         case FieldValueMatcher::ValueMatcherCase::kEqString: {
             for (int i = start; i < end; i++) {
-                if (tryMatchString(uidMap, values[i].mField, values[i].mValue,
-                                   matcher.eq_string())) {
+                if (tryMatchString(uidMap, values[i], matcher.eq_string())) {
                     return true;
                 }
             }
@@ -240,7 +238,7 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
             for (int i = start; i < end; i++) {
                 bool notEqAll = true;
                 for (const auto& str : str_list.str_value()) {
-                    if (tryMatchString(uidMap, values[i].mField, values[i].mValue, str)) {
+                    if (tryMatchString(uidMap, values[i], str)) {
                         notEqAll = false;
                         break;
                     }
@@ -255,7 +253,7 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
             const auto& str_list = matcher.eq_any_string();
             for (int i = start; i < end; i++) {
                 for (const auto& str : str_list.str_value()) {
-                    if (tryMatchString(uidMap, values[i].mField, values[i].mValue, str)) {
+                    if (tryMatchString(uidMap, values[i], str)) {
                         return true;
                     }
                 }
@@ -357,9 +355,10 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
 
 bool matchesSimple(const UidMap& uidMap, const SimpleAtomMatcher& simpleMatcher,
                    const LogEvent& event) {
-    if (simpleMatcher.field_value_matcher_size() <= 0) {
-        return event.GetTagId() == simpleMatcher.atom_id();
+    if (event.GetTagId() != simpleMatcher.atom_id()) {
+        return false;
     }
+
     for (const auto& matcher : simpleMatcher.field_value_matcher()) {
         if (!matchesSimple(uidMap, matcher, event.getValues(), 0, event.getValues().size(), 0)) {
             return false;

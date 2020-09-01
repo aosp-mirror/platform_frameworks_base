@@ -2011,12 +2011,26 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
         }
 
         if (!dispatchNestedPreFling(velocityX, velocityY)) {
-            final boolean canScroll = canScrollHorizontal || canScrollVertical;
-            dispatchNestedFling(velocityX, velocityY, canScroll);
+            final View firstChild = mLayout.getChildAt(0);
+            final View lastChild = mLayout.getChildAt(mLayout.getChildCount() - 1);
+            boolean consumed = false;
+            if (velocityY < 0) {
+                consumed = getChildAdapterPosition(firstChild) > 0
+                        || firstChild.getTop() < getPaddingTop();
+            }
+
+            if (velocityY > 0) {
+                consumed = getChildAdapterPosition(lastChild) < mAdapter.getItemCount() - 1
+                        || lastChild.getBottom() > getHeight() - getPaddingBottom();
+            }
+
+            dispatchNestedFling(velocityX, velocityY, consumed);
 
             if (mOnFlingListener != null && mOnFlingListener.onFling(velocityX, velocityY)) {
                 return true;
             }
+
+            final boolean canScroll = canScrollHorizontal || canScrollVertical;
 
             if (canScroll) {
                 velocityX = Math.max(-mMaxFlingVelocity, Math.min(velocityX, mMaxFlingVelocity));

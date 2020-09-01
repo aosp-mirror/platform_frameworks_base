@@ -66,8 +66,7 @@ public:
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
-    virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior, ColorMode colorMode,
-                            uint32_t extraBuffers) = 0;
+    virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior) = 0;
     virtual void onStop() = 0;
     virtual bool isSurfaceReady() = 0;
     virtual bool isContextReady() = 0;
@@ -80,7 +79,8 @@ public:
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;
-    virtual void onPrepareTree() = 0;
+
+    virtual void setSurfaceColorProperties(ColorMode colorMode) = 0;
     virtual SkColorType getSurfaceColorType() const = 0;
     virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
     virtual GrSurfaceOrigin getSurfaceOrigin() = 0;

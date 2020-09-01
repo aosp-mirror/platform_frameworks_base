@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.animation.Animator;
-import android.content.Context;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
@@ -25,7 +25,8 @@ import android.view.animation.PathInterpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.phone.StatusBar;
+
+import javax.inject.Inject;
 
 /**
  * Utility class to calculate general fling animation when the finger is released.
@@ -56,8 +57,8 @@ public class FlingAnimationUtils {
     private float mCachedStartGradient = -1;
     private float mCachedVelocityFactor = -1;
 
-    public FlingAnimationUtils(Context ctx, float maxLengthSeconds) {
-        this(ctx, maxLengthSeconds, 0.0f);
+    public FlingAnimationUtils(DisplayMetrics displayMetrics, float maxLengthSeconds) {
+        this(displayMetrics, maxLengthSeconds, 0.0f);
     }
 
     /**
@@ -66,8 +67,9 @@ public class FlingAnimationUtils {
      *                      the end of the animation. 0 means it's at the beginning and no
      *                      acceleration will take place.
      */
-    public FlingAnimationUtils(Context ctx, float maxLengthSeconds, float speedUpFactor) {
-        this(ctx, maxLengthSeconds, speedUpFactor, -1.0f, 1.0f);
+    public FlingAnimationUtils(DisplayMetrics displayMetrics, float maxLengthSeconds,
+            float speedUpFactor) {
+        this(displayMetrics, maxLengthSeconds, speedUpFactor, -1.0f, 1.0f);
     }
 
     /**
@@ -79,8 +81,8 @@ public class FlingAnimationUtils {
      *           is provided, the value is automatically calculated.
      * @param y2 the y value to take for the second point of the bezier spline
      */
-    public FlingAnimationUtils(Context ctx, float maxLengthSeconds, float speedUpFactor, float x2,
-            float y2) {
+    public FlingAnimationUtils(DisplayMetrics displayMetrics, float maxLengthSeconds,
+            float speedUpFactor, float x2, float y2) {
         mMaxLengthSeconds = maxLengthSeconds;
         mSpeedUpFactor = speedUpFactor;
         if (x2 < 0) {
@@ -92,10 +94,8 @@ public class FlingAnimationUtils {
         }
         mY2 = y2;
 
-        mMinVelocityPxPerSecond
-                = MIN_VELOCITY_DP_PER_SECOND * ctx.getResources().getDisplayMetrics().density;
-        mHighVelocityPxPerSecond
-                = HIGH_VELOCITY_DP_PER_SECOND * ctx.getResources().getDisplayMetrics().density;
+        mMinVelocityPxPerSecond = MIN_VELOCITY_DP_PER_SECOND * displayMetrics.density;
+        mHighVelocityPxPerSecond = HIGH_VELOCITY_DP_PER_SECOND * displayMetrics.density;
     }
 
     /**
@@ -365,4 +365,51 @@ public class FlingAnimationUtils {
         long duration;
     }
 
+    public static class Builder {
+        private final DisplayMetrics mDisplayMetrics;
+        float mMaxLengthSeconds;
+        float mSpeedUpFactor;
+        float mX2;
+        float mY2;
+
+        @Inject
+        public Builder(DisplayMetrics displayMetrics) {
+            mDisplayMetrics = displayMetrics;
+            reset();
+        }
+
+        public Builder setMaxLengthSeconds(float maxLengthSeconds) {
+            mMaxLengthSeconds = maxLengthSeconds;
+            return this;
+        }
+
+        public Builder setSpeedUpFactor(float speedUpFactor) {
+            mSpeedUpFactor = speedUpFactor;
+            return this;
+        }
+
+        public Builder setX2(float x2) {
+            mX2 = x2;
+            return this;
+        }
+
+        public Builder setY2(float y2) {
+            mY2 = y2;
+            return this;
+        }
+
+        public Builder reset() {
+            mMaxLengthSeconds = 0;
+            mSpeedUpFactor = 0.0f;
+            mX2 = -1.0f;
+            mY2 = 1.0f;
+
+            return this;
+        }
+
+        public FlingAnimationUtils build() {
+            return new FlingAnimationUtils(mDisplayMetrics, mMaxLengthSeconds, mSpeedUpFactor,
+                    mX2, mY2);
+        }
+    }
 }

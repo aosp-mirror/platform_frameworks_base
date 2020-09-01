@@ -2274,6 +2274,26 @@ interface ITelephony {
     int changeIccLockPassword(int subId, String oldPassword, String newPassword);
 
     /**
+     * Request for receiving user activity notification
+     */
+    oneway void requestUserActivityNotification();
+
+    /**
+     * Called when userActivity is signalled in the power manager.
+     * This is safe to call from any thread, with any window manager locks held or not.
+     */
+    oneway void userActivity();
+
+    /**
+     * Get the user manual network selection.
+     * Return empty string if in automatic selection.
+     *
+     * @param subId the id of the subscription
+     * @return operatorinfo on success
+     */
+    String getManualNetworkSelectionPlmn(int subId);
+
+    /**
      * Whether device can connect to 5G network when two SIMs are active.
      */
     boolean canConnectTo5GInDsdsMode();

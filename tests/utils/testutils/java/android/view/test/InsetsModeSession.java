@@ -31,7 +31,7 @@ public class InsetsModeSession implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         ViewRootImpl.sNewInsetsMode = mOldMode;
     }
 }

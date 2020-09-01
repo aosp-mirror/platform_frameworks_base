@@ -18,7 +18,7 @@ package android.service.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -37,11 +37,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
@@ -49,15 +49,23 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IContentCaptureDirectManager;
 import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A service used to capture the content of the screen to provide contextual data in other areas of
@@ -113,6 +121,9 @@ public abstract class ContentCaptureService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.content_capture";
 
+    private final LocalDataShareAdapterResourceManager mDataShareAdapterResourceManager =
+            new LocalDataShareAdapterResourceManager();
+
     private Handler mHandler;
     private IContentCaptureServiceCallback mCallback;
 
@@ -161,16 +172,20 @@ public abstract class ContentCaptureService extends Service {
 
         @Override
         public void onDataRemovalRequest(DataRemovalRequest request) {
-            mHandler.sendMessage(
-                    obtainMessage(ContentCaptureService::handleOnDataRemovalRequest,
-                            ContentCaptureService.this, request));
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnDataRemovalRequest,
+                    ContentCaptureService.this, request));
+        }
+
+        @Override
+        public void onDataShared(DataShareRequest request, IDataShareCallback callback) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnDataShared,
+                    ContentCaptureService.this, request, callback));
         }
 
         @Override
         public void onActivityEvent(ActivityEvent event) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnActivityEvent,
                     ContentCaptureService.this, event));
-
         }
     };
 
@@ -320,9 +335,27 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
+     * Notifies the service that data has been shared via a readable file.
      *
-     * @param sessionId the session's Id
+     * @param request request object containing information about data being shared
+     * @param callback callback to be fired with response on whether the request is "needed" and can
+     *                 be handled by the Content Capture service.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void onDataShareRequest(@NonNull DataShareRequest request,
+            @NonNull DataShareCallback callback) {
+        if (sVerbose) Log.v(TAG, "onDataShareRequest()");
+    }
+
+    /**
+     * Notifies the service of {@link SnapshotData snapshot data} associated with an activity.
+     *
+     * @param sessionId the session's Id. This may also be
+     *                  {@link ContentCaptureSession#NO_SESSION_ID} if no content capture session
+     *                  exists for the activity being snapshotted
      * @param snapshotData the data
      */
     public void onActivitySnapshot(@NonNull ContentCaptureSessionId sessionId,
@@ -507,6 +540,38 @@ public abstract class ContentCaptureService extends Service {
         onDataRemovalRequest(request);
     }
 
+    private void handleOnDataShared(@NonNull DataShareRequest request,
+            IDataShareCallback callback) {
+        onDataShareRequest(request, new DataShareCallback() {
+
+            @Override
+            public void onAccept(@NonNull Executor executor,
+                    @NonNull DataShareReadAdapter adapter) {
+                Preconditions.checkNotNull(adapter);
+                Preconditions.checkNotNull(executor);
+
+                DataShareReadAdapterDelegate delegate =
+                        new DataShareReadAdapterDelegate(executor, adapter,
+                                mDataShareAdapterResourceManager);
+
+                try {
+                    callback.accept(delegate);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to accept data sharing", e);
+                }
+            }
+
+            @Override
+            public void onReject() {
+                try {
+                    callback.reject();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to reject data sharing", e);
+                }
+            }
+        });
+    }
+
     private void handleOnActivityEvent(@NonNull ActivityEvent event) {
         onActivityEvent(event);
     }
@@ -538,7 +603,7 @@ public abstract class ContentCaptureService extends Service {
                     + rightUid);
             long now = System.currentTimeMillis();
             if (now - mLastCallerMismatchLog > mCallerMismatchTimeout) {
-                StatsLog.write(StatsLog.CONTENT_CAPTURE_CALLER_MISMATCH_REPORTED,
+                FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_CALLER_MISMATCH_REPORTED,
                         getPackageManager().getNameForUid(rightUid),
                         getPackageManager().getNameForUid(uid));
                 mLastCallerMismatchLog = now;
@@ -589,6 +654,116 @@ public abstract class ContentCaptureService extends Service {
             mCallback.writeSessionFlush(sessionId, app, flushMetrics, options, flushReason);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to write flush metrics: " + e);
+        }
+    }
+
+    private static class DataShareReadAdapterDelegate extends IDataShareReadAdapter.Stub {
+
+        private final WeakReference<LocalDataShareAdapterResourceManager> mResourceManagerReference;
+        private final Object mLock = new Object();
+
+        DataShareReadAdapterDelegate(Executor executor, DataShareReadAdapter adapter,
+                LocalDataShareAdapterResourceManager resourceManager) {
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(adapter);
+            Preconditions.checkNotNull(resourceManager);
+
+            resourceManager.initializeForDelegate(this, adapter, executor);
+            mResourceManagerReference = new WeakReference<>(resourceManager);
+        }
+
+        @Override
+        public void start(ParcelFileDescriptor fd)
+                throws RemoteException {
+            synchronized (mLock) {
+                executeAdapterMethodLocked(adapter -> adapter.onStart(fd), "onStart");
+            }
+        }
+
+        @Override
+        public void error(int errorCode) throws RemoteException {
+            synchronized (mLock) {
+                executeAdapterMethodLocked(
+                        adapter -> adapter.onError(errorCode), "onError");
+                clearHardReferences();
+            }
+        }
+
+        @Override
+        public void finish() throws RemoteException {
+            synchronized (mLock) {
+                clearHardReferences();
+            }
+        }
+
+        private void executeAdapterMethodLocked(Consumer<DataShareReadAdapter> adapterFn,
+                String methodName) {
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), resource manager has been GC'ed");
+                return;
+            }
+
+            DataShareReadAdapter adapter = resourceManager.getAdapter(this);
+            Executor executor = resourceManager.getExecutor(this);
+
+            if (adapter == null || executor == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), references are null");
+                return;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> adapterFn.accept(adapter));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private void clearHardReferences() {
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't clear references, resource manager has been GC'ed");
+                return;
+            }
+
+            resourceManager.clearHardReferences(this);
+        }
+    }
+
+    /**
+     * Wrapper class making sure dependencies on the current application stay in the application
+     * context.
+     */
+    private static class LocalDataShareAdapterResourceManager {
+
+        // Keeping hard references to the remote objects in the current process (static context)
+        // to prevent them to be gc'ed during the lifetime of the application. This is an
+        // artifact of only operating with weak references remotely: there has to be at least 1
+        // hard reference in order for this to not be killed.
+        private Map<DataShareReadAdapterDelegate, DataShareReadAdapter>
+                mDataShareReadAdapterHardReferences = new HashMap<>();
+        private Map<DataShareReadAdapterDelegate, Executor> mExecutorHardReferences =
+                new HashMap<>();
+
+
+        void initializeForDelegate(DataShareReadAdapterDelegate delegate,
+                DataShareReadAdapter adapter, Executor executor) {
+            mDataShareReadAdapterHardReferences.put(delegate, adapter);
+            mExecutorHardReferences.put(delegate, executor);
+        }
+
+        Executor getExecutor(DataShareReadAdapterDelegate delegate) {
+            return mExecutorHardReferences.get(delegate);
+        }
+
+        DataShareReadAdapter getAdapter(DataShareReadAdapterDelegate delegate) {
+            return mDataShareReadAdapterHardReferences.get(delegate);
+        }
+
+        void clearHardReferences(DataShareReadAdapterDelegate delegate) {
+            mDataShareReadAdapterHardReferences.remove(delegate);
+            mExecutorHardReferences.remove(delegate);
         }
     }
 }

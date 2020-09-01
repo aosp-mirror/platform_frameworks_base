@@ -19,8 +19,10 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -43,7 +45,9 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -53,8 +57,8 @@ import java.util.Arrays;
  * <li>The application display area specifies the part of the display that may contain
  * an application window, excluding the system decorations.  The application display area may
  * be smaller than the real display area because the system subtracts the space needed
- * for decor elements such as the status bar.  Use the following methods to query the
- * application display area: {@link #getSize}, {@link #getRectSize} and {@link #getMetrics}.</li>
+ * for decor elements such as the status bar.  Use {@link WindowMetrics#getBounds()} to query the
+ * application window bounds.</li>
  * <li>The real display area specifies the part of the display that contains content
  * including the system decorations.  Even so, the real display area may be smaller than the
  * physical size of the display if the window manager is emulating a smaller display
@@ -63,7 +67,7 @@ import java.util.Arrays;
  * </ul>
  * </p><p>
  * A logical display does not necessarily represent a particular physical display device
- * such as the built-in screen or an external monitor.  The contents of a logical
+ * such as the internal display or an external display.  The contents of a logical
  * display may be presented on one or more physical displays according to the devices
  * that are currently attached and whether mirroring has been enabled.
  * </p>
@@ -93,15 +97,22 @@ public final class Display {
     // We cache the app width and height properties briefly between calls
     // to getHeight() and getWidth() to ensure that applications perceive
     // consistent results when the size changes (most of the time).
-    // Applications should now be using getSize() instead.
+    // Applications should now be using WindowMetrics instead.
     private static final int CACHED_APP_SIZE_DURATION_MILLIS = 20;
     private long mLastCachedAppSizeUpdate;
     private int mCachedAppWidthCompat;
     private int mCachedAppHeightCompat;
 
     /**
-     * The default Display id, which is the id of the built-in primary display
-     * assuming there is one.
+     * Indicates that the application is started in a different rotation than the real display, so
+     * the display information may be adjusted. That ensures the methods {@link #getRotation},
+     * {@link #getRealSize}, {@link #getRealMetrics}, and {@link #getCutout} are consistent with how
+     * the application window is laid out.
+     */
+    private boolean mMayAdjustByFixedRotation;
+
+    /**
+     * The default Display id, which is the id of the primary display assuming there is one.
      */
     public static final int DEFAULT_DISPLAY = 0;
 
@@ -184,7 +195,7 @@ public final class Display {
      * Display flag: Indicates that the display is a presentation display.
      * <p>
      * This flag identifies secondary displays that are suitable for
-     * use as presentation displays such as HDMI or Wireless displays.  Applications
+     * use as presentation displays such as external or wireless displays.  Applications
      * may automatically project their content to presentation displays to provide
      * richer second screen experiences.
      * </p>
@@ -230,11 +241,24 @@ public final class Display {
      * This flag identifies secondary displays that should show system decorations, such as status
      * bar, navigation bar, home activity or IME.
      * </p>
+     * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      *
+     * @see #getFlags()
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
+
+    /**
+     * Flag: The display is trusted to show system decorations and receive inputs without users'
+     * touch.
+     * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     *
+     * @see #getFlags()
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_TRUSTED = 1 << 7;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled
@@ -250,32 +274,37 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_UNKNOWN = 0;
 
     /**
-     * Display type: Built-in display.
+     * Display type: Physical display connected through an internal port.
      * @hide
      */
-    public static final int TYPE_BUILT_IN = 1;
+    @TestApi
+    public static final int TYPE_INTERNAL = 1;
 
     /**
-     * Display type: HDMI display.
+     * Display type: Physical display connected through an external port.
      * @hide
      */
     @UnsupportedAppUsage
-    public static final int TYPE_HDMI = 2;
+    @TestApi
+    public static final int TYPE_EXTERNAL = 2;
 
     /**
      * Display type: WiFi display.
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_WIFI = 3;
 
     /**
      * Display type: Overlay display.
      * @hide
      */
+    @TestApi
     public static final int TYPE_OVERLAY = 4;
 
     /**
@@ -283,6 +312,7 @@ public final class Display {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static final int TYPE_VIRTUAL = 5;
 
     /**
@@ -382,6 +412,23 @@ public final class Display {
     /** @hide */
     public static final int COLOR_MODE_DISPLAY_P3 = 9;
 
+    /** @hide **/
+    @IntDef(prefix = {"COLOR_MODE_"}, value = {
+            COLOR_MODE_INVALID,
+            COLOR_MODE_DEFAULT,
+            COLOR_MODE_BT601_625,
+            COLOR_MODE_BT601_625_UNADJUSTED,
+            COLOR_MODE_BT601_525,
+            COLOR_MODE_BT601_525_UNADJUSTED,
+            COLOR_MODE_BT709,
+            COLOR_MODE_DCI_P3,
+            COLOR_MODE_SRGB,
+            COLOR_MODE_ADOBE_RGB,
+            COLOR_MODE_DISPLAY_P3
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorMode {}
+
     /**
      * Indicates that when display is removed, all its activities will be moved to the primary
      * display and the topmost activity should become focused.
@@ -402,10 +449,14 @@ public final class Display {
     /**
      * Internal method to create a display.
      * The display created with this method will have a static {@link DisplayAdjustments} applied.
-     * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
-     * or {@link android.hardware.display.DisplayManager#getDisplay}
-     * to get a display object.
+     * Applications should use {@link android.content.Context#getDisplay} with
+     * {@link android.app.Activity} or a context associated with a {@link Display} via
+     * {@link android.content.Context#createDisplayContext(Display)}
+     * to get a display object associated with a {@link android.app.Context}, or
+     * {@link android.hardware.display.DisplayManager#getDisplay} to get a display object by id.
      *
+     * @see android.content.Context#getDisplay()
+     * @see android.content.Context#createDisplayContext(Display)
      * @hide
      */
     public Display(DisplayManagerGlobal global, int displayId, /*@NotNull*/ DisplayInfo displayInfo,
@@ -433,7 +484,7 @@ public final class Display {
         mResources = res;
         mDisplayAdjustments = mResources != null
             ? new DisplayAdjustments(mResources.getConfiguration())
-            : daj != null ? new DisplayAdjustments(daj) : null;
+            : daj != null ? new DisplayAdjustments(daj) : new DisplayAdjustments();
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
@@ -526,6 +577,7 @@ public final class Display {
      * @see #FLAG_SUPPORTS_PROTECTED_BUFFERS
      * @see #FLAG_SECURE
      * @see #FLAG_PRIVATE
+     * @see #FLAG_ROUND
      */
     public int getFlags() {
         return mFlags;
@@ -537,14 +589,15 @@ public final class Display {
      * @return The display type.
      *
      * @see #TYPE_UNKNOWN
-     * @see #TYPE_BUILT_IN
-     * @see #TYPE_HDMI
+     * @see #TYPE_INTERNAL
+     * @see #TYPE_EXTERNAL
      * @see #TYPE_WIFI
      * @see #TYPE_OVERLAY
      * @see #TYPE_VIRTUAL
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public int getType() {
         return mType;
     }
@@ -556,7 +609,6 @@ public final class Display {
      * @return The display address.
      * @hide
      */
-    @UnsupportedAppUsage
     public DisplayAddress getAddress() {
         return mAddress;
     }
@@ -649,7 +701,10 @@ public final class Display {
      * </p>
      *
      * @param outSize A {@link Point} object to receive the size information.
+     * @deprecated Use {@link WindowManager#getCurrentWindowMetrics()} to obtain an instance of
+     * {@link WindowMetrics} and use {@link WindowMetrics#getBounds()} instead.
      */
+    @Deprecated
     public void getSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -663,8 +718,10 @@ public final class Display {
      * Gets the size of the display as a rectangle, in pixels.
      *
      * @param outSize A {@link Rect} object to receive the size information.
-     * @see #getSize(Point)
+     * @deprecated Use {@link WindowMetrics#getBounds()} to get the dimensions of the application
+     * window area.
      */
+    @Deprecated
     public void getRectSize(Rect outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -727,7 +784,7 @@ public final class Display {
     }
 
     /**
-     * @deprecated Use {@link #getSize(Point)} instead.
+     * @deprecated Use {@link WindowMetrics#getBounds#width()} instead.
      */
     @Deprecated
     public int getWidth() {
@@ -738,27 +795,13 @@ public final class Display {
     }
 
     /**
-     * @deprecated Use {@link #getSize(Point)} instead.
+     * @deprecated Use {@link WindowMetrics#getBounds()#height()} instead.
      */
     @Deprecated
     public int getHeight() {
         synchronized (this) {
             updateCachedAppSizeIfNeededLocked();
             return mCachedAppHeightCompat;
-        }
-    }
-
-    /**
-     * @hide
-     * Return a rectangle defining the insets of the overscan region of the display.
-     * Each field of the rectangle is the number of pixels the overscan area extends
-     * into the display on that side.
-     */
-    public void getOverscanInsets(Rect outRect) {
-        synchronized (this) {
-            updateDisplayInfoLocked();
-            outRect.set(mDisplayInfo.overscanLeft, mDisplayInfo.overscanTop,
-                    mDisplayInfo.overscanRight, mDisplayInfo.overscanBottom);
         }
     }
 
@@ -783,7 +826,9 @@ public final class Display {
     public int getRotation() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.rotation;
+            return mMayAdjustByFixedRotation
+                    ? getDisplayAdjustments().getRotation(mDisplayInfo.rotation)
+                    : mDisplayInfo.rotation;
         }
     }
 
@@ -807,7 +852,9 @@ public final class Display {
     public DisplayCutout getCutout() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.displayCutout;
+            return mMayAdjustByFixedRotation
+                    ? getDisplayAdjustments().getDisplayCutout(mDisplayInfo.displayCutout)
+                    : mDisplayInfo.displayCutout;
         }
     }
 
@@ -867,6 +914,31 @@ public final class Display {
             updateDisplayInfoLocked();
             final Display.Mode[] modes = mDisplayInfo.supportedModes;
             return Arrays.copyOf(modes, modes.length);
+        }
+    }
+
+    /**
+     * <p> Returns true if the connected display can be switched into a mode with minimal
+     * post processing. </p>
+     *
+     * <p> If the Display sink is connected via HDMI, this method will return true if the
+     * display supports either Auto Low Latency Mode or Game Content Type.
+     *
+     * <p> If the Display sink has an internal connection or uses some other protocol than
+     * HDMI, this method will return true if the sink can be switched into an
+     * implementation-defined low latency image processing mode. </p>
+     *
+     * <p> The ability to switch to a mode with minimal post processing may be disabled
+     * by a user setting in the system settings menu. In that case, this method returns
+     * false. </p>
+     *
+     * @see android.view.Window#setPreferMinimalPostProcessing
+     */
+    @SuppressLint("VisiblySynchronized")
+    public boolean isMinimalPostProcessingSupported() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.minimalPostProcessingSupported;
         }
     }
 
@@ -974,6 +1046,40 @@ public final class Display {
     }
 
     /**
+     * Gets the supported wide color gamuts of this device.
+     *
+     * @return Supported WCG color spaces.
+     * @hide
+     */
+    @SuppressLint("VisiblySynchronized")
+    @NonNull
+    @TestApi
+    public @ColorMode ColorSpace[] getSupportedWideColorGamut() {
+        synchronized (this) {
+            final ColorSpace[] defaultColorSpaces = new ColorSpace[0];
+            updateDisplayInfoLocked();
+            if (!isWideColorGamut()) {
+                return defaultColorSpaces;
+            }
+
+            final int[] colorModes = getSupportedColorModes();
+            final List<ColorSpace> colorSpaces = new ArrayList<>();
+            for (int colorMode : colorModes) {
+                // Refer to DisplayInfo#isWideColorGamut.
+                switch (colorMode) {
+                    case COLOR_MODE_DCI_P3:
+                        colorSpaces.add(ColorSpace.get(ColorSpace.Named.DCI_P3));
+                        break;
+                    case COLOR_MODE_DISPLAY_P3:
+                        colorSpaces.add(ColorSpace.get(ColorSpace.Named.DISPLAY_P3));
+                        break;
+                }
+            }
+            return colorSpaces.toArray(defaultColorSpaces);
+        }
+    }
+
+    /**
      * Gets the app VSYNC offset, in nanoseconds.  This is a positive value indicating
      * the phase offset of the VSYNC events provided by Choreographer relative to the
      * display refresh.  For example, if Choreographer reports that the refresh occurred
@@ -1032,7 +1138,10 @@ public final class Display {
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
+     * @deprecated Use {@link WindowMetrics#getBounds()} to get the dimensions of the application
+     * window area, and {@link Configuration#densityDpi} to get the current density.
      */
+    @Deprecated
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -1057,6 +1166,9 @@ public final class Display {
             updateDisplayInfoLocked();
             outSize.x = mDisplayInfo.logicalWidth;
             outSize.y = mDisplayInfo.logicalHeight;
+            if (mMayAdjustByFixedRotation) {
+                getDisplayAdjustments().adjustSize(outSize, mDisplayInfo.rotation);
+            }
         }
     }
 
@@ -1076,6 +1188,9 @@ public final class Display {
             updateDisplayInfoLocked();
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+            if (mMayAdjustByFixedRotation) {
+                getDisplayAdjustments().adjustMetrics(outMetrics, mDisplayInfo.rotation);
+            }
         }
     }
 
@@ -1121,6 +1236,16 @@ public final class Display {
                 Display.FLAG_PRESENTATION;
     }
 
+    /**
+     * @return {@code true} if the display is a trusted display.
+     *
+     * @see #FLAG_TRUSTED
+     * @hide
+     */
+    public boolean isTrusted() {
+        return (mFlags & FLAG_TRUSTED) == FLAG_TRUSTED;
+    }
+
     private void updateDisplayInfoLocked() {
         // Note: The display manager caches display info objects on our behalf.
         DisplayInfo newInfo = mGlobal.getDisplayInfo(mDisplayId);
@@ -1142,6 +1267,9 @@ public final class Display {
                 }
             }
         }
+
+        mMayAdjustByFixedRotation = mResources != null
+                && mResources.hasOverrideDisplayAdjustments();
     }
 
     private void updateCachedAppSizeIfNeededLocked() {
@@ -1160,9 +1288,12 @@ public final class Display {
     public String toString() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, getDisplayAdjustments());
+            final DisplayAdjustments adjustments = getDisplayAdjustments();
+            mDisplayInfo.getAppMetrics(mTempMetrics, adjustments);
             return "Display id " + mDisplayId + ": " + mDisplayInfo
-                    + ", " + mTempMetrics + ", isValid=" + mIsValid;
+                    + (mMayAdjustByFixedRotation
+                            ? (", " + adjustments.getFixedRotationAdjustments() + ", ") : ", ")
+                    + mTempMetrics + ", isValid=" + mIsValid;
         }
     }
 
@@ -1173,10 +1304,10 @@ public final class Display {
         switch (type) {
             case TYPE_UNKNOWN:
                 return "UNKNOWN";
-            case TYPE_BUILT_IN:
-                return "BUILT_IN";
-            case TYPE_HDMI:
-                return "HDMI";
+            case TYPE_INTERNAL:
+                return "INTERNAL";
+            case TYPE_EXTERNAL:
+                return "EXTERNAL";
             case TYPE_WIFI:
                 return "WIFI";
             case TYPE_OVERLAY:
@@ -1228,6 +1359,15 @@ public final class Display {
      */
     public static boolean isDozeState(int state) {
         return state == STATE_DOZE || state == STATE_DOZE_SUSPEND;
+    }
+
+    /**
+     * Returns true if the display is in active state such as {@link #STATE_ON}
+     * or {@link #STATE_VR}.
+     * @hide
+     */
+    public static boolean isActiveState(int state) {
+        return state == STATE_ON || state == STATE_VR;
     }
 
     /**
@@ -1436,6 +1576,7 @@ public final class Display {
         public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
                 float maxAverageLuminance, float minLuminance) {
             mSupportedHdrTypes = supportedHdrTypes;
+            Arrays.sort(mSupportedHdrTypes);
             mMaxLuminance = maxLuminance;
             mMaxAverageLuminance = maxAverageLuminance;
             mMinLuminance = minLuminance;
@@ -1538,6 +1679,15 @@ public final class Display {
         @Override
         public int describeContents() {
             return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "HdrCapabilities{"
+                    + "mSupportedHdrTypes=" + Arrays.toString(mSupportedHdrTypes)
+                    + ", mMaxLuminance=" + mMaxLuminance
+                    + ", mMaxAverageLuminance=" + mMaxAverageLuminance
+                    + ", mMinLuminance=" + mMinLuminance + '}';
         }
     }
 }

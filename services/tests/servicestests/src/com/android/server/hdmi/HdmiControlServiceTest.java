@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
 
+import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -25,8 +26,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
+import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.test.TestLooper;
 
 import androidx.test.InstrumentationRegistry;
@@ -36,6 +48,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
@@ -98,6 +112,7 @@ public class HdmiControlServiceTest {
     }
 
     private static final String TAG = "HdmiControlServiceTest";
+    private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceMyDevice mMyAudioSystemDevice;
@@ -109,15 +124,26 @@ public class HdmiControlServiceTest {
     private boolean mStandbyMessageReceived;
     private HdmiPortInfo[] mHdmiPortInfo;
 
+    @Mock private IPowerManager mIPowerManagerMock;
+    @Mock private IThermalService mIThermalServiceMock;
+
     @Before
-    public void SetUp() {
-        mHdmiControlService =
-                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
-                    @Override
-                    boolean isStandbyMessageReceived() {
-                        return mStandbyMessageReceived;
-                    }
-                };
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+
+        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, null);
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
+        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
+
+        mHdmiControlService = new HdmiControlService(mContextSpy) {
+            @Override
+            boolean isStandbyMessageReceived() {
+                return mStandbyMessageReceived;
+            }
+        };
         mMyLooper = mTestLooper.getLooper();
 
         mMyAudioSystemDevice =
@@ -197,5 +223,141 @@ public class HdmiControlServiceTest {
         mNativeWrapper.setPhysicalAddress(0x2000);
         mHdmiControlService.initPortInfo();
         assertThat(mHdmiControlService.pathToPortId(0x1000)).isEqualTo(Constants.INVALID_PORT_ID);
+    }
+
+    @Test
+    public void initialPowerStatus_normalBoot_isTransientToStandby() {
+        assertThat(mHdmiControlService.getInitialPowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+    }
+
+    @Test
+    public void initialPowerStatus_quiescentBoot_isTransientToStandby() throws RemoteException {
+        when(mIPowerManagerMock.isInteractive()).thenReturn(false);
+        assertThat(mHdmiControlService.getInitialPowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+    }
+
+    @Test
+    public void powerStatusAfterBootComplete_normalBoot_isOn() {
+        mHdmiControlService.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON);
+        mHdmiControlService.onBootPhase(PHASE_BOOT_COMPLETED);
+        assertThat(mHdmiControlService.getPowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON);
+    }
+
+    @Test
+    public void powerStatusAfterBootComplete_quiescentBoot_isStandby() throws RemoteException {
+        when(mIPowerManagerMock.isInteractive()).thenReturn(false);
+        mHdmiControlService.onBootPhase(PHASE_BOOT_COMPLETED);
+        assertThat(mHdmiControlService.getPowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_STANDBY);
+    }
+
+    @Test
+    public void setAndGetCecVolumeControlEnabled_isApi() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isFalse();
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isTrue();
+    }
+
+    @Test
+    public void disableAndReenableCec_volumeControlReturnsToOriginalValue() {
+        boolean volumeControlEnabled = true;
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(volumeControlEnabled);
+
+        mHdmiControlService.setControlEnabled(false);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isFalse();
+
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isEqualTo(
+                volumeControlEnabled);
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_emitsCurrentState_enabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isTrue();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_emitsCurrentState_disabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isFalse();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_notifiesStateUpdate() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isTrue();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_honorsUnregistration() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.removeHdmiControlVolumeControlStatusChangeListener(callback);
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isFalse();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_notifiesStateUpdate_multiple() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback1 = new VolumeControlFeatureCallback();
+        VolumeControlFeatureCallback callback2 = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback1);
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback2);
+
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback1.mCallbackReceived).isTrue();
+        assertThat(callback2.mCallbackReceived).isTrue();
+        assertThat(callback1.mVolumeControlEnabled).isTrue();
+        assertThat(callback2.mVolumeControlEnabled).isTrue();
+    }
+
+    private static class VolumeControlFeatureCallback extends
+            IHdmiCecVolumeControlFeatureListener.Stub {
+        boolean mCallbackReceived = false;
+        boolean mVolumeControlEnabled = false;
+
+        @Override
+        public void onHdmiCecVolumeControlFeature(boolean enabled) throws RemoteException {
+            this.mCallbackReceived = true;
+            this.mVolumeControlEnabled = enabled;
+        }
     }
 }

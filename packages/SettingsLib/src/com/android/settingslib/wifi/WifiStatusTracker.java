@@ -17,6 +17,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -28,7 +29,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
-import android.net.wifi.WifiSsid;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -37,7 +37,10 @@ import com.android.settingslib.R;
 
 import java.util.List;
 
-public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
+/**
+ * Track status of Wi-Fi for the Sys UI.
+ */
+public class WifiStatusTracker {
     private final Context mContext;
     private final WifiNetworkScoreCache mWifiNetworkScoreCache;
     private final WifiManager mWifiManager;
@@ -56,8 +59,9 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
             .clearCapabilities()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
-    private final ConnectivityManager.NetworkCallback mNetworkCallback = new ConnectivityManager
-            .NetworkCallback() {
+    private final NetworkCallback mNetworkCallback = new NetworkCallback() {
+        // Note: onCapabilitiesChanged is guaranteed to be called "immediately" after onAvailable
+        // and onLinkPropertiesChanged.
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
@@ -65,10 +69,35 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
             mCallback.run();
         }
     };
+    private final NetworkCallback mDefaultNetworkCallback = new NetworkCallback() {
+                @Override
+                public void onCapabilitiesChanged(Network network, NetworkCapabilities nc) {
+                    // network is now the default network, and its capabilities are nc.
+                    // This method will always be called immediately after the network becomes the
+                    // default, in addition to any time the capabilities change while the network is
+                    // the default.
+                    mDefaultNetwork = network;
+                    mDefaultNetworkCapabilities = nc;
+                    updateStatusLabel();
+                    mCallback.run();
+                }
+                @Override
+                public void onLost(Network network) {
+                    // The system no longer has a default network.
+                    mDefaultNetwork = null;
+                    mDefaultNetworkCapabilities = null;
+                    updateStatusLabel();
+                    mCallback.run();
+                }
+            };
+    private Network mDefaultNetwork = null;
+    private NetworkCapabilities mDefaultNetworkCapabilities = null;
     private final Runnable mCallback;
 
     private WifiInfo mWifiInfo;
     public boolean enabled;
+    public boolean isCaptivePortal;
+    public boolean isDefaultNetwork;
     public int state;
     public boolean connected;
     public String ssid;
@@ -94,12 +123,43 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
             mWifiNetworkScoreCache.registerListener(mCacheListener);
             mConnectivityManager.registerNetworkCallback(
                     mNetworkRequest, mNetworkCallback, mHandler);
+            mConnectivityManager.registerDefaultNetworkCallback(mDefaultNetworkCallback, mHandler);
         } else {
             mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI,
                     mWifiNetworkScoreCache);
             mWifiNetworkScoreCache.unregisterListener();
             mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
+            mConnectivityManager.unregisterNetworkCallback(mDefaultNetworkCallback);
         }
+    }
+
+    /**
+     * Fetches initial state as if a WifiManager.NETWORK_STATE_CHANGED_ACTION have been received.
+     * This replaces the dependency on the initial sticky broadcast.
+     */
+    public void fetchInitialState() {
+        if (mWifiManager == null) {
+            return;
+        }
+        updateWifiState();
+        final NetworkInfo networkInfo =
+                mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        connected = networkInfo != null && networkInfo.isConnected();
+        mWifiInfo = null;
+        ssid = null;
+        if (connected) {
+            mWifiInfo = mWifiManager.getConnectionInfo();
+            if (mWifiInfo != null) {
+                if (mWifiInfo.isPasspointAp() || mWifiInfo.isOsuAp()) {
+                    ssid = mWifiInfo.getPasspointProviderFriendlyName();
+                } else {
+                    ssid = getValidSsid(mWifiInfo);
+                }
+                updateRssi(mWifiInfo.getRssi());
+                maybeRequestNetworkScore();
+            }
+        }
+        updateStatusLabel();
     }
 
     public void handleBroadcast(Intent intent) {
@@ -143,7 +203,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
 
     private void updateRssi(int newRssi) {
         rssi = newRssi;
-        level = WifiManager.calculateSignalLevel(rssi, WifiManager.RSSI_LEVELS);
+        level = mWifiManager.calculateSignalLevel(rssi);
     }
 
     private void maybeRequestNetworkScore() {
@@ -154,11 +214,25 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     }
 
     private void updateStatusLabel() {
-        final NetworkCapabilities networkCapabilities
-                = mConnectivityManager.getNetworkCapabilities(mWifiManager.getCurrentNetwork());
+        if (mWifiManager == null) {
+            return;
+        }
+        NetworkCapabilities networkCapabilities;
+        final Network currentWifiNetwork = mWifiManager.getCurrentNetwork();
+        if (currentWifiNetwork != null && currentWifiNetwork.equals(mDefaultNetwork)) {
+            // Wifi is connected and the default network.
+            isDefaultNetwork = true;
+            networkCapabilities = mDefaultNetworkCapabilities;
+        } else {
+            isDefaultNetwork = false;
+            networkCapabilities = mConnectivityManager.getNetworkCapabilities(
+                    mWifiManager.getCurrentNetwork());
+        }
+        isCaptivePortal = false;
         if (networkCapabilities != null) {
             if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) {
                 statusLabel = mContext.getString(R.string.wifi_status_sign_in_required);
+                isCaptivePortal = true;
                 return;
             } else if (networkCapabilities.hasCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY)) {
                 statusLabel = mContext.getString(R.string.wifi_limited_connection);
@@ -189,7 +263,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
 
     private String getValidSsid(WifiInfo info) {
         String ssid = info.getSSID();
-        if (ssid != null && !WifiSsid.NONE.equals(ssid)) {
+        if (ssid != null && !WifiManager.UNKNOWN_SSID.equals(ssid)) {
             return ssid;
         }
         // OK, it's not in the connectionInfo; we have to go hunting for it

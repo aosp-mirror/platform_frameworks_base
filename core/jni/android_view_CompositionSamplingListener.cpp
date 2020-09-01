@@ -43,15 +43,22 @@ struct {
 
 struct CompositionSamplingListener : public BnRegionSamplingListener {
     CompositionSamplingListener(JNIEnv* env, jobject listener)
-            : mListener(env->NewGlobalRef(listener)) {}
+            : mListener(env->NewWeakGlobalRef(listener)) {}
 
     void onSampleCollected(float medianLuma) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onSampleCollected.");
 
+        jobject listener = env->NewGlobalRef(mListener);
+        if (listener == NULL) {
+            // Weak reference went out of scope
+            return;
+        }
         env->CallStaticVoidMethod(gListenerClassInfo.mClass,
-                gListenerClassInfo.mDispatchOnSampleCollected, mListener,
+                gListenerClassInfo.mDispatchOnSampleCollected, listener,
                 static_cast<jfloat>(medianLuma));
+        env->DeleteGlobalRef(listener);
+
         if (env->ExceptionCheck()) {
             ALOGE("CompositionSamplingListener.onSampleCollected() failed.");
             LOGE_EX(env);
@@ -62,11 +69,11 @@ struct CompositionSamplingListener : public BnRegionSamplingListener {
 protected:
     virtual ~CompositionSamplingListener() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->DeleteGlobalRef(mListener);
+        env->DeleteWeakGlobalRef(mListener);
     }
 
 private:
-    jobject mListener;
+    jweak mListener;
 };
 
 jlong nativeCreate(JNIEnv* env, jclass clazz, jobject obj) {
@@ -80,11 +87,11 @@ void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
     listener->decStrong((void*)nativeCreate);
 }
 
-void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jobject stopLayerTokenObj,
+void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jlong stopLayerObj,
         jint left, jint top, jint right, jint bottom) {
     sp<CompositionSamplingListener> listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
-    sp<IBinder> stopLayerHandle = ibinderForJavaObject(env, stopLayerTokenObj);
-
+    auto stopLayer = reinterpret_cast<SurfaceControl*>(stopLayerObj);
+    sp<IBinder> stopLayerHandle = stopLayer != nullptr ? stopLayer->getHandle() : nullptr;
     if (SurfaceComposerClient::addRegionSamplingListener(
             Rect(left, top, right, bottom), stopLayerHandle, listener) != OK) {
         constexpr auto error_msg = "Couldn't addRegionSamplingListener";
@@ -109,7 +116,7 @@ const JNINativeMethod gMethods[] = {
             (void*)nativeCreate },
     { "nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    { "nativeRegister", "(JLandroid/os/IBinder;IIII)V",
+    { "nativeRegister", "(JJIIII)V",
             (void*)nativeRegister },
     { "nativeUnregister", "(J)V",
             (void*)nativeUnregister }

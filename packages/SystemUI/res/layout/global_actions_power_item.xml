@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<com.android.systemui.globalactions.GlobalActionsItem
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/global_actions_power_dialog_item_width"
+    android:layout_height="@dimen/global_actions_power_dialog_item_height"
+    android:gravity="bottom|center_horizontal"
+    android:orientation="vertical"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:stateListAnimator="@anim/control_state_list_animator">
+    <ImageView
+        android:id="@*android:id/icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginBottom="@dimen/global_actions_power_dialog_item_bottom_margin"
+        android:scaleType="centerInside"
+        android:tint="@color/control_primary_text" />
+    <TextView
+        android:id="@*android:id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:ellipsize="marquee"
+        android:layout_marginBottom="16dp"
+        android:maxLines="1"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:textColor="@color/control_primary_text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+</com.android.systemui.globalactions.GlobalActionsItem>
+

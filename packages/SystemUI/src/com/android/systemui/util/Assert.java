@@ -18,24 +18,32 @@ package com.android.systemui.util;
 
 import android.os.Looper;
 
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Helper providing common assertions.
  */
 public class Assert {
+    private static final Looper sMainLooper = Looper.getMainLooper();
+    private static Looper sTestLooper = null;
 
     @VisibleForTesting
-    public static Looper sMainLooper = Looper.getMainLooper();
+    public static void setTestableLooper(Looper testLooper) {
+        sTestLooper = testLooper;
+    }
 
     public static void isMainThread() {
-        if (!sMainLooper.isCurrentThread()) {
-            throw new IllegalStateException("should be called from the main thread.");
+        if (!sMainLooper.isCurrentThread()
+                && (sTestLooper == null || !sTestLooper.isCurrentThread())) {
+            throw new IllegalStateException("should be called from the main thread."
+                    + " sMainLooper.threadName=" + sMainLooper.getThread().getName()
+                    + " Thread.currentThread()=" + Thread.currentThread().getName());
         }
     }
 
     public static void isNotMainThread() {
-        if (sMainLooper.isCurrentThread()) {
+        if (sMainLooper.isCurrentThread()
+                && (sTestLooper == null || sTestLooper.isCurrentThread())) {
             throw new IllegalStateException("should not be called from the main thread.");
         }
     }

@@ -69,7 +69,7 @@ int DrawFrameTask::drawFrame() {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
     mSyncResult = SyncResult::OK;
-    mSyncQueued = systemTime(CLOCK_MONOTONIC);
+    mSyncQueued = systemTime(SYSTEM_TIME_MONOTONIC);
     postAndWait();
 
     return mSyncResult;

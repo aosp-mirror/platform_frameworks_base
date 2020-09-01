@@ -45,7 +45,7 @@ public:
             canvas.save(SaveFlags::MatrixClip);
             canvas.translate(0, 400);
             canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::Flags(0));  // unclipped
-            SkPaint paint;
+            Paint paint;
             paint.setAntiAlias(true);
             paint.setColor(Color::Green_700);
             canvas.drawCircle(200, 200, 200, paint);

@@ -29,7 +29,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Slog;
+import android.util.Log;
 
 import java.util.Stack;
 
@@ -841,7 +841,7 @@ public class AsyncChannel {
                     msg.replyTo = sm.mMessenger;
                     synchronized (sm.mHandler.mLockObject) {
                         if (sm.mHandler.mResultMsg != null) {
-                            Slog.wtf(TAG, "mResultMsg should be null here");
+                            Log.wtf(TAG, "mResultMsg should be null here");
                             sm.mHandler.mResultMsg = null;
                         }
                         dstMessenger.send(msg);
@@ -851,9 +851,9 @@ public class AsyncChannel {
                     }
                 }
             } catch (InterruptedException e) {
-                Slog.e(TAG, "error in sendMessageSynchronously", e);
+                Log.e(TAG, "error in sendMessageSynchronously", e);
             } catch (RemoteException e) {
-                Slog.e(TAG, "error in sendMessageSynchronously", e);
+                Log.e(TAG, "error in sendMessageSynchronously", e);
             }
             sm.recycle();
             return resultMsg;
@@ -939,7 +939,7 @@ public class AsyncChannel {
      * @param s
      */
     private static void log(String s) {
-        Slog.d(TAG, s);
+        Log.d(TAG, s);
     }
 
     private final class DeathMonitor implements IBinder.DeathRecipient {

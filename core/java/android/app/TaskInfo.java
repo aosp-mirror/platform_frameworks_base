@@ -18,13 +18,16 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
+import android.window.WindowContainerToken;
 
 /**
  * Stores information about a particular Task.
@@ -138,6 +141,41 @@ public class TaskInfo {
     @UnsupportedAppUsage
     public final Configuration configuration = new Configuration();
 
+    /**
+     * Used as an opaque identifier for this task.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerToken token;
+
+    /**
+     * The PictureInPictureParams for the Task, if set.
+     * @hide
+     */
+    @Nullable
+    public PictureInPictureParams pictureInPictureParams;
+
+    /**
+     * The activity type of the top activity in this task.
+     * @hide
+     */
+    public @WindowConfiguration.ActivityType int topActivityType;
+
+    /**
+     * The {@link ActivityInfo} of the top activity in this task.
+     * @hide
+     */
+    @Nullable
+    public ActivityInfo topActivityInfo;
+
+    /**
+     * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
+     * supports), this is what the system actually uses for resizability based on other policy and
+     * developer options.
+     * @hide
+     */
+    public boolean isResizeable;
+
     TaskInfo() {
         // Do nothing
     }
@@ -147,17 +185,31 @@ public class TaskInfo {
     }
 
     /**
-     * @param reducedResolution
+     * @param isLowResolution
      * @return
      * @hide
      */
-    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean reducedResolution) {
+    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean isLowResolution) {
         try {
-            return ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            return ActivityManager.getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;
         }
+    }
+
+    /** @hide */
+    @NonNull
+    @TestApi
+    public WindowContainerToken getToken() {
+        return token;
+    }
+
+    /** @hide */
+    @NonNull
+    @TestApi
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     /**
@@ -186,6 +238,15 @@ public class TaskInfo {
         supportsSplitScreenMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
+        token = WindowContainerToken.CREATOR.createFromParcel(source);
+        topActivityType = source.readInt();
+        pictureInPictureParams = source.readInt() != 0
+                ? PictureInPictureParams.CREATOR.createFromParcel(source)
+                : null;
+        topActivityInfo = source.readInt() != 0
+                ? ActivityInfo.CREATOR.createFromParcel(source)
+                : null;
+        isResizeable = source.readBoolean();
     }
 
     /**
@@ -221,6 +282,21 @@ public class TaskInfo {
         dest.writeBoolean(supportsSplitScreenMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
+        token.writeToParcel(dest, flags);
+        dest.writeInt(topActivityType);
+        if (pictureInPictureParams == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            pictureInPictureParams.writeToParcel(dest, flags);
+        }
+        if (topActivityInfo == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            topActivityInfo.writeToParcel(dest, flags);
+        }
+        dest.writeBoolean(isResizeable);
     }
 
     @Override
@@ -234,6 +310,11 @@ public class TaskInfo {
                 + " numActivities=" + numActivities
                 + " lastActiveTime=" + lastActiveTime
                 + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
-                + " resizeMode=" + resizeMode;
+                + " resizeMode=" + resizeMode
+                + " isResizeable=" + isResizeable
+                + " token=" + token
+                + " topActivityType=" + topActivityType
+                + " pictureInPictureParams=" + pictureInPictureParams
+                + " topActivityInfo=" + topActivityInfo;
     }
 }

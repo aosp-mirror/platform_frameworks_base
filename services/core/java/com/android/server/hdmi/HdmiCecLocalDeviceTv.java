@@ -213,6 +213,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mLocalDeviceAddresses = initLocalDeviceAddresses();
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
+        startQueuedActions();
         if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildRequestActiveSource(mAddress));
         }
@@ -680,6 +681,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleReportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (!mService.isHdmiCecVolumeControlEnabled()) {
+            return false;
+        }
 
         boolean mute = HdmiUtils.isAudioStatusMute(message);
         int volume = HdmiUtils.getAudioStatusVolume(message);
@@ -989,7 +993,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     void setAudioStatus(boolean mute, int volume) {
-        if (!isSystemAudioActivated()) {
+        if (!isSystemAudioActivated() || !mService.isHdmiCecVolumeControlEnabled()) {
             return;
         }
         synchronized (mLock) {
@@ -1011,7 +1015,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // On initialization process, getAvrDeviceInfo() may return null and cause exception
             return;
         }
-        if (delta == 0 || !isSystemAudioActivated()) {
+        if (delta == 0 || !isSystemAudioActivated() || !mService.isHdmiCecVolumeControlEnabled()) {
             return;
         }
 
@@ -1040,7 +1044,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeMute(boolean mute) {
         assertRunOnServiceThread();
-        if (getAvrDeviceInfo() == null) {
+        if (getAvrDeviceInfo() == null || !mService.isHdmiCecVolumeControlEnabled()) {
             // On initialization process, getAvrDeviceInfo() may return null and cause exception
             return;
         }
@@ -1560,6 +1564,18 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!connected) {
             removeCecSwitches(portId);
         }
+
+        // Turning System Audio Mode off when the AVR is unlugged or standby.
+        // When the device is not unplugged but reawaken from standby, we check if the System
+        // Audio Control Feature is enabled or not then decide if turning SAM on/off accordingly.
+        if (getAvrDeviceInfo() != null && portId == getAvrDeviceInfo().getPortId()) {
+            if (!connected) {
+                setSystemAudioMode(false);
+            } else if (mSystemAudioControlFeatureEnabled != mService.isSystemAudioActivated()){
+                setSystemAudioMode(mSystemAudioControlFeatureEnabled);
+            }
+        }
+
         // Tv device will have permanent HotplugDetectionAction.
         List<HotplugDetectionAction> hotplugActions = getActions(HotplugDetectionAction.class);
         if (!hotplugActions.isEmpty()) {

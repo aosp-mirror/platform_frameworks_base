@@ -15,31 +15,33 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.car.CarNavigationBarView
+<com.android.systemui.car.navigationbar.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/system_bar_background"
     android:orientation="vertical">
+    <!--The 20dp padding is the difference between the background selected icon size and the ripple
+        that was chosen, thus it's a hack to make it look pretty and not an official margin value-->
     <LinearLayout
         android:id="@id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="20dp"
+        android:gravity="center"
+        android:layoutDirection="ltr"
         android:paddingEnd="20dp"
-        android:gravity="center">
+        android:paddingStart="20dp">
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/home"
             style="@style/NavigationBarButton"
             systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
             systemui:icon="@drawable/car_ic_overview"
             systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
-            systemui:longIntent="intent:#Intent;action=com.google.android.demandspace.START;end"
             systemui:selectedIcon="@drawable/car_ic_overview_selected"
-            systemui:useMoreIcon="false"
+            systemui:highlightWhenSelected="true"
         />
 
         <Space
@@ -47,14 +49,14 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/maps_nav"
             style="@style/NavigationBarButton"
             systemui:categories="android.intent.category.APP_MAPS"
             systemui:icon="@drawable/car_ic_navigation"
-            systemui:intent="intent:#Intent;component=com.android.car.carlauncher/.CarLauncher;category=android.intent.category.APP_MAPS;launchFlags=0x24000000;end"
+            systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MAPS;launchFlags=0x14000000;end"
             systemui:selectedIcon="@drawable/car_ic_navigation_selected"
-            systemui:useMoreIcon="false"
+            systemui:highlightWhenSelected="true"
         />
 
         <Space
@@ -62,7 +64,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/music_nav"
             style="@style/NavigationBarButton"
             systemui:categories="android.intent.category.APP_MUSIC"
@@ -70,7 +72,7 @@
             systemui:intent="intent:#Intent;action=android.car.intent.action.MEDIA_TEMPLATE;launchFlags=0x10000000;end"
             systemui:packages="com.android.car.media"
             systemui:selectedIcon="@drawable/car_ic_music_selected"
-            systemui:useMoreIcon="false"
+            systemui:highlightWhenSelected="true"
         />
 
         <Space
@@ -78,14 +80,14 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/phone_nav"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/car_ic_phone"
             systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.android.car.dialer;launchFlags=0x10000000;end"
             systemui:packages="com.android.car.dialer"
             systemui:selectedIcon="@drawable/car_ic_phone_selected"
-            systemui:useMoreIcon="false"
+            systemui:highlightWhenSelected="true"
         />
 
         <Space
@@ -93,14 +95,14 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/grid_nav"
             style="@style/NavigationBarButton"
             systemui:componentNames="com.android.car.carlauncher/.AppGridActivity"
             systemui:icon="@drawable/car_ic_apps"
             systemui:intent="intent:#Intent;component=com.android.car.carlauncher/.AppGridActivity;launchFlags=0x24000000;end"
             systemui:selectedIcon="@drawable/car_ic_apps_selected"
-            systemui:useMoreIcon="false"
+            systemui:highlightWhenSelected="true"
         />
 
         <Space
@@ -108,15 +110,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <!-- Click handling will be initialized in CarNavigationBarView because its
-             id = notifications which is treated special for the opening of the notification panel
-         -->
-        <com.android.systemui.statusbar.car.CarNavigationButton
+        <com.android.systemui.car.navigationbar.CarNavigationButton
             android:id="@+id/notifications"
             style="@style/NavigationBarButton"
-            android:src="@drawable/car_ic_notification"
-            systemui:selectedIcon="@drawable/car_ic_notification_selected"
-            systemui:useMoreIcon="false"
+            systemui:icon="@drawable/car_ic_notification"
+            systemui:longIntent="intent:#Intent;component=com.android.car.bugreport/.BugReportActivity;end"
         />
 
         <Space
@@ -124,13 +122,13 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.car.navigationbar.AssitantButton
             android:id="@+id/assist"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/ic_mic_white"
-            systemui:intent="intent:#Intent;action=com.google.android.demandspace.START;end"
-            systemui:useMoreIcon="false"
+            systemui:useDefaultAppIconForRole="true"
         />
+
     </LinearLayout>
 
     <LinearLayout
@@ -138,10 +136,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="@*android:dimen/car_keyline_1"
-        android:paddingEnd="@*android:dimen/car_keyline_1"
         android:gravity="center"
-        android:visibility="gone">
-    </LinearLayout>
+        android:layoutDirection="ltr"
+        android:paddingEnd="@dimen/car_keyline_1"
+        android:paddingStart="@dimen/car_keyline_1"
+        android:visibility="gone"
+    />
 
-</com.android.systemui.statusbar.car.CarNavigationBarView>
+</com.android.systemui.car.navigationbar.CarNavigationBarView>

@@ -24,19 +24,19 @@ public abstract class PipTouchGesture {
     /**
      * Handle the touch down.
      */
-    void onDown(PipTouchState touchState) {}
+    public void onDown(PipTouchState touchState) {}
 
     /**
      * Handle the touch move, and return whether the event was consumed.
      */
-    boolean onMove(PipTouchState touchState) {
+    public boolean onMove(PipTouchState touchState) {
         return false;
     }
 
     /**
      * Handle the touch up, and return whether the gesture was consumed.
      */
-    boolean onUp(PipTouchState touchState) {
+    public boolean onUp(PipTouchState touchState) {
         return false;
     }
 }

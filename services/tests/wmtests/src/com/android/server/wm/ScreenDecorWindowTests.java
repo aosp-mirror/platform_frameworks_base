@@ -25,6 +25,8 @@ import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
 import static android.view.Gravity.TOP;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -61,6 +63,8 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.compatibility.common.util.SystemUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -184,13 +188,24 @@ public class ScreenDecorWindowTests {
         assertTopInsetEquals(mTestActivity, initialInsets.getSystemWindowInsetTop());
     }
 
+    @Test
+    public void testProvidesInsetsTypes() {
+        int[] providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
+        final View win = createWindow("StatusBarSubPanel", TOP, MATCH_PARENT, mDecorThickness, RED,
+                FLAG_LAYOUT_IN_SCREEN, 0, providesInsetsTypes);
+
+        assertInsetGreaterOrEqual(mTestActivity, TOP, mDecorThickness);
+    }
+
     private View createDecorWindow(int gravity, int width, int height) {
+        int[] providesInsetsTypes =
+                new int[]{gravity == TOP ? ITYPE_STATUS_BAR : ITYPE_NAVIGATION_BAR};
         return createWindow("decorWindow", gravity, width, height, RED,
-                FLAG_LAYOUT_IN_SCREEN, PRIVATE_FLAG_IS_SCREEN_DECOR);
+                FLAG_LAYOUT_IN_SCREEN, PRIVATE_FLAG_IS_SCREEN_DECOR, providesInsetsTypes);
     }
 
     private View createWindow(String name, int gravity, int width, int height, int color, int flags,
-            int privateFlags) {
+            int privateFlags, int[] providesInsetsTypes) {
 
         final View[] viewHolder = new View[1];
         final int finalFlag = flags
@@ -202,6 +217,7 @@ public class ScreenDecorWindowTests {
                     width, height, TYPE_APPLICATION_OVERLAY, finalFlag, PixelFormat.OPAQUE);
             lp.gravity = gravity;
             lp.privateFlags |= privateFlags;
+            lp.providesInsetsTypes = providesInsetsTypes;
 
             final TextView view = new TextView(mContext);
             view.setText("ScreenDecorWindowTests - " + name);
@@ -329,7 +345,10 @@ public class ScreenDecorWindowTests {
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(displayId);
-        final Activity activity = mInstrumentation.startActivitySync(intent, options.toBundle());
+
+        final Activity activity = SystemUtil.runWithShellPermissionIdentity(
+                () -> mInstrumentation.startActivitySync(intent, options.toBundle()),
+                "android.permission.ACTIVITY_EMBEDDING");
         waitForIdle();
 
         assertEquals(displayId, activity.getDisplayId());

@@ -46,4 +46,7 @@ public interface PersistentDataBlockManagerInternal {
 
     /** Update the OEM unlock enabled bit, bypassing user restriction checks. */
     void forceOemUnlockEnabled(boolean enabled);
+
+    /** Retrieves the UID that can access the persistent data partition. */
+    int getAllowedUid();
 }

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FRAMEWORK_RES_APK=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/public/android.jar
+FRAMEWORK_RES_APK=${ANDROID_PRODUCT_OUT}/system/framework/framework-res.apk
 
 aapt2 compile --dir res -o compiled.flata
 
@@ -49,6 +49,14 @@ aapt2 link \
     -I "$FRAMEWORK_RES_APK" \
     --manifest AndroidManifestStatic2.xml \
     -o overlay-static-2.apk \
+    compiled.flata
+
+aapt2 link \
+    --no-resource-removal \
+    --shared-lib \
+    -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifest.xml \
+    -o overlay-shared.apk \
     compiled.flata
 
 rm compiled.flata

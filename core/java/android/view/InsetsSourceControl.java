@@ -16,10 +16,14 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
+
+import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Represents a parcelable object to allow controlling a single {@link InsetsSource}.
@@ -27,22 +31,38 @@ import android.view.InsetsState.InternalInsetType;
  */
 public class InsetsSourceControl implements Parcelable {
 
-    private final @InternalInsetType int mType;
-    private final SurfaceControl mLeash;
+    private final @InternalInsetsType int mType;
+    private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;
 
-    public InsetsSourceControl(@InternalInsetType int type, SurfaceControl leash,
+    public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
             Point surfacePosition) {
         mType = type;
         mLeash = leash;
         mSurfacePosition = surfacePosition;
     }
 
+    public InsetsSourceControl(InsetsSourceControl other) {
+        mType = other.mType;
+        if (other.mLeash != null) {
+            mLeash = new SurfaceControl(other.mLeash, "InsetsSourceControl");
+        } else {
+            mLeash = null;
+        }
+        mSurfacePosition = new Point(other.mSurfacePosition);
+    }
+
     public int getType() {
         return mType;
     }
 
-    public SurfaceControl getLeash() {
+    /**
+     * Gets the leash for controlling insets source. If the system is controlling the insets source,
+     * for example, transient bars, the client will receive fake controls without leash in it.
+     *
+     * @return the leash.
+     */
+    public @Nullable SurfaceControl getLeash() {
         return mLeash;
     }
 
@@ -74,6 +94,20 @@ public class InsetsSourceControl implements Parcelable {
         dest.writeInt(mType);
         dest.writeParcelable(mLeash, 0 /* flags*/);
         dest.writeParcelable(mSurfacePosition, 0 /* flags*/);
+    }
+
+    public void release(Consumer<SurfaceControl> surfaceReleaseConsumer) {
+        if (mLeash != null) {
+            surfaceReleaseConsumer.accept(mLeash);
+        }
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix);
+        pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));
+        pw.print(" mLeash="); pw.print(mLeash);
+        pw.print(" mSurfacePosition="); pw.print(mSurfacePosition);
+        pw.println();
     }
 
     public static final @android.annotation.NonNull Creator<InsetsSourceControl> CREATOR

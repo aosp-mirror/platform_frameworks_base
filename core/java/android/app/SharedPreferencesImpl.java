@@ -17,8 +17,12 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.system.ErrnoException;
@@ -59,6 +63,16 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     /** If a fsync takes more than {@value #MAX_FSYNC_DURATION_MILLIS} ms, warn */
     private static final long MAX_FSYNC_DURATION_MILLIS = 256;
+
+    /**
+     * There will now be a callback to {@link
+     * android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+     * OnSharedPreferenceChangeListener.onSharedPreferenceChanged} with a {@code null} key on
+     * {@link android.content.SharedPreferences.Editor#clear Editor.clear}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long CALLBACK_ON_CLEAR_CHANGE = 119147584L;
 
     // Lock ordering rules:
     //  - acquire SharedPreferencesImpl.mLock before EditorImpl.mLock
@@ -360,6 +374,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
     // Return value from EditorImpl#commitToMemory()
     private static class MemoryCommitResult {
         final long memoryStateGeneration;
+        final boolean keysCleared;
         @Nullable final List<String> keysModified;
         @Nullable final Set<OnSharedPreferenceChangeListener> listeners;
         final Map<String, Object> mapToWriteToDisk;
@@ -369,10 +384,12 @@ final class SharedPreferencesImpl implements SharedPreferences {
         volatile boolean writeToDiskResult = false;
         boolean wasWritten = false;
 
-        private MemoryCommitResult(long memoryStateGeneration, @Nullable List<String> keysModified,
+        private MemoryCommitResult(long memoryStateGeneration, boolean keysCleared,
+                @Nullable List<String> keysModified,
                 @Nullable Set<OnSharedPreferenceChangeListener> listeners,
                 Map<String, Object> mapToWriteToDisk) {
             this.memoryStateGeneration = memoryStateGeneration;
+            this.keysCleared = keysCleared;
             this.keysModified = keysModified;
             this.listeners = listeners;
             this.mapToWriteToDisk = mapToWriteToDisk;
@@ -497,6 +514,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         // Returns true if any changes were made
         private MemoryCommitResult commitToMemory() {
             long memoryStateGeneration;
+            boolean keysCleared = false;
             List<String> keysModified = null;
             Set<OnSharedPreferenceChangeListener> listeners = null;
             Map<String, Object> mapToWriteToDisk;
@@ -529,6 +547,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                             changesMade = true;
                             mapToWriteToDisk.clear();
                         }
+                        keysCleared = true;
                         mClear = false;
                     }
 
@@ -568,8 +587,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     memoryStateGeneration = mCurrentMemoryStateGeneration;
                 }
             }
-            return new MemoryCommitResult(memoryStateGeneration, keysModified, listeners,
-                    mapToWriteToDisk);
+            return new MemoryCommitResult(memoryStateGeneration, keysCleared, keysModified,
+                    listeners, mapToWriteToDisk);
         }
 
         @Override
@@ -600,11 +619,17 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         private void notifyListeners(final MemoryCommitResult mcr) {
-            if (mcr.listeners == null || mcr.keysModified == null ||
-                mcr.keysModified.size() == 0) {
+            if (mcr.listeners == null || (mcr.keysModified == null && !mcr.keysCleared)) {
                 return;
             }
             if (Looper.myLooper() == Looper.getMainLooper()) {
+                if (mcr.keysCleared && Compatibility.isChangeEnabled(CALLBACK_ON_CLEAR_CHANGE)) {
+                    for (OnSharedPreferenceChangeListener listener : mcr.listeners) {
+                        if (listener != null) {
+                            listener.onSharedPreferenceChanged(SharedPreferencesImpl.this, null);
+                        }
+                    }
+                }
                 for (int i = mcr.keysModified.size() - 1; i >= 0; i--) {
                     final String key = mcr.keysModified.get(i);
                     for (OnSharedPreferenceChangeListener listener : mcr.listeners) {

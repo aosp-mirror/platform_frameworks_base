@@ -20,7 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -82,13 +84,26 @@ public class WifiMacAddressPreferenceControllerTest {
     public void testHasIntentFilters() {
         final List<String> expectedIntents = Arrays.asList(
                 ConnectivityManager.CONNECTIVITY_ACTION,
-                WifiManager.LINK_CONFIGURATION_CHANGED_ACTION,
+                WifiManager.ACTION_LINK_CONFIGURATION_CHANGED,
                 WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
 
         assertWithMessage("Intent filter should contain expected intents")
                 .that(mController.getConnectivityIntents())
                 .asList().containsAllIn(expectedIntents);
+    }
+
+    @Test
+    public void updateConnectivity_notAvailable_notCalled() {
+        boolean mCalled = false;
+        mController = spy(new ConcreteWifiMacAddressPreferenceController(mContext, mLifecycle) {
+            @Override
+            public boolean isAvailable() {
+                return false;
+            }
+        });
+        mController.displayPreference(mScreen);
+        verify(mController, never()).updateConnectivity();
     }
 
     @Test
@@ -105,10 +120,6 @@ public class WifiMacAddressPreferenceControllerTest {
         doReturn(macAddresses).when(mWifiManager).getFactoryMacAddresses();
         mController.displayPreference(mScreen);
         assertThat(mPreference.getSummary()).isEqualTo(TEST_MAC_ADDRESS);
-
-
-
-
     }
 
     private static class ConcreteWifiMacAddressPreferenceController

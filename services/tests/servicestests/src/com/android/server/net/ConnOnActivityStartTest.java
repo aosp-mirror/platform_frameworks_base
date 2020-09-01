@@ -29,7 +29,6 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
 import android.util.Log;
@@ -88,16 +87,10 @@ public class ConnOnActivityStartTest {
 
     private static final int REPEAT_TEST_COUNT = 5;
 
-    private static final String KEY_PAROLE_DURATION = "parole_duration";
-    private static final String DESIRED_PAROLE_DURATION = "0";
-
     private static Context mContext;
     private static UiDevice mUiDevice;
     private static int mTestPkgUid;
     private static BatteryManager mBatteryManager;
-
-    private static boolean mAppIdleConstsUpdated;
-    private static String mOriginalAppIdleConsts;
 
     private static ServiceConnection mServiceConnection;
     private static ICmdReceiverService mCmdReceiverService;
@@ -107,7 +100,6 @@ public class ConnOnActivityStartTest {
         mContext = InstrumentationRegistry.getContext();
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
-        setDesiredParoleDuration();
         mContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         mTestPkgUid = mContext.getPackageManager().getPackageUid(TEST_PKG, 0);
@@ -119,10 +111,6 @@ public class ConnOnActivityStartTest {
     @AfterClass
     public static void tearDownOnce() throws Exception {
         batteryReset();
-        if (mAppIdleConstsUpdated) {
-            Settings.Global.putString(mContext.getContentResolver(),
-                    Settings.Global.APP_IDLE_CONSTANTS, mOriginalAppIdleConsts);
-        }
         unbindService();
     }
 
@@ -158,27 +146,6 @@ public class ConnOnActivityStartTest {
         if (mCmdReceiverService != null) {
             mContext.unbindService(mServiceConnection);
         }
-    }
-
-    private static void setDesiredParoleDuration() {
-        mOriginalAppIdleConsts = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.APP_IDLE_CONSTANTS);
-        String newAppIdleConstants;
-        final String newConstant = KEY_PAROLE_DURATION + "=" + DESIRED_PAROLE_DURATION;
-        if (mOriginalAppIdleConsts == null || "null".equals(mOriginalAppIdleConsts)) {
-            // app_idle_constants is initially empty, so just assign the desired value.
-            newAppIdleConstants = newConstant;
-        } else if (mOriginalAppIdleConsts.contains(KEY_PAROLE_DURATION)) {
-            // app_idle_constants contains parole_duration, so replace it with the desired value.
-            newAppIdleConstants = mOriginalAppIdleConsts.replaceAll(
-                    KEY_PAROLE_DURATION + "=\\d+", newConstant);
-        } else {
-            // app_idle_constants didn't have parole_duration, so append the desired value.
-            newAppIdleConstants = mOriginalAppIdleConsts + "," + newConstant;
-        }
-        Settings.Global.putString(mContext.getContentResolver(),
-                Settings.Global.APP_IDLE_CONSTANTS, newAppIdleConstants);
-        mAppIdleConstsUpdated = true;
     }
 
     @Test

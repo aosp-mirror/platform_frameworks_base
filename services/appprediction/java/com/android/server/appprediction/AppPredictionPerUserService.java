@@ -16,6 +16,8 @@
 
 package com.android.server.appprediction;
 
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -30,12 +32,17 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 import android.service.appprediction.AppPredictionService;
+import android.service.appprediction.IPredictionService;
 import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AbstractRemoteService;
+import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.people.PeopleServiceInternal;
 
 import java.util.function.Consumer;
 
@@ -47,6 +54,8 @@ public class AppPredictionPerUserService extends
              implements RemoteAppPredictionService.RemoteAppPredictionServiceCallbacks {
 
     private static final String TAG = AppPredictionPerUserService.class.getSimpleName();
+    private static final String PREDICT_USING_PEOPLE_SERVICE_PREFIX =
+            "predict_using_people_service_";
 
     @Nullable
     @GuardedBy("mLock")
@@ -104,14 +113,16 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void onCreatePredictionSessionLocked(@NonNull AppPredictionContext context,
             @NonNull AppPredictionSessionId sessionId) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.onCreatePredictionSession(context, sessionId);
-
-            if (!mSessionInfos.containsKey(sessionId)) {
-                mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context,
-                        this::removeAppPredictionSessionInfo));
-            }
+        if (!mSessionInfos.containsKey(sessionId)) {
+            mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context,
+                    DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
+                            PREDICT_USING_PEOPLE_SERVICE_PREFIX + context.getUiSurface(), false),
+                    this::removeAppPredictionSessionInfo));
+        }
+        final boolean serviceExists = resolveService(sessionId, s ->
+                s.onCreatePredictionSession(context, sessionId), true);
+        if (!serviceExists) {
+            mSessionInfos.remove(sessionId);
         }
     }
 
@@ -121,10 +132,7 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void notifyAppTargetEventLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull AppTargetEvent event) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.notifyAppTargetEvent(sessionId, event);
-        }
+        resolveService(sessionId, s -> s.notifyAppTargetEvent(sessionId, event), false);
     }
 
     /**
@@ -133,10 +141,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void notifyLaunchLocationShownLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.notifyLaunchLocationShown(sessionId, launchLocation, targetIds);
-        }
+        resolveService(sessionId, s ->
+                s.notifyLaunchLocationShown(sessionId, launchLocation, targetIds), false);
     }
 
     /**
@@ -145,10 +151,7 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void sortAppTargetsLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull ParceledListSlice targets, @NonNull IPredictionCallback callback) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.sortAppTargets(sessionId, targets, callback);
-        }
+        resolveService(sessionId, s -> s.sortAppTargets(sessionId, targets, callback), true);
     }
 
     /**
@@ -157,14 +160,11 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void registerPredictionUpdatesLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull IPredictionCallback callback) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.registerPredictionUpdates(sessionId, callback);
-
-            AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
-            if (sessionInfo != null) {
-                sessionInfo.addCallbackLocked(callback);
-            }
+        final boolean serviceExists = resolveService(sessionId, s ->
+                s.registerPredictionUpdates(sessionId, callback), false);
+        final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (serviceExists && sessionInfo != null) {
+            sessionInfo.addCallbackLocked(callback);
         }
     }
 
@@ -174,14 +174,11 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void unregisterPredictionUpdatesLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull IPredictionCallback callback) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.unregisterPredictionUpdates(sessionId, callback);
-
-            AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
-            if (sessionInfo != null) {
-                sessionInfo.removeCallbackLocked(callback);
-            }
+        final boolean serviceExists = resolveService(sessionId, s ->
+                s.unregisterPredictionUpdates(sessionId, callback), false);
+        final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (serviceExists && sessionInfo != null) {
+            sessionInfo.removeCallbackLocked(callback);
         }
     }
 
@@ -190,10 +187,7 @@ public class AppPredictionPerUserService extends
      */
     @GuardedBy("mLock")
     public void requestPredictionUpdateLocked(@NonNull AppPredictionSessionId sessionId) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.requestPredictionUpdate(sessionId);
-        }
+        resolveService(sessionId, s -> s.requestPredictionUpdate(sessionId), true);
     }
 
     /**
@@ -201,14 +195,11 @@ public class AppPredictionPerUserService extends
      */
     @GuardedBy("mLock")
     public void onDestroyPredictionSessionLocked(@NonNull AppPredictionSessionId sessionId) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
-        if (service != null) {
-            service.onDestroyPredictionSession(sessionId);
-
-            AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
-            if (sessionInfo != null) {
-                sessionInfo.destroy();
-            }
+        final boolean serviceExists = resolveService(sessionId, s ->
+                s.onDestroyPredictionSession(sessionId), false);
+        final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (serviceExists && sessionInfo != null) {
+            sessionInfo.destroy();
         }
     }
 
@@ -276,6 +267,9 @@ public class AppPredictionPerUserService extends
         mRemoteService.destroy();
         mRemoteService = null;
 
+        synchronized (mLock) {
+            mZombie = true;
+        }
         mRemoteService = getRemoteServiceLocked();
         if (mRemoteService != null) {
             if (isDebug()) {
@@ -312,6 +306,40 @@ public class AppPredictionPerUserService extends
 
     @GuardedBy("mLock")
     @Nullable
+    protected boolean resolveService(@NonNull final AppPredictionSessionId sessionId,
+            @NonNull final AbstractRemoteService.AsyncRequest<IPredictionService> cb,
+            boolean sendImmediately) {
+        final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (sessionInfo == null) return false;
+        if (sessionInfo.mUsesPeopleService) {
+            final IPredictionService service =
+                    LocalServices.getService(PeopleServiceInternal.class);
+            if (service != null) {
+                try {
+                    cb.run(service);
+                } catch (RemoteException e) {
+                    // Shouldn't happen.
+                    Slog.w(TAG, "Failed to invoke service:" + service, e);
+                }
+            }
+            return service != null;
+        } else {
+            final RemoteAppPredictionService service = getRemoteServiceLocked();
+            if (service != null) {
+                // TODO(b/155887722): implement a priority system so that latency-sensitive
+                // requests gets executed first.
+                if (sendImmediately) {
+                    service.executeOnResolvedService(cb);
+                } else {
+                    service.scheduleOnResolvedService(cb);
+                }
+            }
+            return service != null;
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
     private RemoteAppPredictionService getRemoteServiceLocked() {
         if (mRemoteService == null) {
             final String serviceName = getComponentNameLocked();
@@ -334,8 +362,12 @@ public class AppPredictionPerUserService extends
     private static final class AppPredictionSessionInfo {
         private static final boolean DEBUG = false;  // Do not submit with true
 
+        @NonNull
         private final AppPredictionSessionId mSessionId;
+        @NonNull
         private final AppPredictionContext mPredictionContext;
+        private final boolean mUsesPeopleService;
+        @NonNull
         private final Consumer<AppPredictionSessionId> mRemoveSessionInfoAction;
 
         private final RemoteCallbackList<IPredictionCallback> mCallbacks =
@@ -352,13 +384,17 @@ public class AppPredictionPerUserService extends
                     }
                 };
 
-        AppPredictionSessionInfo(AppPredictionSessionId id, AppPredictionContext predictionContext,
-                Consumer<AppPredictionSessionId> removeSessionInfoAction) {
+        AppPredictionSessionInfo(
+                @NonNull final AppPredictionSessionId id,
+                @NonNull final AppPredictionContext predictionContext,
+                final boolean usesPeopleService,
+                @NonNull final Consumer<AppPredictionSessionId> removeSessionInfoAction) {
             if (DEBUG) {
                 Slog.d(TAG, "Creating AppPredictionSessionInfo for session Id=" + id);
             }
             mSessionId = id;
             mPredictionContext = predictionContext;
+            mUsesPeopleService = usesPeopleService;
             mRemoveSessionInfoAction = removeSessionInfoAction;
         }
 

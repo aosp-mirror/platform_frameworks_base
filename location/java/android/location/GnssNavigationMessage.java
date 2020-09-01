@@ -16,9 +16,9 @@
 
 package android.location;
 
-import android.annotation.TestApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,7 +39,8 @@ public final class GnssNavigationMessage implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_UNKNOWN, TYPE_GPS_L1CA, TYPE_GPS_L2CNAV, TYPE_GPS_L5CNAV, TYPE_GPS_CNAV2,
-        TYPE_GLO_L1CA, TYPE_BDS_D1, TYPE_BDS_D2, TYPE_GAL_I, TYPE_GAL_F})
+            TYPE_SBS, TYPE_GLO_L1CA, TYPE_QZS_L1CA, TYPE_BDS_D1, TYPE_BDS_D2, TYPE_BDS_CNAV1,
+            TYPE_BDS_CNAV2, TYPE_GAL_I, TYPE_GAL_F, TYPE_IRN_L5CA})
     public @interface GnssNavigationMessageType {}
 
     // The following enumerations must be in sync with the values declared in gps.h
@@ -54,16 +55,26 @@ public final class GnssNavigationMessage implements Parcelable {
     public static final int TYPE_GPS_L5CNAV = 0x0103;
     /** GPS CNAV-2 message contained in the structure. */
     public static final int TYPE_GPS_CNAV2 = 0x0104;
+    /** SBAS message contained in the structure. */
+    public static final int TYPE_SBS = 0x0201;
     /** Glonass L1 CA message contained in the structure. */
     public static final int TYPE_GLO_L1CA = 0x0301;
+    /** QZSS L1 C/A message contained in the structure. */
+    public static final int TYPE_QZS_L1CA = 0x0401;
     /** Beidou D1 message contained in the structure. */
     public static final int TYPE_BDS_D1 = 0x0501;
     /** Beidou D2 message contained in the structure. */
     public static final int TYPE_BDS_D2 = 0x0502;
+    /** Beidou CNAV1 message contained in the structure. */
+    public static final int TYPE_BDS_CNAV1 = 0x0503;
+    /** Beidou CNAV2 message contained in the structure. */
+    public static final int TYPE_BDS_CNAV2 = 0x0504;
     /** Galileo I/NAV message contained in the structure. */
     public static final int TYPE_GAL_I = 0x0601;
     /** Galileo F/NAV message contained in the structure. */
     public static final int TYPE_GAL_F = 0x0602;
+    /** IRNSS L5 C/A message contained in the structure. */
+    public static final int TYPE_IRN_L5CA = 0x0701;
 
     /**
      * The Navigation Message Status is 'unknown'.
@@ -199,16 +210,26 @@ public final class GnssNavigationMessage implements Parcelable {
                 return "GPS L5-CNAV";
             case TYPE_GPS_CNAV2:
                 return "GPS CNAV2";
+            case TYPE_SBS:
+                return "SBS";
             case TYPE_GLO_L1CA:
                 return "Glonass L1 C/A";
+            case TYPE_QZS_L1CA:
+                return "QZSS L1 C/A";
             case TYPE_BDS_D1:
                 return "Beidou D1";
             case TYPE_BDS_D2:
                 return "Beidou D2";
+            case TYPE_BDS_CNAV1:
+                return "Beidou CNAV1";
+            case TYPE_BDS_CNAV2:
+                return "Beidou CNAV2";
             case TYPE_GAL_I:
                 return "Galileo I";
             case TYPE_GAL_F:
                 return "Galileo F";
+            case TYPE_IRN_L5CA:
+                return "IRNSS L5 C/A";
             default:
                 return "<Invalid:" + mType + ">";
         }
@@ -251,6 +272,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * range of 1-12</li>
      * <li> For Galileo I/NAV nominal frame structure, this refers to the subframe number in the
      * range of 1-24</li>
+     * <li> For SBAS and Beidou CNAV2, this is unused and can be set to -1.</li>
+     * <li> For QZSS L1 C/A subframe 4 and 5, this value corresponds to the 'frame id' of the
+     * navigation message, in the range of 1-25 (Subframe 1, 2, 3 does not contain a 'frame id' and
+     * this value can be set to -1.)</li>
+     * <li> For Beidou CNAV1 this refers to the page type number in the range of 1-63.</li>
+     * <li> For IRNSS L5 C/A subframe 3 and 4, this value corresponds to the Message Id of the
+     * navigation message, in the range of 1-63. (Subframe 1 and 2 does not contain a message type
+     * id and this value can be set to -1.)</li>
      * </ul>
      */
     public int getMessageId() {
@@ -278,6 +307,13 @@ public final class GnssNavigationMessage implements Parcelable {
      * <li>For Galileo in particular, the type information embedded within the data bits may be even
      * more useful in interpretation, than the nominal page and word types provided in this
      * field.</li>
+     * <li> For SBAS, the submessage id corresponds to the message type, in the range 1-63.</li>
+     * <li> For Beidou CNAV1, the submessage id corresponds to the subframe number of the
+     * navigation message, in the range of 1-3.</li>
+     * <li> For Beidou CNAV2, the submessage id corresponds to the message type, in the range
+     * 1-63.</li>
+     * <li> For IRNSS L5 C/A, the submessage id corresponds to the subframe number of the
+     * navigation message, in the range of 1-4.</li>
      * </ul>
      */
     public int getSubmessageId() {
@@ -312,6 +348,13 @@ public final class GnssNavigationMessage implements Parcelable {
      * <li>For Galileo I/NAV, each page contains 2 page parts, even and odd, with a total of 2x114 =
      * 228 bits, (sync &amp; tail excluded) that should be fit into 29 bytes, with MSB first (skip
      * B229-B232).</li>
+     * <li>For SBAS, each block consists of 250 data bits, that should be fit into 32 bytes.  MSB
+     * first (skip B251-B256).</li>
+     * <li>For Beidou CNAV1, subframe #1 consists of 14 data bits, that should be fit into 2
+     * bytes. MSB first (skip B15-B16).  subframe #2 consists of 600 bits that should be fit into
+     * 75 bytes. subframe #3 consists of 264 data bits that should be fit into 33 bytes.</li>
+     * <li>For Beidou CNAV2, each subframe consists of 288 data bits, that should be fit into 36
+     * bytes.</li>
      * </ul>
      */
     @NonNull

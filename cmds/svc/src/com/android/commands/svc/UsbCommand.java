@@ -42,7 +42,9 @@ public class UsbCommand extends Svc.Command {
                 + "         Sets the functions which, if the device was charging, become current on"
                     + "screen unlock. If function is blank, turn off this feature.\n"
                 + "       svc usb getFunctions\n"
-                + "          Gets the list of currently enabled functions\n\n"
+                + "          Gets the list of currently enabled functions\n"
+                + "       svc usb resetUsbGadget\n"
+                + "          Reset usb gadget\n\n"
                 + "possible values of [function] are any of 'mtp', 'ptp', 'rndis', 'midi'\n";
     }
 
@@ -71,6 +73,13 @@ public class UsbCommand extends Svc.Command {
                 try {
                     usbMgr.setScreenUnlockedFunctions(UsbManager.usbFunctionsFromString(
                             args.length >= 3 ? args[2] : ""));
+                } catch (RemoteException e) {
+                    System.err.println("Error communicating with UsbManager: " + e);
+                }
+                return;
+            } else if ("resetUsbGadget".equals(args[1])) {
+                try {
+                    usbMgr.resetUsbGadget();
                 } catch (RemoteException e) {
                     System.err.println("Error communicating with UsbManager: " + e);
                 }

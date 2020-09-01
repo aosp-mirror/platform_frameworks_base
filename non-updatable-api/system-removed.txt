@@ -11,6 +11,12 @@ package android.app {
 
   public class AppOpsManager {
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
+    method @Deprecated public void setNotedAppOpsCollector(@Nullable android.app.AppOpsManager.AppOpsCollector);
+  }
+
+  @Deprecated public abstract static class AppOpsManager.AppOpsCollector extends android.app.AppOpsManager.OnOpNotedCallback {
+    ctor public AppOpsManager.AppOpsCollector();
+    method @NonNull public java.util.concurrent.Executor getAsyncNotedExecutor();
   }
 
   public class Notification implements android.os.Parcelable {
@@ -19,15 +25,6 @@ package android.app {
 
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
     method @Deprecated public String getChannel();
-  }
-
-}
-
-package android.app.admin {
-
-  public class DevicePolicyManager {
-    method @Deprecated @Nullable public String getDeviceInitializerApp();
-    method @Deprecated @Nullable public android.content.ComponentName getDeviceInitializerComponent();
   }
 
 }
@@ -130,43 +127,10 @@ package android.media.tv {
 
 }
 
-package android.net.wifi {
-
-  @Deprecated public class BatchedScanResult implements android.os.Parcelable {
-    ctor public BatchedScanResult();
-    ctor public BatchedScanResult(android.net.wifi.BatchedScanResult);
-    field public final java.util.List<android.net.wifi.ScanResult> scanResults;
-    field public boolean truncated;
-  }
-
-  public class ScanResult implements android.os.Parcelable {
-    field public boolean untrusted;
-  }
-
-}
-
 package android.os {
 
   public class Build {
     field public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
-  }
-
-  public final class PowerManager {
-    method @Deprecated public boolean isScreenBrightnessBoosted();
-    field @Deprecated public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
-  }
-
-}
-
-package android.provider {
-
-  public final class DeviceConfig {
-    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
-    method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
-  }
-
-  public static interface DeviceConfig.OnPropertyChangedListener {
-    method public void onPropertyChanged(@NonNull String, @NonNull String, @Nullable String);
   }
 
 }
@@ -200,6 +164,11 @@ package android.telecom {
 }
 
 package android.telephony {
+
+  public final class PreciseDataConnectionState implements android.os.Parcelable {
+    method @Deprecated @Nullable public android.net.LinkProperties getDataConnectionLinkProperties();
+    method @Deprecated public int getDataConnectionNetworkType();
+  }
 
   public class TelephonyManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void answerRingingCall();

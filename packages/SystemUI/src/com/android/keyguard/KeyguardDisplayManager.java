@@ -72,11 +72,12 @@ public class KeyguardDisplayManager {
         @Override
         public void onDisplayChanged(int displayId) {
             if (displayId == DEFAULT_DISPLAY) return;
-            final Display display = mDisplayService.getDisplay(displayId);
-            if (display != null && mShowing) {
-                final Presentation presentation = mPresentations.get(displayId);
-                if (presentation != null && !presentation.getDisplay().equals(display)) {
-                    hidePresentation(displayId);
+            final Presentation presentation = mPresentations.get(displayId);
+            if (presentation != null && mShowing) {
+                hidePresentation(displayId);
+                // update DisplayInfo.
+                final Display display = mDisplayService.getDisplay(displayId);
+                if (display != null) {
                     showPresentation(display);
                 }
             }
@@ -125,12 +126,14 @@ public class KeyguardDisplayManager {
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
-            presentation = new KeyguardPresentation(mContext, display, mInjectableInflater);
-            presentation.setOnDismissListener(dialog -> {
-                if (null != mPresentations.get(displayId)) {
+            final Presentation newPresentation = new KeyguardPresentation(mContext, display,
+                    mInjectableInflater.injectable(LayoutInflater.from(mContext)));
+            newPresentation.setOnDismissListener(dialog -> {
+                if (newPresentation.equals(mPresentations.get(displayId))) {
                     mPresentations.remove(displayId);
                 }
             });
+            presentation = newPresentation;
             try {
                 presentation.show();
             } catch (WindowManager.InvalidDisplayException ex) {
@@ -240,7 +243,7 @@ public class KeyguardDisplayManager {
     static final class KeyguardPresentation extends Presentation {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
-        private final InjectionInflationController mInjectableInflater;
+        private final LayoutInflater mInjectableLayoutInflater;
         private View mClock;
         private int mUsableWidth;
         private int mUsableHeight;
@@ -258,11 +261,16 @@ public class KeyguardDisplayManager {
         };
 
         KeyguardPresentation(Context context, Display display,
-                InjectionInflationController injectionInflater) {
+                LayoutInflater injectionLayoutInflater) {
             super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
-            mInjectableInflater = injectionInflater;
+            mInjectableLayoutInflater = injectionLayoutInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
+        }
+
+        @Override
+        public void cancel() {
+            // Do not allow anything to cancel KeyguardPresetation except KeyguardDisplayManager.
         }
 
         @Override
@@ -281,15 +289,14 @@ public class KeyguardDisplayManager {
             mMarginLeft = (100 - VIDEO_SAFE_REGION) * p.x / 200;
             mMarginTop = (100 - VIDEO_SAFE_REGION) * p.y / 200;
 
-            LayoutInflater inflater = mInjectableInflater.injectable(
-                    LayoutInflater.from(getContext()));
-            setContentView(inflater.inflate(R.layout.keyguard_presentation, null));
+            setContentView(mInjectableLayoutInflater.inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            getWindow().getAttributes().setFitInsetsTypes(0 /* types */);
             getWindow().setNavigationBarContrastEnforced(false);
             getWindow().setNavigationBarColor(Color.TRANSPARENT);
 

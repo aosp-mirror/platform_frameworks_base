@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Ranks and compares packages based on usage stats and uses the {@link ResolverRankerService}.
@@ -250,6 +251,15 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
             return target.getSelectProbability();
         }
         return 0;
+    }
+
+    @Override
+    List<ComponentName> getTopComponentNames(int topK) {
+        return mTargetsDict.entrySet().stream()
+                .sorted((o1, o2) -> -Float.compare(getScore(o1.getKey()), getScore(o2.getKey())))
+                .limit(topK)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     // update ranking model when the connection to it is valid.

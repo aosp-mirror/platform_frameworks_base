@@ -147,10 +147,11 @@ struct ResourceId {
   ResourceId(uint32_t res_id);  // NOLINT(google-explicit-constructor)
   ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
-  bool is_valid() const;
+  // Returns true if the ID is a valid ID that is not dynamic (package ID cannot be 0)
+  bool is_valid_static() const;
 
   // Returns true if the ID is a valid ID or dynamic ID (package ID can be 0).
-  bool is_valid_dynamic() const;
+  bool is_valid() const;
 
   uint8_t package_id() const;
   uint8_t type_id() const;
@@ -233,11 +234,11 @@ inline ResourceId::ResourceId(uint32_t res_id) : id(res_id) {}
 inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e)
     : id((p << 24) | (t << 16) | e) {}
 
-inline bool ResourceId::is_valid() const {
+inline bool ResourceId::is_valid_static() const {
   return (id & 0xff000000u) != 0 && (id & 0x00ff0000u) != 0;
 }
 
-inline bool ResourceId::is_valid_dynamic() const {
+inline bool ResourceId::is_valid() const {
   return (id & 0x00ff0000u) != 0;
 }
 

@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.os.Parcel;
@@ -30,7 +32,7 @@ public final class WebViewProviderResponse implements Parcelable {
     }
 
     // aidl stuff
-    public static final @android.annotation.NonNull Parcelable.Creator<WebViewProviderResponse> CREATOR =
+    public static final @NonNull Parcelable.Creator<WebViewProviderResponse> CREATOR =
         new Parcelable.Creator<WebViewProviderResponse>() {
             public WebViewProviderResponse createFromParcel(Parcel in) {
                 return new WebViewProviderResponse(in);
@@ -58,6 +60,7 @@ public final class WebViewProviderResponse implements Parcelable {
     }
 
     @UnsupportedAppUsage
+    @Nullable
     public final PackageInfo packageInfo;
     public final int status;
 }

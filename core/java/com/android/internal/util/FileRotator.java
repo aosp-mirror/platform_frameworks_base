@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -96,8 +97,8 @@ public class FileRotator {
      *            may be deleted.
      */
     public FileRotator(File basePath, String prefix, long rotateAgeMillis, long deleteAgeMillis) {
-        mBasePath = Preconditions.checkNotNull(basePath);
-        mPrefix = Preconditions.checkNotNull(prefix);
+        mBasePath = Objects.requireNonNull(basePath);
+        mPrefix = Objects.requireNonNull(prefix);
         mRotateAgeMillis = rotateAgeMillis;
         mDeleteAgeMillis = deleteAgeMillis;
 
@@ -406,7 +407,7 @@ public class FileRotator {
         public long endMillis;
 
         public FileInfo(String prefix) {
-            this.prefix = Preconditions.checkNotNull(prefix);
+            this.prefix = Objects.requireNonNull(prefix);
         }
 
         /**

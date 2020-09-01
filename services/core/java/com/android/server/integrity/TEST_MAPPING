@@ -1,0 +1,20 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.integrity."
+        }
+      ]
+    },
+    {
+      "name": "GtsSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "com.google.android.security.gts.AppIntegrityManagerTest"
+        }
+      ]
+    }
+  ]
+}

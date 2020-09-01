@@ -1,0 +1,34 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.soundpicker"
+        android:sharedUserId="android.media">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <application
+            android:allowBackup="false"
+            android:label="@string/app_label"
+            android:supportsRtl="true">
+        <receiver android:name="RingtoneReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY"/>
+            </intent-filter>
+        </receiver>
+
+        <service android:name="RingtoneOverlayService" />
+
+        <activity android:name="RingtonePickerActivity"
+                android:theme="@style/PickerDialogTheme"
+                android:enabled="@*android:bool/config_defaultRingtonePickerEnabled"
+                android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.RINGTONE_PICKER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

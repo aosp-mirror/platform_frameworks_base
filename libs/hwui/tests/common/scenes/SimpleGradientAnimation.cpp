@@ -51,13 +51,13 @@ private:
                 [width, height](RenderProperties& props, Canvas& canvas) {
                     float pos[] = {0, 1};
                     SkPoint pts[] = {SkPoint::Make(0, 0), SkPoint::Make(width, height)};
-                    SkPaint paint;
+                    Paint paint;
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {
                         // use i%2 start position to pick 2 color combo with black in it
                         SkColor colors[3] = {Color::Transparent, Color::Black, Color::Cyan_500};
                         paint.setShader(SkGradientShader::MakeLinear(pts, colors + (i % 2), pos, 2,
-                                                                     SkShader::kClamp_TileMode));
+                                                                     SkTileMode::kClamp));
                         canvas.drawRect(i, i, width, height, paint);
                     }
                 });

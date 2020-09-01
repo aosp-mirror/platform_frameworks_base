@@ -4,6 +4,12 @@
 #
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+#
+# Before this can be used, the device must be rooted and the filesystem must be writable by Skia
+# - These steps are necessary once after flashing to enable capture -
+# adb root
+# adb remount
+# adb reboot
 
 if [ -z "$1" ]; then
     printf 'Usage:\n    skp-capture.sh PACKAGE_NAME OPTIONAL_FRAME_COUNT\n\n'
@@ -20,20 +26,27 @@ if ! command -v adb > /dev/null 2>&1; then
         exit 2
     fi
 fi
-phase1_timeout_seconds=15
-phase2_timeout_seconds=60
+phase1_timeout_seconds=60
+phase2_timeout_seconds=300
 package="$1"
-filename="$(date '+%H%M%S').skp"
+extension="skp"
+if (( "$2" > 1 )); then # 2nd arg is number of frames
+    extension="mskp" # use different extension for multi frame files.
+fi
+filename="$(date '+%H%M%S').${extension}"
 remote_path="/data/data/${package}/cache/${filename}"
 local_path_prefix="$(date '+%Y-%m-%d_%H%M%S')_${package}"
-local_path="${local_path_prefix}.skp"
+local_path="${local_path_prefix}.${extension}"
 enable_capture_key='debug.hwui.capture_skp_enabled'
 enable_capture_value=$(adb shell "getprop '${enable_capture_key}'")
-#printf 'captureflag=' "$enable_capture_value" '\n'
+
+# TODO(nifong): check if filesystem is writable here with "avbctl get-verity"
+# result will either start with "verity is disabled" or "verity is enabled"
+
 if [ -z "$enable_capture_value" ]; then
-    printf 'Capture SKP property need to be enabled first. Please use\n'
-    printf "\"adb shell setprop debug.hwui.capture_skp_enabled true\" and then restart\n"
-    printf "the process.\n\n"
+    printf 'debug.hwui.capture_skp_enabled was found to be disabled, enabling it now.\n'
+    printf " restart the process you want to capture on the device, then retry this script.\n\n"
+    adb shell "setprop '${enable_capture_key}' true"
     exit 1
 fi
 if [ ! -z "$2" ]; then
@@ -57,33 +70,17 @@ banner() {
     printf '   %s' "$*"
     printf '\n=====================\n'
 }
-banner '...WAITING...'
-adb_test_exist() {
-    test '0' = "$(adb shell "test -e \"$1\"; echo \$?")";
-}
-timeout=$(( $(date +%s) + $phase1_timeout_seconds))
-while ! adb_test_exist "$remote_path"; do
-    spin 0.05
-    if [ $(date +%s) -gt $timeout ] ; then
-        printf '\bTimed out.\n'
-        adb shell "setprop '${filename_key}' ''"
-        exit 3
-    fi
-done
-printf '\b'
-
-#read -n1 -r -p "Press any key to continue..." key
-
-banner '...SAVING...'
+banner '...WAITING FOR APP INTERACTION...'
+# Waiting for nonzero file is an indication that the pipeline has both opened the file and written
+# the header. With multiple frames this does not occur until the last frame has been recorded,
+# so we continue to show the "waiting for app interaction" message as long as the app still requires
+# interaction to draw more frames.
 adb_test_file_nonzero() {
     # grab first byte of `du` output
     X="$(adb shell "du \"$1\" 2> /dev/null | dd bs=1 count=1 2> /dev/null")"
     test "$X" && test "$X" -ne 0
 }
-#adb_filesize() {
-#    adb shell "wc -c \"$1\"" 2> /dev/null | awk '{print $1}'
-#}
-timeout=$(( $(date +%s) + $phase2_timeout_seconds))
+timeout=$(( $(date +%s) + $phase1_timeout_seconds))
 while ! adb_test_file_nonzero "$remote_path"; do
     spin 0.05
     if [ $(date +%s) -gt $timeout ] ; then
@@ -94,7 +91,36 @@ while ! adb_test_file_nonzero "$remote_path"; do
 done
 printf '\b'
 
+# Disable further capturing
 adb shell "setprop '${filename_key}' ''"
+
+banner '...SAVING...'
+# return the size of a file in bytes
+adb_filesize() {
+    adb shell "wc -c \"$1\"" 2> /dev/null | awk '{print $1}'
+}
+timeout=$(( $(date +%s) + $phase2_timeout_seconds))
+last_size='0' # output of last size check command
+unstable=true # false once the file size stops changing
+counter=0 # used to perform size check only 1/sec though we update spinner 20/sec
+# loop until the file size is unchanged for 1 second.
+while [ $unstable != 0 ] ; do
+    spin 0.05
+    counter=$(( $counter+1 ))
+    if ! (( $counter % 20)) ; then
+        new_size=$(adb_filesize "$remote_path")
+        unstable=$(($(adb_filesize "$remote_path") != last_size))
+        last_size=$new_size
+    fi
+    if [ $(date +%s) -gt $timeout ] ; then
+        printf '\bTimed out.\n'
+        adb shell "setprop '${filename_key}' ''"
+        exit 3
+    fi
+done
+printf '\b'
+
+printf "SKP file serialized: %s\n" $(echo $last_size | numfmt --to=iec)
 
 i=0; while [ $i -lt 10 ]; do spin 0.10; i=$(($i + 1)); done; echo
 
@@ -105,12 +131,4 @@ if ! [ -f "$local_path" ] ; then
 fi
 adb shell rm "$remote_path"
 printf '\nSKP saved to file:\n    %s\n\n'  "$local_path"
-if [ ! -z "$2" ]; then
-    bridge="_"
-    adb shell "setprop 'debug.hwui.capture_skp_frames' ''"
-    for i in $(seq 2 $2); do
-        adb pull "${remote_path}_${i}" "${local_path_prefix}_${i}.skp"
-        adb shell rm "${remote_path}_${i}"
-    done
-fi
 

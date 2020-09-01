@@ -23,6 +23,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -50,6 +51,7 @@ import org.mockito.quality.Strictness;
 @RunWith(AndroidJUnit4.class)
 public class PendingIntentControllerTest {
     private static final String TEST_PACKAGE_NAME = "test-package-1";
+    private static final String TEST_FEATURE_ID = "test-feature-1";
     private static final int TEST_CALLING_UID = android.os.Process.myUid();
     private static final Intent[] TEST_INTENTS = new Intent[]{new Intent("com.test.intent")};
 
@@ -80,15 +82,17 @@ public class PendingIntentControllerTest {
         doReturn(mIPackageManager).when(() -> AppGlobals.getPackageManager());
         when(mIPackageManager.getPackageUid(eq(TEST_PACKAGE_NAME), anyInt(), anyInt())).thenReturn(
                 TEST_CALLING_UID);
+        ActivityManagerConstants constants = mock(ActivityManagerConstants.class);
+        constants.PENDINGINTENT_WARNING_THRESHOLD = 2000;
         mPendingIntentController = new PendingIntentController(Looper.getMainLooper(),
-                mUserController);
+                mUserController, constants);
         mPendingIntentController.onActivityManagerInternalAdded();
     }
 
     private PendingIntentRecord createPendingIntentRecord(int flags) {
         return mPendingIntentController.getIntentSender(ActivityManager.INTENT_SENDER_BROADCAST,
-                TEST_PACKAGE_NAME, TEST_CALLING_UID, 0, null, null, 0, TEST_INTENTS, null, flags,
-                null);
+                TEST_PACKAGE_NAME, TEST_FEATURE_ID, TEST_CALLING_UID, 0, null, null, 0,
+                TEST_INTENTS, null, flags, null);
     }
 
     @Test

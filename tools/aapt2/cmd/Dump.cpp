@@ -118,6 +118,12 @@ class DumpContext : public IAaptContext {
     return 0;
   }
 
+  const std::set<std::string>& GetSplitNameDependencies() override {
+    UNIMPLEMENTED(FATAL) << "Split Name Dependencies should not be necessary";
+    static std::set<std::string> empty;
+    return empty;
+  }
+
  private:
   StdErrDiagnostics diagnostics_;
   bool verbose_ = false;
@@ -385,6 +391,17 @@ int DumpXmlTreeCommand::Dump(LoadedApk* apk) {
     }
     Debug::DumpXml(*xml, GetPrinter());
   }
+  return 0;
+}
+
+int DumpOverlayableCommand::Dump(LoadedApk* apk) {
+  ResourceTable* table = apk->GetResourceTable();
+  if (!table) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    return 1;
+  }
+
+  Debug::DumpOverlayable(*table, GetPrinter());
   return 0;
 }
 

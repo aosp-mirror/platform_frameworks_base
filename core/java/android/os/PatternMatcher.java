@@ -133,7 +133,7 @@ public class PatternMatcher implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(PatternMatcherProto.PATTERN, mPattern);
         proto.write(PatternMatcherProto.TYPE, mType);

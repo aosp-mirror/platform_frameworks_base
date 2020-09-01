@@ -28,7 +28,7 @@ public:
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         card = TestUtils::createNode(0, 0, 200, 200, [](RenderProperties& props, Canvas& canvas) {
-            SkPaint paint;
+            Paint paint;
             paint.setAntiAlias(true);
             paint.setColor(Color::Black);
             canvas.drawOval(0, 0, 200, 200, paint);

@@ -211,6 +211,10 @@ public class BaseInputConnection implements InputConnection {
      *        If this is greater than the number of existing characters between the cursor and
      *        the end of the text, then this method does not fail but deletes all the characters in
      *        that range.
+     *
+     * @return {@code true} when selected text is deleted, {@code false} when either the
+     *         selection is invalid or not yet attached (i.e. selection start or end is -1),
+     *         or the editable text is {@code null}.
      */
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength
@@ -227,6 +231,12 @@ public class BaseInputConnection implements InputConnection {
             int tmp = a;
             a = b;
             b = tmp;
+        }
+
+        // Skip when the selection is not yet attached.
+        if (a == -1 || b == -1) {
+            endBatchEdit();
+            return false;
         }
 
         // Ignore the composing text.
@@ -247,8 +257,12 @@ public class BaseInputConnection implements InputConnection {
         if (beforeLength > 0) {
             int start = a - beforeLength;
             if (start < 0) start = 0;
-            content.delete(start, a);
-            deleted = a - start;
+
+            final int numDeleteBefore = a - start;
+            if (a >= 0 && numDeleteBefore > 0) {
+                content.delete(start, a);
+                deleted = numDeleteBefore;
+            }
         }
 
         if (afterLength > 0) {
@@ -257,7 +271,10 @@ public class BaseInputConnection implements InputConnection {
             int end = b + afterLength;
             if (end > content.length()) end = content.length();
 
-            content.delete(b, end);
+            final int numDeleteAfter = end - b;
+            if (b >= 0 && numDeleteAfter > 0) {
+                content.delete(b, end);
+            }
         }
 
         endBatchEdit();
@@ -741,8 +758,9 @@ public class BaseInputConnection implements InputConnection {
             Context context;
             if (mTargetView != null) {
                 context = mTargetView.getContext();
-            } else if (mIMM.mServedView != null) {
-                context = mIMM.mServedView.getContext();
+            } else if (mIMM.mCurRootView != null) {
+                final View servedView = mIMM.mCurRootView.getImeFocusController().getServedView();
+                context = servedView != null ? servedView.getContext() : null;
             } else {
                 context = null;
             }

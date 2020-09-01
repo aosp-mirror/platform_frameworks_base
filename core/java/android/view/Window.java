@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -33,6 +34,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -46,6 +48,8 @@ import android.os.RemoteException;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
+import android.util.Pair;
+import android.view.View.OnApplyWindowInsetsListener;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.util.Collections;
@@ -127,7 +131,10 @@ public abstract class Window {
     public static final int FEATURE_ACTION_MODE_OVERLAY = 10;
     /**
      * Flag for requesting a decoration-free window that is dismissed by swiping from the left.
+     *
+     * @deprecated Swipe-to-dismiss isn't functional anymore.
      */
+    @Deprecated
     public static final int FEATURE_SWIPE_TO_DISMISS = 11;
     /**
      * Flag for requesting that window content changes should be animated using a
@@ -314,7 +321,7 @@ public abstract class Window {
     @UnsupportedAppUsage
     private boolean mDestroyed;
 
-    private boolean mOverlayWithDecorCaptionEnabled = false;
+    private boolean mOverlayWithDecorCaptionEnabled = true;
     private boolean mCloseOnSwipeEnabled = false;
 
     // The current window attributes.
@@ -636,6 +643,16 @@ public abstract class Window {
 
         /** Returns whether the window belongs to the task root. */
         boolean isTaskRoot();
+
+        /**
+         * Update the status bar color to a forced one.
+         */
+        void updateStatusBarColor(int color);
+
+        /**
+         * Update the navigation bar color to a forced one.
+         */
+        void updateNavigationBarColor(int color);
     }
 
     /**
@@ -675,6 +692,33 @@ public abstract class Window {
          */
         void onFrameMetricsAvailable(Window window, FrameMetrics frameMetrics,
                 int dropCountSinceLastInvocation);
+    }
+
+    /**
+     * Listener for applying window insets on the content of a window. Used only by the framework to
+     * fit content according to legacy SystemUI flags.
+     *
+     * @hide
+     */
+    public interface OnContentApplyWindowInsetsListener {
+
+        /**
+         * Called when the window needs to apply insets on the container of its content view which
+         * are set by calling {@link #setContentView}. The method should determine what insets to
+         * apply on the container of the root level content view and what should be dispatched to
+         * the content view's
+         * {@link View#setOnApplyWindowInsetsListener(OnApplyWindowInsetsListener)} through the view
+         * hierarchy.
+         *
+         * @param view The view for which to apply insets. Must not be directly modified.
+         * @param insets The root level insets that are about to be dispatched
+         * @return A pair, with the first element containing the insets to apply as margin to the
+         * root-level content views, and the second element determining what should be
+         * dispatched to the content view.
+         */
+        @NonNull
+        Pair<Insets, WindowInsets> onContentApplyWindowInsets(@NonNull View view,
+                @NonNull WindowInsets insets);
     }
 
 
@@ -1157,16 +1201,6 @@ public abstract class Window {
     /**
      * {@hide}
      */
-    @UnsupportedAppUsage
-    protected void setNeedsMenuKey(int value) {
-        final WindowManager.LayoutParams attrs = getAttributes();
-        attrs.needsMenuKey = value;
-        dispatchWindowAttributesChanged(attrs);
-    }
-
-    /**
-     * {@hide}
-     */
     protected void dispatchWindowAttributesChanged(WindowManager.LayoutParams attrs) {
         if (mCallback != null) {
             mCallback.onWindowAttributesChanged(attrs);
@@ -1191,6 +1225,44 @@ public abstract class Window {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.setColorMode(colorMode);
         dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * If {@code isPreferred} is true, this method requests that the connected display does minimal
+     * post processing when this window is visible on the screen. Otherwise, it requests that the
+     * display switches back to standard image processing.
+     *
+     * <p> By default, the display does not do minimal post processing and if this is desired, this
+     * method should not be used. It should be used with {@code isPreferred=true} when low
+     * latency has a higher priority than image enhancement processing (e.g. for games or video
+     * conferencing). The display will automatically go back into standard image processing mode
+     * when no window requesting minimal posst processing is visible on screen anymore.
+     * {@code setPreferMinimalPostProcessing(false)} can be used if
+     * {@code setPreferMinimalPostProcessing(true)} was previously called for this window and
+     * minimal post processing is no longer required.
+     *
+     * <p>If the Display sink is connected via HDMI, the device will begin to send infoframes with
+     * Auto Low Latency Mode enabled and Game Content Type. This will switch the connected display
+     * to a minimal image processing mode (if available), which reduces latency, improving the user
+     * experience for gaming or video conferencing applications. For more information, see HDMI 2.1
+     * specification.
+     *
+     * <p>If the Display sink has an internal connection or uses some other protocol than HDMI,
+     * effects may be similar but implementation-defined.
+     *
+     * <p>The ability to switch to a mode with minimal post proessing may be disabled by a user
+     * setting in the system settings menu. In that case, this method does nothing.
+     *
+     * @see android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING
+     * @see android.view.Display#isMinimalPostProcessingSupported
+     * @see android.view.WindowManager.LayoutParams#preferMinimalPostProcessing
+     *
+     * @param isPreferred Indicates whether minimal post processing is preferred for this window
+     *                    ({@code isPreferred=true}) or not ({@code isPreferred=false}).
+     */
+    public void setPreferMinimalPostProcessing(boolean isPreferred) {
+        mWindowAttributes.preferMinimalPostProcessing = isPreferred;
+        dispatchWindowAttributesChanged(mWindowAttributes);
     }
 
     /**
@@ -1235,6 +1307,24 @@ public abstract class Window {
         attrs.dimAmount = amount;
         mHaveDimAmount = true;
         dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * Sets whether the decor view should fit root-level content views for {@link WindowInsets}.
+     * <p>
+     * If set to {@code true}, the framework will inspect the now deprecated
+     * {@link View#SYSTEM_UI_LAYOUT_FLAGS} as well the
+     * {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag and fits content according
+     * to these flags.
+     * </p>
+     * <p>
+     * If set to {@code false}, the framework will not fit the content view to the insets and will
+     * just pass through the {@link WindowInsets} to the content view.
+     * </p>
+     * @param decorFitsSystemWindows Whether the decor view should fit root-level content views for
+     *                               insets.
+     */
+    public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
     }
 
     /**
@@ -1704,6 +1794,24 @@ public abstract class Window {
      * @return Returns the top-level window decor view.
      */
     public abstract @NonNull View getDecorView();
+
+    /**
+     * @return the status bar background view or null.
+     * @hide
+     */
+    @TestApi
+    public @Nullable View getStatusBarBackgroundView() {
+        return null;
+    }
+
+    /**
+     * @return the navigation bar background view or null.
+     * @hide
+     */
+    @TestApi
+    public @Nullable View getNavigationBarBackgroundView() {
+        return null;
+    }
 
     /**
      * Retrieve the current decor view, but only if it has already been created;
@@ -2446,6 +2554,33 @@ public abstract class Window {
         return Collections.emptyList();
     }
 
+    /**
+     * System request to begin scroll capture.
+     *
+     * @param controller the controller to receive responses
+     * @hide
+     */
+    public void requestScrollCapture(IScrollCaptureController controller) {
+    }
+
+    /**
+     * Registers a {@link ScrollCaptureCallback} with the root of this window.
+     *
+     * @param callback the callback to add
+     * @hide
+     */
+    public void addScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+    }
+
+    /**
+     * Unregisters a {@link ScrollCaptureCallback} previously registered with this window.
+     *
+     * @param callback the callback to remove
+     * @hide
+     */
+    public void removeScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+    }
+
     /** @hide */
     public void setTheme(int resId) {
     }
@@ -2512,26 +2647,10 @@ public abstract class Window {
     public abstract void reportActivityRelaunched();
 
     /**
-     * Called to set flag to check if the close on swipe is enabled. This will only function if
-     * FEATURE_SWIPE_TO_DISMISS has been set.
-     * @hide
-     */
-    public void setCloseOnSwipeEnabled(boolean closeOnSwipeEnabled) {
-        mCloseOnSwipeEnabled = closeOnSwipeEnabled;
-    }
-
-    /**
-     * @return {@code true} if the close on swipe is enabled.
-     * @hide
-     */
-    public boolean isCloseOnSwipeEnabled() {
-        return mCloseOnSwipeEnabled;
-    }
-
-    /**
      * @return The {@link WindowInsetsController} associated with this window
      * @see View#getWindowInsetsController()
-     * @hide pending unhide
      */
-    public abstract @NonNull WindowInsetsController getInsetsController();
+    public @Nullable WindowInsetsController getInsetsController() {
+        return null;
+    }
 }

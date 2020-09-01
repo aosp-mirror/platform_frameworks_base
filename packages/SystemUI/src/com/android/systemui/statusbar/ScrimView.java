@@ -182,7 +182,7 @@ public class ScrimView extends View {
      */
     public void setViewAlpha(float alpha) {
         if (isNaN(alpha)) {
-            throw new IllegalArgumentException("alpha cannot be NaN");
+            throw new IllegalArgumentException("alpha cannot be NaN: " + alpha);
         }
         if (alpha != mViewAlpha) {
             mViewAlpha = alpha;

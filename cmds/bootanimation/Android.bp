@@ -43,6 +43,10 @@ cc_binary {
     ],
 
     init_rc: ["bootanim.rc"],
+
+    cflags: [
+        "-Wno-deprecated-declarations",
+    ],
 }
 
 // libbootanimation

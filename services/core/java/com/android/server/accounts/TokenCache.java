@@ -193,7 +193,7 @@ import java.util.Objects;
             String packageName,
             byte[] sigDigest,
             long expiryMillis) {
-        Preconditions.checkNotNull(account);
+        Objects.requireNonNull(account);
         if (token == null || System.currentTimeMillis() > expiryMillis) {
             return;
         }

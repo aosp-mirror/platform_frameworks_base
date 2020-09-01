@@ -20,10 +20,15 @@ android_test {
     static_libs: [
         "services.core",
         "services.net",
+        "service-jobscheduler",
+        "service-permission.impl",
+        "service-blobstore",
         "androidx.test.runner",
+        "androidx.test.ext.truth",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "truth-prebuilt",
+        "testables",
     ],
 
     libs: [

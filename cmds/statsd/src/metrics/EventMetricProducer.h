@@ -33,17 +33,23 @@ namespace statsd {
 
 class EventMetricProducer : public MetricProducer {
 public:
-    EventMetricProducer(const ConfigKey& key, const EventMetric& eventMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int64_t startTimeNs);
+    EventMetricProducer(
+            const ConfigKey& key, const EventMetric& eventMetric, const int conditionIndex,
+            const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
+            const int64_t startTimeNs,
+            const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
+            const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                    eventDeactivationMap = {},
+            const vector<int>& slicedStateAtoms = {},
+            const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
 
     virtual ~EventMetricProducer();
 
 private:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKey, bool condition,
-            const LogEvent& event) override;
+            const ConditionKey& conditionKey, bool condition, const LogEvent& event,
+            const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,

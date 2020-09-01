@@ -33,14 +33,18 @@
     <dimen name="toast_y_offset">24dp</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
-    <!-- Height of the status bar in portrait -->
+    <!-- Height of the status bar in portrait. The height should be
+         Max((status bar content height + waterfall top size), top cutout size) -->
     <dimen name="status_bar_height_portrait">24dp</dimen>
-    <!-- Height of the status bar in landscape -->
+    <!-- Height of the status bar in landscape. The height should be
+         Max((status bar content height + waterfall top size), top cutout size) -->
     <dimen name="status_bar_height_landscape">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of area above QQS where battery/time go -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
     <!-- Total height of QQS (quick_qs_offset_height + 128) -->
     <dimen name="quick_qs_total_height">176dp</dimen>
+    <!-- Total height of QQS with two rows to fit media player (quick_qs_offset_height + 176) -->
+    <dimen name="quick_qs_total_height_with_media">224dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
@@ -121,9 +125,6 @@
 
     <!-- The amount to leave on-screen when the PIP is minimized. -->
     <dimen name="pip_minimized_visible_size">48dp</dimen>
-
-    <!-- The the PIP decelerates at while moving from a fling. -->
-    <dimen name="pip_fling_deceleration">-3000dp</dimen>
 
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
@@ -272,6 +273,9 @@
     <!-- The margin before and after each of the items in the notification header. -->
     <dimen name="notification_header_separating_margin">2dp</dimen>
 
+    <!-- The margin before and after each of the items in the conversation header. -->
+    <dimen name="notification_conversation_header_separating_margin">4dp</dimen>
+
     <!-- The absolute size of the notification expand icon. -2 for wrap_content. -->
     <dimen name="notification_header_expand_icon_size">-2px</dimen>
 
@@ -310,6 +314,12 @@
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
+
+    <!-- The padding at the end of actions when the bubble button is visible-->
+    <dimen name="bubble_visible_padding_end">3dp</dimen>
+
+    <!-- The padding at the end of actions when the bubble button is gone-->
+    <dimen name="bubble_gone_padding_end">12dp</dimen>
 
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
@@ -558,6 +568,10 @@
 
     <dimen name="resolver_max_width">480dp</dimen>
 
+    <!-- Tile Stroke width -->
+    <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
+    <dimen name="config_qsTileStrokeWidthInactive">-1dp</dimen>
+
     <!-- Amount to reduce the size of the circular mask by (to compensate for
          aliasing effects). This is only used on circular displays. -->
     <dimen name="circular_display_mask_thickness">1px</dimen>
@@ -684,6 +698,54 @@
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
+    <dimen name="conversation_avatar_size">52dp</dimen>
+    <!-- Start of the content in the conversation template -->
+    <dimen name="conversation_content_start">80dp</dimen>
+    <!-- Size of the expand button in the conversation layout -->
+    <dimen name="conversation_expand_button_size">80dp</dimen>
+    <!-- Top margin of the expand button for conversations when expanded -->
+    <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
+    <!-- Side margins of the conversation badge in relation to the conversation icon -->
+    <dimen name="conversation_badge_side_margin">36dp</dimen>
+    <!-- size of the notification badge when applied to the conversation icon -->
+    <dimen name="conversation_icon_size_badged">20dp</dimen>
+    <!-- size of the conversation avatar in an expanded group -->
+    <dimen name="conversation_avatar_size_group_expanded">@dimen/messaging_avatar_size</dimen>
+    <!-- size of the face pile icons -->
+    <dimen name="conversation_face_pile_avatar_size">@dimen/messaging_avatar_size</dimen>
+    <!-- size of the face pile icons when the group is expanded -->
+    <dimen name="conversation_face_pile_avatar_size_group_expanded">25dp</dimen>
+    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
+    <dimen name="conversation_badge_side_margin_group_expanded">22dp</dimen>
+    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
+    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">18dp</dimen>
+    <!-- The width of the protection of the face pile layout-->
+    <dimen name="conversation_face_pile_protection_width">2dp</dimen>
+    <!-- The width of the protection of the face pile layout when expanded-->
+    <dimen name="conversation_face_pile_protection_width_expanded">1dp</dimen>
+    <!-- The padding of the expanded message container-->
+    <dimen name="expanded_group_conversation_message_padding">17dp</dimen>
+    <!-- The stroke width of the ring used to visually mark a conversation as important -->
+    <dimen name="importance_ring_stroke_width">2dp</dimen>
+    <!-- The maximum stroke width used for the animation shown when a conversation is marked as important -->
+    <dimen name="importance_ring_anim_max_stroke_width">10dp</dimen>
+    <!-- The size of the importance ring -->
+    <dimen name="importance_ring_size">20dp</dimen>
+
+    <!-- The top padding of the conversation icon container in the regular state-->
+    <dimen name="conversation_icon_container_top_padding">12dp</dimen>
+
+    <!-- The top padding of the conversation icon container when the avatar is small-->
+    <dimen name="conversation_icon_container_top_padding_small_avatar">9dp</dimen>
+
+    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
+    <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
+
+    <!-- margin at the end of messaging group icons when not conversations -->
+    <dimen name="messaging_layout_margin_end">12dp</dimen>
+
+    <!-- Padding between text and sender when singleline -->
+    <dimen name="messaging_group_singleline_sender_padding_end">4dp</dimen>
 
     <dimen name="messaging_group_sending_progress_size">24dp</dimen>
 
@@ -760,18 +822,36 @@
     <dimen name="chooser_edge_margin_normal">24dp</dimen>
     <dimen name="chooser_preview_image_font_size">20sp</dimen>
     <dimen name="chooser_preview_image_border">1dp</dimen>
+    <dimen name="chooser_preview_image_max_dimen">200dp</dimen>
     <dimen name="chooser_preview_width">-1px</dimen>
-    <dimen name="chooser_target_width">90dp</dimen>
     <dimen name="chooser_header_scroll_elevation">4dp</dimen>
     <dimen name="chooser_max_collapsed_height">288dp</dimen>
     <dimen name="chooser_direct_share_label_placeholder_max_width">72dp</dimen>
+    <dimen name="chooser_icon_size">56dp</dimen>
+    <dimen name="chooser_badge_size">22dp</dimen>
     <dimen name="resolver_icon_size">32dp</dimen>
-    <dimen name="resolver_grid_icon_size">42dp</dimen>
-    <dimen name="resolver_button_bar_spacing">8dp</dimen>
+    <dimen name="resolver_button_bar_spacing">0dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>
     <dimen name="resolver_icon_margin">16dp</dimen>
     <dimen name="resolver_small_margin">18dp</dimen>
     <dimen name="resolver_edge_margin">24dp</dimen>
     <dimen name="resolver_elevation">1dp</dimen>
+    <dimen name="resolver_empty_state_height">212dp</dimen>
+    <dimen name="resolver_empty_state_height_with_tabs">268dp</dimen>
+    <dimen name="resolver_max_collapsed_height">192dp</dimen>
+    <dimen name="resolver_max_collapsed_height_with_tabs">268dp</dimen>
+    <dimen name="resolver_max_collapsed_height_with_default">144dp</dimen>
+    <dimen name="resolver_max_collapsed_height_with_default_with_tabs">300dp</dimen>
+    <dimen name="resolver_tab_text_size">14sp</dimen>
+    <dimen name="resolver_title_padding_bottom">0dp</dimen>
+    <dimen name="resolver_empty_state_container_padding_top">8dp</dimen>
+    <dimen name="resolver_empty_state_container_padding_bottom">8dp</dimen>
+
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
+
+    <!-- For Waterfall Display -->
+    <dimen name="waterfall_display_left_edge_size">0px</dimen>
+    <dimen name="waterfall_display_top_edge_size">0px</dimen>
+    <dimen name="waterfall_display_right_edge_size">0px</dimen>
+    <dimen name="waterfall_display_bottom_edge_size">0px</dimen>
 </resources>

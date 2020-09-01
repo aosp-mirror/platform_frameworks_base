@@ -35,10 +35,10 @@ namespace statsd {
 
 struct GaugeAtom {
     GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t elapsedTimeNs)
-        : mFields(fields), mElapsedTimestamps(elapsedTimeNs) {
+        : mFields(fields), mElapsedTimestampNs(elapsedTimeNs) {
     }
     std::shared_ptr<vector<FieldValue>> mFields;
-    int64_t mElapsedTimestamps;
+    int64_t mElapsedTimestampNs;
 };
 
 struct GaugeBucket {
@@ -56,13 +56,16 @@ typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>
 // producer always reports the guage at the earliest time of the bucket when the condition is met.
 class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
-    GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
-                        const int whatMatcherIndex,
-                        const sp<EventMatcherWizard>& matcherWizard,
-                        const int pullTagId, const int triggerAtomId, const int atomId,
-                        const int64_t timeBaseNs, const int64_t startTimeNs,
-                        const sp<StatsPullerManager>& pullerManager);
+    GaugeMetricProducer(
+            const ConfigKey& key, const GaugeMetric& gaugeMetric, const int conditionIndex,
+            const vector<ConditionState>& initialConditionCache,
+            const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
+            const sp<EventMatcherWizard>& matcherWizard, const int pullTagId,
+            const int triggerAtomId, const int atomId, const int64_t timeBaseNs,
+            const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
+            const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
+            const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                    eventDeactivationMap = {});
 
     virtual ~GaugeMetricProducer();
 
@@ -71,18 +74,23 @@ public:
                       bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
-    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
-                          const int64_t version) override {
+    void notifyAppUpgrade(const int64_t& eventTimeNs) override {
         std::lock_guard<std::mutex> lock(mMutex);
 
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
-        if (eventTimeNs > getCurrentBucketEndTimeNs()) {
-            // Flush full buckets on the normal path up to the latest bucket boundary.
-            flushIfNeededLocked(eventTimeNs);
+        flushLocked(eventTimeNs);
+        if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+            pullAndMatchEventsLocked(eventTimeNs);
         }
-        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
+    };
+
+    // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
+    void onStatsdInitCompleted(const int64_t& eventTimeNs) override {
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        flushLocked(eventTimeNs);
         if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
@@ -91,8 +99,8 @@ public:
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKey, bool condition,
-            const LogEvent& event) override;
+            const ConditionKey& conditionKey, bool condition, const LogEvent& event,
+            const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
 private:
     void onDumpReportLocked(const int64_t dumpTimeNs,
@@ -156,9 +164,6 @@ private:
     // this slice (ie, for partial buckets, we use the last partial bucket in this full bucket).
     std::shared_ptr<DimToValMap> mCurrentSlicedBucketForAnomaly;
 
-    // Pairs of (elapsed start, elapsed end) denoting buckets that were skipped.
-    std::list<std::pair<int64_t, int64_t>> mSkippedBuckets;
-
     const int64_t mMinBucketSizeNs;
 
     // Translate Atom based bucket to single numeric value bucket for anomaly and updates the map
@@ -191,13 +196,14 @@ private:
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition);
-    FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
-    FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection);
     FRIEND_TEST(GaugeMetricProducerTest, TestFirstBucket);
     FRIEND_TEST(GaugeMetricProducerTest, TestPullOnTrigger);
     FRIEND_TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput);
+
+    FRIEND_TEST(GaugeMetricProducerTest_PartialBucket, TestPushedEvents);
+    FRIEND_TEST(GaugeMetricProducerTest_PartialBucket, TestPulled);
 };
 
 }  // namespace statsd

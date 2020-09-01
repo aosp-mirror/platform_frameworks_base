@@ -1,6 +1,0 @@
-android_test_helper_app {
-    name: "FrameworksCoreTests_install_split_base",
-    defaults: ["FrameworksCoreTests_apks_defaults"],
-
-    srcs: ["**/*.java"],
-}

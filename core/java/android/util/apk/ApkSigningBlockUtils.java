@@ -124,6 +124,24 @@ final class ApkSigningBlockUtils {
         }
     }
 
+    static boolean isSupportedSignatureAlgorithm(int sigAlgorithm) {
+        switch (sigAlgorithm) {
+            case SIGNATURE_RSA_PSS_WITH_SHA256:
+            case SIGNATURE_RSA_PSS_WITH_SHA512:
+            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256:
+            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
+            case SIGNATURE_ECDSA_WITH_SHA256:
+            case SIGNATURE_ECDSA_WITH_SHA512:
+            case SIGNATURE_DSA_WITH_SHA256:
+            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
+            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
+            case SIGNATURE_VERITY_DSA_WITH_SHA256:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static void verifyIntegrityFor1MbChunkBasedAlgorithm(
             Map<Integer, byte[]> expectedDigests,
             FileDescriptor apkFileDescriptor,
@@ -402,6 +420,11 @@ final class ApkSigningBlockUtils {
     static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
     static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
     static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
+    static final int CONTENT_DIGEST_SHA256 = 4;
+
+    private static final int[] V4_CONTENT_DIGEST_ALGORITHMS =
+            {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
+                    CONTENT_DIGEST_CHUNKED_SHA256};
 
     static int compareSignatureAlgorithm(int sigAlgorithm1, int sigAlgorithm2) {
         int digestAlgorithm1 = getSignatureAlgorithmContentDigestAlgorithm(sigAlgorithm1);
@@ -551,6 +574,21 @@ final class ApkSigningBlockUtils {
                         "Unknown signature algorithm: 0x"
                                 + Long.toHexString(sigAlgorithm & 0xffffffff));
         }
+    }
+
+    /**
+     * Returns the best digest from the map of available digests.
+     * similarly to compareContentDigestAlgorithm.
+     *
+     * Keep in sync with pickBestDigestForV4 in apksigner's ApkSigningBlockUtils.
+     */
+    static byte[] pickBestDigestForV4(Map<Integer, byte[]> contentDigests) {
+        for (int algo : V4_CONTENT_DIGEST_ALGORITHMS) {
+            if (contentDigests.containsKey(algo)) {
+                return contentDigests.get(algo);
+            }
+        }
+        return null;
     }
 
     /**

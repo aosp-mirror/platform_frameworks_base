@@ -336,7 +336,7 @@ public class WifiTrackerTest {
     private static OsuProvider buildOsuProvider(String friendlyName) {
         Map<String, String> friendlyNames = new HashMap<>();
         friendlyNames.put("en", friendlyName);
-        return new OsuProvider(null, friendlyNames, null, null, null, null, null);
+        return new OsuProvider((WifiSsid) null, friendlyNames, null, null, null, null);
     }
 
     private WifiTracker createTrackerWithImmediateBroadcastsAndInjectInitialScanResults(
@@ -494,7 +494,6 @@ public class WifiTrackerTest {
 
         WifiConfiguration selfAddedNoAssociation = new WifiConfiguration();
         selfAddedNoAssociation.ephemeral = true;
-        selfAddedNoAssociation.selfAdded = true;
         selfAddedNoAssociation.numAssociation = 0;
         selfAddedNoAssociation.SSID = SSID_2;
         selfAddedNoAssociation.BSSID = BSSID_2;
@@ -902,7 +901,7 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(
                 mContext, new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION));
         tracker.mReceiver.onReceive(
-                mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
+                mContext, new Intent(WifiManager.ACTION_LINK_CONFIGURATION_CHANGED));
 
 
         verify(mockWifiListener, never()).onAccessPointsChanged();
@@ -920,7 +919,7 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(
                 mContext, new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION));
         tracker.mReceiver.onReceive(
-                mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
+                mContext, new Intent(WifiManager.ACTION_LINK_CONFIGURATION_CHANGED));
 
         verify(mockWifiListener, never()).onAccessPointsChanged();
 

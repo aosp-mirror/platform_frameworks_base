@@ -15,123 +15,29 @@
  */
 
 #include <DeviceInfo.h>
+#include <log/log.h>
+#include <utils/Errors.h>
 
 #include "Properties.h"
-
-#include <gui/ISurfaceComposer.h>
-#include <gui/SurfaceComposerClient.h>
-#include <ui/GraphicTypes.h>
-
-#include <mutex>
-#include <thread>
-
-#include <log/log.h>
 
 namespace android {
 namespace uirenderer {
 
-static constexpr android::DisplayInfo sDummyDisplay{
-        1080,   // w
-        1920,   // h
-        320.0,  // xdpi
-        320.0,  // ydpi
-        60.0,   // fps
-        2.0,    // density
-        0,      // orientation
-        false,  // secure?
-        0,      // appVsyncOffset
-        0,      // presentationDeadline
-        1080,   // viewportW
-        1920,   // viewportH
-};
-
 DeviceInfo* DeviceInfo::get() {
-        static DeviceInfo sDeviceInfo;
-        return &sDeviceInfo;
+    static DeviceInfo sDeviceInfo;
+    return &sDeviceInfo;
 }
 
-static DisplayInfo QueryDisplayInfo() {
-    if (Properties::isolatedProcess) {
-        return sDummyDisplay;
-    }
-
-    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
-    LOG_ALWAYS_FATAL_IF(token == nullptr,
-                        "Failed to get display info because internal display is disconnected");
-
-    DisplayInfo displayInfo;
-    status_t status = SurfaceComposerClient::getDisplayInfo(token, &displayInfo);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
-    return displayInfo;
-}
-
-static float QueryMaxRefreshRate() {
-    if (Properties::isolatedProcess) {
-        return sDummyDisplay.fps;
-    }
-
-    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
-    LOG_ALWAYS_FATAL_IF(token == nullptr,
-                        "Failed to get display info because internal display is disconnected");
-
-    Vector<DisplayInfo> configs;
-    configs.reserve(10);
-    status_t status = SurfaceComposerClient::getDisplayConfigs(token, &configs);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to getDisplayConfigs, error %d", status);
-    LOG_ALWAYS_FATAL_IF(configs.size() == 0, "getDisplayConfigs returned 0 configs?");
-    float max = 0.0f;
-    for (auto& info : configs) {
-        max = std::max(max, info.fps);
-    }
-    return max;
-}
-
-static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
-    if (Properties::isolatedProcess) {
-        *colorSpace = SkColorSpace::MakeSRGB();
-        *colorType = SkColorType::kN32_SkColorType;
-        return;
-    }
-    ui::Dataspace defaultDataspace, wcgDataspace;
-    ui::PixelFormat defaultPixelFormat, wcgPixelFormat;
-    status_t status =
-        SurfaceComposerClient::getCompositionPreference(&defaultDataspace, &defaultPixelFormat,
-                                                        &wcgDataspace, &wcgPixelFormat);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get composition preference, error %d", status);
-    switch (wcgDataspace) {
-        case ui::Dataspace::DISPLAY_P3:
-            *colorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
-            break;
-        case ui::Dataspace::V0_SCRGB:
-            *colorSpace = SkColorSpace::MakeSRGB();
-            break;
-        case ui::Dataspace::V0_SRGB:
-            // when sRGB is returned, it means wide color gamut is not supported.
-            *colorSpace = SkColorSpace::MakeSRGB();
-            break;
-        default:
-            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
-    }
-    switch (wcgPixelFormat) {
-        case ui::PixelFormat::RGBA_8888:
-            *colorType = SkColorType::kN32_SkColorType;
-            break;
-        case ui::PixelFormat::RGBA_FP16:
-            *colorType = SkColorType::kRGBA_F16_SkColorType;
-            break;
-        default:
-            LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format.");
-    }
-}
-
-DeviceInfo::DeviceInfo() : mMaxRefreshRate(QueryMaxRefreshRate()) {
+DeviceInfo::DeviceInfo() {
 #if HWUI_NULL_GPU
         mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
 #else
         mMaxTextureSize = -1;
 #endif
-    mDisplayInfo = QueryDisplayInfo();
-    queryWideColorGamutPreference(&mWideColorSpace, &mWideColorType);
+        updateDisplayInfo();
+}
+DeviceInfo::~DeviceInfo() {
+    ADisplay_release(mDisplays);
 }
 
 int DeviceInfo::maxTextureSize() const {
@@ -143,8 +49,74 @@ void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
     DeviceInfo::get()->mMaxTextureSize = maxTextureSize;
 }
 
-void DeviceInfo::onDisplayConfigChanged() {
-    mDisplayInfo = QueryDisplayInfo();
+void DeviceInfo::onRefreshRateChanged(int64_t vsyncPeriod) {
+    mVsyncPeriod = vsyncPeriod;
+}
+
+void DeviceInfo::updateDisplayInfo() {
+    if (Properties::isolatedProcess) {
+        return;
+    }
+
+    if (mCurrentConfig == nullptr) {
+        mDisplaysSize = ADisplay_acquirePhysicalDisplays(&mDisplays);
+        LOG_ALWAYS_FATAL_IF(mDisplays == nullptr || mDisplaysSize <= 0,
+                            "Failed to get physical displays: no connected display: %d!", mDisplaysSize);
+        for (size_t i = 0; i < mDisplaysSize; i++) {
+            ADisplayType type = ADisplay_getDisplayType(mDisplays[i]);
+            if (type == ADisplayType::DISPLAY_TYPE_INTERNAL) {
+                mPhysicalDisplayIndex = i;
+                break;
+            }
+        }
+        LOG_ALWAYS_FATAL_IF(mPhysicalDisplayIndex < 0, "Failed to find a connected physical display!");
+
+
+        // Since we now just got the primary display for the first time, then
+        // store the primary display metadata here.
+        ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
+        mMaxRefreshRate = ADisplay_getMaxSupportedFps(primaryDisplay);
+        ADataSpace dataspace;
+        AHardwareBuffer_Format format;
+        ADisplay_getPreferredWideColorFormat(primaryDisplay, &dataspace, &format);
+        switch (dataspace) {
+            case ADATASPACE_DISPLAY_P3:
+                mWideColorSpace =
+                        SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
+                break;
+            case ADATASPACE_SCRGB:
+                mWideColorSpace = SkColorSpace::MakeSRGB();
+                break;
+            case ADATASPACE_SRGB:
+                // when sRGB is returned, it means wide color gamut is not supported.
+                mWideColorSpace = SkColorSpace::MakeSRGB();
+                break;
+            default:
+                LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+        }
+        switch (format) {
+            case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
+                mWideColorType = SkColorType::kN32_SkColorType;
+                break;
+            case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+                mWideColorType = SkColorType::kRGBA_F16_SkColorType;
+                break;
+            default:
+                LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format.");
+        }
+    }
+    // This method may have been called when the display config changed, so
+    // sync with the current configuration.
+    ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
+    status_t status = ADisplay_getCurrentConfig(primaryDisplay, &mCurrentConfig);
+    LOG_ALWAYS_FATAL_IF(status, "Failed to get display config, error %d", status);
+
+    mWidth = ADisplayConfig_getWidth(mCurrentConfig);
+    mHeight = ADisplayConfig_getHeight(mCurrentConfig);
+    mDensity = ADisplayConfig_getDensity(mCurrentConfig);
+    mVsyncPeriod = static_cast<int64_t>(1000000000 / ADisplayConfig_getFps(mCurrentConfig));
+    mCompositorOffset = ADisplayConfig_getCompositorOffsetNanos(mCurrentConfig);
+    mAppOffset = ADisplayConfig_getAppVsyncOffsetNanos(mCurrentConfig);
 }
 
 } /* namespace uirenderer */

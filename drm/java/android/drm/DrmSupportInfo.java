@@ -26,7 +26,9 @@ import java.util.Iterator;
  * Plug-in developers can expose the capability of their plug-in by passing an instance of this
  * class to an application.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmSupportInfo {
     private final ArrayList<String> mFileSuffixList = new ArrayList<String>();
     private final ArrayList<String> mMimeTypeList = new ArrayList<String>();

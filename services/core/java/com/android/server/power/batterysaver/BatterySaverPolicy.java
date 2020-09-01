@@ -16,8 +16,13 @@
 package com.android.server.power.batterysaver;
 
 import android.annotation.IntDef;
+import android.app.UiModeManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatterySaverPolicyConfig;
@@ -183,17 +188,14 @@ public class BatterySaverPolicy extends ContentObserver {
     private String mEventLogKeys;
 
     /**
-     * Whether vibration should *really* be disabled -- i.e. {@link Policy#disableVibration}
-     * is true *and* {@link #mAccessibilityEnabled} is false.
-     */
-    @GuardedBy("mLock")
-    private boolean mDisableVibrationEffective;
-
-    /**
      * Whether accessibility is currently enabled or not.
      */
     @GuardedBy("mLock")
     private boolean mAccessibilityEnabled;
+
+    /** Whether the phone is projecting in car mode or not. */
+    @GuardedBy("mLock")
+    private boolean mCarModeEnabled;
 
     /** The current default adaptive policy. */
     @GuardedBy("mLock")
@@ -206,6 +208,13 @@ public class BatterySaverPolicy extends ContentObserver {
     /** The policy to be used for full battery saver. */
     @GuardedBy("mLock")
     private Policy mFullPolicy = DEFAULT_FULL_POLICY;
+
+    /**
+     * The current effective policy. This is based on the current policy level's policy, with any
+     * required adjustments.
+     */
+    @GuardedBy("mLock")
+    private Policy mEffectivePolicyRaw = OFF_POLICY;
 
     @IntDef(prefix = {"POLICY_LEVEL_"}, value = {
             POLICY_LEVEL_OFF,
@@ -225,6 +234,20 @@ public class BatterySaverPolicy extends ContentObserver {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final BatterySavingStats mBatterySavingStats;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED:
+                    setCarModeEnabled(true);
+                    break;
+                case UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED:
+                    setCarModeEnabled(false);
+                    break;
+            }
+        }
+    };
 
     @GuardedBy("mLock")
     private final List<BatterySaverPolicyListener> mListeners = new ArrayList<>();
@@ -259,16 +282,25 @@ public class BatterySaverPolicy extends ContentObserver {
 
         final AccessibilityManager acm = mContext.getSystemService(AccessibilityManager.class);
 
-        acm.addAccessibilityStateChangeListener((enabled) -> {
-            synchronized (mLock) {
-                mAccessibilityEnabled = enabled;
-            }
-            refreshSettings();
-        });
-        final boolean enabled = acm.isEnabled();
+        acm.addAccessibilityStateChangeListener((enabled) -> setAccessibilityEnabled(enabled));
+        final boolean accessibilityEnabled = acm.isEnabled();
         synchronized (mLock) {
-            mAccessibilityEnabled = enabled;
+            mAccessibilityEnabled = accessibilityEnabled;
         }
+
+        final IntentFilter filter = new IntentFilter(
+                UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED);
+        filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED);
+        // The ENTER/EXIT_CAR_MODE_PRIORITIZED intents are sent to UserHandle.ALL, so no need to
+        // register as all users here.
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+        final boolean carModeEnabled =
+                mContext.getSystemService(UiModeManager.class).getCurrentModeType()
+                        == Configuration.UI_MODE_TYPE_CAR;
+        synchronized (mLock) {
+            mCarModeEnabled = carModeEnabled;
+        }
+
         onChange(true, null);
     }
 
@@ -290,13 +322,39 @@ public class BatterySaverPolicy extends ContentObserver {
         return R.string.config_batterySaverDeviceSpecificConfig;
     }
 
+    @VisibleForTesting
+    void invalidatePowerSaveModeCaches() {
+        PowerManager.invalidatePowerSaveModeCaches();
+    }
+
+    /**
+     * Notifies listeners of a policy change on the handler thread only if the current policy level
+     * is not {@link POLICY_LEVEL_OFF}.
+     */
+    private void maybeNotifyListenersOfPolicyChange() {
+        final BatterySaverPolicyListener[] listeners;
+        synchronized (mLock) {
+            if (mPolicyLevel == POLICY_LEVEL_OFF) {
+                // Current policy is OFF, so there's no change to notify listeners of.
+                return;
+            }
+            // Don't call out to listeners with the lock held.
+            listeners = mListeners.toArray(new BatterySaverPolicyListener[mListeners.size()]);
+        }
+
+        mHandler.post(() -> {
+            for (BatterySaverPolicyListener listener : listeners) {
+                listener.onBatterySaverPolicyChanged(this);
+            }
+        });
+    }
+
     @Override
     public void onChange(boolean selfChange, Uri uri) {
         refreshSettings();
     }
 
     private void refreshSettings() {
-        final BatterySaverPolicyListener[] listeners;
         synchronized (mLock) {
             // Load the non-device-specific setting.
             final String setting = getGlobalSetting(Settings.Global.BATTERY_SAVER_CONSTANTS);
@@ -325,16 +383,9 @@ public class BatterySaverPolicy extends ContentObserver {
                 // Nothing of note changed.
                 return;
             }
-
-            listeners = mListeners.toArray(new BatterySaverPolicyListener[0]);
         }
 
-        // Notify the listeners.
-        mHandler.post(() -> {
-            for (BatterySaverPolicyListener listener : listeners) {
-                listener.onBatterySaverPolicyChanged(this);
-            }
-        });
+        maybeNotifyListenersOfPolicyChange();
     }
 
     @GuardedBy("mLock")
@@ -395,31 +446,65 @@ public class BatterySaverPolicy extends ContentObserver {
 
     @GuardedBy("mLock")
     private void updatePolicyDependenciesLocked() {
-        final Policy currPolicy = getCurrentPolicyLocked();
-        // Update the effective vibration policy.
-        mDisableVibrationEffective = currPolicy.disableVibration
-                && !mAccessibilityEnabled; // Don't disable vibration when accessibility is on.
+        final Policy rawPolicy = getCurrentRawPolicyLocked();
+        final int locationMode;
+
+        invalidatePowerSaveModeCaches();
+        if (mCarModeEnabled
+                && rawPolicy.locationMode != PowerManager.LOCATION_MODE_NO_CHANGE
+                && rawPolicy.locationMode != PowerManager.LOCATION_MODE_FOREGROUND_ONLY) {
+            // If car projection is enabled, ensure that navigation works.
+            locationMode = PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
+        } else {
+            locationMode = rawPolicy.locationMode;
+        }
+
+        mEffectivePolicyRaw = new Policy(
+                rawPolicy.adjustBrightnessFactor,
+                rawPolicy.advertiseIsEnabled,
+                rawPolicy.deferFullBackup,
+                rawPolicy.deferKeyValueBackup,
+                rawPolicy.disableAnimation,
+                rawPolicy.disableAod,
+                rawPolicy.disableLaunchBoost,
+                rawPolicy.disableOptionalSensors,
+                rawPolicy.disableSoundTrigger,
+                // Don't disable vibration when accessibility is on.
+                rawPolicy.disableVibration && !mAccessibilityEnabled,
+                rawPolicy.enableAdjustBrightness,
+                rawPolicy.enableDataSaver,
+                rawPolicy.enableFirewall,
+                // Don't force night mode when car projection is enabled.
+                rawPolicy.enableNightMode && !mCarModeEnabled,
+                rawPolicy.enableQuickDoze,
+                rawPolicy.filesForInteractive,
+                rawPolicy.filesForNoninteractive,
+                rawPolicy.forceAllAppsStandby,
+                rawPolicy.forceBackgroundCheck,
+                locationMode
+        );
+
 
         final StringBuilder sb = new StringBuilder();
 
-        if (currPolicy.forceAllAppsStandby) sb.append("A");
-        if (currPolicy.forceBackgroundCheck) sb.append("B");
+        if (mEffectivePolicyRaw.forceAllAppsStandby) sb.append("A");
+        if (mEffectivePolicyRaw.forceBackgroundCheck) sb.append("B");
 
-        if (mDisableVibrationEffective) sb.append("v");
-        if (currPolicy.disableAnimation) sb.append("a");
-        if (currPolicy.disableSoundTrigger) sb.append("s");
-        if (currPolicy.deferFullBackup) sb.append("F");
-        if (currPolicy.deferKeyValueBackup) sb.append("K");
-        if (currPolicy.enableFirewall) sb.append("f");
-        if (currPolicy.enableDataSaver) sb.append("d");
-        if (currPolicy.enableAdjustBrightness) sb.append("b");
+        if (mEffectivePolicyRaw.disableVibration) sb.append("v");
+        if (mEffectivePolicyRaw.disableAnimation) sb.append("a");
+        if (mEffectivePolicyRaw.disableSoundTrigger) sb.append("s");
+        if (mEffectivePolicyRaw.deferFullBackup) sb.append("F");
+        if (mEffectivePolicyRaw.deferKeyValueBackup) sb.append("K");
+        if (mEffectivePolicyRaw.enableFirewall) sb.append("f");
+        if (mEffectivePolicyRaw.enableDataSaver) sb.append("d");
+        if (mEffectivePolicyRaw.enableAdjustBrightness) sb.append("b");
 
-        if (currPolicy.disableLaunchBoost) sb.append("l");
-        if (currPolicy.disableOptionalSensors) sb.append("S");
-        if (currPolicy.disableAod) sb.append("o");
-        if (currPolicy.enableQuickDoze) sb.append("q");
+        if (mEffectivePolicyRaw.disableLaunchBoost) sb.append("l");
+        if (mEffectivePolicyRaw.disableOptionalSensors) sb.append("S");
+        if (mEffectivePolicyRaw.disableAod) sb.append("o");
+        if (mEffectivePolicyRaw.enableQuickDoze) sb.append("q");
 
-        sb.append(currPolicy.locationMode);
+        sb.append(mEffectivePolicyRaw.locationMode);
 
         mEventLogKeys = sb.toString();
     }
@@ -848,7 +933,7 @@ public class BatterySaverPolicy extends ContentObserver {
                     return builder.setBatterySaverEnabled(currPolicy.disableSoundTrigger)
                             .build();
                 case ServiceType.VIBRATION:
-                    return builder.setBatterySaverEnabled(mDisableVibrationEffective)
+                    return builder.setBatterySaverEnabled(currPolicy.disableVibration)
                             .build();
                 case ServiceType.FORCE_ALL_APPS_STANDBY:
                     return builder.setBatterySaverEnabled(currPolicy.forceAllAppsStandby)
@@ -924,6 +1009,10 @@ public class BatterySaverPolicy extends ContentObserver {
     }
 
     private Policy getCurrentPolicyLocked() {
+        return mEffectivePolicyRaw;
+    }
+
+    private Policy getCurrentRawPolicyLocked() {
         switch (mPolicyLevel) {
             case POLICY_LEVEL_FULL:
                 return mFullPolicy;
@@ -985,11 +1074,13 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("    value: " + mAdaptiveDeviceSpecificSettings);
 
             pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled);
+            pw.println("  mCarModeEnabled=" + mCarModeEnabled);
             pw.println("  mPolicyLevel=" + mPolicyLevel);
 
             dumpPolicyLocked(pw, "  ", "full", mFullPolicy);
             dumpPolicyLocked(pw, "  ", "default adaptive", mDefaultAdaptivePolicy);
             dumpPolicyLocked(pw, "  ", "current adaptive", mAdaptivePolicy);
+            dumpPolicyLocked(pw, "  ", "effective", mEffectivePolicyRaw);
         }
     }
 
@@ -1000,11 +1091,7 @@ public class BatterySaverPolicy extends ContentObserver {
         pw.print(indent);
         pw.println("  " + KEY_ADVERTISE_IS_ENABLED + "=" + p.advertiseIsEnabled);
         pw.print(indent);
-        pw.println("  " + KEY_VIBRATION_DISABLED + ":config=" + p.disableVibration);
-        // mDisableVibrationEffective is based on the currently selected policy
-        pw.print(indent);
-        pw.println("  " + KEY_VIBRATION_DISABLED + ":effective=" + (p.disableVibration
-                && !mAccessibilityEnabled));
+        pw.println("  " + KEY_VIBRATION_DISABLED + "=" + p.disableVibration);
         pw.print(indent);
         pw.println("  " + KEY_ANIMATION_DISABLED + "=" + p.disableAnimation);
         pw.print(indent);
@@ -1061,10 +1148,24 @@ public class BatterySaverPolicy extends ContentObserver {
     }
 
     @VisibleForTesting
-    public void setAccessibilityEnabledForTest(boolean enabled) {
+    void setAccessibilityEnabled(boolean enabled) {
         synchronized (mLock) {
-            mAccessibilityEnabled = enabled;
-            updatePolicyDependenciesLocked();
+            if (mAccessibilityEnabled != enabled) {
+                mAccessibilityEnabled = enabled;
+                updatePolicyDependenciesLocked();
+                maybeNotifyListenersOfPolicyChange();
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void setCarModeEnabled(boolean enabled) {
+        synchronized (mLock) {
+            if (mCarModeEnabled != enabled) {
+                mCarModeEnabled = enabled;
+                updatePolicyDependenciesLocked();
+                maybeNotifyListenersOfPolicyChange();
+            }
         }
     }
 }

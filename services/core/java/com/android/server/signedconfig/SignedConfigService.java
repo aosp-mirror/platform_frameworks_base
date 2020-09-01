@@ -26,8 +26,8 @@ import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Slog;
-import android.util.StatsLog;
 
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 
 import java.nio.charset.StandardCharsets;
@@ -85,7 +85,7 @@ public class SignedConfigService {
                 && metaData.containsKey(KEY_GLOBAL_SETTINGS_SIGNATURE)) {
             SignedConfigEvent event = new SignedConfigEvent();
             try {
-                event.type = StatsLog.SIGNED_CONFIG_REPORTED__TYPE__GLOBAL_SETTINGS;
+                event.type = FrameworkStatsLog.SIGNED_CONFIG_REPORTED__TYPE__GLOBAL_SETTINGS;
                 event.fromPackage = packageName;
                 String config = metaData.getString(KEY_GLOBAL_SETTINGS);
                 String signature = metaData.getString(KEY_GLOBAL_SETTINGS_SIGNATURE);
@@ -95,7 +95,8 @@ public class SignedConfigService {
                 } catch (IllegalArgumentException iae) {
                     Slog.e(TAG, "Failed to base64 decode global settings config from "
                             + packageName);
-                    event.status = StatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_CONFIG;
+                    event.status =
+                            FrameworkStatsLog.SIGNED_CONFIG_REPORTED__STATUS__BASE64_FAILURE_CONFIG;
                     return;
                 }
                 if (DBG) {

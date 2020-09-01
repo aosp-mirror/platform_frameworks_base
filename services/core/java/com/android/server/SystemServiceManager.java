@@ -17,12 +17,21 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.os.UserManagerInternal;
+import android.util.ArrayMap;
 import android.util.Slog;
-import android.util.TimingsTraceLog;
+
+import com.android.server.SystemService.TargetUser;
+import com.android.server.utils.TimingsTraceAndSlog;
+
+import dalvik.system.PathClassLoader;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -37,7 +46,16 @@ import java.util.ArrayList;
  */
 public class SystemServiceManager {
     private static final String TAG = "SystemServiceManager";
+    private static final boolean DEBUG = false;
     private static final int SERVICE_CALL_WARN_TIME_MS = 50;
+
+    // Constants used on onUser(...)
+    private static final String START = "Start";
+    private static final String UNLOCKING = "Unlocking";
+    private static final String UNLOCKED = "Unlocked";
+    private static final String SWITCH = "Switch";
+    private static final String STOP = "Stop";
+    private static final String CLEANUP = "Cleanup";
 
     private static File sSystemDir;
     private final Context mContext;
@@ -49,7 +67,12 @@ public class SystemServiceManager {
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
 
+    // Map of paths to PathClassLoader, so we don't load the same path multiple times.
+    private final ArrayMap<String, PathClassLoader> mLoadedPaths = new ArrayMap<>();
+
     private int mCurrentPhase = -1;
+
+    private UserManagerInternal mUserManagerInternal;
 
     SystemServiceManager(Context context) {
         mContext = context;
@@ -60,20 +83,46 @@ public class SystemServiceManager {
      *
      * @return The service instance.
      */
-    @SuppressWarnings("unchecked")
     public SystemService startService(String className) {
-        final Class<SystemService> serviceClass;
+        final Class<SystemService> serviceClass = loadClassFromLoader(className,
+                this.getClass().getClassLoader());
+        return startService(serviceClass);
+    }
+
+    /**
+     * Starts a service by class name and a path that specifies the jar where the service lives.
+     *
+     * @return The service instance.
+     */
+    public SystemService startServiceFromJar(String className, String path) {
+        PathClassLoader pathClassLoader = mLoadedPaths.get(path);
+        if (pathClassLoader == null) {
+            // NB: the parent class loader should always be the system server class loader.
+            // Changing it has implications that require discussion with the mainline team.
+            pathClassLoader = new PathClassLoader(path, this.getClass().getClassLoader());
+            mLoadedPaths.put(path, pathClassLoader);
+        }
+        final Class<SystemService> serviceClass = loadClassFromLoader(className, pathClassLoader);
+        return startService(serviceClass);
+    }
+
+    /*
+     * Loads and initializes a class from the given classLoader. Returns the class.
+     */
+    @SuppressWarnings("unchecked")
+    private static Class<SystemService> loadClassFromLoader(String className,
+            ClassLoader classLoader) {
         try {
-            serviceClass = (Class<SystemService>)Class.forName(className);
+            return (Class<SystemService>) Class.forName(className, true, classLoader);
         } catch (ClassNotFoundException ex) {
-            Slog.i(TAG, "Starting " + className);
             throw new RuntimeException("Failed to create service " + className
-                    + ": service class not found, usually indicates that the caller should "
+                    + " from class loader " + classLoader.toString() + ": service class not "
+                    + "found, usually indicates that the caller should "
                     + "have called PackageManager.hasSystemFeature() to check whether the "
                     + "feature is available on this device before trying to start the "
-                    + "services that implement it", ex);
+                    + "services that implement it. Also ensure that the correct path for the "
+                    + "classloader is supplied, if applicable.", ex);
         }
-        return startService(serviceClass);
     }
 
     /**
@@ -84,7 +133,6 @@ public class SystemServiceManager {
      * @return The service instance, never null.
      * @throws RuntimeException if the service fails to start.
      */
-    @SuppressWarnings("unchecked")
     public <T extends SystemService> T startService(Class<T> serviceClass) {
         try {
             final String name = serviceClass.getName();
@@ -139,9 +187,10 @@ public class SystemServiceManager {
      * Starts the specified boot phase for all system services that have been started up to
      * this point.
      *
+     * @param t trace logger
      * @param phase The boot phase to start.
      */
-    public void startBootPhase(final int phase) {
+    public void startBootPhase(@NonNull TimingsTraceAndSlog t, int phase) {
         if (phase <= mCurrentPhase) {
             throw new IllegalArgumentException("Next phase must be larger than previous");
         }
@@ -149,12 +198,12 @@ public class SystemServiceManager {
 
         Slog.i(TAG, "Starting phase " + mCurrentPhase);
         try {
-            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "OnBootPhase " + phase);
+            t.traceBegin("OnBootPhase_" + phase);
             final int serviceLen = mServices.size();
             for (int i = 0; i < serviceLen; i++) {
                 final SystemService service = mServices.get(i);
                 long time = SystemClock.elapsedRealtime();
-                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, service.getClass().getName());
+                t.traceBegin("OnBootPhase_" + phase + "_" + service.getClass().getName());
                 try {
                     service.onBootPhase(mCurrentPhase);
                 } catch (Exception ex) {
@@ -164,10 +213,16 @@ public class SystemServiceManager {
                             + mCurrentPhase, ex);
                 }
                 warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onBootPhase");
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                t.traceEnd();
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            t.traceEnd();
+        }
+
+        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            final long totalBootTime = SystemClock.uptimeMillis() - mRuntimeStartUptime;
+            t.logDuration("TotalBootTime", totalBootTime);
+            SystemServerInitThreadPool.shutdown();
         }
     }
 
@@ -178,109 +233,139 @@ public class SystemServiceManager {
         return mCurrentPhase >= SystemService.PHASE_BOOT_COMPLETED;
     }
 
-    public void startUser(final int userHandle) {
-        final TimingsTraceLog t = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
-        t.traceBegin("ssm.startUser-" + userHandle);
-        Slog.i(TAG, "Calling onStartUser u" + userHandle);
-        final int serviceLen = mServices.size();
-        for (int i = 0; i < serviceLen; i++) {
-            final SystemService service = mServices.get(i);
-            t.traceBegin("onStartUser-" + userHandle + " " + service.getClass().getName());
-            long time = SystemClock.elapsedRealtime();
-            try {
-                service.onStartUser(userHandle);
-            } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting start of user " + userHandle
-                        + " to service " + service.getClass().getName(), ex);
-            }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onStartUser ");
-            t.traceEnd();
-        }
-        t.traceEnd();
+    /**
+     * Called at the beginning of {@code ActivityManagerService.systemReady()}.
+     */
+    public void preSystemReady() {
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
-    public void unlockUser(final int userHandle) {
-        final TimingsTraceLog t = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
-        t.traceBegin("ssm.unlockUser-" + userHandle);
-        Slog.i(TAG, "Calling onUnlockUser u" + userHandle);
-        final int serviceLen = mServices.size();
-        for (int i = 0; i < serviceLen; i++) {
-            final SystemService service = mServices.get(i);
-            t.traceBegin("onUnlockUser-" + userHandle + " " + service.getClass().getName());
-            long time = SystemClock.elapsedRealtime();
-            try {
-                service.onUnlockUser(userHandle);
-            } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting unlock of user " + userHandle
-                        + " to service " + service.getClass().getName(), ex);
-            }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onUnlockUser ");
-            t.traceEnd();
+    private @NonNull UserInfo getUserInfo(@UserIdInt int userHandle) {
+        if (mUserManagerInternal == null) {
+            throw new IllegalStateException("mUserManagerInternal not set yet");
         }
-        t.traceEnd();
+        final UserInfo userInfo = mUserManagerInternal.getUserInfo(userHandle);
+        if (userInfo == null) {
+            throw new IllegalStateException("No UserInfo for " + userHandle);
+        }
+        return userInfo;
     }
 
-    public void switchUser(final int userHandle) {
-        final TimingsTraceLog t = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
-        t.traceBegin("ssm.switchUser-" + userHandle);
-        Slog.i(TAG, "Calling switchUser u" + userHandle);
-        final int serviceLen = mServices.size();
-        for (int i = 0; i < serviceLen; i++) {
-            final SystemService service = mServices.get(i);
-            t.traceBegin("onSwitchUser-" + userHandle + " " + service.getClass().getName());
-            long time = SystemClock.elapsedRealtime();
-            try {
-                service.onSwitchUser(userHandle);
-            } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting switch of user " + userHandle
-                        + " to service " + service.getClass().getName(), ex);
-            }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onSwitchUser");
-            t.traceEnd();
-        }
-        t.traceEnd();
+    /**
+     * Starts the given user.
+     */
+    public void startUser(final @NonNull TimingsTraceAndSlog t, final @UserIdInt int userHandle) {
+        onUser(t, START, userHandle);
     }
 
-    public void stopUser(final int userHandle) {
-        final TimingsTraceLog t = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
-        t.traceBegin("ssm.stopUser-" + userHandle);
-        Slog.i(TAG, "Calling onStopUser u" + userHandle);
-        final int serviceLen = mServices.size();
-        for (int i = 0; i < serviceLen; i++) {
-            final SystemService service = mServices.get(i);
-            t.traceBegin("onStopUser-" + userHandle + " " + service.getClass().getName());
-            long time = SystemClock.elapsedRealtime();
-            try {
-                service.onStopUser(userHandle);
-            } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting stop of user " + userHandle
-                        + " to service " + service.getClass().getName(), ex);
-            }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onStopUser");
-            t.traceEnd();
-        }
-        t.traceEnd();
+    /**
+     * Unlocks the given user.
+     */
+    public void unlockUser(final @UserIdInt int userHandle) {
+        onUser(UNLOCKING, userHandle);
     }
 
-    public void cleanupUser(final int userHandle) {
-        final TimingsTraceLog t = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
-        t.traceBegin("ssm.cleanupUser-" + userHandle);
-        Slog.i(TAG, "Calling onCleanupUser u" + userHandle);
+    /**
+     * Called after the user was unlocked.
+     */
+    public void onUserUnlocked(final @UserIdInt int userHandle) {
+        onUser(UNLOCKED, userHandle);
+    }
+
+    /**
+     * Switches to the given user.
+     */
+    public void switchUser(final @UserIdInt int from, final @UserIdInt int to) {
+        onUser(TimingsTraceAndSlog.newAsyncLog(), SWITCH, to, from);
+    }
+
+    /**
+     * Stops the given user.
+     */
+    public void stopUser(final @UserIdInt int userHandle) {
+        onUser(STOP, userHandle);
+    }
+
+    /**
+     * Cleans up the given user.
+     */
+    public void cleanupUser(final @UserIdInt int userHandle) {
+        onUser(CLEANUP, userHandle);
+    }
+
+    private void onUser(@NonNull String onWhat, @UserIdInt int userHandle) {
+        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, userHandle);
+    }
+
+    private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
+            @UserIdInt int userHandle) {
+        onUser(t, onWhat, userHandle, UserHandle.USER_NULL);
+    }
+
+    private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
+            @UserIdInt int curUserId, @UserIdInt int prevUserId) {
+        t.traceBegin("ssm." + onWhat + "User-" + curUserId);
+        Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId);
+        final TargetUser curUser = new TargetUser(getUserInfo(curUserId));
+        final TargetUser prevUser = prevUserId == UserHandle.USER_NULL ? null
+                : new TargetUser(getUserInfo(prevUserId));
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
-            t.traceBegin("onCleanupUser-" + userHandle + " " + service.getClass().getName());
+            final String serviceName = service.getClass().getName();
+            boolean supported = service.isUserSupported(curUser);
+
+            // Must check if either curUser or prevUser is supported (for example, if switching from
+            // unsupported to supported, we still need to notify the services)
+            if (!supported && prevUser != null) {
+                supported = service.isUserSupported(prevUser);
+            }
+
+            if (!supported) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Skipping " + onWhat + "User-" + curUserId + " on service "
+                            + serviceName + " because it's not supported (curUser: "
+                            + curUser + ", prevUser:" + prevUser + ")");
+                } else {
+                    Slog.i(TAG,  "Skipping " + onWhat + "User-" + curUserId + " on "
+                            + serviceName);
+                }
+                continue;
+            }
+            t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + "_" + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
-                service.onCleanupUser(userHandle);
+                switch (onWhat) {
+                    case SWITCH:
+                        service.onUserSwitching(prevUser, curUser);
+                        break;
+                    case START:
+                        service.onUserStarting(curUser);
+                        break;
+                    case UNLOCKING:
+                        service.onUserUnlocking(curUser);
+                        break;
+                    case UNLOCKED:
+                        service.onUserUnlocked(curUser);
+                        break;
+                    case STOP:
+                        service.onUserStopping(curUser);
+                        break;
+                    case CLEANUP:
+                        service.onUserStopped(curUser);
+                        break;
+                    default:
+                        throw new IllegalArgumentException(onWhat + " what?");
+                }
             } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting cleanup of user " + userHandle
-                        + " to service " + service.getClass().getName(), ex);
+                Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + curUser
+                        + " to service " + serviceName, ex);
             }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service, "onCleanupUser");
-            t.traceEnd();
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
+                    "on" + onWhat + "User-" + curUserId);
+            t.traceEnd(); // what on service
         }
-        t.traceEnd();
+        t.traceEnd(); // main entry
     }
 
     /** Sets the safe mode flag for services to query. */

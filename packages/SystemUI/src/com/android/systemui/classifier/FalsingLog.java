@@ -37,7 +37,7 @@ import java.util.Locale;
  *  adb shell setprop debug.falsing_log true
  *
  * The log gets dumped as part of the SystemUI services. To dump on demand:
- *  adb shell dumpsys activity service com.android.systemui SystemBars | grep -A 999 FALSING | less
+ *  adb shell dumpsys activity service com.android.systemui StatusBar | grep -A 999 FALSING | less
  *
  * To dump into logcat:
  *  adb shell setprop debug.falsing_logcat true

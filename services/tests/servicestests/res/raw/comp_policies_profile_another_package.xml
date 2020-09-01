@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policies setup-complete="true" provisioning-state="3">
+    <admin name="com.another.package.name/whatever.random.class">
+        <policies flags="991"/>
+    </admin>
+</policies>

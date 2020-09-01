@@ -27,38 +27,14 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-static bool IsTransformSupported(int transform) {
-    // For now, only support pure rotations, not flip or flip-and-rotate, until we have
-    // more time to test them and build sample code. As far as I know we never actually
-    // use anything besides pure rotations anyway.
-    return transform == 0 || transform == NATIVE_WINDOW_TRANSFORM_ROT_90 ||
-           transform == NATIVE_WINDOW_TRANSFORM_ROT_180 ||
-           transform == NATIVE_WINDOW_TRANSFORM_ROT_270;
-}
-
 static int InvertTransform(int transform) {
     switch (transform) {
-        case NATIVE_WINDOW_TRANSFORM_ROT_90:
-            return NATIVE_WINDOW_TRANSFORM_ROT_270;
-        case NATIVE_WINDOW_TRANSFORM_ROT_180:
-            return NATIVE_WINDOW_TRANSFORM_ROT_180;
-        case NATIVE_WINDOW_TRANSFORM_ROT_270:
-            return NATIVE_WINDOW_TRANSFORM_ROT_90;
-        default:
-            return 0;
-    }
-}
-
-static int ConvertVkTransformToNative(VkSurfaceTransformFlagsKHR transform) {
-    switch (transform) {
-        case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_270;
-        case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_180;
-        case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
-            return NATIVE_WINDOW_TRANSFORM_ROT_90;
-        case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
-        case VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
+            return ANATIVEWINDOW_TRANSFORM_ROTATE_270;
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_180:
+            return ANATIVEWINDOW_TRANSFORM_ROTATE_180;
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_270:
+            return ANATIVEWINDOW_TRANSFORM_ROTATE_90;
         default:
             return 0;
     }
@@ -71,11 +47,11 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
     switch (transform) {
         case 0:
             return SkMatrix::I();
-        case NATIVE_WINDOW_TRANSFORM_ROT_90:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
             return SkMatrix::MakeAll(0, -1, height, 1, 0, 0, 0, 0, 1);
-        case NATIVE_WINDOW_TRANSFORM_ROT_180:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_180:
             return SkMatrix::MakeAll(-1, 0, width, 0, -1, height, 0, 0, 1);
-        case NATIVE_WINDOW_TRANSFORM_ROT_270:
+        case ANATIVEWINDOW_TRANSFORM_ROTATE_270:
             return SkMatrix::MakeAll(0, 1, 0, -1, 0, width, 0, 0, 1);
         default:
             LOG_ALWAYS_FATAL("Unsupported Window Transform (%d)", transform);
@@ -83,180 +59,157 @@ static SkMatrix GetPreTransformMatrix(SkISize windowSize, int transform) {
     return SkMatrix::I();
 }
 
-void VulkanSurface::ComputeWindowSizeAndTransform(WindowInfo* windowInfo, const SkISize& minSize,
-                                                  const SkISize& maxSize) {
-    SkISize& windowSize = windowInfo->size;
-
-    // clamp width & height to handle currentExtent of -1 and  protect us from broken hints
-    if (windowSize.width() < minSize.width() || windowSize.width() > maxSize.width() ||
-        windowSize.height() < minSize.height() || windowSize.height() > maxSize.height()) {
-        int width = std::min(maxSize.width(), std::max(minSize.width(), windowSize.width()));
-        int height = std::min(maxSize.height(), std::max(minSize.height(), windowSize.height()));
-        ALOGE("Invalid Window Dimensions [%d, %d]; clamping to [%d, %d]", windowSize.width(),
-              windowSize.height(), width, height);
-        windowSize.set(width, height);
-    }
-
-    windowInfo->actualSize = windowSize;
-    if (windowInfo->transform & HAL_TRANSFORM_ROT_90) {
-        windowInfo->actualSize.set(windowSize.height(), windowSize.width());
-    }
-
-    windowInfo->preTransform = GetPreTransformMatrix(windowInfo->size, windowInfo->transform);
-}
-
-static bool ResetNativeWindow(ANativeWindow* window) {
-    // -- Reset the native window --
-    // The native window might have been used previously, and had its properties
-    // changed from defaults. That will affect the answer we get for queries
-    // like MIN_UNDEQUEUED_BUFFERS. Reset to a known/default state before we
-    // attempt such queries.
+static bool ConnectAndSetWindowDefaults(ANativeWindow* window) {
+    ATRACE_CALL();
 
     int err = native_window_api_connect(window, NATIVE_WINDOW_API_EGL);
     if (err != 0) {
-        ALOGW("native_window_api_connect failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window_api_connect failed: %s (%d)", strerror(-err), err);
         return false;
     }
 
     // this will match what we do on GL so pick that here.
     err = window->setSwapInterval(window, 1);
     if (err != 0) {
-        ALOGW("native_window->setSwapInterval(1) failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window->setSwapInterval(1) failed: %s (%d)", strerror(-err), err);
         return false;
     }
 
     err = native_window_set_shared_buffer_mode(window, false);
     if (err != 0) {
-        ALOGW("native_window_set_shared_buffer_mode(false) failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window_set_shared_buffer_mode(false) failed: %s (%d)", strerror(-err), err);
         return false;
     }
 
     err = native_window_set_auto_refresh(window, false);
     if (err != 0) {
-        ALOGW("native_window_set_auto_refresh(false) failed: %s (%d)", strerror(-err), err);
+        ALOGE("native_window_set_auto_refresh(false) failed: %s (%d)", strerror(-err), err);
+        return false;
+    }
+
+    err = native_window_set_scaling_mode(window, NATIVE_WINDOW_SCALING_MODE_FREEZE);
+    if (err != 0) {
+        ALOGE("native_window_set_scaling_mode(NATIVE_WINDOW_SCALING_MODE_FREEZE) failed: %s (%d)",
+              strerror(-err), err);
+        return false;
+    }
+
+    // Let consumer drive the size of the buffers.
+    err = native_window_set_buffers_dimensions(window, 0, 0);
+    if (err != 0) {
+        ALOGE("native_window_set_buffers_dimensions(0,0) failed: %s (%d)", strerror(-err), err);
+        return false;
+    }
+
+    // Enable auto prerotation, so when buffer size is driven by the consumer
+    // and the transform hint specifies a 90 or 270 degree rotation, the width
+    // and height used for buffer pre-allocation and dequeueBuffer will be
+    // additionally swapped.
+    err = native_window_set_auto_prerotation(window, true);
+    if (err != 0) {
+        ALOGE("VulkanSurface::UpdateWindow() native_window_set_auto_prerotation failed: %s (%d)",
+              strerror(-err), err);
         return false;
     }
 
     return true;
 }
 
-class VkSurfaceAutoDeleter {
-public:
-    VkSurfaceAutoDeleter(VkInstance instance, VkSurfaceKHR surface,
-                         PFN_vkDestroySurfaceKHR destroySurfaceKHR)
-            : mInstance(instance), mSurface(surface), mDestroySurfaceKHR(destroySurfaceKHR) {}
-    ~VkSurfaceAutoDeleter() { destroy(); }
-
-    void destroy() {
-        if (mSurface != VK_NULL_HANDLE) {
-            mDestroySurfaceKHR(mInstance, mSurface, nullptr);
-            mSurface = VK_NULL_HANDLE;
-        }
-    }
-
-private:
-    VkInstance mInstance;
-    VkSurfaceKHR mSurface;
-    PFN_vkDestroySurfaceKHR mDestroySurfaceKHR;
-};
-
 VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
                                      SkColorType colorType, sk_sp<SkColorSpace> colorSpace,
                                      GrContext* grContext, const VulkanManager& vkManager,
                                      uint32_t extraBuffers) {
-    VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
-    memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
-    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.pNext = nullptr;
-    surfaceCreateInfo.flags = 0;
-    surfaceCreateInfo.window = window;
-
-    VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-    VkResult res = vkManager.mCreateAndroidSurfaceKHR(vkManager.mInstance, &surfaceCreateInfo,
-                                                      nullptr, &vkSurface);
-    if (VK_SUCCESS != res) {
-        ALOGE("VulkanSurface::Create() vkCreateAndroidSurfaceKHR failed (%d)", res);
+    // Connect and set native window to default configurations.
+    if (!ConnectAndSetWindowDefaults(window)) {
         return nullptr;
     }
 
-    VkSurfaceAutoDeleter vkSurfaceDeleter(vkManager.mInstance, vkSurface,
-                                          vkManager.mDestroySurfaceKHR);
-
-    SkDEBUGCODE(VkBool32 supported; res = vkManager.mGetPhysicalDeviceSurfaceSupportKHR(
-                                            vkManager.mPhysicalDevice, vkManager.mPresentQueueIndex,
-                                            vkSurface, &supported);
-                // All physical devices and queue families on Android must be capable of
-                // presentation with any native window.
-                SkASSERT(VK_SUCCESS == res && supported););
-
-    // check for capabilities
-    VkSurfaceCapabilitiesKHR caps;
-    res = vkManager.mGetPhysicalDeviceSurfaceCapabilitiesKHR(vkManager.mPhysicalDevice, vkSurface,
-                                                             &caps);
-    if (VK_SUCCESS != res) {
-        ALOGE("VulkanSurface::Create() vkGetPhysicalDeviceSurfaceCapabilitiesKHR failed (%d)", res);
-        return nullptr;
-    }
-
-    LOG_ALWAYS_FATAL_IF(0 == (caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR));
-
-    /*
-     * We must destroy the VK Surface before attempting to update the window as doing so after
-     * will cause the native window to be modified in unexpected ways.
-     */
-    vkSurfaceDeleter.destroy();
-
-    /*
-     * Populate Window Info struct
-     */
+    // Initialize WindowInfo struct.
     WindowInfo windowInfo;
+    if (!InitializeWindowInfoStruct(window, colorMode, colorType, colorSpace, vkManager,
+                                    extraBuffers, &windowInfo)) {
+        return nullptr;
+    }
 
-    windowInfo.transform = ConvertVkTransformToNative(caps.supportedTransforms);
-    windowInfo.size = SkISize::Make(caps.currentExtent.width, caps.currentExtent.height);
+    // Now we attempt to modify the window.
+    if (!UpdateWindow(window, windowInfo)) {
+        return nullptr;
+    }
 
-    const SkISize minSize = SkISize::Make(caps.minImageExtent.width, caps.minImageExtent.height);
-    const SkISize maxSize = SkISize::Make(caps.maxImageExtent.width, caps.maxImageExtent.height);
-    ComputeWindowSizeAndTransform(&windowInfo, minSize, maxSize);
+    return new VulkanSurface(window, windowInfo, grContext);
+}
+
+bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode colorMode,
+                                               SkColorType colorType,
+                                               sk_sp<SkColorSpace> colorSpace,
+                                               const VulkanManager& vkManager,
+                                               uint32_t extraBuffers, WindowInfo* outWindowInfo) {
+    ATRACE_CALL();
+
+    int width, height;
+    int err = window->query(window, NATIVE_WINDOW_DEFAULT_WIDTH, &width);
+    if (err != 0 || width < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, width);
+        return false;
+    }
+    err = window->query(window, NATIVE_WINDOW_DEFAULT_HEIGHT, &height);
+    if (err != 0 || height < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, height);
+        return false;
+    }
+    outWindowInfo->size = SkISize::Make(width, height);
 
     int query_value;
-    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    err = window->query(window, NATIVE_WINDOW_TRANSFORM_HINT, &query_value);
     if (err != 0 || query_value < 0) {
         ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
-        return nullptr;
+        return false;
     }
-    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
+    outWindowInfo->transform = query_value;
 
-    windowInfo.bufferCount = min_undequeued_buffers +
-                             std::max(sTargetBufferCount + extraBuffers, caps.minImageCount);
-    if (caps.maxImageCount > 0 && windowInfo.bufferCount > caps.maxImageCount) {
+    outWindowInfo->actualSize = outWindowInfo->size;
+    if (outWindowInfo->transform & ANATIVEWINDOW_TRANSFORM_ROTATE_90) {
+        outWindowInfo->actualSize.set(outWindowInfo->size.height(), outWindowInfo->size.width());
+    }
+
+    outWindowInfo->preTransform =
+            GetPreTransformMatrix(outWindowInfo->size, outWindowInfo->transform);
+
+    err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return false;
+    }
+    outWindowInfo->bufferCount =
+            static_cast<uint32_t>(query_value) + sTargetBufferCount + extraBuffers;
+
+    err = window->query(window, NATIVE_WINDOW_MAX_BUFFER_COUNT, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return false;
+    }
+    if (outWindowInfo->bufferCount > static_cast<uint32_t>(query_value)) {
         // Application must settle for fewer images than desired:
-        windowInfo.bufferCount = caps.maxImageCount;
+        outWindowInfo->bufferCount = static_cast<uint32_t>(query_value);
     }
 
-    // Currently Skia requires the images to be color attachments and support all transfer
-    // operations.
-    VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                                   VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                                   VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    LOG_ALWAYS_FATAL_IF((caps.supportedUsageFlags & usageFlags) != usageFlags);
-
-    windowInfo.dataspace = HAL_DATASPACE_V0_SRGB;
+    outWindowInfo->dataspace = HAL_DATASPACE_V0_SRGB;
     if (colorMode == ColorMode::WideColorGamut) {
         skcms_Matrix3x3 surfaceGamut;
         LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&surfaceGamut),
                             "Could not get gamut matrix from color space");
         if (memcmp(&surfaceGamut, &SkNamedGamut::kSRGB, sizeof(surfaceGamut)) == 0) {
-            windowInfo.dataspace = HAL_DATASPACE_V0_SCRGB;
+            outWindowInfo->dataspace = HAL_DATASPACE_V0_SCRGB;
         } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDCIP3, sizeof(surfaceGamut)) == 0) {
-            windowInfo.dataspace = HAL_DATASPACE_DISPLAY_P3;
+            outWindowInfo->dataspace = HAL_DATASPACE_DISPLAY_P3;
         } else {
             LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
         }
     }
 
-    windowInfo.pixelFormat = ColorTypeToPixelFormat(colorType);
+    outWindowInfo->pixelFormat = ColorTypeToPixelFormat(colorType);
     VkFormat vkPixelFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    if (windowInfo.pixelFormat == PIXEL_FORMAT_RGBA_FP16) {
+    if (outWindowInfo->pixelFormat == PIXEL_FORMAT_RGBA_FP16) {
         vkPixelFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
     }
 
@@ -275,7 +228,10 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     imageFormatInfo.format = vkPixelFormat;
     imageFormatInfo.type = VK_IMAGE_TYPE_2D;
     imageFormatInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageFormatInfo.usage = usageFlags;
+    // Currently Skia requires the images to be color attachments and support all transfer
+    // operations.
+    imageFormatInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     imageFormatInfo.flags = 0;
 
     VkAndroidHardwareBufferUsageANDROID hwbUsage;
@@ -286,35 +242,27 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     imgFormProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
     imgFormProps.pNext = &hwbUsage;
 
-    res = vkManager.mGetPhysicalDeviceImageFormatProperties2(vkManager.mPhysicalDevice,
-                                                             &imageFormatInfo, &imgFormProps);
+    VkResult res = vkManager.mGetPhysicalDeviceImageFormatProperties2(
+            vkManager.mPhysicalDevice, &imageFormatInfo, &imgFormProps);
     if (VK_SUCCESS != res) {
         ALOGE("Failed to query GetPhysicalDeviceImageFormatProperties2");
-        return nullptr;
+        return false;
     }
 
     uint64_t consumerUsage;
-    native_window_get_consumer_usage(window, &consumerUsage);
-    windowInfo.windowUsageFlags = consumerUsage | hwbUsage.androidHardwareBufferUsage;
-
-    /*
-     * Now we attempt to modify the window!
-     */
-    if (!UpdateWindow(window, windowInfo)) {
-        return nullptr;
+    err = native_window_get_consumer_usage(window, &consumerUsage);
+    if (err != 0) {
+        ALOGE("native_window_get_consumer_usage failed: %s (%d)", strerror(-err), err);
+        return false;
     }
+    outWindowInfo->windowUsageFlags = consumerUsage | hwbUsage.androidHardwareBufferUsage;
 
-    return new VulkanSurface(window, windowInfo, minSize, maxSize, grContext);
+    return true;
 }
 
 bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo) {
     ATRACE_CALL();
 
-    if (!ResetNativeWindow(window)) {
-        return false;
-    }
-
-    // -- Configure the native window --
     int err = native_window_set_buffers_format(window, windowInfo.pixelFormat);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_format(%d) failed: %s (%d)",
@@ -327,15 +275,6 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_data_space(%d) "
               "failed: %s (%d)",
               windowInfo.dataspace, strerror(-err), err);
-        return false;
-    }
-
-    const SkISize& size = windowInfo.actualSize;
-    err = native_window_set_buffers_dimensions(window, size.width(), size.height());
-    if (err != 0) {
-        ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_dimensions(%d,%d) "
-              "failed: %s (%d)",
-              size.width(), size.height(), strerror(-err), err);
         return false;
     }
 
@@ -353,16 +292,6 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    // Vulkan defaults to NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW, but this is different than
-    // HWUI's expectation
-    err = native_window_set_scaling_mode(window, NATIVE_WINDOW_SCALING_MODE_FREEZE);
-    if (err != 0) {
-        ALOGE("VulkanSurface::UpdateWindow() native_window_set_scaling_mode(SCALE_TO_WINDOW) "
-              "failed: %s (%d)",
-              strerror(-err), err);
-        return false;
-    }
-
     err = native_window_set_buffer_count(window, windowInfo.bufferCount);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffer_count(%zu) failed: %s (%d)",
@@ -377,16 +306,12 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    return err == 0;
+    return true;
 }
 
 VulkanSurface::VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo,
-                             SkISize minWindowSize, SkISize maxWindowSize, GrContext* grContext)
-        : mNativeWindow(window)
-        , mWindowInfo(windowInfo)
-        , mGrContext(grContext)
-        , mMinWindowSize(minWindowSize)
-        , mMaxWindowSize(maxWindowSize) {}
+                             GrContext* grContext)
+        : mNativeWindow(window), mWindowInfo(windowInfo), mGrContext(grContext) {}
 
 VulkanSurface::~VulkanSurface() {
     releaseBuffers();
@@ -429,56 +354,49 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     // value at the end of the function if everything dequeued correctly.
     mCurrentBufferInfo = nullptr;
 
-    // check if the native window has been resized or rotated and update accordingly
-    SkISize newSize = SkISize::MakeEmpty();
+    // Query the transform hint synced from the initial Surface connect or last queueBuffer. The
+    // auto prerotation on the buffer is based on the same transform hint in use by the producer.
     int transformHint = 0;
-    mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_WIDTH, &newSize.fWidth);
-    mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_HEIGHT, &newSize.fHeight);
-    mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_TRANSFORM_HINT, &transformHint);
-    if (newSize != mWindowInfo.actualSize || transformHint != mWindowInfo.transform) {
-        WindowInfo newWindowInfo = mWindowInfo;
-        newWindowInfo.size = newSize;
-        newWindowInfo.transform = IsTransformSupported(transformHint) ? transformHint : 0;
-        ComputeWindowSizeAndTransform(&newWindowInfo, mMinWindowSize, mMaxWindowSize);
+    int err =
+            mNativeWindow->query(mNativeWindow.get(), NATIVE_WINDOW_TRANSFORM_HINT, &transformHint);
 
-        int err = 0;
-        if (newWindowInfo.actualSize != mWindowInfo.actualSize) {
-            // reset the native buffers and update the window
-            err = native_window_set_buffers_dimensions(mNativeWindow.get(),
-                                                       newWindowInfo.actualSize.width(),
-                                                       newWindowInfo.actualSize.height());
-            if (err != 0) {
-                ALOGE("native_window_set_buffers_dimensions(%d,%d) failed: %s (%d)",
-                      newWindowInfo.actualSize.width(), newWindowInfo.actualSize.height(),
-                      strerror(-err), err);
-                return nullptr;
-            }
-            // reset the NativeBufferInfo (including SkSurface) associated with the old buffers. The
-            // new NativeBufferInfo storage will be populated lazily as we dequeue each new buffer.
-            releaseBuffers();
-            // TODO should we ask the nativewindow to allocate buffers?
-        }
-
-        if (newWindowInfo.transform != mWindowInfo.transform) {
-            err = native_window_set_buffers_transform(mNativeWindow.get(),
-                                                      InvertTransform(newWindowInfo.transform));
-            if (err != 0) {
-                ALOGE("native_window_set_buffers_transform(%d) failed: %s (%d)",
-                      newWindowInfo.transform, strerror(-err), err);
-                newWindowInfo.transform = mWindowInfo.transform;
-                ComputeWindowSizeAndTransform(&newWindowInfo, mMinWindowSize, mMaxWindowSize);
-            }
-        }
-
-        mWindowInfo = newWindowInfo;
-    }
-
+    // Since auto pre-rotation is enabled, dequeueBuffer to get the consumer driven buffer size
+    // from ANativeWindowBuffer.
     ANativeWindowBuffer* buffer;
     int fence_fd;
-    int err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buffer, &fence_fd);
+    err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buffer, &fence_fd);
     if (err != 0) {
         ALOGE("dequeueBuffer failed: %s (%d)", strerror(-err), err);
         return nullptr;
+    }
+
+    SkISize actualSize = SkISize::Make(buffer->width, buffer->height);
+    if (actualSize != mWindowInfo.actualSize || transformHint != mWindowInfo.transform) {
+        if (actualSize != mWindowInfo.actualSize) {
+            // reset the NativeBufferInfo (including SkSurface) associated with the old buffers. The
+            // new NativeBufferInfo storage will be populated lazily as we dequeue each new buffer.
+            mWindowInfo.actualSize = actualSize;
+            releaseBuffers();
+        }
+
+        if (transformHint != mWindowInfo.transform) {
+            err = native_window_set_buffers_transform(mNativeWindow.get(),
+                                                      InvertTransform(transformHint));
+            if (err != 0) {
+                ALOGE("native_window_set_buffers_transform(%d) failed: %s (%d)", transformHint,
+                      strerror(-err), err);
+                mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer, fence_fd);
+                return nullptr;
+            }
+            mWindowInfo.transform = transformHint;
+        }
+
+        mWindowInfo.size = actualSize;
+        if (mWindowInfo.transform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+            mWindowInfo.size.set(actualSize.height(), actualSize.width());
+        }
+
+        mWindowInfo.preTransform = GetPreTransformMatrix(mWindowInfo.size, mWindowInfo.transform);
     }
 
     uint32_t idx;

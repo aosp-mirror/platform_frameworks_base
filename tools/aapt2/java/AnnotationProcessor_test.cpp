@@ -61,6 +61,21 @@ TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
   EXPECT_THAT(annotations, HasSubstr("This is a system API"));
 }
 
+TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationParamsAndRemovesFromComment) {
+  AnnotationProcessor processor;
+  processor.AppendComment("@SystemApi (p1=k1,p2=k2) This is a system API");
+
+  std::string annotations;
+  StringOutputStream out(&annotations);
+  Printer printer(&out);
+  processor.Print(&printer);
+  out.Flush();
+
+  EXPECT_THAT(annotations, HasSubstr("@android.annotation.SystemApi(p1=k1,p2=k2)"));
+  EXPECT_THAT(annotations, Not(HasSubstr("@SystemApi")));
+  EXPECT_THAT(annotations, HasSubstr("This is a system API"));
+}
+
 TEST(AnnotationProcessorTest, EmitsTestApiAnnotationAndRemovesFromComment) {
   AnnotationProcessor processor;
   processor.AppendComment("@TestApi This is a test API");

@@ -60,12 +60,25 @@ bool initLogTrackers(const StatsdConfig& config,
 // [allConditionTrackers]: stores the sp to all the ConditionTrackers
 // [trackerToConditionMap]: contain the mapping from index of
 //                        log tracker to condition trackers that use the log tracker
+// [initialConditionCache]: stores the initial conditions for each ConditionTracker
 bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     const std::unordered_map<int64_t, int>& logTrackerMap,
                     std::unordered_map<int64_t, int>& conditionTrackerMap,
                     std::vector<sp<ConditionTracker>>& allConditionTrackers,
                     std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                    std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks);
+                    std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
+                    std::vector<ConditionState>& initialConditionCache);
+
+// Initialize State maps using State protos in the config. These maps will
+// eventually be passed to MetricProducers to initialize their state info.
+// input:
+// [config]: the input config
+// output:
+// [stateAtomIdMap]: this map should contain the mapping from state ids to atom ids
+// [allStateGroupMaps]: this map should contain the mapping from states ids and state
+//                      values to state group ids for all states
+bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAtomIdMap,
+                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps);
 
 // Initialize MetricProducers.
 // input:
@@ -74,6 +87,9 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 // [timeBaseSec]: start time base for all metrics
 // [logTrackerMap]: LogMatchingTracker name to index mapping from previous step.
 // [conditionTrackerMap]: condition name to index mapping
+// [stateAtomIdMap]: contains the mapping from state ids to atom ids
+// [allStateGroupMaps]: contains the mapping from atom ids and state values to
+//                      state group ids for all states
 // output:
 // [allMetricProducers]: contains the list of sp to the MetricProducers created.
 // [conditionToMetricMap]: contains the mapping from condition tracker index to
@@ -86,11 +102,17 @@ bool initMetrics(
         const std::unordered_map<int64_t, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
         const vector<sp<LogMatchingTracker>>& allAtomMatchers,
+        const unordered_map<int64_t, int>& stateAtomIdMap,
+        const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
         vector<sp<ConditionTracker>>& allConditionTrackers,
+        const std::vector<ConditionState>& initialConditionCache,
         std::vector<sp<MetricProducer>>& allMetricProducers,
         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
         std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
-        std::set<int64_t>& noReportMetricIds);
+        std::set<int64_t>& noReportMetricIds,
+        std::unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+        std::unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+        std::vector<int>& metricsWithActivation);
 
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
@@ -109,10 +131,9 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
                       unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+                      std::unordered_map<int64_t, int>& alertTrackerMap,
                       vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds);
-
-bool isStateTracker(const SimplePredicate& simplePredicate, std::vector<Matcher>* primaryKeys);
 
 }  // namespace statsd
 }  // namespace os

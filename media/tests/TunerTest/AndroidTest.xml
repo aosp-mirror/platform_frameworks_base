@@ -1,0 +1,17 @@
+<configuration description="Runs Media Tuner tests.">
+    <option name="test-suite-tag" value="apct"/>
+    <option name="test-tag" value="MediaTunerTest"/>
+
+    <target_preparer class="com.android.tradefed.targetprep.TestFilePushSetup"/>
+    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+        <option name="test-file-name" value="mediatunertest.apk"/>
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer"/>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer"/>
+
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="com.android.mediatunertest"/>
+        <option name="hidden-api-checks" value="false"/>
+        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner"/>
+    </test>
+</configuration>

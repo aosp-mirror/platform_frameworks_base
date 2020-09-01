@@ -16,20 +16,51 @@
 
 package com.android.server.locksettings;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 
 import com.android.server.PersistentDataBlockManagerInternal;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import java.io.File;
+import java.util.Arrays;
 
 public class LockSettingsStorageTestable extends LockSettingsStorage {
 
     public File mStorageDir;
-    public PersistentDataBlockManagerInternal mPersistentDataBlock;
+    public PersistentDataBlockManagerInternal mPersistentDataBlockManager;
+    private byte[] mPersistentData;
 
     public LockSettingsStorageTestable(Context context, File storageDir) {
         super(context);
         mStorageDir = storageDir;
+        mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                byte[] handle = (byte[]) invocation.getArguments()[0];
+                if (handle != null) {
+                    mPersistentData = Arrays.copyOf(handle, handle.length);
+                } else {
+                    mPersistentData = null;
+                }
+                return null;
+            }
+        }).when(mPersistentDataBlockManager).setFrpCredentialHandle(any());
+        // For some reasons, simply mocking getFrpCredentialHandle() with
+        // when(mPersistentDataBlockManager.getFrpCredentialHandle()).thenReturn(mPersistentData)
+        // does not work, I had to use the long-winded way below.
+        doAnswer(new Answer<byte[]>() {
+            @Override
+            public byte[] answer(InvocationOnMock invocation) throws Throwable {
+                return mPersistentData;
+            }
+        }).when(mPersistentDataBlockManager).getFrpCredentialHandle();
     }
 
     @Override
@@ -57,8 +88,8 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     }
 
     @Override
-    public PersistentDataBlockManagerInternal getPersistentDataBlock() {
-        return mPersistentDataBlock;
+    PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
+        return mPersistentDataBlockManager;
     }
 
     private File makeDirs(File baseDir, String filePath) {

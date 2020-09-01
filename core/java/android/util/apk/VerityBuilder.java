@@ -70,22 +70,6 @@ public abstract class VerityBuilder {
 
     /**
      * Generates the 4k, SHA-256 based Merkle tree for the given APK and stores in the {@link
-     * ByteBuffer} created by the {@link ByteBufferFactory}.  The output is suitable to be used as
-     * the on-disk format for fs-verity to use.
-     *
-     * @return VerityResult containing a buffer with the generated Merkle tree stored at the
-     *         front, the tree size, and the calculated root hash.
-     */
-    @NonNull
-    public static VerityResult generateFsVerityTree(@NonNull RandomAccessFile apk,
-            @NonNull ByteBufferFactory bufferFactory)
-            throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
-        return generateVerityTreeInternal(apk, bufferFactory, null /* signatureInfo */,
-                false /* skipSigningBlock */);
-    }
-
-    /**
-     * Generates the 4k, SHA-256 based Merkle tree for the given APK and stores in the {@link
      * ByteBuffer} created by the {@link ByteBufferFactory}.  The Merkle tree does not cover Signing
      * Block specificed in {@code signatureInfo}.  The output is suitable to be used as the on-disk
      * format for fs-verity to use (with elide and patch extensions).
@@ -97,21 +81,16 @@ public abstract class VerityBuilder {
     public static VerityResult generateApkVerityTree(@NonNull RandomAccessFile apk,
             @Nullable SignatureInfo signatureInfo, @NonNull ByteBufferFactory bufferFactory)
             throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
-        return generateVerityTreeInternal(apk, bufferFactory, signatureInfo,
-                true /* skipSigningBlock */);
+        return generateVerityTreeInternal(apk, bufferFactory, signatureInfo);
     }
 
     @NonNull
     private static VerityResult generateVerityTreeInternal(@NonNull RandomAccessFile apk,
-            @NonNull ByteBufferFactory bufferFactory, @Nullable SignatureInfo signatureInfo,
-            boolean skipSigningBlock)
+            @NonNull ByteBufferFactory bufferFactory, @Nullable SignatureInfo signatureInfo)
             throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
-        long dataSize = apk.length();
-        if (skipSigningBlock) {
-            long signingBlockSize =
-                    signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
-            dataSize -= signingBlockSize;
-        }
+        long signingBlockSize =
+                signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
+        long dataSize = apk.length() - signingBlockSize;
         int[] levelOffset = calculateVerityLevelOffset(dataSize);
         int merkleTreeSize = levelOffset[levelOffset.length - 1];
 
@@ -120,10 +99,8 @@ public abstract class VerityBuilder {
                 + CHUNK_SIZE_BYTES);  // maximum size of apk-verity metadata
         output.order(ByteOrder.LITTLE_ENDIAN);
         ByteBuffer tree = slice(output, 0, merkleTreeSize);
-        // Only use default salt in legacy case.
-        byte[] salt = skipSigningBlock ? DEFAULT_SALT : null;
-        byte[] apkRootHash = generateVerityTreeInternal(apk, signatureInfo, salt, levelOffset,
-                tree, skipSigningBlock);
+        byte[] apkRootHash = generateVerityTreeInternal(apk, signatureInfo, DEFAULT_SALT,
+                levelOffset, tree);
         return new VerityResult(output, merkleTreeSize, apkRootHash);
     }
 
@@ -173,8 +150,7 @@ public abstract class VerityBuilder {
             throws IOException, SignatureNotFoundException, SecurityException, DigestException,
                    NoSuchAlgorithmException {
         try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
-            VerityResult result = generateVerityTreeInternal(apk, bufferFactory, signatureInfo,
-                    true /* skipSigningBlock */);
+            VerityResult result = generateVerityTreeInternal(apk, bufferFactory, signatureInfo);
             ByteBuffer footer = slice(result.verityData, result.merkleTreeSize,
                     result.verityData.limit());
             generateApkVerityFooter(apk, signatureInfo, footer);
@@ -351,17 +327,12 @@ public abstract class VerityBuilder {
     @NonNull
     private static byte[] generateVerityTreeInternal(@NonNull RandomAccessFile apk,
             @Nullable SignatureInfo signatureInfo, @Nullable byte[] salt,
-            @NonNull int[] levelOffset, @NonNull ByteBuffer output, boolean skipSigningBlock)
+            @NonNull int[] levelOffset, @NonNull ByteBuffer output)
             throws IOException, NoSuchAlgorithmException, DigestException {
         // 1. Digest the apk to generate the leaf level hashes.
-        if (skipSigningBlock) {
-            assertSigningBlockAlignedAndHasFullPages(signatureInfo);
-            generateApkVerityDigestAtLeafLevel(apk, signatureInfo, salt, slice(output,
-                        levelOffset[levelOffset.length - 2], levelOffset[levelOffset.length - 1]));
-        } else {
-            generateFsVerityDigestAtLeafLevel(apk, slice(output,
-                        levelOffset[levelOffset.length - 2], levelOffset[levelOffset.length - 1]));
-        }
+        assertSigningBlockAlignedAndHasFullPages(signatureInfo);
+        generateApkVerityDigestAtLeafLevel(apk, signatureInfo, salt, slice(output,
+                    levelOffset[levelOffset.length - 2], levelOffset[levelOffset.length - 1]));
 
         // 2. Digest the lower level hashes bottom up.
         for (int level = levelOffset.length - 3; level >= 0; level--) {

@@ -17,7 +17,10 @@
 package com.android.systemui.bubbles.animation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.PointF;
@@ -30,23 +33,27 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntSupplier;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase {
 
-    @Spy
-    private TestableStackController mStackController = new TestableStackController();
+    @Mock
+    private FloatingContentCoordinator mFloatingContentCoordinator;
+
+    private TestableStackController mStackController;
 
     private int mStackOffset;
     private Runnable mCheckStartPosSet;
@@ -54,6 +61,13 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        mStackController = spy(new TestableStackController(
+                mFloatingContentCoordinator, new IntSupplier() {
+                    @Override
+                    public int getAsInt() {
+                        return mLayout.getChildCount();
+                    }
+                }, Mockito.mock(Runnable.class)));
         mLayout.setActiveController(mStackController);
         addOneMoreThanBubbleLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
@@ -234,58 +248,18 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     }
 
     @Test
-    @Ignore("Flaky")
-    public void testMagnetToDismiss_dismiss() throws InterruptedException {
-        final Runnable after = Mockito.mock(Runnable.class);
+    public void testFloatingCoordinator() {
+        // We should have called onContentAdded only once while adding all of the bubbles in
+        // setup().
+        verify(mFloatingContentCoordinator, times(1)).onContentAdded(any());
+        verify(mFloatingContentCoordinator, never()).onContentRemoved(any());
 
-        // Magnet to dismiss, verify the stack is at the dismiss target and the callback was
-        // called.
-        mStackController.magnetToDismiss(100 /* velX */, 100 /* velY */, 1000 /* destY */, after);
-        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
-        verify(after).run();
-        assertEquals(1000, mViews.get(0).getTranslationY(), .1f);
+        // Remove all views and verify that we called onContentRemoved only once.
+        while (mLayout.getChildCount() > 0) {
+            mLayout.removeView(mLayout.getChildAt(0));
+        }
 
-        // Dismiss the stack, verify that the callback was called.
-        final Runnable afterImplode = Mockito.mock(Runnable.class);
-        mStackController.implodeStack(afterImplode);
-        waitForPropertyAnimations(
-                DynamicAnimation.ALPHA, DynamicAnimation.SCALE_X, DynamicAnimation.SCALE_Y);
-        verify(after).run();
-    }
-
-    @Test
-    @Ignore("Flaking")
-    public void testMagnetToDismiss_demagnetizeThenDrag() throws InterruptedException {
-        final Runnable after = Mockito.mock(Runnable.class);
-
-        // Magnet to dismiss, verify the stack is at the dismiss target and the callback was
-        // called.
-        mStackController.magnetToDismiss(100 /* velX */, 100 /* velY */, 1000 /* destY */, after);
-        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
-        verify(after).run();
-
-        assertEquals(1000, mViews.get(0).getTranslationY(), .1f);
-
-        // Demagnetize towards (25, 25) and then send a touch event.
-        mStackController.demagnetizeFromDismissToPoint(25, 25, 0, 0);
-        waitForLayoutMessageQueue();
-        mStackController.moveStackFromTouch(20, 20);
-
-        // Since the stack is demagnetizing, it shouldn't be at the stack position yet.
-        assertNotEquals(20, mStackController.getStackPosition().x, 1f);
-        assertNotEquals(20, mStackController.getStackPosition().y, 1f);
-
-        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
-
-        // Once the animation is done it should end at the touch position coordinates.
-        assertEquals(20, mStackController.getStackPosition().x, 1f);
-        assertEquals(20, mStackController.getStackPosition().y, 1f);
-
-        mStackController.moveStackFromTouch(30, 30);
-
-        // Touches after the animation are done should change the stack position instantly.
-        assertEquals(30, mStackController.getStackPosition().x, 1f);
-        assertEquals(30, mStackController.getStackPosition().y, 1f);
+        verify(mFloatingContentCoordinator, times(1)).onContentRemoved(any());
     }
 
     /**
@@ -328,6 +302,13 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
      * Testable version of the stack controller that dispatches its animations on the main thread.
      */
     private class TestableStackController extends StackAnimationController {
+        TestableStackController(
+                FloatingContentCoordinator floatingContentCoordinator,
+                IntSupplier bubbleCountSupplier,
+                Runnable onBubbleAnimatedOutAction) {
+            super(floatingContentCoordinator, bubbleCountSupplier, onBubbleAnimatedOutAction);
+        }
+
         @Override
         protected void flingThenSpringFirstBubbleWithStackFollowing(
                 DynamicAnimation.ViewProperty property, float vel, float friction,

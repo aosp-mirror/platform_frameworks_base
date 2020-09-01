@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -30,7 +31,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
@@ -48,13 +49,14 @@ import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_TRUSTED_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
@@ -73,7 +75,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -81,7 +82,6 @@ import android.view.Display;
 import android.view.IApplicationToken;
 import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
-import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -173,7 +173,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Interface to the Window Manager state associated with a particular
-     * window.  You can hold on to an instance of this interface from the call
+     * window. You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().
      */
     public interface WindowState {
@@ -211,15 +211,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @return Rect The rectangle holding the display frame.
          */
         public Rect getDisplayFrameLw();
-
-        /**
-         * Retrieve the frame of the area inside the overscan region of the
-         * display that this window was last laid out in.  Must be called with the
-         * window manager lock held.
-         *
-         * @return Rect The rectangle holding the display overscan frame.
-         */
-        public Rect getOverscanFrameLw();
 
         /**
          * Retrieve the frame of the content area that this window was last
@@ -279,14 +270,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          *         instance.
          */
         public WindowManager.LayoutParams getAttrs();
-
-        /**
-         * Return whether this window needs the menu key shown.  Must be called
-         * with window lock held, because it may need to traverse down through
-         * window list to determine the result.
-         * @param bottom The bottom-most window to consider when determining this.
-         */
-        public boolean getNeedsMenuLw(WindowState bottom);
 
         /**
          * Retrieve the current system UI visibility flags associated with
@@ -352,13 +335,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         boolean isAnimatingLw();
 
         /**
-         * @return Whether the window can affect SystemUI flags, meaning that SystemUI (system bars,
-         *         for example) will be  affected by the flags specified in this window. This is the
-         *         case when the surface is on screen but not exiting.
-         */
-        boolean canAffectSystemUiFlags();
-
-        /**
          * Is this window considered to be gone for purposes of layout?
          */
         boolean isGoneForLayoutLw();
@@ -417,14 +393,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Returns true if the window is letterboxed for the display cutout.
          */
         default boolean isLetterboxedForDisplayCutoutLw() {
-            return false;
-        }
-
-        /**
-         * Returns true if the window has a letterbox and any part of that letterbox overlaps with
-         * the given {@code rect}.
-         */
-        default boolean isLetterboxedOverlappingWith(Rect rect) {
             return false;
         }
 
@@ -493,6 +461,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Remove the input consumer from the window manager.
          */
         void dismiss();
+        /**
+         * Dispose the input consumer and input receiver from UI thread.
+         */
+        void dispose();
     }
 
     /**
@@ -525,12 +497,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public static final int CAMERA_LENS_COVER_ABSENT = -1;
         public static final int CAMERA_LENS_UNCOVERED = 0;
         public static final int CAMERA_LENS_COVERED = 1;
-
-        /**
-         * Add a input consumer which will consume all input events going to any window below it.
-         */
-        public InputConsumer createInputConsumer(Looper looper, String name,
-                InputEventReceiver.Factory inputEventReceiverFactory, int displayId);
 
         /**
          * Returns a code that describes the current state of the lid switch.
@@ -567,12 +533,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
         /** Unregister a system listener for touch events */
         void unregisterPointerEventListener(PointerEventListener listener, int displayId);
-
-        /**
-         * Retrieves the {@param outBounds} from the stack matching the {@param windowingMode} and
-         * {@param activityType}.
-         */
-        void getStackBounds(int windowingMode, int activityType, Rect outBounds);
 
         /**
          * @return The currently active input method window.
@@ -712,27 +672,25 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             WindowManagerFuncs windowManagerFuncs);
 
     /**
-     * Check permissions when adding a window.
+     * Check permissions when adding a window or a window token from
+     * {@link android.app.WindowContext}.
      *
-     * @param attrs The window's LayoutParams.
+     * @param type The window type
+     * @param isRoundedCornerOverlay {@code true} to indicate the adding window is
+     *                                           round corner overlay.
+     * @param packageName package name
      * @param outAppOp First element will be filled with the app op corresponding to
      *                 this window, or OP_NONE.
      *
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
      *      {@link WindowManagerGlobal#ADD_PERMISSION_DENIED}, to abort the add.
-     */
-    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp);
-
-    /**
-     * Check permissions when adding a window.
      *
-     * @param attrs The window's LayoutParams.
-     *
-     * @return True if the window may only be shown to the current user, false if the window can
-     * be shown on all users' windows.
+     * @see IWindowManager#addWindowTokenWithOptions(IBinder, int, int, Bundle, String)
+     * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
-    public boolean checkShowToOwnerOnly(WindowManager.LayoutParams attrs);
+    int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
+            int[] outAppOp);
 
     /**
      * After the window manager has computed the current configuration based
@@ -833,10 +791,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 // in a higher layer than TYPE_APPLICATION_OVERLAY.
                 return  canAddInternalSystemWindow ? 13 : 10;
             case TYPE_APPLICATION_OVERLAY:
+            case TYPE_TRUSTED_APPLICATION_OVERLAY:
                 return  12;
-            case TYPE_DREAM:
-                // used for Dreams (screensavers with TYPE_DREAM windows)
-                return  14;
             case TYPE_INPUT_METHOD:
                 // on-screen keyboards and other such input method user interfaces go here.
                 return  15;
@@ -845,57 +801,65 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  16;
             case TYPE_STATUS_BAR:
                 return  17;
-            case TYPE_STATUS_BAR_PANEL:
+            case TYPE_STATUS_BAR_ADDITIONAL:
                 return  18;
-            case TYPE_STATUS_BAR_SUB_PANEL:
+            case TYPE_NOTIFICATION_SHADE:
                 return  19;
-            case TYPE_KEYGUARD_DIALOG:
+            case TYPE_STATUS_BAR_SUB_PANEL:
                 return  20;
+            case TYPE_KEYGUARD_DIALOG:
+                return  21;
             case TYPE_VOLUME_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
                 // changes the device volume
-                return  21;
+                return  22;
             case TYPE_SYSTEM_OVERLAY:
                 // the on-screen volume indicator and controller shown when the user
                 // changes the device volume
-                return  canAddInternalSystemWindow ? 22 : 11;
+                return  canAddInternalSystemWindow ? 23 : 11;
             case TYPE_NAVIGATION_BAR:
                 // the navigation bar, if available, shows atop most things
-                return  23;
+                return  24;
             case TYPE_NAVIGATION_BAR_PANEL:
                 // some panels (e.g. search) need to show on top of the navigation bar
-                return  24;
+                return  25;
             case TYPE_SCREENSHOT:
                 // screenshot selection layer shouldn't go above system error, but it should cover
                 // navigation bars at the very least.
-                return  25;
+                return  26;
             case TYPE_SYSTEM_ERROR:
                 // system-level error dialogs
-                return  canAddInternalSystemWindow ? 26 : 10;
+                return  canAddInternalSystemWindow ? 27 : 10;
             case TYPE_MAGNIFICATION_OVERLAY:
                 // used to highlight the magnified portion of a display
-                return  27;
+                return  28;
             case TYPE_DISPLAY_OVERLAY:
                 // used to simulate secondary display devices
-                return  28;
+                return  29;
             case TYPE_DRAG:
                 // the drag layer: input for drag-and-drop is associated with this window,
                 // which sits above all other focusable windows
-                return  29;
+                return  30;
             case TYPE_ACCESSIBILITY_OVERLAY:
                 // overlay put by accessibility services to intercept user interaction
-                return  30;
-            case TYPE_SECURE_SYSTEM_OVERLAY:
                 return  31;
+            case TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY:
+                return 32;
+            case TYPE_SECURE_SYSTEM_OVERLAY:
+                return  33;
             case TYPE_BOOT_PROGRESS:
-                return  32;
+                return  34;
             case TYPE_POINTER:
                 // the (mouse) pointer layer
-                return  33;
+                return  35;
             default:
                 Slog.e("WindowManager", "Unknown window type: " + type);
                 return APPLICATION_LAYER;
         }
+    }
+
+    default int getMaxWindowLayer() {
+        return 35;
     }
 
     /**
@@ -1025,7 +989,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * behavior for keys that can not be overridden by applications.
      * This method is called from the input thread, with no locks held.
      *
-     * @param win The window that currently has focus.  This is where the key
+     * @param focusedToken Client window token that currently has focus. This is where the key
      *            event will normally go.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
@@ -1034,7 +998,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * milliseconds by which the key dispatch should be delayed before trying
      * again.
      */
-    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags);
+    long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event, int policyFlags);
 
     /**
      * Called from the input dispatcher thread when an application did not handle
@@ -1043,14 +1007,14 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * <p>Allows you to define default global behavior for keys that were not handled
      * by applications.  This method is called from the input thread, with no locks held.
      *
-     * @param win The window that currently has focus.  This is where the key
+     * @param focusedToken Client window token that currently has focus. This is where the key
      *            event will normally go.
      * @param event The key event.
      * @param policyFlags The policy flags associated with the key.
      * @return Returns an alternate key event to redispatch as a fallback, or null to give up.
      * The caller is responsible for recycling the key event.
      */
-    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags);
+    KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags);
 
     /**
      * Called when the top focused display is changed.
@@ -1224,6 +1188,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return true if in keyguard is occluded, false otherwise
      */
     public boolean isKeyguardOccluded();
+
+    /**
+     * @return true if in keyguard is on.
+     */
+    boolean isKeyguardShowing();
 
     /**
      * @return true if in keyguard is on and not occluded.
@@ -1413,7 +1382,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *
      * @param proto The protocol buffer output stream to write to.
      */
-    void writeToProto(ProtoOutputStream proto, long fieldId);
+    void dumpDebug(ProtoOutputStream proto, long fieldId);
 
     /**
      * Returns whether a given window type is considered a top level one.
@@ -1459,12 +1428,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return Integer.toString(mode);
         }
     }
-
-    /**
-     * Requests that the WindowManager sends
-     * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
-     */
-    public void requestUserActivityNotification();
 
     /**
      * Registers an IDisplayFoldListener.

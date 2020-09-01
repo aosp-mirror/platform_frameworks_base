@@ -57,15 +57,15 @@ public class AppOpsActiveWatcherTest {
 
         // Start watching active ops
         final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
-        appOpsManager.startWatchingActive(new int[] {AppOpsManager.OP_CAMERA,
-                AppOpsManager.OP_RECORD_AUDIO}, listener);
+        appOpsManager.startWatchingActive(new String[] {AppOpsManager.OPSTR_CAMERA,
+                AppOpsManager.OPSTR_RECORD_AUDIO}, getContext().getMainExecutor(), listener);
 
         // Start the op
         appOpsManager.startOp(AppOpsManager.OP_CAMERA);
 
         // Verify that we got called for the op being active
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(1)).onOpActiveChanged(eq(AppOpsManager.OP_CAMERA),
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()), eq(true));
 
         // This should be the only callback we got
@@ -83,7 +83,7 @@ public class AppOpsActiveWatcherTest {
 
         // Verify that we got called for the op being active
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(1)).onOpActiveChanged(eq(AppOpsManager.OP_CAMERA),
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()), eq(false));
 
         // Verify that the op is not active
@@ -110,6 +110,22 @@ public class AppOpsActiveWatcherTest {
 
         // We should not be getting any callbacks
         verifyNoMoreInteractions(listener);
+
+        // Start watching op again
+        appOpsManager.startWatchingActive(new String[] {AppOpsManager.OPSTR_CAMERA},
+                getContext().getMainExecutor(), listener);
+
+        // Start the op
+        appOpsManager.startOp(AppOpsManager.OP_CAMERA);
+
+        // We should get the callback again (and since we reset the listener, we therefore expect 1)
+        verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
+                eq(Process.myUid()), eq(getContext().getPackageName()), eq(true));
+
+        // Finish up
+        appOpsManager.finishOp(AppOpsManager.OP_CAMERA);
+        appOpsManager.stopWatchingActive(listener);
     }
 
     @Test

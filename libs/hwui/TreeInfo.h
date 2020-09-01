@@ -40,7 +40,6 @@ class ErrorHandler {
 public:
     virtual void onError(const std::string& message) = 0;
 
-protected:
     virtual ~ErrorHandler() = default;
 };
 

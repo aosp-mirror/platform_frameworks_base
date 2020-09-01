@@ -16,6 +16,9 @@
 
 package com.android.fakeoemfeatures;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
@@ -25,6 +28,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -94,8 +99,13 @@ public class FakeApp extends Application {
             return;
         }
 
-        final WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
-        final Display display = wm.getDefaultDisplay();
+        // Construct an instance of WindowManager to add the window of TYPE_APPLICATION_OVERLAY to
+        // the default display.
+        final DisplayManager dm = getSystemService(DisplayManager.class);
+        final Display defaultDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+        final Context windowContext = createDisplayContext(defaultDisplay)
+                .createWindowContext(TYPE_APPLICATION_OVERLAY, null /* options */);
+        final WindowManager wm = windowContext.getSystemService(WindowManager.class);
 
         // Check to make sure we are not running on a user build.  If this
         // is a user build, WARN!  Do not want!
@@ -108,14 +118,14 @@ public class FakeApp extends Application {
             builder.setCancelable(false);
             builder.setPositiveButton("I understand", null);
             Dialog dialog = builder.create();
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            dialog.getWindow().setType(TYPE_APPLICATION_OVERLAY);
             dialog.show();
         }
 
         // Make a fake window that is always around eating graphics resources.
         FakeView view = new FakeView(this);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -124,7 +134,8 @@ public class FakeApp extends Application {
         }
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        int maxSize = display.getMaximumSizeDimension();
+        Rect maxWindowBounds = wm.getMaximumWindowMetrics().getBounds();
+        int maxSize = Math.max(maxWindowBounds.width(), maxWindowBounds.height());
         maxSize *= 2;
         lp.x = maxSize;
         lp.y = maxSize;

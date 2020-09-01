@@ -51,6 +51,17 @@ public interface KeyguardSecurityView {
      */
     int PROMPT_REASON_AFTER_LOCKOUT = 5;
 
+    /***
+     * Strong auth is require to prepare for an unattended update.
+     */
+    int PROMPT_REASON_PREPARE_FOR_UPDATE = 6;
+
+    /**
+     * Primary auth is required because the user uses weak/convenience biometrics and hasn't used
+     * primary auth since a while
+     */
+    int PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT = 7;
+
     /**
      * Interface back to keyguard to tell it when security
      * @param callback
@@ -148,4 +159,9 @@ public interface KeyguardSecurityView {
     default boolean disallowInterceptTouch(MotionEvent event) {
         return false;
     }
+
+    /**
+     * When bouncer was visible but is being dragged down or dismissed.
+     */
+    default void onStartingToHide() {};
 }

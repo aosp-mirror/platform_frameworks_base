@@ -57,6 +57,8 @@ public class AudioDeviceBrokerTest {
 
     @Mock private AudioService mMockAudioService;
     @Spy private AudioDeviceInventory mSpyDevInventory;
+    @Spy private AudioSystemAdapter mSpyAudioSystem;
+    private SystemServerAdapter mSystemServer;
 
     private BluetoothDevice mFakeBtDevice;
 
@@ -65,8 +67,11 @@ public class AudioDeviceBrokerTest {
         mContext = InstrumentationRegistry.getTargetContext();
 
         mMockAudioService = mock(AudioService.class);
-        mSpyDevInventory = spy(new AudioDeviceInventory());
-        mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory);
+        mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
+        mSpyDevInventory = spy(new AudioDeviceInventory(mSpyAudioSystem));
+        mSystemServer = new NoOpSystemServerAdapter();
+        mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory,
+                mSystemServer);
         mSpyDevInventory.setDeviceBroker(mAudioDeviceBroker);
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -77,22 +82,23 @@ public class AudioDeviceBrokerTest {
     @After
     public void tearDown() throws Exception { }
 
-    @Test
-    public void testSetUpAndTearDown() { }
+//    @Test
+//    public void testSetUpAndTearDown() { }
 
     /**
-     * Verify call to postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent() for connection
-     * calls into AudioDeviceInventory with the right params
+     * postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent() for connection:
+     * - verify it calls into AudioDeviceInventory with the right params
+     * - verify it calls into AudioSystem and stays connected (no 2nd call to disconnect)
      * @throws Exception
      */
     @Test
     public void testPostA2dpDeviceConnectionChange() throws Exception {
-        Log.i(TAG, "testPostA2dpDeviceConnectionChange");
+        Log.i(TAG, "starting testPostA2dpDeviceConnectionChange");
         Assert.assertNotNull("invalid null BT device", mFakeBtDevice);
 
         mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1);
-        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+        Thread.sleep(2 * MAX_MESSAGE_HANDLING_DELAY_MS);
         verify(mSpyDevInventory, times(1)).setBluetoothA2dpDeviceConnectionState(
                 any(BluetoothDevice.class),
                 ArgumentMatchers.eq(BluetoothProfile.STATE_CONNECTED) /*state*/,
@@ -100,6 +106,9 @@ public class AudioDeviceBrokerTest {
                 ArgumentMatchers.eq(true) /*suppressNoisyIntent*/, anyInt() /*musicDevice*/,
                 ArgumentMatchers.eq(1) /*a2dpVolume*/
         );
+
+        // verify the connection was reported to AudioSystem
+        checkSingleSystemConnection(mFakeBtDevice);
     }
 
     /**
@@ -110,31 +119,70 @@ public class AudioDeviceBrokerTest {
      */
     @Test
     public void testA2dpDeviceConnectionDisconnectionConnectionChange() throws Exception {
-        Log.i(TAG, "testA2dpDeviceConnectionDisconnectionConnectionChange");
+        Log.i(TAG, "starting testA2dpDeviceConnectionDisconnectionConnectionChange");
 
-        doTestConnectionDisconnectionReconnection(0);
+        doTestConnectionDisconnectionReconnection(0, false,
+                // cannot guarantee single connection since commands are posted in separate thread
+                // than they are processed
+                false);
     }
 
     /**
      * Verify device disconnection and reconnection within the BECOMING_NOISY window
+     * in the absence of media playback
      * @throws Exception
      */
     @Test
     public void testA2dpDeviceReconnectionWithinBecomingNoisyDelay() throws Exception {
-        Log.i(TAG, "testA2dpDeviceReconnectionWithinBecomingNoisyDelay");
+        Log.i(TAG, "starting testA2dpDeviceReconnectionWithinBecomingNoisyDelay");
 
-        doTestConnectionDisconnectionReconnection(AudioService.BECOMING_NOISY_DELAY_MS / 2);
+        doTestConnectionDisconnectionReconnection(AudioService.BECOMING_NOISY_DELAY_MS / 2,
+                false,
+                // do not check single connection since the connection command will come much
+                // after the disconnection command
+                false);
     }
 
-    private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection)
-            throws Exception {
+    /**
+     * Same as testA2dpDeviceConnectionDisconnectionConnectionChange() but with mock media playback
+     * @throws Exception
+     */
+    @Test
+    public void testA2dpConnectionDisconnectionConnectionChange_MediaPlayback() throws Exception {
+        Log.i(TAG, "starting testA2dpConnectionDisconnectionConnectionChange_MediaPlayback");
+
+        doTestConnectionDisconnectionReconnection(0, true,
+                // guarantee single connection since because of media playback the disconnection
+                // is supposed to be delayed, and thus cancelled because of the connection
+                true);
+    }
+
+    /**
+     * Same as testA2dpDeviceReconnectionWithinBecomingNoisyDelay() but with mock media playback
+     * @throws Exception
+     */
+    @Test
+    public void testA2dpReconnectionWithinBecomingNoisyDelay_MediaPlayback() throws Exception {
+        Log.i(TAG, "starting testA2dpReconnectionWithinBecomingNoisyDelay_MediaPlayback");
+
+        doTestConnectionDisconnectionReconnection(AudioService.BECOMING_NOISY_DELAY_MS / 2,
+                true,
+                // guarantee single connection since because of media playback the disconnection
+                // is supposed to be delayed, and thus cancelled because of the connection
+                true);
+    }
+
+    private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection,
+            boolean mockMediaPlayback, boolean guaranteeSingleConnection) throws Exception {
         when(mMockAudioService.getDeviceForStream(AudioManager.STREAM_MUSIC))
                 .thenReturn(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         when(mMockAudioService.isInCommunication()).thenReturn(false);
         when(mMockAudioService.hasMediaDynamicPolicy()).thenReturn(false);
         when(mMockAudioService.hasAudioFocusUsers()).thenReturn(false);
 
-        // first connection
+        ((NoOpAudioSystemAdapter) mSpyAudioSystem).configureIsStreamActive(mockMediaPlayback);
+
+        // first connection: ensure the device is connected as a starting condition for the test
         mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1);
         Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
@@ -158,5 +206,26 @@ public class AudioDeviceBrokerTest {
                 ArgumentMatchers.eq(BluetoothProfile.STATE_CONNECTED));
         Assert.assertTrue("Mock device not connected",
                 mSpyDevInventory.isA2dpDeviceConnected(mFakeBtDevice));
+
+        if (guaranteeSingleConnection) {
+            // when the disconnection was expected to be cancelled, there should have been a single
+            //  call to AudioSystem to declare the device connected (available)
+            checkSingleSystemConnection(mFakeBtDevice);
+        }
+    }
+
+    /**
+     * Verifies the given device was reported to AudioSystem exactly once as available
+     * @param btDevice
+     * @throws Exception
+     */
+    private void checkSingleSystemConnection(BluetoothDevice btDevice) throws Exception {
+        final String expectedName = btDevice.getName() == null ? "" : btDevice.getName();
+        verify(mSpyAudioSystem, times(1)).setDeviceConnectionState(
+                ArgumentMatchers.eq(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
+                ArgumentMatchers.eq(AudioSystem.DEVICE_STATE_AVAILABLE),
+                ArgumentMatchers.eq(btDevice.getAddress()),
+                ArgumentMatchers.eq(expectedName),
+                anyInt() /*codec*/);
     }
 }

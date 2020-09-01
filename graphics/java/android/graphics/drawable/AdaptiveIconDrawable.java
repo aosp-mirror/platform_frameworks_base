@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -223,6 +224,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         final int deviceDensity = Drawable.resolveDensity(r, 0);
         state.setDensity(deviceDensity);
         state.mSrcDensityOverride = mSrcDensityOverride;
+        state.mSourceDrawableId = Resources.getAttributeSetSourceResId(attrs);
 
         final ChildDrawable[] array = state.mChildren;
         for (int i = 0; i < state.mChildren.length; i++) {
@@ -385,7 +387,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public void getOutline(@NonNull Outline outline) {
-        outline.setConvexPath(mMask);
+        outline.setPath(mMask);
     }
 
     /** @hide */
@@ -443,6 +445,17 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
                 state.mChildrenChangingConfigurations |= d.getChangingConfigurations();
             }
         }
+    }
+
+    /**
+     * If the drawable was inflated from XML, this returns the resource ID for the drawable
+     *
+     * @hide
+     */
+    @DrawableRes
+    public int getSourceDrawableResId() {
+        final LayerState state = mLayerState;
+        return state == null ? Resources.ID_NULL : state.mSourceDrawableId;
     }
 
     /**
@@ -944,6 +957,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         @Config int mChangingConfigurations;
         @Config int mChildrenChangingConfigurations;
 
+        @DrawableRes int mSourceDrawableId = Resources.ID_NULL;
+
         private boolean mCheckedOpacity;
         private int mOpacity;
 
@@ -960,6 +975,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
                 mChangingConfigurations = orig.mChangingConfigurations;
                 mChildrenChangingConfigurations = orig.mChildrenChangingConfigurations;
+                mSourceDrawableId = orig.mSourceDrawableId;
 
                 for (int i = 0; i < N_CHILDREN; i++) {
                     final ChildDrawable or = origChildDrawable[i];

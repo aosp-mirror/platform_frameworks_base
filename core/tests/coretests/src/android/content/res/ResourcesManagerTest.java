@@ -72,12 +72,12 @@ public class ResourcesManagerTest extends TestCase {
     public void testMultipleCallsWithIdenticalParametersCacheReference() {
         Resources resources = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources);
 
         Resources newResources = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(newResources);
         assertSame(resources, newResources);
     }
@@ -86,14 +86,14 @@ public class ResourcesManagerTest extends TestCase {
     public void testMultipleCallsWithDifferentParametersReturnDifferentReferences() {
         Resources resources = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources);
 
         Configuration overrideConfig = new Configuration();
         overrideConfig.smallestScreenWidthDp = 200;
         Resources newResources = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, overrideConfig,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(newResources);
         assertNotSame(resources, newResources);
     }
@@ -102,12 +102,13 @@ public class ResourcesManagerTest extends TestCase {
     public void testAddingASplitCreatesANewImpl() {
         Resources resources1 = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
 
         Resources resources2 = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, new String[] { APP_ONE_RES_SPLIT_DIR }, null, null,
-                Display.DEFAULT_DISPLAY, null, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                Display.DEFAULT_DISPLAY, null, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,null,
+                null);
         assertNotNull(resources2);
 
         assertNotSame(resources1, resources2);
@@ -118,12 +119,12 @@ public class ResourcesManagerTest extends TestCase {
     public void testUpdateConfigurationUpdatesAllAssetManagers() {
         Resources resources1 = mResourcesManager.getResources(
                 null, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
 
         Resources resources2 = mResourcesManager.getResources(
                 null, APP_TWO_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources2);
 
         Binder activity = new Binder();
@@ -131,7 +132,7 @@ public class ResourcesManagerTest extends TestCase {
         overrideConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
         Resources resources3 = mResourcesManager.getResources(
                 activity, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY,
-                overrideConfig, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                overrideConfig, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources3);
 
         // No Resources object should be the same.
@@ -164,13 +165,13 @@ public class ResourcesManagerTest extends TestCase {
         Binder activity1 = new Binder();
         Resources resources1 = mResourcesManager.getResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
 
         Binder activity2 = new Binder();
         Resources resources2 = mResourcesManager.getResources(
                 activity2, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
 
         // The references themselves should be unique.
@@ -183,9 +184,9 @@ public class ResourcesManagerTest extends TestCase {
     @SmallTest
     public void testThemesGetUpdatedWithNewImpl() {
         Binder activity1 = new Binder();
-        Resources resources1 = mResourcesManager.createBaseActivityResources(
+        Resources resources1 = mResourcesManager.createBaseTokenResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
 
         Resources.Theme theme = resources1.newTheme();
@@ -216,9 +217,9 @@ public class ResourcesManagerTest extends TestCase {
         // Create a Resources for the Activity.
         Configuration config1 = new Configuration();
         config1.densityDpi = 280;
-        Resources resources1 = mResourcesManager.createBaseActivityResources(
+        Resources resources1 = mResourcesManager.createBaseTokenResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, config1,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
 
         // Create a Resources based on the Activity.
@@ -226,7 +227,7 @@ public class ResourcesManagerTest extends TestCase {
         config2.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
         Resources resources2 = mResourcesManager.getResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, config2,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources2);
 
         assertNotSame(resources1, resources2);
@@ -257,5 +258,36 @@ public class ResourcesManagerTest extends TestCase {
 
         expectedConfig2.orientation = Configuration.ORIENTATION_LANDSCAPE;
         assertEquals(expectedConfig2, resources2.getConfiguration());
+    }
+
+    @SmallTest
+    public void testOverrideDisplayAdjustments() {
+        final int originalOverrideDensity = 200;
+        final int overrideDisplayDensity = 400;
+        final Binder token = new Binder();
+        final Configuration overrideConfig = new Configuration();
+        overrideConfig.densityDpi = originalOverrideDensity;
+        final Resources resources = mResourcesManager.createBaseTokenResources(
+                token, APP_ONE_RES_DIR, null /* splitResDirs */, null /* overlayDirs */,
+                null /* libDirs */, Display.DEFAULT_DISPLAY, overrideConfig,
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null /* classLoader */,
+                null /* loaders */);
+
+        // Update the override.
+        boolean handled = mResourcesManager.overrideTokenDisplayAdjustments(token,
+                adjustments -> adjustments.getConfiguration().densityDpi = overrideDisplayDensity);
+
+        assertTrue(handled);
+        assertTrue(resources.hasOverrideDisplayAdjustments());
+        assertEquals(overrideDisplayDensity,
+                resources.getDisplayAdjustments().getConfiguration().densityDpi);
+
+        // Clear the override.
+        handled = mResourcesManager.overrideTokenDisplayAdjustments(token, null /* override */);
+
+        assertTrue(handled);
+        assertFalse(resources.hasOverrideDisplayAdjustments());
+        assertEquals(originalOverrideDensity,
+                resources.getDisplayAdjustments().getConfiguration().densityDpi);
     }
 }

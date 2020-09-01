@@ -34,15 +34,18 @@ import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.StatsLog;
+import android.util.SparseArray;
 
+import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.wm.SurfaceAnimationThread;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -56,21 +59,21 @@ public class Watchdog extends Thread {
     public static final boolean DEBUG = false;
 
     // Set this to true to use debug default values.
-    static final boolean DB = false;
+    private static final boolean DB = false;
 
     // Note 1: Do not lower this value below thirty seconds without tightening the invoke-with
     //         timeout in com.android.internal.os.ZygoteConnection, or wrapped applications
     //         can trigger the watchdog.
     // Note 2: The debug value is already below the wait time in ZygoteConnection. Wrapped
     //         applications may not work with a debug build. CTS will fail.
-    static final long DEFAULT_TIMEOUT = DB ? 10*1000 : 60*1000;
-    static final long CHECK_INTERVAL = DEFAULT_TIMEOUT / 2;
+    private static final long DEFAULT_TIMEOUT = DB ? 10 * 1000 : 60 * 1000;
+    private static final long CHECK_INTERVAL = DEFAULT_TIMEOUT / 2;
 
     // These are temporally ordered: larger values as lateness increases
-    static final int COMPLETED = 0;
-    static final int WAITING = 1;
-    static final int WAITED_HALF = 2;
-    static final int OVERDUE = 3;
+    private static final int COMPLETED = 0;
+    private static final int WAITING = 1;
+    private static final int WAITED_HALF = 2;
+    private static final int OVERDUE = 3;
 
     // Which native processes to dump into dropbox's stack traces
     public static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
@@ -88,7 +91,7 @@ public class Watchdog extends Thread {
         "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
         "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
         "com.android.bluetooth",  // Bluetooth service
-        "/system/bin/statsd",  // Stats daemon
+        "/apex/com.android.os.statsd/bin/statsd",  // Stats daemon
     };
 
     public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(
@@ -97,31 +100,36 @@ public class Watchdog extends Thread {
             "android.hardware.audio@5.0::IDevicesFactory",
             "android.hardware.audio@6.0::IDevicesFactory",
             "android.hardware.biometrics.face@1.0::IBiometricsFace",
+            "android.hardware.biometrics.fingerprint@2.1::IBiometricsFingerprint",
             "android.hardware.bluetooth@1.0::IBluetoothHci",
             "android.hardware.camera.provider@2.4::ICameraProvider",
+            "android.hardware.gnss@1.0::IGnss",
             "android.hardware.graphics.allocator@2.0::IAllocator",
             "android.hardware.graphics.composer@2.1::IComposer",
             "android.hardware.health@2.0::IHealth",
+            "android.hardware.light@2.0::ILight",
             "android.hardware.media.c2@1.0::IComponentStore",
             "android.hardware.media.omx@1.0::IOmx",
             "android.hardware.media.omx@1.0::IOmxStore",
             "android.hardware.neuralnetworks@1.0::IDevice",
             "android.hardware.power.stats@1.0::IPowerStats",
             "android.hardware.sensors@1.0::ISensors",
+            "android.hardware.sensors@2.0::ISensors",
+            "android.hardware.sensors@2.1::ISensors",
             "android.hardware.vr@1.0::IVr",
             "android.system.suspend@1.0::ISystemSuspend"
     );
 
-    static Watchdog sWatchdog;
+    private static Watchdog sWatchdog;
 
     /* This handler will be used to post message back onto the main thread */
-    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
-    final HandlerChecker mMonitorChecker;
-    ActivityManagerService mActivity;
+    private final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
+    private final HandlerChecker mMonitorChecker;
+    private ActivityManagerService mActivity;
 
-    int mPhonePid;
-    IActivityController mController;
-    boolean mAllowRestart = true;
+    private IActivityController mController;
+    private boolean mAllowRestart = true;
+    private final List<Integer> mInterestingJavaPids = new ArrayList<>();
 
     /**
      * Used for checking status of handle threads and scheduling monitor callbacks.
@@ -326,6 +334,8 @@ public class Watchdog extends Thread {
         // Initialize monitor for Binder threads.
         addMonitor(new BinderThreadMonitor());
 
+        mInterestingJavaPids.add(Process.myPid());
+
         // See the notes on DEFAULT_TIMEOUT.
         assert DB ||
                 DEFAULT_TIMEOUT > ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
@@ -343,10 +353,32 @@ public class Watchdog extends Thread {
                 android.Manifest.permission.REBOOT, null);
     }
 
-    public void processStarted(String name, int pid) {
-        synchronized (this) {
-            if ("com.android.phone".equals(name)) {
-                mPhonePid = pid;
+    private static boolean isInterestingJavaProcess(String processName) {
+        return processName.equals(StorageManagerService.sMediaStoreAuthorityProcessName)
+                || processName.equals("com.android.phone");
+    }
+
+    /**
+     * Notifies the watchdog when a Java process with {@code pid} is started.
+     * This process may have its stack trace dumped during an ANR.
+     */
+    public void processStarted(String processName, int pid) {
+        if (isInterestingJavaProcess(processName)) {
+            Slog.i(TAG, "Interesting Java process " + processName + " started. Pid " + pid);
+            synchronized (this) {
+                mInterestingJavaPids.add(pid);
+            }
+        }
+    }
+
+    /**
+     * Notifies the watchdog when a Java process with {@code pid} dies.
+     */
+    public void processDied(String processName, int pid) {
+        if (isInterestingJavaProcess(processName)) {
+            Slog.i(TAG, "Interesting Java process " + processName + " died. Pid " + pid);
+            synchronized (this) {
+                mInterestingJavaPids.remove(Integer.valueOf(pid));
             }
         }
     }
@@ -560,10 +592,9 @@ public class Watchdog extends Thread {
                         Slog.i(TAG, "WAITED_HALF");
                         // We've waited half the deadlock-detection interval.  Pull a stack
                         // trace and wait another half.
-                        ArrayList<Integer> pids = new ArrayList<Integer>();
-                        pids.add(Process.myPid());
+                        ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
                         ActivityManagerService.dumpStackTraces(pids, null, null,
-                                getInterestingNativePids());
+                                getInterestingNativePids(), null);
                         waitedHalf = true;
                     }
                     continue;
@@ -580,16 +611,24 @@ public class Watchdog extends Thread {
             // Then kill this process so that the system will restart.
             EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
 
-            ArrayList<Integer> pids = new ArrayList<>();
-            pids.add(Process.myPid());
-            if (mPhonePid > 0) pids.add(mPhonePid);
+            ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
 
+            long anrTime = SystemClock.uptimeMillis();
+            StringBuilder report = new StringBuilder();
+            report.append(MemoryPressureUtil.currentPsiState());
+            ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
+            StringWriter tracesFileException = new StringWriter();
             final File stack = ActivityManagerService.dumpStackTraces(
-                    pids, null, null, getInterestingNativePids());
+                    pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
+                    tracesFileException);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
             SystemClock.sleep(5000);
+
+            processCpuTracker.update();
+            report.append(processCpuTracker.printCurrentState(anrTime));
+            report.append(tracesFileException.getBuffer());
 
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
             doSysRq('w');
@@ -605,9 +644,10 @@ public class Watchdog extends Thread {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    subject, null, stack, null);
+                                    subject, report.toString(), stack, null);
                         }
-                        StatsLog.write(StatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED, subject);
+                        FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
+                                subject);
                     }
                 };
             dropboxThread.start();

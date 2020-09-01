@@ -17,6 +17,7 @@
 #ifndef _ANDROID_MEDIA_MEDIASYNC_H_
 #define _ANDROID_MEDIA_MEDIASYNC_H_
 
+#include <media/AudioResamplerPublic.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/MediaSync.h>
 #include <utils/Errors.h>
@@ -24,7 +25,6 @@
 
 namespace android {
 
-struct AudioPlaybackRate;
 class AudioTrack;
 class IGraphicBufferProducer;
 struct MediaClock;

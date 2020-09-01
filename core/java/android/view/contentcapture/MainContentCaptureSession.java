@@ -22,6 +22,7 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_RESUM
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_STARTED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_DISAPPEARED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_INSETS_CHANGED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING;
@@ -36,6 +37,7 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Insets;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,6 +52,7 @@ import android.view.contentcapture.ViewNode.ViewStructureImpl;
 import com.android.internal.os.IResultReceiver;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -144,7 +147,44 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * Binder object used to update the session state.
      */
     @NonNull
-    private final IResultReceiver.Stub mSessionStateReceiver;
+    private final SessionStateReceiver mSessionStateReceiver;
+
+    private static class SessionStateReceiver extends IResultReceiver.Stub {
+        private final WeakReference<MainContentCaptureSession> mMainSession;
+
+        SessionStateReceiver(MainContentCaptureSession session) {
+            mMainSession = new WeakReference<>(session);
+        }
+
+        @Override
+        public void send(int resultCode, Bundle resultData) {
+            final MainContentCaptureSession mainSession = mMainSession.get();
+            if (mainSession == null) {
+                Log.w(TAG, "received result after mina session released");
+                return;
+            }
+            final IBinder binder;
+            if (resultData != null) {
+                // Change in content capture enabled.
+                final boolean hasEnabled = resultData.getBoolean(EXTRA_ENABLED_STATE);
+                if (hasEnabled) {
+                    final boolean disabled = (resultCode == RESULT_CODE_FALSE);
+                    mainSession.mDisabled.set(disabled);
+                    return;
+                }
+                binder = resultData.getBinder(EXTRA_BINDER);
+                if (binder == null) {
+                    Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
+                    mainSession.mHandler.post(() -> mainSession.resetSession(
+                            STATE_DISABLED | STATE_INTERNAL_ERROR));
+                    return;
+                }
+            } else {
+                binder = null;
+            }
+            mainSession.mHandler.post(() -> mainSession.onSessionStarted(resultCode, binder));
+        }
+    }
 
     protected MainContentCaptureSession(@NonNull Context context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
@@ -157,32 +197,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         final int logHistorySize = mManager.mOptions.logHistorySize;
         mFlushHistory = logHistorySize > 0 ? new LocalLog(logHistorySize) : null;
 
-        mSessionStateReceiver = new IResultReceiver.Stub() {
-            @Override
-            public void send(int resultCode, Bundle resultData) {
-                final IBinder binder;
-                if (resultData != null) {
-                    // Change in content capture enabled.
-                    final boolean hasEnabled = resultData.getBoolean(EXTRA_ENABLED_STATE);
-                    if (hasEnabled) {
-                        final boolean disabled = (resultCode == RESULT_CODE_FALSE);
-                        mDisabled.set(disabled);
-                        return;
-                    }
-                    binder = resultData.getBinder(EXTRA_BINDER);
-                    if (binder == null) {
-                        Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
-                        mHandler.post(() -> resetSession(
-                                STATE_DISABLED | STATE_INTERNAL_ERROR));
-                        return;
-                    }
-                } else {
-                    binder = null;
-                }
-                mHandler.post(() -> onSessionStarted(resultCode, binder));
-            }
-        };
-
+        mSessionStateReceiver = new SessionStateReceiver(this);
     }
 
     @Override
@@ -271,6 +286,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         } else {
             mState = resultCode;
             mDisabled.set(false);
+            // Flush any pending data immediately as buffering forced until now.
+            flushIfNeeded(FLUSH_REASON_SESSION_CONNECTED);
         }
         if (sVerbose) {
             Log.v(TAG, "handleSessionStarted() result: id=" + mId + " resultCode=" + resultCode
@@ -539,6 +556,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             Log.e(TAG, "Error destroying system-service session " + mId + " for "
                     + getDebugState() + ": " + e);
         }
+
+        if (mDirectServiceInterface != null) {
+            mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+        }
+        mDirectServiceInterface = null;
     }
 
     // TODO(b/122454205): once we support multiple sessions, we might need to move some of these
@@ -578,8 +600,23 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets) {
+        notifyViewInsetsChanged(mId, viewInsets);
+    }
+
+    @Override
     public void internalNotifyViewTreeEvent(boolean started) {
         notifyViewTreeEvent(mId, started);
+    }
+
+    @Override
+    public void internalNotifySessionResumed() {
+        notifySessionResumed(mId);
+    }
+
+    @Override
+    public void internalNotifySessionPaused() {
+        notifySessionPaused(mId);
     }
 
     @Override
@@ -632,15 +669,23 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     /** Public because is also used by ViewRootImpl */
+    public void notifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
+                .setInsets(viewInsets));
+    }
+
+    /** Public because is also used by ViewRootImpl */
     public void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
         sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
     }
 
-    /** Public because is also used by ViewRootImpl */
-    public void notifySessionLifecycle(boolean started) {
-        final int type = started ? TYPE_SESSION_RESUMED : TYPE_SESSION_PAUSED;
-        sendEvent(new ContentCaptureEvent(mId, type), FORCE_FLUSH);
+    void notifySessionResumed(int sessionId) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_SESSION_RESUMED), FORCE_FLUSH);
+    }
+
+    void notifySessionPaused(int sessionId) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_SESSION_PAUSED), FORCE_FLUSH);
     }
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {

@@ -37,23 +37,16 @@ oneway interface ITaskStackListener {
 
     /**
      * Called whenever IActivityManager.startActivity is called on an activity that is already
-     * running in the pinned stack and the activity is not actually started, but the task is either
-     * brought to the front or a new Intent is delivered to it.
+     * running, but the task is either brought to the front or a new Intent is delivered to it.
      *
+     * @param task information about the task the activity was relaunched into
+     * @param homeVisible whether or not the home task is visible
      * @param clearedTask whether or not the launch activity also cleared the task as a part of
      * starting
+     * @param wasVisible whether the activity was visible before the restart attempt
      */
-    void onPinnedActivityRestartAttempt(boolean clearedTask);
-
-    /**
-     * Called whenever the pinned stack is starting animating a resize.
-     */
-    void onPinnedStackAnimationStarted();
-
-    /**
-     * Called whenever the pinned stack is done animating a resize.
-     */
-    void onPinnedStackAnimationEnded();
+    void onActivityRestartAttempt(in ActivityManager.RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask, boolean wasVisible);
 
     /**
      * Called when we launched an activity that we forced to be resizable.
@@ -158,7 +151,7 @@ oneway interface ITaskStackListener {
      * @param activityToken Token of the size compatibility mode activity. It will be null when
      *                      switching to a activity that is not in size compatibility mode or the
      *                      configuration of the activity.
-     * @see com.android.server.wm.AppWindowToken#inSizeCompatMode
+     * @see com.android.server.wm.ActivityRecord#inSizeCompatMode
      */
     void onSizeCompatModeActivityChanged(int displayId, in IBinder activityToken);
 
@@ -192,4 +185,47 @@ oneway interface ITaskStackListener {
      * @param newDisplayId id of the new display.
      */
     void onTaskDisplayChanged(int taskId, int newDisplayId);
+
+    /**
+     * Called when any additions or deletions to the recent tasks list have been made.
+     */
+    void onRecentTaskListUpdated();
+
+    /**
+     * Called when Recent Tasks list is frozen or unfrozen.
+     *
+     * @param frozen if true, Recents Tasks list is currently frozen, false otherwise
+     */
+    void onRecentTaskListFrozenChanged(boolean frozen);
+
+    /**
+     * Called when a task gets or loses focus.
+     *
+     * @param taskId id of the task.
+     * @param {@code true} if the task got focus, {@code false} if it lost it.
+     */
+    void onTaskFocusChanged(int taskId, boolean focused);
+
+    /**
+     * Called when a task changes its requested orientation. It is different from {@link
+     * #onActivityRequestedOrientationChanged(int, int)} in the sense that this method is called
+     * when a task changes requested orientation due to activity launch, dimiss or reparenting.
+     *
+     * @param taskId id of the task.
+     * @param requestedOrientation the new requested orientation of this task as screen orientations
+     *                             in {@link android.content.pm.ActivityInfo}.
+     */
+     void onTaskRequestedOrientationChanged(int taskId, int requestedOrientation);
+
+    /**
+     * Called when a rotation is about to start on the foreground activity.
+     * This applies for:
+     *   * free sensor rotation
+     *   * forced rotation
+     *   * rotation settings set through adb command line
+     *   * rotation that occurs when rotation tile is toggled in quick settings
+     *
+     * @param displayId id of the display where activity will rotate
+     */
+     void onActivityRotation(int displayId);
 }

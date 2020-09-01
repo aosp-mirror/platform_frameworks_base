@@ -17,15 +17,16 @@ package com.android.test.uibench.recyclerview;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.test.uibench.R;
 
@@ -51,12 +52,19 @@ public abstract class RvCompatListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         FragmentManager fm = getSupportFragmentManager();
-        if (fm.findFragmentById(android.R.id.content) == null) {
+        Fragment existingFragment = fm.findFragmentById(android.R.id.content);
+        if (existingFragment == null) {
             RecyclerViewFragment fragment = new RecyclerViewFragment();
-            fragment.layoutManager = createLayoutManager(this);
-            fragment.adapter = createAdapter();
+            initializeRecyclerViewFragment(fragment);
             fm.beginTransaction().add(android.R.id.content, fragment).commit();
+        } else if (existingFragment instanceof RecyclerViewFragment) {
+            initializeRecyclerViewFragment((RecyclerViewFragment) existingFragment);
         }
+    }
+
+    private void initializeRecyclerViewFragment(RecyclerViewFragment fragment) {
+        fragment.layoutManager = createLayoutManager(this);
+        fragment.adapter = createAdapter();
     }
 
     protected RecyclerView.LayoutManager createLayoutManager(Context context) {

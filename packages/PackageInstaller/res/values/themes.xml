@@ -17,7 +17,8 @@
 
 <resources>
 
-    <style name="Theme.AlertDialogActivity.NoAnimation">
+    <style name="Theme.AlertDialogActivity.NoAnimation"
+           parent="@style/Theme.AlertDialogActivity.NoActionBar">
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 

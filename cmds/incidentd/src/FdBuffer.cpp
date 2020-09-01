@@ -17,6 +17,7 @@
 #include "Log.h"
 
 #include "FdBuffer.h"
+#include "incidentd_util.h"
 
 #include <log/log.h>
 #include <utils/SystemClock.h>
@@ -31,17 +32,24 @@ namespace os {
 namespace incidentd {
 
 const ssize_t BUFFER_SIZE = 16 * 1024;  // 16 KB
-const ssize_t MAX_BUFFER_COUNT = 6144;   // 96 MB max
+const ssize_t MAX_BUFFER_SIZE = 96 * 1024 * 1024;  // 96 MB
 
-FdBuffer::FdBuffer()
-        :mBuffer(new EncodedBuffer(BUFFER_SIZE)),
+FdBuffer::FdBuffer(): FdBuffer(get_buffer_from_pool(), /* isBufferPooled= */ true)  {
+}
+
+FdBuffer::FdBuffer(sp<EncodedBuffer> buffer, bool isBufferPooled)
+        :mBuffer(buffer),
          mStartTime(-1),
          mFinishTime(-1),
          mTimedOut(false),
-         mTruncated(false) {
+         mTruncated(false),
+         mIsBufferPooled(isBufferPooled) {
 }
 
 FdBuffer::~FdBuffer() {
+    if (mIsBufferPooled) {
+        return_buffer_to_pool(mBuffer);
+    }
 }
 
 status_t FdBuffer::read(int fd, int64_t timeout) {
@@ -51,7 +59,7 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     while (true) {
-        if (mBuffer->size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+        if (mBuffer->size() >= MAX_BUFFER_SIZE) {
             mTruncated = true;
             VLOG("Truncating data");
             break;
@@ -106,7 +114,7 @@ status_t FdBuffer::readFully(int fd) {
     mStartTime = uptimeMillis();
 
     while (true) {
-        if (mBuffer->size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+        if (mBuffer->size() >= MAX_BUFFER_SIZE) {
             // Don't let it get too big.
             mTruncated = true;
             VLOG("Truncating data");
@@ -156,7 +164,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
 
     // This is the buffer used to store processed data
     while (true) {
-        if (mBuffer->size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
+        if (mBuffer->size() >= MAX_BUFFER_SIZE) {
             VLOG("Truncating data");
             mTruncated = true;
             break;

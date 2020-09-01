@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -32,6 +33,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.LocalTime;
 
 /**
  * This class provides access to the system uimode services.  These services
@@ -178,6 +180,7 @@ public class UiModeManager {
     /** @hide */
     @IntDef(prefix = { "MODE_" }, value = {
             MODE_NIGHT_AUTO,
+            MODE_NIGHT_CUSTOM,
             MODE_NIGHT_NO,
             MODE_NIGHT_YES
     })
@@ -188,19 +191,25 @@ public class UiModeManager {
      * Constant for {@link #setNightMode(int)} and {@link #getNightMode()}:
      * automatically switch night mode on and off based on the time.
      */
-    public static final int MODE_NIGHT_AUTO = Configuration.UI_MODE_NIGHT_UNDEFINED >> 4;
+    public static final int MODE_NIGHT_AUTO = 0;
+
+    /**
+     * Constant for {@link #setNightMode(int)} and {@link #getNightMode()}:
+     * automatically switch night mode on and off based on the time.
+     */
+    public static final int MODE_NIGHT_CUSTOM = 3;
     
     /**
      * Constant for {@link #setNightMode(int)} and {@link #getNightMode()}:
      * never run in night mode.
      */
-    public static final int MODE_NIGHT_NO = Configuration.UI_MODE_NIGHT_NO >> 4;
+    public static final int MODE_NIGHT_NO = 1;
     
     /**
      * Constant for {@link #setNightMode(int)} and {@link #getNightMode()}:
      * always run in night mode.
      */
-    public static final int MODE_NIGHT_YES = Configuration.UI_MODE_NIGHT_YES >> 4;
+    public static final int MODE_NIGHT_YES = 2;
 
     private IUiModeManager mService;
 
@@ -400,6 +409,8 @@ public class UiModeManager {
      *       {@code notnight} mode</li>
      *   <li><em>{@link #MODE_NIGHT_YES}</em> sets the device into
      *       {@code night} mode</li>
+     *   <li><em>{@link #MODE_NIGHT_CUSTOM}</em> automatically switches between
+     *       {@code night} and {@code notnight} based on the custom time set (or default)</li>
      *   <li><em>{@link #MODE_NIGHT_AUTO}</em> automatically switches between
      *       {@code night} and {@code notnight} based on the device's current
      *       location and certain other sensors</li>
@@ -441,6 +452,7 @@ public class UiModeManager {
      *   <li>{@link #MODE_NIGHT_NO}</li>
      *   <li>{@link #MODE_NIGHT_YES}</li>
      *   <li>{@link #MODE_NIGHT_AUTO}</li>
+     *   <li>{@link #MODE_NIGHT_CUSTOM}</li>
      *   <li>{@code -1} on error</li>
      * </ul>
      *
@@ -498,7 +510,7 @@ public class UiModeManager {
     }
 
     /**
-     * @hide*
+     * @hide
      */
     public boolean setNightModeActivated(boolean active) {
         if (mService != null) {
@@ -510,4 +522,75 @@ public class UiModeManager {
         }
         return false;
     }
+
+    /**
+     * Returns the time of the day Dark theme activates
+     * <p>
+     * When night mode is {@link #MODE_NIGHT_CUSTOM}, the system uses
+     * this time set to activate it automatically.
+     */
+    @NonNull
+    public LocalTime getCustomNightModeStart() {
+        if (mService != null) {
+            try {
+                return LocalTime.ofNanoOfDay(mService.getCustomNightModeStart() * 1000);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return LocalTime.MIDNIGHT;
+    }
+
+    /**
+     * Sets the time of the day Dark theme activates
+     * <p>
+     * When night mode is {@link #MODE_NIGHT_CUSTOM}, the system uses
+     * this time set to activate it automatically
+     * @param time The time of the day Dark theme should activate
+     */
+    public void setCustomNightModeStart(@NonNull LocalTime time) {
+        if (mService != null) {
+            try {
+                mService.setCustomNightModeStart(time.toNanoOfDay() / 1000);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the time of the day Dark theme deactivates
+     * <p>
+     * When night mode is {@link #MODE_NIGHT_CUSTOM}, the system uses
+     * this time set to deactivate it automatically.
+     */
+    @NonNull
+    public LocalTime getCustomNightModeEnd() {
+        if (mService != null) {
+            try {
+                return LocalTime.ofNanoOfDay(mService.getCustomNightModeEnd() * 1000);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return LocalTime.MIDNIGHT;
+    }
+
+    /**
+     * Sets the time of the day Dark theme deactivates
+     * <p>
+     * When night mode is {@link #MODE_NIGHT_CUSTOM}, the system uses
+     * this time set to deactivate it automatically.
+     * @param time The time of the day Dark theme should deactivate
+     */
+    public void setCustomNightModeEnd(@NonNull LocalTime time) {
+        if (mService != null) {
+            try {
+                mService.setCustomNightModeEnd(time.toNanoOfDay() / 1000);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
 }

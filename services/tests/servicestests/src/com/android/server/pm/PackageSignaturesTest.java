@@ -16,8 +16,8 @@
 package com.android.server.pm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -467,8 +467,7 @@ public class PackageSignaturesTest {
         File appPath = new File("/data/app/app");
         PackageSetting result = new PackageSetting("test.app", null, appPath, appPath,
                 "/data/app/app", null, null, null,
-                1, 940097092, 0, null,
-                null, 0 /*userId*/, null, null);
+                1, 940097092, 0, 0 /*userId*/, null, null, null /*mimeGroups*/);
         return result;
     }
 }

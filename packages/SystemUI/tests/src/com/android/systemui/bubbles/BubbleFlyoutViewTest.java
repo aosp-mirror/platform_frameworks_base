@@ -45,14 +45,22 @@ import org.mockito.MockitoAnnotations;
 public class BubbleFlyoutViewTest extends SysuiTestCase {
     private BubbleFlyoutView mFlyout;
     private TextView mFlyoutText;
+    private TextView mSenderName;
     private float[] mDotCenter = new float[2];
+    private Bubble.FlyoutMessage mFlyoutMessage;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mFlyoutMessage = new Bubble.FlyoutMessage();
+        mFlyoutMessage.senderName = "Josh";
+        mFlyoutMessage.message = "Hello";
+
         mFlyout = new BubbleFlyoutView(getContext());
 
         mFlyoutText = mFlyout.findViewById(R.id.bubble_flyout_text);
+        mSenderName = mFlyout.findViewById(R.id.bubble_flyout_name);
         mDotCenter[0] = 30;
         mDotCenter[1] = 30;
     }
@@ -60,18 +68,22 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
     @Test
     public void testShowFlyout_isVisible() {
         mFlyout.setupFlyoutStartingAsDot(
-                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter);
+                mFlyoutMessage,
+                new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter,
+                false);
         mFlyout.setVisibility(View.VISIBLE);
 
         assertEquals("Hello", mFlyoutText.getText());
+        assertEquals("Josh", mSenderName.getText());
         assertEquals(View.VISIBLE, mFlyout.getVisibility());
     }
 
     @Test
     public void testFlyoutHide_runsCallback() {
         Runnable after = Mockito.mock(Runnable.class);
-        mFlyout.setupFlyoutStartingAsDot(
-                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, after, mDotCenter);
+        mFlyout.setupFlyoutStartingAsDot(mFlyoutMessage,
+                new PointF(100, 100), 500, true, Color.WHITE, null, after, mDotCenter,
+                false);
         mFlyout.hideFlyout();
 
         verify(after).run();
@@ -79,8 +91,9 @@ public class BubbleFlyoutViewTest extends SysuiTestCase {
 
     @Test
     public void testSetCollapsePercent() {
-        mFlyout.setupFlyoutStartingAsDot(
-                "Hello", new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter);
+        mFlyout.setupFlyoutStartingAsDot(mFlyoutMessage,
+                new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter,
+                false);
         mFlyout.setVisibility(View.VISIBLE);
 
         mFlyout.setCollapsePercent(1f);

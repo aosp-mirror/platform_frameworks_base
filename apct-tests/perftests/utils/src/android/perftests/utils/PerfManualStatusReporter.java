@@ -16,7 +16,7 @@
 
 package android.perftests.utils;
 
-import androidx.test.InstrumentationRegistry;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -59,15 +59,15 @@ public class PerfManualStatusReporter implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
+        mState.configure(description.getAnnotation(ManualBenchmarkState.ManualBenchmarkTest.class));
+
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
                 base.evaluate();
 
-                mState.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(),
-                        description.getMethodName());
+                mState.sendFullStatusReport(getInstrumentation(), description.getMethodName());
             }
         };
     }
 }
-

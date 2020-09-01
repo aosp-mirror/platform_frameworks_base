@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -208,6 +209,15 @@ public class MockContext extends Context {
 
     @Override
     public File getFilesDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc Context#getCrateDir()}
+     * @hide
+     */
+    @Override
+    public File getCrateDir(@NonNull String crateId) {
         throw new UnsupportedOperationException();
     }
 
@@ -802,6 +812,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public @NonNull Context createWindowContext(int type, Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isRestricted() {
         throw new UnsupportedOperationException();
     }
@@ -812,9 +827,14 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
-    /** @hide */
     @Override
     public Display getDisplay() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public Display getDisplayNoVerify() {
         throw new UnsupportedOperationException();
     }
 
@@ -906,6 +926,12 @@ public class MockContext extends Context {
     /** {@hide} */
     @Override
     public Handler getMainThreadHandler() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public boolean isUiContext() {
         throw new UnsupportedOperationException();
     }
 }

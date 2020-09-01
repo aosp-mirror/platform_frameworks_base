@@ -1,0 +1,172 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+java_defaults {
+    name: "wifi-module-sdk-version-defaults",
+    min_sdk_version: "30",
+    target_sdk_version: "30",
+}
+
+filegroup {
+    name: "framework-wifi-updatable-exported-aidl-sources",
+    srcs: ["aidl-export/**/*.aidl"],
+    path: "aidl-export",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "framework-wifi-updatable-java-sources",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+    exclude_srcs: [
+        ":framework-wifi-non-updatable-sources"
+    ],
+    path: "java",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "framework-wifi-updatable-sources",
+    srcs: [
+        ":framework-wifi-updatable-java-sources",
+        ":framework-wifi-updatable-exported-aidl-sources",
+    ],
+}
+
+filegroup {
+    name: "framework-wifi-non-updatable-sources",
+    srcs: [
+        // TODO(b/146011398) package android.net.wifi is now split amongst 2 jars: framework.jar and
+        // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
+        // to a separate package.
+        "java/android/net/wifi/SoftApConfToXmlMigrationUtil.java",
+        "java/android/net/wifi/WifiNetworkScoreCache.java",
+        "java/android/net/wifi/WifiMigration.java",
+        "java/android/net/wifi/nl80211/*.java",
+        ":libwificond_ipc_aidl",
+    ],
+}
+
+filegroup {
+    name: "framework-wifi-annotations",
+    srcs: ["java/android/net/wifi/WifiAnnotations.java"],
+}
+
+// list of tests that are allowed to access @hide APIs from framework-wifi
+test_access_hidden_api_whitelist = [
+    "//frameworks/base/wifi/tests",
+    "//frameworks/opt/net/wifi/tests/wifitests:__subpackages__",
+
+    "//external/robolectric-shadows:__subpackages__",
+    "//frameworks/base/packages/SettingsLib/tests/integ",
+    "//external/sl4a:__subpackages__",
+]
+
+// wifi-service needs pre-jarjared version of framework-wifi so it can reference copied utility
+// classes before they are renamed.
+java_library {
+    name: "framework-wifi-pre-jarjar",
+    defaults: ["wifi-module-sdk-version-defaults"],
+    sdk_version: "module_current",
+    static_libs: [
+        "framework-wifi-util-lib",
+        "android.hardware.wifi-V1.0-java-constants",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+    ],
+    srcs: [
+        ":framework-wifi-updatable-sources",
+        ":framework-wifi-util-lib-aidls",
+    ],
+    // java_api_finder must accompany `srcs`
+    plugins: ["java_api_finder"],
+    installable: false,
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//frameworks/opt/net/wifi/tests/wifitests",
+    ],
+}
+
+// post-jarjar version of framework-wifi
+java_sdk_library {
+    name: "framework-wifi",
+    defaults: [
+        "framework-module-defaults",
+        "wifi-module-sdk-version-defaults",
+    ],
+    static_libs: [
+        "framework-wifi-util-lib",
+        "android.hardware.wifi-V1.0-java-constants",
+    ],
+    libs: [
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+    ],
+    srcs: [
+        ":framework-wifi-updatable-sources",
+        ":framework-wifi-util-lib-aidls",
+    ],
+
+    jarjar_rules: ":wifi-jarjar-rules",
+
+    installable: true,
+    optimize: {
+        enabled: false
+    },
+    hostdex: true, // for hiddenapi check
+
+    // Allow access to the stubs from anywhere.
+    visibility: ["//visibility:public"],
+
+    // Restrict access to implementation library.
+    impl_library_visibility: [
+        "//visibility:override", // Ignore the visibility property.
+        "//frameworks/opt/net/wifi/service:__subpackages__",
+    ] + test_access_hidden_api_whitelist,
+
+    apex_available: [
+        "com.android.wifi",
+        "test_com.android.wifi",
+    ],
+    permitted_packages: [
+        "android.hardware.wifi",
+        "android.net.wifi",
+        // Created by jarjar rules.
+        "com.android.wifi.x",
+    ],
+}
+
+// defaults for tests that need to build against framework-wifi's @hide APIs
+java_defaults {
+    name: "framework-wifi-test-defaults",
+    sdk_version: "core_platform", // tests can use @CorePlatformApi's
+    libs: [
+        // order matters: classes in framework-wifi are resolved before framework, meaning
+        // @hide APIs in framework-wifi are resolved before @SystemApi stubs in framework
+        "framework-wifi.impl",
+        "framework",
+
+        // if sdk_version="" this gets automatically included, but here we need to add manually.
+        "framework-res",
+    ],
+    visibility: test_access_hidden_api_whitelist,
+}
+
+filegroup {
+    name: "wifi-jarjar-rules",
+    srcs: ["jarjar-rules.txt"],
+}

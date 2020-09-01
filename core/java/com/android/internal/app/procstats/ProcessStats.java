@@ -20,23 +20,30 @@ import android.content.ComponentName;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.procstats.ProcessStatsAssociationProto;
 import android.service.procstats.ProcessStatsAvailablePagesProto;
 import android.service.procstats.ProcessStatsPackageProto;
 import android.service.procstats.ProcessStatsSectionProto;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.ProcessMap;
+import com.android.internal.app.procstats.AssociationState.SourceKey;
+import com.android.internal.app.procstats.AssociationState.SourceState;
 
 import dalvik.system.VMRuntime;
 
@@ -48,6 +55,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -179,7 +187,7 @@ public final class ProcessStats implements Parcelable {
             {"proc", "pkg-proc", "pkg-svc", "pkg-asc", "pkg-all", "all"};
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 36;
+    private static final int PARCEL_VERSION = 38;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -195,6 +203,9 @@ public final class ProcessStats implements Parcelable {
     public final long[] mMemFactorDurations = new long[ADJ_COUNT];
     public int mMemFactor = STATE_NOTHING;
     public long mStartTime;
+
+    // Number of individual stats that have been aggregated to create this one.
+    public int mNumAggregated = 1;
 
     public long mTimePeriodStartClock;
     public long mTimePeriodStartRealtime;
@@ -259,6 +270,15 @@ public final class ProcessStats implements Parcelable {
     public ProcessStats(Parcel in) {
         reset();
         readFromParcel(in);
+    }
+
+    /**
+     * No-arg constructor is for use in AIDL-derived stubs.
+     *
+     * <p>This defaults to the non-running state, so is equivalent to ProcessStats(false).
+     */
+    public ProcessStats() {
+        this(false);
     }
 
     public void add(ProcessStats other) {
@@ -347,6 +367,8 @@ public final class ProcessStats implements Parcelable {
         }
 
         mSysMemUsage.mergeStats(other.mSysMemUsage);
+
+        mNumAggregated += other.mNumAggregated;
 
         if (other.mTimePeriodStartClock < mTimePeriodStartClock) {
             mTimePeriodStartClock = other.mTimePeriodStartClock;
@@ -569,6 +591,7 @@ public final class ProcessStats implements Parcelable {
     }
 
     private void resetCommon() {
+        mNumAggregated = 1;
         mTimePeriodStartClock = System.currentTimeMillis();
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
@@ -845,6 +868,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
+        out.writeInt(mNumAggregated);
         out.writeLong(mTimePeriodStartClock);
         out.writeLong(mTimePeriodStartRealtime);
         out.writeLong(mTimePeriodEndRealtime);
@@ -1031,6 +1055,7 @@ public final class ProcessStats implements Parcelable {
 
         mIndexToCommonString = new ArrayList<String>();
 
+        mNumAggregated = in.readInt();
         mTimePeriodStartClock = in.readLong();
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = in.readLong();
@@ -1457,15 +1482,79 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
+    final class AssociationDumpContainer {
+        final AssociationState mState;
+        ArrayList<Pair<AssociationState.SourceKey, AssociationState.SourceDumpContainer>> mSources;
+        long mTotalTime;
+        long mActiveTime;
+
+        AssociationDumpContainer(AssociationState state) {
+            mState = state;
+        }
+    }
+
+    static final Comparator<AssociationDumpContainer> ASSOCIATION_COMPARATOR = (o1, o2) -> {
+        int diff = o1.mState.getProcessName().compareTo(o2.mState.getProcessName());
+        if (diff != 0) {
+            return diff;
+        }
+        if (o1.mActiveTime != o2.mActiveTime) {
+            return o1.mActiveTime > o2.mActiveTime ? -1 : 1;
+        }
+        if (o1.mTotalTime != o2.mTotalTime) {
+            return o1.mTotalTime > o2.mTotalTime ? -1 : 1;
+        }
+        diff = o1.mState.getName().compareTo(o2.mState.getName());
+        if (diff != 0) {
+            return diff;
+        }
+        return 0;
+    };
+
     public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
             boolean dumpDetails, boolean dumpAll, boolean activeOnly, int section) {
         long totalTime = DumpUtils.dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
-        boolean sepNeeded = false;
+        pw.print("          Start time: ");
+        pw.print(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimePeriodStartClock));
+        pw.println();
+        pw.print("        Total uptime: ");
+        TimeUtils.formatDuration(
+                (mRunning ? SystemClock.uptimeMillis() : mTimePeriodEndUptime)
+                        - mTimePeriodStartUptime, pw);
+        pw.println();
+        pw.print("  Total elapsed time: ");
+        TimeUtils.formatDuration(
+                (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
+                        - mTimePeriodStartRealtime, pw);
+        boolean partial = true;
+        if ((mFlags & FLAG_SHUTDOWN) != 0) {
+            pw.print(" (shutdown)");
+            partial = false;
+        }
+        if ((mFlags & FLAG_SYSPROPS) != 0) {
+            pw.print(" (sysprops)");
+            partial = false;
+        }
+        if ((mFlags & FLAG_COMPLETE) != 0) {
+            pw.print(" (complete)");
+            partial = false;
+        }
+        if (partial) {
+            pw.print(" (partial)");
+        }
+        if (mHasSwappedOutPss) {
+            pw.print(" (swapped-out-pss)");
+        }
+        pw.print(' ');
+        pw.print(mRuntime);
+        pw.println();
+        pw.print("     Aggregated over: ");
+        pw.println(mNumAggregated);
         if (mSysMemUsage.getKeyCount() > 0) {
+            pw.println();
             pw.println("System memory usage:");
             mSysMemUsage.dump(pw, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ);
-            sepNeeded = true;
         }
         boolean printedHeader = false;
         if ((section & REPORT_PKG_STATS) != 0) {
@@ -1485,8 +1574,8 @@ public final class ProcessStats implements Parcelable {
                         final int NASCS = pkgState.mAssociations.size();
                         final boolean pkgMatch = reqPackage == null || reqPackage.equals(pkgName);
                         boolean onlyAssociations = false;
+                        boolean procMatch = false;
                         if (!pkgMatch) {
-                            boolean procMatch = false;
                             for (int iproc = 0; iproc < NPROCS; iproc++) {
                                 ProcessState proc = pkgState.mProcesses.valueAt(iproc);
                                 if (reqPackage.equals(proc.getName())) {
@@ -1511,10 +1600,9 @@ public final class ProcessStats implements Parcelable {
                         }
                         if (NPROCS > 0 || NSRVS > 0 || NASCS > 0) {
                             if (!printedHeader) {
-                                if (sepNeeded) pw.println();
+                                pw.println();
                                 pw.println("Per-Package Stats:");
                                 printedHeader = true;
-                                sepNeeded = true;
                             }
                             pw.print("  * ");
                             pw.print(pkgName);
@@ -1597,6 +1685,8 @@ public final class ProcessStats implements Parcelable {
                             }
                         }
                         if ((section & REPORT_PKG_ASC_STATS) != 0) {
+                            ArrayList<AssociationDumpContainer> associations =
+                                    new ArrayList<>(NASCS);
                             for (int iasc = 0; iasc < NASCS; iasc++) {
                                 AssociationState asc = pkgState.mAssociations.valueAt(iasc);
                                 if (!pkgMatch && !reqPackage.equals(asc.getProcessName())) {
@@ -1604,6 +1694,18 @@ public final class ProcessStats implements Parcelable {
                                         continue;
                                     }
                                 }
+                                final AssociationDumpContainer cont =
+                                        new AssociationDumpContainer(asc);
+                                cont.mSources = asc.createSortedAssociations(now, totalTime);
+                                cont.mTotalTime = asc.getTotalDuration(now);
+                                cont.mActiveTime = asc.getActiveDuration(now);
+                                associations.add(cont);
+                            }
+                            Collections.sort(associations, ASSOCIATION_COMPARATOR);
+                            final int NCONT = associations.size();
+                            for (int iasc = 0; iasc < NCONT; iasc++) {
+                                final AssociationDumpContainer cont = associations.get(iasc);
+                                final AssociationState asc = cont.mState;
                                 if (activeOnly && !asc.isInUse()) {
                                     pw.print("      (Not active association: ");
                                     pw.print(pkgState.mAssociations.keyAt(iasc));
@@ -1615,13 +1717,15 @@ public final class ProcessStats implements Parcelable {
                                 } else {
                                     pw.print("      * Asc ");
                                 }
-                                pw.print(pkgState.mAssociations.keyAt(iasc));
+                                pw.print(cont.mState.getName());
                                 pw.println(":");
                                 pw.print("        Process: ");
                                 pw.println(asc.getProcessName());
                                 asc.dumpStats(pw, "        ", "          ", "    ",
-                                        now, totalTime, onlyAssociations ? reqPackage : null,
-                                        dumpDetails, dumpAll);
+                                        cont.mSources, now, totalTime,
+                                        onlyAssociations && !pkgMatch && !procMatch
+                                                && !asc.getProcessName().equals(reqPackage)
+                                                ? reqPackage : null, dumpDetails, dumpAll);
                             }
                         }
                     }
@@ -1651,10 +1755,7 @@ public final class ProcessStats implements Parcelable {
                         continue;
                     }
                     numShownProcs++;
-                    if (sepNeeded) {
-                        pw.println();
-                    }
-                    sepNeeded = true;
+                    pw.println();
                     if (!printedHeader) {
                         pw.println("Multi-Package Common Processes:");
                         printedHeader = true;
@@ -1684,11 +1785,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         if (dumpAll) {
-            if (sepNeeded) {
-                pw.println();
-            }
-            sepNeeded = true;
-
+            pw.println();
             if (mTrackingAssociations.size() > 0) {
                 pw.println();
                 pw.println("Tracking associations:");
@@ -1734,9 +1831,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
-        if (sepNeeded) {
-            pw.println();
-        }
+        pw.println();
         if (dumpSummary) {
             pw.println("Process summary:");
             dumpSummaryLocked(pw, reqPackage, now, activeOnly);
@@ -1860,41 +1955,6 @@ public final class ProcessStats implements Parcelable {
         pw.print(mExternalSlowPssCount);
         pw.print("x over ");
         TimeUtils.formatDuration(mExternalSlowPssTime, pw);
-        pw.println();
-        pw.println();
-        pw.print("          Start time: ");
-        pw.print(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimePeriodStartClock));
-        pw.println();
-        pw.print("        Total uptime: ");
-        TimeUtils.formatDuration(
-                (mRunning ? SystemClock.uptimeMillis() : mTimePeriodEndUptime)
-                        - mTimePeriodStartUptime, pw);
-        pw.println();
-        pw.print("  Total elapsed time: ");
-        TimeUtils.formatDuration(
-                (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
-                        - mTimePeriodStartRealtime, pw);
-        boolean partial = true;
-        if ((mFlags&FLAG_SHUTDOWN) != 0) {
-            pw.print(" (shutdown)");
-            partial = false;
-        }
-        if ((mFlags&FLAG_SYSPROPS) != 0) {
-            pw.print(" (sysprops)");
-            partial = false;
-        }
-        if ((mFlags&FLAG_COMPLETE) != 0) {
-            pw.print(" (complete)");
-            partial = false;
-        }
-        if (partial) {
-            pw.print(" (partial)");
-        }
-        if (mHasSwappedOutPss) {
-            pw.print(" (swapped-out-pss)");
-        }
-        pw.print(' ');
-        pw.print(mRuntime);
         pw.println();
     }
 
@@ -2123,30 +2183,8 @@ public final class ProcessStats implements Parcelable {
     /**
      * Writes to ProtoOutputStream.
      */
-    public void writeToProto(ProtoOutputStream proto, long now, int section) {
-        proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
-        proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
-                mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
-        proto.write(ProcessStatsSectionProto.START_UPTIME_MS, mTimePeriodStartUptime);
-        proto.write(ProcessStatsSectionProto.END_UPTIME_MS, mTimePeriodEndUptime);
-        proto.write(ProcessStatsSectionProto.RUNTIME, mRuntime);
-        proto.write(ProcessStatsSectionProto.HAS_SWAPPED_PSS, mHasSwappedOutPss);
-        boolean partial = true;
-        if ((mFlags & FLAG_SHUTDOWN) != 0) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SHUTDOWN);
-            partial = false;
-        }
-        if ((mFlags & FLAG_SYSPROPS) != 0) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SYSPROPS);
-            partial = false;
-        }
-        if ((mFlags & FLAG_COMPLETE) != 0) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_COMPLETE);
-            partial = false;
-        }
-        if (partial) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_PARTIAL);
-        }
+    public void dumpDebug(ProtoOutputStream proto, long now, int section) {
+        dumpProtoPreamble(proto);
 
         final int NPAGETYPES = mPageTypeLabels.size();
         for (int i = 0; i < NPAGETYPES; i++) {
@@ -2170,7 +2208,7 @@ public final class ProcessStats implements Parcelable {
                 for (int iu = 0; iu < uids.size(); iu++) {
                     final int uid = uids.keyAt(iu);
                     final ProcessState procState = uids.valueAt(iu);
-                    procState.writeToProto(proto, ProcessStatsSectionProto.PROCESS_STATS, procName,
+                    procState.dumpDebug(proto, ProcessStatsSectionProto.PROCESS_STATS, procName,
                             uid, now);
                 }
             }
@@ -2185,10 +2223,215 @@ public final class ProcessStats implements Parcelable {
                     final LongSparseArray<PackageState> vers = uids.valueAt(iu);
                     for (int iv = 0; iv < vers.size(); iv++) {
                         final PackageState pkgState = vers.valueAt(iv);
-                        pkgState.writeToProto(proto, ProcessStatsSectionProto.PACKAGE_STATS, now,
+                        pkgState.dumpDebug(proto, ProcessStatsSectionProto.PACKAGE_STATS, now,
                                 section);
                     }
                 }
+            }
+        }
+    }
+
+    /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
+    public void dumpAggregatedProtoForStatsd(ProtoOutputStream[] protoStreams,
+            long maxRawShardSizeBytes) {
+        int shardIndex = 0;
+        dumpProtoPreamble(protoStreams[shardIndex]);
+
+        final ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        final ProcessMap<ArraySet<PackageState>> procToPkgMap = new ProcessMap<>();
+        final SparseArray<ArraySet<String>> uidToPkgMap = new SparseArray<>();
+        collectProcessPackageMaps(null, false, procToPkgMap, uidToPkgMap);
+
+        for (int ip = 0; ip < procMap.size(); ip++) {
+            final String procName = procMap.keyAt(ip);
+            if (protoStreams[shardIndex].getRawSize() > maxRawShardSizeBytes) {
+                shardIndex++;
+                if (shardIndex >= protoStreams.length) {
+                    // We have run out of space; we'll drop the rest of the processes.
+                    Slog.d(TAG, String.format("Dropping process indices from %d to %d from "
+                            + "statsd proto (too large)", ip, procMap.size()));
+                    break;
+                }
+                dumpProtoPreamble(protoStreams[shardIndex]);
+            }
+
+            final SparseArray<ProcessState> uids = procMap.valueAt(ip);
+            for (int iu = 0; iu < uids.size(); iu++) {
+                final int uid = uids.keyAt(iu);
+                final ProcessState procState = uids.valueAt(iu);
+                procState.dumpAggregatedProtoForStatsd(protoStreams[shardIndex],
+                        ProcessStatsSectionProto.PROCESS_STATS,
+                        procName, uid, mTimePeriodEndRealtime,
+                        procToPkgMap, uidToPkgMap);
+            }
+        }
+
+        for (int i = 0; i <= shardIndex; i++) {
+            protoStreams[i].flush();
+        }
+    }
+
+    private void dumpProtoPreamble(ProtoOutputStream proto) {
+        proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
+        proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
+                mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
+        proto.write(ProcessStatsSectionProto.START_UPTIME_MS, mTimePeriodStartUptime);
+        proto.write(ProcessStatsSectionProto.END_UPTIME_MS, mTimePeriodEndUptime);
+        proto.write(ProcessStatsSectionProto.RUNTIME, mRuntime);
+        proto.write(ProcessStatsSectionProto.HAS_SWAPPED_PSS, mHasSwappedOutPss);
+        boolean partial = true;
+        if ((mFlags & FLAG_SHUTDOWN) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SHUTDOWN);
+            partial = false;
+        }
+        if ((mFlags & FLAG_SYSPROPS) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SYSPROPS);
+            partial = false;
+        }
+        if ((mFlags & FLAG_COMPLETE) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_COMPLETE);
+            partial = false;
+        }
+        if (partial) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_PARTIAL);
+        }
+    }
+
+    /**
+     * Walk through the known processes and build up the process -> packages map if necessary.
+     */
+    private void collectProcessPackageMaps(String reqPackage, boolean activeOnly,
+            final ProcessMap<ArraySet<PackageState>> procToPkgMap,
+            final SparseArray<ArraySet<String>> uidToPkgMap) {
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
+        for (int ip = pkgMap.size() - 1; ip >= 0; ip--) {
+            final String pkgName = pkgMap.keyAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> procs = pkgMap.valueAt(ip);
+            for (int iu = procs.size() - 1; iu >= 0; iu--) {
+                final LongSparseArray<PackageState> vpkgs = procs.valueAt(iu);
+                for (int iv = vpkgs.size() - 1; iv >= 0; iv--) {
+                    final PackageState state = vpkgs.valueAt(iv);
+                    final boolean pkgMatch = reqPackage == null || reqPackage.equals(pkgName);
+                    for (int iproc = state.mProcesses.size() - 1; iproc >= 0; iproc--) {
+                        final ProcessState proc = state.mProcesses.valueAt(iproc);
+                        if (!pkgMatch && !reqPackage.equals(proc.getName())) {
+                            continue;
+                        }
+                        if (activeOnly && !proc.isInUse()) {
+                            continue;
+                        }
+
+                        final String name = proc.getName();
+                        final int uid = proc.getUid();
+                        ArraySet<PackageState> pkgStates = procToPkgMap.get(name, uid);
+                        if (pkgStates == null) {
+                            pkgStates = new ArraySet<>();
+                            procToPkgMap.put(name, uid, pkgStates);
+                        }
+                        pkgStates.add(state);
+                        ArraySet<String> packages = uidToPkgMap.get(uid);
+                        if (packages == null) {
+                            packages = new ArraySet<>();
+                            uidToPkgMap.put(uid, packages);
+                        }
+                        packages.add(state.mPackageName);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Dump the association states related to given process into statsd.
+     *
+     * <p> Note: Only dump the single-package process state, or the common process state of
+     * multi-package process; while the per-package process state of a multi-package process
+     * should not be dumped into the statsd due to its incompletion.</p>
+     *
+     * @param proto     The proto output stream
+     * @param fieldId   The proto output field ID
+     * @param now       The timestamp when the dump was initiated.
+     * @param procState The target process where its association states should be dumped.
+     * @param proc2Pkg  The map between process to packages running within it.
+     * @param uidToPkgMap The map between UID to packages with this UID
+     */
+    public void dumpFilteredAssociationStatesProtoForProc(ProtoOutputStream proto,
+            long fieldId, long now, ProcessState procState,
+            final ProcessMap<ArraySet<PackageState>> proc2Pkg,
+            final SparseArray<ArraySet<String>> uidToPkgMap) {
+        if (procState.isMultiPackage() && procState.getCommonProcess() != procState) {
+            // It's a per-package process state, don't bother to write into statsd
+            return;
+        }
+        ArrayMap<SourceKey, long[]> assocVals = new ArrayMap<>();
+        final String procName = procState.getName();
+        final int procUid = procState.getUid();
+        final long procVersion = procState.getVersion();
+        final ArraySet<PackageState> packages = proc2Pkg.get(procName, procUid);
+        if (packages == null || packages.isEmpty()) {
+            // Shouldn't happen
+            return;
+        }
+        for (int i = packages.size() - 1; i >= 0; i--) {
+            final PackageState pkgState = packages.valueAt(i);
+            final ArrayMap<String, AssociationState> associations = pkgState.mAssociations;
+            for (int j = associations.size() - 1; j >= 0; j--) {
+                final AssociationState assoc = associations.valueAt(j);
+                // Make sure this association is really about this process
+                if (!TextUtils.equals(assoc.getProcessName(), procName)) {
+                    continue;
+                }
+                final ArrayMap<SourceKey, SourceState> sources = assoc.mSources;
+                for (int k = sources.size() - 1; k >= 0; k--) {
+                    final SourceKey key = sources.keyAt(k);
+                    final SourceState state = sources.valueAt(k);
+                    long[] vals = assocVals.get(key);
+                    if (vals == null) {
+                        vals = new long[2];
+                        assocVals.put(key, vals);
+                    }
+                    vals[0] += state.mDuration;
+                    vals[1] += state.mCount;
+                    if (state.mNesting > 0) {
+                        vals[0] += now - state.mStartUptime;
+                    }
+                }
+            }
+        }
+        final IProcessStats procStatsService = IProcessStats.Stub.asInterface(
+                ServiceManager.getService(SERVICE_NAME));
+        if (procStatsService != null) {
+            try {
+                final long minimum = procStatsService.getMinAssociationDumpDuration();
+                if (minimum > 0) {
+                    // Now filter out unnecessary ones.
+                    for (int i = assocVals.size() - 1; i >= 0; i--) {
+                        final long[] vals = assocVals.valueAt(i);
+                        if (vals[0] < minimum) {
+                            assocVals.removeAt(i);
+                        }
+                    }
+                }
+            } catch (RemoteException e) {
+                // ignore.
+            }
+        }
+        if (!assocVals.isEmpty()) {
+            for (int i = assocVals.size() - 1; i >= 0; i--) {
+                final SourceKey key = assocVals.keyAt(i);
+                final long[] vals = assocVals.valueAt(i);
+                final long token = proto.start(fieldId);
+                final int idx = uidToPkgMap.indexOfKey(key.mUid);
+                ProcessState.writeCompressedProcessName(proto,
+                        ProcessStatsAssociationProto.ASSOC_PROCESS_NAME,
+                        key.mProcess, key.mPackage,
+                        idx >= 0 && uidToPkgMap.valueAt(idx).size() > 1);
+                proto.write(ProcessStatsAssociationProto.ASSOC_UID, key.mUid);
+                proto.write(ProcessStatsAssociationProto.TOTAL_COUNT, (int) vals[1]);
+                proto.write(ProcessStatsAssociationProto.TOTAL_DURATION_SECS,
+                        (int) (vals[0] / 1000));
+                proto.end(token);
             }
         }
     }
@@ -2238,7 +2481,7 @@ public final class ProcessStats implements Parcelable {
         /**
          * Writes the containing stats into proto, with options to choose smaller sections.
          */
-        public void writeToProto(ProtoOutputStream proto, long fieldId, long now, int section) {
+        public void dumpDebug(ProtoOutputStream proto, long fieldId, long now, int section) {
             final long token = proto.start(fieldId);
 
             proto.write(ProcessStatsPackageProto.PACKAGE, mPackageName);
@@ -2249,7 +2492,7 @@ public final class ProcessStats implements Parcelable {
                 for (int ip = 0; ip < mProcesses.size(); ip++) {
                     final String procName = mProcesses.keyAt(ip);
                     final ProcessState procState = mProcesses.valueAt(ip);
-                    procState.writeToProto(proto, ProcessStatsPackageProto.PROCESS_STATS, procName,
+                    procState.dumpDebug(proto, ProcessStatsPackageProto.PROCESS_STATS, procName,
                             mUid, now);
                 }
             }
@@ -2257,7 +2500,7 @@ public final class ProcessStats implements Parcelable {
             if ((section & ProcessStats.REPORT_PKG_SVC_STATS) != 0) {
                 for (int is = 0; is < mServices.size(); is++) {
                     final ServiceState serviceState = mServices.valueAt(is);
-                    serviceState.writeToProto(proto, ProcessStatsPackageProto.SERVICE_STATS,
+                    serviceState.dumpDebug(proto, ProcessStatsPackageProto.SERVICE_STATS,
                             now);
                 }
             }
@@ -2265,7 +2508,7 @@ public final class ProcessStats implements Parcelable {
             if ((section & ProcessStats.REPORT_PKG_ASC_STATS) != 0) {
                 for (int ia = 0; ia < mAssociations.size(); ia++) {
                     final AssociationState ascState = mAssociations.valueAt(ia);
-                    ascState.writeToProto(proto, ProcessStatsPackageProto.ASSOCIATION_STATS,
+                    ascState.dumpDebug(proto, ProcessStatsPackageProto.ASSOCIATION_STATS,
                             now);
                 }
             }

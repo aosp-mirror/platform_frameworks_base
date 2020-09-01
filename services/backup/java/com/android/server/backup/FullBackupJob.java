@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -37,7 +39,7 @@ public class FullBackupJob extends JobService {
     public static final int MAX_JOB_ID = 52419896;
 
     private static ComponentName sIdleService =
-            new ComponentName("android", FullBackupJob.class.getName());
+            new ComponentName(PLATFORM_PACKAGE_NAME, FullBackupJob.class.getName());
 
     @GuardedBy("mParamsForUser")
     private final SparseArray<JobParameters> mParamsForUser = new SparseArray<>();
@@ -89,7 +91,7 @@ public class FullBackupJob extends JobService {
             mParamsForUser.put(userId, params);
         }
 
-        Trampoline service = BackupManagerService.getInstance();
+        BackupManagerService service = BackupManagerService.getInstance();
         return service.beginFullBackup(userId, this);
     }
 
@@ -103,7 +105,7 @@ public class FullBackupJob extends JobService {
             }
         }
 
-        Trampoline service = BackupManagerService.getInstance();
+        BackupManagerService service = BackupManagerService.getInstance();
         service.endFullBackup(userId);
 
         return false;

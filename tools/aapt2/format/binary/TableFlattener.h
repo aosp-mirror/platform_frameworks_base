@@ -19,6 +19,7 @@
 
 #include "android-base/macros.h"
 
+#include "Resource.h"
 #include "ResourceTable.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/BigBuffer.h"
@@ -41,8 +42,8 @@ struct TableFlattenerOptions {
   // have name indices that point to this single value
   bool collapse_key_stringpool = false;
 
-  // Set of whitelisted resource names to avoid altering in key stringpool
-  std::set<std::string> whitelisted_resources;
+  // Set of resources to avoid collapsing to a single entry in key stringpool.
+  std::set<ResourceName> name_collapse_exemptions;
 
   // Map from original resource paths to shortened resource paths.
   std::map<std::string, std::string> shortened_path_map;

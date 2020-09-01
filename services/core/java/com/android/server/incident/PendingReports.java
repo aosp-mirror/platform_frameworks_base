@@ -359,6 +359,8 @@ class PendingReports {
     private void sendBroadcast(ComponentName receiver, int primaryUser) {
         final Intent intent = new Intent(Intent.ACTION_PENDING_INCIDENT_REPORTS_CHANGED);
         intent.setComponent(receiver);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         final BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setBackgroundActivityStartsAllowed(true);
 

@@ -92,7 +92,7 @@ int AudioTrackTest::Test01() {
 
         iMem = heap->allocate(BUF_SZ*sizeof(short));
 
-        p = static_cast<uint8_t*>(iMem->pointer());
+        p = static_cast<uint8_t*>(iMem->unsecurePointer());
         memcpy(p, smpBuf, BUF_SZ*sizeof(short));
 
         sp<AudioTrack> track = new AudioTrack(AUDIO_STREAM_MUSIC,// stream type

@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import org.junit.Before;
@@ -60,6 +61,8 @@ public class NavigationBarContextTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mDependency.injectMockDependency(AssistManager.class);
+
         mGroup = new ContextualButtonGroup(GROUP_ID);
         mBtn0 = new ContextualButton(BUTTON_0_ID, ICON_RES_ID);
         mBtn1 = new ContextualButton(BUTTON_1_ID, ICON_RES_ID);

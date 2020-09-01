@@ -47,7 +47,11 @@ import com.android.systemui.statusbar.CommandQueue;
 
 import java.lang.ref.WeakReference;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** Shows a restart-activity button when the foreground activity is in size compatibility mode. */
+@Singleton
 public class SizeCompatModeActivityController extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "SizeCompatMode";
 
@@ -55,16 +59,17 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
     private final SparseArray<RestartActivityButton> mActiveButtons = new SparseArray<>(1);
     /** Avoid creating display context frequently for non-default display. */
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
+    private final CommandQueue mCommandQueue;
 
     /** Only show once automatically in the process life. */
     private boolean mHasShownHint;
 
-    public SizeCompatModeActivityController() {
-        this(ActivityManagerWrapper.getInstance());
-    }
-
     @VisibleForTesting
-    SizeCompatModeActivityController(ActivityManagerWrapper am) {
+    @Inject
+    SizeCompatModeActivityController(Context context, ActivityManagerWrapper am,
+            CommandQueue commandQueue) {
+        super(context);
+        mCommandQueue = commandQueue;
         am.registerTaskStackListener(new TaskStackChangeListener() {
             @Override
             public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
@@ -76,7 +81,7 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
 
     @Override
     public void start() {
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
     }
 
     @Override
@@ -202,7 +207,7 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
             mWinParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
             mWinParams.format = PixelFormat.TRANSLUCENT;
-            mWinParams.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            mWinParams.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             mWinParams.setTitle(SizeCompatModeActivityController.class.getSimpleName()
                     + context.getDisplayId());
         }
@@ -224,6 +229,9 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
         }
 
         void remove() {
+            if (mShowingHint != null) {
+                mShowingHint.dismiss();
+            }
             getContext().getSystemService(WindowManager.class).removeViewImmediate(this);
         }
 
@@ -275,6 +283,7 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
                     R.layout.size_compat_mode_hint, null /* root */);
             PopupWindow popupWindow = new PopupWindow(popupView,
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            popupWindow.setWindowLayoutType(mWinParams.type);
             popupWindow.setElevation(getResources().getDimension(R.dimen.bubble_elevation));
             popupWindow.setAnimationStyle(android.R.style.Animation_InputMethod);
             popupWindow.setClippingEnabled(false);

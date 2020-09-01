@@ -23,21 +23,12 @@ import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
 import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_VERSION;
-import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAGE;
-import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
-import android.app.IBackupAgent;
-import android.app.backup.BackupAgent;
 import android.app.backup.IFullBackupRestoreObserver;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.Signature;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
-import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
@@ -50,8 +41,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.InflaterInputStream;
 
@@ -71,34 +60,9 @@ public class PerformAdbRestoreTask implements Runnable {
     private final String mCurrentPassword;
     private final String mDecryptPassword;
     private final AtomicBoolean mLatchObject;
-    private final BackupAgent mPackageManagerBackupAgent;
-    private final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
+    private final FullBackupObbConnection mObbConnection;
 
     private IFullBackupRestoreObserver mObserver;
-    private IBackupAgent mAgent;
-    private String mAgentPackage;
-    private ApplicationInfo mTargetApp;
-    private FullBackupObbConnection mObbConnection = null;
-    private ParcelFileDescriptor[] mPipes = null;
-    private byte[] mWidgetData = null;
-    private long mAppVersion;
-
-    private long mBytes;
-    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
-
-    // possible handling states for a given package in the restore dataset
-    private final HashMap<String, RestorePolicy> mPackagePolicies
-            = new HashMap<>();
-
-    // installer package names for each encountered app, derived from the manifests
-    private final HashMap<String, String> mPackageInstallers = new HashMap<>();
-
-    // Signatures for a given package found in its manifest file
-    private final HashMap<String, Signature[]> mManifestSignatures
-            = new HashMap<>();
-
-    // Packages we've already wiped data on when restoring their first file
-    private final HashSet<String> mClearedPackages = new HashSet<>();
 
     public PerformAdbRestoreTask(UserBackupManagerService backupManagerService,
             ParcelFileDescriptor fd, String curPassword, String decryptPassword,
@@ -109,19 +73,7 @@ public class PerformAdbRestoreTask implements Runnable {
         mDecryptPassword = decryptPassword;
         mObserver = observer;
         mLatchObject = latch;
-        mAgent = null;
-        mPackageManagerBackupAgent = backupManagerService.makeMetadataAgent();
-        mAgentPackage = null;
-        mTargetApp = null;
         mObbConnection = new FullBackupObbConnection(backupManagerService);
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
-                backupManagerService.getAgentTimeoutParameters(),
-                "Timeout parameters cannot be null");
-
-        // Which packages we've already wiped data on.  We prepopulate this
-        // with a whitelist of packages known to be unclearable.
-        mClearedPackages.add("android");
-        mClearedPackages.add(SETTINGS_PACKAGE);
     }
 
     @Override
@@ -129,11 +81,6 @@ public class PerformAdbRestoreTask implements Runnable {
         Slog.i(TAG, "--- Performing full-dataset restore ---");
         mObbConnection.establish();
         mObserver = FullBackupRestoreObserverUtils.sendStartRestore(mObserver);
-
-        // Are we able to restore shared-storage data?
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            mPackagePolicies.put(SHARED_BACKUP_AGENT_PACKAGE, RestorePolicy.ACCEPT);
-        }
 
         FileInputStream rawInStream = null;
         try {
@@ -143,8 +90,6 @@ public class PerformAdbRestoreTask implements Runnable {
                 }
                 return;
             }
-
-            mBytes = 0;
 
             rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
 
@@ -157,7 +102,7 @@ public class PerformAdbRestoreTask implements Runnable {
             }
 
             FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService, null,
-                    mObserver, null, null, true, true/*unused*/, 0 /*unused*/, true);
+                    mObserver, null, null, true, 0 /*unused*/, true);
             FullRestoreEngineThread mEngineThread = new FullRestoreEngineThread(mEngine,
                     tarInputStream);
             mEngineThread.run();
@@ -165,7 +110,7 @@ public class PerformAdbRestoreTask implements Runnable {
             if (MORE_DEBUG) {
                 Slog.v(TAG, "Done consuming input tarfile.");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to read restore input");
         } finally {
             try {

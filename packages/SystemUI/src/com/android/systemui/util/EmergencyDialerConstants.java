@@ -21,11 +21,10 @@ package com.android.systemui.util;
  * Please keep these constants being consistent with those in com.android.phone.EmergencyDialer.
  */
 public class EmergencyDialerConstants {
-    // Intent action for emergency dialer activity.
-    public static final String ACTION_DIAL = "com.android.phone.EmergencyDialer.DIAL";
 
     /**
-     * Extra included in {@link #ACTION_DIAL} to indicate the entry type that user starts
+     * Extra included in {@link android.telecom.TelecomManager#createLaunchEmergencyDialerIntent}
+     * to indicate the entry type that user starts
      * the emergency dialer.
      */
     public static final String EXTRA_ENTRY_TYPE =

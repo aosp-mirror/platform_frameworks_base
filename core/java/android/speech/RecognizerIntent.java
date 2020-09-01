@@ -413,6 +413,10 @@ public class RecognizerIntent {
      * {@link #ACTION_VOICE_SEARCH_HANDS_FREE}, {@link #ACTION_WEB_SEARCH} to indicate whether to
      * only use an offline speech recognition engine. The default is false, meaning that either
      * network or offline recognition engines may be used.
+     *
+     * <p>Depending on the recognizer implementation, these values may have
+     * no effect.</p>
+     *
      */
     public static final String EXTRA_PREFER_OFFLINE = "android.speech.extra.PREFER_OFFLINE";
 }

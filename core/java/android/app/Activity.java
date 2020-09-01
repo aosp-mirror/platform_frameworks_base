@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
 
 import static java.lang.Character.MIN_VALUE;
@@ -45,6 +47,7 @@ import android.content.CursorLoader;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -59,6 +62,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -125,6 +129,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.widget.AdapterView;
@@ -726,7 +731,7 @@ public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
-        Window.OnWindowDismissedCallback, WindowControllerCallback,
+        Window.OnWindowDismissedCallback,
         AutofillManager.AutofillClient, ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
@@ -766,7 +771,6 @@ public class Activity extends ContextThemeWrapper
 
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
     private static final String AUTO_FILL_AUTH_WHO_PREFIX = "@android:autoFillAuth:";
-
     private static final String KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME = "com.android.systemui";
 
     private static final int LOG_AM_ON_CREATE_CALLED = 30057;
@@ -808,7 +812,9 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActivityInfo mActivityInfo;
     @UnsupportedAppUsage
     /*package*/ ActivityThread mMainThread;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 137825207, maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code androidx.fragment.app.Fragment} and "
+                    + "{@code androidx.fragment.app.FragmentManager} instead")
     Activity mParent;
     @UnsupportedAppUsage
     boolean mCalled;
@@ -943,9 +949,64 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     boolean mEnterAnimationComplete;
 
-    /** Track last dispatched multi-window and PiP mode to client, internal debug purpose **/
-    private Boolean mLastDispatchedIsInMultiWindowMode;
-    private Boolean mLastDispatchedIsInPictureInPictureMode;
+    private boolean mIsInMultiWindowMode;
+    private boolean mIsInPictureInPictureMode;
+
+    private final WindowControllerCallback mWindowControllerCallback =
+            new WindowControllerCallback() {
+        /**
+         * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing
+         * mode and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+         *
+         * @hide
+         */
+        @Override
+        public void toggleFreeformWindowingMode() throws RemoteException {
+            ActivityTaskManager.getService().toggleFreeformWindowingMode(mToken);
+        }
+
+        /**
+         * Puts the activity in picture-in-picture mode if the activity supports.
+         * @see android.R.attr#supportsPictureInPicture
+         * @hide
+         */
+        @Override
+        public void enterPictureInPictureModeIfPossible() {
+            if (mActivityInfo.supportsPictureInPicture()) {
+                enterPictureInPictureMode();
+            }
+        }
+
+        @Override
+        public boolean isTaskRoot() {
+            try {
+                return ActivityTaskManager.getService().getTaskForActivity(mToken, true) >= 0;
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
+
+        /**
+         * Update the forced status bar color.
+         * @hide
+         */
+        @Override
+        public void updateStatusBarColor(int color) {
+            mTaskDescription.setStatusBarColor(color);
+            setTaskDescription(mTaskDescription);
+        }
+
+        /**
+         * Update the forced navigation bar color.
+         * @hide
+         */
+        @Override
+        public void updateNavigationBarColor(int color) {
+            mTaskDescription.setNavigationBarColor(color);
+            setTaskDescription(mTaskDescription);
+        }
+
+    };
 
     private static native String getDlWarning();
 
@@ -966,6 +1027,42 @@ public class Activity extends ContextThemeWrapper
      */
     public void setIntent(Intent newIntent) {
         mIntent = newIntent;
+    }
+
+    /**
+     * Sets the {@link android.content.LocusId} for this activity. The locus id
+     * helps identify different instances of the same {@code Activity} class.
+     * <p> For example, a locus id based on a specific conversation could be set on a
+     * conversation app's chat {@code Activity}. The system can then use this locus id
+     * along with app's contents to provide ranking signals in various UI surfaces
+     * including sharing, notifications, shortcuts and so on.
+     * <p> It is recommended to set the same locus id in the shortcut's locus id using
+     * {@link android.content.pm.ShortcutInfo.Builder#setLocusId(android.content.LocusId)
+     *      setLocusId}
+     * so that the system can learn appropriate ranking signals linking the activity's
+     * locus id with the matching shortcut.
+     *
+     * @param locusId  a unique, stable id that identifies this {@code Activity} instance from
+     *      others. This can be linked to a shortcut using
+     *      {@link android.content.pm.ShortcutInfo.Builder#setLocusId(android.content.LocusId)
+     *      setLocusId} with the same locus id string.
+     * @param bundle extras set or updated as part of this locus context. This may help provide
+     *      additional metadata such as URLs, conversation participants specific to this
+     *      {@code Activity}'s context.
+     *
+     * @see android.view.contentcapture.ContentCaptureManager
+     * @see android.view.contentcapture.ContentCaptureContext
+     */
+    public void setLocusContext(@Nullable LocusId locusId, @Nullable Bundle bundle) {
+        try {
+            ActivityManager.getService().setActivityLocusContext(mComponent, locusId, mToken);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+        // If locusId is not null pass it to the Content Capture.
+        if (locusId != null) {
+            setLocusContextToContentCapture(locusId, bundle);
+        }
     }
 
     /** Return the application that owns this activity. */
@@ -1116,6 +1213,19 @@ public class Activity extends ContextThemeWrapper
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+    }
+
+    private void setLocusContextToContentCapture(LocusId locusId, @Nullable Bundle bundle) {
+        final ContentCaptureManager cm = getContentCaptureManager();
+        if (cm == null) return;
+
+        ContentCaptureContext.Builder contentCaptureContextBuilder =
+                new ContentCaptureContext.Builder(locusId);
+        if (bundle != null) {
+            contentCaptureContextBuilder.setExtras(bundle);
+        }
+        cm.getMainContentCaptureSession().setContentCaptureContext(
+                contentCaptureContextBuilder.build());
     }
 
     @Override
@@ -1799,6 +1909,7 @@ public class Activity extends ContextThemeWrapper
             if (!mAutoFillIgnoreFirstResumePause) {
                 View focus = getCurrentFocus();
                 if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
+                    // TODO(b/148815880): Bring up keyboard if resumed from inline authentication.
                     // TODO: in Activity killed/recreated case, i.e. SessionLifecycleTest#
                     // testDatasetVisibleWhileAutofilledAppIsLifecycled: the View's initial
                     // window visibility after recreation is INVISIBLE in onResume() and next frame
@@ -1861,8 +1972,13 @@ public class Activity extends ContextThemeWrapper
     final void performTopResumedActivityChanged(boolean isTopResumedActivity, String reason) {
         onTopResumedActivityChanged(isTopResumedActivity);
 
-        writeEventLog(isTopResumedActivity
-                ? LOG_AM_ON_TOP_RESUMED_GAINED_CALLED : LOG_AM_ON_TOP_RESUMED_LOST_CALLED, reason);
+        if (isTopResumedActivity) {
+            EventLogTags.writeWmOnTopResumedGainedCalled(mIdent, getComponentName().getClassName(),
+                    reason);
+        } else {
+            EventLogTags.writeWmOnTopResumedLostCalled(mIdent, getComponentName().getClassName(),
+                    reason);
+        }
     }
 
     void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
@@ -1922,11 +2038,15 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Like {@link #isVoiceInteraction}, but only returns true if this is also the root
-     * of a voice interaction.  That is, returns true if this activity was directly
+     * Like {@link #isVoiceInteraction}, but only returns {@code true} if this is also the root
+     * of a voice interaction.  That is, returns {@code true} if this activity was directly
      * started by the voice interaction service as the initiation of a voice interaction.
      * Otherwise, for example if it was started by another activity while under voice
-     * interaction, returns false.
+     * interaction, returns {@code false}.
+     * If the activity {@link android.R.styleable#AndroidManifestActivity_launchMode launchMode} is
+     * {@code singleTask}, it forces the activity to launch in a new task, separate from the one
+     * that started it. Therefore, there is no longer a relationship between them, and
+     * {@link #isVoiceInteractionRoot()} return {@code false} in this case.
      */
     public boolean isVoiceInteractionRoot() {
         try {
@@ -2383,8 +2503,11 @@ public class Activity extends ContextThemeWrapper
      * {@link #onProvideKeyboardShortcuts} to retrieve the shortcuts for the foreground activity.
      */
     public final void requestShowKeyboardShortcuts() {
+        final ComponentName sysuiComponent = ComponentName.unflattenFromString(
+                getResources().getString(
+                        com.android.internal.R.string.config_systemUIServiceComponent));
         Intent intent = new Intent(Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS);
-        intent.setPackage(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME);
+        intent.setPackage(sysuiComponent.getPackageName());
         sendBroadcastAsUser(intent, Process.myUserHandle());
     }
 
@@ -2392,8 +2515,11 @@ public class Activity extends ContextThemeWrapper
      * Dismiss the Keyboard Shortcuts screen.
      */
     public final void dismissKeyboardShortcutsHelper() {
+        final ComponentName sysuiComponent = ComponentName.unflattenFromString(
+                getResources().getString(
+                        com.android.internal.R.string.config_systemUIServiceComponent));
         Intent intent = new Intent(Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS);
-        intent.setPackage(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME);
+        intent.setPackage(sysuiComponent.getPackageName());
         sendBroadcastAsUser(intent, Process.myUserHandle());
     }
 
@@ -2467,20 +2593,12 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         if (mAutoFillResetNeeded) {
-            getAutofillManager().onInvisibleForAutofill();
-        }
-
-        if (isFinishing()) {
-            if (mAutoFillResetNeeded) {
-                getAutofillManager().onActivityFinishing();
-            } else if (mIntent != null
-                    && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-                // Activity was launched when user tapped a link in the Autofill Save UI - since
-                // user launched another activity, the Save UI should not be restored when this
-                // activity is finished.
-                getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
-                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
-            }
+            // If stopped without changing the configurations, the response should expire.
+            getAutofillManager().onInvisibleForAutofill(!mChangingConfigurations);
+        } else if (mIntent != null
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {
+            restoreAutofillSaveUi();
         }
         mEnterAnimationComplete = false;
     }
@@ -2517,6 +2635,10 @@ public class Activity extends ContextThemeWrapper
     protected void onDestroy() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
         mCalled = true;
+
+        if (isFinishing() && mAutoFillResetNeeded) {
+            getAutofillManager().onActivityFinishing();
+        }
 
         // dismiss any dialogs we are managing.
         if (mManagedDialogs != null) {
@@ -2557,9 +2679,12 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Report to the system that your app is now fully drawn, purely for diagnostic
-     * purposes (calling it does not impact the visible behavior of the activity).
-     * This is only used to help instrument application launch times, so that the
+     * Report to the system that your app is now fully drawn, for diagnostic and
+     * optimization purposes.  The system may adjust optimizations to prioritize
+     * work that happens before reportFullyDrawn is called, to improve app startup.
+     * Misrepresenting the startup window by calling reportFullyDrawn too late or too
+     * early may decrease application and startup performance.<p>
+     * This is also used to help instrument application launch times, so that the
      * app can report when it is fully in a usable state; without this, the only thing
      * the system itself can determine is the point at which the activity's window
      * is <em>first</em> drawn and displayed.  To participate in app launch time
@@ -2568,6 +2693,9 @@ public class Activity extends ContextThemeWrapper
      * entirely drawn your UI and populated with all of the significant data.  You
      * can safely call this method any time after first launch as well, in which case
      * it will simply be ignored.
+     * <p>If this method is called before the activity's window is <em>first</em> drawn
+     * and displayed as measured by the system, the reported time here will be shifted
+     * to the system measured time.
      */
     public void reportFullyDrawn() {
         if (mDoReportFullyDrawn) {
@@ -2621,11 +2749,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if the activity is in multi-window mode.
      */
     public boolean isInMultiWindowMode() {
-        try {
-            return ActivityTaskManager.getService().isInMultiWindowMode(mToken);
-        } catch (RemoteException e) {
-        }
-        return false;
+        return mIsInMultiWindowMode;
     }
 
     /**
@@ -2668,11 +2792,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if the activity is in picture-in-picture mode.
      */
     public boolean isInPictureInPictureMode() {
-        try {
-            return ActivityTaskManager.getService().isInPictureInPictureMode(mToken);
-        } catch (RemoteException e) {
-        }
-        return false;
+        return mIsInPictureInPictureMode;
     }
 
     /**
@@ -2688,12 +2808,6 @@ public class Activity extends ContextThemeWrapper
         enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
     }
 
-    /** @removed */
-    @Deprecated
-    public boolean enterPictureInPictureMode(@NonNull PictureInPictureArgs args) {
-        return enterPictureInPictureMode(PictureInPictureArgs.convert(args));
-    }
-
     /**
      * Puts the activity in picture-in-picture mode if possible in the current system state. The
      * set parameters in {@param params} will be combined with the parameters from prior calls to
@@ -2701,6 +2815,11 @@ public class Activity extends ContextThemeWrapper
      *
      * The system may disallow entering picture-in-picture in various cases, including when the
      * activity is not visible, if the screen is locked or if the user has an activity pinned.
+     *
+     * <p>By default, system calculates the dimension of picture-in-picture window based on the
+     * given {@param params}.
+     * See <a href="{@docRoot}guide/topics/ui/picture-in-picture">Picture-in-picture Support</a>
+     * on how to override this behavior.</p>
      *
      * @see android.R.attr#supportsPictureInPicture
      * @see PictureInPictureParams
@@ -2724,16 +2843,16 @@ public class Activity extends ContextThemeWrapper
                 throw new IllegalStateException("Activity must be resumed to enter"
                         + " picture-in-picture");
             }
-            return ActivityTaskManager.getService().enterPictureInPictureMode(mToken, params);
+            // Set mIsInPictureInPictureMode earlier and don't wait for
+            // onPictureInPictureModeChanged callback here. This is to ensure that
+            // isInPictureInPictureMode returns true in the following onPause callback.
+            // See https://developer.android.com/guide/topics/ui/picture-in-picture for guidance.
+            mIsInPictureInPictureMode = ActivityTaskManager.getService().enterPictureInPictureMode(
+                    mToken, params);
+            return mIsInPictureInPictureMode;
         } catch (RemoteException e) {
             return false;
         }
-    }
-
-    /** @removed */
-    @Deprecated
-    public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
-        setPictureInPictureParams(PictureInPictureArgs.convert(args));
     }
 
     /**
@@ -2774,6 +2893,24 @@ public class Activity extends ContextThemeWrapper
      */
     private boolean deviceSupportsPictureInPictureMode() {
         return getPackageManager().hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE);
+    }
+
+    /**
+     * This method is called by the system in various cases where picture in picture mode should be
+     * entered if supported.
+     *
+     * <p>It is up to the app developer to choose whether to call
+     * {@link #enterPictureInPictureMode(PictureInPictureParams)} at this time. For example, the
+     * system will call this method when the activity is being put into the background, so the app
+     * developer might want to switch an activity into PIP mode instead.</p>
+     *
+     * @return {@code true} if the activity received this callback regardless of if it acts on it
+     * or not. If {@code false}, the framework will assume the app hasn't been updated to leverage
+     * this callback and will in turn send a legacy callback of {@link #onUserLeaveHint()} for the
+     * app to enter picture-in-picture mode.
+     */
+    public boolean onPictureInPictureRequested() {
+        return false;
     }
 
     void dispatchMovedToDisplay(int displayId, Configuration config) {
@@ -3925,29 +4062,6 @@ public class Activity extends ContextThemeWrapper
 
 
     /**
-     * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing mode
-     * and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
-     *
-     * @hide
-     */
-    @Override
-    public void toggleFreeformWindowingMode() throws RemoteException {
-        ActivityTaskManager.getService().toggleFreeformWindowingMode(mToken);
-    }
-
-    /**
-     * Puts the activity in picture-in-picture mode if the activity supports.
-     * @see android.R.attr#supportsPictureInPicture
-     * @hide
-     */
-    @Override
-    public void enterPictureInPictureModeIfPossible() {
-        if (mActivityInfo.supportsPictureInPicture()) {
-            enterPictureInPictureMode();
-        }
-    }
-
-    /**
      * Called to process key events.  You can override this to intercept all
      * key events before they are dispatched to the window.  Be sure to call
      * this implementation for key events that should be handled normally.
@@ -4367,7 +4481,9 @@ public class Activity extends ContextThemeWrapper
      * The default implementation simply calls onNavigateUp() on this activity (the parent).
      *
      * @param child The activity making the call.
+     * @deprecated Use {@link #onNavigateUp()} instead.
      */
+    @Deprecated
     public boolean onNavigateUpFromChild(Activity child) {
         return onNavigateUp();
     }
@@ -5040,6 +5156,10 @@ public class Activity extends ContextThemeWrapper
      * the signature of the app declaring the permissions.
      * </p>
      * <p>
+     * Call {@link #shouldShowRequestPermissionRationale(String)} before calling this API to
+     * check if the system recommends to show a rationale UI before asking for a permission.
+     * </p>
+     * <p>
      * If your app does not have the requested permissions the user will be presented
      * with UI for accepting them. After the user has accepted or rejected the
      * requested permissions you will receive a callback on {@link
@@ -5129,20 +5249,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Gets whether you should show UI with rationale for requesting a permission.
-     * You should do this only if you do not have the permission and the context in
-     * which the permission is requested does not clearly communicate to the user
-     * what would be the benefit from granting this permission.
-     * <p>
-     * For example, if you write a camera app, requesting the camera permission
-     * would be expected by the user and no rationale for why it is requested is
-     * needed. If however, the app needs location for tagging photos then a non-tech
-     * savvy user may wonder how location is related to taking photos. In this case
-     * you may choose to show UI with rationale of requesting this permission.
-     * </p>
+     * Gets whether you should show UI with rationale before requesting a permission.
      *
      * @param permission A permission your app wants to request.
-     * @return Whether you can show permission rationale UI.
+     * @return Whether you should show permission rationale UI.
      *
      * @see #checkSelfPermission(String)
      * @see #requestPermissions(String[], int)
@@ -5457,7 +5567,7 @@ public class Activity extends ContextThemeWrapper
             options = transferSpringboardActivityOptions(options);
             String resolvedType = null;
             if (fillInIntent != null) {
-                fillInIntent.migrateExtraStreamToClipData();
+                fillInIntent.migrateExtraStreamToClipData(this);
                 fillInIntent.prepareToLeaveProcess(this);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
@@ -5531,6 +5641,21 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
+        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {
+            if (TextUtils.equals(getPackageName(),
+                    intent.resolveActivity(getPackageManager()).getPackageName())) {
+                // Apply Autofill restore mechanism on the started activity by startActivity()
+                final IBinder token =
+                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+                // Remove restore ability from current activity
+                mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+                mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY);
+                // Put restore token
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
+            }
+        }
         if (options != null) {
             startActivityForResult(intent, -1, options);
         } else {
@@ -5697,13 +5822,13 @@ public class Activity extends ContextThemeWrapper
                 if (referrer != null) {
                     intent.putExtra(Intent.EXTRA_REFERRER, referrer);
                 }
-                intent.migrateExtraStreamToClipData();
+                intent.migrateExtraStreamToClipData(this);
                 intent.prepareToLeaveProcess(this);
                 result = ActivityTaskManager.getService()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
-                            intent, intent.resolveTypeIfNeeded(getContentResolver()), mToken,
-                            mEmbeddedID, requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                            null, options);
+                            getAttributionTag(), intent,
+                            intent.resolveTypeIfNeeded(getContentResolver()), mToken, mEmbeddedID,
+                            requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED, null, options);
             } catch (RemoteException e) {
                 // Empty
             }
@@ -5768,7 +5893,7 @@ public class Activity extends ContextThemeWrapper
             @Nullable Bundle options) {
         if (mParent == null) {
             try {
-                intent.migrateExtraStreamToClipData();
+                intent.migrateExtraStreamToClipData(this);
                 intent.prepareToLeaveProcess(this);
                 return ActivityTaskManager.getService()
                     .startNextMatchingActivity(mToken, intent, options);
@@ -5794,7 +5919,10 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #startActivity
      * @see #startActivityForResult
+     * @deprecated Use {@code androidx.fragment.app.FragmentActivity#startActivityFromFragment(
+     * androidx.fragment.app.Fragment,Intent,int)}
      */
+    @Deprecated
     public void startActivityFromChild(@NonNull Activity child, @RequiresPermission Intent intent,
             int requestCode) {
         startActivityFromChild(child, intent, requestCode, null);
@@ -5818,7 +5946,10 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #startActivity
      * @see #startActivityForResult
+     * @deprecated Use {@code androidx.fragment.app.FragmentActivity#startActivityFromFragment(
+     * androidx.fragment.app.Fragment,Intent,int,Bundle)}
      */
+    @Deprecated
     public void startActivityFromChild(@NonNull Activity child, @RequiresPermission Intent intent,
             int requestCode, @Nullable Bundle options) {
         options = transferSpringboardActivityOptions(options);
@@ -5847,7 +5978,7 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
      *
-     * @deprecated Use {@link androidx.fragment.app.FragmentActivity#startActivityFromFragment(
+     * @deprecated Use {@code androidx.fragment.app.FragmentActivity#startActivityFromFragment(
      * androidx.fragment.app.Fragment,Intent,int)}
      */
     @Deprecated
@@ -5876,7 +6007,7 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivity
      * @see Fragment#startActivityForResult
      *
-     * @deprecated Use {@link androidx.fragment.app.FragmentActivity#startActivityFromFragment(
+     * @deprecated Use {@code androidx.fragment.app.FragmentActivity#startActivityFromFragment(
      * androidx.fragment.app.Fragment,Intent,int,Bundle)}
      */
     @Deprecated
@@ -5885,10 +6016,7 @@ public class Activity extends ContextThemeWrapper
         startActivityForResult(fragment.mWho, intent, requestCode, options);
     }
 
-    /**
-     * @hide
-     */
-    public void startActivityAsUserFromFragment(@NonNull Fragment fragment,
+    private void startActivityAsUserFromFragment(@NonNull Fragment fragment,
             @RequiresPermission Intent intent, int requestCode, @Nullable Bundle options,
             UserHandle user) {
         startActivityForResultAsUser(intent, fragment.mWho, requestCode, options, user);
@@ -5929,7 +6057,10 @@ public class Activity extends ContextThemeWrapper
     /**
      * Same as calling {@link #startIntentSenderFromChild(Activity, IntentSender,
      * int, Intent, int, int, int, Bundle)} with no options.
+     * @deprecated Use {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
+     * instead.
      */
+    @Deprecated
     public void startIntentSenderFromChild(Activity child, IntentSender intent,
             int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
             int extraFlags)
@@ -5943,7 +6074,11 @@ public class Activity extends ContextThemeWrapper
      * taking a IntentSender; see
      * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
      * for more information.
+     * @deprecated Use
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int, Bundle)}
+     * instead.
      */
+    @Deprecated
     public void startIntentSenderFromChild(Activity child, IntentSender intent,
             int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
             int extraFlags, @Nullable Bundle options)
@@ -5953,17 +6088,15 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Like {@link #startIntentSenderFromChild}, but taking a Fragment; see
+     * Like {@link #startIntentSender}, but taking a Fragment; see
      * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
      * for more information.
-     *
-     * @hide
      */
-    public void startIntentSenderFromChildFragment(Fragment child, IntentSender intent,
+    private void startIntentSenderFromFragment(Fragment fragment, IntentSender intent,
             int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
-            int extraFlags, @Nullable Bundle options)
+            @Nullable Bundle options)
             throws IntentSender.SendIntentException {
-        startIntentSenderForResultInner(intent, child.mWho, requestCode, fillInIntent,
+        startIntentSenderForResultInner(intent, fragment.mWho, requestCode, fillInIntent,
                 flagsMask, flagsValues, options);
     }
 
@@ -6253,9 +6386,21 @@ public class Activity extends ContextThemeWrapper
         // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
         // be restored now.
         if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-            getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
-                    mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+            restoreAutofillSaveUi();
         }
+    }
+
+    /**
+     * Restores Autofill Save UI
+     */
+    private void restoreAutofillSaveUi() {
+        final IBinder token =
+                mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+        // Make only restore Autofill once
+        mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+        mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY);
+        getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
+                token);
     }
 
     /**
@@ -6305,7 +6450,9 @@ public class Activity extends ContextThemeWrapper
      * @param child The activity making the call.
      *
      * @see #finish
+     * @deprecated Use {@link #finish()} instead.
      */
+    @Deprecated
     public void finishFromChild(Activity child) {
         finish();
     }
@@ -6352,7 +6499,9 @@ public class Activity extends ContextThemeWrapper
      * @param child The activity making the call.
      * @param requestCode Request code that had been used to start the
      *                    activity.
+     * @deprecated Use {@link #finishActivity(int)} instead.
      */
+    @Deprecated
     public void finishActivityFromChild(@NonNull Activity child, int requestCode) {
         try {
             ActivityTaskManager.getService()
@@ -6397,8 +6546,12 @@ public class Activity extends ContextThemeWrapper
      * {@link #RESULT_CANCELED} if the activity explicitly returned that,
      * didn't return any result, or crashed during its operation.
      *
-     * <p>You will receive this call immediately before onResume() when your
-     * activity is re-starting.
+     * <p>An activity can never receive a result in the resumed state. You can count on
+     * {@link #onResume} being called after this method, though not necessarily immediately after.
+     * If the activity was resumed, it will be paused and the result will be delivered, followed
+     * by {@link #onResume}.  If the activity wasn't in the resumed state, then the result will
+     * be delivered, with {@link #onResume} called sometime later when the activity becomes active
+     * again.
      *
      * <p>This method is never invoked if your activity sets
      * {@link android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
@@ -6472,12 +6625,10 @@ public class Activity extends ContextThemeWrapper
         String packageName = getPackageName();
         try {
             data.prepareToLeaveProcess(this);
-            IIntentSender target =
-                ActivityManager.getService().getIntentSender(
-                        ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
-                        mParent == null ? mToken : mParent.mToken,
-                        mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null,
-                        getUserId());
+            IIntentSender target = ActivityManager.getService().getIntentSenderWithFeature(
+                    ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName, getAttributionTag(),
+                    mParent == null ? mToken : mParent.mToken, mEmbeddedID, requestCode,
+                    new Intent[]{data}, null, flags, null, getUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
             // Empty
@@ -6552,13 +6703,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if this is the root activity, else false.
      */
-    @Override
     public boolean isTaskRoot() {
-        try {
-            return ActivityTaskManager.getService().getTaskForActivity(mToken, true) >= 0;
-        } catch (RemoteException e) {
-            return false;
-        }
+        return mWindowControllerCallback.isTaskRoot();
     }
 
     /**
@@ -6751,7 +6897,7 @@ public class Activity extends ContextThemeWrapper
                 final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
                 final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
                         true);
-                mTaskDescription.setIcon(icon);
+                mTaskDescription.setIcon(Icon.createWithBitmap(icon));
             }
         }
         try {
@@ -7002,14 +7148,19 @@ public class Activity extends ContextThemeWrapper
                 writer.print(mResumed); writer.print(" mStopped=");
                 writer.print(mStopped); writer.print(" mFinished=");
                 writer.println(mFinished);
-        writer.print(innerPrefix); writer.print("mLastDispatchedIsInMultiWindowMode=");
-                writer.print(mLastDispatchedIsInMultiWindowMode);
-                writer.print(" mLastDispatchedIsInPictureInPictureMode=");
-                writer.println(mLastDispatchedIsInPictureInPictureMode);
+        writer.print(innerPrefix); writer.print("mIsInMultiWindowMode=");
+                writer.print(mIsInMultiWindowMode);
+                writer.print(" mIsInPictureInPictureMode=");
+                writer.println(mIsInPictureInPictureMode);
         writer.print(innerPrefix); writer.print("mChangingConfigurations=");
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
                 writer.println(mCurrentConfig);
+        if (getResources().hasOverrideDisplayAdjustments()) {
+            writer.print(innerPrefix);
+            writer.print("FixedRotationAdjustments=");
+            writer.println(getResources().getDisplayAdjustments().getFixedRotationAdjustments());
+        }
 
         mFragments.dumpLoaders(innerPrefix, fd, writer, args);
         mFragments.getFragmentManager().dump(innerPrefix, fd, writer, args);
@@ -7089,14 +7240,28 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} to a
-     * fullscreen opaque Activity.
+     * Convert an activity, which particularly with {@link android.R.attr#windowIsTranslucent} or
+     * {@link android.R.attr#windowIsFloating} attribute, to a fullscreen opaque activity, or
+     * convert it from opaque back to translucent.
+     *
+     * @param translucent {@code true} convert from opaque to translucent.
+     *                    {@code false} convert from translucent to opaque.
+     * @return The result of setting translucency. Return {@code true} if set successfully,
+     *         {@code false} otherwise.
+     */
+    public boolean setTranslucent(boolean translucent) {
+        if (translucent) {
+            return convertToTranslucent(null /* callback */, null /* options */);
+        } else {
+            return convertFromTranslucentInternal();
+        }
+    }
+
+    /**
+     * Convert an activity to a fullscreen opaque activity.
      * <p>
-     * Call this whenever the background of a translucent Activity has changed to become opaque.
-     * Doing so will allow the {@link android.view.Surface} of the Activity behind to be released.
-     * <p>
-     * This call has no effect on non-translucent activities or on activities with the
-     * {@link android.R.attr#windowIsFloating} attribute.
+     * Call this whenever the background of a translucent activity has changed to become opaque.
+     * Doing so will allow the {@link android.view.Surface} of the activity behind to be released.
      *
      * @see #convertToTranslucent(android.app.Activity.TranslucentConversionListener,
      * ActivityOptions)
@@ -7106,31 +7271,33 @@ public class Activity extends ContextThemeWrapper
      */
     @SystemApi
     public void convertFromTranslucent() {
+        convertFromTranslucentInternal();
+    }
+
+    private boolean convertFromTranslucentInternal() {
         try {
             mTranslucentCallback = null;
             if (ActivityTaskManager.getService().convertFromTranslucent(mToken)) {
                 WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, true);
+                return true;
             }
         } catch (RemoteException e) {
             // pass
         }
+        return false;
     }
 
     /**
-     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} back from
-     * opaque to translucent following a call to {@link #convertFromTranslucent()}.
+     * Convert an activity to a translucent activity.
      * <p>
-     * Calling this allows the Activity behind this one to be seen again. Once all such Activities
+     * Calling this allows the activity behind this one to be seen again. Once all such activities
      * have been redrawn {@link TranslucentConversionListener#onTranslucentConversionComplete} will
      * be called indicating that it is safe to make this activity translucent again. Until
      * {@link TranslucentConversionListener#onTranslucentConversionComplete} is called the image
-     * behind the frontmost Activity will be indeterminate.
-     * <p>
-     * This call has no effect on non-translucent activities or on activities with the
-     * {@link android.R.attr#windowIsFloating} attribute.
+     * behind the frontmost activity will be indeterminate.
      *
-     * @param callback the method to call when all visible Activities behind this one have been
-     * drawn and it is safe to make this Activity translucent again.
+     * @param callback the method to call when all visible activities behind this one have been
+     * drawn and it is safe to make this activity translucent again.
      * @param options activity options delivered to the activity below this one. The options
      * are retrieved using {@link #getActivityOptions}.
      * @return <code>true</code> if Window was opaque and will become translucent or
@@ -7599,7 +7766,9 @@ public class Activity extends ContextThemeWrapper
      * @return true if up navigation successfully reached the activity indicated by upIntent and
      *         upIntent was delivered to it. false if an instance of the indicated activity could
      *         not be found and this activity was simply finished normally.
+     * @deprecated Use {@link #navigateUpTo(Intent)} instead.
      */
+    @Deprecated
     public boolean navigateUpToFromChild(Activity child, Intent upIntent) {
         return navigateUpTo(upIntent);
     }
@@ -7732,7 +7901,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.attachHost(null /*parent*/);
 
         mWindow = new PhoneWindow(this, window, activityConfigCallback);
-        mWindow.setWindowControllerCallback(this);
+        mWindow.setWindowControllerCallback(mWindowControllerCallback);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
@@ -7778,6 +7947,8 @@ public class Activity extends ContextThemeWrapper
         mCurrentConfig = config;
 
         mWindow.setColorMode(info.colorMode);
+        mWindow.setPreferMinimalPostProcessing(
+                (info.flags & ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING) != 0);
 
         setAutofillOptions(application.getAutofillOptions());
         setContentCaptureOptions(application.getContentCaptureOptions());
@@ -7817,13 +7988,19 @@ public class Activity extends ContextThemeWrapper
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         dispatchActivityPreCreated(icicle);
         mCanEnterPictureInPicture = true;
+        // initialize mIsInMultiWindowMode and mIsInPictureInPictureMode before onCreate
+        final int windowingMode = getResources().getConfiguration().windowConfiguration
+                .getWindowingMode();
+        mIsInMultiWindowMode = inMultiWindowMode(windowingMode);
+        mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
         restoreHasCurrentPermissionRequest(icicle);
         if (persistentState != null) {
             onCreate(icicle, persistentState);
         } else {
             onCreate(icicle);
         }
-        writeEventLog(LOG_AM_ON_CREATE_CALLED, "performCreate");
+        EventLogTags.writeWmOnCreateCalled(mIdent, getComponentName().getClassName(),
+                "performCreate");
         mActivityTransitionState.readState(icicle);
 
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
@@ -7845,7 +8022,7 @@ public class Activity extends ContextThemeWrapper
         mCalled = false;
         mFragments.execPendingActions();
         mInstrumentation.callActivityOnStart(this);
-        writeEventLog(LOG_AM_ON_START_CALLED, reason);
+        EventLogTags.writeWmOnStartCalled(mIdent, getComponentName().getClassName(), reason);
 
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -7923,7 +8100,7 @@ public class Activity extends ContextThemeWrapper
 
             mCalled = false;
             mInstrumentation.callActivityOnRestart(this);
-            writeEventLog(LOG_AM_ON_RESTART_CALLED, reason);
+            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(), reason);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -7956,7 +8133,7 @@ public class Activity extends ContextThemeWrapper
         mCalled = false;
         // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
-        writeEventLog(LOG_AM_ON_RESUME_CALLED, reason);
+        EventLogTags.writeWmOnResumeCalled(mIdent, getComponentName().getClassName(), reason);
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
@@ -7995,7 +8172,8 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchPause();
         mCalled = false;
         onPause();
-        writeEventLog(LOG_AM_ON_PAUSE_CALLED, "performPause");
+        EventLogTags.writeWmOnPausedCalled(mIdent, getComponentName().getClassName(),
+                "performPause");
         mResumed = false;
         if (!mCalled && getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.GINGERBREAD) {
@@ -8035,7 +8213,7 @@ public class Activity extends ContextThemeWrapper
 
             mCalled = false;
             mInstrumentation.callActivityOnStop(this);
-            writeEventLog(LOG_AM_ON_STOP_CALLED, reason);
+            EventLogTags.writeWmOnStopCalled(mIdent, getComponentName().getClassName(), reason);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -8065,7 +8243,8 @@ public class Activity extends ContextThemeWrapper
         mWindow.destroy();
         mFragments.dispatchDestroy();
         onDestroy();
-        writeEventLog(LOG_AM_ON_DESTROY_CALLED, "performDestroy");
+        EventLogTags.writeWmOnDestroyCalled(mIdent, getComponentName().getClassName(),
+                "performDestroy");
         mFragments.doLoaderDestroy();
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
@@ -8082,7 +8261,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        mLastDispatchedIsInMultiWindowMode = isInMultiWindowMode;
+        mIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -8095,7 +8274,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
-        mLastDispatchedIsInPictureInPictureMode = isInPictureInPictureMode;
+        mIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
@@ -8158,7 +8337,9 @@ public class Activity extends ContextThemeWrapper
                 frag.onActivityResult(requestCode, resultCode, data);
             }
         }
-        writeEventLog(LOG_AM_ON_ACTIVITY_RESULT_CALLED, reason);
+
+        EventLogTags.writeWmOnActivityResultCalled(mIdent, getComponentName().getClassName(),
+                reason);
     }
 
     /**
@@ -8298,7 +8479,7 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     @Override
     public final void autofillClientAuthenticate(int authenticationId, IntentSender intent,
-            Intent fillInIntent) {
+            Intent fillInIntent, boolean authenticateInline) {
         try {
             startIntentSenderForResultInner(intent, AUTO_FILL_AUTH_WHO_PREFIX,
                     authenticationId, fillInIntent, 0, 0, null);
@@ -8576,7 +8757,6 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
-    @UnsupportedAppUsage
     public void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         try {
             ActivityTaskManager.getService().registerRemoteAnimations(mToken, definition);
@@ -8585,10 +8765,18 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    /** Log a lifecycle event for current user id and component class. */
-    private void writeEventLog(int event, String reason) {
-        EventLog.writeEvent(event, UserHandle.myUserId(), getComponentName().getClassName(),
-                reason);
+    /**
+     * Unregisters all remote animations for this activity.
+     *
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public void unregisterRemoteAnimations() {
+        try {
+            ActivityTaskManager.getService().unregisterRemoteAnimations(mToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
@@ -8653,8 +8841,8 @@ public class Activity extends ContextThemeWrapper
                 startIntentSenderForResultInner(intent, fragment.mWho, requestCode, fillInIntent,
                         flagsMask, flagsValues, options);
             } else if (options != null) {
-                mParent.startIntentSenderFromChildFragment(fragment, intent, requestCode,
-                        fillInIntent, flagsMask, flagsValues, extraFlags, options);
+                mParent.startIntentSenderFromFragment(fragment, intent, requestCode,
+                        fillInIntent, flagsMask, flagsValues, options);
             }
         }
 

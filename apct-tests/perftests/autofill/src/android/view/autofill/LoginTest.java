@@ -20,7 +20,7 @@ import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT
 import static android.view.autofill.AutofillManager.AutofillCallback.EVENT_INPUT_SHOWN;
 
 import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 import android.view.View;
 import android.widget.EditText;
 
@@ -39,7 +39,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     }
 
     @Override
-    protected void onCreate(StubActivity activity) {
+    protected void onCreate(PerfTestActivity activity) {
         View root = activity.getWindow().getDecorView();
         mUsername = root.findViewById(R.id.username);
         mPassword = root.findViewById(R.id.password);

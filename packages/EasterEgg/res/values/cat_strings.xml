@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_name" translatable="false">Android Neko</string>
+    <string name="notification_channel_name" translatable="false">New cats</string>
+    <string name="default_tile_name" translatable="false">\????</string>
+    <string name="notification_title" translatable="false">A cat is here.</string>
+    <string name="default_cat_name" translatable="false">Cat #%s</string>
+    <string name="directory_name" translatable="false">Cats</string>
+    <string name="confirm_delete" translatable="false">Forget %s?</string>
+    <string-array name="food_names" translatable="false">
+        <item>Empty dish</item>
+        <item>Bits</item>
+        <item>Fish</item>
+        <item>Chicken</item>
+        <item>Treat</item>
+    </string-array>
+    <array name="food_icons">
+        <item>@drawable/food_dish</item>
+        <item>@drawable/food_bits</item>
+        <item>@drawable/food_sysuituna</item>
+        <item>@drawable/food_chicken</item>
+        <item>@drawable/food_cookie</item>
+    </array>
+    <integer-array name="food_intervals">
+        <item>0</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+    </integer-array>
+    <integer-array name="food_new_cat_prob">
+        <item>0</item>
+        <item>5</item>
+        <item>35</item>
+        <item>65</item>
+        <item>90</item>
+    </integer-array>
+    <string-array name="cat_messages" translatable="false">
+        <item>😸</item>
+        <item>😹</item>
+        <item>😺</item>
+        <item>😻</item>
+        <item>😼</item>
+        <item>😽</item>
+        <item>😾</item>
+        <item>😿</item>
+        <item>🙀</item>
+        <item>💩</item>
+        <item>🐁</item>
+    </string-array>
+    <string-array name="rare_cat_messages" translatable="false">
+        <item>🍩</item>
+        <item>🍭</item>
+        <item>🍫</item>
+        <item>🍨</item>
+        <item>🔔</item>
+        <item>🐝</item>
+        <item>🍪</item>
+        <item>🥧</item>
+    </string-array>
+    <string name="control_toy_title" translatable="false">Toy</string>
+    <string name="control_toy_subtitle" translatable="false">Tap to use</string>
+    <string name="control_toy_status" translatable="false">Cat attracted!</string>
+    <string name="control_water_title" translatable="false">Water bubbler</string>
+    <string name="control_water_subtitle" translatable="false">Swipe to fill</string>
+    <string name="control_food_title" translatable="false">Food bowl</string>
+    <string name="control_food_subtitle" translatable="false">Tap to refill</string>
+    <string name="control_food_status_full" translatable="false">Full</string>
+    <string name="control_food_status_empty" translatable="false">Empty</string>
+</resources>
+

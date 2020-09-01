@@ -26,11 +26,13 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 
-import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Region;
 import android.os.Binder;
 import android.view.View;
 import android.view.WindowManager;
+
+import com.android.systemui.wm.SystemWindows;
 
 /**
  * Manages the window parameters of the docked stack divider.
@@ -39,15 +41,16 @@ public class DividerWindowManager {
 
     private static final String WINDOW_TITLE = "DockedStackDivider";
 
-    private final WindowManager mWindowManager;
+    final SystemWindows mSystemWindows;
     private WindowManager.LayoutParams mLp;
     private View mView;
 
-    public DividerWindowManager(Context ctx) {
-        mWindowManager = ctx.getSystemService(WindowManager.class);
+    public DividerWindowManager(SystemWindows systemWindows) {
+        mSystemWindows = systemWindows;
     }
 
-    public void add(View view, int width, int height) {
+    /** Add a divider view */
+    public void add(View view, int width, int height, int displayId) {
         mLp = new WindowManager.LayoutParams(
                 width, height, TYPE_DOCK_DIVIDER,
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL
@@ -60,13 +63,13 @@ public class DividerWindowManager {
         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        mWindowManager.addView(view, mLp);
+        mSystemWindows.addView(view, mLp, displayId, TYPE_DOCK_DIVIDER);
         mView = view;
     }
 
     public void remove() {
         if (mView != null) {
-            mWindowManager.removeView(mView);
+            mSystemWindows.removeView(mView);
         }
         mView = null;
     }
@@ -81,11 +84,14 @@ public class DividerWindowManager {
             changed = true;
         }
         if (changed) {
-            mWindowManager.updateViewLayout(mView, mLp);
+            mSystemWindows.updateViewLayout(mView, mLp);
         }
     }
 
     public void setTouchable(boolean touchable) {
+        if (mView == null) {
+            return;
+        }
         boolean changed = false;
         if (!touchable && (mLp.flags & FLAG_NOT_TOUCHABLE) == 0) {
             mLp.flags |= FLAG_NOT_TOUCHABLE;
@@ -95,7 +101,15 @@ public class DividerWindowManager {
             changed = true;
         }
         if (changed) {
-            mWindowManager.updateViewLayout(mView, mLp);
+            mSystemWindows.updateViewLayout(mView, mLp);
         }
+    }
+
+    /** Sets the touch region to `touchRegion`. Use null to unset.*/
+    public void setTouchRegion(Region touchRegion) {
+        if (mView == null) {
+            return;
+        }
+        mSystemWindows.setTouchableRegion(mView, touchRegion);
     }
 }

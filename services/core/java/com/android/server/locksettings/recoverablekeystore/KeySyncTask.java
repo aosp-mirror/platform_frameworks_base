@@ -18,9 +18,9 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.security.Scrypt;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
@@ -164,16 +164,28 @@ public class KeySyncTask implements Runnable {
     }
 
     private void syncKeys() throws RemoteException {
+        int generation = mPlatformKeyManager.getGenerationId(mUserId);
         if (mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             // Application keys for the user will not be available for sync.
             Log.w(TAG, "Credentials are not set for user " + mUserId);
-            int generation = mPlatformKeyManager.getGenerationId(mUserId);
-            mPlatformKeyManager.invalidatePlatformKey(mUserId, generation);
+            if (generation < PlatformKeyManager.MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED
+                    || mUserId != UserHandle.USER_SYSTEM) {
+                // Only invalidate keys with legacy protection param.
+                mPlatformKeyManager.invalidatePlatformKey(mUserId, generation);
+            }
             return;
         }
         if (isCustomLockScreen()) {
-            Log.w(TAG, "Unsupported credential type " + mCredentialType + "for user " + mUserId);
-            mRecoverableKeyStoreDb.invalidateKeysForUserIdOnCustomScreenLock(mUserId);
+            Log.w(TAG, "Unsupported credential type " + mCredentialType + " for user " + mUserId);
+            // Keys will be synced when user starts using non custom screen lock.
+            if (generation < PlatformKeyManager.MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED
+                    || mUserId != UserHandle.USER_SYSTEM) {
+                mRecoverableKeyStoreDb.invalidateKeysForUserIdOnCustomScreenLock(mUserId);
+            }
+            return;
+        }
+        if (mPlatformKeyManager.isDeviceLocked(mUserId) && mUserId == UserHandle.USER_SYSTEM) {
+            Log.w(TAG, "Can't sync keys for locked user " + mUserId);
             return;
         }
 
@@ -193,6 +205,7 @@ public class KeySyncTask implements Runnable {
     private boolean isCustomLockScreen() {
         return mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE
             && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+            && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PIN
             && mCredentialType != LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
     }
 
@@ -345,7 +358,7 @@ public class KeySyncTask implements Runnable {
         }
         KeyChainProtectionParams keyChainProtectionParams = new KeyChainProtectionParams.Builder()
                 .setUserSecretType(TYPE_LOCKSCREEN)
-                .setLockScreenUiFormat(getUiFormat(mCredentialType, mCredential))
+                .setLockScreenUiFormat(getUiFormat(mCredentialType))
                 .setKeyDerivationParams(keyDerivationParams)
                 .setSecret(new byte[0])
                 .build();
@@ -449,11 +462,10 @@ public class KeySyncTask implements Runnable {
      * @return The format - either pattern, pin, or password.
      */
     @VisibleForTesting
-    @KeyChainProtectionParams.LockScreenUiFormat static int getUiFormat(
-            int credentialType, byte[] credential) {
+    @KeyChainProtectionParams.LockScreenUiFormat static int getUiFormat(int credentialType) {
         if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
             return KeyChainProtectionParams.UI_FORMAT_PATTERN;
-        } else if (isPin(credential)) {
+        } else if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PIN) {
             return KeyChainProtectionParams.UI_FORMAT_PIN;
         } else {
             return KeyChainProtectionParams.UI_FORMAT_PASSWORD;
@@ -469,23 +481,6 @@ public class KeySyncTask implements Runnable {
         byte[] salt = new byte[SALT_LENGTH_BYTES];
         new SecureRandom().nextBytes(salt);
         return salt;
-    }
-
-    /**
-     * Returns {@code true} if {@code credential} looks like a pin.
-     */
-    @VisibleForTesting
-    static boolean isPin(@Nullable byte[] credential) {
-        if (credential == null) {
-            return false;
-        }
-        int length = credential.length;
-        for (int i = 0; i < length; i++) {
-            if (!Character.isDigit((char) credential[i])) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -541,6 +536,7 @@ public class KeySyncTask implements Runnable {
     }
 
     private boolean shouldUseScryptToHashCredential() {
-        return mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+        return mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+                || mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_PIN;
     }
 }

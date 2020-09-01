@@ -42,16 +42,30 @@ public abstract class GlobalActionsLayout extends MultiListLayout {
     }
 
     private void setBackgrounds() {
-        int gridBackgroundColor = getResources().getColor(
+        ViewGroup listView = getListView();
+        int listBgColor = getResources().getColor(
                 R.color.global_actions_grid_background, null);
-        int separatedBackgroundColor = getResources().getColor(
-                R.color.global_actions_separated_background, null);
-        HardwareBgDrawable listBackground  = new HardwareBgDrawable(true, true, getContext());
-        HardwareBgDrawable separatedBackground = new HardwareBgDrawable(true, true, getContext());
-        listBackground.setTint(gridBackgroundColor);
-        separatedBackground.setTint(separatedBackgroundColor);
-        getListView().setBackground(listBackground);
-        getSeparatedView().setBackground(separatedBackground);
+        HardwareBgDrawable listBackground = getBackgroundDrawable(listBgColor);
+        if (listBackground != null) {
+            listView.setBackground(listBackground);
+        }
+
+        ViewGroup separatedView = getSeparatedView();
+
+        if (separatedView != null) {
+            int separatedBgColor = getResources().getColor(
+                    R.color.global_actions_separated_background, null);
+            HardwareBgDrawable separatedBackground = getBackgroundDrawable(separatedBgColor);
+            if (separatedBackground != null) {
+                getSeparatedView().setBackground(separatedBackground);
+            }
+        }
+    }
+
+    protected HardwareBgDrawable getBackgroundDrawable(int backgroundColor) {
+        HardwareBgDrawable background = new HardwareBgDrawable(true, true, getContext());
+        background.setTint(backgroundColor);
+        return background;
     }
 
     @Override
@@ -74,10 +88,16 @@ public abstract class GlobalActionsLayout extends MultiListLayout {
     }
 
     protected void addToSeparatedView(View v, boolean reverse) {
-        if (reverse) {
-            getSeparatedView().addView(v, 0);
+        ViewGroup separated = getSeparatedView();
+        if (separated != null) {
+            if (reverse) {
+                separated.addView(v, 0);
+            } else {
+                separated.addView(v);
+            }
         } else {
-            getSeparatedView().addView(v);
+            // if no separated view exists, just use the list view
+            addToListView(v, reverse);
         }
     }
 

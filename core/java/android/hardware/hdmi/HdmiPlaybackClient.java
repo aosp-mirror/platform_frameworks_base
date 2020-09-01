@@ -73,8 +73,12 @@ public final class HdmiPlaybackClient extends HdmiClient {
     }
 
     /**
-     * Performs the feature 'one touch play' from playback device to turn on display
-     * and switch the input.
+     * Performs the feature 'one touch play' from playback device to turn on display and claim
+     * to be the streaming source.
+     *
+     * <p>Client side is responsible to send out intent to choose whichever internal
+     * source on the current device it would like to switch to. Otherwise the current
+     * device will remain on the current input.
      *
      * @param callback {@link OneTouchPlayCallback} object to get informed
      *         of the result

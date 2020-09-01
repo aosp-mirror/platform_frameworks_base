@@ -18,6 +18,8 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.os.Bundle;
@@ -28,8 +30,15 @@ import android.os.UserHandle;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Printer;
+import android.view.View;
+import android.view.autofill.AutofillId;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * An EditorInfo describes several attributes of a text editing object
@@ -417,6 +426,14 @@ public class EditorInfo implements InputType, Parcelable {
     public String packageName;
 
     /**
+     * Autofill Id for the field that's currently on focus.
+     *
+     * <p> Marked as hide since it's only used by framework.</p>
+     * @hide
+     */
+    public AutofillId autofillId;
+
+    /**
      * Identifier for the editor's field.  This is optional, and may be
      * 0.  By default it is filled in with the result of
      * {@link android.view.View#getId() View.getId()} on the View that
@@ -480,7 +497,7 @@ public class EditorInfo implements InputType, Parcelable {
      * matter what user ID the calling process has.
      *
      * <p>Note: This field will be silently ignored when
-     * {@link android.view.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
+     * {@link com.android.server.inputmethod.InputMethodSystemProperty#MULTI_CLIENT_IME_ENABLED} is
      * {@code true}.</p>
      *
      * <p>Note also that pseudo handles such as {@link UserHandle#ALL} are not supported.</p>
@@ -490,6 +507,249 @@ public class EditorInfo implements InputType, Parcelable {
     @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     @Nullable
     public UserHandle targetInputMethodUser = null;
+
+    @IntDef({TrimPolicy.HEAD, TrimPolicy.TAIL})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TrimPolicy {
+        int HEAD = 0;
+        int TAIL = 1;
+    }
+
+    /**
+     * The maximum length of initialSurroundingText. When the input text from
+     * {@code setInitialSurroundingText(CharSequence)} is longer than this, trimming shall be
+     * performed to keep memory efficiency.
+     */
+    @VisibleForTesting
+    static final int MEMORY_EFFICIENT_TEXT_LENGTH = 2048;
+    /**
+     * When the input text is longer than {@code #MEMORY_EFFICIENT_TEXT_LENGTH}, we start trimming
+     * the input text into three parts: BeforeCursor, Selection, and AfterCursor. We don't want to
+     * trim the Selection but we also don't want it consumes all available space. Therefore, the
+     * maximum acceptable Selection length is half of {@code #MEMORY_EFFICIENT_TEXT_LENGTH}.
+     */
+    @VisibleForTesting
+    static final int MAX_INITIAL_SELECTION_LENGTH =  MEMORY_EFFICIENT_TEXT_LENGTH / 2;
+
+    @NonNull
+    private InitialSurroundingText mInitialSurroundingText = new InitialSurroundingText();
+
+    /**
+     * Editors may use this method to provide initial input text to IMEs. As the surrounding text
+     * could be used to provide various input assistance, we recommend editors to provide the
+     * complete initial input text in its {@link View#onCreateInputConnection(EditorInfo)} callback.
+     * The supplied text will then be processed to serve {@code #getInitialTextBeforeCursor},
+     * {@code #getInitialSelectedText}, and {@code #getInitialTextBeforeCursor}. System is allowed
+     * to trim {@code sourceText} for various reasons while keeping the most valuable data to IMEs.
+     *
+     * <p><strong>Editor authors: </strong>Providing the initial input text helps reducing IPC calls
+     * for IMEs to provide many modern features right after the connection setup. We recommend
+     * calling this method in your implementation.
+     *
+     * @param sourceText The complete input text.
+     */
+    public void setInitialSurroundingText(@NonNull CharSequence sourceText) {
+        setInitialSurroundingSubText(sourceText, /* subTextStart = */ 0);
+    }
+
+    /**
+     * Editors may use this method to provide initial input text to IMEs. As the surrounding text
+     * could be used to provide various input assistance, we recommend editors to provide the
+     * complete initial input text in its {@link View#onCreateInputConnection(EditorInfo)} callback.
+     * When trimming the input text is needed, call this method instead of
+     * {@code setInitialSurroundingText(CharSequence)} and provide the trimmed position info. Always
+     * try to include the selected text within {@code subText} to give the system best flexibility
+     * to choose where and how to trim {@code subText} when necessary.
+     *
+     * @param subText The input text. When it was trimmed, {@code subTextStart} must be provided
+     *                correctly.
+     * @param subTextStart  The position that the input text got trimmed. For example, when the
+     *                      editor wants to trim out the first 10 chars, subTextStart should be 10.
+     */
+    public void setInitialSurroundingSubText(@NonNull CharSequence subText, int subTextStart) {
+        Objects.requireNonNull(subText);
+
+        // Swap selection start and end if necessary.
+        final int subTextSelStart = initialSelStart > initialSelEnd
+                ? initialSelEnd - subTextStart : initialSelStart - subTextStart;
+        final int subTextSelEnd = initialSelStart > initialSelEnd
+                ? initialSelStart - subTextStart : initialSelEnd - subTextStart;
+
+        final int subTextLength = subText.length();
+        // Unknown or invalid selection.
+        if (subTextStart < 0 || subTextSelStart < 0 || subTextSelEnd > subTextLength) {
+            mInitialSurroundingText = new InitialSurroundingText();
+            return;
+        }
+
+        // For privacy protection reason, we don't carry password inputs to IMEs.
+        if (isPasswordInputType(inputType)) {
+            mInitialSurroundingText = new InitialSurroundingText();
+            return;
+        }
+
+        if (subTextLength <= MEMORY_EFFICIENT_TEXT_LENGTH) {
+            mInitialSurroundingText = new InitialSurroundingText(subText, subTextSelStart,
+                    subTextSelEnd);
+            return;
+        }
+
+        trimLongSurroundingText(subText, subTextSelStart, subTextSelEnd);
+    }
+
+    /**
+     * Trims the initial surrounding text when it is over sized. Fundamental trimming rules are:
+     * - The text before the cursor is the most important information to IMEs.
+     * - The text after the cursor is the second important information to IMEs.
+     * - The selected text is the least important information but it shall NEVER be truncated. When
+     *    it is too long, just drop it.
+     *<p><pre>
+     * For example, the subText can be viewed as
+     *     TextBeforeCursor + Selection + TextAfterCursor
+     * The result could be
+     *     1. (maybeTrimmedAtHead)TextBeforeCursor + Selection + TextAfterCursor(maybeTrimmedAtTail)
+     *     2. (maybeTrimmedAtHead)TextBeforeCursor + TextAfterCursor(maybeTrimmedAtTail)</pre>
+     *
+     * @param subText The long text that needs to be trimmed.
+     * @param selStart The text offset of the start of the selection.
+     * @param selEnd The text offset of the end of the selection
+     */
+    private void trimLongSurroundingText(CharSequence subText, int selStart, int selEnd) {
+        final int sourceSelLength = selEnd - selStart;
+        // When the selected text is too long, drop it.
+        final int newSelLength = (sourceSelLength > MAX_INITIAL_SELECTION_LENGTH)
+                ? 0 : sourceSelLength;
+
+        // Distribute rest of length quota to TextBeforeCursor and TextAfterCursor in 4:1 ratio.
+        final int subTextBeforeCursorLength = selStart;
+        final int subTextAfterCursorLength = subText.length() - selEnd;
+        final int maxLengthMinusSelection = MEMORY_EFFICIENT_TEXT_LENGTH - newSelLength;
+        final int possibleMaxBeforeCursorLength =
+                Math.min(subTextBeforeCursorLength, (int) (0.8 * maxLengthMinusSelection));
+        int newAfterCursorLength = Math.min(subTextAfterCursorLength,
+                maxLengthMinusSelection - possibleMaxBeforeCursorLength);
+        int newBeforeCursorLength = Math.min(subTextBeforeCursorLength,
+                maxLengthMinusSelection - newAfterCursorLength);
+
+        // As trimming may happen at the head of TextBeforeCursor, calculate new starting position.
+        int newBeforeCursorHead = subTextBeforeCursorLength - newBeforeCursorLength;
+
+        // We don't want to cut surrogate pairs in the middle. Exam that at the new head and tail.
+        if (isCutOnSurrogate(subText,
+                selStart - newBeforeCursorLength, TrimPolicy.HEAD)) {
+            newBeforeCursorHead = newBeforeCursorHead + 1;
+            newBeforeCursorLength = newBeforeCursorLength - 1;
+        }
+        if (isCutOnSurrogate(subText,
+                selEnd + newAfterCursorLength - 1, TrimPolicy.TAIL)) {
+            newAfterCursorLength = newAfterCursorLength - 1;
+        }
+
+        // Now we know where to trim, compose the initialSurroundingText.
+        final int newTextLength = newBeforeCursorLength + newSelLength + newAfterCursorLength;
+        final CharSequence newInitialSurroundingText;
+        if (newSelLength != sourceSelLength) {
+            final CharSequence beforeCursor = subText.subSequence(newBeforeCursorHead,
+                    newBeforeCursorHead + newBeforeCursorLength);
+            final CharSequence afterCursor = subText.subSequence(selEnd,
+                    selEnd + newAfterCursorLength);
+
+            newInitialSurroundingText = TextUtils.concat(beforeCursor, afterCursor);
+        } else {
+            newInitialSurroundingText = subText
+                    .subSequence(newBeforeCursorHead, newBeforeCursorHead + newTextLength);
+        }
+
+        // As trimming may happen at the head, adjust cursor position in the initialSurroundingText
+        // obj.
+        newBeforeCursorHead = 0;
+        final int newSelHead = newBeforeCursorHead + newBeforeCursorLength;
+        mInitialSurroundingText = new InitialSurroundingText(
+                newInitialSurroundingText, newSelHead, newSelHead + newSelLength);
+    }
+
+    /**
+     * Get <var>length</var> characters of text before the current cursor position. May be
+     * {@code null} when the protocol is not supported.
+     *
+     * @param length The expected length of the text.
+     * @param flags Supplies additional options controlling how the text is returned. May be
+     * either 0 or {@link InputConnection#GET_TEXT_WITH_STYLES}.
+     * @return the text before the cursor position; the length of the returned text might be less
+     * than <var>length</var>. When there is no text before the cursor, an empty string will be
+     * returned. It could also be {@code null} when the editor or system could not support this
+     * protocol.
+     */
+    @Nullable
+    public CharSequence getInitialTextBeforeCursor(int length, int flags) {
+        return mInitialSurroundingText.getInitialTextBeforeCursor(length, flags);
+    }
+
+    /**
+     * Gets the selected text, if any. May be {@code null} when the protocol is not supported or the
+     * selected text is way too long.
+     *
+     * @param flags Supplies additional options controlling how the text is returned. May be
+     * either 0 or {@link InputConnection#GET_TEXT_WITH_STYLES}.
+     * @return the text that is currently selected, if any. It could be an empty string when there
+     * is no text selected. When {@code null} is returned, the selected text might be too long or
+     * this protocol is not supported.
+     */
+    @Nullable
+    public CharSequence getInitialSelectedText(int flags) {
+        // Swap selection start and end if necessary.
+        final int correctedTextSelStart = initialSelStart > initialSelEnd
+                ? initialSelEnd : initialSelStart;
+        final int correctedTextSelEnd = initialSelStart > initialSelEnd
+                ? initialSelStart : initialSelEnd;
+
+        final int sourceSelLength = correctedTextSelEnd - correctedTextSelStart;
+        if (initialSelStart < 0 || initialSelEnd < 0
+                || mInitialSurroundingText.getSelectionLength() != sourceSelLength) {
+            return null;
+        }
+        return mInitialSurroundingText.getInitialSelectedText(flags);
+    }
+
+    /**
+     * Get <var>length</var> characters of text after the current cursor position. May be
+     * {@code null} when the protocol is not supported.
+     *
+     * @param length The expected length of the text.
+     * @param flags Supplies additional options controlling how the text is returned. May be
+     * either 0 or {@link InputConnection#GET_TEXT_WITH_STYLES}.
+     * @return the text after the cursor position; the length of the returned text might be less
+     * than <var>length</var>. When there is no text after the cursor, an empty string will be
+     * returned. It could also be {@code null} when the editor or system could not support this
+     * protocol.
+     */
+    @Nullable
+    public CharSequence getInitialTextAfterCursor(int length, int flags) {
+        return mInitialSurroundingText.getInitialTextAfterCursor(length, flags);
+    }
+
+    private static boolean isCutOnSurrogate(CharSequence sourceText, int cutPosition,
+            @TrimPolicy int policy) {
+        switch (policy) {
+            case TrimPolicy.HEAD:
+                return Character.isLowSurrogate(sourceText.charAt(cutPosition));
+            case TrimPolicy.TAIL:
+                return Character.isHighSurrogate(sourceText.charAt(cutPosition));
+            default:
+                return false;
+        }
+    }
+
+    private static boolean isPasswordInputType(int inputType) {
+        final int variation =
+                inputType & (TYPE_MASK_CLASS | TYPE_MASK_VARIATION);
+        return variation
+                == (TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_PASSWORD)
+                || variation
+                == (TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_WEB_PASSWORD)
+                || variation
+                == (TYPE_CLASS_NUMBER | TYPE_NUMBER_VARIATION_PASSWORD);
+    }
 
     /**
      * Ensure that the data in this EditorInfo is compatible with an application
@@ -542,6 +802,7 @@ public class EditorInfo implements InputType, Parcelable {
         pw.println(prefix + "hintText=" + hintText
                 + " label=" + label);
         pw.println(prefix + "packageName=" + packageName
+                + " autofillId=" + autofillId
                 + " fieldId=" + fieldId
                 + " fieldName=" + fieldName);
         pw.println(prefix + "extras=" + extras);
@@ -570,9 +831,11 @@ public class EditorInfo implements InputType, Parcelable {
         TextUtils.writeToParcel(hintText, dest, flags);
         TextUtils.writeToParcel(label, dest, flags);
         dest.writeString(packageName);
+        dest.writeParcelable(autofillId, flags);
         dest.writeInt(fieldId);
         dest.writeString(fieldName);
         dest.writeBundle(extras);
+        mInitialSurroundingText.writeToParcel(dest, flags);
         if (hintLocales != null) {
             hintLocales.writeToParcel(dest, flags);
         } else {
@@ -600,9 +863,13 @@ public class EditorInfo implements InputType, Parcelable {
                     res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.packageName = source.readString();
+                    res.autofillId = source.readParcelable(AutofillId.class.getClassLoader());
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();
+                    InitialSurroundingText initialSurroundingText =
+                            InitialSurroundingText.CREATOR.createFromParcel(source);
+                    res.mInitialSurroundingText = initialSurroundingText;
                     LocaleList hintLocales = LocaleList.CREATOR.createFromParcel(source);
                     res.hintLocales = hintLocales.isEmpty() ? null : hintLocales;
                     res.contentMimeTypes = source.readStringArray();
@@ -619,4 +886,92 @@ public class EditorInfo implements InputType, Parcelable {
         return 0;
     }
 
+    static final class InitialSurroundingText implements Parcelable {
+        @Nullable final CharSequence mSurroundingText;
+        final int mSelectionHead;
+        final int mSelectionEnd;
+
+        InitialSurroundingText() {
+            mSurroundingText = null;
+            mSelectionHead = 0;
+            mSelectionEnd = 0;
+        }
+
+        InitialSurroundingText(@Nullable CharSequence surroundingText, int selectionHead,
+                int selectionEnd) {
+            mSurroundingText = surroundingText;
+            mSelectionHead = selectionHead;
+            mSelectionEnd = selectionEnd;
+        }
+
+        @Nullable
+        private CharSequence getInitialTextBeforeCursor(int n, int flags) {
+            if (mSurroundingText == null) {
+                return null;
+            }
+
+            final int length = Math.min(n, mSelectionHead);
+            return ((flags & InputConnection.GET_TEXT_WITH_STYLES) != 0)
+                    ? mSurroundingText.subSequence(mSelectionHead - length, mSelectionHead)
+                    : TextUtils.substring(mSurroundingText, mSelectionHead - length,
+                            mSelectionHead);
+        }
+
+        @Nullable
+        private CharSequence getInitialSelectedText(int flags) {
+            if (mSurroundingText == null) {
+                return null;
+            }
+
+            return ((flags & InputConnection.GET_TEXT_WITH_STYLES) != 0)
+                    ? mSurroundingText.subSequence(mSelectionHead, mSelectionEnd)
+                    : TextUtils.substring(mSurroundingText, mSelectionHead, mSelectionEnd);
+        }
+
+        @Nullable
+        private CharSequence getInitialTextAfterCursor(int n, int flags) {
+            if (mSurroundingText == null) {
+                return null;
+            }
+
+            final int length = Math.min(n, mSurroundingText.length() - mSelectionEnd);
+            return ((flags & InputConnection.GET_TEXT_WITH_STYLES) != 0)
+                    ? mSurroundingText.subSequence(mSelectionEnd, mSelectionEnd + length)
+                    : TextUtils.substring(mSurroundingText, mSelectionEnd, mSelectionEnd + length);
+        }
+
+        private int getSelectionLength() {
+            return mSelectionEnd - mSelectionHead;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            TextUtils.writeToParcel(mSurroundingText, dest, flags);
+            dest.writeInt(mSelectionHead);
+            dest.writeInt(mSelectionEnd);
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<InitialSurroundingText>
+                CREATOR = new Parcelable.Creator<InitialSurroundingText>() {
+                    @Override
+                    public InitialSurroundingText createFromParcel(Parcel source) {
+                        final CharSequence initialText =
+                                TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+                        final int selectionHead = source.readInt();
+                        final int selectionEnd = source.readInt();
+
+                        return new InitialSurroundingText(initialText, selectionHead, selectionEnd);
+                    }
+
+                    @Override
+                    public InitialSurroundingText[] newArray(int size) {
+                        return new InitialSurroundingText[size];
+                    }
+                };
+    }
 }

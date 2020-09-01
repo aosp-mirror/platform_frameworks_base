@@ -29,13 +29,11 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ApplicationErrorReport;
-import android.app.Dialog;
+import android.app.ApplicationExitInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ModuleInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -57,7 +55,6 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.PackageWatchdog;
-import com.android.server.RescueParty;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.FileDescriptor;
@@ -89,6 +86,11 @@ class AppErrors {
     private final ProcessMap<Long> mProcessCrashTimesPersistent = new ProcessMap<>();
 
     /**
+     * The last time that various processes have crashed and shown an error dialog.
+     */
+    private final ProcessMap<Long> mProcessCrashShowDialogTimes = new ProcessMap<>();
+
+    /**
      * Set of applications that we consider to be bad, and will reject
      * incoming broadcasts from (which the user has no control over).
      * Processes are added to this set when they have crashed twice within
@@ -106,7 +108,7 @@ class AppErrors {
         mPackageWatchdog = watchdog;
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId, String dumpPackage) {
         if (mProcessCrashTimes.getMap().isEmpty() && mBadProcesses.getMap().isEmpty()) {
             return;
         }
@@ -313,17 +315,24 @@ class AppErrors {
         }
     }
 
-    void killAppAtUserRequestLocked(ProcessRecord app, Dialog fromDialog) {
-        if (app.anrDialog == fromDialog) {
-            app.anrDialog = null;
+    void killAppAtUserRequestLocked(ProcessRecord app) {
+        ProcessRecord.ErrorDialogController controller =
+                app.getDialogController();
+
+        int reasonCode = ApplicationExitInfo.REASON_ANR;
+        int subReason = ApplicationExitInfo.SUBREASON_UNKNOWN;
+        if (controller.hasDebugWaitingDialog()) {
+            reasonCode = ApplicationExitInfo.REASON_OTHER;
+            subReason = ApplicationExitInfo.SUBREASON_WAIT_FOR_DEBUGGER;
         }
-        if (app.waitDialog == fromDialog) {
-            app.waitDialog = null;
-        }
-        killAppImmediateLocked(app, "user-terminated", "user request after error");
+
+        controller.clearAllErrorDialogs();
+        killAppImmediateLocked(app, reasonCode, subReason,
+                "user-terminated", "user request after error");
     }
 
-    private void killAppImmediateLocked(ProcessRecord app, String reason, String killReason) {
+    private void killAppImmediateLocked(ProcessRecord app, int reasonCode, int subReason,
+            String reason, String killReason) {
         app.setCrashing(false);
         app.crashingReport = null;
         app.setNotResponding(false);
@@ -331,7 +340,7 @@ class AppErrors {
         if (app.pid > 0 && app.pid != MY_PID) {
             handleAppCrashLocked(app, reason,
                     null /*shortMsg*/, null /*longMsg*/, null /*stackTrace*/, null /*data*/);
-            app.kill(killReason, true);
+            app.kill(killReason, reasonCode, subReason, true);
         }
     }
 
@@ -385,7 +394,9 @@ class AppErrors {
             mService.mHandler.postDelayed(
                     () -> {
                         synchronized (mService) {
-                            killAppImmediateLocked(p, "forced", "killed for invalid state");
+                            killAppImmediateLocked(p, ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_INVALID_STATE,
+                                    "forced", "killed for invalid state");
                         }
                     },
                     5000L);
@@ -424,30 +435,15 @@ class AppErrors {
         }
 
         if (r != null) {
-            boolean isApexModule = false;
-            try {
-                for (String androidPackage : r.getPackageList()) {
-                    ModuleInfo moduleInfo = mContext.getPackageManager().getModuleInfo(
-                            androidPackage, /*flags=*/ 0);
-                    if (moduleInfo != null) {
-                        isApexModule = true;
-                        break;
-                    }
-                }
-            } catch (IllegalStateException | PackageManager.NameNotFoundException e) {
-                // Call to PackageManager#getModuleInfo() can result in NameNotFoundException or
-                // IllegalStateException. In case they are thrown, there isn't much we can do
-                // other than proceed with app crash handling.
-            }
-
-            if (r.isPersistent() || isApexModule) {
-                // If a persistent app or apex module is stuck in a crash loop, the device isn't
-                // very usable, so we want to consider sending out a rescue party.
-                RescueParty.noteAppCrash(mContext, r.uid);
-            }
-
             mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
                     PackageWatchdog.FAILURE_REASON_APP_CRASH);
+
+            mService.mProcessList.noteAppKill(r, (crashInfo != null
+                      && "Native crash".equals(crashInfo.exceptionClassName))
+                      ? ApplicationExitInfo.REASON_CRASH_NATIVE
+                      : ApplicationExitInfo.REASON_CRASH,
+                      ApplicationExitInfo.SUBREASON_UNKNOWN,
+                    "crash");
         }
 
         final int relaunchReason = r != null
@@ -514,7 +510,8 @@ class AppErrors {
                 stopReportingCrashesLocked(r);
             }
             if (res == AppErrorDialog.RESTART) {
-                mService.mProcessList.removeProcessLocked(r, false, true, "crash");
+                mService.mProcessList.removeProcessLocked(r, false, true,
+                        ApplicationExitInfo.REASON_CRASH, "crash");
                 if (taskId != INVALID_TASK_ID) {
                     try {
                         mService.startActivityFromRecents(taskId,
@@ -532,7 +529,8 @@ class AppErrors {
                     // Kill it with fire!
                     mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
                     if (!r.isPersistent()) {
-                        mService.mProcessList.removeProcessLocked(r, false, false, "crash");
+                        mService.mProcessList.removeProcessLocked(r, false, false,
+                                ApplicationExitInfo.REASON_CRASH, "crash");
                         mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                     }
                 } finally {
@@ -575,22 +573,26 @@ class AppErrors {
 
         return mService.mAtmInternal.handleAppCrashInActivityController(
                 name, pid, shortMsg, longMsg, timeMillis, crashInfo.stackTrace, () -> {
-            if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
-                    && "Native crash".equals(crashInfo.exceptionClassName)) {
-                Slog.w(TAG, "Skip killing native crashed app " + name
-                        + "(" + pid + ") during testing");
-            } else {
-                Slog.w(TAG, "Force-killing crashed app " + name + " at watcher's request");
-                if (r != null) {
-                    if (!makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, null)) {
-                        r.kill("crash", true);
-                    }
+                if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
+                        && "Native crash".equals(crashInfo.exceptionClassName)) {
+                    Slog.w(TAG, "Skip killing native crashed app " + name
+                            + "(" + pid + ") during testing");
                 } else {
-                    // Huh.
-                    Process.killProcess(pid);
-                    ProcessList.killProcessGroup(uid, pid);
+                    Slog.w(TAG, "Force-killing crashed app " + name + " at watcher's request");
+                    if (r != null) {
+                        if (!makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, null)) {
+                            r.kill("crash", ApplicationExitInfo.REASON_CRASH, true);
+                        }
+                    } else {
+                        // Huh.
+                        Process.killProcess(pid);
+                        ProcessList.killProcessGroup(uid, pid);
+                        mService.mProcessList.noteAppKill(pid, uid,
+                                ApplicationExitInfo.REASON_CRASH,
+                                ApplicationExitInfo.SUBREASON_UNKNOWN,
+                                "crash");
+                    }
                 }
-            }
         });
     }
 
@@ -700,10 +702,10 @@ class AppErrors {
         }
 
         // Bump up the crash count of any services currently running in the proc.
-        for (int i = app.services.size() - 1; i >= 0; i--) {
+        for (int i = app.numberOfRunningServices() - 1; i >= 0; i--) {
             // Any services running in the application need to be placed
             // back in the pending list.
-            ServiceRecord sr = app.services.valueAt(i);
+            ServiceRecord sr = app.getRunningServiceAt(i);
             // If the service was restarted a while ago, then reset crash count, else increment it.
             if (now > sr.restartTime + ProcessList.MIN_CRASH_INTERVAL) {
                 sr.crashCount = 1;
@@ -745,7 +747,8 @@ class AppErrors {
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
-                mService.mProcessList.removeProcessLocked(app, false, tryAgain, "crash");
+                mService.mProcessList.removeProcessLocked(app, false, tryAgain,
+                        ApplicationExitInfo.REASON_CRASH, "crash");
                 mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                 if (!showBackground) {
                     return false;
@@ -795,8 +798,6 @@ class AppErrors {
         boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
-        AppErrorDialog dialogToShow = null;
-        final String packageName;
         final int userId;
         synchronized (mService) {
             final ProcessRecord proc = data.proc;
@@ -805,9 +806,8 @@ class AppErrors {
                 Slog.e(TAG, "handleShowAppErrorUi: proc is null");
                 return;
             }
-            packageName = proc.info.packageName;
             userId = proc.userId;
-            if (proc.crashDialog != null) {
+            if (proc.getDialogController().hasCrashDialogs()) {
                 Slog.e(TAG, "App already has crash dialog: " + proc);
                 if (res != null) {
                     res.set(AppErrorDialog.ALREADY_SHOWING);
@@ -827,6 +827,11 @@ class AppErrors {
                 }
                 return;
             }
+            Long crashShowErrorTime = null;
+            if (!proc.isolated) {
+                crashShowErrorTime = mProcessCrashShowDialogTimes.get(proc.info.processName,
+                        proc.uid);
+            }
             final boolean showFirstCrash = Settings.Global.getInt(
                     mContext.getContentResolver(),
                     Settings.Global.SHOW_FIRST_CRASH_DIALOG, 0) != 0;
@@ -837,10 +842,16 @@ class AppErrors {
                     mService.mUserController.getCurrentUserId()) != 0;
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
+            final long now = SystemClock.uptimeMillis();
+            final boolean shouldThottle = crashShowErrorTime != null
+                    && now < crashShowErrorTime + ProcessList.MIN_CRASH_INTERVAL;
             if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
-                    && !crashSilenced
+                    && !crashSilenced && !shouldThottle
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
-                proc.crashDialog = dialogToShow = new AppErrorDialog(mContext, mService, data);
+                proc.getDialogController().showCrashDialogs(data);
+                if (!proc.isolated) {
+                    mProcessCrashShowDialogTimes.put(proc.info.processName, proc.uid, now);
+                }
             } else {
                 // The device is asleep, so just pretend that the user
                 // saw a crash dialog and hit "force quit".
@@ -848,11 +859,6 @@ class AppErrors {
                     res.set(AppErrorDialog.CANT_SHOW);
                 }
             }
-        }
-        // If we've created a crash dialog, show it without the lock held
-        if (dialogToShow != null) {
-            Slog.i(TAG, "Showing crash dialog for package " + packageName + " u" + userId);
-            dialogToShow.show();
         }
     }
 
@@ -864,7 +870,6 @@ class AppErrors {
     }
 
     void handleShowAnrUi(Message msg) {
-        Dialog dialogToShow = null;
         List<VersionedPackage> packageList = null;
         synchronized (mService) {
             AppNotRespondingDialog.Data data = (AppNotRespondingDialog.Data) msg.obj;
@@ -876,7 +881,7 @@ class AppErrors {
             if (!proc.isPersistent()) {
                 packageList = proc.getPackageListWithVersionCode();
             }
-            if (proc.anrDialog != null) {
+            if (proc.getDialogController().hasAnrDialogs()) {
                 Slog.e(TAG, "App already has anr dialog: " + proc);
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
                         AppNotRespondingDialog.ALREADY_SHOWING);
@@ -886,18 +891,13 @@ class AppErrors {
             boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
             if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
-                dialogToShow = new AppNotRespondingDialog(mService, mContext, data);
-                proc.anrDialog = dialogToShow;
+                proc.getDialogController().showAnrDialogs(data);
             } else {
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
                         AppNotRespondingDialog.CANT_SHOW);
                 // Just kill the app if there is no dialog to be shown.
-                mService.killAppAtUsersRequest(proc, null);
+                mService.killAppAtUsersRequest(proc);
             }
-        }
-        // If we've created a crash dialog, show it without the lock held
-        if (dialogToShow != null) {
-            dialogToShow.show();
         }
         // Notify PackageWatchdog without the lock held
         if (packageList != null) {

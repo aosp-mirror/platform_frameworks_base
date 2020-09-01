@@ -34,6 +34,7 @@
 #include <string>
 #include <vector>
 
+#include "R.h"
 #include "TestHelpers.h"
 #include "androidfw/PosixUtils.h"
 #include "gmock/gmock.h"
@@ -127,10 +128,14 @@ TEST_F(Idmap2BinaryTests, Dump) {
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find("0x7f010000 -> 0x7f010000 integer/int1"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f02000c -> 0x7f020000 string/str1"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f02000e -> 0x7f020001 string/str3"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f02000f -> 0x7f020002 string/str4"), std::string::npos);
+  ASSERT_NE(result->stdout.find(R::target::integer::literal::int1 + " -> 0x7f010000 integer/int1"),
+            std::string::npos);
+  ASSERT_NE(result->stdout.find(R::target::string::literal::str1 + " -> 0x7f020000 string/str1"),
+            std::string::npos);
+  ASSERT_NE(result->stdout.find(R::target::string::literal::str3 + " -> 0x7f020001 string/str3"),
+            std::string::npos);
+  ASSERT_NE(result->stdout.find(R::target::string::literal::str4 + " -> 0x7f020002 string/str4"),
+            std::string::npos);
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -141,7 +146,6 @@ TEST_F(Idmap2BinaryTests, Dump) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   ASSERT_NE(result->stdout.find("00000000: 504d4449  magic"), std::string::npos);
-  ASSERT_NE(result->stdout.find("00000210:     007f  target package id"), std::string::npos);
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
@@ -298,7 +302,7 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                           "lookup",
                           "--idmap-path", GetIdmapPath(),
                           "--config", "",
-                          "--resid", "0x7f02000c"});  // string/str1
+                          "--resid", R::target::string::literal::str1});
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;

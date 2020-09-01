@@ -17,6 +17,7 @@
 package com.android.server.role;
 
 import android.Manifest;
+import android.annotation.AnyThread;
 import android.annotation.CheckResult;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -49,7 +50,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.service.sms.FinancialSmsService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -59,6 +59,8 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AndroidFuture;
+import com.android.internal.infra.ThrottledRunnable;
 import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
@@ -72,6 +74,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -80,7 +83,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -96,6 +98,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     private static final String LOG_TAG = RoleManagerService.class.getSimpleName();
 
     private static final boolean DEBUG = false;
+
+    private static final long GRANT_DEFAULT_ROLES_INTERVAL_MILLIS = 1000;
 
     @NonNull
     private final UserManagerInternal mUserManagerInternal;
@@ -140,6 +144,14 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     @NonNull
     private final Handler mListenerHandler = FgThread.getHandler();
 
+    /**
+     * Maps user id to its throttled runnable for granting default roles.
+     */
+    @GuardedBy("mLock")
+    @NonNull
+    private final SparseArray<ThrottledRunnable> mGrantDefaultRolesThrottledRunnables =
+            new SparseArray<>();
+
     public RoleManagerService(@NonNull Context context,
             @NonNull RoleHoldersResolver legacyRoleResolver) {
         super(context);
@@ -153,11 +165,11 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         LocalServices.addService(RoleManagerInternal.class, new Internal());
 
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        packageManagerInternal.setDefaultBrowserProvider(new DefaultBrowserProvider());
-        packageManagerInternal.setDefaultDialerProvider(new DefaultDialerProvider());
-        packageManagerInternal.setDefaultHomeProvider(new DefaultHomeProvider());
+        PermissionManagerServiceInternal permissionManagerInternal =
+                LocalServices.getService(PermissionManagerServiceInternal.class);
+        permissionManagerInternal.setDefaultBrowserProvider(new DefaultBrowserProvider());
+        permissionManagerInternal.setDefaultDialerProvider(new DefaultDialerProvider());
+        permissionManagerInternal.setDefaultHomeProvider(new DefaultHomeProvider());
 
         registerUserRemovedReceiver();
     }
@@ -180,8 +192,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     public void onStart() {
         publishBinderService(Context.ROLE_SERVICE, new Stub());
 
-        //TODO add watch for new user creation and run default grants for them
-
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -201,65 +211,80 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     // Package is being upgraded - we're about to get ACTION_PACKAGE_ADDED
                     return;
                 }
-                performInitialGrantsIfNecessaryAsync(userId);
+                maybeGrantDefaultRolesAsync(userId);
             }
         }, UserHandle.ALL, intentFilter, null, null);
     }
 
     @Override
     public void onStartUser(@UserIdInt int userId) {
-        performInitialGrantsIfNecessary(userId);
-    }
-
-    private CompletableFuture<Void> performInitialGrantsIfNecessaryAsync(@UserIdInt int userId) {
-        RoleUserState userState;
-        userState = getOrCreateUserState(userId);
-
-        String packagesHash = computeComponentStateHash(userId);
-        String oldPackagesHash = userState.getPackagesHash();
-        boolean needGrant = !Objects.equals(packagesHash, oldPackagesHash);
-        if (needGrant) {
-
-            //TODO gradually add more role migrations statements here for remaining roles
-            // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
-            // for a given role before adding a migration statement for it here
-            migrateRoleIfNecessary(RoleManager.ROLE_ASSISTANT, userId);
-            migrateRoleIfNecessary(RoleManager.ROLE_BROWSER, userId);
-            migrateRoleIfNecessary(RoleManager.ROLE_DIALER, userId);
-            migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
-            migrateRoleIfNecessary(RoleManager.ROLE_EMERGENCY, userId);
-
-            // Some vital packages state has changed since last role grant
-            // Run grants again
-            Slog.i(LOG_TAG, "Granting default permissions...");
-            CompletableFuture<Void> result = new CompletableFuture<>();
-            getOrCreateController(userId).grantDefaultRoles(FgThread.getExecutor(),
-                    successful -> {
-                        if (successful) {
-                            userState.setPackagesHash(packagesHash);
-                            result.complete(null);
-                        } else {
-                            result.completeExceptionally(new RuntimeException());
-                        }
-                    });
-            return result;
-        } else if (DEBUG) {
-            Slog.i(LOG_TAG, "Already ran grants for package state " + packagesHash);
-        }
-        return CompletableFuture.completedFuture(null);
+        maybeGrantDefaultRolesSync(userId);
     }
 
     @MainThread
-    private void performInitialGrantsIfNecessary(@UserIdInt int userId) {
-        CompletableFuture<Void> result = performInitialGrantsIfNecessaryAsync(userId);
+    private void maybeGrantDefaultRolesSync(@UserIdInt int userId) {
+        AndroidFuture<Void> future = maybeGrantDefaultRolesInternal(userId);
         try {
-            result.get(30, TimeUnit.SECONDS);
+            future.get(30, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
+            Slog.e(LOG_TAG, "Failed to grant default roles for user " + userId, e);
         }
     }
 
-    private void migrateRoleIfNecessary(String role, @UserIdInt int userId) {
+    private void maybeGrantDefaultRolesAsync(@UserIdInt int userId) {
+        ThrottledRunnable runnable;
+        synchronized (mLock) {
+            runnable = mGrantDefaultRolesThrottledRunnables.get(userId);
+            if (runnable == null) {
+                runnable = new ThrottledRunnable(FgThread.getHandler(),
+                        GRANT_DEFAULT_ROLES_INTERVAL_MILLIS,
+                        () -> maybeGrantDefaultRolesInternal(userId));
+                mGrantDefaultRolesThrottledRunnables.put(userId, runnable);
+            }
+        }
+        runnable.run();
+    }
+
+    @AnyThread
+    @NonNull
+    private AndroidFuture<Void> maybeGrantDefaultRolesInternal(@UserIdInt int userId) {
+        RoleUserState userState = getOrCreateUserState(userId);
+        String oldPackagesHash = userState.getPackagesHash();
+        String newPackagesHash = computeComponentStateHash(userId);
+        if (Objects.equals(oldPackagesHash, newPackagesHash)) {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "Already granted default roles for packages hash "
+                        + newPackagesHash);
+            }
+            return AndroidFuture.completedFuture(null);
+        }
+
+        //TODO gradually add more role migrations statements here for remaining roles
+        // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
+        // for a given role before adding a migration statement for it here
+        maybeMigrateRole(RoleManager.ROLE_ASSISTANT, userId);
+        maybeMigrateRole(RoleManager.ROLE_BROWSER, userId);
+        maybeMigrateRole(RoleManager.ROLE_DIALER, userId);
+        maybeMigrateRole(RoleManager.ROLE_SMS, userId);
+        maybeMigrateRole(RoleManager.ROLE_EMERGENCY, userId);
+        maybeMigrateRole(RoleManager.ROLE_HOME, userId);
+
+        // Some package state has changed, so grant default roles again.
+        Slog.i(LOG_TAG, "Granting default roles...");
+        AndroidFuture<Void> future = new AndroidFuture<>();
+        getOrCreateController(userId).grantDefaultRoles(FgThread.getExecutor(),
+                successful -> {
+                    if (successful) {
+                        userState.setPackagesHash(newPackagesHash);
+                        future.complete(null);
+                    } else {
+                        future.completeExceptionally(new RuntimeException());
+                    }
+                });
+        return future;
+    }
+
+    private void maybeMigrateRole(String role, @UserIdInt int userId) {
         // Any role for which we have a record are already migrated
         RoleUserState userState = getOrCreateUserState(userId);
         if (!userState.isRoleAvailable(role)) {
@@ -282,12 +307,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         pm.forEachInstalledPackage(FunctionalUtils.uncheckExceptions(pkg -> {
-            out.write(pkg.packageName.getBytes());
+            out.write(pkg.getPackageName().getBytes());
             out.write(BitUtils.toBytes(pkg.getLongVersionCode()));
-            out.write(pm.getApplicationEnabledState(pkg.packageName, userId));
+            out.write(pm.getApplicationEnabledState(pkg.getPackageName(), userId));
 
             ArraySet<String> enabledComponents =
-                    pm.getEnabledComponents(pkg.packageName, userId);
+                    pm.getEnabledComponents(pkg.getPackageName(), userId);
             int numComponents = CollectionUtils.size(enabledComponents);
             out.write(numComponents);
             for (int i = 0; i < numComponents; i++) {
@@ -295,12 +320,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             }
 
             ArraySet<String> disabledComponents =
-                    pm.getDisabledComponents(pkg.packageName, userId);
+                    pm.getDisabledComponents(pkg.getPackageName(), userId);
             numComponents = CollectionUtils.size(disabledComponents);
             for (int i = 0; i < numComponents; i++) {
                 out.write(disabledComponents.valueAt(i).getBytes());
             }
-            for (Signature signature : pkg.mSigningDetails.signatures) {
+            for (Signature signature : pkg.getSigningDetails().signatures) {
                 out.write(signature.toByteArray());
             }
         }), userId);
@@ -365,6 +390,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         RemoteCallbackList<IOnRoleHoldersChangedListener> listeners;
         RoleUserState userState;
         synchronized (mLock) {
+            mGrantDefaultRolesThrottledRunnables.remove(userId);
             listeners = mListeners.removeReturnOld(userId);
             mControllers.remove(userId);
             userState = mUserStates.removeReturnOld(userId);
@@ -485,7 +511,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
 
             getOrCreateController(userId).onAddRoleHolder(roleName, packageName, flags,
                     callback);
@@ -505,7 +531,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
             Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
 
             getOrCreateController(userId).onRemoveRoleHolder(roleName, packageName, flags,
                     callback);
@@ -524,7 +550,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     "clearRoleHoldersAsUser");
 
             Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
 
             getOrCreateController(userId).onClearRoleHolders(roleName, flags, callback);
         }
@@ -540,7 +566,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS,
                     "addOnRoleHoldersChangedListenerAsUser");
 
-            Preconditions.checkNotNull(listener, "listener cannot be null");
+            Objects.requireNonNull(listener, "listener cannot be null");
 
             RemoteCallbackList<IOnRoleHoldersChangedListener> listeners = getOrCreateListeners(
                     userId);
@@ -558,7 +584,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             getContext().enforceCallingOrSelfPermission(Manifest.permission.OBSERVE_ROLE_HOLDERS,
                     "removeOnRoleHoldersChangedListenerAsUser");
 
-            Preconditions.checkNotNull(listener, "listener cannot be null");
+            Objects.requireNonNull(listener, "listener cannot be null");
 
             RemoteCallbackList<IOnRoleHoldersChangedListener> listeners = getListeners(userId);
             if (listener == null) {
@@ -573,7 +599,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     RoleManager.PERMISSION_MANAGE_ROLES_FROM_CONTROLLER,
                     "setRoleNamesFromController");
 
-            Preconditions.checkNotNull(roleNames, "roleNames cannot be null");
+            Objects.requireNonNull(roleNames, "roleNames cannot be null");
 
             int userId = UserHandle.getCallingUserId();
             getOrCreateUserState(userId).setRoleNames(roleNames);
@@ -696,7 +722,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
     }
 
-    private class DefaultBrowserProvider implements PackageManagerInternal.DefaultBrowserProvider {
+    private class DefaultBrowserProvider implements
+            PermissionManagerServiceInternal.DefaultBrowserProvider {
 
         @Nullable
         @Override
@@ -707,7 +734,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
         @Override
         public boolean setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId) {
-            CompletableFuture<Void> future = new CompletableFuture<>();
+            AndroidFuture<Void> future = new AndroidFuture<>();
             RemoteCallback callback = new RemoteCallback(result -> {
                 boolean successful = result != null;
                 if (successful) {
@@ -750,7 +777,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
     }
 
-    private class DefaultDialerProvider implements PackageManagerInternal.DefaultDialerProvider {
+    private class DefaultDialerProvider implements
+            PermissionManagerServiceInternal.DefaultDialerProvider {
 
         @Nullable
         @Override
@@ -760,7 +788,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         }
     }
 
-    private class DefaultHomeProvider implements PackageManagerInternal.DefaultHomeProvider {
+    private class DefaultHomeProvider implements
+            PermissionManagerServiceInternal.DefaultHomeProvider {
 
         @Nullable
         @Override

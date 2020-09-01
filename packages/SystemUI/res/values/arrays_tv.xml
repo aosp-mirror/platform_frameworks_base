@@ -33,4 +33,7 @@
         <item>com.google.android.tungsten.setupwraith/.settings.usage.UsageDiagnosticsSettingActivity</item>
         <item>com.google.android.tvlauncher/.notifications.NotificationsSidePanelActivity</item>
     </string-array>
+
+    <string-array name="audio_recording_disclosure_exempt_apps" translatable="false">
+    </string-array>
 </resources>

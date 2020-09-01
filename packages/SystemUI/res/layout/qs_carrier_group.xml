@@ -15,7 +15,7 @@
   -->
 
 <!-- Extends LinearLayout -->
-<com.android.systemui.qs.QSCarrierGroup
+<com.android.systemui.qs.carrier.QSCarrierGroup
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_mobile"
     android:layout_width="0dp"
@@ -29,6 +29,9 @@
         android:id="@+id/no_carrier_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:gravity="center_vertical"
         android:textAppearance="@style/TextAppearance.QS.Status"
         android:textDirection="locale"
         android:marqueeRepeatLimit="marquee_forever"
@@ -68,4 +71,4 @@
         android:layout_weight="1"
         android:visibility="gone"/>
 
-</com.android.systemui.qs.QSCarrierGroup>
+</com.android.systemui.qs.carrier.QSCarrierGroup>

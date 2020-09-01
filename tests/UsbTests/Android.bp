@@ -26,6 +26,7 @@ android_test {
         "services.net",
         "services.usb",
         "truth-prebuilt",
+        "UsbManagerTestLib",
     ],
     jni_libs: ["libdexmakerjvmtiagent"],
     certificate: "platform",

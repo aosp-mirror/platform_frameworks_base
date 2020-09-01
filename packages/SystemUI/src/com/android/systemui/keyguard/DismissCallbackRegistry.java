@@ -11,24 +11,33 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.keyguard;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.systemui.Dependency;
-import com.android.systemui.UiOffloadThread;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Registry holding the current set of {@link IKeyguardDismissCallback}s.
  */
+@Singleton
 public class DismissCallbackRegistry {
 
     private final ArrayList<DismissCallbackWrapper> mDismissCallbacks = new ArrayList<>();
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    private final Executor mUiBgExecutor;
+
+    @Inject
+    public DismissCallbackRegistry(@UiBackground Executor uiBgExecutor) {
+        mUiBgExecutor = uiBgExecutor;
+    }
 
     public void addCallback(IKeyguardDismissCallback callback) {
         mDismissCallbacks.add(new DismissCallbackWrapper(callback));
@@ -37,7 +46,7 @@ public class DismissCallbackRegistry {
     public void notifyDismissCancelled() {
         for (int i = mDismissCallbacks.size() - 1; i >= 0; i--) {
             DismissCallbackWrapper callback = mDismissCallbacks.get(i);
-            mUiOffloadThread.submit(callback::notifyDismissCancelled);
+            mUiBgExecutor.execute(callback::notifyDismissCancelled);
         }
         mDismissCallbacks.clear();
     }
@@ -45,7 +54,7 @@ public class DismissCallbackRegistry {
     public void notifyDismissSucceeded() {
         for (int i = mDismissCallbacks.size() - 1; i >= 0; i--) {
             DismissCallbackWrapper callback = mDismissCallbacks.get(i);
-            mUiOffloadThread.submit(callback::notifyDismissSucceeded);
+            mUiBgExecutor.execute(callback::notifyDismissSucceeded);
         }
         mDismissCallbacks.clear();
     }

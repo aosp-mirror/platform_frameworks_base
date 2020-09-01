@@ -23,15 +23,16 @@ import android.content.Intent;
 import android.os.SystemClock;
 
 import androidx.lifecycle.Lifecycle.Event;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.settingslib.core.lifecycle.LifecycleObserver;
+import com.android.settingslib.core.lifecycle.events.OnAttach;
 
 /**
  * Logs visibility change of a fragment.
  */
-public class VisibilityLoggerMixin implements LifecycleObserver {
+public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
 
     private static final String TAG = "VisibilityLoggerMixin";
 
@@ -39,6 +40,7 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
 
     private MetricsFeatureProvider mMetricsFeature;
     private int mSourceMetricsCategory = MetricsProto.MetricsEvent.VIEW_UNKNOWN;
+    private long mCreationTimestamp;
     private long mVisibleTimestamp;
 
     public VisibilityLoggerMixin(int metricsCategory, MetricsFeatureProvider metricsFeature) {
@@ -46,19 +48,48 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
         mMetricsFeature = metricsFeature;
     }
 
+    @Override
+    public void onAttach() {
+        mCreationTimestamp = SystemClock.elapsedRealtime();
+    }
+
     @OnLifecycleEvent(Event.ON_RESUME)
     public void onResume() {
+        if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
+            return;
+        }
         mVisibleTimestamp = SystemClock.elapsedRealtime();
-        if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {
-            mMetricsFeature.visible(null /* context */, mSourceMetricsCategory, mMetricsCategory);
+        if (mCreationTimestamp != 0L) {
+            final int elapse = (int) (mVisibleTimestamp - mCreationTimestamp);
+            mMetricsFeature.visible(null /* context */, mSourceMetricsCategory,
+                    mMetricsCategory, elapse);
+        } else {
+            mMetricsFeature.visible(null /* context */, mSourceMetricsCategory,
+                    mMetricsCategory, 0);
         }
     }
 
     @OnLifecycleEvent(Event.ON_PAUSE)
     public void onPause() {
-        mVisibleTimestamp = 0;
+        mCreationTimestamp = 0;
         if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {
-            mMetricsFeature.hidden(null /* context */, mMetricsCategory);
+            final int elapse = (int) (SystemClock.elapsedRealtime() - mVisibleTimestamp);
+            mMetricsFeature.hidden(null /* context */, mMetricsCategory, elapse);
+        }
+    }
+
+    /**
+     * Logs the elapsed time from onAttach to calling {@link #writeElapsedTimeMetric(int, String)}.
+     * @param action : The value of the Action Enums.
+     * @param key : The value of special key string.
+     */
+    public void writeElapsedTimeMetric(int action, String key) {
+        if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
+            return;
+        }
+        if (mCreationTimestamp != 0L) {
+            final int elapse = (int) (SystemClock.elapsedRealtime() - mCreationTimestamp);
+            mMetricsFeature.action(METRICS_CATEGORY_UNKNOWN, action, mMetricsCategory, key, elapse);
         }
     }
 

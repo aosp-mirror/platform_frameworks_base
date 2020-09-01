@@ -821,6 +821,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             // was a click, the text view gets the selected item
             // from the drop down as its content
             case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_TAB:
                 if (event.hasNoModifiers()) {

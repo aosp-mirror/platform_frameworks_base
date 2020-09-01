@@ -17,22 +17,14 @@
 package android.util.apk;
 
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_DSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_ECDSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_ECDSA_WITH_SHA512;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PSS_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_RSA_PSS_WITH_SHA512;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_VERITY_DSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_VERITY_ECDSA_WITH_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.compareSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getContentDigestAlgorithmJcaDigestAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getLengthPrefixedSlice;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContentDigestAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.util.ArrayMap;
@@ -126,7 +118,10 @@ public class ApkSignatureSchemeV2Verifier {
         return vSigner.certs;
     }
 
-    private static VerifiedSigner verify(String apkFile, boolean verifyIntegrity)
+    /**
+     * Same as above returns the full signer object, containing additional info e.g. digest.
+     */
+    public static VerifiedSigner verify(String apkFile, boolean verifyIntegrity)
             throws SignatureNotFoundException, SecurityException, IOException {
         try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
             return verify(apk, verifyIntegrity);
@@ -218,9 +213,11 @@ public class ApkSignatureSchemeV2Verifier {
                     verityDigest, apk.length(), signatureInfo);
         }
 
+        byte[] digest = pickBestDigestForV4(contentDigests);
+
         return new VerifiedSigner(
                 signerCerts.toArray(new X509Certificate[signerCerts.size()][]),
-                verityRootHash);
+                verityRootHash, digest);
     }
 
     private static X509Certificate[] verifySigner(
@@ -428,24 +425,6 @@ public class ApkSignatureSchemeV2Verifier {
         }
     }
 
-    private static boolean isSupportedSignatureAlgorithm(int sigAlgorithm) {
-        switch (sigAlgorithm) {
-            case SIGNATURE_RSA_PSS_WITH_SHA256:
-            case SIGNATURE_RSA_PSS_WITH_SHA512:
-            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256:
-            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
-            case SIGNATURE_ECDSA_WITH_SHA256:
-            case SIGNATURE_ECDSA_WITH_SHA512:
-            case SIGNATURE_DSA_WITH_SHA256:
-            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
-            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
-            case SIGNATURE_VERITY_DSA_WITH_SHA256:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     /**
      * Verified APK Signature Scheme v2 signer.
      *
@@ -453,11 +432,14 @@ public class ApkSignatureSchemeV2Verifier {
      */
     public static class VerifiedSigner {
         public final X509Certificate[][] certs;
-        public final byte[] verityRootHash;
 
-        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash) {
+        public final byte[] verityRootHash;
+        public final byte[] digest;
+
+        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash, byte[] digest) {
             this.certs = certs;
             this.verityRootHash = verityRootHash;
+            this.digest = digest;
         }
 
     }

@@ -21,6 +21,8 @@
 
 using android::ConfigDescription;
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag) {
@@ -290,43 +292,51 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
     pb::Overlayable* pb_overlayable = pb_table->add_overlayable();
     pb_overlayable->set_name(overlayable_item.overlayable->name);
     pb_overlayable->set_actor(overlayable_item.overlayable->actor);
-    SerializeSourceToPb(overlayable_item.overlayable->source, source_pool,
-                        pb_overlayable->mutable_source());
+    if (source_pool != nullptr) {
+      SerializeSourceToPb(overlayable_item.overlayable->source, source_pool,
+                          pb_overlayable->mutable_source());
+    }
   }
 
   pb::OverlayableItem* pb_overlayable_item = pb_entry->mutable_overlayable_item();
   pb_overlayable_item->set_overlayable_idx(i);
 
-  if (overlayable_item.policies & OverlayableItem::Policy::kPublic) {
+  if (overlayable_item.policies & PolicyFlags::PUBLIC) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::PUBLIC);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kProduct) {
+  if (overlayable_item.policies & PolicyFlags::PRODUCT_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kSystem) {
+  if (overlayable_item.policies & PolicyFlags::SYSTEM_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::SYSTEM);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kVendor) {
+  if (overlayable_item.policies & PolicyFlags::VENDOR_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::VENDOR);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kSignature) {
+  if (overlayable_item.policies & PolicyFlags::SIGNATURE) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::SIGNATURE);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kOdm) {
+  if (overlayable_item.policies & PolicyFlags::ODM_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::ODM);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kOem) {
+  if (overlayable_item.policies & PolicyFlags::OEM_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::OEM);
   }
+  if (overlayable_item.policies & PolicyFlags::ACTOR_SIGNATURE) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::ACTOR);
+  }
 
-  SerializeSourceToPb(overlayable_item.source, source_pool,
-                      pb_overlayable_item->mutable_source());
+  if (source_pool != nullptr) {
+    SerializeSourceToPb(overlayable_item.source, source_pool,
+                        pb_overlayable_item->mutable_source());
+  }
   pb_overlayable_item->set_comment(overlayable_item.comment);
 }
 
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
-                        IDiagnostics* diag) {
-  StringPool source_pool;
+                        IDiagnostics* diag, SerializeTableOptions options) {
+  auto source_pool = (options.exclude_sources) ? nullptr : util::make_unique<StringPool>();
+
   pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
   pb_fingerprint->set_tool(util::GetToolName());
   pb_fingerprint->set_version(util::GetToolFingerprint());
@@ -356,32 +366,40 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
         pb_visibility->set_level(SerializeVisibilityToPb(entry->visibility.level));
-        SerializeSourceToPb(entry->visibility.source, &source_pool,
-                            pb_visibility->mutable_source());
+        if (source_pool != nullptr) {
+          SerializeSourceToPb(entry->visibility.source, source_pool.get(),
+                              pb_visibility->mutable_source());
+        }
         pb_visibility->set_comment(entry->visibility.comment);
 
         if (entry->allow_new) {
           pb::AllowNew* pb_allow_new = pb_entry->mutable_allow_new();
-          SerializeSourceToPb(entry->allow_new.value().source, &source_pool,
-                              pb_allow_new->mutable_source());
+          if (source_pool != nullptr) {
+            SerializeSourceToPb(entry->allow_new.value().source, source_pool.get(),
+                                pb_allow_new->mutable_source());
+          }
           pb_allow_new->set_comment(entry->allow_new.value().comment);
         }
 
         if (entry->overlayable_item) {
-          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables, &source_pool,
-                                       pb_entry, out_table);
+          SerializeOverlayableItemToPb(entry->overlayable_item.value(), overlayables,
+                                       source_pool.get(), pb_entry, out_table);
         }
 
         for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
           pb::ConfigValue* pb_config_value = pb_entry->add_config_value();
           SerializeConfig(config_value->config, pb_config_value->mutable_config());
           pb_config_value->mutable_config()->set_product(config_value->product);
-          SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(), &source_pool);
+          SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(),
+                             source_pool.get());
         }
       }
     }
   }
-  SerializeStringPoolToPb(source_pool, out_table->mutable_source_pool(), diag);
+
+  if (source_pool != nullptr) {
+    SerializeStringPoolToPb(*source_pool, out_table->mutable_source_pool(), diag);
+  }
 }
 
 static pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type) {
@@ -405,6 +423,9 @@ static void SerializeReferenceToPb(const Reference& ref, pb::Reference* pb_ref) 
 
   pb_ref->set_private_(ref.private_reference);
   pb_ref->set_type(SerializeReferenceTypeToPb(ref.reference_type));
+  if (ref.is_dynamic) {
+    pb_ref->mutable_is_dynamic()->set_value(ref.is_dynamic);
+  }
 }
 
 template <typename T>
@@ -552,6 +573,7 @@ class ValueSerializer : public ConstValueVisitor {
       SerializeItemMetaDataToPb(symbol.symbol, pb_symbol, src_pool_);
       SerializeReferenceToPb(symbol.symbol, pb_symbol->mutable_name());
       pb_symbol->set_value(symbol.value);
+      pb_symbol->set_type(symbol.type);
     }
   }
 

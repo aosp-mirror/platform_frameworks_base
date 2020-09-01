@@ -43,6 +43,10 @@ import java.util.Set;
  * through the {@link CameraManager CameraManager}
  * interface with {@link CameraManager#getCameraCharacteristics}.</p>
  *
+ * <p>When obtained by a client that does not hold the CAMERA permission, some metadata values are
+ * not included. The list of keys that require the permission is given by
+ * {@link #getKeysNeedingPermission}.</p>
+ *
  * <p>{@link CameraCharacteristics} objects are immutable.</p>
  *
  * @see CameraDevice
@@ -488,11 +492,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * The respective value of such request key can be obtained by calling
      * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
      * individual physical device requests must be built via
-     * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.
-     * Such extended capture requests can be passed only to
-     * {@link CameraCaptureSession#capture } or {@link CameraCaptureSession#captureBurst } and
-     * not to {@link CameraCaptureSession#setRepeatingRequest } or
-     * {@link CameraCaptureSession#setRepeatingBurst }.</p>
+     * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.</p>
      *
      * <p>The list returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
@@ -760,14 +760,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>For devices at the LIMITED level or above:</p>
      * <ul>
-     * <li>For YUV_420_888 burst capture use case, this list will always include (<code>min</code>, <code>max</code>)
-     * and (<code>max</code>, <code>max</code>) where <code>min</code> &lt;= 15 and <code>max</code> = the maximum output frame rate of the
+     * <li>For devices that advertise NIR color filter arrangement in
+     * {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}, this list will always include
+     * (<code>max</code>, <code>max</code>) where <code>max</code> = the maximum output frame rate of the maximum YUV_420_888
+     * output size.</li>
+     * <li>For devices advertising any color filter arrangement other than NIR, or devices not
+     * advertising color filter arrangement, this list will always include (<code>min</code>, <code>max</code>) and
+     * (<code>max</code>, <code>max</code>) where <code>min</code> &lt;= 15 and <code>max</code> = the maximum output frame rate of the
      * maximum YUV_420_888 output size.</li>
      * </ul>
      * <p><b>Units</b>: Frames per second (FPS)</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      */
     @PublicKey
     @NonNull
@@ -929,7 +935,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of the maximum number of regions that can be used for metering in
      * auto-exposure (AE), auto-white balance (AWB), and auto-focus (AF);
-     * this corresponds to the the maximum number of elements in
+     * this corresponds to the maximum number of elements in
      * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}, {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions},
      * and {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
      * <p><b>Range of valid values:</b><br></p>
@@ -949,7 +955,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The maximum number of metering regions that can be used by the auto-exposure (AE)
      * routine.</p>
-     * <p>This corresponds to the the maximum allowed number of elements in
+     * <p>This corresponds to the maximum allowed number of elements in
      * {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}.</p>
      * <p><b>Range of valid values:</b><br>
      * Value will be &gt;= 0. For FULL-capability devices, this
@@ -967,7 +973,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The maximum number of metering regions that can be used by the auto-white balance (AWB)
      * routine.</p>
-     * <p>This corresponds to the the maximum allowed number of elements in
+     * <p>This corresponds to the maximum allowed number of elements in
      * {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}.</p>
      * <p><b>Range of valid values:</b><br>
      * Value will be &gt;= 0.</p>
@@ -983,7 +989,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>The maximum number of metering regions that can be used by the auto-focus (AF) routine.</p>
-     * <p>This corresponds to the the maximum allowed number of elements in
+     * <p>This corresponds to the maximum allowed number of elements in
      * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}.</p>
      * <p><b>Range of valid values:</b><br>
      * Value will be &gt;= 0. For FULL-capability devices, this
@@ -1117,6 +1123,112 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<android.util.Range<Integer>> CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE =
             new Key<android.util.Range<Integer>>("android.control.postRawSensitivityBoostRange", new TypeReference<android.util.Range<Integer>>() {{ }});
+
+    /**
+     * <p>The list of extended scene modes for {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode} that are supported
+     * by this camera device, and each extended scene mode's maximum streaming (non-stall) size
+     * with  effect.</p>
+     * <p>For DISABLED mode, the camera behaves normally with no extended scene mode enabled.</p>
+     * <p>For BOKEH_STILL_CAPTURE mode, the maximum streaming dimension specifies the limit
+     * under which bokeh is effective when capture intent is PREVIEW. Note that when capture
+     * intent is PREVIEW, the bokeh effect may not be as high in quality compared to
+     * STILL_CAPTURE intent in order to maintain reasonable frame rate. The maximum streaming
+     * dimension must be one of the YUV_420_888 or PRIVATE resolutions in
+     * availableStreamConfigurations, or (0, 0) if preview bokeh is not supported. If the
+     * application configures a stream larger than the maximum streaming dimension, bokeh
+     * effect may not be applied for this stream for PREVIEW intent.</p>
+     * <p>For BOKEH_CONTINUOUS mode, the maximum streaming dimension specifies the limit under
+     * which bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE
+     * resolutions in availableStreamConfigurations, and if the sensor maximum resolution is
+     * larger than or equal to 1080p, the maximum streaming dimension must be at least 1080p.
+     * If the application configures a stream with larger dimension, the stream may not have
+     * bokeh effect applied.</p>
+     * <p><b>Units</b>: (mode, width, height)</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<int[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_MAX_SIZES =
+            new Key<int[]>("android.control.availableExtendedSceneModeMaxSizes", int[].class);
+
+    /**
+     * <p>The ranges of supported zoom ratio for non-DISABLED {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode}.</p>
+     * <p>When extended scene mode is set, the camera device may have limited range of zoom ratios
+     * compared to when extended scene mode is DISABLED. This tag lists the zoom ratio ranges
+     * for all supported non-DISABLED extended scene modes, in the same order as in
+     * android.control.availableExtended.</p>
+     * <p>Range [1.0, 1.0] means that no zoom (optical or digital) is supported.</p>
+     * <p><b>Units</b>: (minZoom, maxZoom)</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<float[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_ZOOM_RATIO_RANGES =
+            new Key<float[]>("android.control.availableExtendedSceneModeZoomRatioRanges", float[].class);
+
+    /**
+     * <p>The list of extended scene modes for {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode} that
+     * are supported by this camera device, and each extended scene mode's capabilities such
+     * as maximum streaming size, and supported zoom ratio ranges.</p>
+     * <p>For DISABLED mode, the camera behaves normally with no extended scene mdoe enabled.</p>
+     * <p>For BOKEH_STILL_CAPTURE mode, the maximum streaming dimension specifies the limit
+     * under which bokeh is effective when capture intent is PREVIEW. Note that when capture
+     * intent is PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE
+     * intent in order to maintain reasonable frame rate. The maximum streaming dimension must
+     * be one of the YUV_420_888 or PRIVATE resolutions in availableStreamConfigurations, or
+     * (0, 0) if preview bokeh is not supported. If the application configures a stream
+     * larger than the maximum streaming dimension, bokeh effect may not be applied for this
+     * stream for PREVIEW intent.</p>
+     * <p>For BOKEH_CONTINUOUS mode, the maximum streaming dimension specifies the limit under
+     * which bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE
+     * resolutions in availableStreamConfigurations, and if the sensor maximum resolution is
+     * larger than or equal to 1080p, the maximum streaming dimension must be at least 1080p.
+     * If the application configures a stream with larger dimension, the stream may not have
+     * bokeh effect applied.</p>
+     * <p>When extended scene mode is set, the camera device may have limited range of zoom ratios
+     * compared to when the mode is DISABLED. availableExtendedSceneModeCapabilities lists the
+     * zoom ranges for all supported extended modes. A range of (1.0, 1.0) means that no zoom
+     * (optical or digital) is supported.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.Capability[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_CAPABILITIES =
+            new Key<android.hardware.camera2.params.Capability[]>("android.control.availableExtendedSceneModeCapabilities", android.hardware.camera2.params.Capability[].class);
+
+    /**
+     * <p>Minimum and maximum zoom ratios supported by this camera device.</p>
+     * <p>If the camera device supports zoom-out from 1x zoom, minZoom will be less than 1.0, and
+     * setting {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to values less than 1.0 increases the camera's field
+     * of view.</p>
+     * <p><b>Units</b>: A pair of zoom ratio in floating-points: (minZoom, maxZoom)</p>
+     * <p><b>Range of valid values:</b><br></p>
+     * <p>maxZoom &gt;= 1.0 &gt;= minZoom</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.util.Range<Float>> CONTROL_ZOOM_RATIO_RANGE =
+            new Key<android.util.Range<Float>>("android.control.zoomRatioRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
     /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
@@ -1427,10 +1539,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><code>p' = Rp</code></p>
      * <p>where <code>p</code> is in the device sensor coordinate system, and
      *  <code>p'</code> is in the camera-oriented coordinate system.</p>
+     * <p>If {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, the quaternion rotation cannot
+     *  be accurately represented by the camera device, and will be represented by
+     *  default values matching its default facing.</p>
      * <p><b>Units</b>:
      * Quaternion coefficients</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
      */
     @PublicKey
     @NonNull
@@ -1465,6 +1582,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is GYROSCOPE, then this position is relative to
      * the center of the primary gyroscope on the device. The axis definitions are the same as
      * with PRIMARY_CAMERA.</p>
+     * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, this position cannot be accurately
+     * represented by the camera device, and will be represented as <code>(0, 0, 0)</code>.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
@@ -1602,20 +1721,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<float[]>("android.lens.radialDistortion", float[].class);
 
     /**
-     * <p>The origin for {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
+     * <p>The origin for {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}, and the accuracy of
+     * {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} and {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}.</p>
      * <p>Different calibration methods and use cases can produce better or worse results
      * depending on the selected coordinate origin.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
+     *   <li>{@link #LENS_POSE_REFERENCE_UNDEFINED UNDEFINED}</li>
      * </ul></p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see #LENS_POSE_REFERENCE_PRIMARY_CAMERA
      * @see #LENS_POSE_REFERENCE_GYROSCOPE
+     * @see #LENS_POSE_REFERENCE_UNDEFINED
      */
     @PublicKey
     @NonNull
@@ -1949,6 +2072,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA LOGICAL_MULTI_CAMERA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA SECURE_IMAGE_DATA}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA SYSTEM_CAMERA}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1967,6 +2092,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING
      */
     @PublicKey
     @NonNull
@@ -2174,11 +2301,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Crop regions that have a width or height that is smaller
      * than this ratio allows will be rounded up to the minimum
      * allowed size by the camera device.</p>
+     * <p>Starting from API level 30, when using {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to zoom in or out,
+     * the application must use {@link CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE android.control.zoomRatioRange} to query both the minimum and
+     * maximum zoom ratio.</p>
      * <p><b>Units</b>: Zoom scale factor</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;=1</p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE
      * @see CaptureRequest#SCALER_CROP_REGION
      */
     @PublicKey
@@ -2626,6 +2758,21 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Camera devices that support FREEFORM cropping will support any crop region that
      * is inside of the active array. The camera device will apply the same crop region and
      * return the final used crop region in capture result metadata {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</p>
+     * <p>Starting from API level 30,</p>
+     * <ul>
+     * <li>If the camera device supports FREEFORM cropping, in order to do FREEFORM cropping, the
+     * application must set {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to 1.0, and use {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}
+     * for zoom.</li>
+     * <li>To do CENTER_ONLY zoom, the application has below 2 options:<ol>
+     * <li>Set {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to 1.0; adjust zoom by {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</li>
+     * <li>Adjust zoom by {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}; use {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to crop
+     * the field of view vertically (letterboxing) or horizontally (pillarboxing), but not
+     * windowboxing.</li>
+     * </ol>
+     * </li>
+     * <li>Setting {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to values different than 1.0 and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to be windowboxing at the same time is undefined behavior.</li>
+     * </ul>
      * <p>LEGACY capability devices will only support CENTER_ONLY cropping.</p>
      * <p><b>Possible values:</b>
      * <ul>
@@ -2634,6 +2781,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see #SCALER_CROPPING_TYPE_CENTER_ONLY
@@ -2710,6 +2858,43 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @SyntheticKey
     public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS =
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
+     * <p>An array of mandatory concurrent stream combinations.
+     * This is an app-readable conversion of the concurrent mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each
+     * device which has its Id present in the set returned by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds }.
+     * Clients can use the array as a quick reference to find an appropriate camera stream
+     * combination.
+     * The mandatory stream combination array will be {@code null} in case the device is not a
+     * part of at least one set of combinations returned by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryConcurrentStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
+     * <p>List of rotate-and-crop modes for android.scaler.rotateAndCrop that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for android.scaler.rotateAndCrop for this camera device.</p>
+     * <p>Starting at some future API level, all devices will list at least <code>ROTATE_AND_CROP_NONE</code>.
+     * Devices with support for rotate-and-crop will additionally list at least
+     * <code>ROTATE_AND_CROP_AUTO</code> and <code>ROTATE_AND_CROP_90</code>.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in android.scaler.rotateAndCrop</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES =
+            new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
 
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
@@ -3901,10 +4086,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The accuracy of frame timestamp synchronization between physical cameras</p>
      * <p>The accuracy of the frame timestamp synchronization determines the physical cameras'
-     * ability to start exposure at the same time. If the sensorSyncType is CALIBRATED,
-     * the physical camera sensors usually run in master-slave mode so that their shutter
-     * time is synchronized. For APPROXIMATE sensorSyncType, the camera sensors usually run in
-     * master-master mode, and there could be offset between their start of exposure.</p>
+     * ability to start exposure at the same time. If the sensorSyncType is CALIBRATED, the
+     * physical camera sensors usually run in leader/follower mode where one sensor generates a
+     * timing signal for the other, so that their shutter time is synchronized. For APPROXIMATE
+     * sensorSyncType, the camera sensors usually run in leader/leader mode, where both sensors
+     * use their own timing generator, and there could be offset between their start of exposure.</p>
      * <p>In both cases, all images generated for a particular capture request still carry the same
      * timestamps, so that they can be used to look up the matching frame number and
      * onCaptureStarted callback.</p>

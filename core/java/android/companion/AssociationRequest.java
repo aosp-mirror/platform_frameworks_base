@@ -127,6 +127,12 @@ public final class AssociationRequest implements Parcelable {
         public Builder() {}
 
         /**
+         * Whether only a single device should match the provided filter.
+         *
+         * When scanning for a single device with a specifc {@link BluetoothDeviceFilter} mac
+         * address, bonded devices are also searched among. This allows to obtain the necessary app
+         * privileges even if the device is already paired.
+         *
          * @param singleDevice if true, scanning for a device will stop as soon as at least one
          *                     fitting device is found
          */

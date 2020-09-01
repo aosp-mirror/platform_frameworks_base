@@ -56,4 +56,16 @@
         <item>17</item>
         <item>19</item>
     </integer-array>
+
+    <attr name="customAttribute" />
+    <id name="view_1" />
+    <id name="view_2" />
+    <id name="view_3" />
+
+    <!-- Stabilize the ids of attributes and ids used in test layouts so that they differ from the
+     overlay resource ids -->
+    <public type="attr" name="customAttribute" id="0x7f200000"/>
+    <public type="id" name="view_1" id="0x7f210000"/>
+    <public type="id" name="view_2" id="0x7f210001"/>
+    <public type="id" name="view_3" id="0x7f210002"/>
 </resources>

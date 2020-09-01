@@ -108,8 +108,8 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
 
         mIntent.setComponent(componentName);
         synchronized (mService) {
-            mService.broadcastIntentLocked(null, null, mIntent, null, this, 0, null, null, null,
-                    AppOpsManager.OP_NONE, null, true, false, ActivityManagerService.MY_PID,
+            mService.broadcastIntentLocked(null, null, null, mIntent, null, this, 0, null, null,
+                    null, AppOpsManager.OP_NONE, null, true, false, ActivityManagerService.MY_PID,
                     Process.SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(), mUserId);
         }
     }

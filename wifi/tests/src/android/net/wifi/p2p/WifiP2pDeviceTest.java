@@ -45,7 +45,7 @@ public class WifiP2pDeviceTest {
         assertEquals(devA.groupCapability, devB.groupCapability);
         assertEquals(devA.status, devB.status);
         if (devA.wfdInfo != null) {
-            assertEquals(devA.wfdInfo.isWfdEnabled(), devB.wfdInfo.isWfdEnabled());
+            assertEquals(devA.wfdInfo.isEnabled(), devB.wfdInfo.isEnabled());
             assertEquals(devA.wfdInfo.getDeviceInfoHex(), devB.wfdInfo.getDeviceInfoHex());
             assertEquals(devA.wfdInfo.getControlPort(), devB.wfdInfo.getControlPort());
             assertEquals(devA.wfdInfo.getMaxThroughput(), devB.wfdInfo.getMaxThroughput());

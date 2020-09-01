@@ -81,9 +81,19 @@ public final class LocalLog {
     }
 
     public synchronized void dump(PrintWriter pw) {
+        dump("", pw);
+    }
+
+    /**
+     * Dumps the content of local log to print writer with each log entry predeced with indent
+     *
+     * @param indent indent that precedes each log entry
+     * @param pw printer writer to write into
+     */
+    public synchronized void dump(String indent, PrintWriter pw) {
         Iterator<String> itr = mLog.iterator();
         while (itr.hasNext()) {
-            pw.println(itr.next());
+            pw.printf("%s%s\n", indent, itr.next());
         }
     }
 

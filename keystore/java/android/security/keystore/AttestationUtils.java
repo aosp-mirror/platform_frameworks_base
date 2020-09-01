@@ -74,6 +74,14 @@ public abstract class AttestationUtils {
     public static final int ID_TYPE_MEID = 3;
 
     /**
+     * Specifies that the device should sign the attestation record using its device-unique
+     * attestation certificate. For use with {@link #attestDeviceIds}.
+     *
+     * @see #attestDeviceIds
+     */
+    public static final int USE_INDIVIDUAL_ATTESTATION = 4;
+
+    /**
      * Creates an array of X509Certificates from the provided KeymasterCertificateChain.
      *
      * @hide Only called by the DevicePolicyManager.
@@ -194,6 +202,10 @@ public abstract class AttestationUtils {
                     }
                     attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MEID,
                             meid.getBytes(StandardCharsets.UTF_8));
+                    break;
+                }
+                case USE_INDIVIDUAL_ATTESTATION: {
+                    attestArgs.addBoolean(KeymasterDefs.KM_TAG_DEVICE_UNIQUE_ATTESTATION);
                     break;
                 }
                 default:

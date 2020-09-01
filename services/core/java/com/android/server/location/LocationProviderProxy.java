@@ -18,15 +18,17 @@ package com.android.server.location;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.WorkSource;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -35,15 +37,12 @@ import com.android.internal.location.ILocationProviderManager;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.server.FgThread;
-import com.android.server.LocationManagerService;
 import com.android.server.ServiceWatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Proxy for ILocationProvider implementations.
@@ -51,191 +50,162 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class LocationProviderProxy extends AbstractLocationProvider {
 
     private static final String TAG = "LocationProviderProxy";
-    private static final boolean D = LocationManagerService.D;
 
-    // used to ensure that updates to mProviderPackages are atomic
-    private final Object mProviderPackagesLock = new Object();
-
-    // used to ensure that updates to mRequest and mWorkSource are atomic
-    private final Object mRequestLock = new Object();
-
-    private final ILocationProviderManager.Stub mManager = new ILocationProviderManager.Stub() {
-        // executed on binder thread
-        @Override
-        public void onSetAdditionalProviderPackages(List<String> packageNames) {
-            LocationProviderProxy.this.onSetAdditionalProviderPackages(packageNames);
-        }
-
-        // executed on binder thread
-        @Override
-        public void onSetEnabled(boolean enabled) {
-            LocationProviderProxy.this.setEnabled(enabled);
-        }
-
-        // executed on binder thread
-        @Override
-        public void onSetProperties(ProviderProperties properties) {
-            LocationProviderProxy.this.setProperties(properties);
-        }
-
-        // executed on binder thread
-        @Override
-        public void onReportLocation(Location location) {
-            LocationProviderProxy.this.reportLocation(location);
-        }
-    };
-
-    private final ServiceWatcher mServiceWatcher;
-
-    @GuardedBy("mProviderPackagesLock")
-    private final CopyOnWriteArrayList<String> mProviderPackages = new CopyOnWriteArrayList<>();
-
-    @GuardedBy("mRequestLock")
-    @Nullable
-    private ProviderRequest mRequest;
-    @GuardedBy("mRequestLock")
-    private WorkSource mWorkSource;
+    private static final int MAX_ADDITIONAL_PACKAGES = 2;
 
     /**
-     * Creates a new LocationProviderProxy and immediately begins binding to the best applicable
-     * service.
+     * Creates and registers this proxy. If no suitable service is available for the proxy, returns
+     * null.
      */
     @Nullable
-    public static LocationProviderProxy createAndBind(
-            Context context, LocationProviderManager locationProviderManager, String action,
-            int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId) {
-        LocationProviderProxy proxy = new LocationProviderProxy(context, locationProviderManager,
-                action, overlaySwitchResId, defaultServicePackageNameResId,
-                initialPackageNamesResId);
-        if (proxy.bind()) {
+    public static LocationProviderProxy createAndRegister(Context context, String action,
+            int enableOverlayResId, int nonOverlayPackageResId) {
+        LocationProviderProxy proxy = new LocationProviderProxy(context, action, enableOverlayResId,
+                nonOverlayPackageResId);
+        if (proxy.register()) {
             return proxy;
         } else {
             return null;
         }
     }
 
-    private LocationProviderProxy(Context context, LocationProviderManager locationProviderManager,
-            String action, int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId) {
-        super(context, locationProviderManager);
+    private final ILocationProviderManager.Stub mManager = new ILocationProviderManager.Stub() {
+        // executed on binder thread
+        @Override
+        public void onSetAdditionalProviderPackages(List<String> packageNames) {
+            int maxCount = Math.min(MAX_ADDITIONAL_PACKAGES, packageNames.size());
+            ArraySet<String> allPackages = new ArraySet<>(maxCount + 1);
+            for (String packageName : packageNames) {
+                if (packageNames.size() >= maxCount) {
+                    return;
+                }
 
-        mServiceWatcher = new ServiceWatcher(context, TAG, action, overlaySwitchResId,
-                defaultServicePackageNameResId, initialPackageNamesResId,
-                FgThread.getHandler()) {
-
-            @Override
-            protected void onBind() {
-                runOnBinder(LocationProviderProxy.this::initializeService);
+                try {
+                    mContext.getPackageManager().getPackageInfo(packageName, MATCH_SYSTEM_ONLY);
+                    allPackages.add(packageName);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, mServiceWatcher + " specified unknown additional provider package: "
+                            + packageName);
+                }
             }
 
-            @Override
-            protected void onUnbind() {
-                resetProviderPackages(Collections.emptyList());
-                setEnabled(false);
-                setProperties(null);
-            }
-        };
+            synchronized (mLock) {
+                if (!mBound) {
+                    return;
+                }
 
-        mRequest = null;
-        mWorkSource = new WorkSource();
+                // add the binder package
+                ComponentName service = mServiceWatcher.getBoundService().component;
+                if (service != null) {
+                    allPackages.add(service.getPackageName());
+                }
+
+                setPackageNames(allPackages);
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onSetAllowed(boolean allowed) {
+            synchronized (mLock) {
+                if (mBound) {
+                    setAllowed(allowed);
+                }
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onSetProperties(ProviderProperties properties) {
+            synchronized (mLock) {
+                if (mBound) {
+                    setProperties(properties);
+                }
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onReportLocation(Location location) {
+            reportLocation(location);
+        }
+    };
+
+    // also used to synchronized any state changes (setEnabled, setProperties, setState, etc)
+    private final Object mLock = new Object();
+
+    private final Context mContext;
+    private final ServiceWatcher mServiceWatcher;
+
+    @GuardedBy("mLock")
+    private boolean mBound;
+
+    private volatile ProviderRequest mRequest;
+
+    private LocationProviderProxy(Context context, String action, int enableOverlayResId,
+            int nonOverlayPackageResId) {
+        // safe to use direct executor since our locks are not acquired in a code path invoked by
+        // our owning provider
+        super(DIRECT_EXECUTOR, Collections.emptySet());
+
+        mContext = context;
+        mServiceWatcher = new ServiceWatcher(context, FgThread.getHandler(), action, this::onBind,
+                this::onUnbind, enableOverlayResId, nonOverlayPackageResId);
+
+        mBound = false;
+        mRequest = ProviderRequest.EMPTY_REQUEST;
     }
 
-    private boolean bind() {
-        return mServiceWatcher.start();
+    private boolean register() {
+        return mServiceWatcher.register();
     }
 
-    private void initializeService(IBinder binder) throws RemoteException {
-        ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-        if (D) Log.d(TAG, "applying state to connected service " + mServiceWatcher);
+    private void onBind(IBinder binder) throws RemoteException {
+        ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
 
-        resetProviderPackages(Collections.emptyList());
+        synchronized (mLock) {
+            mBound = true;
 
-        service.setLocationProviderManager(mManager);
+            provider.setLocationProviderManager(mManager);
 
-        synchronized (mRequestLock) {
-            if (mRequest != null) {
-                service.setRequest(mRequest, mWorkSource);
+            ProviderRequest request = mRequest;
+            if (!request.equals(ProviderRequest.EMPTY_REQUEST)) {
+                provider.setRequest(request, request.workSource);
             }
+
+            ComponentName service = mServiceWatcher.getBoundService().component;
+            if (service != null) {
+                setPackageNames(Collections.singleton(service.getPackageName()));
+            }
+        }
+    }
+
+    private void onUnbind() {
+        synchronized (mLock) {
+            mBound = false;
+            setState(State.EMPTY_STATE);
         }
     }
 
     @Override
-    public List<String> getProviderPackages() {
-        synchronized (mProviderPackagesLock) {
-            return mProviderPackages;
-        }
-    }
-
-    @Override
-    public void setRequest(ProviderRequest request, WorkSource source) {
-        synchronized (mRequestLock) {
-            mRequest = request;
-            mWorkSource = source;
-        }
+    public void onSetRequest(ProviderRequest request) {
+        mRequest = request;
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            service.setRequest(request, source);
+            service.setRequest(request, request.workSource);
         });
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("    service=" + mServiceWatcher);
-        synchronized (mProviderPackagesLock) {
-            if (mProviderPackages.size() > 1) {
-                pw.println("    additional packages=" + mProviderPackages);
-            }
-        }
-    }
-
-    @Override
-    public int getStatus(Bundle extras) {
-        return mServiceWatcher.runOnBinderBlocking(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            return service.getStatus(extras);
-        }, LocationProvider.TEMPORARILY_UNAVAILABLE);
-    }
-
-    @Override
-    public long getStatusUpdateTime() {
-        return mServiceWatcher.runOnBinderBlocking(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            return service.getStatusUpdateTime();
-        }, 0L);
-    }
-
-    @Override
-    public void sendExtraCommand(String command, Bundle extras) {
+    public void onExtraCommand(int uid, int pid, String command, Bundle extras) {
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
             service.sendExtraCommand(command, extras);
         });
     }
 
-    private void onSetAdditionalProviderPackages(List<String> packageNames) {
-        resetProviderPackages(packageNames);
-    }
-
-    private void resetProviderPackages(List<String> additionalPackageNames) {
-        ArrayList<String> permittedPackages = new ArrayList<>(additionalPackageNames.size());
-        for (String packageName : additionalPackageNames) {
-            try {
-                mContext.getPackageManager().getPackageInfo(packageName, MATCH_SYSTEM_ONLY);
-                permittedPackages.add(packageName);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, mServiceWatcher + " specified unknown additional provider package: "
-                        + packageName);
-            }
-        }
-
-        synchronized (mProviderPackagesLock) {
-            mProviderPackages.clear();
-            String myPackage = mServiceWatcher.getCurrentPackageName();
-            if (myPackage != null) {
-                mProviderPackages.add(myPackage);
-                mProviderPackages.addAll(permittedPackages);
-            }
-        }
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mServiceWatcher.dump(fd, pw, args);
     }
 }

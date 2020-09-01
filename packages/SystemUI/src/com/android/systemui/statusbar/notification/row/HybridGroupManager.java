@@ -16,18 +16,20 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
+import android.service.notification.StatusBarNotification;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationDozeHelper;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 
 /**
  * A class managing hybrid groups that include {@link HybridNotificationView} and the notification
@@ -36,41 +38,41 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 public class HybridGroupManager {
 
     private final Context mContext;
-    private final ViewGroup mParent;
 
     private float mOverflowNumberSize;
     private int mOverflowNumberPadding;
 
     private int mOverflowNumberColor;
 
-    public HybridGroupManager(Context ctx, ViewGroup parent) {
+    public HybridGroupManager(Context ctx) {
         mContext = ctx;
-        mParent = parent;
         initDimens();
     }
 
     public void initDimens() {
         Resources res = mContext.getResources();
-        mOverflowNumberSize = res.getDimensionPixelSize(
-                R.dimen.group_overflow_number_size);
-        mOverflowNumberPadding = res.getDimensionPixelSize(
-                R.dimen.group_overflow_number_padding);
+        mOverflowNumberSize = res.getDimensionPixelSize(R.dimen.group_overflow_number_size);
+        mOverflowNumberPadding = res.getDimensionPixelSize(R.dimen.group_overflow_number_padding);
     }
 
-    private HybridNotificationView inflateHybridViewWithStyle(int style) {
+    private HybridNotificationView inflateHybridViewWithStyle(int style,
+            View contentView, ViewGroup parent) {
         LayoutInflater inflater = new ContextThemeWrapper(mContext, style)
                 .getSystemService(LayoutInflater.class);
-        HybridNotificationView hybrid = (HybridNotificationView) inflater.inflate(
-                R.layout.hybrid_notification, mParent, false);
-        mParent.addView(hybrid);
+        int layout = contentView instanceof ConversationLayout
+                ? R.layout.hybrid_conversation_notification
+                : R.layout.hybrid_notification;
+        HybridNotificationView hybrid = (HybridNotificationView)
+                inflater.inflate(layout, parent, false);
+        parent.addView(hybrid);
         return hybrid;
     }
 
-    private TextView inflateOverflowNumber() {
+    private TextView inflateOverflowNumber(ViewGroup parent) {
         LayoutInflater inflater = mContext.getSystemService(LayoutInflater.class);
         TextView numberView = (TextView) inflater.inflate(
-                R.layout.hybrid_overflow_number, mParent, false);
-        mParent.addView(numberView);
+                R.layout.hybrid_overflow_number, parent, false);
+        parent.addView(numberView);
         updateOverFlowNumberColor(numberView);
         return numberView;
     }
@@ -87,23 +89,27 @@ public class HybridGroupManager {
     }
 
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
-            Notification notification) {
-        return bindFromNotificationWithStyle(reusableView, notification,
-                R.style.HybridNotification);
+            View contentView, StatusBarNotification notification,
+            ViewGroup parent) {
+        return bindFromNotificationWithStyle(reusableView, contentView, notification,
+                R.style.HybridNotification, parent);
     }
 
     private HybridNotificationView bindFromNotificationWithStyle(
-            HybridNotificationView reusableView, Notification notification, int style) {
+            HybridNotificationView reusableView, View contentView,
+            StatusBarNotification notification,
+            int style, ViewGroup parent) {
         if (reusableView == null) {
-            reusableView = inflateHybridViewWithStyle(style);
+            reusableView = inflateHybridViewWithStyle(style, contentView, parent);
         }
-        CharSequence titleText = resolveTitle(notification);
-        CharSequence contentText = resolveText(notification);
-        reusableView.bind(titleText, contentText);
+        CharSequence titleText = resolveTitle(notification.getNotification());
+        CharSequence contentText = resolveText(notification.getNotification());
+        reusableView.bind(titleText, contentText, contentView);
         return reusableView;
     }
 
-    private CharSequence resolveText(Notification notification) {
+    @Nullable
+    public static CharSequence resolveText(Notification notification) {
         CharSequence contentText = notification.extras.getCharSequence(Notification.EXTRA_TEXT);
         if (contentText == null) {
             contentText = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
@@ -111,7 +117,8 @@ public class HybridGroupManager {
         return contentText;
     }
 
-    private CharSequence resolveTitle(Notification notification) {
+    @Nullable
+    public static CharSequence resolveTitle(Notification notification) {
         CharSequence titleText = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
         if (titleText == null) {
             titleText = notification.extras.getCharSequence(Notification.EXTRA_TITLE_BIG);
@@ -119,9 +126,10 @@ public class HybridGroupManager {
         return titleText;
     }
 
-    public TextView bindOverflowNumber(TextView reusableView, int number) {
+    public TextView bindOverflowNumber(TextView reusableView, int number,
+            ViewGroup parent) {
         if (reusableView == null) {
-            reusableView = inflateOverflowNumber();
+            reusableView = inflateOverflowNumber(parent);
         }
         String text = mContext.getResources().getString(
                 R.string.notification_group_overflow_indicator, number);

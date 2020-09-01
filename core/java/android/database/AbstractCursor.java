@@ -24,13 +24,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -416,8 +415,8 @@ public abstract class AbstractCursor implements CrossProcessCursor {
 
     @Override
     public void setNotificationUris(@NonNull ContentResolver cr, @NonNull List<Uri> notifyUris) {
-        Preconditions.checkNotNull(cr);
-        Preconditions.checkNotNull(notifyUris);
+        Objects.requireNonNull(cr);
+        Objects.requireNonNull(notifyUris);
 
         setNotificationUris(cr, notifyUris, cr.getUserId(), true);
     }

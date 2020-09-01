@@ -18,6 +18,7 @@ package android.media;
 
 import android.bluetooth.BluetoothDevice;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
@@ -28,6 +29,7 @@ import android.media.IAudioServerStateDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -38,6 +40,7 @@ import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.net.Uri;
+import android.view.KeyEvent;
 
 /**
  * {@hide}
@@ -76,6 +79,9 @@ interface IAudioService {
     @UnsupportedAppUsage
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
+    oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
+            String callingPackage, String caller);
+
     boolean isStreamMute(int streamType);
 
     void forceRemoteSubmixFullVolume(boolean startForcing, IBinder cb);
@@ -103,6 +109,10 @@ interface IAudioService {
     int getMinVolumeIndexForAttributes(in AudioAttributes aa);
 
     int getLastAudibleStreamVolume(int streamType);
+
+    void setSupportedSystemUsages(in int[] systemUsages);
+
+    int[] getSupportedSystemUsages();
 
     List<AudioProductStrategy> getAudioProductStrategies();
 
@@ -144,7 +154,7 @@ interface IAudioService {
 
     oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
 
-    void setSpeakerphoneOn(boolean on);
+    void setSpeakerphoneOn(IBinder cb, boolean on);
 
     boolean isSpeakerphoneOn();
 
@@ -261,12 +271,40 @@ interface IAudioService {
 
     int removeUidDeviceAffinity(in IAudioPolicyCallback pcb, in int uid);
 
+    int setUserIdDeviceAffinity(in IAudioPolicyCallback pcb, in int userId, in int[] deviceTypes,
+             in String[] deviceAddresses);
+    int removeUserIdDeviceAffinity(in IAudioPolicyCallback pcb, in int userId);
+
     boolean hasHapticChannels(in Uri uri);
+
+    boolean isCallScreeningModeSupported();
+
+    int setPreferredDeviceForStrategy(in int strategy, in AudioDeviceAttributes device);
+
+    int removePreferredDeviceForStrategy(in int strategy);
+
+    AudioDeviceAttributes getPreferredDeviceForStrategy(in int strategy);
+
+    List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
     int setAllowedCapturePolicy(in int capturePolicy);
 
     int getAllowedCapturePolicy();
 
+    void registerStrategyPreferredDeviceDispatcher(IStrategyPreferredDeviceDispatcher dispatcher);
+
+    oneway void unregisterStrategyPreferredDeviceDispatcher(
+            IStrategyPreferredDeviceDispatcher dispatcher);
+
+    oneway void setRttEnabled(in boolean rttEnabled);
+
+    void setDeviceVolumeBehavior(in AudioDeviceAttributes device,
+             in int deviceVolumeBehavior, in String pkgName);
+
+    int getDeviceVolumeBehavior(in AudioDeviceAttributes device);
+
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.
+
+    oneway void setMultiAudioFocusEnabled(in boolean enabled);
 }

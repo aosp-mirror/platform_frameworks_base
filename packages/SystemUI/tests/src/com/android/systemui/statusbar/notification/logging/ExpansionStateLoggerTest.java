@@ -29,10 +29,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,12 +52,12 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
     private NotificationLogger.ExpansionStateLogger mLogger;
     @Mock
     private IStatusBarService mBarService;
+    private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mLogger = new NotificationLogger.ExpansionStateLogger(
-                Dependency.get(UiOffloadThread.class));
+        mLogger = new NotificationLogger.ExpansionStateLogger(mUiBgExecutor);
         mLogger.mBarService = mBarService;
     }
 
@@ -66,7 +66,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
         mLogger.onVisibilityChanged(
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
                 Collections.emptyList());
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService, Mockito.never()).onNotificationExpansionChanged(
                 eq(NOTIFICATION_KEY), anyBoolean(), anyBoolean(), anyInt());
@@ -76,7 +76,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
     public void testExpanded() throws RemoteException {
         mLogger.onExpansionChanged(NOTIFICATION_KEY, false, true,
                 NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN);
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService, Mockito.never()).onNotificationExpansionChanged(
                 eq(NOTIFICATION_KEY), anyBoolean(), anyBoolean(), anyInt());
@@ -89,7 +89,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
         mLogger.onVisibilityChanged(
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
                 Collections.emptyList());
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService, Mockito.never()).onNotificationExpansionChanged(
                 eq(NOTIFICATION_KEY), anyBoolean(), anyBoolean(), anyInt());
@@ -102,7 +102,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
         mLogger.onVisibilityChanged(
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
                 Collections.emptyList());
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, true, true,
@@ -117,7 +117,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true,
                     NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA)),
                 Collections.emptyList());
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, false, true,
@@ -133,7 +133,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
                 Collections.emptyList());
         mLogger.onExpansionChanged(NOTIFICATION_KEY, false, true,
                 NotificationVisibility.NotificationLocation.LOCATION_FIRST_HEADS_UP);
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, false, true,
@@ -150,7 +150,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
                 NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN);
         mLogger.onExpansionChanged(NOTIFICATION_KEY, false, true,
                 NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN);
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
 
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, false, true,
@@ -158,21 +158,21 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnEntryReinflated() throws RemoteException {
+    public void testOnEntryUpdated() throws RemoteException {
         mLogger.onExpansionChanged(NOTIFICATION_KEY, true, true,
                 NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN);
         mLogger.onVisibilityChanged(
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
                 Collections.emptyList());
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, true, true, ExpandableViewState.LOCATION_UNKNOWN);
 
-        mLogger.onEntryReinflated(NOTIFICATION_KEY);
+        mLogger.onEntryUpdated(NOTIFICATION_KEY);
         mLogger.onVisibilityChanged(
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
                 Collections.emptyList());
-        waitForUiOffloadThread();
+        mUiBgExecutor.runAllReady();
         // onNotificationExpansionChanged is called the second time.
         verify(mBarService, times(2)).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, true, true, ExpandableViewState.LOCATION_UNKNOWN);

@@ -98,6 +98,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
             // Remove switch widget.
             setWidgetLayoutResource(NO_WIDGET);
         }
+        setIconSize(context.getResources().getDimensionPixelSize(R.dimen.secondary_app_icon_size));
     }
 
     @VisibleForTesting

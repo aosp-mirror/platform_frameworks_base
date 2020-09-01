@@ -267,6 +267,7 @@ public class StatusBarManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public void expandNotificationsPanel() {
         try {
             final IStatusBarService svc = getService();
@@ -284,6 +285,7 @@ public class StatusBarManager {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public void collapsePanels() {
         try {
             final IStatusBarService svc = getService();
@@ -397,7 +399,6 @@ public class StatusBarManager {
      *                 {@code false}, re-enables expansion of the status bar.
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setDisabledForSimNetworkLock(boolean disabled) {

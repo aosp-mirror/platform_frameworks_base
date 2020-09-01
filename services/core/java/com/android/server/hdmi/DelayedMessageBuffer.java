@@ -64,7 +64,7 @@ final class DelayedMessageBuffer {
         }
     }
 
-    private void removeActiveSource() {
+    protected void removeActiveSource() {
         // Uses iterator to remove elements while looping through the list.
         for (Iterator<HdmiCecMessage> iter = mBuffer.iterator(); iter.hasNext(); ) {
             HdmiCecMessage message = iter.next();

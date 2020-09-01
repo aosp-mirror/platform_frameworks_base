@@ -23,6 +23,8 @@ import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 
@@ -34,11 +36,15 @@ public class MockLockSettingsContext extends ContextWrapper {
     private StorageManager mStorageManager;
     private TrustManager mTrustManager;
     private KeyguardManager mKeyguardManager;
+    private FingerprintManager mFingerprintManager;
+    private FaceManager mFaceManager;
+    private PackageManager mPackageManager;
 
     public MockLockSettingsContext(Context base, UserManager userManager,
             NotificationManager notificationManager, DevicePolicyManager devicePolicyManager,
             StorageManager storageManager, TrustManager trustManager,
-            KeyguardManager keyguardManager) {
+            KeyguardManager keyguardManager, FingerprintManager fingerprintManager,
+            FaceManager faceManager, PackageManager packageManager) {
         super(base);
         mUserManager = userManager;
         mNotificationManager = notificationManager;
@@ -46,6 +52,9 @@ public class MockLockSettingsContext extends ContextWrapper {
         mStorageManager = storageManager;
         mTrustManager = trustManager;
         mKeyguardManager = keyguardManager;
+        mFingerprintManager = fingerprintManager;
+        mFaceManager = faceManager;
+        mPackageManager = packageManager;
     }
 
     @Override
@@ -62,9 +71,18 @@ public class MockLockSettingsContext extends ContextWrapper {
             return mTrustManager;
         } else if (KEYGUARD_SERVICE.equals(name)) {
             return mKeyguardManager;
+        } else if (FINGERPRINT_SERVICE.equals(name)) {
+            return mFingerprintManager;
+        } else if (FACE_SERVICE.equals(name)) {
+            return mFaceManager;
         } else {
             throw new RuntimeException("System service not mocked: " + name);
         }
+    }
+
+    @Override
+    public PackageManager getPackageManager() {
+        return mPackageManager;
     }
 
     @Override

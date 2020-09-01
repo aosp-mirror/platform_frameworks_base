@@ -29,6 +29,9 @@ import android.icu.util.MeasureUnit;
 import com.android.internal.R;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
@@ -516,17 +519,21 @@ public class DateUtils
      * @return true if the supplied when is today else false
      */
     public static boolean isToday(long when) {
-        Time time = new Time();
-        time.set(when);
+        return isSameDate(when, System.currentTimeMillis());
+    }
 
-        int thenYear = time.year;
-        int thenMonth = time.month;
-        int thenMonthDay = time.monthDay;
+    private static boolean isSameDate(long oneMillis, long twoMillis) {
+        ZoneId zoneId = ZoneId.systemDefault();
 
-        time.set(System.currentTimeMillis());
-        return (thenYear == time.year)
-                && (thenMonth == time.month)
-                && (thenMonthDay == time.monthDay);
+        Instant oneInstant = Instant.ofEpochMilli(oneMillis);
+        LocalDateTime oneLocalDateTime = LocalDateTime.ofInstant(oneInstant, zoneId);
+
+        Instant twoInstant = Instant.ofEpochMilli(twoMillis);
+        LocalDateTime twoLocalDateTime = LocalDateTime.ofInstant(twoInstant, zoneId);
+
+        return (oneLocalDateTime.getYear() == twoLocalDateTime.getYear())
+                && (oneLocalDateTime.getMonthValue() == twoLocalDateTime.getMonthValue())
+                && (oneLocalDateTime.getDayOfMonth() == twoLocalDateTime.getDayOfMonth());
     }
 
     /**

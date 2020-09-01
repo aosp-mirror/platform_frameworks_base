@@ -29,3 +29,13 @@ java_library_static {
     // this is part of updatable modules(CaptivePortalLogin) which targets 29(Q)
     min_sdk_version: "29",
 }
+
+filegroup {
+    name: "system-messages-proto-src",
+    srcs: ["src/system_messages.proto"],
+}
+
+filegroup {
+    name: "ipconnectivity-proto-src",
+    srcs: ["src/ipconnectivity.proto"],
+}

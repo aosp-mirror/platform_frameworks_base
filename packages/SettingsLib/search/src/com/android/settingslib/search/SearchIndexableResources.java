@@ -21,15 +21,12 @@ import java.util.Collection;
 public interface SearchIndexableResources {
 
     /**
-     * Returns a collection of classes that should be indexed for search.
-     *
-     * Each class should have the SEARCH_INDEX_DATA_PROVIDER public static member.
+     * Returns a Collection of {@link SearchIndexableData} that should be indexed for search.
      */
-    Collection<Class> getProviderValues();
+    Collection<SearchIndexableData> getProviderValues();
 
     /**
-     * For testing. Can't use @VisibleForTesting here because this builds as a host binary as well
-     * as a device binary.
+     * Add {@link SearchIndexableData} for search in Android Settings.
      */
-    void addIndex(Class indexClass);
+    void addIndex(SearchIndexableData indexBundle);
 }

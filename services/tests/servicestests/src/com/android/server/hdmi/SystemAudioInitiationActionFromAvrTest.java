@@ -221,6 +221,7 @@ public class SystemAudioInitiationActionFromAvrTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void testTvSupport() {
         resetTestVariables();
         mShouldDispatchActiveSource = true;

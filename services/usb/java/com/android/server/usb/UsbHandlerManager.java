@@ -19,6 +19,7 @@ package com.android.server.usb;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -59,8 +60,9 @@ class UsbHandlerManager {
         if (uri != null && uri.length() > 0) {
             // display URI to user
             Intent dialogIntent = createDialogIntent();
-            dialogIntent.setClassName("com.android.systemui",
-                    "com.android.systemui.usb.UsbAccessoryUriActivity");
+            dialogIntent.setComponent(ComponentName.unflattenFromString(
+                    mContext.getResources().getString(
+                            com.android.internal.R.string.config_usbAccessoryUriActivity)));
             dialogIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
             dialogIntent.putExtra("uri", uri);
             try {
@@ -84,8 +86,9 @@ class UsbHandlerManager {
             @Nullable UsbAccessory accessory) {
         Intent resolverIntent = createDialogIntent();
         // start UsbConfirmActivity if there is only one choice
-        resolverIntent.setClassName("com.android.systemui",
-                "com.android.systemui.usb.UsbConfirmActivity");
+        resolverIntent.setComponent(ComponentName.unflattenFromString(
+                mContext.getResources().getString(
+                        com.android.internal.R.string.config_usbConfirmActivity)));
         resolverIntent.putExtra("rinfo", rInfo);
         UserHandle user =
                 UserHandle.getUserHandleForUid(rInfo.activityInfo.applicationInfo.uid);
@@ -115,8 +118,9 @@ class UsbHandlerManager {
     void selectUsbHandler(@NonNull ArrayList<ResolveInfo> matches,
             @NonNull UserHandle user, @NonNull Intent intent) {
         Intent resolverIntent = createDialogIntent();
-        resolverIntent.setClassName("com.android.systemui",
-                "com.android.systemui.usb.UsbResolverActivity");
+        resolverIntent.setComponent(ComponentName.unflattenFromString(
+                mContext.getResources().getString(
+                        com.android.internal.R.string.config_usbResolverActivity)));
         resolverIntent.putParcelableArrayListExtra("rlist", matches);
         resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
 

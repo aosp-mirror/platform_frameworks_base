@@ -73,6 +73,10 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         mFps = 0;
         mLastFpsUpdate = 0;
         mFrameCount = 0;
+
+        mDf = new DecimalFormat("fps: #.##");
+        mDf.setRoundingMode(RoundingMode.HALF_UP);
+
         Trace.endSection();
     }
 
@@ -181,9 +185,7 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         // Draw the ball
         canvas.drawColor(BACKGROUND_COLOR);
         canvas.drawOval(left, top, right, bottom, getBallColor());
-        DecimalFormat df = new DecimalFormat("fps: #.##");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        canvas.drawText(df.format(mFps), width, 100, mTextPaint);
+        canvas.drawText(mDf.format(mFps), width, 100, mTextPaint);
 
         invalidate();
         Trace.endSection();
@@ -220,6 +222,7 @@ class TouchLatencyView extends View implements View.OnTouchListener {
 
     private long mLastDrawNano, mLastFpsUpdate, mFrameCount;
     private float mFps;
+    private DecimalFormat mDf;
 }
 
 public class TouchLatencyActivity extends Activity {

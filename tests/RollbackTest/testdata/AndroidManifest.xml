@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.apex.apkrollback.test">
+    <!-- APEX does not have classes.dex -->
+    <application android:hasCode="false" />
+    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="29"/>
+</manifest>
+

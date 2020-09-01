@@ -16,17 +16,21 @@
 
 package android.media;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.IMediaScannerListener;
-import android.media.IMediaScannerService;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.provider.MediaStore;
 import android.util.Log;
 
+import com.android.internal.os.BackgroundThread;
+
+import java.io.File;
 
 /**
  * MediaScannerConnection provides a way for applications to pass a
@@ -38,20 +42,24 @@ import android.util.Log;
  * to the client of the MediaScannerConnection class.
  */
 public class MediaScannerConnection implements ServiceConnection {
-
     private static final String TAG = "MediaScannerConnection";
 
-    private Context mContext;
-    private MediaScannerConnectionClient mClient;
-    private IMediaScannerService mService;
-    private boolean mConnected; // true if connect() has been called since last disconnect()
+    private final Context mContext;
+    private final MediaScannerConnectionClient mClient;
 
+    private ContentProviderClient mProvider;
+
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+    private IMediaScannerService mService;
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+    private boolean mConnected;
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
     private final IMediaScannerListener.Stub mListener = new IMediaScannerListener.Stub() {
+        @Override
         public void scanCompleted(String path, Uri uri) {
-            MediaScannerConnectionClient client = mClient;
-            if (client != null) {
-                client.onScanCompleted(path, uri);
-            }
         }
     };
 
@@ -81,15 +89,6 @@ public class MediaScannerConnection implements ServiceConnection {
          * MediaScanner service has been established.
          */
         public void onMediaScannerConnected();
-
-        /**
-         * Called to notify the client when the media scanner has finished
-         * scanning a file.
-         * @param path the path to the file that has been scanned.
-         * @param uri the Uri for the file if the scanning operation succeeded
-         * and the file was added to the media database, or null if scanning failed.
-         */
-        public void onScanCompleted(String path, Uri uri);
     }
 
     /**
@@ -111,13 +110,12 @@ public class MediaScannerConnection implements ServiceConnection {
      */
     public void connect() {
         synchronized (this) {
-            if (!mConnected) {
-                Intent intent = new Intent(IMediaScannerService.class.getName());
-                intent.setComponent(
-                        new ComponentName("com.android.providers.media",
-                                "com.android.providers.media.MediaScannerService"));
-                mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
-                mConnected = true;
+            if (mProvider == null) {
+                mProvider = mContext.getContentResolver()
+                        .acquireContentProviderClient(MediaStore.AUTHORITY);
+                if (mClient != null) {
+                    mClient.onMediaScannerConnected();
+                }
             }
         }
     }
@@ -127,22 +125,9 @@ public class MediaScannerConnection implements ServiceConnection {
      */
     public void disconnect() {
         synchronized (this) {
-            if (mConnected) {
-                if (false) {
-                    Log.v(TAG, "Disconnecting from Media Scanner");
-                }
-                try {
-                    mContext.unbindService(this);
-                    if (mClient instanceof ClientProxy) {
-                        mClient = null;
-                    }
-                    mService = null;
-                } catch (IllegalArgumentException ex) {
-                    if (false) {
-                        Log.v(TAG, "disconnect failed: " + ex);
-                    }
-                }
-                mConnected = false;
+            if (mProvider != null) {
+                mProvider.close();
+                mProvider = null;
             }
         }
     }
@@ -152,7 +137,7 @@ public class MediaScannerConnection implements ServiceConnection {
      * @return true if we are connected, false otherwise
      */
     public synchronized boolean isConnected() {
-        return (mService != null && mConnected);
+        return (mProvider != null);
     }
 
     /**
@@ -166,55 +151,13 @@ public class MediaScannerConnection implements ServiceConnection {
      */
      public void scanFile(String path, String mimeType) {
         synchronized (this) {
-            if (mService == null || !mConnected) {
+            if (mProvider == null) {
                 throw new IllegalStateException("not connected to MediaScannerService");
             }
-            try {
-                if (false) {
-                    Log.v(TAG, "Scanning file " + path);
-                }
-                mService.requestScanFile(path, mimeType, mListener);
-            } catch (RemoteException e) {
-                if (false) {
-                    Log.d(TAG, "Failed to scan file " + path);
-                }
-            }
-        }
-    }
-
-    static class ClientProxy implements MediaScannerConnectionClient {
-        final String[] mPaths;
-        final String[] mMimeTypes;
-        final OnScanCompletedListener mClient;
-        MediaScannerConnection mConnection;
-        int mNextPath;
-
-        ClientProxy(String[] paths, String[] mimeTypes, OnScanCompletedListener client) {
-            mPaths = paths;
-            mMimeTypes = mimeTypes;
-            mClient = client;
-        }
-
-        public void onMediaScannerConnected() {
-            scanNextPath();
-        }
-
-        public void onScanCompleted(String path, Uri uri) {
-            if (mClient != null) {
-                mClient.onScanCompleted(path, uri);
-            }
-            scanNextPath();
-        }
-
-        void scanNextPath() {
-            if (mNextPath >= mPaths.length) {
-                mConnection.disconnect();
-                mConnection = null;
-                return;
-            }
-            String mimeType = mMimeTypes != null ? mMimeTypes[mNextPath] : null;
-            mConnection.scanFile(mPaths[mNextPath], mimeType);
-            mNextPath++;
+            BackgroundThread.getExecutor().execute(() -> {
+                final Uri uri = scanFileQuietly(mProvider, new File(path));
+                runCallBack(mContext, mClient, path, uri);
+            });
         }
     }
 
@@ -237,36 +180,91 @@ public class MediaScannerConnection implements ServiceConnection {
      */
     public static void scanFile(Context context, String[] paths, String[] mimeTypes,
             OnScanCompletedListener callback) {
-        ClientProxy client = new ClientProxy(paths, mimeTypes, callback);
-        MediaScannerConnection connection = new MediaScannerConnection(context, client);
-        client.mConnection = connection;
-        connection.connect();
+        BackgroundThread.getExecutor().execute(() -> {
+            try (ContentProviderClient client = context.getContentResolver()
+                    .acquireContentProviderClient(MediaStore.AUTHORITY)) {
+                for (String path : paths) {
+                    final Uri uri = scanFileQuietly(client, new File(path));
+                    runCallBack(context, callback, path, uri);
+                }
+            }
+        });
     }
 
-    /**
-     * Part of the ServiceConnection interface.  Do not call.
-     */
-    public void onServiceConnected(ComponentName className, IBinder service) {
-        if (false) {
-            Log.v(TAG, "Connected to Media Scanner");
+    private static Uri scanFileQuietly(ContentProviderClient client, File file) {
+        Uri uri = null;
+        try {
+            uri = MediaStore.scanFile(ContentResolver.wrap(client), file.getCanonicalFile());
+            Log.d(TAG, "Scanned " + file + " to " + uri);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to scan " + file + ": " + e);
         }
-        synchronized (this) {
-            mService = IMediaScannerService.Stub.asInterface(service);
-            if (mService != null && mClient != null) {
-                mClient.onMediaScannerConnected();
+        return uri;
+    }
+
+    private static void runCallBack(Context context, OnScanCompletedListener callback,
+            String path, Uri uri) {
+        if (callback != null) {
+            // Ignore exceptions from callback to avoid calling app from crashing.
+            // Don't ignore exceptions for apps targeting 'R' or higher.
+            try {
+                callback.onScanCompleted(path, uri);
+            } catch (Throwable e) {
+                if (context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+                    throw e;
+                } else {
+                    Log.w(TAG, "Ignoring exception from callback for backward compatibility", e);
+                }
             }
         }
     }
 
+    @Deprecated
+    static class ClientProxy implements MediaScannerConnectionClient {
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        final String[] mPaths;
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        final String[] mMimeTypes;
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        final OnScanCompletedListener mClient;
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        MediaScannerConnection mConnection;
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        int mNextPath;
+
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        ClientProxy(String[] paths, String[] mimeTypes, OnScanCompletedListener client) {
+            mPaths = paths;
+            mMimeTypes = mimeTypes;
+            mClient = client;
+        }
+
+        @Override
+        public void onMediaScannerConnected() {
+        }
+
+        @Override
+        public void onScanCompleted(String path, Uri uri) {
+        }
+
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+        void scanNextPath() {
+        }
+    }
+
     /**
      * Part of the ServiceConnection interface.  Do not call.
      */
+    @Override
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // No longer needed
+    }
+
+    /**
+     * Part of the ServiceConnection interface.  Do not call.
+     */
+    @Override
     public void onServiceDisconnected(ComponentName className) {
-        if (false) {
-            Log.v(TAG, "Disconnected from Media Scanner");
-        }
-        synchronized (this) {
-            mService = null;
-        }
+        // No longer needed
     }
 }

@@ -20,6 +20,7 @@ import android.location.Address;
 import android.location.Location;
 import android.net.MacAddress;
 import android.os.Parcel;
+import android.util.SparseArray;
 import android.webkit.MimeTypeMap;
 
 import static junit.framework.Assert.assertEquals;
@@ -502,6 +503,30 @@ public class ResponderLocationTest {
         assertEquals("Mtn View", address.getAddressLine(2));
         assertEquals("CA 94043", address.getAddressLine(3));
         assertEquals("US", address.getAddressLine(4));
+    }
+
+    /**
+     * Test that a Civic Location sparseArray can be extracted from a valid lcr buffer.
+     */
+    @Test
+    public void testLcrTestCivicLocationSparseArray() {
+        byte[] testLciBuffer = concatenateArrays(sTestLciIeHeader, sTestLciSE);
+        byte[] testLcrBuffer =
+                concatenateArrays(sTestLcrBufferHeader, sTestCivicLocationSEWithAddress);
+        ResponderLocation responderLocation = new ResponderLocation(testLciBuffer, testLcrBuffer);
+
+        boolean valid = responderLocation.isValid();
+        SparseArray<String> civicLocationSparseArray = responderLocation
+                .toCivicLocationSparseArray();
+
+        assertTrue(valid);
+        assertEquals("15", civicLocationSparseArray.get(CivicLocationKeys.HNO));
+        assertEquals("Alto",
+                civicLocationSparseArray.get(CivicLocationKeys.PRIMARY_ROAD_NAME));
+        assertEquals("Road",
+                civicLocationSparseArray.get(CivicLocationKeys.STREET_NAME_POST_MODIFIER));
+        assertEquals("Mtn View", civicLocationSparseArray.get(CivicLocationKeys.CITY));
+        assertEquals("94043", civicLocationSparseArray.get(CivicLocationKeys.POSTAL_CODE));
     }
 
     /**

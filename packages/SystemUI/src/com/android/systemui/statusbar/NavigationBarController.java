@@ -18,9 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-import static com.android.systemui.SysUiServiceProvider.getComponent;
-
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
@@ -37,6 +34,9 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
+import com.android.systemui.assist.AssistHandleViewController;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -44,10 +44,10 @@ import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 
@@ -66,14 +66,12 @@ public class NavigationBarController implements Callbacks {
     SparseArray<NavigationBarFragment> mNavigationBars = new SparseArray<>();
 
     @Inject
-    public NavigationBarController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler) {
+    public NavigationBarController(Context context, @Main Handler handler,
+            CommandQueue commandQueue) {
         mContext = context;
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        CommandQueue commandQueue = getComponent(mContext, CommandQueue.class);
-        if (commandQueue != null) {
-            commandQueue.addCallback(this);
-        }
+        commandQueue.addCallback(this);
     }
 
     @Override
@@ -142,7 +140,8 @@ public class NavigationBarController implements Callbacks {
                     ? Dependency.get(LightBarController.class)
                     : new LightBarController(context,
                             Dependency.get(DarkIconDispatcher.class),
-                            Dependency.get(BatteryController.class));
+                            Dependency.get(BatteryController.class),
+                            Dependency.get(NavigationModeController.class));
             navBar.setLightBarController(lightBarController);
 
             // TODO(b/118592525): to support multi-display, we start to add something which is
@@ -151,9 +150,10 @@ public class NavigationBarController implements Callbacks {
             //                    Dependency problem.
             AutoHideController autoHideController = isOnDefaultDisplay
                     ? Dependency.get(AutoHideController.class)
-                    : new AutoHideController(context, mHandler);
+                    : new AutoHideController(context, mHandler,
+                            Dependency.get(IWindowManager.class));
             navBar.setAutoHideController(autoHideController);
-            navBar.restoreSystemUiVisibilityState();
+            navBar.restoreAppearanceAndTransientState();
             mNavigationBars.append(displayId, navBar);
 
             if (result != null) {
@@ -167,9 +167,13 @@ public class NavigationBarController implements Callbacks {
     private void removeNavigationBar(int displayId) {
         NavigationBarFragment navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
+            navBar.setAutoHideController(/* autoHideController */ null);
             View navigationWindow = navBar.getView().getRootView();
             WindowManagerGlobal.getInstance()
                     .removeView(navigationWindow, true /* immediate */);
+            // Also remove FragmentHostState here in case that onViewDetachedFromWindow has not yet
+            // invoked after display removal.
+            FragmentHostManager.removeAndDestroy(navigationWindow);
             mNavigationBars.remove(displayId);
         }
     }
@@ -230,7 +234,15 @@ public class NavigationBarController implements Callbacks {
     }
 
     /** @return {@link NavigationBarFragment} on the default display. */
+    @Nullable
     public NavigationBarFragment getDefaultNavigationBarFragment() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
+    }
+
+    /** @return {@link AssistHandleViewController} (only on the default display). */
+    @Nullable
+    public AssistHandleViewController getAssistHandlerViewController() {
+        NavigationBarFragment navBar = getDefaultNavigationBarFragment();
+        return navBar == null ? null : navBar.getAssistHandlerViewController();
     }
 }

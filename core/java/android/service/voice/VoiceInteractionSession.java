@@ -1137,6 +1137,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
                 mCallbacks, this, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
+        mWindow.getWindow().getAttributes().setFitInsetsTypes(0 /* types */);
         mWindow.getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
@@ -1310,10 +1311,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             throw new IllegalStateException("Can't call before onCreate()");
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(mContext);
             intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startVoiceActivity(mToken, intent,
-                    intent.resolveType(mContext.getContentResolver()));
+                    intent.resolveType(mContext.getContentResolver()),
+                    mContext.getAttributionTag());
             Instrumentation.checkStartActivityResult(res, intent);
         } catch (RemoteException e) {
         }
@@ -1338,10 +1340,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             throw new IllegalStateException("Can't call before onCreate()");
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(mContext);
             intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startAssistantActivity(mToken, intent,
-                    intent.resolveType(mContext.getContentResolver()));
+                    intent.resolveType(mContext.getContentResolver()),
+                    mContext.getAttributionTag());
             Instrumentation.checkStartActivityResult(res, intent);
         } catch (RemoteException e) {
         }

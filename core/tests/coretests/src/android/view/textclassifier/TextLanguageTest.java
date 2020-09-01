@@ -17,6 +17,8 @@
 package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import android.icu.util.ULocale;
 import android.os.Bundle;
@@ -75,7 +77,9 @@ public final class TextLanguageTest {
         final TextLanguage.Request reference = new TextLanguage.Request.Builder(text)
                 .setExtras(bundle)
                 .build();
-        reference.setCallingPackageName(packageName);
+        final SystemTextClassifierMetadata systemTcMetadata =
+                new SystemTextClassifierMetadata(packageName, 1, false);
+        reference.setSystemTextClassifierMetadata(systemTcMetadata);
 
         final Parcel parcel = Parcel.obtain();
         reference.writeToParcel(parcel, 0);
@@ -85,5 +89,11 @@ public final class TextLanguageTest {
         assertEquals(text, result.getText());
         assertEquals("bundle", result.getExtras().getString(bundleKey));
         assertEquals(packageName, result.getCallingPackageName());
+        final SystemTextClassifierMetadata resultSystemTcMetadata =
+                result.getSystemTextClassifierMetadata();
+        assertNotNull(resultSystemTcMetadata);
+        assertEquals(packageName, resultSystemTcMetadata.getCallingPackageName());
+        assertEquals(1, resultSystemTcMetadata.getUserId());
+        assertFalse(resultSystemTcMetadata.useDefaultTextClassifier());
     }
 }

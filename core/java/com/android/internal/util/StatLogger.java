@@ -163,6 +163,9 @@ public class StatLogger {
                 proto.write(Event.LABEL, mLabels[i]);
                 proto.write(Event.COUNT, mCountStats[i]);
                 proto.write(Event.TOTAL_DURATION_MICROS, mDurationStats[i]);
+                proto.write(Event.MAX_CALLS_PER_SECOND, mMaxCallsPerSecond[i]);
+                proto.write(Event.MAX_DURATION_PER_SECOND_MICROS, mMaxDurationPerSecond[i]);
+                proto.write(Event.MAX_DURATION_STATS_MICROS, mMaxDurationStats[i]);
 
                 proto.end(inner);
             }

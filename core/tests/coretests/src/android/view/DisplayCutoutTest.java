@@ -69,6 +69,8 @@ public class DisplayCutoutTest {
             null /* boundBottom */);
 
     final DisplayCutout mCutoutTop = createCutoutTop();
+    final DisplayCutout mCutoutWithWaterfall = createCutoutWithWaterfall();
+    final DisplayCutout mWaterfallOnly = createCutoutWaterfallOnly();
 
     @Test
     public void testExtractBoundsFromList_left() {
@@ -104,8 +106,8 @@ public class DisplayCutoutTest {
 
     @Test
     public void testExtractBoundsFromList_top_and_bottom() {
-        Rect safeInsets = new Rect(0, 1, 0, 10);
-        Rect boundTop = new Rect(80, 0, 120, 10);
+        Rect safeInsets = new Rect(0, 10, 0, 10);
+        Rect boundTop = new Rect(0, 0, 120, 10);
         Rect boundBottom = new Rect(80, 190, 120, 200);
         assertThat(extractBoundsFromList(safeInsets,
                 Arrays.asList(new Rect[]{boundTop, boundBottom})),
@@ -126,9 +128,23 @@ public class DisplayCutoutTest {
     }
 
     @Test
-    public void hasCutout() throws Exception {
-        assertTrue(NO_CUTOUT.isEmpty());
-        assertFalse(mCutoutTop.isEmpty());
+    public void testHasCutout_noCutout() throws Exception {
+        assertTrue(NO_CUTOUT.isBoundsEmpty());
+    }
+
+    @Test
+    public void testHasCutout_cutoutOnly() {
+        assertFalse(mCutoutTop.isBoundsEmpty());
+    }
+
+    @Test
+    public void testHasCutout_cutoutWithWaterfall() {
+        assertFalse(mCutoutWithWaterfall.isBoundsEmpty());
+    }
+
+    @Test
+    public void testHasCutout_waterfallOnly() {
+        assertTrue(mWaterfallOnly.isBoundsEmpty());
     }
 
     @Test
@@ -142,20 +158,27 @@ public class DisplayCutoutTest {
     }
 
     @Test
+    public void testGetWaterfallInsets() throws Exception {
+        DisplayCutout cutout =
+                createCutoutWaterfallOnly(Insets.of(5, 6, 7, 8));
+        assertEquals(Insets.of(5, 6, 7, 8), cutout.getWaterfallInsets());
+    }
+
+    @Test
     public void testHashCode() throws Exception {
-        assertEquals(mCutoutTop.hashCode(), createCutoutTop().hashCode());
-        assertNotEquals(mCutoutTop.hashCode(), mCutoutNumbers.hashCode());
+        assertEquals(mCutoutWithWaterfall.hashCode(), createCutoutWithWaterfall().hashCode());
+        assertNotEquals(mCutoutWithWaterfall.hashCode(), mCutoutNumbers.hashCode());
     }
 
     @Test
     public void testEquals() throws Exception {
-        assertEquals(mCutoutTop, createCutoutTop());
-        assertNotEquals(mCutoutTop, mCutoutNumbers);
+        assertEquals(mCutoutWithWaterfall, createCutoutWithWaterfall());
+        assertNotEquals(mCutoutWithWaterfall, mCutoutNumbers);
     }
 
     @Test
     public void testToString() throws Exception {
-        assertFalse(mCutoutTop.toString().isEmpty());
+        assertFalse(mCutoutWithWaterfall.toString().isEmpty());
         assertFalse(mCutoutNumbers.toString().isEmpty());
     }
 
@@ -207,6 +230,16 @@ public class DisplayCutoutTest {
     }
 
     @Test
+    public void inset_insets_withWaterfallCutout() throws Exception {
+        DisplayCutout cutout = createCutoutWaterfallOnly(Insets.of(0, 10, 0, 10)).inset(1, 2, 3, 4);
+
+        assertEquals(cutout.getSafeInsetLeft(), 0);
+        assertEquals(cutout.getSafeInsetTop(), 8);
+        assertEquals(cutout.getSafeInsetRight(), 0);
+        assertEquals(cutout.getSafeInsetBottom(), 6);
+    }
+
+    @Test
     public void inset_insets_consumeInset() throws Exception {
         DisplayCutout cutout = mCutoutTop.inset(0, 1000, 0, 0);
 
@@ -240,12 +273,12 @@ public class DisplayCutoutTest {
     public void parcel_unparcel_regular() {
         Parcel p = Parcel.obtain();
 
-        new ParcelableWrapper(mCutoutTop).writeToParcel(p, 0);
+        new ParcelableWrapper(mCutoutWithWaterfall).writeToParcel(p, 0);
         int posAfterWrite = p.dataPosition();
 
         p.setDataPosition(0);
 
-        assertEquals(mCutoutTop, ParcelableWrapper.CREATOR.createFromParcel(p).get());
+        assertEquals(mCutoutWithWaterfall, ParcelableWrapper.CREATOR.createFromParcel(p).get());
         assertEquals(posAfterWrite, p.dataPosition());
     }
 
@@ -264,49 +297,101 @@ public class DisplayCutoutTest {
 
     @Test
     public void fromSpec_caches() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), sameInstance(cached));
+        Insets waterfallInsets = Insets.of(0, 20, 0, 20);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, waterfallInsets);
+        assertThat(
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, waterfallInsets),
+                sameInstance(cached));
     }
 
     @Test
     public void fromSpec_wontCacheIfSpecChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 400, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1000,1000 L0,1 z", 200, 400, 1f, Insets.NONE);
+        assertThat(
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfScreenWidthChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 400, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 2000, 400, 1f, Insets.NONE);
+        assertThat(
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfScreenHeightChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 4000, 1f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 4000, 1f, Insets.NONE);
+        assertThat(
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_wontCacheIfDensityChanges() {
-        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f);
-        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, Insets.NONE);
+        assertThat(
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f, Insets.NONE),
+                not(sameInstance(cached)));
+    }
+
+    @Test
+    public void fromSpec_wontCacheIfWaterfallInsetsChange() {
+        Insets waterfallInsets = Insets.of(0, 20, 0, 20);
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, Insets.NONE);
+        assertThat(
+                fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f, waterfallInsets),
+                not(sameInstance(cached)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_top() {
-        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z", 200, 400, 2f);
+        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z", 200, 400, 2f, Insets.NONE);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 0)));
     }
 
     @Test
     public void fromSpec_setsSafeInsets_top_and_bottom() {
         DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
-                + "@bottom M -50,0 v -10,0 h 100 v 20 z", 200, 400, 2f);
+                + "@bottom M -50,0 v -10,0 h 100 v 20 z", 200, 400, 2f, Insets.NONE);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 10)));
         assertThat(cutout.getBoundingRectsAll(), equalTo(new Rect[]{
                 ZERO_RECT, new Rect(50, 0, 150, 20),
                 ZERO_RECT, new Rect(50, 390, 150, 410)
         }));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_waterfallTopBottom() {
+        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(0, 30, 0, 30));
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 30, 0, 30)));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_waterfallLeftRight() {
+        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(30, 0, 30, 0));
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(30, 0, 30, 0)));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_waterfall_allEdges() {
+        DisplayCutout cutout = fromSpec("", 200, 400, 2f, Insets.of(30, 30, 30, 30));
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(30, 30, 30, 30)));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_cutoutTopBottom_waterfallTopBottom() {
+        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
+                + "@bottom M -50,0 v -20,0 h 100 v 20 z", 200, 400, 2f, Insets.of(0, 30, 0, 30));
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 30, 0, 30)));
+    }
+
+    @Test
+    public void fromSpec_setsSafeInsets_cutoutTopBottom_waterfallLeftRight() {
+        DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
+                + "@bottom M -50,0 v -20,0 h 100 v 20 z", 200, 400, 2f, Insets.of(30, 0, 30, 0));
+        assertThat(cutout.getSafeInsets(), equalTo(new Rect(30, 20, 30, 20)));
     }
 
     @Test
@@ -326,7 +411,7 @@ public class DisplayCutoutTest {
     public void parcel_unparcel_inplace() {
         Parcel p = Parcel.obtain();
 
-        new ParcelableWrapper(mCutoutTop).writeToParcel(p, 0);
+        new ParcelableWrapper(mCutoutWithWaterfall).writeToParcel(p, 0);
         int posAfterWrite = p.dataPosition();
 
         p.setDataPosition(0);
@@ -334,22 +419,24 @@ public class DisplayCutoutTest {
         ParcelableWrapper wrapper = new ParcelableWrapper();
         wrapper.readFromParcel(p);
 
-        assertEquals(mCutoutTop, wrapper.get());
+        assertEquals(mCutoutWithWaterfall, wrapper.get());
         assertEquals(posAfterWrite, p.dataPosition());
     }
 
     @Test
     public void wrapper_hashcode() throws Exception {
-        assertEquals(new ParcelableWrapper(mCutoutTop).hashCode(),
-                new ParcelableWrapper(createCutoutTop()).hashCode());
-        assertNotEquals(new ParcelableWrapper(mCutoutTop).hashCode(),
+        assertEquals(new ParcelableWrapper(mCutoutWithWaterfall).hashCode(),
+                new ParcelableWrapper(createCutoutWithWaterfall()).hashCode());
+        assertNotEquals(new ParcelableWrapper(mCutoutWithWaterfall).hashCode(),
                 new ParcelableWrapper(mCutoutNumbers).hashCode());
     }
 
     @Test
     public void wrapper_equals() throws Exception {
-        assertEquals(new ParcelableWrapper(mCutoutTop), new ParcelableWrapper(createCutoutTop()));
-        assertNotEquals(new ParcelableWrapper(mCutoutTop), new ParcelableWrapper(mCutoutNumbers));
+        assertEquals(new ParcelableWrapper(mCutoutWithWaterfall),
+                new ParcelableWrapper(createCutoutWithWaterfall()));
+        assertNotEquals(new ParcelableWrapper(mCutoutWithWaterfall),
+                new ParcelableWrapper(mCutoutNumbers));
     }
 
     private static DisplayCutout createCutoutTop() {
@@ -362,5 +449,30 @@ public class DisplayCutoutTest {
         return new DisplayCutout(
                 safeInset, null /* boundLeft */, boundTop, null /* boundRight */,
                 null /* boundBottom */);
+    }
+
+    private static DisplayCutout createCutoutWithWaterfall() {
+        return new DisplayCutout(
+                Insets.of(20, 100, 20, 0),
+                ZERO_RECT,
+                new Rect(50, 0, 75, 100),
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.of(20, 0, 20, 0));
+    }
+
+    private static DisplayCutout createCutoutWaterfallOnly() {
+        return createCutoutWaterfallOnly(Insets.of(20, 0, 20, 0));
+    }
+
+    private static DisplayCutout createCutoutWaterfallOnly(Insets waterfallInsets) {
+        return new DisplayCutout(
+                Insets.of(waterfallInsets.left, waterfallInsets.top, waterfallInsets.right,
+                        waterfallInsets.bottom),
+                ZERO_RECT,
+                ZERO_RECT,
+                ZERO_RECT,
+                ZERO_RECT,
+                waterfallInsets);
     }
 }

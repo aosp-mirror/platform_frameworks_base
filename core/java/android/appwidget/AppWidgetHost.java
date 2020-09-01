@@ -56,6 +56,7 @@ public class AppWidgetHost {
     static final int HANDLE_PROVIDERS_CHANGED = 3;
     @UnsupportedAppUsage
     static final int HANDLE_VIEW_DATA_CHANGED = 4;
+    static final int HANDLE_APP_WIDGET_REMOVED = 5;
 
     final static Object sServiceLock = new Object();
     @UnsupportedAppUsage
@@ -103,6 +104,14 @@ public class AppWidgetHost {
             msg.sendToTarget();
         }
 
+        public void appWidgetRemoved(int appWidgetId) {
+            Handler handler = mWeakHandler.get();
+            if (handler == null) {
+                return;
+            }
+            handler.obtainMessage(HANDLE_APP_WIDGET_REMOVED, appWidgetId, 0).sendToTarget();
+        }
+
         public void providersChanged() {
             Handler handler = mWeakHandler.get();
             if (handler == null) {
@@ -135,6 +144,10 @@ public class AppWidgetHost {
             switch (msg.what) {
                 case HANDLE_UPDATE: {
                     updateAppWidgetView(msg.arg1, (RemoteViews)msg.obj);
+                    break;
+                }
+                case HANDLE_APP_WIDGET_REMOVED: {
+                    dispatchOnAppWidgetRemoved(msg.arg1);
                     break;
                 }
                 case HANDLE_PROVIDER_CHANGED: {
@@ -224,6 +237,10 @@ public class AppWidgetHost {
                     break;
                 case PendingHostUpdate.TYPE_VIEW_DATA_CHANGED:
                     viewDataChanged(update.appWidgetId, update.viewId);
+                    break;
+                case PendingHostUpdate.TYPE_APP_WIDGET_REMOVED:
+                    dispatchOnAppWidgetRemoved(update.appWidgetId);
+                    break;
             }
         }
     }
@@ -424,6 +441,21 @@ public class AppWidgetHost {
         if (v != null) {
             v.resetAppWidget(appWidget);
         }
+    }
+
+    void dispatchOnAppWidgetRemoved(int appWidgetId) {
+        synchronized (mViews) {
+            mViews.remove(appWidgetId);
+        }
+        onAppWidgetRemoved(appWidgetId);
+    }
+
+    /**
+     * Called when the app widget is removed for appWidgetId
+     * @param appWidgetId
+     */
+    public void onAppWidgetRemoved(int appWidgetId) {
+        // Does nothing
     }
 
     /**

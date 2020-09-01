@@ -95,9 +95,6 @@
     <!-- The maximum number of tiles in the QuickQSPanel -->
     <integer name="quick_qs_panel_max_columns">6</integer>
 
-    <!-- Whether QuickSettings is in a phone landscape -->
-    <bool name="quick_settings_wide">false</bool>
-
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
 
@@ -109,7 +106,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast
+        wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast,screenrecord
     </string>
 
     <!-- The minimum number of tiles to display in QuickSettings -->
@@ -117,7 +114,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,dark,work,cast,night
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,dark,work,cast,night,screenrecord,reverse
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -125,8 +122,15 @@
 
     <!-- The tiles to display in QuickSettings in retail mode -->
     <string name="quick_settings_tiles_retail_mode" translatable="false">
-        cell,battery,dnd,flashlight,rotation,location
+        night,dark,dnd,flashlight,rotation,location
     </string>
+
+    <!-- Tiles to auto add to Quick Settings upon first change of a given secure setting.
+         The syntax is setting-name:spec. If the tile is a TileService, the spec should be specified
+         as custom(package/class). Relative class name is supported. -->
+    <string-array name="config_quickSettingsAutoAdd" translatable="false">
+        <item>accessibility_display_inversion_enabled:inversion</item>
+    </string-array>
 
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
@@ -175,9 +179,6 @@
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
     <string name="velocity_tracker_impl" translatable="false">platform</string>
 
-    <!-- Set to true to enable the user switcher on the keyguard. -->
-    <bool name="config_keyguardUserSwitcher">false</bool>
-
     <!-- Doze: does this device support STATE_DOZE?  -->
     <bool name="doze_display_state_supported">false</bool>
 
@@ -202,12 +203,11 @@
     <string name="doze_brightness_sensor_type" translatable="false"></string>
 
     <!-- Override value to use for proximity sensor.  -->
-    <string name="proximity_sensor_type" translatable="false">@string/doze_brightness_sensor_type</string>
+    <string name="proximity_sensor_type" translatable="false"></string>
 
     <!-- If using proximity_sensor_type, specifies a threshold value to distinguish near and
-         far break points. A sensor value less than or equal to this is considered "near". -->
-    <item name="proximity_sensor_threshold" translatable="false" format="float" type="dimen">
-        0</item>
+         far break points. A sensor value less than this is considered "near". -->
+    <item name="proximity_sensor_threshold" translatable="false" format="float" type="dimen"></item>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">130</integer>
@@ -282,12 +282,11 @@
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
         <item>com.android.systemui.recents.Recents</item>
         <item>com.android.systemui.volume.VolumeUI</item>
         <item>com.android.systemui.stackdivider.Divider</item>
-        <item>com.android.systemui.SystemBars</item>
+        <item>com.android.systemui.statusbar.phone.StatusBar</item>
         <item>com.android.systemui.usb.StorageNotification</item>
         <item>com.android.systemui.power.PowerUI</item>
         <item>com.android.systemui.media.RingtonePlayer</item>
@@ -299,11 +298,14 @@
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.biometrics.BiometricDialogImpl</item>
+        <item>com.android.systemui.biometrics.AuthController</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
         <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.theme.ThemeOverlayController</item>
+        <item>com.android.systemui.accessibility.WindowMagnification</item>
+        <item>com.android.systemui.accessibility.SystemActions</item>
+        <item>com.android.systemui.toast.ToastUI</item>
     </string-array>
 
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
@@ -333,6 +335,10 @@
     <item type="id" name="action_split_task_to_top" />
 
     <item type="id" name="action_toggle_overview"/>
+
+    <!-- Whether or not to show notifications to the user. If disabled, SystemUI will still be
+         registered as a notification listener, but will ignore all notification events. -->
+    <bool name="config_renderNotifications">true</bool>
 
     <!-- Whether or not the gear icon on notifications should be shown. The gear is shown when the
          the notification is not swiped enough to dismiss it. -->
@@ -463,15 +469,22 @@
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
+    <!-- Animation duration for resizing of PIP when entering/exiting. -->
+    <integer name="config_pipResizeAnimationDuration">425</integer>
+
     <!-- Allow dragging the PIP to a location to close it -->
     <bool name="config_pipEnableDismissDragToEdge">true</bool>
+
+    <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
+    <bool name="config_pipEnableResizeForMenu">true</bool>
+
+    <!-- Allow PIP to enable round corner, see also R.dimen.pip_corner_radius -->
+    <bool name="config_pipEnableRoundCorner">false</bool>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
     <string-array name="config_pluginWhitelist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
-
-    <integer name="ongoing_appops_dialog_max_apps">5</integer>
 
     <!-- Launcher package name for overlaying icons. -->
     <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>
@@ -488,8 +501,17 @@
     <!-- Preferred refresh rate at keyguard, if supported by the display -->
     <integer name="config_keyguardRefreshRate">-1</integer>
 
-    <!-- Respect the drawable/rounded.xml that allow to customize as multiple radius corner path -->
-    <bool name="config_roundedCornerMultipleRadius">false</bool>
+    <!-- Whether or not to add a "people" notifications section -->
+    <bool name="config_usePeopleFiltering">false</bool>
+
+    <!-- Defines the blacklist for system icons.  That is to say, the icons in the status bar that
+         are part of the blacklist are never displayed. Each item in the blacklist must be a string
+         defined in core/res/res/config.xml to properly blacklist the icon.
+     -->
+    <string-array name="config_statusBarIconBlackList" translatable="false">
+        <item>@*android:string/status_bar_rotate</item>
+        <item>@*android:string/status_bar_headset</item>
+    </string-array>
 
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
@@ -512,4 +534,23 @@
     <!--  Flag to turn on the rendering of the above path or not  -->
     <bool name="config_enableDisplayCutoutProtection">false</bool>
 
+    <!-- Respect drawable/rounded.xml intrinsic size for multiple radius corner path customization -->
+    <bool name="config_roundedCornerMultipleRadius">false</bool>
+
+    <!-- Controls can query 2 preferred applications for limited number of suggested controls.
+         This config value should contain a list of package names of thoses preferred applications.
+    -->
+    <string-array translatable="false" name="config_controlsPreferredPackages" />
+
+    <!-- Max number of columns for quick controls area -->
+    <integer name="controls_max_columns">2</integer>
+
+    <!-- Max number of columns for power menu -->
+    <integer name="power_menu_max_columns">3</integer>
+
+    <!-- If the dp width of the available space is <= this value, potentially adjust the number
+         of columns-->
+    <integer name="controls_max_columns_adjust_below_width_dp">320</integer>
+    <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
+    <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
 </resources>

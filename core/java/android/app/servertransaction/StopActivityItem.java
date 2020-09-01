@@ -31,14 +31,13 @@ public class StopActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "StopActivityItem";
 
-    private boolean mShowWindow;
     private int mConfigChanges;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-        client.handleStopActivity(token, mShowWindow, mConfigChanges, pendingActions,
+        client.handleStopActivity(token, mConfigChanges, pendingActions,
                 true /* finalStateRequest */, "STOP_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -59,13 +58,15 @@ public class StopActivityItem extends ActivityLifecycleItem {
 
     private StopActivityItem() {}
 
-    /** Obtain an instance initialized with provided params. */
-    public static StopActivityItem obtain(boolean showWindow, int configChanges) {
+    /**
+     * Obtain an instance initialized with provided params.
+     * @param configChanges Configuration pieces that changed.
+     */
+    public static StopActivityItem obtain(int configChanges) {
         StopActivityItem instance = ObjectPool.obtain(StopActivityItem.class);
         if (instance == null) {
             instance = new StopActivityItem();
         }
-        instance.mShowWindow = showWindow;
         instance.mConfigChanges = configChanges;
 
         return instance;
@@ -74,7 +75,6 @@ public class StopActivityItem extends ActivityLifecycleItem {
     @Override
     public void recycle() {
         super.recycle();
-        mShowWindow = false;
         mConfigChanges = 0;
         ObjectPool.recycle(this);
     }
@@ -85,13 +85,11 @@ public class StopActivityItem extends ActivityLifecycleItem {
     /** Write to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBoolean(mShowWindow);
         dest.writeInt(mConfigChanges);
     }
 
     /** Read from Parcel. */
     private StopActivityItem(Parcel in) {
-        mShowWindow = in.readBoolean();
         mConfigChanges = in.readInt();
     }
 
@@ -115,20 +113,18 @@ public class StopActivityItem extends ActivityLifecycleItem {
             return false;
         }
         final StopActivityItem other = (StopActivityItem) o;
-        return mShowWindow == other.mShowWindow && mConfigChanges == other.mConfigChanges;
+        return mConfigChanges == other.mConfigChanges;
     }
 
     @Override
     public int hashCode() {
         int result = 17;
-        result = 31 * result + (mShowWindow ? 1 : 0);
         result = 31 * result + mConfigChanges;
         return result;
     }
 
     @Override
     public String toString() {
-        return "StopActivityItem{showWindow=" + mShowWindow + ",configChanges=" + mConfigChanges
-                + "}";
+        return "StopActivityItem{configChanges=" + mConfigChanges + "}";
     }
 }

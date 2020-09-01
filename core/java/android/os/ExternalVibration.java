@@ -84,6 +84,10 @@ public class ExternalVibration implements Parcelable {
         return mAttrs;
     }
 
+    public VibrationAttributes getVibrationAttributes() {
+        return new VibrationAttributes.Builder(mAttrs, null).build();
+    }
+
     /**
      * Mutes the external vibration if it's playing and unmuted.
      *

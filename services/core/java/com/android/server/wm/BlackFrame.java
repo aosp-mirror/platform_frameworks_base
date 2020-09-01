@@ -16,30 +16,30 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 
-import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.util.Slog;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 
+import com.android.server.protolog.common.ProtoLog;
+
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 /**
  * Four black surfaces put together to make a black frame.
  */
 public class BlackFrame {
-    class BlackSurface {
+    static class BlackSurface {
         final int left;
         final int top;
         final int layer;
         final SurfaceControl surface;
 
         BlackSurface(SurfaceControl.Transaction transaction, int layer,
-                int l, int t, int r, int b, DisplayContent dc) throws OutOfResourcesException {
+                int l, int t, int r, int b, DisplayContent dc,
+                SurfaceControl surfaceControl) throws OutOfResourcesException {
             left = l;
             top = t;
             this.layer = layer;
@@ -49,55 +49,24 @@ public class BlackFrame {
             surface = dc.makeOverlay()
                     .setName("BlackSurface")
                     .setColorLayer()
-                    .setParent(null) // TODO: Work-around for b/69259549
+                    .setParent(surfaceControl)
+                    .setCallsite("BlackSurface")
                     .build();
             transaction.setWindowCrop(surface, w, h);
-            transaction.setLayerStack(surface, dc.getDisplayId());
             transaction.setAlpha(surface, 1);
             transaction.setLayer(surface, layer);
             transaction.setPosition(surface, left, top);
             transaction.show(surface);
-            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
-                            "  BLACK " + surface + ": CREATE layer=" + layer);
-        }
-
-        void setAlpha(SurfaceControl.Transaction t, float alpha) {
-            t.setAlpha(surface, alpha);
-        }
-
-        void setMatrix(SurfaceControl.Transaction t, Matrix matrix) {
-            mTmpMatrix.setTranslate(left, top);
-            mTmpMatrix.postConcat(matrix);
-            mTmpMatrix.getValues(mTmpFloats);
-            t.setPosition(surface, mTmpFloats[Matrix.MTRANS_X],
-                    mTmpFloats[Matrix.MTRANS_Y]);
-            t.setMatrix(surface,
-                    mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
-                    mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-            if (false) {
-                Slog.i(TAG_WM, "Black Surface @ (" + left + "," + top + "): ("
-                        + mTmpFloats[Matrix.MTRANS_X] + ","
-                        + mTmpFloats[Matrix.MTRANS_Y] + ") matrix=["
-                        + mTmpFloats[Matrix.MSCALE_X] + ","
-                        + mTmpFloats[Matrix.MSCALE_Y] + "]["
-                        + mTmpFloats[Matrix.MSKEW_X] + ","
-                        + mTmpFloats[Matrix.MSKEW_Y] + "]");
-            }
-        }
-
-        void clearMatrix(SurfaceControl.Transaction t) {
-            t.setMatrix(surface, 1, 0, 0, 1);
+            ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
+                    "  BLACK %s: CREATE layer=%d", surface, layer);
         }
     }
 
-    final Rect mOuterRect;
-    final Rect mInnerRect;
-    final Matrix mTmpMatrix = new Matrix();
-    final float[] mTmpFloats = new float[9];
-    final BlackSurface[] mBlackSurfaces = new BlackSurface[4];
+    private final Rect mOuterRect;
+    private final Rect mInnerRect;
+    private final BlackSurface[] mBlackSurfaces = new BlackSurface[4];
 
-    final boolean mForceDefaultOrientation;
-    private final TransactionFactory mTransactionFactory;
+    private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Outer: "); mOuterRect.printShortString(pw);
@@ -112,13 +81,13 @@ public class BlackFrame {
         }
     }
 
-    public BlackFrame(TransactionFactory factory, SurfaceControl.Transaction t, Rect outer,
-            Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation)
+    public BlackFrame(Supplier<SurfaceControl.Transaction> factory, SurfaceControl.Transaction t,
+            Rect outer, Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation,
+            SurfaceControl surfaceControl)
             throws OutOfResourcesException {
         boolean success = false;
 
         mTransactionFactory = factory;
-        mForceDefaultOrientation = forceDefaultOrientation;
 
         // TODO: Why do we use 4 surfaces instead of just one big one behind the screenshot?
         // b/68253229
@@ -127,19 +96,20 @@ public class BlackFrame {
         try {
             if (outer.top < inner.top) {
                 mBlackSurfaces[0] = new BlackSurface(t, layer,
-                        outer.left, outer.top, inner.right, inner.top, dc);
+                        outer.left, outer.top, inner.right, inner.top, dc, surfaceControl);
             }
             if (outer.left < inner.left) {
                 mBlackSurfaces[1] = new BlackSurface(t, layer,
-                        outer.left, inner.top, inner.left, outer.bottom, dc);
+                        outer.left, inner.top, inner.left, outer.bottom, dc, surfaceControl);
             }
             if (outer.bottom > inner.bottom) {
                 mBlackSurfaces[2] = new BlackSurface(t, layer,
-                        inner.left, inner.bottom, outer.right, outer.bottom, dc);
+                        inner.left, inner.bottom, outer.right, outer.bottom, dc,
+                        surfaceControl);
             }
             if (outer.right > inner.right) {
                 mBlackSurfaces[3] = new BlackSurface(t, layer,
-                        inner.right, outer.top, outer.right, inner.bottom, dc);
+                        inner.right, outer.top, outer.right, inner.bottom, dc, surfaceControl);
             }
             success = true;
         } finally {
@@ -150,51 +120,14 @@ public class BlackFrame {
     }
 
     public void kill() {
-        if (mBlackSurfaces != null) {
-            SurfaceControl.Transaction t = mTransactionFactory.make();
-            for (int i=0; i<mBlackSurfaces.length; i++) {
-                if (mBlackSurfaces[i] != null) {
-                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
-                            "  BLACK " + mBlackSurfaces[i].surface + ": DESTROY");
-                    t.remove(mBlackSurfaces[i].surface);
-                    mBlackSurfaces[i] = null;
-                }
-            }
-            t.apply();
-        }
-    }
-
-    public void hide(SurfaceControl.Transaction t) {
-        if (mBlackSurfaces != null) {
-            for (int i=0; i<mBlackSurfaces.length; i++) {
-                if (mBlackSurfaces[i] != null) {
-                    t.hide(mBlackSurfaces[i].surface);
-                }
-            }
-        }
-    }
-
-    public void setAlpha(SurfaceControl.Transaction t, float alpha) {
-        for (int i=0; i<mBlackSurfaces.length; i++) {
+        SurfaceControl.Transaction t = mTransactionFactory.get();
+        for (int i = 0; i < mBlackSurfaces.length; i++) {
             if (mBlackSurfaces[i] != null) {
-                mBlackSurfaces[i].setAlpha(t, alpha);
+                ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "  BLACK %s: DESTROY", mBlackSurfaces[i].surface);
+                t.remove(mBlackSurfaces[i].surface);
+                mBlackSurfaces[i] = null;
             }
         }
-    }
-
-    public void setMatrix(SurfaceControl.Transaction t, Matrix matrix) {
-        for (int i=0; i<mBlackSurfaces.length; i++) {
-            if (mBlackSurfaces[i] != null) {
-                mBlackSurfaces[i].setMatrix(t, matrix);
-            }
-        }
-    }
-
-    public void clearMatrix(SurfaceControl.Transaction t) {
-        for (int i=0; i<mBlackSurfaces.length; i++) {
-            if (mBlackSurfaces[i] != null) {
-                mBlackSurfaces[i].clearMatrix(t);
-            }
-        }
+        t.apply();
     }
 }

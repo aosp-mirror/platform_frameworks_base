@@ -17,7 +17,7 @@
 package com.android.server.contentcapture;
 
 import static android.service.contentcapture.ContentCaptureService.setClientState;
-import static android.view.contentcapture.ContentCaptureSession.NO_SESSION_ID;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 import static android.view.contentcapture.ContentCaptureSession.STATE_DUPLICATED_ID;
 import static android.view.contentcapture.ContentCaptureSession.STATE_INTERNAL_ERROR;
@@ -54,18 +54,20 @@ import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.ContentCaptureServiceInfo;
 import android.service.contentcapture.FlushMetrics;
 import android.service.contentcapture.IContentCaptureServiceCallback;
+import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 import com.android.server.infra.AbstractPerUserSystemService;
@@ -273,7 +275,7 @@ final class ContentCapturePerUserService
                     /* binder= */ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
                     componentName, /* isChildSession= */ false);
             return;
@@ -297,7 +299,7 @@ final class ContentCapturePerUserService
                     /* binder= */ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
                     componentName, /* isChildSession= */ false);
             return;
@@ -311,7 +313,7 @@ final class ContentCapturePerUserService
                     /* binder=*/ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_DUPLICATED_ID,
                     serviceComponentName, componentName, /* isChildSession= */ false);
             return;
@@ -328,7 +330,7 @@ final class ContentCapturePerUserService
                     /* binder= */ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
                     componentName, /* isChildSession= */ false);
             return;
@@ -375,6 +377,16 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
+    public void onDataSharedLocked(@NonNull DataShareRequest request,
+            IDataShareCallback.Stub dataShareCallback) {
+        if (!isEnabledLocked()) {
+            return;
+        }
+        assertCallerLocked(request.getPackageName());
+        mRemoteService.onDataShareRequest(request, dataShareCallback);
+    }
+
+    @GuardedBy("mLock")
     @Nullable
     public ComponentName getServiceSettingsActivityLocked() {
         if (mInfo == null) return null;
@@ -414,18 +426,26 @@ final class ContentCapturePerUserService
     public boolean sendActivityAssistDataLocked(@NonNull IBinder activityToken,
             @NonNull Bundle data) {
         final int id = getSessionId(activityToken);
+        final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
+        final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
+        final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
+        final SnapshotData snapshotData = new SnapshotData(assistData,
+                assistStructure, assistContent);
         if (id != NO_SESSION_ID) {
             final ContentCaptureServerSession session = mSessions.get(id);
-            final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
-            final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
-            final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
-            final SnapshotData snapshotData = new SnapshotData(assistData,
-                    assistStructure, assistContent);
             session.sendActivitySnapshotLocked(snapshotData);
             return true;
-        } else {
-            Slog.e(TAG, "Failed to notify activity assist data for activity: " + activityToken);
         }
+
+        // We want to send an activity snapshot regardless of whether a content capture session is
+        // present or not since a content capture session is not required for this functionality
+        if (mRemoteService != null) {
+            mRemoteService.onActivitySnapshotRequest(NO_SESSION_ID, snapshotData);
+            Slog.d(TAG, "Notified activity assist data for activity: "
+                    + activityToken + " without a session Id");
+            return true;
+        }
+
         return false;
     }
 
@@ -639,7 +659,7 @@ final class ContentCapturePerUserService
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-            writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_DISABLED,
+            writeServiceEvent(FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_DISABLED,
                     getServiceComponentName());
         }
 

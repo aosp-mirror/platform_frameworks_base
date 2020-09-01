@@ -19,6 +19,7 @@
     featureSplit="feature1">
 
     <uses-sdk android:minSdkVersion="21" />
+    <uses-split android:name="feature2" />
 
     <application>
         <activity android:name=".one.One" android:label="Feature One">

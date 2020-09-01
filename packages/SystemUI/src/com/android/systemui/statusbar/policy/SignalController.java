@@ -19,12 +19,12 @@ import static com.android.systemui.statusbar.policy.NetworkControllerImpl.TAG;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.BitSet;
 
 
@@ -167,7 +167,7 @@ public abstract class SignalController<T extends SignalController.State,
     /**
      * Returns the resource if resId is not 0, and an empty string otherwise.
      */
-    @NonNull CharSequence getStringIfExists(int resId) {
+    @NonNull CharSequence getTextIfExists(int resId) {
         return resId != 0 ? mContext.getText(resId) : "";
     }
 
@@ -255,6 +255,8 @@ public abstract class SignalController<T extends SignalController.State,
     }
 
     static class State {
+        // No locale as it's only used for logging purposes
+        private static SimpleDateFormat sSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
         boolean connected;
         boolean enabled;
         boolean activityIn;
@@ -299,7 +301,7 @@ public abstract class SignalController<T extends SignalController.State,
                     .append("activityIn=").append(activityIn).append(',')
                     .append("activityOut=").append(activityOut).append(',')
                     .append("rssi=").append(rssi).append(',')
-                    .append("lastModified=").append(DateFormat.format("MM-dd HH:mm:ss", time));
+                    .append("lastModified=").append(sSDF.format(time));
         }
 
         @Override

@@ -74,7 +74,6 @@ public class TaskPersisterTest {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testTaskIdsPersistence() {
         SparseBooleanArray taskIdsOnFile = new SparseBooleanArray();
         for (int i = 0; i < 100; i++) {

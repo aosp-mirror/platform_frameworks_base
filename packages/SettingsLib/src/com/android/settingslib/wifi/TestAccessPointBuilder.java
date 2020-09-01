@@ -22,6 +22,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -56,8 +57,6 @@ public class TestAccessPointBuilder {
     private int mSecurity = AccessPoint.SECURITY_NONE;
     private WifiConfiguration mWifiConfig;
     private WifiInfo mWifiInfo;
-    private boolean mIsCarrierAp = false;
-    private String mCarrierName = null;
 
     Context mContext;
     private ArrayList<ScanResult> mScanResults;
@@ -85,7 +84,7 @@ public class TestAccessPointBuilder {
         bundle.putParcelable(AccessPoint.KEY_NETWORKINFO, mNetworkInfo);
         bundle.putParcelable(AccessPoint.KEY_WIFIINFO, mWifiInfo);
         if (mFqdn != null) {
-            bundle.putString(AccessPoint.KEY_FQDN, mFqdn);
+            bundle.putString(AccessPoint.KEY_PASSPOINT_UNIQUE_ID, mFqdn);
         }
         if (mProviderFriendlyName != null) {
             bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
@@ -99,10 +98,6 @@ public class TestAccessPointBuilder {
         }
         bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
         bundle.putInt(AccessPoint.KEY_SPEED, mSpeed);
-        bundle.putBoolean(AccessPoint.KEY_IS_CARRIER_AP, mIsCarrierAp);
-        if (mCarrierName != null) {
-            bundle.putString(AccessPoint.KEY_CARRIER_NAME, mCarrierName);
-        }
 
         AccessPoint ap = new AccessPoint(mContext, bundle);
         ap.setRssi(mRssi);
@@ -132,13 +127,15 @@ public class TestAccessPointBuilder {
     @Keep
     public TestAccessPointBuilder setLevel(int level) {
         // Reversal of WifiManager.calculateSignalLevels
+        WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
+        int maxSignalLevel = wifiManager.getMaxSignalLevel();
         if (level == 0) {
             mRssi = MIN_RSSI;
-        } else if (level >= AccessPoint.SIGNAL_LEVELS) {
+        } else if (level > maxSignalLevel) {
             mRssi = MAX_RSSI;
         } else {
             float inputRange = MAX_RSSI - MIN_RSSI;
-            float outputRange = AccessPoint.SIGNAL_LEVELS - 1;
+            float outputRange = maxSignalLevel;
             mRssi = (int) (level * inputRange / outputRange + MIN_RSSI);
         }
         return this;
@@ -238,16 +235,6 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setScanResults(ArrayList<ScanResult> scanResults) {
         mScanResults = scanResults;
-        return this;
-    }
-
-    public TestAccessPointBuilder setIsCarrierAp(boolean isCarrierAp) {
-        mIsCarrierAp = isCarrierAp;
-        return this;
-    }
-
-    public TestAccessPointBuilder setCarrierName(String carrierName) {
-        mCarrierName = carrierName;
         return this;
     }
 

@@ -89,7 +89,7 @@ public class MockTracker implements MockCreationListener, AutoCloseable {
 
         for (final Object mock : mMocks.keySet()) {
             if (MockUtil.isMock(mock)) {
-                Mockito.reset(mock);
+                mMockitoFramework.clearInlineMock(mock);
             }
         }
         mMocks.clear();

@@ -38,24 +38,33 @@ namespace statsd {
 
 class DurationMetricProducer : public MetricProducer {
 public:
-    DurationMetricProducer(const ConfigKey& key, const DurationMetric& durationMetric,
-                           const int conditionIndex, const size_t startIndex,
-                           const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
-                           const sp<ConditionWizard>& wizard,
-                           const FieldMatcher& internalDimensions, const int64_t timeBaseNs, const int64_t startTimeNs);
+    DurationMetricProducer(
+            const ConfigKey& key, const DurationMetric& durationMetric, const int conditionIndex,
+            const vector<ConditionState>& initialConditionCache, const size_t startIndex,
+            const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
+            const sp<ConditionWizard>& wizard, const FieldMatcher& internalDimensions,
+            const int64_t timeBaseNs, const int64_t startTimeNs,
+            const unordered_map<int, shared_ptr<Activation>>& eventActivationMap = {},
+            const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap = {},
+            const vector<int>& slicedStateAtoms = {},
+            const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
 
     virtual ~DurationMetricProducer();
 
     sp<AnomalyTracker> addAnomalyTracker(const Alert &alert,
                                          const sp<AlarmMonitor>& anomalyAlarmMonitor) override;
 
+    void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                        const HashableDimensionKey& primaryKey, const FieldValue& oldState,
+                        const FieldValue& newState) override;
+
 protected:
     void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) override;
 
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKeys, bool condition,
-            const LogEvent& event) override;
+            const ConditionKey& conditionKeys, bool condition, const LogEvent& event,
+            const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
 private:
     void handleStartEvent(const MetricDimensionKey& eventKey, const ConditionKey& conditionKeys,
@@ -127,13 +136,12 @@ private:
     std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>> mPastBuckets;
 
     // The duration trackers in the current bucket.
-    std::unordered_map<HashableDimensionKey,
-        std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>>
+    std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
             mCurrentSlicedDurationTrackerMap;
 
     // Helper function to create a duration tracker given the metric aggregation type.
     std::unique_ptr<DurationTracker> createDurationTracker(
-        const MetricDimensionKey& eventKey) const;
+            const MetricDimensionKey& eventKey) const;
 
     // This hides the base class's std::vector<sp<AnomalyTracker>> mAnomalyTrackers
     std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
@@ -146,12 +154,14 @@ private:
     FRIEND_TEST(DurationMetricTrackerTest, TestNoCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState);
-    FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade);
-    FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket);
-    FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade);
-    FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicates);
     FRIEND_TEST(DurationMetricTrackerTest, TestFirstBucket);
+
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestSumDuration);
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket,
+                TestSumDurationWithSplitInFollowingBucket);
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestMaxDuration);
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestMaxDurationWithSplitInNextBucket);
 };
 
 }  // namespace statsd

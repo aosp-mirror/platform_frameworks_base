@@ -26,9 +26,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
+import java.util.Objects;
 
 /** Represents the action suggested by a {@link TextClassifier} on a given conversation. */
 public final class ConversationAction implements Parcelable {
@@ -133,11 +132,11 @@ public final class ConversationAction implements Parcelable {
             @Nullable CharSequence textReply,
             float score,
             @NonNull Bundle extras) {
-        mType = Preconditions.checkNotNull(type);
+        mType = Objects.requireNonNull(type);
         mAction = action;
         mTextReply = textReply;
         mScore = score;
-        mExtras = Preconditions.checkNotNull(extras);
+        mExtras = Objects.requireNonNull(extras);
     }
 
     private ConversationAction(Parcel in) {
@@ -207,6 +206,15 @@ public final class ConversationAction implements Parcelable {
         return mExtras;
     }
 
+    /** @hide */
+    public Builder toBuilder() {
+        return new Builder(mType)
+            .setTextReply(mTextReply)
+            .setAction(mAction)
+            .setConfidenceScore(mScore)
+            .setExtras(mExtras);
+    }
+
     /** Builder class to construct {@link ConversationAction}. */
     public static final class Builder {
         @Nullable
@@ -221,7 +229,7 @@ public final class ConversationAction implements Parcelable {
         private Bundle mExtras;
 
         public Builder(@NonNull @ActionType String actionType) {
-            mType = Preconditions.checkNotNull(actionType);
+            mType = Objects.requireNonNull(actionType);
         }
 
         /**

@@ -16,10 +16,18 @@
 
 package android.app.activity;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.SmallTest;
@@ -110,7 +118,157 @@ public class ActivityManagerTest extends AndroidTestCase {
             assertNotNull(config.reqInputFeatures & ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD);
         }    
     }
-    
+
+    @SmallTest
+    public void testTaskDescriptionCopyFrom() {
+        TaskDescription td1 = new TaskDescription(
+                "test label",            // label
+                Icon.createWithResource(mContext.getPackageName(), 21), // icon
+                0x111111,                // colorPrimary
+                0x222222,                // colorBackground
+                0x333333,                // statusBarColor
+                0x444444,                // navigationBarColor
+                true,                    // ensureStatusBarContrastWhenTransparent
+                true,                    // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_RESIZEABLE,  // resizeMode
+                10,                      // minWidth
+                20                       // minHeight
+        );
+
+        TaskDescription td2 = new TaskDescription();
+        // Must overwrite all the fields
+        td2.copyFrom(td1);
+
+        assertTaskDescriptionEqual(td1, td2, true, true);
+    }
+
+    @SmallTest
+    public void testTaskDescriptionCopyFromPreserveHiddenFields() {
+        TaskDescription td1 = new TaskDescription(
+                "test label",              // label
+                Icon.createWithResource(mContext.getPackageName(), 21), // icon
+                0x111111,                  // colorPrimary
+                0x222222,                  // colorBackground
+                0x333333,                  // statusBarColor
+                0x444444,                  // navigationBarColor
+                false,                     // ensureStatusBarContrastWhenTransparent
+                false,                     // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_UNRESIZEABLE,  // resizeMode
+                10,                        // minWidth
+                20                         // minHeight
+        );
+
+        TaskDescription td2 = new TaskDescription(
+                "test label2",           // label
+                Icon.createWithResource(mContext.getPackageName(), 212), // icon
+                0x1111112,               // colorPrimary
+                0x2222222,               // colorBackground
+                0x3333332,               // statusBarColor
+                0x4444442,               // navigationBarColor
+                true,                    // ensureStatusBarContrastWhenTransparent
+                true,                    // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_RESIZEABLE,  // resizeMode
+                102,                     // minWidth
+                202                      // minHeight
+        );
+
+        // Must overwrite all public and hidden fields, since other has all fields set.
+        td2.copyFromPreserveHiddenFields(td1);
+
+        assertTaskDescriptionEqual(td1, td2, true, true);
+
+        TaskDescription td3 = new TaskDescription();
+        // Must overwrite only public fields, and preserve hidden fields.
+        td2.copyFromPreserveHiddenFields(td3);
+
+        assertTaskDescriptionEqual(td3, td2, true, false);
+        assertTaskDescriptionEqual(td1, td2, false, true);
+    }
+
+    @SmallTest
+    public void testTaskDescriptionParceling() throws Exception {
+        TaskDescription tdBitmapNull = new TaskDescription(
+                "test label",              // label
+                Icon.createWithResource(mContext.getPackageName(), 21), // icon
+                0x111111,                  // colorPrimary
+                0x222222,                  // colorBackground
+                0x333333,                  // statusBarColor
+                0x444444,                  // navigationBarColor
+                false,                     // ensureStatusBarContrastWhenTransparent
+                false,                     // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_UNRESIZEABLE,  // resizeMode
+                10,                        // minWidth
+                20                         // minHeight
+        );
+
+        // Normal parceling should keep everything the same.
+        TaskDescription tdParcelled = new TaskDescription(parcelingRoundTrip(tdBitmapNull));
+        assertTaskDescriptionEqual(tdBitmapNull, tdParcelled, true, true);
+
+        Bitmap recycledBitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
+        recycledBitmap.recycle();
+        assertTrue(recycledBitmap.isRecycled());
+        TaskDescription tdBitmapRecycled = new TaskDescription(
+                "test label",              // label
+                Icon.createWithBitmap(recycledBitmap), // icon
+                0x111111,                  // colorPrimary
+                0x222222,                  // colorBackground
+                0x333333,                  // statusBarColor
+                0x444444,                  // navigationBarColor
+                false,                     // ensureStatusBarContrastWhenTransparent
+                false,                     // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_UNRESIZEABLE,  // resizeMode
+                10,                        // minWidth
+                20                         // minHeight
+        );
+        // Recycled bitmap will be ignored while parceling.
+        tdParcelled = new TaskDescription(parcelingRoundTrip(tdBitmapRecycled));
+        assertTaskDescriptionEqual(tdBitmapNull, tdParcelled, true, true);
+
+    }
+
+    private void assertTaskDescriptionEqual(TaskDescription td1, TaskDescription td2,
+            boolean checkOverwrittenFields, boolean checkPreservedFields) {
+        if (checkOverwrittenFields) {
+            assertEquals(td1.getLabel(), td2.getLabel());
+            assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
+            assertEquals(td1.getIconFilename(), td2.getIconFilename());
+            assertEquals(td1.getIconResourcePackage(), td2.getIconResourcePackage());
+            assertEquals(td1.getIconResource(), td2.getIconResource());
+            assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
+            assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),
+                    td2.getEnsureStatusBarContrastWhenTransparent());
+            assertEquals(td1.getEnsureNavigationBarContrastWhenTransparent(),
+                    td2.getEnsureNavigationBarContrastWhenTransparent());
+        }
+        if (checkPreservedFields) {
+            assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
+            assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
+            assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
+            assertEquals(td1.getResizeMode(), td2.getResizeMode());
+            assertEquals(td1.getMinWidth(), td2.getMinWidth());
+            assertEquals(td1.getMinHeight(), td2.getMinHeight());
+        }
+    }
+
+    private <T extends Parcelable> T parcelingRoundTrip(final T in) throws Exception {
+        final Parcel p = Parcel.obtain();
+        in.writeToParcel(p, /* flags */ 0);
+        p.setDataPosition(0);
+        final byte[] marshalledData = p.marshall();
+        p.recycle();
+
+        final Parcel q = Parcel.obtain();
+        q.unmarshall(marshalledData, 0, marshalledData.length);
+        q.setDataPosition(0);
+
+        final Parcelable.Creator<T> creator = (Parcelable.Creator<T>)
+                in.getClass().getField("CREATOR").get(null); // static object, so null receiver
+        final T unmarshalled = (T) creator.createFromParcel(q);
+        q.recycle();
+        return unmarshalled;
+    }
+
     // If any entries in appear in the list, sanity check them against all running applications
     private void checkErrorListSanity(List<ActivityManager.ProcessErrorStateInfo> errList) {
         if (errList == null) return;

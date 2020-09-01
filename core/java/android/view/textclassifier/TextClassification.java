@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
@@ -36,7 +35,6 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.text.SpannedString;
 import android.util.ArrayMap;
 import android.view.View.OnClickListener;
@@ -46,12 +44,11 @@ import android.view.textclassifier.TextClassifier.Utils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
-import com.google.android.textclassifier.AnnotatorModel;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -150,7 +147,7 @@ public final class TextClassification implements Parcelable {
         mLegacyIntent = legacyIntent;
         mLegacyOnClickListener = legacyOnClickListener;
         mActions = Collections.unmodifiableList(actions);
-        mEntityConfidence = Preconditions.checkNotNull(entityConfidence);
+        mEntityConfidence = Objects.requireNonNull(entityConfidence);
         mId = id;
         mExtras = extras;
     }
@@ -274,6 +271,20 @@ public final class TextClassification implements Parcelable {
         return mExtras;
     }
 
+    /** @hide */
+    public Builder toBuilder() {
+        return new Builder()
+                .setId(mId)
+                .setText(mText)
+                .addActions(mActions)
+                .setEntityConfidence(mEntityConfidence)
+                .setIcon(mLegacyIcon)
+                .setLabel(mLegacyLabel)
+                .setIntent(mLegacyIntent)
+                .setOnClickListener(mLegacyOnClickListener)
+                .setExtras(mExtras);
+    }
+
     @Override
     public String toString() {
         return String.format(Locale.US,
@@ -287,7 +298,7 @@ public final class TextClassification implements Parcelable {
      * @hide
      */
     public static OnClickListener createIntentOnClickListener(@NonNull final PendingIntent intent) {
-        Preconditions.checkNotNull(intent);
+        Objects.requireNonNull(intent);
         return v -> {
             try {
                 intent.send();
@@ -327,11 +338,8 @@ public final class TextClassification implements Parcelable {
      */
     public static final class Builder {
 
-        @NonNull private List<RemoteAction> mActions = new ArrayList<>();
+        @NonNull private final List<RemoteAction> mActions = new ArrayList<>();
         @NonNull private final Map<String, Float> mTypeScoreMap = new ArrayMap<>();
-        @NonNull
-        private final Map<String, AnnotatorModel.ClassificationResult> mClassificationResults =
-                new ArrayMap<>();
         @Nullable private String mText;
         @Nullable private Drawable mLegacyIcon;
         @Nullable private String mLegacyLabel;
@@ -339,8 +347,6 @@ public final class TextClassification implements Parcelable {
         @Nullable private OnClickListener mLegacyOnClickListener;
         @Nullable private String mId;
         @Nullable private Bundle mExtras;
-        @NonNull private final ArrayList<Intent> mActionIntents = new ArrayList<>();
-        @Nullable private Bundle mForeignLanguageExtra;
 
         /**
          * Sets the classified text.
@@ -364,36 +370,19 @@ public final class TextClassification implements Parcelable {
         public Builder setEntityType(
                 @NonNull @EntityType String type,
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-            setEntityType(type, confidenceScore, null);
-            return this;
-        }
-
-        /**
-         * @see #setEntityType(String, float)
-         *
-         * @hide
-         */
-        @NonNull
-        public Builder setEntityType(AnnotatorModel.ClassificationResult classificationResult) {
-            setEntityType(
-                    classificationResult.getCollection(),
-                    classificationResult.getScore(),
-                    classificationResult);
-            return this;
-        }
-
-        /**
-         * @see #setEntityType(String, float)
-         *
-         * @hide
-         */
-        @NonNull
-        private Builder setEntityType(
-                @NonNull @EntityType String type,
-                @FloatRange(from = 0.0, to = 1.0) float confidenceScore,
-                @Nullable AnnotatorModel.ClassificationResult classificationResult) {
             mTypeScoreMap.put(type, confidenceScore);
-            mClassificationResults.put(type, classificationResult);
+            return this;
+        }
+
+        Builder setEntityConfidence(EntityConfidence scores) {
+            mTypeScoreMap.clear();
+            mTypeScoreMap.putAll(scores.toMap());
+            return this;
+        }
+
+        /** @hide */
+        public Builder clearEntityTypes() {
+            mTypeScoreMap.clear();
             return this;
         }
 
@@ -404,19 +393,21 @@ public final class TextClassification implements Parcelable {
          */
         @NonNull
         public Builder addAction(@NonNull RemoteAction action) {
-            return addAction(action, null);
-        }
-
-        /**
-         * @param intent the intent in the remote action.
-         * @see #addAction(RemoteAction)
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public Builder addAction(RemoteAction action, @Nullable Intent intent) {
             Preconditions.checkArgument(action != null);
             mActions.add(action);
-            mActionIntents.add(intent);
+            return this;
+        }
+
+        /** @hide */
+        public Builder addActions(Collection<RemoteAction> actions) {
+            Objects.requireNonNull(actions);
+            mActions.addAll(actions);
+            return this;
+        }
+
+        /** @hide */
+        public Builder clearActions() {
+            mActions.clear();
             return this;
         }
 
@@ -502,16 +493,6 @@ public final class TextClassification implements Parcelable {
         }
 
         /**
-         * @see #setExtras(Bundle)
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public Builder setForeignLanguageExtra(@Nullable Bundle extra) {
-            mForeignLanguageExtra = extra;
-            return this;
-        }
-
-        /**
          * Builds and returns a {@link TextClassification} object.
          */
         @NonNull
@@ -519,25 +500,7 @@ public final class TextClassification implements Parcelable {
             EntityConfidence entityConfidence = new EntityConfidence(mTypeScoreMap);
             return new TextClassification(mText, mLegacyIcon, mLegacyLabel, mLegacyIntent,
                     mLegacyOnClickListener, mActions, entityConfidence, mId,
-                    buildExtras(entityConfidence));
-        }
-
-        private Bundle buildExtras(EntityConfidence entityConfidence) {
-            final Bundle extras = mExtras == null ? new Bundle() : mExtras;
-            if (mActionIntents.stream().anyMatch(Objects::nonNull)) {
-                ExtrasUtils.putActionsIntents(extras, mActionIntents);
-            }
-            if (mForeignLanguageExtra != null) {
-                ExtrasUtils.putForeignLanguageExtra(extras, mForeignLanguageExtra);
-            }
-            List<String> sortedTypes = entityConfidence.getEntities();
-            ArrayList<AnnotatorModel.ClassificationResult> sortedEntities = new ArrayList<>();
-            for (String type : sortedTypes) {
-                sortedEntities.add(mClassificationResults.get(type));
-            }
-            ExtrasUtils.putEntities(
-                    extras, sortedEntities.toArray(new AnnotatorModel.ClassificationResult[0]));
-            return extras.isEmpty() ? Bundle.EMPTY : extras;
+                    mExtras == null ? Bundle.EMPTY : mExtras);
         }
     }
 
@@ -552,9 +515,7 @@ public final class TextClassification implements Parcelable {
         @Nullable private final LocaleList mDefaultLocales;
         @Nullable private final ZonedDateTime mReferenceTime;
         @NonNull private final Bundle mExtras;
-        @Nullable private String mCallingPackageName;
-        @UserIdInt
-        private int mUserId = UserHandle.USER_NULL;
+        @Nullable private SystemTextClassifierMetadata mSystemTcMetadata;
 
         private Request(
                 CharSequence text,
@@ -615,41 +576,33 @@ public final class TextClassification implements Parcelable {
         }
 
         /**
-         * Sets the name of the package that is sending this request.
-         * <p>
-         * For SystemTextClassifier's use.
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public void setCallingPackageName(@Nullable String callingPackageName) {
-            mCallingPackageName = callingPackageName;
-        }
-
-        /**
          * Returns the name of the package that sent this request.
          * This returns {@code null} if no calling package name is set.
          */
         @Nullable
         public String getCallingPackageName() {
-            return mCallingPackageName;
+            return mSystemTcMetadata != null ? mSystemTcMetadata.getCallingPackageName() : null;
         }
 
         /**
-         * Sets the id of the user that sent this request.
-         * <p>
-         * Package-private for SystemTextClassifier's use.
-         */
-        void setUserId(@UserIdInt int userId) {
-            mUserId = userId;
-        }
-
-        /**
-         * Returns the id of the user that sent this request.
+         * Sets the information about the {@link SystemTextClassifier} that sent this request.
+         *
          * @hide
          */
-        @UserIdInt
-        public int getUserId() {
-            return mUserId;
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setSystemTextClassifierMetadata(
+                @Nullable SystemTextClassifierMetadata systemTcMetadata) {
+            mSystemTcMetadata = systemTcMetadata;
+        }
+
+        /**
+         * Returns the information about the {@link SystemTextClassifier} that sent this request.
+         *
+         * @hide
+         */
+        @Nullable
+        public SystemTextClassifierMetadata getSystemTextClassifierMetadata() {
+            return mSystemTcMetadata;
         }
 
         /**
@@ -751,9 +704,8 @@ public final class TextClassification implements Parcelable {
             dest.writeInt(mEndIndex);
             dest.writeParcelable(mDefaultLocales, flags);
             dest.writeString(mReferenceTime == null ? null : mReferenceTime.toString());
-            dest.writeString(mCallingPackageName);
-            dest.writeInt(mUserId);
             dest.writeBundle(mExtras);
+            dest.writeParcelable(mSystemTcMetadata, flags);
         }
 
         private static Request readFromParcel(Parcel in) {
@@ -764,14 +716,12 @@ public final class TextClassification implements Parcelable {
             final String referenceTimeString = in.readString();
             final ZonedDateTime referenceTime = referenceTimeString == null
                     ? null : ZonedDateTime.parse(referenceTimeString);
-            final String callingPackageName = in.readString();
-            final int userId = in.readInt();
             final Bundle extras = in.readBundle();
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
 
             final Request request = new Request(text, startIndex, endIndex,
                     defaultLocales, referenceTime, extras);
-            request.setCallingPackageName(callingPackageName);
-            request.setUserId(userId);
+            request.setSystemTextClassifierMetadata(systemTcMetadata);
             return request;
         }
 

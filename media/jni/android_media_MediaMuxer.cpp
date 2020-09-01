@@ -230,8 +230,9 @@ static void android_media_MediaMuxer_stop(JNIEnv *env, jclass /* clazz */,
     status_t err = muxer->stop();
 
     if (err != OK) {
+        ALOGE("Error during stop:%d", err);
         jniThrowException(env, "java/lang/IllegalStateException",
-                          "Failed to stop the muxer");
+                    "Error during stop(), muxer would have stopped already");
         return;
     }
 }

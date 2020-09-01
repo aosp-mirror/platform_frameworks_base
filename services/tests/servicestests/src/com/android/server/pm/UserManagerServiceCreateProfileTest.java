@@ -16,26 +16,31 @@
 
 package com.android.server.pm;
 
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.app.ApplicationPackageManager;
+import android.app.PropertyInvalidatedCache;
 import android.content.pm.UserInfo;
 import android.os.Looper;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.util.IconDrawableFactory;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
+import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.List;
 
@@ -56,6 +61,9 @@ public class UserManagerServiceCreateProfileTest {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
+
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         mUserManagerService = new UserManagerService(InstrumentationRegistry.getContext());
 
@@ -71,6 +79,7 @@ public class UserManagerServiceCreateProfileTest {
         removeUsers();
     }
 
+    /** Tests UMS.getProfileIds() when no specific userType is specified. */
     @Test
     public void testGetProfiles() {
         // Pretend we have a secondary user with a profile.
@@ -93,38 +102,73 @@ public class UserManagerServiceCreateProfileTest {
                 || users.get(1).id == profile.id);
     }
 
+    /** Tests UMS.getProfileIds() when a specific userType is specified. */
+    @Test
+    public void testGetProfileIds_specifyType() {
+        // Pretend we have a secondary user with a profile.
+        UserInfo secondaryUser = addUser();
+        UserInfo profile = addProfile(secondaryUser);
+
+        // TODO: When there are multiple profiles types, ensure correct output for mixed types.
+        final String userType1 = USER_TYPE_PROFILE_MANAGED;
+
+        // System user should still have no userType1 profile so getProfileIds should be empty.
+        int[] users = mUserManagerService.getProfileIds(UserHandle.USER_SYSTEM, userType1, false);
+        assertEquals("System user should have no managed profiles", 0, users.length);
+
+        // Secondary user should have one userType1 profile, so return just that.
+        users = mUserManagerService.getProfileIds(secondaryUser.id, userType1, false);
+        assertEquals("Wrong number of profiles", 1, users.length);
+        assertEquals("Wrong profile id", profile.id, users[0]);
+
+        // The profile itself is a userType1 profile, so it should return just itself.
+        users = mUserManagerService.getProfileIds(profile.id, userType1, false);
+        assertEquals("Wrong number of profiles", 1, users.length);
+        assertEquals("Wrong profile id", profile.id, users[0]);
+    }
+
     @Test
     public void testProfileBadge() {
         // First profile for system user should get badge 0
         assertEquals("First profile isn't given badge index 0", 0,
-                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
+                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM,
+                        USER_TYPE_PROFILE_MANAGED));
 
         // Pretend we have a secondary user.
         UserInfo secondaryUser = addUser();
 
         // Check first profile badge for secondary user is also 0.
         assertEquals("First profile for secondary user isn't given badge index 0", 0,
-                mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
+                mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id,
+                        USER_TYPE_PROFILE_MANAGED));
 
         // Shouldn't impact the badge for profile in system user
         assertEquals("First profile isn't given badge index 0 with secondary user", 0,
-                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
+                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM,
+                        USER_TYPE_PROFILE_MANAGED));
 
         // Pretend a secondary user has a profile.
         addProfile(secondaryUser);
 
         // Shouldn't have impacted the badge for the system user
         assertEquals("First profile isn't given badge index 0 in secondary user", 0,
-                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
+                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM,
+                        USER_TYPE_PROFILE_MANAGED));
     }
 
     @Test
     public void testProfileBadgeUnique() {
         List<UserInfo> users = mUserManagerService.getUsers(/* excludeDying */ false);
         UserInfo system = users.get(0);
+        int max = mUserManagerService.getMaxUsersOfTypePerParent(USER_TYPE_PROFILE_MANAGED);
+        if (max < 0) {
+            // Indicates no max. Instead of infinite, we'll just do 10.
+            max = 10;
+        }
         // Badges should get allocated 0 -> max
-        for (int i = 0; i < UserManagerService.getMaxManagedProfiles(); ++i) {
-            int nextBadge = mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM);
+        for (int i = 0; i < max; ++i) {
+            int nextBadge = mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM,
+                    USER_TYPE_PROFILE_MANAGED);
             assertEquals("Wrong badge allocated", i, nextBadge);
             UserInfo profile = addProfile(system);
             profile.profileBadge = nextBadge;
@@ -140,27 +184,20 @@ public class UserManagerServiceCreateProfileTest {
         mUserManagerService.addRemovingUserIdLocked(profile.id);
         // We should reuse the badge from the profile being removed.
         assertEquals("Badge index not reused while removing a user", 0,
-                mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
+                mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id,
+                        USER_TYPE_PROFILE_MANAGED));
 
         // Edge case of reuse that only applies if we ever support 3 managed profiles
         // We should prioritise using lower badge indexes
-        if (UserManagerService.getMaxManagedProfiles() > 2) {
+        int max = mUserManagerService.getMaxUsersOfTypePerParent(USER_TYPE_PROFILE_MANAGED);
+        if (max < 0 || max > 2) {
             UserInfo profileBadgeOne = addProfile(secondaryUser);
             profileBadgeOne.profileBadge = 1;
             // 0 and 2 are free, we should reuse 0 rather than 2.
             assertEquals("Lower index not used", 0,
-                    mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
+                    mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id,
+                            USER_TYPE_PROFILE_MANAGED));
         }
-    }
-
-    @Test
-    public void testNumberOfBadges() {
-        assertTrue("Max profiles greater than number of badges",
-                UserManagerService.MAX_MANAGED_PROFILES
-                <= IconDrawableFactory.CORP_BADGE_COLORS.length);
-        assertEquals("Num colors doesn't match number of badge labels",
-                IconDrawableFactory.CORP_BADGE_COLORS.length,
-                ApplicationPackageManager.CORP_BADGE_LABEL_RES_ID.length);
     }
 
     @Test
@@ -169,6 +206,10 @@ public class UserManagerServiceCreateProfileTest {
         // skip the test
         if (!mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
                 false /* disallow remove */)) {
+            return;
+        }
+        if (mUserManagerService.getMaxUsersOfTypePerParent(USER_TYPE_PROFILE_MANAGED) < 0) {
+            // Indicates no limit, so we cannot run this test;
             return;
         }
 
@@ -192,6 +233,10 @@ public class UserManagerServiceCreateProfileTest {
                 false /* disallow remove */)) {
             return;
         }
+        if (mUserManagerService.getMaxUsersOfTypePerParent(USER_TYPE_PROFILE_MANAGED) < 0) {
+            // Indicates no limit, so we cannot run this test;
+            return;
+        }
 
         // GIVEN we've reached the limit of managed profiles possible on the system user
         // GIVEN that the profiles are not enabled yet
@@ -204,6 +249,65 @@ public class UserManagerServiceCreateProfileTest {
         assertTrue("Cannot add a managed profile by removing another one",
                 mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
                         true /* allow remove */));
+    }
+
+    @Test
+    public void testCreateProfileForUser_lowStorageException() {
+        DeviceStorageMonitorInternal dsmMock = Mockito.mock(DeviceStorageMonitorInternal.class);
+        Mockito.when(dsmMock.isMemoryLow()).thenReturn(true);
+        LocalServices.addService(DeviceStorageMonitorInternal.class, dsmMock);
+
+        try {
+            mUserManagerService.createProfileForUserWithThrow("user2", USER_TYPE_PROFILE_MANAGED, 0,
+                    UserHandle.USER_SYSTEM, null);
+        } catch (ServiceSpecificException e) {
+            assertEquals(UserManager.USER_OPERATION_ERROR_LOW_STORAGE,
+                    UserManager.UserOperationException.from(e).getUserOperationResult());
+        } finally {
+            LocalServices.removeServiceForTest(DeviceStorageMonitorInternal.class);
+        }
+    }
+
+    @Test
+    public void testCreateProfileForUser_unknownParentUser() {
+        DeviceStorageMonitorInternal dsmMock = Mockito.mock(DeviceStorageMonitorInternal.class);
+        Mockito.when(dsmMock.isMemoryLow()).thenReturn(false);
+        LocalServices.addService(DeviceStorageMonitorInternal.class, dsmMock);
+
+        try {
+            final int badParentUserId = 1234;
+            mUserManagerService.createProfileForUserWithThrow("profile", USER_TYPE_PROFILE_MANAGED,
+                    0, badParentUserId, null);
+        } catch (ServiceSpecificException e) {
+            assertEquals(UserManager.USER_OPERATION_ERROR_UNKNOWN,
+                    UserManager.UserOperationException.from(e).getUserOperationResult());
+        } finally {
+            LocalServices.removeServiceForTest(DeviceStorageMonitorInternal.class);
+        }
+    }
+
+    @Test
+    public void testCreateManagedProfileForUser_maxManagedUsersException() {
+        DeviceStorageMonitorInternal dsmMock = Mockito.mock(DeviceStorageMonitorInternal.class);
+        Mockito.when(dsmMock.isMemoryLow()).thenReturn(false);
+        LocalServices.addService(DeviceStorageMonitorInternal.class, dsmMock);
+
+        UserManagerService userManagerServiceSpy = Mockito.spy(mUserManagerService);
+        Mockito.doReturn(false).when(userManagerServiceSpy).canAddMoreManagedProfiles(
+                Mockito.anyInt(), Mockito.anyBoolean());
+
+        Mockito.doReturn(false).when(userManagerServiceSpy).canAddMoreProfilesToUser(
+                Mockito.anyString(), Mockito.anyInt(), Mockito.anyBoolean());
+
+        try {
+            userManagerServiceSpy.createProfileForUserWithThrow("profile",
+                    USER_TYPE_PROFILE_MANAGED, 0, UserHandle.USER_SYSTEM, null);
+        } catch (ServiceSpecificException e) {
+            assertEquals(UserManager.USER_OPERATION_ERROR_MAX_USERS,
+                    UserManager.UserOperationException.from(e).getUserOperationResult());
+        } finally {
+            LocalServices.removeServiceForTest(DeviceStorageMonitorInternal.class);
+        }
     }
 
     private void removeUsers() {

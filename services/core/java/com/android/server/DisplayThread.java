@@ -20,6 +20,8 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.Trace;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Shared singleton foreground thread for the system.  This is a thread for
  * operations that affect what's on the display, which needs to have a minimum
@@ -56,6 +58,22 @@ public final class DisplayThread extends ServiceThread {
         synchronized (DisplayThread.class) {
             ensureThreadLocked();
             return sHandler;
+        }
+    }
+
+    /**
+     * Disposes current display thread if it's initialized. Should only be used in tests to set up a
+     * new environment.
+     */
+    @VisibleForTesting
+    public static void dispose() {
+        synchronized (DisplayThread.class) {
+            if (sInstance == null) {
+                return;
+            }
+
+            getHandler().runWithScissors(() -> sInstance.quit(), 0 /* timeout */);
+            sInstance = null;
         }
     }
 }

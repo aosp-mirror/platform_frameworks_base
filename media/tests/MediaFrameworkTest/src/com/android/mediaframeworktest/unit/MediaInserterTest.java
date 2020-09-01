@@ -42,6 +42,7 @@ import org.mockito.MockitoAnnotations;
 
 public class MediaInserterTest extends InstrumentationTestCase {
 
+    private static final String TEST_FEATURE_ID = "testFeature";
     private MediaInserter mMediaInserter;
     private static final int TEST_BUFFER_SIZE = 10;
     private @Mock IContentProvider mMockProvider;
@@ -86,7 +87,8 @@ public class MediaInserterTest extends InstrumentationTestCase {
         MockitoAnnotations.initMocks(this);
 
         final ContentProviderClient client = new ContentProviderClient(
-                getInstrumentation().getContext().getContentResolver(), mMockProvider, true);
+                getInstrumentation().getContext().createFeatureContext(TEST_FEATURE_ID)
+                        .getContentResolver(), mMockProvider, true);
         mMediaInserter = new MediaInserter(client, TEST_BUFFER_SIZE);
         mPackageName = getInstrumentation().getContext().getPackageName();
         mFilesCounter = 0;
@@ -142,31 +144,36 @@ public class MediaInserterTest extends InstrumentationTestCase {
         fillBuffer(sVideoUri, TEST_BUFFER_SIZE - 2);
         fillBuffer(sImagesUri, TEST_BUFFER_SIZE - 1);
 
-        verify(mMockProvider, never()).bulkInsert(eq(mPackageName), any(), any());
+        verify(mMockProvider, never()).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any());
     }
 
     @SmallTest
     public void testInsertContentsEqualToBufferSize() throws Exception {
-        when(mMockProvider.bulkInsert(eq(mPackageName), any(), any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any())).thenReturn(1);
 
         fillBuffer(sFilesUri, TEST_BUFFER_SIZE);
         fillBuffer(sAudioUri, TEST_BUFFER_SIZE);
         fillBuffer(sVideoUri, TEST_BUFFER_SIZE);
         fillBuffer(sImagesUri, TEST_BUFFER_SIZE);
 
-        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), any(), any());
+        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any());
     }
 
     @SmallTest
     public void testInsertContentsMoreThanBufferSize() throws Exception {
-        when(mMockProvider.bulkInsert(eq(mPackageName), any(), any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any())).thenReturn(1);
 
         fillBuffer(sFilesUri, TEST_BUFFER_SIZE + 1);
         fillBuffer(sAudioUri, TEST_BUFFER_SIZE + 2);
         fillBuffer(sVideoUri, TEST_BUFFER_SIZE + 3);
         fillBuffer(sImagesUri, TEST_BUFFER_SIZE + 4);
 
-        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), any(), any());
+        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any());
     }
 
     @SmallTest
@@ -176,7 +183,8 @@ public class MediaInserterTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testFlushAllWithSomeContents() throws Exception {
-        when(mMockProvider.bulkInsert(eq(mPackageName), any(), any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any())).thenReturn(1);
 
         fillBuffer(sFilesUri, TEST_BUFFER_SIZE - 4);
         fillBuffer(sAudioUri, TEST_BUFFER_SIZE - 3);
@@ -184,12 +192,14 @@ public class MediaInserterTest extends InstrumentationTestCase {
         fillBuffer(sImagesUri, TEST_BUFFER_SIZE - 1);
         mMediaInserter.flushAll();
 
-        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), any(), any());
+        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any());
     }
 
     @SmallTest
     public void testInsertContentsAfterFlushAll() throws Exception {
-        when(mMockProvider.bulkInsert(eq(mPackageName), any(), any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any())).thenReturn(1);
 
         fillBuffer(sFilesUri, TEST_BUFFER_SIZE - 4);
         fillBuffer(sAudioUri, TEST_BUFFER_SIZE - 3);
@@ -202,15 +212,20 @@ public class MediaInserterTest extends InstrumentationTestCase {
         fillBuffer(sVideoUri, TEST_BUFFER_SIZE + 3);
         fillBuffer(sImagesUri, TEST_BUFFER_SIZE + 4);
 
-        verify(mMockProvider, times(8)).bulkInsert(eq(mPackageName), any(), any());
+        verify(mMockProvider, times(8)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), any(),
+                any());
     }
 
     @SmallTest
     public void testInsertContentsWithDifferentSizePerContentType() throws Exception {
-        when(mMockProvider.bulkInsert(eq(mPackageName), eqUri(sFilesUri), any())).thenReturn(1);
-        when(mMockProvider.bulkInsert(eq(mPackageName), eqUri(sAudioUri), any())).thenReturn(1);
-        when(mMockProvider.bulkInsert(eq(mPackageName), eqUri(sVideoUri), any())).thenReturn(1);
-        when(mMockProvider.bulkInsert(eq(mPackageName), eqUri(sImagesUri), any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), eqUri(sFilesUri),
+                any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), eqUri(sAudioUri),
+                any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), eqUri(sVideoUri),
+                any())).thenReturn(1);
+        when(mMockProvider.bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID), eqUri(sImagesUri),
+                any())).thenReturn(1);
 
         for (int i = 0; i < TEST_BUFFER_SIZE; ++i) {
             fillBuffer(sFilesUri, 1);
@@ -219,9 +234,13 @@ public class MediaInserterTest extends InstrumentationTestCase {
             fillBuffer(sImagesUri, 4);
         }
 
-        verify(mMockProvider, times(1)).bulkInsert(eq(mPackageName), eqUri(sFilesUri), any());
-        verify(mMockProvider, times(2)).bulkInsert(eq(mPackageName), eqUri(sAudioUri), any());
-        verify(mMockProvider, times(3)).bulkInsert(eq(mPackageName), eqUri(sVideoUri), any());
-        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), eqUri(sImagesUri), any());
+        verify(mMockProvider, times(1)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID),
+                eqUri(sFilesUri), any());
+        verify(mMockProvider, times(2)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID),
+                eqUri(sAudioUri), any());
+        verify(mMockProvider, times(3)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID),
+                eqUri(sVideoUri), any());
+        verify(mMockProvider, times(4)).bulkInsert(eq(mPackageName), eq(TEST_FEATURE_ID),
+                eqUri(sImagesUri), any());
     }
 }

@@ -17,13 +17,17 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.FileUtils;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,12 +50,13 @@ import java.util.Arrays;
  * backing directory when checking existence, making changes, and deleting.
  */
 public final class AtomicDirectory {
-    private final @NonNull ArrayMap<File, FileOutputStream> mOpenFiles = new ArrayMap<>();
+
+    private static final String LOG_TAG = AtomicDirectory.class.getSimpleName();
+
     private final @NonNull File mBaseDirectory;
     private final @NonNull File mBackupDirectory;
 
-    private int mBaseDirectoryFd = -1;
-    private int mBackupDirectoryFd = -1;
+    private final @NonNull ArrayMap<File, FileOutputStream> mOpenFiles = new ArrayMap<>();
 
     /**
      * Creates a new instance.
@@ -65,15 +70,16 @@ public final class AtomicDirectory {
     }
 
     /**
-     * Gets the backup directory if present. This could be useful if you are
-     * writing new state to the dir but need to access the last persisted state
-     * at the same time. This means that this call is useful in between
-     * {@link #startWrite()} and {@link #finishWrite()} or {@link #failWrite()}.
-     * You should not modify the content returned by this method.
+     * Gets the backup directory which may or may not exist. This could be
+     * useful if you are writing new state to the directory but need to access
+     * the last persisted state at the same time. This means that this call is
+     * useful in between {@link #startWrite()} and {@link #finishWrite()} or
+     * {@link #failWrite()}. You should not modify the content returned by this
+     * method.
      *
      * @see #startRead()
      */
-    public @Nullable File getBackupDirectory() {
+    public @NonNull File getBackupDirectory() {
         return mBackupDirectory;
     }
 
@@ -88,7 +94,8 @@ public final class AtomicDirectory {
      */
     public @NonNull File startRead() throws IOException {
         restore();
-        return getOrCreateBaseDirectory();
+        ensureBaseDirectory();
+        return mBaseDirectory;
     }
 
     /**
@@ -97,10 +104,7 @@ public final class AtomicDirectory {
      * @see #startRead()
      * @see #startWrite()
      */
-    public void finishRead() {
-        mBaseDirectoryFd = -1;
-        mBackupDirectoryFd = -1;
-    }
+    public void finishRead() {}
 
     /**
      * Starts editing this directory. After calling this method you should
@@ -119,7 +123,8 @@ public final class AtomicDirectory {
      */
     public @NonNull File startWrite() throws IOException {
         backup();
-        return getOrCreateBaseDirectory();
+        ensureBaseDirectory();
+        return mBaseDirectory;
     }
 
     /**
@@ -133,13 +138,14 @@ public final class AtomicDirectory {
      * @see #closeWrite(FileOutputStream)
      */
     public @NonNull FileOutputStream openWrite(@NonNull File file) throws IOException {
-        if (file.isDirectory() || !file.getParentFile().equals(getOrCreateBaseDirectory())) {
-            throw new IllegalArgumentException("Must be a file in " + getOrCreateBaseDirectory());
+        if (file.isDirectory() || !file.getParentFile().equals(mBaseDirectory)) {
+            throw new IllegalArgumentException("Must be a file in " + mBaseDirectory);
+        }
+        if (mOpenFiles.containsKey(file)) {
+            throw new IllegalArgumentException("Already open file " + file.getAbsolutePath());
         }
         final FileOutputStream destination = new FileOutputStream(file);
-        if (mOpenFiles.put(file, destination) != null) {
-            throw new IllegalArgumentException("Already open file" + file.getCanonicalPath());
-        }
+        mOpenFiles.put(file, destination);
         return destination;
     }
 
@@ -152,20 +158,21 @@ public final class AtomicDirectory {
      */
     public void closeWrite(@NonNull FileOutputStream destination) {
         final int indexOfValue = mOpenFiles.indexOfValue(destination);
-        if (mOpenFiles.removeAt(indexOfValue) == null) {
+        if (indexOfValue < 0) {
             throw new IllegalArgumentException("Unknown file stream " + destination);
         }
+        mOpenFiles.removeAt(indexOfValue);
         FileUtils.sync(destination);
-        try {
-            destination.close();
-        } catch (IOException ignored) {}
+        FileUtils.closeQuietly(destination);
     }
 
     public void failWrite(@NonNull FileOutputStream destination) {
         final int indexOfValue = mOpenFiles.indexOfValue(destination);
-        if (indexOfValue >= 0) {
-            mOpenFiles.removeAt(indexOfValue);
+        if (indexOfValue < 0) {
+            throw new IllegalArgumentException("Unknown file stream " + destination);
         }
+        mOpenFiles.removeAt(indexOfValue);
+        FileUtils.closeQuietly(destination);
     }
 
     /**
@@ -173,15 +180,15 @@ public final class AtomicDirectory {
      *
      * @see #startWrite()
      *
-     * @throws IllegalStateException is some files are not closed.
+     * @throws IllegalStateException if some files are not closed.
      */
     public void finishWrite() {
         throwIfSomeFilesOpen();
-        fsyncDirectoryFd(mBaseDirectoryFd);
+
+        syncDirectory(mBaseDirectory);
+        syncParentDirectory();
         deleteDirectory(mBackupDirectory);
-        fsyncDirectoryFd(mBackupDirectoryFd);
-        mBaseDirectoryFd = -1;
-        mBackupDirectoryFd = -1;
+        syncParentDirectory();
     }
 
     /**
@@ -191,11 +198,12 @@ public final class AtomicDirectory {
      */
     public void failWrite() {
         throwIfSomeFilesOpen();
+
         try{
             restore();
-        } catch (IOException ignored) {}
-        mBaseDirectoryFd = -1;
-        mBackupDirectoryFd = -1;
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to restore in failWrite()", e);
+        }
     }
 
     /**
@@ -209,29 +217,28 @@ public final class AtomicDirectory {
      * Deletes this directory.
      */
     public void delete() {
+        boolean deleted = false;
         if (mBaseDirectory.exists()) {
-            deleteDirectory(mBaseDirectory);
-            fsyncDirectoryFd(mBaseDirectoryFd);
+            deleted |= deleteDirectory(mBaseDirectory);
         }
         if (mBackupDirectory.exists()) {
-            deleteDirectory(mBackupDirectory);
-            fsyncDirectoryFd(mBackupDirectoryFd);
+            deleted |= deleteDirectory(mBackupDirectory);
+        }
+        if (deleted) {
+            syncParentDirectory();
         }
     }
 
-    private @NonNull File getOrCreateBaseDirectory() throws IOException {
-        if (!mBaseDirectory.exists()) {
-            if (!mBaseDirectory.mkdirs()) {
-                throw new IOException("Couldn't create directory " + mBaseDirectory);
-            }
-            FileUtils.setPermissions(mBaseDirectory.getPath(),
-                    FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH,
-                    -1, -1);
+    private void ensureBaseDirectory() throws IOException {
+        if (mBaseDirectory.exists()) {
+            return;
         }
-        if (mBaseDirectoryFd < 0) {
-            mBaseDirectoryFd = getDirectoryFd(mBaseDirectory.getCanonicalPath());
+
+        if (!mBaseDirectory.mkdirs()) {
+            throw new IOException("Failed to create directory " + mBaseDirectory);
         }
-        return mBaseDirectory;
+        FileUtils.setPermissions(mBaseDirectory.getPath(),
+                FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH, -1, -1);
     }
 
     private void throwIfSomeFilesOpen() {
@@ -245,50 +252,56 @@ public final class AtomicDirectory {
         if (!mBaseDirectory.exists()) {
             return;
         }
-        if (mBaseDirectoryFd < 0) {
-            mBaseDirectoryFd = getDirectoryFd(mBaseDirectory.getCanonicalPath());
-        }
+
         if (mBackupDirectory.exists()) {
             deleteDirectory(mBackupDirectory);
         }
         if (!mBaseDirectory.renameTo(mBackupDirectory)) {
-            throw new IOException("Couldn't backup " + mBaseDirectory
-                    + " to " + mBackupDirectory);
+            throw new IOException("Failed to backup " + mBaseDirectory + " to " + mBackupDirectory);
         }
-        mBackupDirectoryFd = mBaseDirectoryFd;
-        mBaseDirectoryFd = -1;
-        fsyncDirectoryFd(mBackupDirectoryFd);
+        syncParentDirectory();
     }
 
     private void restore() throws IOException {
         if (!mBackupDirectory.exists()) {
             return;
         }
-        if (mBackupDirectoryFd == -1) {
-            mBackupDirectoryFd = getDirectoryFd(mBackupDirectory.getCanonicalPath());
-        }
+
         if (mBaseDirectory.exists()) {
             deleteDirectory(mBaseDirectory);
         }
         if (!mBackupDirectory.renameTo(mBaseDirectory)) {
-            throw new IOException("Couldn't restore " + mBackupDirectory
-                    + " to " + mBaseDirectory);
+            throw new IOException("Failed to restore " + mBackupDirectory + " to "
+                    + mBaseDirectory);
         }
-        mBaseDirectoryFd = mBackupDirectoryFd;
-        mBackupDirectoryFd = -1;
-        fsyncDirectoryFd(mBaseDirectoryFd);
+        syncParentDirectory();
     }
 
-    private static void deleteDirectory(@NonNull File file) {
-        final File[] children = file.listFiles();
-        if (children != null) {
-            for (File child : children) {
-                deleteDirectory(child);
-            }
-        }
-        file.delete();
+    private static boolean deleteDirectory(@NonNull File directory) {
+        return FileUtils.deleteContentsAndDir(directory);
     }
 
-    private static native int getDirectoryFd(String path);
-    private static native void fsyncDirectoryFd(int fd);
+    private void syncParentDirectory() {
+        syncDirectory(mBaseDirectory.getParentFile());
+    }
+
+    // Standard Java IO doesn't allow opening a directory (will throw a FileNotFoundException
+    // instead), so we have to do it manually.
+    private static void syncDirectory(@NonNull File directory) {
+        String path = directory.getAbsolutePath();
+        FileDescriptor fd;
+        try {
+            fd = Os.open(path, OsConstants.O_RDONLY, 0);
+        } catch (ErrnoException e) {
+            Log.e(LOG_TAG, "Failed to open " + path, e);
+            return;
+        }
+        try {
+            Os.fsync(fd);
+        } catch (ErrnoException e) {
+            Log.e(LOG_TAG, "Failed to fsync " + path, e);
+        } finally {
+            FileUtils.closeQuietly(fd);
+        }
+    }
 }

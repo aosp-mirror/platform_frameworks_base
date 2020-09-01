@@ -24,6 +24,7 @@
 #include "Resource.h"
 #include "split/TableSplitter.h"
 #include "format/binary/TableFlattener.h"
+#include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
 #include "trace/TraceBuffer.h"
 
@@ -42,6 +43,7 @@ struct LinkOptions {
   std::vector<std::string> assets_dirs;
   bool output_to_directory = false;
   bool auto_add_overlay = false;
+  bool override_styles_instead_of_overlaying = false;
   OutputFormat output_format = OutputFormat::kApk;
   Maybe<std::string> rename_resources_package;
 
@@ -55,6 +57,7 @@ struct LinkOptions {
   bool generate_conditional_proguard_rules = false;
   bool generate_minimal_proguard_rules = false;
   bool generate_non_final_ids = false;
+  bool no_proguard_location_reference = false;
   std::vector<std::string> javadoc_annotations;
   Maybe<std::string> private_symbols;
 
@@ -71,6 +74,7 @@ struct LinkOptions {
 
   // Static lib options.
   bool no_static_lib_packages = false;
+  bool merge_only = false;
 
   // AndroidManifest.xml massaging options.
   ManifestFixerOptions manifest_fixer_options;
@@ -80,6 +84,7 @@ struct LinkOptions {
 
   // Flattening options.
   TableFlattenerOptions table_flattener_options;
+  SerializeTableOptions proto_table_flattener_options;
   bool keep_raw_values = false;
 
   // Split APK options.
@@ -212,6 +217,9 @@ class LinkCommand : public Command {
         "Generates R.java without the final modifier. This is implied when\n"
             "--static-lib is specified.",
         &options_.generate_non_final_ids);
+    AddOptionalSwitch("--no-proguard-location-reference",
+        "Keep proguard rules files from having a reference to the source file",
+        &options_.no_proguard_location_reference);
     AddOptionalFlag("--stable-ids", "File containing a list of name to ID mapping.",
         &stable_id_file_path_);
     AddOptionalFlag("--emit-ids",
@@ -243,6 +251,10 @@ class LinkCommand : public Command {
         "Allows the addition of new resources in overlays without\n"
             "<add-resource> tags.",
         &options_.auto_add_overlay);
+    AddOptionalSwitch("--override-styles-instead-of-overlaying",
+        "Causes styles defined in -R resources to replace previous definitions\n"
+            "instead of merging into them\n",
+        &options_.override_styles_instead_of_overlaying);
     AddOptionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml.",
         &options_.manifest_fixer_options.rename_manifest_package);
     AddOptionalFlag("--rename-resources-package", "Renames the package in resources table",
@@ -255,7 +267,7 @@ class LinkCommand : public Command {
         "Changes the name of the target package for overlay. Most useful\n"
             "when used in conjunction with --rename-manifest-package.",
         &options_.manifest_fixer_options.rename_overlay_target_package);
-    AddOptionalFlagList("-0", "File extensions not to compress.",
+    AddOptionalFlagList("-0", "File suffix not to compress.",
         &options_.extensions_to_not_compress);
     AddOptionalSwitch("--no-compress", "Do not compress any resources.",
         &options_.do_not_compress_anything);
@@ -263,8 +275,8 @@ class LinkCommand : public Command {
         &options_.keep_raw_values);
     AddOptionalFlag("--no-compress-regex",
         "Do not compress extensions matching the regular expression. Remember to\n"
-            " use the '$' symbol for end of line. Uses a non case-sensitive\n"
-            " ECMAScript regular expression grammar.",
+            "use the '$' symbol for end of line. Uses a case-sensitive ECMAScript"
+            "regular expression grammar.",
         &no_compress_regex);
     AddOptionalSwitch("--warn-manifest-validation",
         "Treat manifest validation errors as warnings.",
@@ -284,9 +296,18 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--strict-visibility",
         "Do not allow overlays with different visibility levels.",
         &options_.strict_visibility);
+    AddOptionalSwitch("--exclude-sources",
+        "Do not serialize source file information when generating resources in\n"
+            "Protobuf format.",
+        &options_.proto_table_flattener_options.exclude_sources);
+    AddOptionalFlag("--trace-folder",
+        "Generate systrace json trace fragment to specified folder.",
+        &trace_folder_);
+    AddOptionalSwitch("--merge-only",
+        "Only merge the resources, without verifying resource references. This flag\n"
+            "should only be used together with the --static-lib flag.",
+        &options_.merge_only);
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
-    AddOptionalFlag("--trace-folder", "Generate systrace json trace fragment to specified folder.",
-                    &trace_folder_);
   }
 
   int Action(const std::vector<std::string>& args) override;

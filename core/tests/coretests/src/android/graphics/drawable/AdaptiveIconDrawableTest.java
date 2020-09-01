@@ -145,9 +145,6 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
         assertEquals("top", boundFromDrawable.top, boundFromDeviceConfig.top, delta);
         assertEquals("right", boundFromDrawable.right, boundFromDeviceConfig.right, delta);
         assertEquals("bottom", boundFromDrawable.bottom, boundFromDeviceConfig.bottom, delta);
-
-        assertTrue("path from device config is convex.", pathFromDeviceConfig.isConvex());
-        assertTrue("path from drawable is convex.", pathFromDrawable.isConvex());
     }
 
     @Test
@@ -169,8 +166,6 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
         assertEquals("top", top, maskBounds.top, delta);
         assertEquals("right", right, maskBounds.right, delta);
         assertEquals("bottom", bottom, maskBounds.bottom, delta);
-
-        assertTrue(mIconDrawable.getIconMask().isConvex());
     }
 
     @Test
@@ -185,7 +180,6 @@ public class AdaptiveIconDrawableTest extends AndroidTestCase {
         mIconDrawable.setBounds(left, top, right, bottom);
         Outline outline = new Outline();
         mIconDrawable.getOutline(outline);
-        assertTrue("outline path should be convex", outline.mPath.isConvex());
     }
 
     @Test

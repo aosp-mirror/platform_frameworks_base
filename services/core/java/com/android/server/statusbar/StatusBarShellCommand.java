@@ -72,6 +72,8 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runDisableForSetup();
                 case "send-disable-flag":
                     return runSendDisableFlag();
+                case "tracing":
+                    return runTracing();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -185,6 +187,18 @@ public class StatusBarShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runTracing() {
+        switch (getNextArg()) {
+            case "start":
+                mInterface.startTracing();
+                break;
+            case "stop":
+                mInterface.stopTracing();
+                break;
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -232,6 +246,9 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("        system-icons        - disable system icons appearing in status bar");
         pw.println("        clock               - disable clock appearing in status bar");
         pw.println("        notification-icons  - disable notification icons from status bar");
+        pw.println("");
+        pw.println("  tracing (start | stop)");
+        pw.println("    Start or stop SystemUI tracing");
         pw.println("");
     }
 

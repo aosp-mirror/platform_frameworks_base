@@ -1,0 +1,68 @@
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="horizontal"
+      android:layout_marginTop="@dimen/controls_top_margin"
+      android:layout_marginBottom="@dimen/controls_header_bottom_margin">
+
+    <!-- make sure the header stays centered in the layout by adding a spacer -->
+    <Space
+        android:layout_width="@dimen/controls_header_menu_size"
+        android:layout_height="1dp" />
+    <!-- need to keep this outer view in order to have a correctly sized anchor
+         for the dropdown menu, as well as dropdown background in the right place -->
+    <LinearLayout
+        android:id="@+id/controls_header"
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:minHeight="48dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center">
+      <TextView
+          style="@style/Control.Spinner.Header"
+          android:clickable="false"
+          android:id="@+id/app_or_structure_spinner"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center" />
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/controls_more"
+        android:src="@drawable/ic_more_vert"
+        android:layout_width="@dimen/controls_header_menu_size"
+        android:layout_height="@dimen/controls_header_menu_size"
+        android:padding="12dp"
+        android:tint="@color/control_more_vert"
+        android:layout_gravity="center"
+        android:contentDescription="@string/accessibility_menu"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/global_actions_controls_list"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:layout_marginLeft="@dimen/global_actions_side_margin"
+      android:layout_marginRight="@dimen/global_actions_side_margin" />
+</merge>

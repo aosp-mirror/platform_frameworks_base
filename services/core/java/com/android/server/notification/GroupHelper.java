@@ -16,8 +16,12 @@
 package com.android.server.notification;
 
 import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +41,11 @@ public class GroupHelper {
     private final Callback mCallback;
     private final int mAutoGroupAtCount;
 
+    // count the number of ongoing notifications per group
+    // userId -> (package name -> (group Id -> (set of notification keys)))
+    final ArrayMap<String, ArraySet<String>>
+            mOngoingGroupCount = new ArrayMap<>();
+
     // Map of user : <Map of package : notification keys>. Only contains notifications that are not
     // grouped by the app (aka no group or sort key).
     Map<Integer, Map<String, LinkedHashSet<String>>> mUngroupedNotifications = new HashMap<>();
@@ -46,10 +55,52 @@ public class GroupHelper {
         mCallback = callback;
     }
 
+    private String generatePackageGroupKey(int userId, String pkg, String group) {
+        return userId + "|" + pkg + "|" + group;
+    }
+
+    @VisibleForTesting
+    protected int getOngoingGroupCount(int userId, String pkg, String group) {
+        String key = generatePackageGroupKey(userId, pkg, group);
+        return mOngoingGroupCount.getOrDefault(key, new ArraySet<>(0)).size();
+    }
+
+    private void addToOngoingGroupCount(StatusBarNotification sbn, boolean add) {
+        if (sbn.getNotification().isGroupSummary()) return;
+        if (!sbn.isOngoing() && add) return;
+        String group = sbn.getGroup();
+        if (group == null) return;
+        int userId = sbn.getUser().getIdentifier();
+        String key = generatePackageGroupKey(userId, sbn.getPackageName(), group);
+        ArraySet<String> notifications = mOngoingGroupCount.getOrDefault(key, new ArraySet<>(0));
+        if (add) {
+            notifications.add(sbn.getKey());
+            mOngoingGroupCount.put(key, notifications);
+        } else {
+            notifications.remove(sbn.getKey());
+            // we dont need to put it back if it is default
+        }
+        String combinedKey = generatePackageGroupKey(userId, sbn.getPackageName(), group);
+        boolean needsOngoingFlag = notifications.size() > 0;
+        mCallback.updateAutogroupSummary(sbn.getKey(), needsOngoingFlag);
+    }
+
+    public void onNotificationUpdated(StatusBarNotification childSbn,
+            boolean autogroupSummaryExists) {
+        if (childSbn.getGroup() != AUTOGROUP_KEY
+                || childSbn.getNotification().isGroupSummary()) return;
+        if (childSbn.isOngoing()) {
+            addToOngoingGroupCount(childSbn, true);
+        } else {
+            addToOngoingGroupCount(childSbn, false);
+        }
+    }
+
     public void onNotificationPosted(StatusBarNotification sbn, boolean autogroupSummaryExists) {
         if (DEBUG) Log.i(TAG, "POSTED " + sbn.getKey());
         try {
             List<String> notificationsToGroup = new ArrayList<>();
+            if (autogroupSummaryExists) addToOngoingGroupCount(sbn, true);
             if (!sbn.isAppGroup()) {
                 // Not grouped by the app, add to the list of notifications for the app;
                 // send grouping update if app exceeds the autogrouping limit.
@@ -90,6 +141,7 @@ public class GroupHelper {
 
     public void onNotificationRemoved(StatusBarNotification sbn) {
         try {
+            addToOngoingGroupCount(sbn, false);
             maybeUngroup(sbn, true, sbn.getUserId());
         } catch (Exception e) {
             Slog.e(TAG, "Error processing canceled notification", e);
@@ -159,5 +211,6 @@ public class GroupHelper {
         void removeAutoGroup(String key);
         void addAutoGroupSummary(int userId, String pkg, String triggeringKey);
         void removeAutoGroupSummary(int user, String pkg);
+        void updateAutogroupSummary(String key, boolean needsOngoingFlag);
     }
 }

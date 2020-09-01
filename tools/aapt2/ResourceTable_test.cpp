@@ -30,6 +30,8 @@ using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::StrEq;
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 TEST(ResourceTableTest, FailToAddResourceWithBadName) {
@@ -247,8 +249,8 @@ TEST(ResourceTableTest, SetOverlayable) {
   auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme",
                                                    Source("res/values/overlayable.xml", 40));
   OverlayableItem overlayable_item(overlayable);
-  overlayable_item.policies |= OverlayableItem::Policy::kProduct;
-  overlayable_item.policies |= OverlayableItem::Policy::kVendor;
+  overlayable_item.policies |= PolicyFlags::PRODUCT_PARTITION;
+  overlayable_item.policies |= PolicyFlags::VENDOR_PARTITION;
   overlayable_item.comment = "comment";
   overlayable_item.source = Source("res/values/overlayable.xml", 42);
 
@@ -264,8 +266,8 @@ TEST(ResourceTableTest, SetOverlayable) {
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
   EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
   EXPECT_THAT(result_overlayable_item.overlayable->source.line, 40);
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
-                                                   | OverlayableItem::Policy::kVendor));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(PolicyFlags::PRODUCT_PARTITION
+                                                   | PolicyFlags::VENDOR_PARTITION));
   ASSERT_THAT(result_overlayable_item.comment, StrEq("comment"));
   EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
   EXPECT_THAT(result_overlayable_item.source.line, 42);
@@ -277,17 +279,17 @@ TEST(ResourceTableTest, SetMultipleOverlayableResources) {
   const ResourceName foo = test::ParseNameOrDie("android:string/foo");
   auto group = std::make_shared<Overlayable>("Name", "overlay://theme");
   OverlayableItem overlayable(group);
-  overlayable.policies = OverlayableItem::Policy::kProduct;
+  overlayable.policies = PolicyFlags::PRODUCT_PARTITION;
   ASSERT_TRUE(table.SetOverlayable(foo, overlayable, test::GetDiagnostics()));
 
   const ResourceName bar = test::ParseNameOrDie("android:string/bar");
   OverlayableItem overlayable2(group);
-  overlayable2.policies = OverlayableItem::Policy::kProduct;
+  overlayable2.policies = PolicyFlags::PRODUCT_PARTITION;
   ASSERT_TRUE(table.SetOverlayable(bar, overlayable2, test::GetDiagnostics()));
 
   const ResourceName baz = test::ParseNameOrDie("android:string/baz");
   OverlayableItem overlayable3(group);
-  overlayable3.policies = OverlayableItem::Policy::kVendor;
+  overlayable3.policies = PolicyFlags::VENDOR_PARTITION;
   ASSERT_TRUE(table.SetOverlayable(baz, overlayable3, test::GetDiagnostics()));
 }
 
@@ -296,12 +298,12 @@ TEST(ResourceTableTest, SetOverlayableDifferentResourcesDifferentName) {
 
   const ResourceName foo = test::ParseNameOrDie("android:string/foo");
   OverlayableItem overlayable_item(std::make_shared<Overlayable>("Name", "overlay://theme"));
-  overlayable_item.policies = OverlayableItem::Policy::kProduct;
+  overlayable_item.policies = PolicyFlags::PRODUCT_PARTITION;
   ASSERT_TRUE(table.SetOverlayable(foo, overlayable_item, test::GetDiagnostics()));
 
   const ResourceName bar = test::ParseNameOrDie("android:string/bar");
   OverlayableItem overlayable_item2(std::make_shared<Overlayable>("Name2",  "overlay://theme"));
-  overlayable_item2.policies = OverlayableItem::Policy::kProduct;
+  overlayable_item2.policies = PolicyFlags::PRODUCT_PARTITION;
   ASSERT_TRUE(table.SetOverlayable(bar, overlayable_item2, test::GetDiagnostics()));
 }
 

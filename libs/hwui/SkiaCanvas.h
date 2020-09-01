@@ -16,12 +16,16 @@
 #pragma once
 
 #include "CanvasProperty.h"
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include "DeferredLayerUpdater.h"
+#endif
 #include "RenderNode.h"
 #include "VectorDrawable.h"
 #include "hwui/Canvas.h"
+#include "hwui/Paint.h"
 
 #include <SkCanvas.h>
+#include "src/core/SkArenaAlloc.h"
 
 #include <cassert>
 #include <optional>
@@ -43,8 +47,6 @@ public:
     explicit SkiaCanvas(SkCanvas* canvas);
 
     virtual ~SkiaCanvas();
-
-    virtual SkCanvas* asSkCanvas() override { return mCanvas; }
 
     virtual void resetRecording(int width, int height,
                                 uirenderer::RenderNode* renderNode) override {
@@ -99,42 +101,41 @@ public:
     virtual void drawColor(int color, SkBlendMode mode) override;
     virtual void drawPaint(const SkPaint& paint) override;
 
-    virtual void drawPoint(float x, float y, const SkPaint& paint) override;
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint) override;
+    virtual void drawPoint(float x, float y, const Paint& paint) override;
+    virtual void drawPoints(const float* points, int count, const Paint& paint) override;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-                          const SkPaint& paint) override;
-    virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
+                          const Paint& paint) override;
+    virtual void drawLines(const float* points, int count, const Paint& paint) override;
     virtual void drawRect(float left, float top, float right, float bottom,
-                          const SkPaint& paint) override;
-    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
+                          const Paint& paint) override;
+    virtual void drawRegion(const SkRegion& region, const Paint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
-                               const SkPaint& paint) override;
+                               const Paint& paint) override;
 
    virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
-                               const SkPaint& paint) override;
+                               const Paint& paint) override;
 
-    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
+    virtual void drawCircle(float x, float y, float radius, const Paint& paint) override;
     virtual void drawOval(float left, float top, float right, float bottom,
-                          const SkPaint& paint) override;
+                          const Paint& paint) override;
     virtual void drawArc(float left, float top, float right, float bottom, float startAngle,
-                         float sweepAngle, bool useCenter, const SkPaint& paint) override;
-    virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) override;
+                         float sweepAngle, bool useCenter, const Paint& paint) override;
+    virtual void drawPath(const SkPath& path, const Paint& paint) override;
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) override;
 
-    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
-    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
                             float srcBottom, float dstLeft, float dstTop, float dstRight,
-                            float dstBottom, const SkPaint* paint) override;
+                            float dstBottom, const Paint* paint) override;
     virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
                                 const float* vertices, const int* colors,
-                                const SkPaint* paint) override;
+                                const Paint* paint) override;
     virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk, float dstLeft,
                                float dstTop, float dstRight, float dstBottom,
-                               const SkPaint* paint) override;
+                               const Paint* paint) override;
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) override;
 
-    virtual bool drawTextAbsolutePos() const override { return true; }
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
     virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
@@ -153,9 +154,11 @@ public:
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
     virtual void callDrawGLFunction(Functor* functor,
                                     uirenderer::GlFunctorLifecycleListener* listener) override;
+    virtual void drawPicture(const SkPicture& picture) override;
 
 protected:
     SkiaCanvas();
+    SkCanvas* asSkCanvas() { return mCanvas; }
     void reset(SkCanvas* skiaCanvas);
     void drawDrawable(SkDrawable* drawable) { mCanvas->drawDrawable(drawable); }
 
@@ -206,6 +209,35 @@ protected:
      */
     PaintCoW&& filterPaint(PaintCoW&& paint) const;
 
+    template <typename Proc> void apply_looper(const Paint* paint, Proc proc) {
+        SkPaint skp;
+        SkDrawLooper* looper = nullptr;
+        if (paint) {
+            skp = *filterPaint(paint);
+            looper = paint->getLooper();
+        }
+        if (looper) {
+            SkSTArenaAlloc<256> alloc;
+            SkDrawLooper::Context* ctx = looper->makeContext(&alloc);
+            if (ctx) {
+                SkDrawLooper::Context::Info info;
+                for (;;) {
+                    SkPaint p = skp;
+                    if (!ctx->next(&info, &p)) {
+                        break;
+                    }
+                    mCanvas->save();
+                    mCanvas->translate(info.fTranslate.fX, info.fTranslate.fY);
+                    proc(p);
+                    mCanvas->restore();
+                }
+            }
+        } else {
+            proc(skp);
+        }
+    }
+
+
 private:
     struct SaveRec {
         int saveCount;
@@ -220,17 +252,7 @@ private:
     void recordClip(const T&, SkClipOp);
     void applyPersistentClips(size_t clipStartIndex);
 
-    void drawPoints(const float* points, int count, const SkPaint& paint, SkCanvas::PointMode mode);
-
-    /** Filters the paint for bitmap drawing.
-     *
-     *  After filtering the paint for bitmap drawing,
-     *  also calls filterPaint on the paint.
-     *
-     *  @param paint the paint to filter. Will be initialized with the default
-     *      SkPaint before filtering if filtering is required.
-     */
-    PaintCoW&& filterBitmap(PaintCoW&& paint, sk_sp<SkColorFilter> colorSpaceFilter) const;
+    void drawPoints(const float* points, int count, const Paint& paint, SkCanvas::PointMode mode);
 
     class Clip;
 

@@ -81,22 +81,18 @@ abstract public class VerityUtils {
 
     /** Returns whether the file has fs-verity enabled. */
     public static boolean hasFsverity(@NonNull String filePath) {
-        // NB: only measure but not check the actual measurement here. As long as this succeeds,
-        // the file is on readable if the measurement can be verified against a trusted key, and
-        // this is good enough for installed apps.
-        int errno = measureFsverityNative(filePath);
-        if (errno != 0) {
-            if (errno != OsConstants.ENODATA) {
-                Slog.e(TAG, "Failed to measure fs-verity, errno " + errno + ": " + filePath);
-            }
+        int retval = statxForFsverityNative(filePath);
+        if (retval < 0) {
+            Slog.e(TAG, "Failed to check whether fs-verity is enabled, errno " + -retval + ": "
+                    + filePath);
             return false;
         }
-        return true;
+        return (retval == 1);
     }
 
     private static native int enableFsverityNative(@NonNull String filePath,
             @NonNull byte[] pkcs7Signature);
-    private static native int measureFsverityNative(@NonNull String filePath);
+    private static native int statxForFsverityNative(@NonNull String filePath);
 
     /**
      * Generates legacy Merkle tree and fs-verity metadata with Signing Block skipped.

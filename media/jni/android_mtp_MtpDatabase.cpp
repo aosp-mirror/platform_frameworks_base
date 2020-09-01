@@ -820,7 +820,10 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
     switch (info.mFormat) {
         case MTP_FORMAT_EXIF_JPEG:
         case MTP_FORMAT_HEIF:
-        case MTP_FORMAT_JFIF: {
+        case MTP_FORMAT_JFIF:
+        case MTP_FORMAT_PNG:
+        case MTP_FORMAT_BMP:
+        case MTP_FORMAT_GIF: {
             env = AndroidRuntime::getJNIEnv();
             if (env->CallBooleanMethod(
                     mDatabase, method_getThumbnailInfo, (jint)handle, mLongBuffer)) {
@@ -881,7 +884,10 @@ void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
         switch (format) {
             case MTP_FORMAT_EXIF_JPEG:
             case MTP_FORMAT_HEIF:
-            case MTP_FORMAT_JFIF: {
+            case MTP_FORMAT_JFIF:
+            case MTP_FORMAT_PNG:
+            case MTP_FORMAT_BMP:
+            case MTP_FORMAT_GIF: {
                 JNIEnv* env = AndroidRuntime::getJNIEnv();
                 jbyteArray thumbData = (jbyteArray) env->CallObjectMethod(
                         mDatabase, method_getThumbnailData, (jint)handle);

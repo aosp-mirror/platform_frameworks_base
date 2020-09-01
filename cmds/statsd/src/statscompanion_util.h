@@ -16,14 +16,17 @@
 
 #pragma once
 
-#include "StatsLogProcessor.h"
+#include <aidl/android/os/IStatsCompanionService.h>
+
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
 namespace statsd {
 
 /** Fetches and returns the StatsCompanionService. */
-sp<IStatsCompanionService> getStatsCompanionService();
+shared_ptr<IStatsCompanionService> getStatsCompanionService();
 
 }  // namespace statsd
 }  // namespace os

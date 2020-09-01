@@ -136,6 +136,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns the same array or an empty one if it's null.
+     */
+    public static @NonNull <T> T[] emptyIfNull(@Nullable T[] items, Class<T> kind) {
+        return items != null ? items : emptyArray(kind);
+    }
+
+    /**
      * Checks if given array is null or has zero elements.
      */
     public static boolean isEmpty(@Nullable Collection<?> array) {
@@ -320,22 +327,56 @@ public class ArrayUtils {
         return array;
     }
 
+    /**
+     * Combine multiple arrays into a single array.
+     *
+     * @param kind The class of the array elements
+     * @param arrays The arrays to combine
+     * @param <T> The class of the array elements (inferred from kind).
+     * @return A single array containing all the elements of the parameter arrays.
+     */
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] concatElements(Class<T> kind, @Nullable T[] a, @Nullable T[] b) {
-        final int an = (a != null) ? a.length : 0;
-        final int bn = (b != null) ? b.length : 0;
-        if (an == 0 && bn == 0) {
-            if (kind == String.class) {
-                return (T[]) EmptyArray.STRING;
-            } else if (kind == Object.class) {
-                return (T[]) EmptyArray.OBJECT;
-            }
+    public static @NonNull <T> T[] concatElements(Class<T> kind, @Nullable T[]... arrays) {
+        if (arrays == null || arrays.length == 0) {
+            return createEmptyArray(kind);
         }
-        final T[] res = (T[]) Array.newInstance(kind, an + bn);
-        if (an > 0) System.arraycopy(a, 0, res, 0, an);
-        if (bn > 0) System.arraycopy(b, 0, res, an, bn);
-        return res;
+
+        int totalLength = 0;
+        for (T[] item : arrays) {
+            if (item == null) {
+                continue;
+            }
+
+            totalLength += item.length;
+        }
+
+        // Optimization for entirely empty arrays.
+        if (totalLength == 0) {
+            return createEmptyArray(kind);
+        }
+
+        final T[] all = (T[]) Array.newInstance(kind, totalLength);
+        int pos = 0;
+        for (T[] item : arrays) {
+            if (item == null || item.length == 0) {
+                continue;
+            }
+            System.arraycopy(item, 0, all, pos, item.length);
+            pos += item.length;
+        }
+        return all;
     }
+
+    private static @NonNull <T> T[] createEmptyArray(Class<T> kind) {
+        if (kind == String.class) {
+            return (T[]) EmptyArray.STRING;
+        } else if (kind == Object.class) {
+            return (T[]) EmptyArray.OBJECT;
+        }
+
+        return (T[]) Array.newInstance(kind, 0);
+    }
+
 
     /**
      * Adds value to given array if not already present, providing set-like
@@ -566,6 +607,14 @@ public class ArrayUtils {
         return cur;
     }
 
+    public static @NonNull <T> ArrayList<T> add(@Nullable ArrayList<T> cur, int index, T val) {
+        if (cur == null) {
+            cur = new ArrayList<>();
+        }
+        cur.add(index, val);
+        return cur;
+    }
+
     public static @Nullable <T> ArrayList<T> remove(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             return null;
@@ -704,6 +753,42 @@ public class ArrayUtils {
         for (int i = 0; i < size; i++) {
             if (val[i] != null) {
                 result[outIdx++] = val[i];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns an array containing elements from the given one that match the given predicate.
+     */
+    public static @Nullable <T> T[] filter(@Nullable T[] items,
+            @NonNull IntFunction<T[]> arrayConstructor,
+            @NonNull java.util.function.Predicate<T> predicate) {
+        if (isEmpty(items)) {
+            return items;
+        }
+
+        int matchesCount = 0;
+        int size = size(items);
+        for (int i = 0; i < size; i++) {
+            if (predicate.test(items[i])) {
+                matchesCount++;
+            }
+        }
+        if (matchesCount == 0) {
+            return items;
+        }
+        if (matchesCount == items.length) {
+            return items;
+        }
+        if (matchesCount == 0) {
+            return null;
+        }
+        T[] result = arrayConstructor.apply(matchesCount);
+        int outIdx = 0;
+        for (int i = 0; i < size; i++) {
+            if (predicate.test(items[i])) {
+                result[outIdx++] = items[i];
             }
         }
         return result;

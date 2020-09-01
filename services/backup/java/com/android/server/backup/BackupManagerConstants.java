@@ -19,6 +19,7 @@ package com.android.server.backup;
 import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 
 import android.app.AlarmManager;
+import android.app.job.JobInfo;
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.provider.Settings;
@@ -80,14 +81,18 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
     public static final long DEFAULT_KEY_VALUE_BACKUP_FUZZ_MILLISECONDS = 10 * 60 * 1000;
 
     @VisibleForTesting public static final boolean DEFAULT_KEY_VALUE_BACKUP_REQUIRE_CHARGING = true;
-    @VisibleForTesting public static final int DEFAULT_KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE = 1;
+    @VisibleForTesting
+    public static final int DEFAULT_KEY_VALUE_BACKUP_REQUIRED_NETWORK_TYPE =
+            JobInfo.NETWORK_TYPE_ANY;
 
     @VisibleForTesting
     public static final long DEFAULT_FULL_BACKUP_INTERVAL_MILLISECONDS =
             24 * AlarmManager.INTERVAL_HOUR;
 
     @VisibleForTesting public static final boolean DEFAULT_FULL_BACKUP_REQUIRE_CHARGING = true;
-    @VisibleForTesting public static final int DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE = 2;
+    @VisibleForTesting
+    public static final int DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE =
+            JobInfo.NETWORK_TYPE_UNMETERED;
 
     @VisibleForTesting
     public static final String DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS = "";

@@ -63,8 +63,8 @@
         <attr name="badgeMargin" format="dimension" />
     </declare-styleable>
     <declare-styleable name="UserDetailItemView">
-        <attr name="regularFontFamily" format="string" />
-        <attr name="activatedFontFamily" format="string" />
+        <attr name="regularTextAppearance" format="string" />
+        <attr name="activatedTextAppearance" format="string" />
     </declare-styleable>
     <declare-styleable name="DateView">
         <attr name="datePattern" format="string" />
@@ -155,11 +155,11 @@
         <attr name="optedOut" format="boolean" />
     </declare-styleable>
 
-    <!-- Theme attributes used to style the appearance of expanded Bubbles -->
-    <declare-styleable name="BubbleExpandedView">
-        <attr name="android:colorBackgroundFloating" />
-        <attr name="android:dialogCornerRadius" />
+    <declare-styleable name="IlluminationDrawable">
+        <attr name="highlight" format="integer" />
+        <attr name="cornerRadius" format="dimension" />
+        <attr name="rippleMinSize" format="dimension" />
+        <attr name="rippleMaxSize" format="dimension" />
     </declare-styleable>
-
 </resources>
 

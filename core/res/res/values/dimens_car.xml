@@ -16,14 +16,7 @@
 */
 -->
 <resources>
-    <dimen name="car_fullscreen_user_pod_icon_text_size">64sp</dimen>
-    <dimen name="car_fullscreen_user_pod_width">243dp</dimen>
-    <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
     <dimen name="car_large_avatar_size">96dp</dimen>
-
-
     <!-- Application Bar -->
     <dimen name="car_app_bar_height">80dp</dimen>
     <!-- Margin -->
@@ -147,5 +140,6 @@
     <dimen name="action_bar_margin_end">@*android:dimen/car_margin</dimen>
     <!-- Space between a button and another button or screen edge -->
     <dimen name="action_bar_button_margin">@*android:dimen/car_padding_4</dimen>
+    <dimen name="action_bar_button_max_width">268dp</dimen>
     <dimen name="action_bar_toggle_internal_padding">@*android:dimen/car_padding_3</dimen>
 </resources>

@@ -57,7 +57,10 @@ public abstract class MultiListLayout extends LinearLayout {
     }
 
     protected void setSeparatedViewVisibility(boolean visible) {
-        getSeparatedView().setVisibility(visible ? View.VISIBLE : View.GONE);
+        ViewGroup separatedView = getSeparatedView();
+        if (separatedView != null) {
+            separatedView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
     }
 
     /**

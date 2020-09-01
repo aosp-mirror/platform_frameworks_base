@@ -24,6 +24,8 @@ import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.res.TypedArrayUtils;
@@ -39,6 +41,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     RestrictedPreferenceHelper mHelper;
     boolean mUseAdditionalSummary = false;
     CharSequence mRestrictedSwitchSummary;
+    private int mIconSize;
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -62,7 +65,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                     && restrictedSwitchSummary.type == TypedValue.TYPE_STRING) {
                 if (restrictedSwitchSummary.resourceId != 0) {
                     mRestrictedSwitchSummary =
-                        context.getText(restrictedSwitchSummary.resourceId);
+                            context.getText(restrictedSwitchSummary.resourceId);
                 } else {
                     mRestrictedSwitchSummary = restrictedSwitchSummary.string;
                 }
@@ -87,6 +90,10 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         this(context, null);
     }
 
+    public void setIconSize(int iconSize) {
+        mIconSize = iconSize;
+    }
+
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
@@ -95,7 +102,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         CharSequence switchSummary;
         if (mRestrictedSwitchSummary == null) {
             switchSummary = getContext().getText(isChecked()
-                ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+                    ? R.string.enabled_by_admin : R.string.disabled_by_admin);
         } else {
             switchSummary = mRestrictedSwitchSummary;
         }
@@ -107,6 +114,12 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         }
         if (switchWidget != null) {
             switchWidget.setVisibility(isDisabledByAdmin() ? View.GONE : View.VISIBLE);
+        }
+
+        final ImageView icon = holder.itemView.findViewById(android.R.id.icon);
+
+        if (mIconSize > 0) {
+            icon.setLayoutParams(new LinearLayout.LayoutParams(mIconSize, mIconSize));
         }
 
         if (mUseAdditionalSummary) {

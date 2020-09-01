@@ -12,3 +12,11 @@ xsd_config {
     api_dir: "platform-compat-schema",
     package_name: "com.android.server.compat.config",
 }
+
+
+xsd_config {
+    name: "display-device-config",
+    srcs: ["display-device-config/display-device-config.xsd"],
+    api_dir: "display-device-config/schema",
+    package_name: "com.android.server.display.config",
+}

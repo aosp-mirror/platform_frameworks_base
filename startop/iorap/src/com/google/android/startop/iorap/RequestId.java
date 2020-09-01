@@ -75,6 +75,11 @@ public class RequestId implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        return Long.hashCode(requestId);
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;

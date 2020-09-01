@@ -28,6 +28,7 @@ import android.graphics.PixelFormat;
 import android.graphics.RecordingCanvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Trace;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -72,6 +73,11 @@ public class KeyButtonRipple extends Drawable {
 
     private final HashSet<Animator> mRunningAnimations = new HashSet<>();
     private final ArrayList<Animator> mTmpArray = new ArrayList<>();
+
+    private final TraceAnimatorListener mExitHwTraceAnimator =
+            new TraceAnimatorListener("exitHardware");
+    private final TraceAnimatorListener mEnterHwTraceAnimator =
+            new TraceAnimatorListener("enterHardware");
 
     public enum Type {
         OVAL,
@@ -220,7 +226,7 @@ public class KeyButtonRipple extends Drawable {
 
     @Override
     public void jumpToCurrentState() {
-        cancelAnimations();
+        endAnimations("jumpToCurrentState", false /* cancel */);
     }
 
     @Override
@@ -253,13 +259,19 @@ public class KeyButtonRipple extends Drawable {
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    private void cancelAnimations() {
+    private void endAnimations(String reason, boolean cancel) {
+        Trace.beginSection("KeyButtonRipple.endAnim: reason=" + reason + " cancel=" + cancel);
+        Trace.endSection();
         mVisible = false;
         mTmpArray.addAll(mRunningAnimations);
         int size = mTmpArray.size();
         for (int i = 0; i < size; i++) {
             Animator a = mTmpArray.get(i);
-            a.cancel();
+            if (cancel) {
+                a.cancel();
+            } else {
+                a.end();
+            }
         }
         mTmpArray.clear();
         mRunningAnimations.clear();
@@ -284,7 +296,7 @@ public class KeyButtonRipple extends Drawable {
     }
 
     private void enterSoftware() {
-        cancelAnimations();
+        endAnimations("enterSoftware", true /* cancel */);
         mVisible = true;
         mGlowAlpha = getMaxGlowAlpha();
         ObjectAnimator scaleAnimator = ObjectAnimator.ofFloat(this, "glowScale",
@@ -370,7 +382,7 @@ public class KeyButtonRipple extends Drawable {
     }
 
     private void enterHardware() {
-        cancelAnimations();
+        endAnimations("enterHardware", true /* cancel */);
         mVisible = true;
         mDrawingHardwareGlow = true;
         setExtendStart(CanvasProperty.createFloat(getExtendSize() / 2));
@@ -387,6 +399,7 @@ public class KeyButtonRipple extends Drawable {
         endAnim.setDuration(ANIMATION_DURATION_SCALE);
         endAnim.setInterpolator(mInterpolator);
         endAnim.addListener(mAnimatorListener);
+        endAnim.addListener(mEnterHwTraceAnimator);
         endAnim.setTarget(mTargetView);
 
         if (isHorizontal()) {
@@ -428,6 +441,7 @@ public class KeyButtonRipple extends Drawable {
         opacityAnim.setDuration(ANIMATION_DURATION_FADE);
         opacityAnim.setInterpolator(Interpolators.ALPHA_OUT);
         opacityAnim.addListener(mAnimatorListener);
+        opacityAnim.addListener(mExitHwTraceAnimator);
         opacityAnim.setTarget(mTargetView);
 
         opacityAnim.start();
@@ -438,16 +452,41 @@ public class KeyButtonRipple extends Drawable {
 
     private final AnimatorListenerAdapter mAnimatorListener =
             new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRunningAnimations.remove(animation);
+                    if (mRunningAnimations.isEmpty() && !mPressed) {
+                        mVisible = false;
+                        mDrawingHardwareGlow = false;
+                        invalidateSelf();
+                    }
+                }
+            };
+
+    private static final class TraceAnimatorListener extends AnimatorListenerAdapter {
+        private final String mName;
+        TraceAnimatorListener(String name) {
+            mName = name;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            Trace.beginSection("KeyButtonRipple.start." + mName);
+            Trace.endSection();
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            Trace.beginSection("KeyButtonRipple.cancel." + mName);
+            Trace.endSection();
+        }
+
         @Override
         public void onAnimationEnd(Animator animation) {
-            mRunningAnimations.remove(animation);
-            if (mRunningAnimations.isEmpty() && !mPressed) {
-                mVisible = false;
-                mDrawingHardwareGlow = false;
-                invalidateSelf();
-            }
+            Trace.beginSection("KeyButtonRipple.end." + mName);
+            Trace.endSection();
         }
-    };
+    }
 
     /**
      * Interpolator with a smooth log deceleration

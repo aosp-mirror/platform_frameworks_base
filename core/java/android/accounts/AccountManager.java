@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
@@ -40,6 +41,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -528,12 +530,9 @@ public class AccountManager {
      *     authenticator known to the AccountManager service.  Empty (never
      *     null) if no authenticators are known.
      */
+    @UserHandleAware
     public AuthenticatorDescription[] getAuthenticatorTypes() {
-        try {
-            return mService.getAuthenticatorTypes(UserHandle.getCallingUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getAuthenticatorTypesAsUser(mContext.getUserId());
     }
 
     /**
@@ -584,13 +583,10 @@ public class AccountManager {
      * @return An array of {@link Account}, one for each account. Empty (never null) if no accounts
      *         have been added.
      */
+    @UserHandleAware
     @NonNull
     public Account[] getAccounts() {
-        try {
-            return mService.getAccounts(null, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getAccountsAsUser(mContext.getUserId());
     }
 
     /**
@@ -708,6 +704,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one per matching account. Empty (never null) if no
      *         accounts of the specified type have been added.
      */
+    @UserHandleAware
     @NonNull
     public Account[] getAccountsByType(String type) {
         return getAccountsByTypeAsUser(type, mContext.getUser());
@@ -1183,23 +1180,11 @@ public class AccountManager {
      *     {@link #removeAccount(Account, Activity, AccountManagerCallback, Handler)}
      *     instead
      */
+    @UserHandleAware
     @Deprecated
     public AccountManagerFuture<Boolean> removeAccount(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler) {
-        if (account == null) throw new IllegalArgumentException("account is null");
-        return new Future2Task<Boolean>(handler, callback) {
-            @Override
-            public void doWork() throws RemoteException {
-                mService.removeAccount(mResponse, account, false);
-            }
-            @Override
-            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
-                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
-                    throw new AuthenticatorException("no result in response");
-                }
-                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
-            }
-        }.start();
+        return removeAccountAsUser(account, callback, handler, mContext.getUser());
     }
 
     /**
@@ -1243,15 +1228,10 @@ public class AccountManager {
      *      adding accounts (of this type) has been disabled by policy
      * </ul>
      */
+    @UserHandleAware
     public AccountManagerFuture<Bundle> removeAccount(final Account account,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (account == null) throw new IllegalArgumentException("account is null");
-        return new AmsTask(activity, handler, callback) {
-            @Override
-            public void doWork() throws RemoteException {
-                mService.removeAccount(mResponse, account, activity != null);
-            }
-        }.start();
+        return removeAccountAsUser(account, activity, callback, handler, mContext.getUser());
     }
 
     /**
@@ -1841,24 +1821,30 @@ public class AccountManager {
      *      creating a new account, usually because of network trouble
      * </ul>
      */
+    @UserHandleAware
     public AccountManagerFuture<Bundle> addAccount(final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final Bundle addAccountOptions,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (accountType == null) throw new IllegalArgumentException("accountType is null");
-        final Bundle optionsIn = new Bundle();
-        if (addAccountOptions != null) {
-            optionsIn.putAll(addAccountOptions);
-        }
-        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
-
-        return new AmsTask(activity, handler, callback) {
-            @Override
-            public void doWork() throws RemoteException {
-                mService.addAccount(mResponse, accountType, authTokenType,
-                        requiredFeatures, activity != null, optionsIn);
+        if (Process.myUserHandle().equals(mContext.getUser())) {
+            if (accountType == null) throw new IllegalArgumentException("accountType is null");
+            final Bundle optionsIn = new Bundle();
+            if (addAccountOptions != null) {
+                optionsIn.putAll(addAccountOptions);
             }
-        }.start();
+            optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+
+            return new AmsTask(activity, handler, callback) {
+                @Override
+                public void doWork() throws RemoteException {
+                    mService.addAccount(mResponse, accountType, authTokenType,
+                            requiredFeatures, activity != null, optionsIn);
+                }
+            }.start();
+        } else {
+            return addAccountAsUser(accountType, authTokenType, requiredFeatures, addAccountOptions,
+                    activity, callback, handler, mContext.getUser());
+        }
     }
 
     /**
@@ -2002,6 +1988,7 @@ public class AccountManager {
      *      verifying the password, usually because of network trouble
      * </ul>
      */
+    @UserHandleAware
     public AccountManagerFuture<Bundle> confirmCredentials(final Account account,
             final Bundle options,
             final Activity activity,
@@ -2228,8 +2215,6 @@ public class AccountManager {
     }
 
     private abstract class AmsTask extends FutureTask<Bundle> implements AccountManagerFuture<Bundle> {
-
-
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final IAccountManagerResponse mResponse;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -3211,6 +3196,7 @@ public class AccountManager {
      *         </ul>
      * @see #startAddAccountSession and #startUpdateCredentialsSession
      */
+    @UserHandleAware
     public AccountManagerFuture<Bundle> finishSession(
             final Bundle sessionBundle,
             final Activity activity,

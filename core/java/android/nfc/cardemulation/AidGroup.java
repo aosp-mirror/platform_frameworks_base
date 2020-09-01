@@ -20,6 +20,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -115,6 +116,21 @@ public final class AidGroup implements Parcelable {
             out.append(", ");
         }
         return out.toString();
+    }
+
+    /**
+     * Dump debugging info as AidGroupProto
+     *
+     * If the output belongs to a sub message, the caller is responsible for wrapping this function
+     * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
+     *
+     * @param proto the ProtoOutputStream to write to
+     */
+    public void dump(ProtoOutputStream proto) {
+        proto.write(AidGroupProto.CATEGORY, category);
+        for (String aid : aids) {
+            proto.write(AidGroupProto.AIDS, aid);
+        }
     }
 
     @Override

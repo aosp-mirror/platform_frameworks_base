@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language language governing permissions and
+     limitations under the License.
+-->
+<overlay>
+    <!-- Overlays string/overlayable5 with the string "Overlay One". -->
+    <item target="string/overlayable5" value="@string/overlay1"/>
+
+    <!-- Overlays string/overlayable6 and string/overlayable7 with the string "Overlay Two". -->
+    <item target="string/overlayable7" value="@string/overlay2" />
+    <item target="string/overlayable6" value="@string/overlay2" />
+
+    <!-- Overlays string/overlayable8 with a reference to @string/internal. -->
+    <item target="string/overlayable8" value="@string/overlay3" />
+
+    <!-- Overlays string/overlayable9 with a reference to @string/overlay2. The reference to
+         @string/overlay2 should be rewritten to @string/overlayable7 in the target. -->
+    <item target="string/overlayable9" value="@string/overlay4" />
+
+    <!-- Overlays string/overlayable10 with the string "yes". -->
+    <item target="string/overlayable10" value="@android:string/yes" />
+
+    <!-- Overlays string/overlayable11 with the string "Hardcoded string". -->
+    <item target="string/overlayable11" value="Hardcoded string" />
+
+    <!-- Overlays string/overlayable10 with the string "yes". -->
+    <item target="integer/config_int" value="42" />
+
+    <!-- @attr/max_lines and @id/hello_view should be rewritten to @attr/max_lines and
+         @id/hello_view in the target. -->
+    <item target="layout/hello_view" value="@layout/hello_view" />
+    <item target="attr/max_lines" value="@attr/max_lines" />
+    <item target="id/hello_view" value="@id/hello_view" />
+</overlay>
+
+

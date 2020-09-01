@@ -21,7 +21,9 @@ import java.util.HashMap;
 /**
  * A base class that is used to send asynchronous event information from the DRM framework.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmEvent {
 
     // Please do not add type constants in this class. More event type constants

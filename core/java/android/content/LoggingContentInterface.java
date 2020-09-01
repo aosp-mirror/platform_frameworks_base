@@ -165,11 +165,24 @@ public class LoggingContentInterface implements ContentInterface {
     }
 
     @Override
-    public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues)
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags)
             throws RemoteException {
-        try (Logger l = new Logger("insert", uri, initialValues)) {
+        try (Logger l = new Logger("checkUriPermission", uri, uid, modeFlags)) {
             try {
-                return l.setResult(delegate.insert(uri, initialValues));
+                return l.setResult(delegate.checkUriPermission(uri, uid, modeFlags));
+            } catch (Exception res) {
+                l.setResult(res);
+                throw res;
+            }
+        }
+    }
+
+    @Override
+    public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues initialValues,
+            @Nullable Bundle extras) throws RemoteException {
+        try (Logger l = new Logger("insert", uri, initialValues, extras)) {
+            try {
+                return l.setResult(delegate.insert(uri, initialValues, extras));
             } catch (Exception res) {
                 l.setResult(res);
                 throw res;
@@ -191,11 +204,10 @@ public class LoggingContentInterface implements ContentInterface {
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String selection,
-            @Nullable String[] selectionArgs) throws RemoteException {
-        try (Logger l = new Logger("delete", uri, selection, selectionArgs)) {
+    public int delete(@NonNull Uri uri, @Nullable Bundle extras) throws RemoteException {
+        try (Logger l = new Logger("delete", uri, extras)) {
             try {
-                return l.setResult(delegate.delete(uri, selection, selectionArgs));
+                return l.setResult(delegate.delete(uri, extras));
             } catch (Exception res) {
                 l.setResult(res);
                 throw res;
@@ -204,11 +216,11 @@ public class LoggingContentInterface implements ContentInterface {
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
-            @Nullable String[] selectionArgs) throws RemoteException {
-        try (Logger l = new Logger("update", uri, values, selection, selectionArgs)) {
+    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable Bundle extras)
+            throws RemoteException {
+        try (Logger l = new Logger("update", uri, values, extras)) {
             try {
-                return l.setResult(delegate.update(uri, values, selection, selectionArgs));
+                return l.setResult(delegate.update(uri, values, extras));
             } catch (Exception res) {
                 l.setResult(res);
                 throw res;

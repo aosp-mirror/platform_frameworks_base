@@ -360,10 +360,8 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
           __FUNCTION__, width, height, format, maxImages);
 
     PublicFormat publicFormat = static_cast<PublicFormat>(format);
-    nativeFormat = android_view_Surface_mapPublicFormatToHalFormat(
-        publicFormat);
-    nativeDataspace = android_view_Surface_mapPublicFormatToHalDataspace(
-        publicFormat);
+    nativeFormat = mapPublicFormatToHalFormat(publicFormat);
+    nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -418,11 +416,13 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                           "Failed to set buffer consumer default format 0x%x", nativeFormat);
+        return;
     }
     res = bufferConsumer->setDefaultBufferDataSpace(nativeDataspace);
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
                           "Failed to set buffer consumer default dataSpace 0x%x", nativeDataspace);
+        return;
     }
 }
 
@@ -706,7 +706,7 @@ static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) 
     // and we don't set them here.
 }
 
-static void Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
+static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
         int32_t writerFormat, uint8_t **base, uint32_t *size, int *pixelStride, int *rowStride) {
     ALOGV("%s", __FUNCTION__);
 
@@ -715,7 +715,9 @@ static void Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
                              "Pixel format: 0x%x is unsupported", buffer->flexFormat);
+        return false;
     }
+    return true;
 }
 
 static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
@@ -729,8 +731,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     jobject byteBuffer = NULL;
 
     PublicFormat publicReaderFormat = static_cast<PublicFormat>(readerFormat);
-    int halReaderFormat = android_view_Surface_mapPublicFormatToHalFormat(
-        publicReaderFormat);
+    int halReaderFormat = mapPublicFormatToHalFormat(publicReaderFormat);
 
     if (isFormatOpaque(halReaderFormat) && numPlanes > 0) {
         String8 msg;
@@ -759,8 +760,10 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     }
     // Create all SurfacePlanes
     for (int i = 0; i < numPlanes; i++) {
-        Image_getLockedImageInfo(env, &lockedImg, i, halReaderFormat,
-                &pData, &dataSize, &pixelStride, &rowStride);
+        if (!Image_getLockedImageInfo(env, &lockedImg, i, halReaderFormat,
+                &pData, &dataSize, &pixelStride, &rowStride)) {
+            return NULL;
+        }
         byteBuffer = env->NewDirectByteBuffer(pData, dataSize);
         if ((byteBuffer == NULL) && (env->ExceptionCheck() == false)) {
             jniThrowException(env, "java/lang/IllegalStateException",
@@ -796,8 +799,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         return static_cast<jint>(PublicFormat::PRIVATE);
     } else {
         BufferItem* buffer = Image_getBufferItem(env, thiz);
-        int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
-                static_cast<PublicFormat>(readerFormat));
+        int readerHalFormat = mapPublicFormatToHalFormat(static_cast<PublicFormat>(readerFormat));
         int32_t fmt = applyFormatOverrides(
                 buffer->mGraphicBuffer->getPixelFormat(), readerHalFormat);
         // Override the image format to HAL_PIXEL_FORMAT_YCbCr_420_888 if the actual format is
@@ -808,8 +810,7 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         if (isPossiblyYUV(fmt)) {
             fmt = HAL_PIXEL_FORMAT_YCbCr_420_888;
         }
-        PublicFormat publicFmt = android_view_Surface_mapHalFormatDataspaceToPublicFormat(
-                fmt, buffer->mDataSpace);
+        PublicFormat publicFmt = mapHalFormatDataspaceToPublicFormat(fmt, buffer->mDataSpace);
         return static_cast<jint>(publicFmt);
     }
 }

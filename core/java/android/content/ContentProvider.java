@@ -17,6 +17,7 @@
 package android.content;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
@@ -26,8 +27,11 @@ import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
@@ -44,13 +48,16 @@ import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -134,7 +141,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     private boolean mNoPerms;
     private boolean mSingleUser;
 
-    private ThreadLocal<String> mCallingPackage;
+    private ThreadLocal<Pair<String, String>> mCallingPackage;
 
     private Transport mTransport = new Transport();
 
@@ -224,11 +231,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Cursor query(String callingPkg, Uri uri, @Nullable String[] projection,
-                @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal) {
+        public Cursor query(String callingPkg, @Nullable String attributionTag, Uri uri,
+                @Nullable String[] projection, @Nullable Bundle queryArgs,
+                @Nullable ICancellationSignal cancellationSignal) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 // The caller has no access to the data, so return an empty cursor with
                 // the columns in the requested order. The caller may ask for an invalid
                 // column and we would not catch that but this is not a problem in practice.
@@ -244,7 +253,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 // we have to execute the query as if allowed to get a cursor with the
                 // columns. We then use the column names to return an empty cursor.
                 Cursor cursor;
-                final String original = setCallingPackage(callingPkg);
+                final Pair<String, String> original = setCallingPackage(
+                        new Pair<>(callingPkg, attributionTag));
                 try {
                     cursor = mInterface.query(
                             uri, projection, queryArgs,
@@ -262,7 +272,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 return new MatrixCursor(cursor.getColumnNames(), 0);
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "query");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.query(
                         uri, projection, queryArgs,
@@ -291,12 +302,27 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
+        public void getTypeAsync(Uri uri, RemoteCallback callback) {
+            final Bundle result = new Bundle();
+            try {
+                result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            } catch (Exception e) {
+                result.putParcelable(ContentResolver.REMOTE_CALLBACK_ERROR,
+                        new ParcelableException(e));
+            }
+            callback.sendResult(result);
+        }
+
+        @Override
+        public Uri insert(String callingPkg, @Nullable String attributionTag, Uri uri,
+                ContentValues initialValues, Bundle extras) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
-                final String original = setCallingPackage(callingPkg);
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
+                final Pair<String, String> original = setCallingPackage(
+                        new Pair<>(callingPkg, attributionTag));
                 try {
                     return rejectInsert(uri, initialValues);
                 } finally {
@@ -304,9 +330,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 }
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "insert");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
-                return maybeAddUserId(mInterface.insert(uri, initialValues), userId);
+                return maybeAddUserId(mInterface.insert(uri, initialValues, extras), userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
@@ -316,14 +343,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int bulkInsert(String callingPkg, Uri uri, ContentValues[] initialValues) {
+        public int bulkInsert(String callingPkg, @Nullable String attributionTag, Uri uri,
+                ContentValues[] initialValues) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "bulkInsert");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.bulkInsert(uri, initialValues);
             } catch (RemoteException e) {
@@ -335,7 +365,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public ContentProviderResult[] applyBatch(String callingPkg, String authority,
+        public ContentProviderResult[] applyBatch(String callingPkg,
+                @Nullable String attributionTag, String authority,
                 ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
             validateIncomingAuthority(authority);
@@ -353,20 +384,21 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     operations.set(i, operation);
                 }
                 if (operation.isReadOperation()) {
-                    if (enforceReadPermission(callingPkg, uri, null)
+                    if (enforceReadPermission(callingPkg, attributionTag, uri, null)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
                 }
                 if (operation.isWriteOperation()) {
-                    if (enforceWritePermission(callingPkg, uri, null)
+                    if (enforceWritePermission(callingPkg, attributionTag, uri, null)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
                 }
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "applyBatch");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 ContentProviderResult[] results = mInterface.applyBatch(authority,
                         operations);
@@ -388,16 +420,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int delete(String callingPkg, Uri uri, String selection, String[] selectionArgs) {
+        public int delete(String callingPkg, @Nullable String attributionTag, Uri uri,
+                Bundle extras) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "delete");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
-                return mInterface.delete(uri, selection, selectionArgs);
+                return mInterface.delete(uri, extras);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
@@ -407,17 +442,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int update(String callingPkg, Uri uri, ContentValues values, String selection,
-                String[] selectionArgs) {
+        public int update(String callingPkg, @Nullable String attributionTag, Uri uri,
+                ContentValues values, Bundle extras) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "update");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
-                return mInterface.update(uri, values, selection, selectionArgs);
+                return mInterface.update(uri, values, extras);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
@@ -427,14 +464,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public ParcelFileDescriptor openFile(
-                String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal,
-                IBinder callerToken) throws FileNotFoundException {
+        public ParcelFileDescriptor openFile(String callingPkg, @Nullable String attributionTag,
+                Uri uri, String mode, ICancellationSignal cancellationSignal, IBinder callerToken)
+                throws FileNotFoundException {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, uri, mode, callerToken);
+            enforceFilePermission(callingPkg, attributionTag, uri, mode, callerToken);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openFile");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.openFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
@@ -447,14 +485,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(
-                String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
+        public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String attributionTag,
+                Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, uri, mode, null);
+            enforceFilePermission(callingPkg, attributionTag, uri, mode, null);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openAssetFile");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.openAssetFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
@@ -467,12 +506,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Bundle call(String callingPkg, String authority, String method, @Nullable String arg,
-                @Nullable Bundle extras) {
+        public Bundle call(String callingPkg, @Nullable String attributionTag, String authority,
+                String method, @Nullable String arg, @Nullable Bundle extras) {
             validateIncomingAuthority(authority);
             Bundle.setDefusable(extras, true);
             Trace.traceBegin(TRACE_TAG_DATABASE, "call");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.call(authority, method, arg, extras);
             } catch (RemoteException e) {
@@ -499,14 +539,16 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
-                Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
+        public AssetFileDescriptor openTypedAssetFile(String callingPkg,
+                @Nullable String attributionTag, Uri uri, String mimeType, Bundle opts,
+                ICancellationSignal cancellationSignal) throws FileNotFoundException {
             Bundle.setDefusable(opts, true);
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, uri, "r", null);
+            enforceFilePermission(callingPkg, attributionTag, uri, "r", null);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.openTypedAssetFile(
                         uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
@@ -524,15 +566,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Uri canonicalize(String callingPkg, Uri uri) {
+        public Uri canonicalize(String callingPkg, @Nullable String attributionTag, Uri uri) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "canonicalize");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return maybeAddUserId(mInterface.canonicalize(uri), userId);
             } catch (RemoteException e) {
@@ -544,15 +588,31 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Uri uncanonicalize(String callingPkg, Uri uri) {
+        public void canonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
+                RemoteCallback callback) {
+            final Bundle result = new Bundle();
+            try {
+                result.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                        canonicalize(callingPkg, attributionTag, uri));
+            } catch (Exception e) {
+                result.putParcelable(ContentResolver.REMOTE_CALLBACK_ERROR,
+                        new ParcelableException(e));
+            }
+            callback.sendResult(result);
+        }
+
+        @Override
+        public Uri uncanonicalize(String callingPkg, String attributionTag,  Uri uri) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "uncanonicalize");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return maybeAddUserId(mInterface.uncanonicalize(uri), userId);
             } catch (RemoteException e) {
@@ -564,17 +624,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public boolean refresh(String callingPkg, Uri uri, Bundle args,
+        public boolean refresh(String callingPkg, String attributionTag, Uri uri, Bundle extras,
                 ICancellationSignal cancellationSignal) throws RemoteException {
             uri = validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
+                    != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "refresh");
-            final String original = setCallingPackage(callingPkg);
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
             try {
-                return mInterface.refresh(uri, args,
+                return mInterface.refresh(uri, extras,
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
@@ -582,44 +644,68 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
         }
 
-        private void enforceFilePermission(String callingPkg, Uri uri, String mode,
-                IBinder callerToken) throws FileNotFoundException, SecurityException {
+        @Override
+        public int checkUriPermission(String callingPkg, @Nullable String attributionTag, Uri uri,
+                int uid, int modeFlags) {
+            uri = validateIncomingUri(uri);
+            uri = maybeGetUriWithoutUserId(uri);
+            Trace.traceBegin(TRACE_TAG_DATABASE, "checkUriPermission");
+            final Pair<String, String> original = setCallingPackage(
+                    new Pair<>(callingPkg, attributionTag));
+            try {
+                return mInterface.checkUriPermission(uri, uid, modeFlags);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            } finally {
+                setCallingPackage(original);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
+            }
+        }
+
+        private void enforceFilePermission(String callingPkg, @Nullable String attributionTag,
+                Uri uri, String mode, IBinder callerToken)
+                throws FileNotFoundException, SecurityException {
             if (mode != null && mode.indexOf('w') != -1) {
-                if (enforceWritePermission(callingPkg, uri, callerToken)
+                if (enforceWritePermission(callingPkg, attributionTag, uri, callerToken)
                         != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
             } else {
-                if (enforceReadPermission(callingPkg, uri, callerToken)
+                if (enforceReadPermission(callingPkg, attributionTag, uri, callerToken)
                         != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
             }
         }
 
-        private int enforceReadPermission(String callingPkg, Uri uri, IBinder callerToken)
+        private int enforceReadPermission(String callingPkg, @Nullable String attributionTag,
+                Uri uri, IBinder callerToken)
                 throws SecurityException {
-            final int mode = enforceReadPermissionInner(uri, callingPkg, callerToken);
+            final int mode = enforceReadPermissionInner(uri, callingPkg, attributionTag,
+                    callerToken);
             if (mode != MODE_ALLOWED) {
                 return mode;
             }
 
-            return noteProxyOp(callingPkg, mReadOp);
+            return noteProxyOp(callingPkg, attributionTag, mReadOp);
         }
 
-        private int enforceWritePermission(String callingPkg, Uri uri, IBinder callerToken)
+        private int enforceWritePermission(String callingPkg, String attributionTag, Uri uri,
+                IBinder callerToken)
                 throws SecurityException {
-            final int mode = enforceWritePermissionInner(uri, callingPkg, callerToken);
+            final int mode = enforceWritePermissionInner(uri, callingPkg, attributionTag,
+                    callerToken);
             if (mode != MODE_ALLOWED) {
                 return mode;
             }
 
-            return noteProxyOp(callingPkg, mWriteOp);
+            return noteProxyOp(callingPkg, attributionTag, mWriteOp);
         }
 
-        private int noteProxyOp(String callingPkg, int op) {
+        private int noteProxyOp(String callingPkg, String attributionTag, int op) {
             if (op != AppOpsManager.OP_NONE) {
-                int mode = mAppOpsManager.noteProxyOp(op, callingPkg);
+                int mode = mAppOpsManager.noteProxyOp(op, callingPkg, Binder.getCallingUid(),
+                        attributionTag, null);
                 return mode == MODE_DEFAULT ? MODE_IGNORED : mode;
             }
 
@@ -628,9 +714,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     boolean checkUser(int pid, int uid, Context context) {
-        return UserHandle.getUserId(uid) == context.getUserId()
-                || mSingleUser
-                || context.checkPermission(INTERACT_ACROSS_USERS, pid, uid)
+        if (UserHandle.getUserId(uid) == context.getUserId() || mSingleUser) {
+            return true;
+        }
+        return context.checkPermission(INTERACT_ACROSS_USERS, pid, uid) == PERMISSION_GRANTED
+                || context.checkPermission(INTERACT_ACROSS_USERS_FULL, pid, uid)
                 == PERMISSION_GRANTED;
     }
 
@@ -639,18 +727,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * associated with that permission.
      */
     private int checkPermissionAndAppOp(String permission, String callingPkg,
-            IBinder callerToken) {
+            @Nullable String attributionTag, IBinder callerToken) {
         if (getContext().checkPermission(permission, Binder.getCallingPid(), Binder.getCallingUid(),
                 callerToken) != PERMISSION_GRANTED) {
             return MODE_ERRORED;
         }
 
-        return mTransport.noteProxyOp(callingPkg, AppOpsManager.permissionToOpCode(permission));
+        return mTransport.noteProxyOp(callingPkg, attributionTag,
+                AppOpsManager.permissionToOpCode(permission));
     }
 
     /** {@hide} */
-    protected int enforceReadPermissionInner(Uri uri, String callingPkg, IBinder callerToken)
-            throws SecurityException {
+    protected int enforceReadPermissionInner(Uri uri, String callingPkg,
+            @Nullable String attributionTag, IBinder callerToken) throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -664,7 +753,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getReadPermission();
             if (componentPerm != null) {
-                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, callerToken);
+                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, attributionTag,
+                        callerToken);
                 if (mode == MODE_ALLOWED) {
                     return MODE_ALLOWED;
                 } else {
@@ -683,7 +773,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getReadPermission();
                     if (pathPerm != null && pp.match(path)) {
-                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg, callerToken);
+                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg,
+                                attributionTag, callerToken);
                         if (mode == MODE_ALLOWED) {
                             return MODE_ALLOWED;
                         } else {
@@ -731,8 +822,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** {@hide} */
-    protected int enforceWritePermissionInner(Uri uri, String callingPkg, IBinder callerToken)
-            throws SecurityException {
+    protected int enforceWritePermissionInner(Uri uri, String callingPkg,
+            @Nullable String attributionTag, IBinder callerToken) throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -746,7 +837,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getWritePermission();
             if (componentPerm != null) {
-                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, callerToken);
+                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg,
+                        attributionTag, callerToken);
                 if (mode == MODE_ALLOWED) {
                     return MODE_ALLOWED;
                 } else {
@@ -765,7 +857,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getWritePermission();
                     if (pathPerm != null && pp.match(path)) {
-                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg, callerToken);
+                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg,
+                                attributionTag, callerToken);
                         if (mode == MODE_ALLOWED) {
                             return MODE_ALLOWED;
                         } else {
@@ -814,11 +907,28 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Set the calling package, returning the current value (or {@code null})
+     * Retrieves a Non-Nullable Context this provider is running in, this is intended to be called
+     * after {@link #onCreate}. When called before context was created, an IllegalStateException
+     * will be thrown.
+     * <p>
+     * Note A provider must be declared in the manifest and created automatically by the system,
+     * and context is only available after {@link #onCreate} is called.
+     */
+    @NonNull
+    public final Context requireContext() {
+        final Context ctx = getContext();
+        if (ctx == null) {
+            throw new IllegalStateException("Cannot find context from the provider.");
+        }
+        return ctx;
+    }
+
+    /**
+     * Set the calling package/feature, returning the current value (or {@code null})
      * which can be used later to restore the previous state.
      */
-    private String setCallingPackage(String callingPackage) {
-        final String original = mCallingPackage.get();
+    private Pair<String, String> setCallingPackage(Pair<String, String> callingPackage) {
+        final Pair<String, String> original = mCallingPackage.get();
         mCallingPackage.set(callingPackage);
         onCallingPackageChanged();
         return original;
@@ -839,19 +949,71 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *             calling UID.
      */
     public final @Nullable String getCallingPackage() {
-        final String pkg = mCallingPackage.get();
+        final Pair<String, String> pkg = mCallingPackage.get();
         if (pkg != null) {
-            mTransport.mAppOpsManager.checkPackage(Binder.getCallingUid(), pkg);
+            mTransport.mAppOpsManager.checkPackage(Binder.getCallingUid(), pkg.first);
+            return pkg.first;
         }
-        return pkg;
+
+        return null;
     }
 
-    /** {@hide} */
+    /**
+     * Return the attribution tag of the caller that initiated the request being
+     * processed on the current thread. Returns {@code null} if not currently processing
+     * a request of the request is for the default attribution.
+     * <p>
+     * This will always return {@code null} when processing
+     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     *
+     * @see #getCallingPackage
+     */
+    public final @Nullable String getCallingAttributionTag() {
+        final Pair<String, String> pkg = mCallingPackage.get();
+        if (pkg != null) {
+            return pkg.second;
+        }
+
+        return null;
+    }
+
+    /**
+     * @removed
+     */
+    @Deprecated
+    public final @Nullable String getCallingFeatureId() {
+        return getCallingAttributionTag();
+    }
+
+    /**
+     * Return the package name of the caller that initiated the request being
+     * processed on the current thread. The returned package will have
+     * <em>not</em> been verified to belong to the calling UID. Returns
+     * {@code null} if not currently processing a request.
+     * <p>
+     * This will always return {@code null} when processing
+     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     *
+     * @see Binder#getCallingUid()
+     * @see Context#grantUriPermission(String, Uri, int)
+     */
     public final @Nullable String getCallingPackageUnchecked() {
-        return mCallingPackage.get();
+        final Pair<String, String> pkg = mCallingPackage.get();
+        if (pkg != null) {
+            return pkg.first;
+        }
+
+        return null;
     }
 
-    /** {@hide} */
+    /**
+     * Called whenever the value of {@link #getCallingPackage()} changes, giving
+     * the provider an opportunity to invalidate any security related caching it
+     * may be performing.
+     * <p>
+     * This typically happens when a {@link ContentProvider} makes a nested call
+     * back into itself when already processing a call from a remote process.
+     */
     public void onCallingPackageChanged() {
     }
 
@@ -862,10 +1024,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         /** {@hide} */
         public final long binderToken;
         /** {@hide} */
-        public final String callingPackage;
+        public final Pair<String, String> callingPackage;
 
         /** {@hide} */
-        public CallingIdentity(long binderToken, String callingPackage) {
+        public CallingIdentity(long binderToken, Pair<String, String> callingPackage) {
             this.binderToken = binderToken;
             this.callingPackage = callingPackage;
         }
@@ -1013,6 +1175,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
     /** @hide */
     public final void setTransportLoggingEnabled(boolean enabled) {
+        if (mTransport == null) {
+            return;
+        }
         if (enabled) {
             mTransport.mInterface = new LoggingContentInterface(getClass().getSimpleName(), this);
         } else {
@@ -1286,8 +1451,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @param uri The URI to query. This will be the full URI sent by the client.
      * @param projection The list of columns to put into the cursor.
      *            If {@code null} provide a default set of columns.
-     * @param queryArgs A Bundle containing all additional information necessary for the query.
-     *            Values in the Bundle may include SQL style arguments.
+     * @param queryArgs A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
      * @param cancellationSignal A signal to cancel the operation in progress,
      *            or {@code null}.
      * @return a Cursor or {@code null}.
@@ -1389,31 +1557,62 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Implement this to support refresh of content identified by {@code uri}. By default, this
-     * method returns false; providers who wish to implement this should return true to signal the
-     * client that the provider has tried refreshing with its own implementation.
+     * Implement this to support refresh of content identified by {@code uri}.
+     * By default, this method returns false; providers who wish to implement
+     * this should return true to signal the client that the provider has tried
+     * refreshing with its own implementation.
      * <p>
-     * This allows clients to request an explicit refresh of content identified by {@code uri}.
+     * This allows clients to request an explicit refresh of content identified
+     * by {@code uri}.
      * <p>
-     * Client code should only invoke this method when there is a strong indication (such as a user
-     * initiated pull to refresh gesture) that the content is stale.
+     * Client code should only invoke this method when there is a strong
+     * indication (such as a user initiated pull to refresh gesture) that the
+     * content is stale.
      * <p>
-     * Remember to send {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
+     * Remember to send
+     * {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
      * notifications when content changes.
      *
      * @param uri The Uri identifying the data to refresh.
-     * @param args Additional options from the client. The definitions of these are specific to the
-     *            content provider being called.
-     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if
-     *            none. For example, if you called refresh on a particular uri, you should call
-     *            {@link CancellationSignal#throwIfCanceled()} to check whether the client has
-     *            canceled the refresh request.
+     * @param extras Additional options from the client. The definitions of
+     *            these are specific to the content provider being called.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *            or {@code null} if none. For example, if you called refresh on
+     *            a particular uri, you should call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether
+     *            the client has canceled the refresh request.
      * @return true if the provider actually tried refreshing.
      */
     @Override
-    public boolean refresh(Uri uri, @Nullable Bundle args,
+    public boolean refresh(Uri uri, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) {
         return false;
+    }
+
+    /**
+     * Perform a detailed internal check on a {@link Uri} to determine if a UID
+     * is able to access it with specific mode flags.
+     * <p>
+     * This method is typically used when the provider implements more dynamic
+     * access controls that cannot be expressed with {@code <path-permission>}
+     * style static rules.
+     * <p>
+     * Because validation of these dynamic access controls has significant
+     * system health impact, this feature is only available to providers that
+     * are built into the system.
+     *
+     * @param uri the {@link Uri} to perform an access check on.
+     * @param uid the UID to check the permission for.
+     * @param modeFlags the access flags to use for the access check, such as
+     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}.
+     * @return {@link PackageManager#PERMISSION_GRANTED} if access is allowed,
+     *         otherwise {@link PackageManager#PERMISSION_DENIED}.
+     * @hide
+     */
+    @Override
+    @SystemApi
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
+        return PackageManager.PERMISSION_DENIED;
     }
 
     /**
@@ -1433,19 +1632,45 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Implement this to handle requests to insert a new row.
-     * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
-     * after inserting.
-     * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * Implement this to handle requests to insert a new row. As a courtesy,
+     * call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after inserting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
-     * @param uri The content:// URI of the insertion request. This must not be {@code null}.
+     *
+     * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
-     *     This must not be {@code null}.
      * @return The URI for the newly inserted item.
      */
-    @Override
     public abstract @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values);
+
+    /**
+     * Implement this to handle requests to insert a new row. As a courtesy,
+     * call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after inserting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * @param uri The content:// URI of the insertion request.
+     * @param values A set of column_name/value pairs to add to the database.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
+     * @return The URI for the newly inserted item.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
+     */
+    @Override
+    public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values,
+            @Nullable Bundle extras) {
+        return insert(uri, values);
+    }
 
     /**
      * Override this to handle requests to insert a set of new rows, or the
@@ -1472,49 +1697,116 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Implement this to handle requests to delete one or more rows.
-     * The implementation should apply the selection clause when performing
+     * Implement this to handle requests to delete one or more rows. The
+     * implementation should apply the selection clause when performing
      * deletion, allowing the operation to affect multiple rows in a directory.
-     * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
-     * after deleting.
-     * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after deleting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
+     * <p>
+     * The implementation is responsible for parsing out a row ID at the end of
+     * the URI, if a specific row is being deleted. That is, the client would
+     * pass in <code>content://contacts/people/22</code> and the implementation
+     * is responsible for parsing the record number (22) when creating a SQL
+     * statement.
      *
-     * <p>The implementation is responsible for parsing out a row ID at the end
-     * of the URI, if a specific row is being deleted. That is, the client would
-     * pass in <code>content://contacts/people/22</code> and the implementation is
-     * responsible for parsing the record number (22) when creating a SQL statement.
-     *
-     * @param uri The full URI to query, including a row ID (if a specific record is requested).
+     * @param uri The full URI to query, including a row ID (if a specific
+     *            record is requested).
      * @param selection An optional restriction to apply to rows when deleting.
      * @return The number of rows affected.
      * @throws SQLException
      */
-    @Override
     public abstract int delete(@NonNull Uri uri, @Nullable String selection,
             @Nullable String[] selectionArgs);
 
     /**
-     * Implement this to handle requests to update one or more rows.
-     * The implementation should update all rows matching the selection
-     * to set the columns according to the provided values map.
-     * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
-     * after updating.
-     * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * Implement this to handle requests to delete one or more rows. The
+     * implementation should apply the selection clause when performing
+     * deletion, allowing the operation to affect multiple rows in a directory.
+     * As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after deleting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     * <p>
+     * The implementation is responsible for parsing out a row ID at the end of
+     * the URI, if a specific row is being deleted. That is, the client would
+     * pass in <code>content://contacts/people/22</code> and the implementation
+     * is responsible for parsing the record number (22) when creating a SQL
+     * statement.
+     *
+     * @param uri The full URI to query, including a row ID (if a specific
+     *            record is requested).
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
+     * @throws SQLException
+     */
+    @Override
+    public int delete(@NonNull Uri uri, @Nullable Bundle extras) {
+        extras = (extras != null) ? extras : Bundle.EMPTY;
+        return delete(uri,
+                extras.getString(ContentResolver.QUERY_ARG_SQL_SELECTION),
+                extras.getStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS));
+    }
+
+    /**
+     * Implement this to handle requests to update one or more rows. The
+     * implementation should update all rows matching the selection to set the
+     * columns according to the provided values map. As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after updating. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      *
-     * @param uri The URI to query. This can potentially have a record ID if this
-     * is an update request for a specific record.
+     * @param uri The URI to query. This can potentially have a record ID if
+     *            this is an update request for a specific record.
      * @param values A set of column_name/value pairs to update in the database.
-     *     This must not be {@code null}.
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
-    @Override
     public abstract int update(@NonNull Uri uri, @Nullable ContentValues values,
             @Nullable String selection, @Nullable String[] selectionArgs);
+
+    /**
+     * Implement this to handle requests to update one or more rows. The
+     * implementation should update all rows matching the selection to set the
+     * columns according to the provided values map. As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after updating. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * @param uri The URI to query. This can potentially have a record ID if
+     *            this is an update request for a specific record.
+     * @param values A set of column_name/value pairs to update in the database.
+     * @param extras A Bundle containing additional information necessary for
+     *            the operation. Arguments may include SQL style arguments, such
+     *            as {@link ContentResolver#QUERY_ARG_SQL_LIMIT}, but note that
+     *            the documentation for each individual provider will indicate
+     *            which arguments they support.
+     * @return the number of rows affected.
+     * @throws IllegalArgumentException if the provider doesn't support one of
+     *             the requested Bundle arguments.
+     */
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues values,
+            @Nullable Bundle extras) {
+        extras = (extras != null) ? extras : Bundle.EMPTY;
+        return update(uri, values,
+                extras.getString(ContentResolver.QUERY_ARG_SQL_SELECTION),
+                extras.getStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS));
+    }
 
     /**
      * Override this to handle requests to open a file blob.
@@ -2088,6 +2380,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 mSingleUser = (info.flags & ProviderInfo.FLAG_SINGLE_USER) != 0;
                 setAuthorities(info.authority);
             }
+            if (Build.IS_DEBUGGABLE) {
+                setTransportLoggingEnabled(Log.isLoggable(getClass().getSimpleName(),
+                        Log.VERBOSE));
+            }
             ContentProvider.this.onCreate();
         }
     }
@@ -2272,6 +2568,16 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     /** @hide */
     public static int getUserIdFromUri(Uri uri) {
         return getUserIdFromUri(uri, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns the user associated with the given URI.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull static UserHandle getUserHandleFromUri(@NonNull Uri uri) {
+        return UserHandle.of(getUserIdFromUri(uri, Process.myUserHandle().getIdentifier()));
     }
 
     /**

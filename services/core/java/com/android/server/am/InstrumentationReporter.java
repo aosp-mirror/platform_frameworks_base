@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.app.IInstrumentationWatcher;
 import android.content.ComponentName;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -109,6 +110,8 @@ public class InstrumentationReporter {
             mName = name;
             mResultCode = resultCode;
             mResults = results;
+
+            Binder.allowBlocking(mWatcher.asBinder());
         }
     }
 

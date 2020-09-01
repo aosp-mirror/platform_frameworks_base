@@ -37,11 +37,15 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
-    public SecureSetting(Context context, Handler handler, String settingName) {
+    protected SecureSetting(Context context, Handler handler, String settingName) {
+        this(context, handler, settingName, ActivityManager.getCurrentUser());
+    }
+
+    public SecureSetting(Context context, Handler handler, String settingName, int userId) {
         super(handler);
         mContext = context;
         mSettingName = settingName;
-        mUserId = ActivityManager.getCurrentUser();
+        mUserId = userId;
     }
 
     public int getValue() {
@@ -79,5 +83,17 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
             setListening(false);
             setListening(true);
         }
+    }
+
+    public int getCurrentUser() {
+        return mUserId;
+    }
+
+    public String getKey() {
+        return mSettingName;
+    }
+
+    public boolean isListening() {
+        return mListening;
     }
 }

@@ -17,26 +17,22 @@
 #define DEBUG false
 #include "Log.h"
 
-#include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsPullerCallback.h>
+#include "StatsPullerManager.h"
+
 #include <cutils/log.h>
 #include <math.h>
 #include <stdint.h>
+
 #include <algorithm>
+#include <iostream>
+
 #include "../StatsService.h"
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
 #include "../statscompanion_util.h"
-#include "CarStatsPuller.h"
-#include "GpuStatsPuller.h"
-#include "PowerStatsPuller.h"
-#include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
-#include "StatsCompanionServicePuller.h"
-#include "StatsPullerManager.h"
-#include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 
 using std::shared_ptr;
 using std::vector;
@@ -45,254 +41,132 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// Stores the puller as a wp to avoid holding a reference in case it is unregistered and
+// pullAtomCallbackDied is never called.
+struct PullAtomCallbackDeathCookie {
+    PullAtomCallbackDeathCookie(const wp<StatsPullerManager>& pullerManager,
+                                const PullerKey& pullerKey, const wp<StatsPuller>& puller) :
+            mPullerManager(pullerManager), mPullerKey(pullerKey), mPuller(puller) {
+    }
+
+    wp<StatsPullerManager> mPullerManager;
+    PullerKey mPullerKey;
+    wp<StatsPuller> mPuller;
+};
+
+void StatsPullerManager::pullAtomCallbackDied(void* cookie) {
+    PullAtomCallbackDeathCookie* cookie_ = static_cast<PullAtomCallbackDeathCookie*>(cookie);
+    sp<StatsPullerManager> thiz = cookie_->mPullerManager.promote();
+    if (!thiz) {
+        return;
+    }
+
+    const PullerKey& pullerKey = cookie_->mPullerKey;
+    wp<StatsPuller> puller = cookie_->mPuller;
+
+    // Erase the mapping from the puller key to the puller if the mapping still exists.
+    // Note that we are removing the StatsPuller object, which internally holds the binder
+    // IPullAtomCallback. However, each new registration creates a new StatsPuller, so this works.
+    lock_guard<mutex> lock(thiz->mLock);
+    const auto& it = thiz->kAllPullAtomInfo.find(pullerKey);
+    if (it != thiz->kAllPullAtomInfo.end() && puller != nullptr && puller == it->second) {
+        StatsdStats::getInstance().notePullerCallbackRegistrationChanged(pullerKey.atomTag,
+                                                                         /*registered=*/false);
+        thiz->kAllPullAtomInfo.erase(pullerKey);
+    }
+    // The death recipient corresponding to this specific IPullAtomCallback can never
+    // be triggered again, so free up resources.
+    delete cookie_;
+}
+
 // Values smaller than this may require to update the alarm.
 const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
-std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
-        // wifi_bytes_transfer
-        {android::util::WIFI_BYTES_TRANSFER,
-         {.additiveFields = {2, 3, 4, 5},
-          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
-        // wifi_bytes_transfer_by_fg_bg
-        {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
-         {.additiveFields = {3, 4, 5, 6},
-          .puller = new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
-        // mobile_bytes_transfer
-        {android::util::MOBILE_BYTES_TRANSFER,
-         {.additiveFields = {2, 3, 4, 5},
-          .puller = new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
-        // mobile_bytes_transfer_by_fg_bg
-        {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
-         {.additiveFields = {3, 4, 5, 6},
-          .puller =
-                  new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
-        // bluetooth_bytes_transfer
-        {android::util::BLUETOOTH_BYTES_TRANSFER,
-         {.additiveFields = {2, 3},
-          .puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
-        // kernel_wakelock
-        {android::util::KERNEL_WAKELOCK,
-         {.puller = new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
-        // subsystem_sleep_state
-        {android::util::SUBSYSTEM_SLEEP_STATE, {.puller = new SubsystemSleepStatePuller()}},
-        // on_device_power_measurement
-        {android::util::ON_DEVICE_POWER_MEASUREMENT, {.puller = new PowerStatsPuller()}},
-        // cpu_time_per_freq
-        {android::util::CPU_TIME_PER_FREQ,
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
-        // cpu_time_per_uid
-        {android::util::CPU_TIME_PER_UID,
-         {.additiveFields = {2, 3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
-        // cpu_time_per_uid_freq
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {android::util::CPU_TIME_PER_UID_FREQ,
-         {.additiveFields = {4},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
-        // cpu_active_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {android::util::CPU_ACTIVE_TIME,
-         {.additiveFields = {2},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
-        // cpu_cluster_time
-        // the throttling is 3sec, handled in
-        // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        {android::util::CPU_CLUSTER_TIME,
-         {.additiveFields = {3},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
-        // wifi_activity_energy_info
-        {android::util::WIFI_ACTIVITY_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
-        // modem_activity_info
-        {android::util::MODEM_ACTIVITY_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
-        // bluetooth_activity_info
-        {android::util::BLUETOOTH_ACTIVITY_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
-        // system_elapsed_realtime
-        {android::util::SYSTEM_ELAPSED_REALTIME,
-         {.coolDownNs = NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
-          .pullTimeoutNs = NS_PER_SEC / 2,
-         }},
-        // system_uptime
-        {android::util::SYSTEM_UPTIME,
-         {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
-        // remaining_battery_capacity
-        {android::util::REMAINING_BATTERY_CAPACITY,
-         {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
-        // full_battery_capacity
-        {android::util::FULL_BATTERY_CAPACITY,
-         {.puller = new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
-        // battery_voltage
-        {android::util::BATTERY_VOLTAGE,
-         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
-        // battery_level
-        {android::util::BATTERY_LEVEL,
-         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
-        // battery_cycle_count
-        {android::util::BATTERY_CYCLE_COUNT,
-         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
-        // process_memory_state
-        {android::util::PROCESS_MEMORY_STATE,
-         {.additiveFields = {4, 5, 6, 7, 8, 9},
-          .puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
-        // native_process_memory_state
-        {android::util::NATIVE_PROCESS_MEMORY_STATE,
-         {.additiveFields = {3, 4, 5, 6, 8},
-          .puller = new StatsCompanionServicePuller(android::util::NATIVE_PROCESS_MEMORY_STATE)}},
-        // process_memory_high_water_mark
-        {android::util::PROCESS_MEMORY_HIGH_WATER_MARK,
-         {.additiveFields = {3},
-          .puller =
-                  new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
-        // system_ion_heap_size
-        {android::util::SYSTEM_ION_HEAP_SIZE,
-         {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_ION_HEAP_SIZE)}},
-        // process_system_ion_heap_size
-        {android::util::PROCESS_SYSTEM_ION_HEAP_SIZE,
-         {.puller = new StatsCompanionServicePuller(android::util::PROCESS_SYSTEM_ION_HEAP_SIZE)}},
-        // temperature
-        {android::util::TEMPERATURE,
-         {.puller = new StatsCompanionServicePuller(android::util::TEMPERATURE)}},
-        // cooling_device
-        {android::util::COOLING_DEVICE,
-         {.puller = new StatsCompanionServicePuller(android::util::COOLING_DEVICE)}},
-        // binder_calls
-        {android::util::BINDER_CALLS,
-         {.additiveFields = {4, 5, 6, 8, 12},
-          .puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
-        // binder_calls_exceptions
-        {android::util::BINDER_CALLS_EXCEPTIONS,
-         {.puller = new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
-        // looper_stats
-        {android::util::LOOPER_STATS,
-         {.additiveFields = {5, 6, 7, 8, 9},
-          .puller = new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
-        // Disk Stats
-        {android::util::DISK_STATS,
-         {.puller = new StatsCompanionServicePuller(android::util::DISK_STATS)}},
-        // Directory usage
-        {android::util::DIRECTORY_USAGE,
-         {.puller = new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
-        // Size of app's code, data, and cache
-        {android::util::APP_SIZE,
-         {.puller = new StatsCompanionServicePuller(android::util::APP_SIZE)}},
-        // Size of specific categories of files. Eg. Music.
-        {android::util::CATEGORY_SIZE,
-         {.puller = new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
-        // Number of fingerprints enrolled for each user.
-        {android::util::NUM_FINGERPRINTS_ENROLLED,
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS_ENROLLED)}},
-        // Number of faces enrolled for each user.
-        {android::util::NUM_FACES_ENROLLED,
-         {.puller = new StatsCompanionServicePuller(android::util::NUM_FACES_ENROLLED)}},
-        // ProcStats.
-        {android::util::PROC_STATS,
-         {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS)}},
-        // ProcStatsPkgProc.
-        {android::util::PROC_STATS_PKG_PROC,
-         {.puller = new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
-        // Disk I/O stats per uid.
-        {android::util::DISK_IO,
-         {.additiveFields = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
-          .coolDownNs = 3 * NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::DISK_IO)}},
-        // PowerProfile constants for power model calculations.
-        {android::util::POWER_PROFILE,
-         {.puller = new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
-        // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
-        {android::util::PROCESS_CPU_TIME,
-         {.coolDownNs = 5 * NS_PER_SEC /* min cool-down in seconds*/,
-          .puller = new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
-        {android::util::CPU_TIME_PER_THREAD_FREQ,
-         {.additiveFields = {7, 9, 11, 13, 15, 17, 19, 21},
-          .puller = new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
-        // DeviceCalculatedPowerUse.
-        {android::util::DEVICE_CALCULATED_POWER_USE,
-         {.puller = new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
-        // DeviceCalculatedPowerBlameUid.
-        {android::util::DEVICE_CALCULATED_POWER_BLAME_UID,
-         {.puller = new StatsCompanionServicePuller(
-                  android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
-        // DeviceCalculatedPowerBlameOther.
-        {android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER,
-         {.puller = new StatsCompanionServicePuller(
-                  android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
-        // DebugElapsedClock.
-        {android::util::DEBUG_ELAPSED_CLOCK,
-         {.additiveFields = {1, 2, 3, 4},
-          .puller = new StatsCompanionServicePuller(android::util::DEBUG_ELAPSED_CLOCK)}},
-        // DebugFailingElapsedClock.
-        {android::util::DEBUG_FAILING_ELAPSED_CLOCK,
-         {.additiveFields = {1, 2, 3, 4},
-          .puller = new StatsCompanionServicePuller(android::util::DEBUG_FAILING_ELAPSED_CLOCK)}},
-        // BuildInformation.
-        {android::util::BUILD_INFORMATION,
-         {.puller = new StatsCompanionServicePuller(android::util::BUILD_INFORMATION)}},
-        // RoleHolder.
-        {android::util::ROLE_HOLDER,
-         {.puller = new StatsCompanionServicePuller(android::util::ROLE_HOLDER)}},
-        // PermissionState.
-        {android::util::DANGEROUS_PERMISSION_STATE,
-         {.puller = new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE)}},
-        // TrainInfo.
-        {android::util::TRAIN_INFO, {.puller = new TrainInfoPuller()}},
-        // TimeZoneDataInfo.
-        {android::util::TIME_ZONE_DATA_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
-        // ExternalStorageInfo
-        {android::util::EXTERNAL_STORAGE_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
-        // GpuStatsGlobalInfo
-        {android::util::GPU_STATS_GLOBAL_INFO,
-         {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},
-        // GpuStatsAppInfo
-        {android::util::GPU_STATS_APP_INFO,
-         {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
-        // AppsOnExternalStorageInfo
-        {android::util::APPS_ON_EXTERNAL_STORAGE_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::APPS_ON_EXTERNAL_STORAGE_INFO)}},
-        // Face Settings
-        {android::util::FACE_SETTINGS,
-         {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
-        // App ops
-        {android::util::APP_OPS,
-         {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
-        // VmsClientStats
-        {android::util::VMS_CLIENT_STATS,
-         {.additiveFields = {5, 6, 7, 8, 9, 10},
-          .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
-        // NotiifcationRemoteViews.
-        {android::util::NOTIFICATION_REMOTE_VIEWS,
-         {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
-};
-
-StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
+StatsPullerManager::StatsPullerManager()
+    : kAllPullAtomInfo({
+              // TrainInfo.
+              {{.atomTag = util::TRAIN_INFO, .uid = AID_STATSD}, new TrainInfoPuller()},
+      }),
+      mNextPullTimeNs(NO_ALARM_UPDATE),
+      mPullAtomCallbackDeathRecipient(AIBinder_DeathRecipient_new(pullAtomCallbackDied)) {
 }
 
-bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
-    VLOG("Initiating pulling %d", tagId);
+bool StatsPullerManager::Pull(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
+                              vector<shared_ptr<LogEvent>>* data, bool useUids) {
+    std::lock_guard<std::mutex> _l(mLock);
+    return PullLocked(tagId, configKey, eventTimeNs, data, useUids);
+}
 
-    if (kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end()) {
-        bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
-        VLOG("pulled %d items", (int)data->size());
-        if (!ret) {
-            StatsdStats::getInstance().notePullFailed(tagId);
+bool StatsPullerManager::Pull(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
+                              vector<std::shared_ptr<LogEvent>>* data, bool useUids) {
+    std::lock_guard<std::mutex> _l(mLock);
+    return PullLocked(tagId, uids, eventTimeNs, data, useUids);
+}
+
+bool StatsPullerManager::PullLocked(int tagId, const ConfigKey& configKey,
+                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data,
+                                    bool useUids) {
+    vector<int32_t> uids;
+    if (useUids) {
+        auto uidProviderIt = mPullUidProviders.find(configKey);
+        if (uidProviderIt == mPullUidProviders.end()) {
+            ALOGE("Error pulling tag %d. No pull uid provider for config key %s", tagId,
+                  configKey.ToString().c_str());
+            StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
+            return false;
         }
-        return ret;
+        sp<PullUidProvider> pullUidProvider = uidProviderIt->second.promote();
+        if (pullUidProvider == nullptr) {
+            ALOGE("Error pulling tag %d, pull uid provider for config %s is gone.", tagId,
+                  configKey.ToString().c_str());
+            StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
+            return false;
+        }
+        uids = pullUidProvider->getPullAtomUids(tagId);
+    }
+    return PullLocked(tagId, uids, eventTimeNs, data, useUids);
+}
+
+bool StatsPullerManager::PullLocked(int tagId, const vector<int32_t>& uids,
+                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data,
+                                    bool useUids) {
+    VLOG("Initiating pulling %d", tagId);
+    if (useUids) {
+        for (int32_t uid : uids) {
+            PullerKey key = {.atomTag = tagId, .uid = uid};
+            auto pullerIt = kAllPullAtomInfo.find(key);
+            if (pullerIt != kAllPullAtomInfo.end()) {
+                bool ret = pullerIt->second->Pull(eventTimeNs, data);
+                VLOG("pulled %zu items", data->size());
+                if (!ret) {
+                    StatsdStats::getInstance().notePullFailed(tagId);
+                }
+                return ret;
+            }
+        }
+        StatsdStats::getInstance().notePullerNotFound(tagId);
+        ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
+        return false;  // Return early since we don't know what to pull.
     } else {
-        VLOG("Unknown tagId %d", tagId);
+        PullerKey key = {.atomTag = tagId, .uid = -1};
+        auto pullerIt = kAllPullAtomInfo.find(key);
+        if (pullerIt != kAllPullAtomInfo.end()) {
+            bool ret = pullerIt->second->Pull(eventTimeNs, data);
+            VLOG("pulled %zu items", data->size());
+            if (!ret) {
+                StatsdStats::getInstance().notePullFailed(tagId);
+            }
+            return ret;
+        }
+        ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
         return false;  // Return early since we don't know what to pull.
     }
 }
 
 bool StatsPullerManager::PullerForMatcherExists(int tagId) const {
-    // Vendor pulled atoms might be registered after we parse the config.
-    return isVendorPulledAtom(tagId) || kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end();
+    // Pulled atoms might be registered after we parse the config, so just make sure the id is in
+    // an appropriate range.
+    return isVendorPulledAtom(tagId) || isPulledAtom(tagId);
 }
 
 void StatsPullerManager::updateAlarmLocked() {
@@ -301,9 +175,9 @@ void StatsPullerManager::updateAlarmLocked() {
         return;
     }
 
-    sp<IStatsCompanionService> statsCompanionServiceCopy = mStatsCompanionService;
-    if (statsCompanionServiceCopy != nullptr) {
-        statsCompanionServiceCopy->setPullingAlarm(mNextPullTimeNs / 1000000);
+    // TODO(b/151045771): do not hold a lock while making a binder call
+    if (mStatsCompanionService != nullptr) {
+        mStatsCompanionService->setPullingAlarm(mNextPullTimeNs / 1000000);
     } else {
         VLOG("StatsCompanionService not available. Alarm not set.");
     }
@@ -311,22 +185,23 @@ void StatsPullerManager::updateAlarmLocked() {
 }
 
 void StatsPullerManager::SetStatsCompanionService(
-        sp<IStatsCompanionService> statsCompanionService) {
-    AutoMutex _l(mLock);
-    sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
+        shared_ptr<IStatsCompanionService> statsCompanionService) {
+    std::lock_guard<std::mutex> _l(mLock);
+    shared_ptr<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
-        pulledAtom.second.puller->SetStatsCompanionService(statsCompanionService);
+        pulledAtom.second->SetStatsCompanionService(statsCompanionService);
     }
     if (mStatsCompanionService != nullptr) {
         updateAlarmLocked();
     }
 }
 
-void StatsPullerManager::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
-                                              int64_t nextPullTimeNs, int64_t intervalNs) {
-    AutoMutex _l(mLock);
-    auto& receivers = mReceivers[tagId];
+void StatsPullerManager::RegisterReceiver(int tagId, const ConfigKey& configKey,
+                                          wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
+                                          int64_t intervalNs) {
+    std::lock_guard<std::mutex> _l(mLock);
+    auto& receivers = mReceivers[{.atomTag = tagId, .configKey = configKey}];
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
         if (it->receiver == receiver) {
             VLOG("Receiver already registered of %d", (int)receivers.size());
@@ -358,13 +233,15 @@ void StatsPullerManager::RegisterReceiver(int tagId, wp<PullDataReceiver> receiv
     VLOG("Puller for tagId %d registered of %d", tagId, (int)receivers.size());
 }
 
-void StatsPullerManager::UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
-    AutoMutex _l(mLock);
-    if (mReceivers.find(tagId) == mReceivers.end()) {
+void StatsPullerManager::UnRegisterReceiver(int tagId, const ConfigKey& configKey,
+                                            wp<PullDataReceiver> receiver) {
+    std::lock_guard<std::mutex> _l(mLock);
+    auto receiversIt = mReceivers.find({.atomTag = tagId, .configKey = configKey});
+    if (receiversIt == mReceivers.end()) {
         VLOG("Unknown pull code or no receivers: %d", tagId);
         return;
     }
-    auto& receivers = mReceivers.find(tagId)->second;
+    std::list<ReceiverInfo>& receivers = receiversIt->second;
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
         if (receiver == it->receiver) {
             receivers.erase(it);
@@ -374,16 +251,30 @@ void StatsPullerManager::UnRegisterReceiver(int tagId, wp<PullDataReceiver> rece
     }
 }
 
+void StatsPullerManager::RegisterPullUidProvider(const ConfigKey& configKey,
+                                                 wp<PullUidProvider> provider) {
+    std::lock_guard<std::mutex> _l(mLock);
+    mPullUidProviders[configKey] = provider;
+}
+
+void StatsPullerManager::UnregisterPullUidProvider(const ConfigKey& configKey,
+                                                   wp<PullUidProvider> provider) {
+    std::lock_guard<std::mutex> _l(mLock);
+    const auto& it = mPullUidProviders.find(configKey);
+    if (it != mPullUidProviders.end() && it->second == provider) {
+        mPullUidProviders.erase(it);
+    }
+}
+
 void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
-    AutoMutex _l(mLock);
+    std::lock_guard<std::mutex> _l(mLock);
     int64_t wallClockNs = getWallClockNs();
 
     int64_t minNextPullTimeNs = NO_ALARM_UPDATE;
 
-    vector<pair<int, vector<ReceiverInfo*>>> needToPull =
-            vector<pair<int, vector<ReceiverInfo*>>>();
+    vector<pair<const ReceiverKey*, vector<ReceiverInfo*>>> needToPull;
     for (auto& pair : mReceivers) {
-        vector<ReceiverInfo*> receivers = vector<ReceiverInfo*>();
+        vector<ReceiverInfo*> receivers;
         if (pair.second.size() != 0) {
             for (ReceiverInfo& receiverInfo : pair.second) {
                 if (receiverInfo.nextPullTimeNs <= elapsedTimeNs) {
@@ -395,18 +286,15 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
                 }
             }
             if (receivers.size() > 0) {
-                needToPull.push_back(make_pair(pair.first, receivers));
+                needToPull.push_back(make_pair(&pair.first, receivers));
             }
         }
     }
-
     for (const auto& pullInfo : needToPull) {
         vector<shared_ptr<LogEvent>> data;
-        bool pullSuccess = Pull(pullInfo.first, &data);
-        if (pullSuccess) {
-            StatsdStats::getInstance().notePullDelay(
-                    pullInfo.first, getElapsedRealtimeNs() - elapsedTimeNs);
-        } else {
+        bool pullSuccess = PullLocked(pullInfo.first->atomTag, pullInfo.first->configKey,
+                                      elapsedTimeNs, &data);
+        if (!pullSuccess) {
             VLOG("pull failed at %lld, will try again later", (long long)elapsedTimeNs);
         }
 
@@ -448,7 +336,7 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
 int StatsPullerManager::ForceClearPullerCache() {
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
-        totalCleared += pulledAtom.second.puller->ForceClearCache();
+        totalCleared += pulledAtom.second->ForceClearCache();
     }
     return totalCleared;
 }
@@ -456,32 +344,45 @@ int StatsPullerManager::ForceClearPullerCache() {
 int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
-        totalCleared += pulledAtom.second.puller->ClearCacheIfNecessary(timestampNs);
+        totalCleared += pulledAtom.second->ClearCacheIfNecessary(timestampNs);
     }
     return totalCleared;
 }
 
-void StatsPullerManager::RegisterPullerCallback(int32_t atomTag,
-        const sp<IStatsPullerCallback>& callback) {
-    AutoMutex _l(mLock);
-    // Platform pullers cannot be changed.
-    if (!isVendorPulledAtom(atomTag)) {
-        VLOG("RegisterPullerCallback: atom tag %d is not vendor pulled", atomTag);
+void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t atomTag,
+                                                  const int64_t coolDownNs, const int64_t timeoutNs,
+                                                  const vector<int32_t>& additiveFields,
+                                                  const shared_ptr<IPullAtomCallback>& callback,
+                                                  bool useUid) {
+    std::lock_guard<std::mutex> _l(mLock);
+    VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
+
+    if (callback == nullptr) {
+        ALOGW("SetPullAtomCallback called with null callback for atom %d.", atomTag);
         return;
     }
-    VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
+
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
-    kAllPullAtomInfo[atomTag] = {.puller = new StatsCallbackPuller(atomTag, callback)};
+    int64_t actualCoolDownNs = coolDownNs < kMinCoolDownNs ? kMinCoolDownNs : coolDownNs;
+    int64_t actualTimeoutNs = timeoutNs > kMaxTimeoutNs ? kMaxTimeoutNs : timeoutNs;
+
+    sp<StatsCallbackPuller> puller = new StatsCallbackPuller(atomTag, callback, actualCoolDownNs,
+                                                             actualTimeoutNs, additiveFields);
+    PullerKey key = {.atomTag = atomTag, .uid = useUid ? uid : -1};
+    AIBinder_linkToDeath(callback->asBinder().get(), mPullAtomCallbackDeathRecipient.get(),
+                         new PullAtomCallbackDeathCookie(this, key, puller));
+    kAllPullAtomInfo[key] = puller;
 }
 
-void StatsPullerManager::UnregisterPullerCallback(int32_t atomTag) {
-    AutoMutex _l(mLock);
-    // Platform pullers cannot be changed.
-    if (!isVendorPulledAtom(atomTag)) {
-        return;
+void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag,
+                                                    bool useUids) {
+    std::lock_guard<std::mutex> _l(mLock);
+    PullerKey key = {.atomTag = atomTag, .uid = useUids ? uid : -1};
+    if (kAllPullAtomInfo.find(key) != kAllPullAtomInfo.end()) {
+        StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag,
+                                                                         /*registered=*/false);
+        kAllPullAtomInfo.erase(key);
     }
-    StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/false);
-    kAllPullAtomInfo.erase(atomTag);
 }
 
 }  // namespace statsd

@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.ActivityThread;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -45,7 +46,8 @@ public class TestableDeviceConfigTest {
     private static final long WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS = 2000; // 2 sec
 
     @Rule
-    public TestableDeviceConfig mTestableDeviceConfig = new TestableDeviceConfig();
+    public TestableDeviceConfig.TestableDeviceConfigRule
+            mTestableDeviceConfig = new TestableDeviceConfig.TestableDeviceConfigRule();
 
     @Test
     public void getProperty_empty() {
@@ -87,6 +89,45 @@ public class TestableDeviceConfigTest {
         DeviceConfig.setProperty(sNamespace, sKey, newValue, false);
         String result = DeviceConfig.getProperty(sNamespace, sKey);
         assertThat(result).isEqualTo(newValue);
+    }
+
+    @Test
+    public void getProperties_empty() {
+        String newKey = "key2";
+        String newValue = "value2";
+        DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
+        Properties properties = DeviceConfig.getProperties(sNamespace);
+        assertThat(properties.getString(sKey, null)).isEqualTo(sValue);
+        assertThat(properties.getString(newKey, null)).isNull();
+
+        DeviceConfig.setProperty(sNamespace, newKey, newValue, false);
+        properties = DeviceConfig.getProperties(sNamespace);
+        assertThat(properties.getString(sKey, null)).isEqualTo(sValue);
+        assertThat(properties.getString(newKey, null)).isEqualTo(newValue);
+
+    }
+
+    @Test
+    public void getProperties() {
+        Properties properties = DeviceConfig.getProperties(sNamespace, sKey);
+        assertThat(properties.getString(sKey, null)).isNull();
+
+        DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
+        properties = DeviceConfig.getProperties(sNamespace, sKey);
+        assertThat(properties.getString(sKey, null)).isEqualTo(sValue);
+
+        String newKey = "key2";
+        String newValue = "value2";
+        DeviceConfig.setProperty(sNamespace, newKey, newValue, false);
+        properties = DeviceConfig.getProperties(sNamespace, sKey, newKey);
+        assertThat(properties.getString(sKey, null)).isEqualTo(sValue);
+        assertThat(properties.getString(newKey, null)).isEqualTo(newValue);
+
+        String unsetKey = "key3";
+        properties = DeviceConfig.getProperties(sNamespace, newKey, unsetKey);
+        assertThat(properties.getKeyset()).containsExactly(newKey, unsetKey);
+        assertThat(properties.getString(newKey, null)).isEqualTo(newValue);
+        assertThat(properties.getString(unsetKey, null)).isNull();
     }
 
     @Test

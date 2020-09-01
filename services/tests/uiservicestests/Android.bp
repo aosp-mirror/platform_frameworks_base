@@ -21,6 +21,7 @@ android_test {
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "platformprotosnano",
+        "statsdprotolite",
         "hamcrest-library",
         "testables",
         "truth-prebuilt",
@@ -29,6 +30,7 @@ android_test {
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
 
     dxflags: ["--multi-dex"],

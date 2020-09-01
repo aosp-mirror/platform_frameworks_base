@@ -18,12 +18,15 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 
+import android.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.SimpleNotificationListContainer;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -33,7 +36,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
  * notification views added and removed from it, and will manage displaying them to the user.
  */
 public interface NotificationListContainer extends ExpandableView.OnHeightChangedListener,
-        VisibilityLocationProvider {
+        VisibilityLocationProvider, SimpleNotificationListContainer {
 
     /**
      * Called when a child is being transferred.
@@ -186,4 +189,12 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
     }
 
     default void setWillExpand(boolean willExpand) {};
+
+    /**
+     * Remove a list item from the container
+     * @param v the item to remove
+     */
+    void removeListItem(@NonNull NotificationListItem v);
+
+    void setNotificationActivityStarter(NotificationActivityStarter notificationActivityStarter);
 }

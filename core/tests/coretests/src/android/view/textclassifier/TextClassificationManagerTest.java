@@ -16,20 +16,15 @@
 
 package android.view.textclassifier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.LocaleList;
-import android.service.textclassifier.TextClassifierService;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,14 +34,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationManagerTest {
 
-    private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
-
     private Context mContext;
     private TextClassificationManager mTcm;
 
     @Before
     public void setup() {
-        mContext = InstrumentationRegistry.getTargetContext();
+        mContext = ApplicationProvider.getApplicationContext();
         mTcm = mContext.getSystemService(TextClassificationManager.class);
     }
 
@@ -54,46 +47,17 @@ public class TextClassificationManagerTest {
     public void testSetTextClassifier() {
         TextClassifier classifier = mock(TextClassifier.class);
         mTcm.setTextClassifier(classifier);
-        assertEquals(classifier, mTcm.getTextClassifier());
+        assertThat(mTcm.getTextClassifier()).isEqualTo(classifier);
     }
 
     @Test
     public void testGetLocalTextClassifier() {
-        assertTrue(mTcm.getTextClassifier(TextClassifier.LOCAL) instanceof TextClassifierImpl);
+        assertThat(mTcm.getTextClassifier(TextClassifier.LOCAL)).isSameAs(TextClassifier.NO_OP);
     }
+
     @Test
     public void testGetSystemTextClassifier() {
-        assertTrue(
-                TextClassifierService.getServiceComponentName(mContext) == null
-                || mTcm.getTextClassifier(TextClassifier.SYSTEM) instanceof SystemTextClassifier);
-    }
-
-    @Test
-    public void testCannotResolveIntent() {
-        Context fakeContext = new FakeContextBuilder()
-                .setAllIntentComponent(FakeContextBuilder.DEFAULT_COMPONENT)
-                .setIntentComponent(Intent.ACTION_INSERT_OR_EDIT, null)
-                .build();
-
-        TextClassifier fallback = TextClassifier.NO_OP;
-        TextClassifier classifier = new TextClassifierImpl(
-                fakeContext, new TextClassificationConstants(() -> null), fallback);
-
-        String text = "Contact me at +12122537077";
-        String classifiedText = "+12122537077";
-        int startIndex = text.indexOf(classifiedText);
-        int endIndex = startIndex + classifiedText.length();
-        TextClassification.Request request = new TextClassification.Request.Builder(
-                text, startIndex, endIndex)
-                .setDefaultLocales(LOCALES)
-                .build();
-
-        TextClassification result = classifier.classifyText(request);
-        TextClassification fallbackResult = fallback.classifyText(request);
-
-        // classifier should not totally fail in which case it returns a fallback result.
-        // It should skip the failing intent and return a result for non-failing intents.
-        assertFalse(result.getActions().isEmpty());
-        assertNotSame(result, fallbackResult);
+        assertThat(mTcm.getTextClassifier(TextClassifier.SYSTEM))
+                .isInstanceOf(SystemTextClassifier.class);
     }
 }

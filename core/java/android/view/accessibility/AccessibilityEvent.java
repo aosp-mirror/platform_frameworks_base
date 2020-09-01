@@ -17,11 +17,13 @@
 package android.view.accessibility;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.BitUtils;
@@ -390,7 +392,10 @@ import java.util.List;
  * @see AccessibilityNodeInfo
  */
 public final class AccessibilityEvent extends AccessibilityRecord implements Parcelable {
-    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "AccessibilityEvent";
+
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
+
     /** @hide */
     public static final boolean DEBUG_ORIGIN = false;
 
@@ -598,6 +603,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 0x00000020;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * state description of the node as returned by
+     * {@link AccessibilityNodeInfo#getStateDescription} changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_STATE_DESCRIPTION = 0x00000040;
+
+    /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window was added.
      */
@@ -618,6 +630,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window's bounds changed.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#R R}, this event implies the window's
+     * region changed. It's also possible that region changed but bounds doesn't.
+     * </p>
      */
     public static final int WINDOWS_CHANGE_BOUNDS = 0x00000008;
 
@@ -688,6 +704,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_SUBTREE,
                     CONTENT_CHANGE_TYPE_TEXT,
                     CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
+                    CONTENT_CHANGE_TYPE_STATE_DESCRIPTION,
                     CONTENT_CHANGE_TYPE_PANE_TITLE,
                     CONTENT_CHANGE_TYPE_PANE_APPEARED,
                     CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
@@ -780,10 +797,32 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     private ArrayList<AccessibilityRecord> mRecords;
 
-    /*
-     * Hide constructor from clients.
+    /**
+     * Creates a new {@link AccessibilityEvent}.
      */
-    private AccessibilityEvent() {
+    public AccessibilityEvent() {
+        if (DEBUG_ORIGIN) originStackTrace = Thread.currentThread().getStackTrace();
+    }
+
+
+    /**
+     * Creates a new {@link AccessibilityEvent} with the given <code>eventType</code>.
+     *
+     * @param eventType The event type.
+     */
+    public AccessibilityEvent(int eventType) {
+        mEventType = eventType;
+        if (DEBUG_ORIGIN) originStackTrace = Thread.currentThread().getStackTrace();
+    }
+
+    /**
+     * Copy constructor. Creates a new {@link AccessibilityEvent}, and this instance is initialized
+     * from the given <code>event</code>.
+     *
+     * @param event The other event.
+     */
+    public AccessibilityEvent(@NonNull AccessibilityEvent event) {
+        init(event);
     }
 
     /**
@@ -800,6 +839,15 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mWindowChangeTypes = event.mWindowChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
+        if (event.mRecords != null) {
+            final int recordCount = event.mRecords.size();
+            mRecords = new ArrayList<>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                final AccessibilityRecord record = event.mRecords.get(i);
+                final AccessibilityRecord recordClone = new AccessibilityRecord(record);
+                mRecords.add(recordClone);
+            }
+        }
         if (DEBUG_ORIGIN) originStackTrace = event.originStackTrace;
     }
 
@@ -877,6 +925,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return The bit mask of change types. One or more of:
      *         <ul>
      *         <li>{@link #CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}
      *         <li>{@link #CONTENT_CHANGE_TYPE_SUBTREE}
      *         <li>{@link #CONTENT_CHANGE_TYPE_TEXT}
      *         <li>{@link #CONTENT_CHANGE_TYPE_PANE_TITLE}
@@ -898,6 +947,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         switch (type) {
             case CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION:
                 return "CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION";
+            case CONTENT_CHANGE_TYPE_STATE_DESCRIPTION:
+                return "CONTENT_CHANGE_TYPE_STATE_DESCRIPTION";
             case CONTENT_CHANGE_TYPE_SUBTREE: return "CONTENT_CHANGE_TYPE_SUBTREE";
             case CONTENT_CHANGE_TYPE_TEXT: return "CONTENT_CHANGE_TYPE_TEXT";
             case CONTENT_CHANGE_TYPE_PANE_TITLE: return "CONTENT_CHANGE_TYPE_PANE_TITLE";
@@ -1090,6 +1141,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Returns a cached instance if such is available or a new one is
      * instantiated with its type property set.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityEvent(int)} instead.
+     *
      * @param eventType The event type.
      * @return An instance.
      */
@@ -1104,29 +1158,24 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * created. The returned instance is initialized from the given
      * <code>event</code>.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityEvent(AccessibilityEvent)} instead.
+     *
      * @param event The other event.
      * @return An instance.
      */
     public static AccessibilityEvent obtain(AccessibilityEvent event) {
         AccessibilityEvent eventClone = AccessibilityEvent.obtain();
         eventClone.init(event);
-
-        if (event.mRecords != null) {
-            final int recordCount = event.mRecords.size();
-            eventClone.mRecords = new ArrayList<AccessibilityRecord>(recordCount);
-            for (int i = 0; i < recordCount; i++) {
-                final AccessibilityRecord record = event.mRecords.get(i);
-                final AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
-                eventClone.mRecords.add(recordClone);
-            }
-        }
-
         return eventClone;
     }
 
     /**
      * Returns a cached instance if such is available or a new one is
      * instantiated.
+     *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityEvent()} instead.
      *
      * @return An instance.
      */
@@ -1142,6 +1191,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * <p>
      *   <b>Note: You must not touch the object after calling this function.</b>
      * </p>
+     *
+     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
      *
      * @throws IllegalStateException If the event is already recycled.
      */
@@ -1346,8 +1397,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 builder.append("\n");
             }
             if (DEBUG) {
-                builder.append("; SourceWindowId: ").append(mSourceWindowId);
-                builder.append("; SourceNodeId: ").append(mSourceNodeId);
+                builder.append("; SourceWindowId: 0x").append(Long.toHexString(mSourceWindowId));
+                builder.append("; SourceNodeId: 0x").append(Long.toHexString(mSourceNodeId));
             }
             for (int i = 0; i < getRecordCount(); i++) {
                 builder.append("  Record ").append(i).append(":");

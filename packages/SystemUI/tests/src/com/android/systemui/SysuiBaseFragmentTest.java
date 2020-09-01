@@ -24,6 +24,7 @@ import android.testing.DexmakerShareClassLoaderRule;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;
 
@@ -42,7 +43,7 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
 
-    protected final TestableDependency mDependency = new TestableDependency(mContext);
+    protected TestableDependency mDependency;
     protected SysuiTestableContext mSysuiContext;
     private Instrumentation mRealInstrumentation;
 
@@ -53,6 +54,7 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
     @Before
     public void SysuiSetup() {
         SystemUIFactory.createFromConfig(mContext);
+        mDependency = new TestableDependency(mContext);
         // TODO: Figure out another way to give reference to a SysuiTestableContext.
         mSysuiContext = (SysuiTestableContext) mContext;
 
@@ -63,12 +65,14 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
         when(inst.getTargetContext()).thenThrow(new RuntimeException(
                 "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext"));
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
+        mDependency.injectMockDependency(AssistManager.class);
     }
 
     @After
     public void SysuiTeardown() {
         InstrumentationRegistry.registerInstance(mRealInstrumentation,
                 InstrumentationRegistry.getArguments());
+        SystemUIFactory.cleanup();
     }
 
     @Override

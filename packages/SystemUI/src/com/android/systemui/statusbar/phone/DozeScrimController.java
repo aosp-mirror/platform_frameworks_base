@@ -27,13 +27,18 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Controller which handles all the doze animations of the scrims.
  */
+@Singleton
 public class DozeScrimController implements StateListener {
     private static final String TAG = "DozeScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final DozeLog mDozeLog;
     private final DozeParameters mDozeParameters;
     private final Handler mHandler = new Handler();
 
@@ -84,20 +89,14 @@ public class DozeScrimController implements StateListener {
         public void onCancelled() {
             pulseFinished();
         }
-
-        /**
-         * Whether to timeout wallpaper or not.
-         */
-        @Override
-        public boolean shouldTimeoutWallpaper() {
-            return mPulseReason == DozeLog.PULSE_REASON_DOCKING;
-        }
     };
 
-    public DozeScrimController(DozeParameters dozeParameters) {
+    @Inject
+    public DozeScrimController(DozeParameters dozeParameters, DozeLog dozeLog) {
         mDozeParameters = dozeParameters;
         //Never expected to be destroyed
         Dependency.get(StatusBarStateController.class).addCallback(this);
+        mDozeLog = dozeLog;
     }
 
     @VisibleForTesting
@@ -168,14 +167,14 @@ public class DozeScrimController implements StateListener {
     }
 
     private void pulseStarted() {
-        DozeLog.tracePulseStart(mPulseReason);
+        mDozeLog.tracePulseStart(mPulseReason);
         if (mPulseCallback != null) {
             mPulseCallback.onPulseStarted();
         }
     }
 
     private void pulseFinished() {
-        DozeLog.tracePulseFinish();
+        mDozeLog.tracePulseFinish();
         if (mPulseCallback != null) {
             mPulseCallback.onPulseFinished();
             mPulseCallback = null;

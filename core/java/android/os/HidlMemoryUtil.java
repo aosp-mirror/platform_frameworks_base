@@ -21,14 +21,13 @@ import static android.system.OsConstants.PROT_READ;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.DirectByteBuffer;
 import java.util.ArrayList;
@@ -82,8 +81,7 @@ public final class HidlMemoryUtil {
             ByteBuffer buffer = shmem.mapReadWrite();
             buffer.put(input);
             shmem.unmap(buffer);
-            NativeHandle handle = new NativeHandle(shmem.getFileDescriptor(), true);
-            return new HidlMemory("ashmem", input.length, handle);
+            return sharedMemoryToHidlMemory(shmem);
         } catch (ErrnoException e) {
             throw new RuntimeException(e);
         }
@@ -128,8 +126,7 @@ public final class HidlMemoryUtil {
                 buffer.put(b);
             }
             shmem.unmap(buffer);
-            NativeHandle handle = new NativeHandle(shmem.getFileDescriptor(), true);
-            return new HidlMemory("ashmem", input.size(), handle);
+            return sharedMemoryToHidlMemory(shmem);
         } catch (ErrnoException e) {
             throw new RuntimeException(e);
         }
@@ -187,6 +184,38 @@ public final class HidlMemoryUtil {
             result.add(buffer.get());
         }
         return result;
+    }
+
+    /**
+     * Converts a SharedMemory to a HidlMemory without copying.
+     *
+     * @param shmem The shared memory object. Null means "empty" and will still result in a non-null
+     *              return value.
+     * @return The HidlMemory instance.
+     */
+    @NonNull public static HidlMemory sharedMemoryToHidlMemory(@Nullable SharedMemory shmem) {
+        if (shmem == null) {
+            return new HidlMemory("ashmem", 0, null);
+        }
+        return fileDescriptorToHidlMemory(shmem.getFileDescriptor(), shmem.getSize());
+    }
+
+    /**
+     * Converts a FileDescriptor to a HidlMemory without copying.
+     *
+     * @param fd   The FileDescriptor object. Null is allowed if size is 0 and will still result in
+     *             a non-null return value.
+     * @param size The size of the memory buffer.
+     * @return The HidlMemory instance.
+     */
+    @NonNull public static HidlMemory fileDescriptorToHidlMemory(@Nullable FileDescriptor fd,
+            int size) {
+        Preconditions.checkArgument(fd != null || size == 0);
+        if (fd == null) {
+            return new HidlMemory("ashmem", 0, null);
+        }
+        NativeHandle handle = new NativeHandle(fd, true);
+        return new HidlMemory("ashmem", size, handle);
     }
 
     private static ByteBuffer getBuffer(@NonNull HidlMemory mem) {

@@ -1,0 +1,7 @@
+android_test_helper_app {
+    name: "FrameworksServicesTests_install_intent_filters",
+    defaults: ["FrameworksServicesTests_apks_defaults"],
+
+    srcs: ["**/*.java"],
+}
+

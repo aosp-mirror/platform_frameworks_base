@@ -49,6 +49,7 @@ public class DozeUi implements DozeMachine.Part {
     private final AlarmTimeout mTimeTicker;
     private final boolean mCanAnimateTransition;
     private final DozeParameters mDozeParameters;
+    private final DozeLog mDozeLog;
 
     private boolean mKeyguardShowing;
     private final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
@@ -65,7 +66,8 @@ public class DozeUi implements DozeMachine.Part {
 
     public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
             WakeLock wakeLock, DozeHost host, Handler handler,
-            DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DozeLog dozeLog) {
         mContext = context;
         mMachine = machine;
         mWakeLock = wakeLock;
@@ -75,6 +77,7 @@ public class DozeUi implements DozeMachine.Part {
         mDozeParameters = params;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
+        mDozeLog = dozeLog;
     }
 
     /**
@@ -118,6 +121,7 @@ public class DozeUi implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD:
+            case DOZE_AOD_DOCKED:
                 if (oldState == DOZE_AOD_PAUSED || oldState == DOZE) {
                     // Whenever turning on the display, it's necessary to push a new frame.
                     // The display buffers will be empty and need to be filled.
@@ -132,7 +136,6 @@ public class DozeUi implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD_PAUSED:
-                mHost.prepareForGentleWakeUp();
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:
@@ -176,7 +179,7 @@ public class DozeUi implements DozeMachine.Part {
         long delta = roundToNextMinute(time) - System.currentTimeMillis();
         boolean scheduled = mTimeTicker.schedule(delta, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
         if (scheduled) {
-            DozeLog.traceTimeTickScheduled(time, time + delta);
+            mDozeLog.traceTimeTickScheduled(time, time + delta);
         }
         mLastTimeTickElapsed = SystemClock.elapsedRealtime();
     }
@@ -193,7 +196,7 @@ public class DozeUi implements DozeMachine.Part {
         long millisSinceLastTick = SystemClock.elapsedRealtime() - mLastTimeTickElapsed;
         if (millisSinceLastTick > TIME_TICK_DEADLINE_MILLIS) {
             String delay = Formatter.formatShortElapsedTime(mContext, millisSinceLastTick);
-            DozeLog.traceMissedTick(delay);
+            mDozeLog.traceMissedTick(delay);
             Log.e(DozeMachine.TAG, "Missed AOD time tick by " + delay);
         }
     }

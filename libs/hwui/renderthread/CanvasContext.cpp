@@ -15,11 +15,19 @@
  */
 
 #include "CanvasContext.h"
-#include <GpuMemoryTracker.h>
+
+#include <apex/window.h>
+#include <fcntl.h>
+#include <strings.h>
+#include <sys/stat.h>
+
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
 
 #include "../Properties.h"
 #include "AnimationContext.h"
-#include "EglManager.h"
 #include "Frame.h"
 #include "LayerUpdateQueue.h"
 #include "Properties.h"
@@ -32,18 +40,6 @@
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
-
-#include <cutils/properties.h>
-#include <private/hwui/DrawGlInfo.h>
-#include <strings.h>
-
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <algorithm>
-
-#include <cstdint>
-#include <cstdlib>
-#include <functional>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
@@ -105,13 +101,13 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mGenerationID(0)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mJankTracker(&thread.globalProfileData(), DeviceInfo::get()->displayInfo())
+        , mJankTracker(&thread.globalProfileData())
         , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
-    mProfiler.setDensity(DeviceInfo::get()->displayInfo().density);
+    mProfiler.setDensity(DeviceInfo::getDensity());
     setRenderAheadDepth(Properties::defaultRenderAhead);
 }
 
@@ -143,18 +139,21 @@ void CanvasContext::destroy() {
     mAnimationContext->destroy();
 }
 
-void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
-    ATRACE_CALL();
-
-    if (surface) {
-        mNativeSurface = new ReliableSurface{std::move(surface)};
-        if (enableTimeout) {
-            // TODO: Fix error handling & re-shorten timeout
-            mNativeSurface->setDequeueTimeout(4000_ms);
-        }
-    } else {
-        mNativeSurface = nullptr;
+static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
+    int query_value;
+    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return;
     }
+    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
+
+    int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
+    native_window_set_buffer_count(window, bufferCount);
+}
+
+void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
+    ATRACE_CALL();
 
     if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
         mFixedRenderAhead = false;
@@ -164,15 +163,34 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
         mRenderAheadCapacity = mRenderAheadDepth;
     }
 
-    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
-    bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode,
-                                                  mRenderAheadCapacity);
+    if (window) {
+        mNativeSurface = std::make_unique<ReliableSurface>(window);
+        mNativeSurface->init();
+        if (enableTimeout) {
+            // TODO: Fix error handling & re-shorten timeout
+            ANativeWindow_setDequeueTimeout(window, 4000_ms);
+        }
+        mNativeSurface->setExtraBufferCount(mRenderAheadCapacity);
+    } else {
+        mNativeSurface = nullptr;
+    }
+
+    bool hasSurface = mRenderPipeline->setSurface(
+            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior);
+
+    if (mNativeSurface && !mNativeSurface->didSetExtraBuffers()) {
+        setBufferCount(mNativeSurface->getNativeWindow(), mRenderAheadCapacity);
+    }
 
     mFrameNumber = -1;
 
-    if (hasSurface) {
+    if (window != nullptr && hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
+        // Enable frame stats after the surface has been bound to the appropriate graphics API.
+        // Order is important when new and old surfaces are the same, because old surface has
+        // its frame stats disabled automatically.
+        native_window_enable_frame_timestamps(mNativeSurface->getNativeWindow(), true);
     } else {
         mRenderThread.removeFrameCallback(this);
         mGenerationID++;
@@ -203,7 +221,7 @@ void CanvasContext::setStopped(bool stopped) {
 
 void CanvasContext::allocateBuffers() {
     if (mNativeSurface) {
-        mNativeSurface->allocateBuffers();
+        ANativeWindow_tryAllocateBuffers(mNativeSurface->getNativeWindow());
     }
 }
 
@@ -222,7 +240,8 @@ void CanvasContext::setOpaque(bool opaque) {
 }
 
 void CanvasContext::setWideGamut(bool wideGamut) {
-    mWideColorGamut = wideGamut;
+    ColorMode colorMode = wideGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
+    mRenderPipeline->setSurfaceColorProperties(colorMode);
 }
 
 bool CanvasContext::makeCurrent() {
@@ -299,6 +318,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     // just keep using the previous frame's structure instead
     if (!wasSkipped(mCurrentFrameInfo)) {
         mCurrentFrameInfo = mJankTracker.startFrame();
+        mLast4FrameInfos.next().first = mCurrentFrameInfo;
     }
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
     mCurrentFrameInfo->set(FrameInfoIndex::SyncQueued) = syncQueued;
@@ -306,10 +326,10 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     info.damageAccumulator = &mDamageAccumulator;
     info.layerUpdateQueue = &mLayerUpdateQueue;
+    info.damageGenerationId = mDamageId++;
     info.out.canDrawThisFrame = true;
 
     mAnimationContext->startFrame(info.mode);
-    mRenderPipeline->onPrepareTree();
     for (const sp<RenderNode>& node : mRenderNodes) {
         // Only the primary target node will be drawn full - all other nodes would get drawn in
         // real time mode. In case of a window, the primary node is the window content and the other
@@ -425,9 +445,10 @@ void CanvasContext::setPresentTime() {
 
     if (renderAhead) {
         presentTime = mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
-                (frameIntervalNanos * (renderAhead + 1));
+                (frameIntervalNanos * (renderAhead + 1)) - DeviceInfo::get()->getAppOffset() +
+                (frameIntervalNanos / 2);
     }
-    native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
+    native_window_set_buffers_timestamp(mNativeSurface->getNativeWindow(), presentTime);
 }
 
 void CanvasContext::draw() {
@@ -436,6 +457,12 @@ void CanvasContext::draw() {
 
     if (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw()) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+        // Notify the callbacks, even if there's nothing to draw so they aren't waiting
+        // indefinitely
+        for (auto& func : mFrameCompleteCallbacks) {
+            std::invoke(func, mFrameNumber);
+        }
+        mFrameCompleteCallbacks.clear();
         return;
     }
 
@@ -450,48 +477,69 @@ void CanvasContext::draw() {
                                       mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
                                       &(profiler()));
 
-    int64_t frameCompleteNr = mFrameCompleteCallbacks.size() ? getFrameNumber() : -1;
+    int64_t frameCompleteNr = getFrameNumber();
 
     waitOnFences();
 
     bool requireSwap = false;
+    int error = OK;
     bool didSwap =
             mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo, &requireSwap);
 
     mIsDirty = false;
 
     if (requireSwap) {
-        if (!didSwap) {  // some error happened
+        bool didDraw = true;
+        // Handle any swapchain errors
+        error = mNativeSurface->getAndClearError();
+        if (error == TIMED_OUT) {
+            // Try again
+            mRenderThread.postFrameCallback(this);
+            // But since this frame didn't happen, we need to mark full damage in the swap
+            // history
+            didDraw = false;
+
+        } else if (error != OK || !didSwap) {
+            // Unknown error, abandon the surface
             setSurface(nullptr);
+            didDraw = false;
         }
+
         SwapHistory& swap = mSwapHistory.next();
-        swap.damage = windowDirty;
-        swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
+        if (didDraw) {
+            swap.damage = windowDirty;
+        } else {
+            float max = static_cast<float>(INT_MAX);
+            swap.damage = SkRect::MakeWH(max, max);
+        }
+        swap.swapCompletedTime = systemTime(SYSTEM_TIME_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
-        if (mNativeSurface.get()) {
-            int durationUs;
-            nsecs_t dequeueStart = mNativeSurface->getLastDequeueStartTime();
+        if (didDraw) {
+            nsecs_t dequeueStart =
+                    ANativeWindow_getLastDequeueStartTime(mNativeSurface->getNativeWindow());
             if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::SyncStart)) {
                 // Ignoring dequeue duration as it happened prior to frame render start
                 // and thus is not part of the frame.
                 swap.dequeueDuration = 0;
             } else {
-                mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
-                swap.dequeueDuration = us2ns(durationUs);
+                swap.dequeueDuration =
+                        ANativeWindow_getLastDequeueDuration(mNativeSurface->getNativeWindow());
             }
-            mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
-            swap.queueDuration = us2ns(durationUs);
+            swap.queueDuration =
+                    ANativeWindow_getLastQueueDuration(mNativeSurface->getNativeWindow());
         } else {
             swap.dequeueDuration = 0;
             swap.queueDuration = 0;
         }
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
+        mLast4FrameInfos[-1].second = frameCompleteNr;
         mHaveNewSurface = false;
         mFrameNumber = -1;
     } else {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
+        mLast4FrameInfos[-1].second = -1;
     }
 
     // TODO: Use a fence for real completion?
@@ -524,7 +572,23 @@ void CanvasContext::draw() {
         mFrameMetricsReporter->reportFrameMetrics(mCurrentFrameInfo->data());
     }
 
-    GpuMemoryTracker::onFrameCompleted();
+    if (mLast4FrameInfos.size() == mLast4FrameInfos.capacity()) {
+        // By looking 4 frames back, we guarantee all SF stats are available. There are at
+        // most 3 buffers in BufferQueue. Surface object keeps stats for the last 8 frames.
+        FrameInfo* forthBehind = mLast4FrameInfos.front().first;
+        int64_t composedFrameId = mLast4FrameInfos.front().second;
+        nsecs_t acquireTime = -1;
+        if (mNativeSurface) {
+            native_window_get_frame_timestamps(mNativeSurface->getNativeWindow(), composedFrameId,
+                                               nullptr, &acquireTime, nullptr, nullptr, nullptr,
+                                               nullptr, nullptr, nullptr, nullptr);
+        }
+        // Ignore default -1, NATIVE_WINDOW_TIMESTAMP_INVALID and NATIVE_WINDOW_TIMESTAMP_PENDING
+        forthBehind->set(FrameInfoIndex::GpuCompleted) = acquireTime > 0 ? acquireTime : -1;
+        mJankTracker.finishGpuDraw(*forthBehind);
+    }
+
+    mRenderThread.cacheManager().onFrameCompleted();
 }
 
 // Called by choreographer to do an RT-driven animation
@@ -534,14 +598,16 @@ void CanvasContext::doFrame() {
 }
 
 SkISize CanvasContext::getNextFrameSize() const {
-    ReliableSurface* surface = mNativeSurface.get();
-    if (surface) {
-        SkISize size;
-        surface->query(NATIVE_WINDOW_WIDTH, &size.fWidth);
-        surface->query(NATIVE_WINDOW_HEIGHT, &size.fHeight);
-        return size;
+    static constexpr SkISize defaultFrameSize = {INT32_MAX, INT32_MAX};
+    if (mNativeSurface == nullptr) {
+        return defaultFrameSize;
     }
-    return {INT32_MAX, INT32_MAX};
+    ANativeWindow* anw = mNativeSurface->getNativeWindow();
+
+    SkISize size;
+    size.fWidth = ANativeWindow_getWidth(anw);
+    size.fHeight = ANativeWindow_getHeight(anw);
+    return size;
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {
@@ -552,7 +618,7 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     UiFrameInfoBuilder(frameInfo).addFlag(FrameInfoFlags::RTAnimation).setVsync(vsync, vsync);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
-    prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
+    prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
         draw();
     } else {
@@ -660,7 +726,7 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
 int64_t CanvasContext::getFrameNumber() {
     // mFrameNumber is reset to -1 when the surface changes or we swap buffers
     if (mFrameNumber == -1 && mNativeSurface.get()) {
-        mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
+        mFrameNumber = ANativeWindow_getNextFrameId(mNativeSurface->getNativeWindow());
     }
     return mFrameNumber;
 }
@@ -669,13 +735,11 @@ bool CanvasContext::surfaceRequiresRedraw() {
     if (!mNativeSurface) return false;
     if (mHaveNewSurface) return true;
 
-    int width = -1;
-    int height = -1;
-    ReliableSurface* surface = mNativeSurface.get();
-    surface->query(NATIVE_WINDOW_WIDTH, &width);
-    surface->query(NATIVE_WINDOW_HEIGHT, &height);
+    ANativeWindow* anw = mNativeSurface->getNativeWindow();
+    const int width = ANativeWindow_getWidth(anw);
+    const int height = ANativeWindow_getHeight(anw);
 
-    return width == mLastFrameWidth && height == mLastFrameHeight;
+    return width != mLastFrameWidth || height != mLastFrameHeight;
 }
 
 void CanvasContext::setRenderAheadDepth(int renderAhead) {
@@ -696,7 +760,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
         // New surface needs a full draw
         dirty->setEmpty();
     } else {
-        if (!dirty->isEmpty() && !dirty->intersect(0, 0, frame.width(), frame.height())) {
+        if (!dirty->isEmpty() && !dirty->intersect(SkRect::MakeIWH(frame.width(), frame.height()))) {
             ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?", SK_RECT_ARGS(*dirty),
                   frame.width(), frame.height());
             dirty->setEmpty();
@@ -705,7 +769,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     }
 
     if (dirty->isEmpty()) {
-        dirty->set(0, 0, frame.width(), frame.height());
+        dirty->setIWH(frame.width(), frame.height());
     }
 
     // At this point dirty is the area of the window to update. However,
@@ -721,7 +785,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
         if (frame.bufferAge() > (int)mSwapHistory.size()) {
             // We don't have enough history to handle this old of a buffer
             // Just do a full-draw
-            dirty->set(0, 0, frame.width(), frame.height());
+            dirty->setIWH(frame.width(), frame.height());
         } else {
             // At this point we haven't yet added the latest frame
             // to the damage history (happens below)

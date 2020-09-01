@@ -17,7 +17,11 @@
 #pragma once
 
 #include <private/hwui/WebViewFunctor.h>
+#ifdef __ANDROID__ // Layoutlib does not support render thread
 #include <renderthread/RenderProxy.h>
+#else
+#include <utils/Log.h>
+#endif
 
 #include <utils/LightRefBase.h>
 #include <mutex>
@@ -34,7 +38,11 @@ public:
 
     class Handle : public LightRefBase<Handle> {
     public:
-        ~Handle() { renderthread::RenderProxy::destroyFunctor(id()); }
+        ~Handle() {
+#ifdef __ANDROID__ // Layoutlib does not support render thread
+            renderthread::RenderProxy::destroyFunctor(id());
+#endif
+        }
 
         int id() const { return mReference.id(); }
 

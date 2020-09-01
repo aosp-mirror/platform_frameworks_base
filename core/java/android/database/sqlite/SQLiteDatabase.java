@@ -60,7 +60,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 /**
  * Exposes methods to manage a SQLite database.
@@ -957,26 +960,125 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Registers a CustomFunction callback as a function that can be called from
-     * SQLite database triggers.
+     * Register a custom scalar function that can be called from SQL
+     * expressions.
+     * <p>
+     * For example, registering a custom scalar function named {@code REVERSE}
+     * could be used in a query like
+     * {@code SELECT REVERSE(name) FROM employees}.
+     * <p>
+     * When attempting to register multiple functions with the same function
+     * name, SQLite will replace any previously defined functions with the
+     * latest definition, regardless of what function type they are. SQLite does
+     * not support unregistering functions.
      *
-     * @param name the name of the sqlite3 function
-     * @param numArgs the number of arguments for the function
-     * @param function callback to call when the function is executed
-     * @hide
+     * @param functionName Case-insensitive name to register this function
+     *            under, limited to 255 UTF-8 bytes in length.
+     * @param scalarFunction Functional interface that will be invoked when the
+     *            function name is used by a SQL statement. The argument values
+     *            from the SQL statement are passed to the functional interface,
+     *            and the return values from the functional interface are
+     *            returned back into the SQL statement.
+     * @throws SQLiteException if the custom function could not be registered.
+     * @see #setCustomAggregateFunction(String, BinaryOperator)
      */
-    public void addCustomFunction(String name, int numArgs, CustomFunction function) {
-        // Create wrapper (also validates arguments).
-        SQLiteCustomFunction wrapper = new SQLiteCustomFunction(name, numArgs, function);
+    public void setCustomScalarFunction(@NonNull String functionName,
+            @NonNull UnaryOperator<String> scalarFunction) throws SQLiteException {
+        Objects.requireNonNull(functionName);
+        Objects.requireNonNull(scalarFunction);
 
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            mConfigurationLocked.customFunctions.add(wrapper);
+            mConfigurationLocked.customScalarFunctions.put(functionName, scalarFunction);
             try {
                 mConnectionPoolLocked.reconfigure(mConfigurationLocked);
             } catch (RuntimeException ex) {
-                mConfigurationLocked.customFunctions.remove(wrapper);
+                mConfigurationLocked.customScalarFunctions.remove(functionName);
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * Register a custom aggregate function that can be called from SQL
+     * expressions.
+     * <p>
+     * For example, registering a custom aggregation function named
+     * {@code LONGEST} could be used in a query like
+     * {@code SELECT LONGEST(name) FROM employees}.
+     * <p>
+     * The implementation of this method follows the reduction flow outlined in
+     * {@link java.util.stream.Stream#reduce(BinaryOperator)}, and the custom
+     * aggregation function is expected to be an associative accumulation
+     * function, as defined by that class.
+     * <p>
+     * When attempting to register multiple functions with the same function
+     * name, SQLite will replace any previously defined functions with the
+     * latest definition, regardless of what function type they are. SQLite does
+     * not support unregistering functions.
+     *
+     * @param functionName Case-insensitive name to register this function
+     *            under, limited to 255 UTF-8 bytes in length.
+     * @param aggregateFunction Functional interface that will be invoked when
+     *            the function name is used by a SQL statement. The argument
+     *            values from the SQL statement are passed to the functional
+     *            interface, and the return values from the functional interface
+     *            are returned back into the SQL statement.
+     * @throws SQLiteException if the custom function could not be registered.
+     * @see #setCustomScalarFunction(String, UnaryOperator)
+     */
+    public void setCustomAggregateFunction(@NonNull String functionName,
+            @NonNull BinaryOperator<String> aggregateFunction) throws SQLiteException {
+        Objects.requireNonNull(functionName);
+        Objects.requireNonNull(aggregateFunction);
+
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            mConfigurationLocked.customAggregateFunctions.put(functionName, aggregateFunction);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.customAggregateFunctions.remove(functionName);
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * Execute the given SQL statement on all connections to this database.
+     * <p>
+     * This statement will be immediately executed on all existing connections,
+     * and will be automatically executed on all future connections.
+     * <p>
+     * Some example usages are changes like {@code PRAGMA trusted_schema=OFF} or
+     * functions like {@code SELECT icu_load_collation()}. If you execute these
+     * statements using {@link #execSQL} then they will only apply to a single
+     * database connection; using this method will ensure that they are
+     * uniformly applied to all current and future connections.
+     *
+     * @param sql The SQL statement to be executed. Multiple statements
+     *            separated by semicolons are not supported.
+     * @param bindArgs The arguments that should be bound to the SQL statement.
+     */
+    public void execPerConnectionSQL(@NonNull String sql, @Nullable Object[] bindArgs)
+            throws SQLException {
+        Objects.requireNonNull(sql);
+
+        // Copy arguments to ensure that the caller doesn't accidentally change
+        // the values used by future connections
+        bindArgs = DatabaseUtils.deepCopyOf(bindArgs);
+
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            final int index = mConfigurationLocked.perConnectionSql.size();
+            mConfigurationLocked.perConnectionSql.add(Pair.create(sql, bindArgs));
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.perConnectionSql.remove(index);
                 throw ex;
             }
         }
@@ -1724,6 +1826,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * using "PRAGMA journal_mode'<value>" statement if your app is using
      * {@link #enableWriteAheadLogging()}
      * </p>
+     * <p>
+     * Note that {@code PRAGMA} values which apply on a per-connection basis
+     * should <em>not</em> be configured using this method; you should instead
+     * use {@link #execPerConnectionSQL} to ensure that they are uniformly
+     * applied to all current and future connections.
+     * </p>
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
      * not supported.
@@ -1769,6 +1877,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * automatically managed by this class. So, do not set journal_mode
      * using "PRAGMA journal_mode'<value>" statement if your app is using
      * {@link #enableWriteAheadLogging()}
+     * </p>
+     * <p>
+     * Note that {@code PRAGMA} values which apply on a per-connection basis
+     * should <em>not</em> be configured using this method; you should instead
+     * use {@link #execPerConnectionSQL} to ensure that they are uniformly
+     * applied to all current and future connections.
      * </p>
      *
      * @param sql the SQL statement to be executed. Multiple statements separated by semicolons are
@@ -2691,7 +2805,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
              */
             @NonNull
             public Builder setJournalMode(@NonNull  String journalMode) {
-                Preconditions.checkNotNull(journalMode);
+                Objects.requireNonNull(journalMode);
                 mJournalMode = journalMode;
                 return this;
             }
@@ -2703,7 +2817,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
              */
             @NonNull
             public Builder setSynchronousMode(@NonNull String syncMode) {
-                Preconditions.checkNotNull(syncMode);
+                Objects.requireNonNull(syncMode);
                 mSyncMode = syncMode;
                 return this;
             }

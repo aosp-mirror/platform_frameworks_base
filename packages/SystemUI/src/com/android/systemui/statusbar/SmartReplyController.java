@@ -21,31 +21,33 @@ import android.util.ArraySet;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Handles when smart replies are added to a notification
  * and clicked upon.
  */
-@Singleton
 public class SmartReplyController {
     private final IStatusBarService mBarService;
     private final NotificationEntryManager mEntryManager;
+    private final NotificationClickNotifier mClickNotifier;
     private Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
 
-    @Inject
+    /**
+     * Injected constructor. See {@link StatusBarModule}.
+     */
     public SmartReplyController(NotificationEntryManager entryManager,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            NotificationClickNotifier clickNotifier) {
         mBarService = statusBarService;
         mEntryManager = entryManager;
+        mClickNotifier = clickNotifier;
     }
 
     public void setCallback(Callback callback) {
@@ -58,9 +60,9 @@ public class SmartReplyController {
     public void smartReplySent(NotificationEntry entry, int replyIndex, CharSequence reply,
             int notificationLocation, boolean modifiedBeforeSending) {
         mCallback.onSmartReplySent(entry, reply);
-        mSendingKeys.add(entry.key);
+        mSendingKeys.add(entry.getKey());
         try {
-            mBarService.onNotificationSmartReplySent(entry.notification.getKey(), replyIndex, reply,
+            mBarService.onNotificationSmartReplySent(entry.getSbn().getKey(), replyIndex, reply,
                     notificationLocation, modifiedBeforeSending);
         } catch (RemoteException e) {
             // Nothing to do, system going down
@@ -73,18 +75,14 @@ public class SmartReplyController {
     public void smartActionClicked(
             NotificationEntry entry, int actionIndex, Notification.Action action,
             boolean generatedByAssistant) {
-        final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
-        final int rank = mEntryManager.getNotificationData().getRank(entry.key);
+        final int count = mEntryManager.getActiveNotificationsCount();
+        final int rank = entry.getRanking().getRank();
         NotificationVisibility.NotificationLocation location =
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(
-                entry.key, rank, count, true, location);
-        try {
-            mBarService.onNotificationActionClick(
-                    entry.key, actionIndex, action, nv, generatedByAssistant);
-        } catch (RemoteException e) {
-            // Nothing to do, system going down
-        }
+                entry.getKey(), rank, count, true, location);
+        mClickNotifier.onNotificationActionClick(
+                entry.getKey(), actionIndex, action, nv, generatedByAssistant);
     }
 
     /**
@@ -101,7 +99,7 @@ public class SmartReplyController {
     public void smartSuggestionsAdded(final NotificationEntry entry, int replyCount,
             int actionCount, boolean generatedByAssistant, boolean editBeforeSending) {
         try {
-            mBarService.onNotificationSmartSuggestionsAdded(entry.notification.getKey(), replyCount,
+            mBarService.onNotificationSmartSuggestionsAdded(entry.getSbn().getKey(), replyCount,
                     actionCount, generatedByAssistant, editBeforeSending);
         } catch (RemoteException e) {
             // Nothing to do, system going down
@@ -110,7 +108,7 @@ public class SmartReplyController {
 
     public void stopSending(final NotificationEntry entry) {
         if (entry != null) {
-            mSendingKeys.remove(entry.notification.getKey());
+            mSendingKeys.remove(entry.getSbn().getKey());
         }
     }
 

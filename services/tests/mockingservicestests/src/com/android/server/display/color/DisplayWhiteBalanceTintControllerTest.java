@@ -20,6 +20,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Binder;
@@ -184,8 +186,56 @@ public class DisplayWhiteBalanceTintControllerTest {
                 .isFalse();
     }
 
+    /**
+     * Matrix should match the precalculated one for given cct and display primaries.
+     */
+    @Test
+    public void displayWhiteBalance_validateTransformMatrix() {
+        DisplayPrimaries displayPrimaries = new DisplayPrimaries();
+        displayPrimaries.red = new CieXyz();
+        displayPrimaries.red.X = 0.412315f;
+        displayPrimaries.red.Y = 0.212600f;
+        displayPrimaries.red.Z = 0.019327f;
+        displayPrimaries.green = new CieXyz();
+        displayPrimaries.green.X = 0.357600f;
+        displayPrimaries.green.Y = 0.715200f;
+        displayPrimaries.green.Z = 0.119200f;
+        displayPrimaries.blue = new CieXyz();
+        displayPrimaries.blue.X = 0.180500f;
+        displayPrimaries.blue.Y = 0.072200f;
+        displayPrimaries.blue.Z = 0.950633f;
+        displayPrimaries.white = new CieXyz();
+        displayPrimaries.white.X = 0.950456f;
+        displayPrimaries.white.Y = 1.000000f;
+        displayPrimaries.white.Z = 1.089058f;
+        doReturn(displayPrimaries)
+                .when(() -> SurfaceControl.getDisplayNativePrimaries(mDisplayToken));
+
+        setUpTintController();
+        assertWithMessage("Setup with valid SurfaceControl failed")
+                .that(mDisplayWhiteBalanceTintController.mSetUp)
+                .isTrue();
+
+        final int cct = 6500;
+        mDisplayWhiteBalanceTintController.setMatrix(cct);
+        assertWithMessage("Failed to set temperature")
+                .that(mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .isEqualTo(cct);
+
+        float[] matrixDwb = mDisplayWhiteBalanceTintController.getMatrix();
+        final float[] expectedMatrixDwb = {
+            0.962880f,  -0.001780f, -0.000158f, 0.0f,
+            0.035765f,   0.929988f,  0.000858f, 0.0f,
+            0.001354f,  -0.000470f,  0.948327f, 0.0f,
+            0.0f,        0.0f,       0.0f,      1.0f
+        };
+        assertArrayEquals("Unexpected DWB matrix", matrixDwb, expectedMatrixDwb,
+            1e-6f /* tolerance */);
+    }
+
     private void setUpTintController() {
         mDisplayWhiteBalanceTintController = new DisplayWhiteBalanceTintController();
         mDisplayWhiteBalanceTintController.setUp(mMockedContext, true);
+        mDisplayWhiteBalanceTintController.setActivated(true);
     }
 }

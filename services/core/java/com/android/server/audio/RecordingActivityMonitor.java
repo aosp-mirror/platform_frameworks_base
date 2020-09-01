@@ -18,6 +18,7 @@ package com.android.server.audio;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecordingConfiguration;
@@ -35,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
@@ -48,6 +51,16 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     // keep track of whether there is at least one to know when we need to create the list of
     // playback configurations that do not contain uid/package name information.
     private boolean mHasPublicClients = false;
+
+
+    // When legacy remote submix device is active, remote submix device should not be fixed and
+    // full volume device. When legacy remote submix device is active, there will be a recording
+    // activity using device with type as {@link AudioSystem.DEVICE_OUT_REMOTE_SUBMIX} and address
+    // as {@link AudioSystem.LEGACY_REMOTE_SUBMIX_ADDRESS}. Cache riid of legacy remote submix
+    // since remote submix state is not cached in mRecordStates.
+    private AtomicInteger mLegacyRemoteSubmixRiid =
+            new AtomicInteger(AudioManager.RECORD_RIID_INVALID);
+    private AtomicBoolean mLegacyRemoteSubmixActive = new AtomicBoolean(false);
 
     static final class RecordingState {
         private final int mRiid;
@@ -137,6 +150,16 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         final AudioRecordingConfiguration config = createRecordingConfiguration(
                 uid, session, source, recordingInfo,
                 portId, silenced, activeSource, clientEffects, effects);
+        if (source == MediaRecorder.AudioSource.REMOTE_SUBMIX
+                && (event == AudioManager.RECORD_CONFIG_EVENT_START
+                        || event == AudioManager.RECORD_CONFIG_EVENT_UPDATE)) {
+            final AudioDeviceInfo device = config.getAudioDevice();
+            if (device != null
+                    && AudioSystem.LEGACY_REMOTE_SUBMIX_ADDRESS.equals(device.getAddress())) {
+                mLegacyRemoteSubmixRiid.set(riid);
+                mLegacyRemoteSubmixActive.set(true);
+            }
+        }
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             // still want to log event, it just won't appear in recording configurations;
             sEventLogger.log(new RecordingEvent(event, riid, config).printLog(TAG));
@@ -170,6 +193,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * Receive an event from the client about a tracked recorder
      */
     public void recorderEvent(int riid, int event) {
+        if (mLegacyRemoteSubmixRiid.get() == riid) {
+            mLegacyRemoteSubmixActive.set(event == AudioManager.RECORDER_STATE_STARTED);
+        }
         int configEvent = event == AudioManager.RECORDER_STATE_STARTED
                 ? AudioManager.RECORD_CONFIG_EVENT_START :
                 event == AudioManager.RECORDER_STATE_STOPPED
@@ -187,6 +213,25 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      */
     public void releaseRecorder(int riid) {
         dispatchCallbacks(updateSnapshot(AudioManager.RECORD_CONFIG_EVENT_RELEASE, riid, null));
+    }
+
+    /**
+     * Returns true if a recorder belonging to the app with given uid is active.
+     *
+     * @param uid the app uid
+     * @return true if a recorder is active, false otherwise
+     */
+    public boolean isRecordingActiveForUid(int uid) {
+        synchronized (mRecordStates) {
+            for (RecordingState state : mRecordStates) {
+                // Note: isActiveConfiguration() == true => state.getConfig() != null
+                if (state.isActiveConfiguration()
+                        && state.getConfig().getClientUid() == uid) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void dispatchCallbacks(List<AudioRecordingConfiguration> configs) {
@@ -320,6 +365,13 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             configs = anonymizeForPublicConsumption(configs);
         }
         return configs;
+    }
+
+    /**
+     * Return true if legacy remote submix device is active. Otherwise, return false.
+     */
+    boolean isLegacyRemoteSubmixActive() {
+        return mLegacyRemoteSubmixActive.get();
     }
 
     /**

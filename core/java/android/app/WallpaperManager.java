@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
@@ -40,6 +41,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.ColorSpace;
+import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -63,11 +66,15 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Display;
 import android.view.WindowManagerGlobal;
+
+import com.android.internal.R;
 
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -76,7 +83,10 @@ import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -168,6 +178,13 @@ public class WallpaperManager {
     public static final String COMMAND_DROP = "android.home.drop";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already
+     * set is re-applied by the user.
+     * @hide
+     */
+    public static final String COMMAND_REAPPLY = "android.wallpaper.reapply";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */
@@ -193,7 +210,13 @@ public class WallpaperManager {
      */
     public static final int FLAG_LOCK = 1 << 1;
 
+    private static final Object sSync = new Object[0];
+    @UnsupportedAppUsage
+    private static Globals sGlobals;
+
     private final Context mContext;
+    private final boolean mWcgEnabled;
+    private final ColorManagementProxy mCmProxy;
 
     /**
      * Special drawable that draws a wallpaper as fast as possible.  Assumes
@@ -388,13 +411,14 @@ public class WallpaperManager {
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
-                @SetWallpaperFlags int which) {
+                @SetWallpaperFlags int which, ColorManagementProxy cmProxy) {
             return peekWallpaperBitmap(context, returnDefault, which, context.getUserId(),
-                    false /* hardware */);
+                    false /* hardware */, cmProxy);
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
-                @SetWallpaperFlags int which, int userId, boolean hardware) {
+                @SetWallpaperFlags int which, int userId, boolean hardware,
+                ColorManagementProxy cmProxy) {
             if (mService != null) {
                 try {
                     if (!mService.isWallpaperSupported(context.getOpPackageName())) {
@@ -412,7 +436,8 @@ public class WallpaperManager {
                 mCachedWallpaper = null;
                 mCachedWallpaperUserId = 0;
                 try {
-                    mCachedWallpaper = getCurrentWallpaperLocked(context, userId, hardware);
+                    mCachedWallpaper = getCurrentWallpaperLocked(
+                            context, userId, hardware, cmProxy);
                     mCachedWallpaperUserId = userId;
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
@@ -450,7 +475,8 @@ public class WallpaperManager {
             }
         }
 
-        private Bitmap getCurrentWallpaperLocked(Context context, int userId, boolean hardware) {
+        private Bitmap getCurrentWallpaperLocked(Context context, int userId, boolean hardware,
+                ColorManagementProxy cmProxy) {
             if (mService == null) {
                 Log.w(TAG, "WallpaperService not running");
                 return null;
@@ -458,20 +484,29 @@ public class WallpaperManager {
 
             try {
                 Bundle params = new Bundle();
-                ParcelFileDescriptor fd = mService.getWallpaper(context.getOpPackageName(),
-                        this, FLAG_SYSTEM, params, userId);
-                if (fd != null) {
-                    try {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        if (hardware) {
-                            options.inPreferredConfig = Bitmap.Config.HARDWARE;
+                ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
+                        context.getOpPackageName(), context.getAttributionTag(), this, FLAG_SYSTEM,
+                        params, userId);
+
+                if (pfd != null) {
+                    try (BufferedInputStream bis = new BufferedInputStream(
+                            new ParcelFileDescriptor.AutoCloseInputStream(pfd))) {
+                        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        int data;
+                        while ((data = bis.read()) != -1) {
+                            baos.write(data);
                         }
-                        return BitmapFactory.decodeFileDescriptor(
-                                fd.getFileDescriptor(), null, options);
-                    } catch (OutOfMemoryError e) {
+                        ImageDecoder.Source src = ImageDecoder.createSource(baos.toByteArray());
+                        return ImageDecoder.decodeBitmap(src, ((decoder, info, source) -> {
+                            // Mutable and hardware config can't be set at the same time.
+                            decoder.setMutableRequired(!hardware);
+                            // Let's do color management
+                            if (cmProxy != null) {
+                                cmProxy.doColorManagement(decoder, info);
+                            }
+                        }));
+                    } catch (OutOfMemoryError | IOException e) {
                         Log.w(TAG, "Can't decode file", e);
-                    } finally {
-                        IoUtils.closeQuietly(fd);
                     }
                 }
             } catch (RemoteException e) {
@@ -496,10 +531,6 @@ public class WallpaperManager {
         }
     }
 
-    private static final Object sSync = new Object[0];
-    @UnsupportedAppUsage
-    private static Globals sGlobals;
-
     static void initGlobals(IWallpaperManager service, Looper looper) {
         synchronized (sSync) {
             if (sGlobals == null) {
@@ -513,6 +544,17 @@ public class WallpaperManager {
         if (service != null) {
             initGlobals(service, context.getMainLooper());
         }
+        // Check if supports mixed color spaces composition in hardware.
+        mWcgEnabled = context.getResources().getConfiguration().isScreenWideColorGamut()
+                && context.getResources().getBoolean(R.bool.config_enableWcgMode);
+        mCmProxy = new ColorManagementProxy(context);
+    }
+
+    // no-op constructor called just by DisabledWallpaperManager
+    /*package*/ WallpaperManager() {
+        mContext = null;
+        mCmProxy = null;
+        mWcgEnabled = false;
     }
 
     /**
@@ -527,6 +569,24 @@ public class WallpaperManager {
     @UnsupportedAppUsage
     public IWallpaperManager getIWallpaperManager() {
         return sGlobals.mService;
+    }
+
+    /**
+     * Indicate whether wcg (Wide Color Gamut) should be enabled.
+     * <p>
+     * Some devices lack of capability of mixed color spaces composition,
+     * enable wcg on such devices might cause memory or battery concern.
+     * <p>
+     * Therefore, in addition to {@link Configuration#isScreenWideColorGamut()},
+     * we also take mixed color spaces composition (config_enableWcgMode) into account.
+     *
+     * @see Configuration#isScreenWideColorGamut()
+     * @return True if wcg should be enabled for this device.
+     * @hide
+     */
+    @TestApi
+    public boolean shouldEnableWideColorGamut() {
+        return mWcgEnabled;
     }
 
     /**
@@ -545,7 +605,8 @@ public class WallpaperManager {
      *     is not able to access the wallpaper.
      */
     public Drawable getDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -776,7 +837,8 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -800,7 +862,8 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable getFastDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -816,7 +879,8 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable peekFastDrawable() {
-       Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -824,10 +888,35 @@ public class WallpaperManager {
     }
 
     /**
+     * Whether the wallpaper supports Wide Color Gamut or not.
+     * @param which The wallpaper whose image file is to be retrieved. Must be a single
+     *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
+     * @return true when supported.
+     *
+     * @see #FLAG_LOCK
+     * @see #FLAG_SYSTEM
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+    public boolean wallpaperSupportsWcg(int which) {
+        if (!shouldEnableWideColorGamut()) {
+            return false;
+        }
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bitmap = sGlobals.peekWallpaperBitmap(mContext, false, which, cmProxy);
+        return bitmap != null && bitmap.getColorSpace() != null
+                && bitmap.getColorSpace() != ColorSpace.get(ColorSpace.Named.SRGB)
+                && cmProxy.isSupportedColorSpace(bitmap.getColorSpace());
+    }
+
+    /**
      * Like {@link #getDrawable()} but returns a Bitmap with default {@link Bitmap.Config}.
      *
      * @hide
      */
+    @TestApi
+    @Nullable
     @UnsupportedAppUsage
     public Bitmap getBitmap() {
         return getBitmap(false);
@@ -851,7 +940,8 @@ public class WallpaperManager {
      * @hide
      */
     public Bitmap getBitmapAsUser(int userId, boolean hardware) {
-        return sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, userId, hardware);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        return sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, userId, hardware, cmProxy);
     }
 
     /**
@@ -932,6 +1022,9 @@ public class WallpaperManager {
      * {@link android.service.wallpaper.WallpaperService.Engine#onComputeColors()
      *     WallpaperService.Engine#onComputeColors()}.</li>
      * </ul>
+     * <p>Please note that this API will go through IPC and may take some time to
+     * calculate the wallpaper color, which could block the caller thread, so it is
+     * not recommended to call this in the UI thread.</p>
      *
      * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or
      *     {@link #FLAG_LOCK}.
@@ -982,8 +1075,8 @@ public class WallpaperManager {
         } else {
             try {
                 Bundle outParams = new Bundle();
-                return sGlobals.mService.getWallpaper(mContext.getOpPackageName(), null, which,
-                        outParams, userId);
+                return sGlobals.mService.getWallpaperWithFeature(mContext.getOpPackageName(),
+                        mContext.getAttributionTag(), null, which, outParams, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (SecurityException e) {
@@ -1483,6 +1576,8 @@ public class WallpaperManager {
      * @return The desired minimum width for the wallpaper. This value should
      * be honored by applications that set the wallpaper but it is not
      * mandatory.
+     *
+     * @see #getDesiredMinimumHeight()
      */
     public int getDesiredMinimumWidth() {
         if (sGlobals.mService == null) {
@@ -1509,6 +1604,8 @@ public class WallpaperManager {
      * @return The desired minimum height for the wallpaper. This value should
      * be honored by applications that set the wallpaper but it is not
      * mandatory.
+     *
+     * @see #getDesiredMinimumWidth()
      */
     public int getDesiredMinimumHeight() {
         if (sGlobals.mService == null) {
@@ -1528,12 +1625,11 @@ public class WallpaperManager {
      * a virtual wallpaper that is larger than the physical screen, matching
      * the size of their workspace.
      *
-     * <p>Note developers, who don't seem to be reading this.  This is
-     * for <em>home apps</em> to tell what size wallpaper they would like.
-     * Nobody else should be calling this!  Certainly not other non-home
-     * apps that change the wallpaper.  Those apps are supposed to
-     * <b>retrieve</b> the suggested size so they can construct a wallpaper
-     * that matches it.
+     * <p class="note">Calling this method from apps other than the active
+     * home app is not guaranteed to work properly.  Other apps that supply
+     * wallpaper imagery should use {@link #getDesiredMinimumWidth()} and
+     * {@link #getDesiredMinimumHeight()} and construct a wallpaper that
+     * matches those dimensions.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER_HINTS}.
@@ -1764,6 +1860,23 @@ public class WallpaperManager {
     }
 
     /**
+     * Set the current zoom out level of the wallpaper
+     * @param zoom from 0 to 1 (inclusive) where 1 means fully zoomed out, 0 means fully zoomed in
+     *
+     * @hide
+     */
+    public void setWallpaperZoomOut(IBinder windowToken, float zoom) {
+        if (zoom < 0 || zoom > 1f) {
+            throw new IllegalArgumentException("zoom must be between 0 and one: " + zoom);
+        }
+        try {
+            WindowManagerGlobal.getWindowSession().setWallpaperZoomOut(windowToken, zoom);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether wallpapers are supported for the calling user. If this function returns
      * {@code false}, any attempts to changing the wallpaper will have no effect,
      * and any attempt to obtain of the wallpaper will return {@code null}.
@@ -1969,6 +2082,49 @@ public class WallpaperManager {
             Log.e(TAG, "Exception querying wallpaper backup eligibility: " + e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Get the instance of {@link ColorManagementProxy}.
+     *
+     * @return instance of {@link ColorManagementProxy}.
+     * @hide
+     */
+    public ColorManagementProxy getColorManagementProxy() {
+        return mCmProxy;
+    }
+
+    /**
+     * A hidden class to help {@link Globals#getCurrentWallpaperLocked} handle color management.
+     * @hide
+     */
+    public static class ColorManagementProxy {
+        private final Set<ColorSpace> mSupportedColorSpaces = new HashSet<>();
+
+        public ColorManagementProxy(@NonNull Context context) {
+            // Get a list of supported wide gamut color spaces.
+            Display display = context.getDisplayNoVerify();
+            if (display != null) {
+                mSupportedColorSpaces.addAll(Arrays.asList(display.getSupportedWideColorGamut()));
+            }
+        }
+
+        @NonNull
+        public Set<ColorSpace> getSupportedColorSpaces() {
+            return mSupportedColorSpaces;
+        }
+
+        boolean isSupportedColorSpace(ColorSpace colorSpace) {
+            return colorSpace != null && (colorSpace == ColorSpace.get(ColorSpace.Named.SRGB)
+                    || getSupportedColorSpaces().contains(colorSpace));
+        }
+
+        void doColorManagement(ImageDecoder decoder, ImageDecoder.ImageInfo info) {
+            if (!isSupportedColorSpace(info.getColorSpace())) {
+                decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+                Log.w(TAG, "Not supported color space: " + info.getColorSpace());
+            }
+        }
     }
 
     // Private completion callback for setWallpaper() synchronization

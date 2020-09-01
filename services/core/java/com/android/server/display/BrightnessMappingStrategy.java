@@ -28,12 +28,14 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.Spline;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A utility to map from an ambient brightness to a display's "backlight" brightness based on the
@@ -47,6 +49,12 @@ public abstract class BrightnessMappingStrategy {
 
     private static final float LUX_GRAD_SMOOTHING = 0.25f;
     private static final float MAX_GRAD = 1.0f;
+    private static final float SHORT_TERM_MODEL_THRESHOLD_RATIO = 0.6f;
+
+    // Constant that ensures that each step of the curve can increase by up to at least
+    // MIN_PERMISSABLE_INCREASE. Otherwise when the brightness is set to 0, the curve will never
+    // increase and will always be 0.
+    private static final float MIN_PERMISSABLE_INCREASE =  0.004f;
 
     protected boolean mLoggingEnabled;
 
@@ -69,6 +77,9 @@ public abstract class BrightnessMappingStrategy {
         int[] backlightRange = resources.getIntArray(
                 com.android.internal.R.array.config_screenBrightnessBacklight);
 
+        long shortTermModelTimeout = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessShortTermModelTimeout);
+
         if (isValidMapping(nitsRange, backlightRange)
                 && isValidMapping(luxLevels, brightnessLevelsNits)) {
             int minimumBacklight = resources.getInteger(
@@ -82,11 +93,14 @@ public abstract class BrightnessMappingStrategy {
             }
             BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
                     luxLevels, brightnessLevelsNits);
+            builder.setShortTermModelTimeoutMillis(shortTermModelTimeout);
+            builder.setShortTermModelLowerLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
+            builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange,
                     autoBrightnessAdjustmentMaxGamma);
         } else if (isValidMapping(luxLevels, brightnessLevelsBacklight)) {
             return new SimpleMappingStrategy(luxLevels, brightnessLevelsBacklight,
-                    autoBrightnessAdjustmentMaxGamma);
+                    autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout);
         } else {
             return null;
         }
@@ -101,11 +115,17 @@ public abstract class BrightnessMappingStrategy {
         return levels;
     }
 
-    private static float[] getFloatArray(TypedArray array) {
+    /**
+     * Extracts a float array from the specified {@link TypedArray}.
+     *
+     * @param array The array to convert.
+     * @return the given array as a float array.
+     */
+    public static float[] getFloatArray(TypedArray array) {
         final int N = array.length();
         float[] vals = new float[N];
         for (int i = 0; i < N; i++) {
-            vals[i] = array.getFloat(i, -1.0f);
+            vals[i] = array.getFloat(i, PowerManager.BRIGHTNESS_OFF_FLOAT);
         }
         array.recycle();
         return vals;
@@ -187,6 +207,12 @@ public abstract class BrightnessMappingStrategy {
      * @return Whether the brightness configuration has changed.
      */
     public abstract boolean setBrightnessConfiguration(@Nullable BrightnessConfiguration config);
+
+    /**
+     * Gets the current {@link BrightnessConfiguration}.
+     */
+    @Nullable
+    public abstract BrightnessConfiguration getBrightnessConfiguration();
 
     /**
      * Returns the desired brightness of the display based on the current ambient lux, including
@@ -274,12 +300,58 @@ public abstract class BrightnessMappingStrategy {
     /** @return The default brightness configuration. */
     public abstract BrightnessConfiguration getDefaultConfig();
 
+
+    /**
+     * Returns the timeout for the short term model
+     *
+     * Timeout after which we remove the effects any user interactions might've had on the
+     * brightness mapping. This timeout doesn't start until we transition to a non-interactive
+     * display policy so that we don't reset while users are using their devices, but also so that
+     * we don't erroneously keep the short-term model if the device is dozing but the
+     * display is fully on.
+     */
+    public abstract long getShortTermModelTimeout();
+
     public abstract void dump(PrintWriter pw);
 
-    protected float normalizeAbsoluteBrightness(int brightness) {
-        brightness = MathUtils.constrain(brightness,
-                PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON);
-        return (float) brightness / PowerManager.BRIGHTNESS_ON;
+    /**
+     * Check if the short term model should be reset given the anchor lux the last
+     * brightness change was made at and the current ambient lux.
+     */
+    public boolean shouldResetShortTermModel(float ambientLux, float shortTermModelAnchor) {
+        BrightnessConfiguration config = getBrightnessConfiguration();
+        float minThresholdRatio = SHORT_TERM_MODEL_THRESHOLD_RATIO;
+        float maxThresholdRatio = SHORT_TERM_MODEL_THRESHOLD_RATIO;
+        if (config != null) {
+            if (!Float.isNaN(config.getShortTermModelLowerLuxMultiplier())) {
+                minThresholdRatio = config.getShortTermModelLowerLuxMultiplier();
+            }
+            if (!Float.isNaN(config.getShortTermModelUpperLuxMultiplier())) {
+                maxThresholdRatio = config.getShortTermModelUpperLuxMultiplier();
+            }
+        }
+        final float minAmbientLux =
+                shortTermModelAnchor - shortTermModelAnchor * minThresholdRatio;
+        final float maxAmbientLux =
+                shortTermModelAnchor + shortTermModelAnchor * maxThresholdRatio;
+        if (minAmbientLux < ambientLux && ambientLux <= maxAmbientLux) {
+            if (mLoggingEnabled) {
+                Slog.d(TAG, "ShortTermModel: re-validate user data, ambient lux is "
+                        + minAmbientLux + " < " + ambientLux + " < " + maxAmbientLux);
+            }
+            return false;
+        } else {
+            Slog.d(TAG, "ShortTermModel: reset data, ambient lux is " + ambientLux
+                    + "(" + minAmbientLux + ", " + maxAmbientLux + ")");
+            return true;
+        }
+    }
+
+    // Normalize entire brightness range to 0 - 1.
+    protected static float normalizeAbsoluteBrightness(int brightness) {
+        return BrightnessSynchronizer.brightnessIntToFloat(brightness,
+                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
     }
 
     private Pair<float[], float[]> insertControlPoint(
@@ -334,7 +406,9 @@ public abstract class BrightnessMappingStrategy {
         for (int i = idx+1; i < lux.length; i++) {
             float currLux = lux[i];
             float currBrightness = brightness[i];
-            float maxBrightness = prevBrightness * permissibleRatio(currLux, prevLux);
+            float maxBrightness = MathUtils.max(
+                    prevBrightness * permissibleRatio(currLux, prevLux),
+                    prevBrightness + MIN_PERMISSABLE_INCREASE);
             float newBrightness = MathUtils.constrain(
                     currBrightness, prevBrightness, maxBrightness);
             if (newBrightness == currBrightness) {
@@ -455,8 +529,10 @@ public abstract class BrightnessMappingStrategy {
         private float mAutoBrightnessAdjustment;
         private float mUserLux;
         private float mUserBrightness;
+        private long mShortTermModelTimeout;
 
-        public SimpleMappingStrategy(float[] lux, int[] brightness, float maxGamma) {
+        private SimpleMappingStrategy(float[] lux, int[] brightness, float maxGamma,
+                long timeout) {
             Preconditions.checkArgument(lux.length != 0 && brightness.length != 0,
                     "Lux and brightness arrays must not be empty!");
             Preconditions.checkArgument(lux.length == brightness.length,
@@ -481,11 +557,22 @@ public abstract class BrightnessMappingStrategy {
                 PLOG.start("simple mapping strategy");
             }
             computeSpline();
+            mShortTermModelTimeout = timeout;
+        }
+
+        @Override
+        public long getShortTermModelTimeout() {
+            return mShortTermModelTimeout;
         }
 
         @Override
         public boolean setBrightnessConfiguration(@Nullable BrightnessConfiguration config) {
             return false;
+        }
+
+        @Override
+        public BrightnessConfiguration getBrightnessConfiguration() {
+            return null;
         }
 
         @Override
@@ -631,7 +718,7 @@ public abstract class BrightnessMappingStrategy {
                     "Nits and backlight arrays must not be empty!");
             Preconditions.checkArgument(nits.length == backlight.length,
                     "Nits and backlight arrays must be the same length!");
-            Preconditions.checkNotNull(config);
+            Objects.requireNonNull(config);
             Preconditions.checkArrayElementsInRange(nits, 0, Float.MAX_VALUE, "nits");
             Preconditions.checkArrayElementsInRange(backlight,
                     PowerManager.BRIGHTNESS_OFF, PowerManager.BRIGHTNESS_ON, "backlight");
@@ -660,6 +747,15 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
+        public long getShortTermModelTimeout() {
+            if (mConfig.getShortTermModelTimeoutMillis() >= 0) {
+                return mConfig.getShortTermModelTimeoutMillis();
+            } else {
+                return mDefaultConfig.getShortTermModelTimeoutMillis();
+            }
+        }
+
+        @Override
         public boolean setBrightnessConfiguration(@Nullable BrightnessConfiguration config) {
             if (config == null) {
                 config = mDefaultConfig;
@@ -673,6 +769,11 @@ public abstract class BrightnessMappingStrategy {
             mConfig = config;
             computeSpline();
             return true;
+        }
+
+        @Override
+        public BrightnessConfiguration getBrightnessConfiguration() {
+            return mConfig;
         }
 
         @Override

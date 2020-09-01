@@ -17,6 +17,7 @@ android_test {
     srcs: ["src/**/*.java"],
     static_libs: [
         "androidx.test.rules",
+        "collector-device-lib-platform",
         "apct-perftests-utils",
     ],
     platform_apis: true,

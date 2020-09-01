@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <android/os/IStatsCompanionService.h>
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 #include <mutex>
 #include <vector>
@@ -26,13 +26,19 @@
 #include "logd/LogEvent.h"
 #include "puller_util.h"
 
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
+
 namespace android {
 namespace os {
 namespace statsd {
 
 class StatsPuller : public virtual RefBase {
 public:
-    explicit StatsPuller(const int tagId);
+    explicit StatsPuller(const int tagId,
+                         const int64_t coolDownNs = NS_PER_SEC,
+                         const int64_t pullTimeoutNs = StatsdStats::kPullMaxDelayNs,
+                         const std::vector<int> additiveFields = std::vector<int>());
 
     virtual ~StatsPuller() {}
 
@@ -45,7 +51,7 @@ public:
     //   2) pull takes longer than mPullTimeoutNs (intrinsic to puller)
     // If a metric wants to make any change to the data, like timestamps, it
     // should make a copy as this data may be shared with multiple metrics.
-    bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
+    bool Pull(const int64_t eventTimeNs, std::vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear cache immediately
     int ForceClearCache();
@@ -55,10 +61,17 @@ public:
 
     static void SetUidMap(const sp<UidMap>& uidMap);
 
-    virtual void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService){};
+    virtual void SetStatsCompanionService(
+            shared_ptr<IStatsCompanionService> statsCompanionService) {};
 
 protected:
     const int mTagId;
+
+    // Max time allowed to pull this atom.
+    // We cannot reliably kill a pull thread. So we don't terminate the puller.
+    // The data is discarded if the pull takes longer than this and mHasGoodData
+    // marked as false.
+    const int64_t mPullTimeoutNs = StatsdStats::kPullMaxDelayNs;
 
 private:
     mutable std::mutex mLock;
@@ -68,7 +81,23 @@ private:
 
     bool mHasGoodData = false;
 
+    // Minimum time before this puller does actual pull again.
+    // Pullers can cause significant impact to system health and battery.
+    // So that we don't pull too frequently.
+    // If a pull request comes before cooldown, a cached version from previous pull
+    // will be returned.
+    const int64_t mCoolDownNs = 1 * NS_PER_SEC;
+
+    // The field numbers of the fields that need to be summed when merging
+    // isolated uid with host uid.
+    const std::vector<int> mAdditiveFields;
+
     int64_t mLastPullTimeNs;
+
+    // All pulls happen due to an event (app upgrade, bucket boundary, condition change, etc).
+    // If multiple pulls need to be done at the same event time, we will always use the cache after
+    // the first pull.
+    int64_t mLastEventTimeNs;
 
     // Cache of data from last pull. If next request comes before cool down finishes,
     // cached data will be returned.

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/sym_def_app_icon_background" />
+    <foreground >
+        <vector
+            android:height="108dp"
+            android:width="108dp"
+            android:viewportHeight="108.0"
+            android:viewportWidth="108.0">
+            <path android:fillColor="#202124" android:pathData="
+M68,54h-7.25L54,60.75V76c0,2.2,1.8,4,4,4h10c2.2,0,4-1.8,4-4V58C72,55.8,70.2,54,68,54z"/>
+
+            <path android:fillColor="#FFFFFF" android:pathData="
+M64.59,34.48l3.9-3.9c0.6-0.6,0.6-1.53,0-2.13c-0.6-0.6-1.53-0.6-2.13,0l-4.44,4.44
+C59.55,31.69,56.85,31,54,31c-2.88,0-5.58,0.69-7.98,1.89l-4.47-4.44c-0.6-0.6-1.53-0.6-2.13,0c-0.6,0.6-0.6,1.53,0,2.13l3.93,3.93
+C38.91,37.78,36,43.03,36,49h36C72,43.03,69.09,37.75,64.59,34.48z M48,43h-3v-3h3V43z M63,43h-3v-3h3V43z
+
+M52,76.01C52,76,52,76,52,76.01l0-15.26v-0.83l0,0v-0.01h0.01l0.58-0.58l6.75-6.75L59.92,52v0H40
+c-2.21,0-4,1.79-4,4v20c0,2.21,1.79,4,4,4h12V76.01z
+
+M66.84,68.75h-2.81v6.75h2.81c0.93,0,1.69-0.75,1.69-1.69v-3.38C68.52,69.5,67.77,68.75,66.84,68.75z
+M66.84,73.81h-1.12v-3.38h1.12V73.81z
+
+M63.02,70.16h-3.09v1.27h1.97c0.62,0,1.12,0.64,1.12,1.26v1.69c0,0.62-0.51,1.12-1.12,1.12h-3.38v-1.41
+h3.09v-1.27h-1.96c-0.62,0-1.12-0.64-1.12-1.26v-1.69c0-0.62,0.51-1.12,1.12-1.12h3.36V70.16z"/>
+
+            <path android:fillColor="#FFE082" android:pathData="
+M 59   58.5 h 2.5 v 4.5 h -2.5z
+M 62.5 58.5 h 2.5 v 4.5 h -2.5z
+M 66   58.5 h 2.5 v 4.5 h -2.5z"/>
+        </vector>
+    </foreground>
+</adaptive-icon>

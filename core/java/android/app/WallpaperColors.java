@@ -222,6 +222,14 @@ public final class WallpaperColors implements Parcelable {
     public WallpaperColors(@NonNull Color primaryColor, @Nullable Color secondaryColor,
             @Nullable Color tertiaryColor) {
         this(primaryColor, secondaryColor, tertiaryColor, 0);
+
+        // Calculate dark theme support based on primary color.
+        final float[] tmpHsl = new float[3];
+        ColorUtils.colorToHSL(primaryColor.toArgb(), tmpHsl);
+        final float luminance = tmpHsl[2];
+        if (luminance < DARK_THEME_MEAN_LUMINANCE) {
+            mColorHints |= HINT_SUPPORTS_DARK_THEME;
+        }
     }
 
     /**

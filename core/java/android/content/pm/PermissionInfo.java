@@ -239,14 +239,25 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Additional flag for {@link #protectionLevel}, corresponding
-     * to the <code>telephony</code> value of
+     * to the <code>companion</code> value of
      * {@link android.R.attr#protectionLevel}.
      *
      * @hide
      */
     @SystemApi
     @TestApi
-    public static final int PROTECTION_FLAG_TELEPHONY = 0x400000;
+    public static final int PROTECTION_FLAG_COMPANION = 0x800000;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>retailDemo</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_RETAIL_DEMO = 0x1000000;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
@@ -269,7 +280,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_CONFIGURATOR,
             PROTECTION_FLAG_INCIDENT_REPORT_APPROVER,
             PROTECTION_FLAG_APP_PREDICTOR,
-            PROTECTION_FLAG_TELEPHONY,
+            PROTECTION_FLAG_COMPANION,
+            PROTECTION_FLAG_RETAIL_DEMO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -513,8 +525,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         if ((level & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0) {
             protLevel += "|appPredictor";
         }
-        if ((level & PermissionInfo.PROTECTION_FLAG_TELEPHONY) != 0) {
-            protLevel += "|telephony";
+        if ((level & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0) {
+            protLevel += "|retailDemo";
         }
         return protLevel;
     }
@@ -606,8 +618,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(protectionLevel);
         dest.writeInt(flags);
-        dest.writeString(group);
-        dest.writeString(backgroundPermission);
+        dest.writeString8(group);
+        dest.writeString8(backgroundPermission);
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
@@ -666,8 +678,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         super(source);
         protectionLevel = source.readInt();
         flags = source.readInt();
-        group = source.readString();
-        backgroundPermission = source.readString();
+        group = source.readString8();
+        backgroundPermission = source.readString8();
         descriptionRes = source.readInt();
         requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

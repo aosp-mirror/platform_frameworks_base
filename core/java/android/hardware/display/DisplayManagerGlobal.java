@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -33,7 +34,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -73,6 +73,8 @@ public final class DisplayManagerGlobal {
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
 
+    // Guarded by mLock
+    private boolean mDispatchNativeCallbacks = false;
     private final Object mLock = new Object();
 
     @UnsupportedAppUsage
@@ -98,6 +100,20 @@ public final class DisplayManagerGlobal {
             throw ex.rethrowFromSystemServer();
         }
     }
+
+    private PropertyInvalidatedCache<Integer, DisplayInfo> mDisplayCache =
+            new PropertyInvalidatedCache<Integer, DisplayInfo>(
+                8, // size of display cache
+                CACHE_KEY_DISPLAY_INFO_PROPERTY) {
+                @Override
+                protected DisplayInfo recompute(Integer id) {
+                    try {
+                        return mDm.getDisplayInfo(id);
+                    } catch (RemoteException ex) {
+                        throw ex.rethrowFromSystemServer();
+                    }
+                }
+            };
 
     /**
      * Gets an instance of the display manager global singleton.
@@ -127,34 +143,36 @@ public final class DisplayManagerGlobal {
      */
     @UnsupportedAppUsage
     public DisplayInfo getDisplayInfo(int displayId) {
-        try {
-            synchronized (mLock) {
-                DisplayInfo info;
-                if (USE_CACHE) {
-                    info = mDisplayInfoCache.get(displayId);
-                    if (info != null) {
-                        return info;
-                    }
-                }
-
-                info = mDm.getDisplayInfo(displayId);
-                if (info == null) {
-                    return null;
-                }
-
-                if (USE_CACHE) {
-                    mDisplayInfoCache.put(displayId, info);
-                }
-                registerCallbackIfNeededLocked();
-
-                if (DEBUG) {
-                    Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
-                }
-                return info;
-            }
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
+        synchronized (mLock) {
+            return getDisplayInfoLocked(displayId);
         }
+    }
+
+    /**
+     * Gets information about a particular logical display
+     * See {@link getDisplayInfo}, but assumes that {@link mLock} is held
+     */
+    private @Nullable DisplayInfo getDisplayInfoLocked(int displayId) {
+        DisplayInfo info = null;
+        if (mDisplayCache != null) {
+            info = mDisplayCache.query(displayId);
+        } else {
+            try {
+                info = mDm.getDisplayInfo(displayId);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+        }
+        if (info == null) {
+            return null;
+        }
+
+        registerCallbackIfNeededLocked();
+
+        if (DEBUG) {
+            Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
+        }
+        return info;
     }
 
     /**
@@ -332,6 +350,20 @@ public final class DisplayManagerGlobal {
             for (int i = 0; i < numListeners; i++) {
                 mDisplayListeners.get(i).sendDisplayEvent(displayId, event);
             }
+            if (event == EVENT_DISPLAY_CHANGED && mDispatchNativeCallbacks) {
+                // Choreographer only supports a single display, so only dispatch refresh rate
+                // changes for the default display.
+                if (displayId == Display.DEFAULT_DISPLAY) {
+                    // We can likely save a binder hop if we attach the refresh rate onto the
+                    // listener.
+                    DisplayInfo display = getDisplayInfoLocked(displayId);
+                    if (display != null) {
+                        float refreshRate = display.getMode().getRefreshRate();
+                        // Signal native callbacks if we ever set a refresh rate.
+                        nSignalNativeCallbacks(refreshRate);
+                    }
+                }
+            }
         }
     }
 
@@ -442,35 +474,26 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
-            String name, int width, int height, int densityDpi, Surface surface, int flags,
-            VirtualDisplay.Callback callback, Handler handler, String uniqueId) {
-        if (TextUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("name must be non-null and non-empty");
-        }
-        if (width <= 0 || height <= 0 || densityDpi <= 0) {
-            throw new IllegalArgumentException("width, height, and densityDpi must be "
-                    + "greater than 0");
-        }
-
+    public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
+            @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
+            Handler handler) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
-            displayId = mDm.createVirtualDisplay(callbackWrapper, projectionToken,
-                    context.getPackageName(), name, width, height, densityDpi, surface, flags,
-                    uniqueId);
+            displayId = mDm.createVirtualDisplay(virtualDisplayConfig, callbackWrapper,
+                    projectionToken, context.getPackageName());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
         if (displayId < 0) {
-            Log.e(TAG, "Could not create virtual display: " + name);
+            Log.e(TAG, "Could not create virtual display: " + virtualDisplayConfig.getName());
             return null;
         }
         Display display = getRealDisplay(displayId);
         if (display == null) {
             Log.wtf(TAG, "Could not obtain display info for newly created "
-                    + "virtual display: " + name);
+                    + "virtual display: " + virtualDisplayConfig.getName());
             try {
                 mDm.releaseVirtualDisplay(callbackWrapper);
             } catch (RemoteException ex) {
@@ -478,7 +501,8 @@ public final class DisplayManagerGlobal {
             }
             return null;
         }
-        return new VirtualDisplay(this, display, callbackWrapper, surface);
+        return new VirtualDisplay(this, display, callbackWrapper,
+                virtualDisplayConfig.getSurface());
     }
 
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
@@ -594,6 +618,19 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Gets the last requested minimal post processing setting for the display with displayId.
+     *
+     * @hide
+     */
+    public boolean isMinimalPostProcessingRequested(int displayId) {
+        try {
+            return mDm.isMinimalPostProcessingRequested(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Temporarily sets the brightness of the display.
      * <p>
      * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
@@ -603,7 +640,7 @@ public final class DisplayManagerGlobal {
      *
      * @hide Requires signature permission.
      */
-    public void setTemporaryBrightness(int brightness) {
+    public void setTemporaryBrightness(float brightness) {
         try {
             mDm.setTemporaryBrightness(brightness);
         } catch (RemoteException ex) {
@@ -762,6 +799,54 @@ public final class DisplayManagerGlobal {
                     mCallback.onStopped();
                     break;
             }
+        }
+    }
+
+    /**
+     * Name of the property containing a unique token which changes every time we update the
+     * system's display configuration.
+     */
+    public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
+            "cache_key.display_info";
+
+    /**
+     * Invalidates the contents of the display info cache for all applications. Can only
+     * be called by system_server.
+     */
+    public static void invalidateLocalDisplayInfoCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DISPLAY_INFO_PROPERTY);
+    }
+
+    /**
+     * Disables the binder call cache.
+     */
+    public void disableLocalDisplayInfoCaches() {
+        mDisplayCache = null;
+    }
+
+    private static native void nSignalNativeCallbacks(float refreshRate);
+
+    // Called from AChoreographer via JNI.
+    // Registers AChoreographer so that refresh rate callbacks can be dispatched from DMS.
+    private void registerNativeChoreographerForRefreshRateCallbacks() {
+        synchronized (mLock) {
+            registerCallbackIfNeededLocked();
+            mDispatchNativeCallbacks = true;
+            DisplayInfo display = getDisplayInfoLocked(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                // We need to tell AChoreographer instances the current refresh rate so that apps
+                // can get it for free once a callback first registers.
+                float refreshRate = display.getMode().getRefreshRate();
+                nSignalNativeCallbacks(refreshRate);
+            }
+        }
+    }
+
+    // Called from AChoreographer via JNI.
+    // Unregisters AChoreographer from receiving refresh rate callbacks.
+    private void unregisterNativeChoreographerForRefreshRateCallbacks() {
+        synchronized (mLock) {
+            mDispatchNativeCallbacks = false;
         }
     }
 }

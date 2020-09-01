@@ -19,6 +19,7 @@ package com.android.server.audio;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.media.MediaMetrics;
 
 import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 
@@ -26,28 +27,82 @@ import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 public class AudioServiceEvents {
 
     final static class PhoneStateEvent extends AudioEventLogger.Event {
+        static final int MODE_SET = 0;
+        static final int MODE_IN_COMMUNICATION_TIMEOUT = 1;
+
+        final int mOp;
         final String mPackage;
         final int mOwnerPid;
         final int mRequesterPid;
         final int mRequestedMode;
         final int mActualMode;
 
+        /** used for MODE_SET */
         PhoneStateEvent(String callingPackage, int requesterPid, int requestedMode,
                         int ownerPid, int actualMode) {
+            mOp = MODE_SET;
             mPackage = callingPackage;
             mRequesterPid = requesterPid;
             mRequestedMode = requestedMode;
             mOwnerPid = ownerPid;
             mActualMode = actualMode;
+            logMetricEvent();
+        }
+
+        /** used for MODE_IN_COMMUNICATION_TIMEOUT */
+        PhoneStateEvent(String callingPackage, int ownerPid) {
+            mOp = MODE_IN_COMMUNICATION_TIMEOUT;
+            mPackage = callingPackage;
+            mOwnerPid = ownerPid;
+            mRequesterPid = 0;
+            mRequestedMode = 0;
+            mActualMode = 0;
+            logMetricEvent();
         }
 
         @Override
         public String eventToString() {
-            return new StringBuilder("setMode(").append(AudioSystem.modeToString(mRequestedMode))
-                    .append(") from package=").append(mPackage)
-                    .append(" pid=").append(mRequesterPid)
-                    .append(" selected mode=").append(AudioSystem.modeToString(mActualMode))
-                    .append(" by pid=").append(mOwnerPid).toString();
+            switch (mOp) {
+                case MODE_SET:
+                    return new StringBuilder("setMode(")
+                            .append(AudioSystem.modeToString(mRequestedMode))
+                            .append(") from package=").append(mPackage)
+                            .append(" pid=").append(mRequesterPid)
+                            .append(" selected mode=")
+                            .append(AudioSystem.modeToString(mActualMode))
+                            .append(" by pid=").append(mOwnerPid).toString();
+                case MODE_IN_COMMUNICATION_TIMEOUT:
+                    return new StringBuilder("mode IN COMMUNICATION timeout")
+                            .append(" for package=").append(mPackage)
+                            .append(" pid=").append(mOwnerPid).toString();
+                default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
+            }
+        }
+
+        /**
+         * Audio Analytics unique Id.
+         */
+        private static final String mMetricsId = MediaMetrics.Name.AUDIO_MODE;
+
+        private void logMetricEvent() {
+            switch (mOp) {
+                case MODE_SET:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "set")
+                            .set(MediaMetrics.Property.REQUESTED_MODE,
+                                    AudioSystem.modeToString(mRequestedMode))
+                            .set(MediaMetrics.Property.MODE, AudioSystem.modeToString(mActualMode))
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mPackage)
+                            .record();
+                    return;
+                case MODE_IN_COMMUNICATION_TIMEOUT:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "inCommunicationTimeout")
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mPackage)
+                            .record();
+                    return;
+                default: return;
+            }
         }
     }
 
@@ -99,6 +154,7 @@ public class AudioServiceEvents {
         static final int VOL_VOICE_ACTIVITY_HEARING_AID = 6;
         static final int VOL_MODE_CHANGE_HEARING_AID = 7;
         static final int VOL_SET_GROUP_VOL = 8;
+        static final int VOL_MUTE_STREAM_INT = 9;
 
         final int mOp;
         final int mStream;
@@ -120,6 +176,7 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = null;
             mAudioAttributes = null;
+            logMetricEvent();
         }
 
         /** used for VOL_SET_HEARING_AID_VOL*/
@@ -132,6 +189,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+            logMetricEvent();
         }
 
         /** used for VOL_SET_AVRCP_VOL */
@@ -144,6 +202,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+            logMetricEvent();
         }
 
         /** used for VOL_VOICE_ACTIVITY_HEARING_AID */
@@ -156,6 +215,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+            logMetricEvent();
         }
 
         /** used for VOL_MODE_CHANGE_HEARING_AID */
@@ -168,6 +228,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+            logMetricEvent();
         }
 
         /** used for VOL_SET_GROUP_VOL */
@@ -179,6 +240,117 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = group;
             mAudioAttributes = aa;
+            logMetricEvent();
+        }
+
+        /** used for VOL_MUTE_STREAM_INT */
+        VolumeEvent(int op, int stream, boolean state) {
+            mOp = op;
+            mStream = stream;
+            mVal1 = state ? 1 : 0;
+            mVal2 = 0;
+            mCaller = null;
+            mGroupName = null;
+            mAudioAttributes = null;
+            logMetricEvent();
+        }
+
+
+        /**
+         * Audio Analytics unique Id.
+         */
+        private static final String mMetricsId = MediaMetrics.Name.AUDIO_VOLUME_EVENT;
+
+        /**
+         * Log mediametrics event
+         */
+        private void logMetricEvent() {
+            switch (mOp) {
+                case VOL_ADJUST_SUGG_VOL:
+                case VOL_ADJUST_VOL_UID:
+                case VOL_ADJUST_STREAM_VOL: {
+                    String eventName;
+                    switch (mOp) {
+                        case VOL_ADJUST_SUGG_VOL:
+                            eventName = "adjustSuggestedStreamVolume";
+                            break;
+                        case VOL_ADJUST_STREAM_VOL:
+                            eventName = "adjustStreamVolume";
+                            break;
+                        case VOL_ADJUST_VOL_UID:
+                            eventName = "adjustStreamVolumeForUid";
+                            break;
+                        default:
+                            return; // not possible, just return here
+                    }
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.DIRECTION, mVal1 > 0 ? "up" : "down")
+                            .set(MediaMetrics.Property.EVENT, eventName)
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                }
+                case VOL_SET_STREAM_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.EVENT, "setStreamVolume")
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                case VOL_SET_HEARING_AID_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "setHearingAidVolume")
+                            .set(MediaMetrics.Property.GAIN_DB, (double) mVal2)
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .record();
+                    return;
+                case VOL_SET_AVRCP_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "setAvrcpVolume")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .record();
+                    return;
+                case VOL_VOICE_ACTIVITY_HEARING_AID:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "voiceActivityHearingAid")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.STATE,
+                                    mVal2 == 1 ? "active" : "inactive")
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                case VOL_MODE_CHANGE_HEARING_AID:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "modeChangeHearingAid")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.MODE, AudioSystem.modeToString(mVal2))
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                case VOL_SET_GROUP_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.ATTRIBUTES, mAudioAttributes.toString())
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.EVENT, "setVolumeIndexForAttributes")
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.GROUP, mGroupName)
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .record();
+                    return;
+                case VOL_MUTE_STREAM_INT:
+                    // No value in logging metrics for this internal event
+                    return;
+                default:
+                    return;
+            }
         }
 
         @Override
@@ -240,6 +412,11 @@ public class AudioServiceEvents {
                             .append(" index:").append(mVal1)
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
                             .append(") from ").append(mCaller)
+                            .toString();
+                case VOL_MUTE_STREAM_INT:
+                    return new StringBuilder("VolumeStreamState.muteInternally(stream:")
+                            .append(AudioSystem.streamToString(mStream))
+                            .append(mVal1 == 1 ? ", muted)" : ", unmuted)")
                             .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }

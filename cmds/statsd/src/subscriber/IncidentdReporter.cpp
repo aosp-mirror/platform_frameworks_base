@@ -21,10 +21,8 @@
 #include "packages/UidMap.h"
 #include "stats_log_util.h"
 
-#include <android/os/IIncidentManager.h>
-#include <android/os/IncidentReportArgs.h>
 #include <android/util/ProtoOutputStream.h>
-#include <binder/IServiceManager.h>
+#include <incident/incident_report.h>
 
 #include <vector>
 
@@ -51,7 +49,6 @@ const int FIELD_ID_TRIGGER_DETAILS = 4;
 const int FIELD_ID_TRIGGER_DETAILS_TRIGGER_METRIC = 1;
 const int FIELD_ID_METRIC_VALUE_METRIC_ID = 1;
 const int FIELD_ID_METRIC_VALUE_DIMENSION_IN_WHAT = 2;
-const int FIELD_ID_METRIC_VALUE_DIMENSION_IN_CONDITION = 3;
 const int FIELD_ID_METRIC_VALUE_VALUE = 4;
 
 const int FIELD_ID_PACKAGE_INFO = 3;
@@ -83,10 +80,8 @@ void getProtoData(const int64_t& rule_id, int64_t metricId, const MetricDimensio
     writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), nullptr, &headerProto);
     headerProto.end(dimToken);
 
+    // deprecated field
     // optional DimensionsValue dimension_in_condition = 3;
-    dimToken = headerProto.start(FIELD_TYPE_MESSAGE | FIELD_ID_METRIC_VALUE_DIMENSION_IN_CONDITION);
-    writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), nullptr, &headerProto);
-    headerProto.end(dimToken);
 
     // optional int64 value = 4;
     headerProto.write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_VALUE_VALUE, (long long)metricValue);
@@ -100,13 +95,6 @@ void getProtoData(const int64_t& rule_id, int64_t metricId, const MetricDimensio
     for (const auto& dim : dimensionKey.getDimensionKeyInWhat().getValues()) {
         int uid = getUidIfExists(dim);
         // any uid <= 2000 are predefined AID_*
-        if (uid > 2000) {
-            uids.insert(uid);
-        }
-    }
-
-    for (const auto& dim : dimensionKey.getDimensionKeyInCondition().getValues()) {
-        int uid = getUidIfExists(dim);
         if (uid > 2000) {
             uids.insert(uid);
         }
@@ -142,44 +130,38 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
         return false;
     }
 
-    IncidentReportArgs incidentReport;
+    AIncidentReportArgs* args = AIncidentReportArgs_init();
 
     vector<uint8_t> protoData;
     getProtoData(rule_id, metricId, dimensionKey, metricValue, configKey,
                  config.alert_description(), &protoData);
-    incidentReport.addHeader(protoData);
+    AIncidentReportArgs_addHeader(args, protoData.data(), protoData.size());
 
     for (int i = 0; i < config.section_size(); i++) {
-        incidentReport.addSection(config.section(i));
+        AIncidentReportArgs_addSection(args, config.section(i));
     }
 
     uint8_t dest;
     switch (config.dest()) {
         case IncidentdDetails_Destination_AUTOMATIC:
-            dest = android::os::PRIVACY_POLICY_AUTOMATIC;
+            dest = INCIDENT_REPORT_PRIVACY_POLICY_AUTOMATIC;
             break;
         case IncidentdDetails_Destination_EXPLICIT:
-            dest = android::os::PRIVACY_POLICY_EXPLICIT;
+            dest = INCIDENT_REPORT_PRIVACY_POLICY_EXPLICIT;
             break;
         default:
-            dest = android::os::PRIVACY_POLICY_AUTOMATIC;
+            dest = INCIDENT_REPORT_PRIVACY_POLICY_AUTOMATIC;
     }
-    incidentReport.setPrivacyPolicy(dest);
+    AIncidentReportArgs_setPrivacyPolicy(args, dest);
 
-    incidentReport.setReceiverPkg(config.receiver_pkg());
+    AIncidentReportArgs_setReceiverPackage(args, config.receiver_pkg().c_str());
 
-    incidentReport.setReceiverCls(config.receiver_cls());
+    AIncidentReportArgs_setReceiverClass(args, config.receiver_cls().c_str());
 
-    sp<IIncidentManager> service = interface_cast<IIncidentManager>(
-            defaultServiceManager()->getService(android::String16("incident")));
-    if (service == nullptr) {
-        ALOGW("Failed to fetch incident service.");
-        return false;
-    }
-    VLOG("Calling incidentd %p", service.get());
-    binder::Status s = service->reportIncident(incidentReport);
-    VLOG("Report incident status: %s", s.toString8().string());
-    return s.isOk();
+    int err = AIncidentReportArgs_takeReport(args);
+    AIncidentReportArgs_delete(args);
+
+    return err == NO_ERROR;
 }
 
 }  // namespace statsd

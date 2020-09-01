@@ -25,6 +25,100 @@ namespace statsd {
 
 using std::string;
 using std::vector;
+using android::base::StringPrintf;
+
+// These constants must be kept in sync with those in StatsDimensionsValue.java
+const static int STATS_DIMENSIONS_VALUE_STRING_TYPE = 2;
+const static int STATS_DIMENSIONS_VALUE_INT_TYPE = 3;
+const static int STATS_DIMENSIONS_VALUE_LONG_TYPE = 4;
+// const static int STATS_DIMENSIONS_VALUE_BOOL_TYPE = 5; (commented out because
+// unused -- statsd does not correctly support bool types)
+const static int STATS_DIMENSIONS_VALUE_FLOAT_TYPE = 6;
+const static int STATS_DIMENSIONS_VALUE_TUPLE_TYPE = 7;
+
+/**
+ * Recursive helper function that populates a parent StatsDimensionsValueParcel
+ * with children StatsDimensionsValueParcels.
+ *
+ * \param parent parcel that will be populated with children
+ * \param childDepth depth of children FieldValues
+ * \param childPrefix expected FieldValue prefix of children
+ * \param dims vector of FieldValues stored by HashableDimensionKey
+ * \param index position in dims to start reading children from
+ */
+static void populateStatsDimensionsValueParcelChildren(StatsDimensionsValueParcel& parent,
+                                                       int childDepth, int childPrefix,
+                                                       const vector<FieldValue>& dims,
+                                                       size_t& index) {
+    if (childDepth > 2) {
+        ALOGE("Depth > 2 not supported by StatsDimensionsValueParcel.");
+        return;
+    }
+
+    while (index < dims.size()) {
+        const FieldValue& dim = dims[index];
+        int fieldDepth = dim.mField.getDepth();
+        int fieldPrefix = dim.mField.getPrefix(childDepth);
+
+        StatsDimensionsValueParcel child;
+        child.field = dim.mField.getPosAtDepth(childDepth);
+
+        if (fieldDepth == childDepth && fieldPrefix == childPrefix) {
+            switch (dim.mValue.getType()) {
+                case INT:
+                    child.valueType = STATS_DIMENSIONS_VALUE_INT_TYPE;
+                    child.intValue = dim.mValue.int_value;
+                    break;
+                case LONG:
+                    child.valueType = STATS_DIMENSIONS_VALUE_LONG_TYPE;
+                    child.longValue = dim.mValue.long_value;
+                    break;
+                case FLOAT:
+                    child.valueType = STATS_DIMENSIONS_VALUE_FLOAT_TYPE;
+                    child.floatValue = dim.mValue.float_value;
+                    break;
+                case STRING:
+                    child.valueType = STATS_DIMENSIONS_VALUE_STRING_TYPE;
+                    child.stringValue = dim.mValue.str_value;
+                    break;
+                default:
+                    ALOGE("Encountered FieldValue with unsupported value type.");
+                    break;
+            }
+            index++;
+            parent.tupleValue.push_back(child);
+        } else if (fieldDepth > childDepth && fieldPrefix == childPrefix) {
+            // This FieldValue is not a child of the current parent, but it is
+            // an indirect descendant. Thus, create a direct child of TUPLE_TYPE
+            // and recurse to parcel the indirect descendants.
+            child.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
+            populateStatsDimensionsValueParcelChildren(child, childDepth + 1,
+                                                       dim.mField.getPrefix(childDepth + 1), dims,
+                                                       index);
+            parent.tupleValue.push_back(child);
+        } else {
+            return;
+        }
+    }
+}
+
+StatsDimensionsValueParcel HashableDimensionKey::toStatsDimensionsValueParcel() const {
+    StatsDimensionsValueParcel root;
+    if (mValues.size() == 0) {
+        return root;
+    }
+
+    root.field = mValues[0].mField.getTag();
+    root.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
+
+    // Children of the root correspond to top-level (depth = 0) FieldValues.
+    int childDepth = 0;
+    int childPrefix = 0;
+    size_t index = 0;
+    populateStatsDimensionsValueParcelChildren(root, childDepth, childPrefix, mValues, index);
+
+    return root;
+}
 
 android::hash_t hashDimension(const HashableDimensionKey& value) {
     android::hash_t hash = 0;
@@ -57,6 +151,17 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
     return JenkinsHashWhiten(hash);
 }
 
+bool filterValues(const Matcher& matcherField, const vector<FieldValue>& values,
+                  FieldValue* output) {
+    for (const auto& value : values) {
+        if (value.mField.matches(matcherField)) {
+            (*output) = value;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>& values,
                   HashableDimensionKey* output) {
     size_t num_matches = 0;
@@ -70,6 +175,23 @@ bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>
                     value.mField.getField() & matcher.mMask);
                 num_matches++;
             }
+        }
+    }
+    return num_matches > 0;
+}
+
+bool filterPrimaryKey(const std::vector<FieldValue>& values, HashableDimensionKey* output) {
+    size_t num_matches = 0;
+    const int32_t simpleFieldMask = 0xff7f0000;
+    const int32_t attributionUidFieldMask = 0xff7f7f7f;
+    for (const auto& value : values) {
+        if (value.mAnnotations.isPrimaryField()) {
+            output->addValue(value);
+            output->mutableValue(num_matches)->mField.setTag(value.mField.getTag());
+            const int32_t mask =
+                    isAttributionUidField(value) ? attributionUidFieldMask : simpleFieldMask;
+            output->mutableValue(num_matches)->mField.setField(value.mField.getField() & mask);
+            num_matches++;
         }
     }
     return num_matches > 0;
@@ -94,16 +216,76 @@ void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
 
     size_t count = conditionDimension->getValues().size();
     if (count != links.conditionFields.size()) {
-        // ALOGE("WTF condition link is bad");
         return;
     }
 
     for (size_t i = 0; i < count; i++) {
         conditionDimension->mutableValue(i)->mField.setField(
-            links.conditionFields[i].mMatcher.getField());
+                links.conditionFields[i].mMatcher.getField());
         conditionDimension->mutableValue(i)->mField.setTag(
-            links.conditionFields[i].mMatcher.getTag());
+                links.conditionFields[i].mMatcher.getTag());
     }
+}
+
+void getDimensionForState(const std::vector<FieldValue>& eventValues, const Metric2State& link,
+                          HashableDimensionKey* statePrimaryKey) {
+    // First, get the dimension from the event using the "what" fields from the
+    // MetricStateLinks.
+    filterValues(link.metricFields, eventValues, statePrimaryKey);
+
+    // Then check that the statePrimaryKey size equals the number of state fields
+    size_t count = statePrimaryKey->getValues().size();
+    if (count != link.stateFields.size()) {
+        return;
+    }
+
+    // For each dimension Value in the statePrimaryKey, set the field and tag
+    // using the state atom fields from MetricStateLinks.
+    for (size_t i = 0; i < count; i++) {
+        statePrimaryKey->mutableValue(i)->mField.setField(link.stateFields[i].mMatcher.getField());
+        statePrimaryKey->mutableValue(i)->mField.setTag(link.stateFields[i].mMatcher.getTag());
+    }
+}
+
+bool containsLinkedStateValues(const HashableDimensionKey& whatKey,
+                               const HashableDimensionKey& primaryKey,
+                               const vector<Metric2State>& stateLinks, const int32_t stateAtomId) {
+    if (whatKey.getValues().size() < primaryKey.getValues().size()) {
+        ALOGE("Contains linked values false: whatKey is too small");
+        return false;
+    }
+
+    for (const auto& primaryValue : primaryKey.getValues()) {
+        bool found = false;
+        for (const auto& whatValue : whatKey.getValues()) {
+            if (linked(stateLinks, stateAtomId, primaryValue.mField, whatValue.mField) &&
+                primaryValue.mValue == whatValue.mValue) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool linked(const vector<Metric2State>& stateLinks, const int32_t stateAtomId,
+            const Field& stateField, const Field& metricField) {
+    for (auto stateLink : stateLinks) {
+        if (stateLink.stateAtomId != stateAtomId) {
+            continue;
+        }
+
+        for (size_t i = 0; i < stateLink.stateFields.size(); i++) {
+            if (stateLink.stateFields[i].mMatcher == stateField &&
+                stateLink.metricFields[i].mMatcher == metricField) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool LessThan(const vector<FieldValue>& s1, const vector<FieldValue>& s2) {
@@ -118,6 +300,10 @@ bool LessThan(const vector<FieldValue>& s1, const vector<FieldValue>& s2) {
         }
     }
     return false;
+}
+
+bool HashableDimensionKey::operator!=(const HashableDimensionKey& that) const {
+    return !((*this) == that);
 }
 
 bool HashableDimensionKey::operator==(const HashableDimensionKey& that) const {
@@ -173,11 +359,11 @@ string HashableDimensionKey::toString() const {
 
 bool MetricDimensionKey::operator==(const MetricDimensionKey& that) const {
     return mDimensionKeyInWhat == that.getDimensionKeyInWhat() &&
-           mDimensionKeyInCondition == that.getDimensionKeyInCondition();
+           mStateValuesKey == that.getStateValuesKey();
 };
 
 string MetricDimensionKey::toString() const {
-    return mDimensionKeyInWhat.toString() + mDimensionKeyInCondition.toString();
+    return mDimensionKeyInWhat.toString() + mStateValuesKey.toString();
 }
 
 bool MetricDimensionKey::operator<(const MetricDimensionKey& that) const {
@@ -187,7 +373,7 @@ bool MetricDimensionKey::operator<(const MetricDimensionKey& that) const {
         return false;
     }
 
-    return mDimensionKeyInCondition < that.getDimensionKeyInCondition();
+    return mStateValuesKey < that.getStateValuesKey();
 }
 
 }  // namespace statsd

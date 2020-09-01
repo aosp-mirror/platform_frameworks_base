@@ -19,6 +19,7 @@ import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toSet;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,12 +30,16 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.WindowManager;
@@ -47,14 +52,41 @@ import com.android.internal.util.SyncResultReceiver;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
- * Content capture is mechanism used to let apps notify the Android system of events associated with
- * views.
+ * <p>The {@link ContentCaptureManager} provides additional ways for for apps to
+ * integrate with the content capture subsystem.
  *
- * <p>Before using this manager, you should check if it's available. Example:
+ * <p>Content capture provides real-time, continuous capture of application activity, display and
+ * events to an intelligence service that is provided by the Android system. The intelligence
+ * service then uses that info to mediate and speed user journey through different apps. For
+ * example, when the user receives a restaurant address in a chat app and switchs to a map app
+ * to search for that restaurant, the intelligence service could offer an autofill dialog to
+ * let the user automatically select its address.
+ *
+ * <p>Content capture was designed with two major concerns in mind: privacy and performance.
+ *
+ * <ul>
+ *   <li><b>Privacy:</b> the intelligence service is a trusted component provided that is provided
+ *   by the device manufacturer and that cannot be changed by the user (although the user can
+ *   globaly disable content capture using the Android Settings app). This service can only use the
+ *   data for in-device machine learning, which is enforced both by process isolation and
+ *   <a href="https://source.android.com/compatibility/cdd">CDD requirements</a>.
+ *   <li><b>Performance:</b> content capture is highly optimized to minimize its impact in the app
+ *   jankiness and overall device system health. For example, its only enabled on apps (or even
+ *   specific activities from an app) that were explicitly whitelisted by the intelligence service,
+ *   and it buffers the events so they are sent in a batch to the service (see
+ *   {@link #isContentCaptureEnabled()} for other cases when its disabled).
+ * </ul>
+ *
+ * <p>In fact, before using this manager, the app developer should check if it's available. Example:
  * <pre><code>
  *  ContentCaptureManager mgr = context.getSystemService(ContentCaptureManager.class);
  *  if (mgr != null && mgr.isContentCaptureEnabled()) {
@@ -62,50 +94,28 @@ import java.util.Set;
  *  }
  *  </code></pre>
  *
- * <p>To support content capture, you must notifiy the Android system of the following events:
+ * <p>App developers usually don't need to explicitly interact with content capture, except when the
+ * app:
  *
  * <ul>
- *   <li>When a visible view is laid out, call
- *   {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)}.
- *   <li>When a view becomes invisible or is removed from the view hierarchy, call
- *   {@link ContentCaptureSession#notifyViewDisappeared(android.view.autofill.AutofillId)}.
- *   <li>When the view represents text and the text value changed, call {@link
- *   ContentCaptureSession#notifyViewTextChanged(android.view.autofill.AutofillId, CharSequence)}.
+ *   <li>Can define a contextual {@link android.content.LocusId} to identify unique state (such as a
+ *   conversation between 2 chat users).
+ *   <li>Can have multiple view hierarchies with different contextual meaning (for example, a
+ *   browser app with multiple tabs, each representing a different URL).
+ *   <li>Contains custom views (that extend View directly and are not provided by the standard
+ *   Android SDK.
+ *   <li>Contains views that provide their own virtual hierarchy (like a web browser that render the
+ *   HTML elements using a Canvas).
  * </ul>
  *
- * <p>You can get a blank content capture structure using
- * {@link ContentCaptureSession#newViewStructure(View)}, then populate its relevant fields.
- * Here's an example of the relevant methods for an {@code EditText}-like view:
- *
- * <pre><code>
- * public class MyEditText extends View {
- *
- * private void populateContentCaptureStructure(@NonNull ViewStructure structure) {
- *   structure.setText(getText(), getSelectionStart(), getSelectionEnd());
- *   structure.setHint(getHint());
- *   structure.setInputType(getInputType());
- *   // set other properties like setTextIdEntry(), setTextLines(), setTextStyle(),
- *   // setMinTextEms(), setMaxTextEms(), setMaxTextLength()
- * }
- *
- * private void onTextChanged() {
- *   if (isLaidOut() && isTextEditable()) {
- *     ContentCaptureManager mgr = mContext.getSystemService(ContentCaptureManager.class);
- *     if (cm != null && cm.isContentCaptureEnabled()) {
- *        ContentCaptureSession session = getContentCaptureSession();
- *        if (session != null) {
- *          session.notifyViewTextChanged(getAutofillId(), getText());
- *        }
- *   }
- * }
- * </code></pre>
- *
  * <p>The main integration point with content capture is the {@link ContentCaptureSession}. A "main"
- * session is automatically created by the Android system when content capture is enabled for the
- * activity. The session could have a {@link ContentCaptureContext} to provide more contextual info
- * about it, such as the locus associated with the view hierarchy
- * (see {@link android.content.LocusId} for more info about locus). By default, the main session
- * doesn't have a {@code ContentCaptureContext}, but you can change it after its created. Example:
+ * session is automatically created by the Android System when content capture is enabled for the
+ * activity and its used by the standard Android views to notify the content capture service of
+ * events such as views being added, views been removed, and text changed by user input. The session
+ * could have a {@link ContentCaptureContext} to provide more contextual info about it, such as
+ * the locus associated with the view hierarchy (see {@link android.content.LocusId} for more info
+ * about locus). By default, the main session doesn't have a {@code ContentCaptureContext}, but you
+ * can change it after its created. Example:
  *
  * <pre><code>
  * protected void onCreate(Bundle savedInstanceState) {
@@ -145,11 +155,77 @@ import java.util.Set;
  * }
  * </code></pre>
  *
+ * <p>If your activity has custom views (i.e., views that extend {@link View} directly and provide
+ * just one logical view, not a virtual tree hiearchy) and it provides content that's relevant for
+ * content capture (as of {@link android.os.Build.VERSION_CODES#Q Android Q}, the only relevant
+ * content is text), then your view implementation should:
+ *
+ * <ul>
+ *   <li>Set it as important for content capture.
+ *   <li>Fill {@link ViewStructure} used for content capture.
+ *   <li>Notify the {@link ContentCaptureSession} when the text is changed by user input.
+ * </ul>
+ *
+ * <p>Here's an example of the relevant methods for an {@code EditText}-like view:
+ *
+ * <pre><code>
+ * public class MyEditText extends View {
+ *
+ * public MyEditText(...) {
+ *   if (getImportantForContentCapture() == IMPORTANT_FOR_CONTENT_CAPTURE_AUTO) {
+ *     setImportantForContentCapture(IMPORTANT_FOR_CONTENT_CAPTURE_YES);
+ *   }
+ * }
+ *
+ * public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
+ *   super.onProvideContentCaptureStructure(structure, flags);
+ *
+ *   structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+ *   structure.setHint(getHint());
+ *   structure.setInputType(getInputType());
+ *   // set other properties like setTextIdEntry(), setTextLines(), setTextStyle(),
+ *   // setMinTextEms(), setMaxTextEms(), setMaxTextLength()
+ * }
+ *
+ * private void onTextChanged() {
+ *   if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
+ *     ContentCaptureManager mgr = mContext.getSystemService(ContentCaptureManager.class);
+ *     if (cm != null && cm.isContentCaptureEnabled()) {
+ *        ContentCaptureSession session = getContentCaptureSession();
+ *        if (session != null) {
+ *          session.notifyViewTextChanged(getAutofillId(), getText());
+ *        }
+ *   }
+ * }
+ * </code></pre>
+ *
+ * <p>If your view provides its own virtual hierarchy (for example, if it's a browser that draws
+ * the HTML using {@link Canvas} or native libraries in a different render process), then the view
+ * is also responsible to notify the session when the virtual elements appear and disappear - see
+ * {@link View#onProvideContentCaptureStructure(ViewStructure, int)} for more info.
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
 
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
+
+    /** Error happened during the data sharing session. */
+    public static final int DATA_SHARE_ERROR_UNKNOWN = 1;
+
+    /** Request has been rejected, because a concurrent data share sessions is in progress. */
+    public static final int DATA_SHARE_ERROR_CONCURRENT_REQUEST = 2;
+
+    /** Request has been interrupted because of data share session timeout. */
+    public static final int DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED = 3;
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            DATA_SHARE_ERROR_UNKNOWN,
+            DATA_SHARE_ERROR_CONCURRENT_REQUEST,
+            DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataShareError {}
 
     /** @hide */
     public static final int RESULT_CODE_OK = 0;
@@ -159,6 +235,13 @@ public final class ContentCaptureManager {
     public static final int RESULT_CODE_FALSE = 2;
     /** @hide */
     public static final int RESULT_CODE_SECURITY_EXCEPTION = -1;
+
+    /**
+     * ID used to indicate that a session does not exist
+     * @hide
+     */
+    @SystemApi
+    public static final int NO_SESSION_ID = 0;
 
     /**
      * Timeout for calls to system_server.
@@ -263,7 +346,7 @@ public final class ContentCaptureManager {
 
 
     /** @hide */
-    public static final int DEFAULT_MAX_BUFFER_SIZE = 100;
+    public static final int DEFAULT_MAX_BUFFER_SIZE = 500; // Enough for typical busy screen.
     /** @hide */
     public static final int DEFAULT_IDLE_FLUSHING_FREQUENCY_MS = 5_000;
     /** @hide */
@@ -278,6 +361,9 @@ public final class ContentCaptureManager {
 
     @NonNull
     private final IContentCaptureManager mService;
+
+    @GuardedBy("mLock")
+    private final LocalDataShareAdapterResourceManager mDataShareAdapterResourceManager;
 
     @NonNull
     final ContentCaptureOptions mOptions;
@@ -318,6 +404,8 @@ public final class ContentCaptureManager {
         // do, then we should optimize it to run the tests after the Choreographer finishes the most
         // important steps of the frame.
         mHandler = Handler.createAsync(Looper.getMainLooper());
+
+        mDataShareAdapterResourceManager = new LocalDataShareAdapterResourceManager();
     }
 
     /**
@@ -355,14 +443,14 @@ public final class ContentCaptureManager {
     @UiThread
     public void onActivityResumed() {
         if (mOptions.lite) return;
-        getMainContentCaptureSession().notifySessionLifecycle(/* started= */ true);
+        getMainContentCaptureSession().notifySessionResumed();
     }
 
     /** @hide */
     @UiThread
     public void onActivityPaused() {
         if (mOptions.lite) return;
-        getMainContentCaptureSession().notifySessionLifecycle(/* started= */ false);
+        getMainContentCaptureSession().notifySessionPaused();
     }
 
     /** @hide */
@@ -399,6 +487,8 @@ public final class ContentCaptureManager {
             return resultReceiver.getParcelableResult();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get service componentName.");
         }
     }
 
@@ -428,11 +518,25 @@ public final class ContentCaptureManager {
             return resultReceiver.getParcelableResult();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            Log.e(TAG, "Fail to get service settings componentName: " + e);
+            return null;
         }
     }
 
     /**
      * Checks whether content capture is enabled for this activity.
+     *
+     * <p>There are many reasons it could be disabled, such as:
+     * <ul>
+     *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
+     *   <li>Intelligence service did not whitelist content capture for this activity's package.
+     *   <li>Intelligence service did not whitelist content capture for this specific activity.
+     *   <li>Intelligence service disabled content capture globally.
+     *   <li>User disabled content capture globally through the Android Settings app.
+     *   <li>Device manufacturer (OEM) disabled content capture globally.
+     *   <li>Transient errors, such as intelligence service package being updated.
+     * </ul>
      */
     public boolean isContentCaptureEnabled() {
         if (mOptions.lite) return false;
@@ -452,9 +556,9 @@ public final class ContentCaptureManager {
      * Gets the list of conditions for when content capture should be allowed.
      *
      * <p>This method is typically used by web browsers so they don't generate unnecessary content
-     * capture events for some websites.
+     * capture events for websites the content capture service is not interested on.
      *
-     * @return list of conditions, or {@code null} if there isn't any restriction
+     * @return list of conditions, or {@code null} if the service didn't set any restriction
      * (in which case content capture events should always be generated). If the list is empty,
      * then it should not generate any event at all.
      */
@@ -468,9 +572,13 @@ public final class ContentCaptureManager {
         final SyncResultReceiver resultReceiver = syncRun(
                 (r) -> mService.getContentCaptureConditions(mContext.getPackageName(), r));
 
-        final ArrayList<ContentCaptureCondition> result = resultReceiver
-                .getParcelableListResult();
-        return toSet(result);
+        try {
+            final ArrayList<ContentCaptureCondition> result = resultReceiver
+                    .getParcelableListResult();
+            return toSet(result);
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get content capture conditions.");
+        }
     }
 
     /**
@@ -540,22 +648,29 @@ public final class ContentCaptureManager {
     public boolean isContentCaptureFeatureEnabled() {
         final SyncResultReceiver resultReceiver = syncRun(
                 (r) -> mService.isContentCaptureFeatureEnabled(r));
-        final int resultCode = resultReceiver.getIntResult();
-        switch (resultCode) {
-            case RESULT_CODE_TRUE:
-                return true;
-            case RESULT_CODE_FALSE:
-                return false;
-            default:
-                Log.wtf(TAG, "received invalid result: " + resultCode);
-                return false;
+
+        try {
+            final int resultCode = resultReceiver.getIntResult();
+            switch (resultCode) {
+                case RESULT_CODE_TRUE:
+                    return true;
+                case RESULT_CODE_FALSE:
+                    return false;
+                default:
+                    Log.wtf(TAG, "received invalid result: " + resultCode);
+                    return false;
+            }
+        } catch (SyncResultReceiver.TimeoutException e) {
+            Log.e(TAG, "Fail to get content capture feature enable status: " + e);
+            return false;
         }
     }
 
     /**
-     * Called by the app to remove content capture data associated with some context.
+     * Called by the app to request the content capture service to remove content capture data
+     * associated with some context.
      *
-     * @param request object specifying what data should be removed.
+     * @param request object specifying what user data should be removed.
      */
     public void removeData(@NonNull DataRemovalRequest request) {
         Preconditions.checkNotNull(request);
@@ -563,7 +678,35 @@ public final class ContentCaptureManager {
         try {
             mService.removeData(request);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by the app to request data sharing via writing to a file.
+     *
+     * <p>The ContentCaptureService app will receive a read-only file descriptor pointing to the
+     * same file and will be able to read data being shared from it.
+     *
+     * <p>Note: using this API doesn't guarantee the app staying alive and is "best-effort".
+     * Starting a foreground service would minimize the chances of the app getting killed during the
+     * file sharing session.
+     *
+     * @param request object specifying details of the data being shared.
+     */
+    public void shareData(@NonNull DataShareRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull DataShareWriteAdapter dataShareWriteAdapter) {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(dataShareWriteAdapter);
+        Preconditions.checkNotNull(executor);
+
+        try {
+            mService.shareData(request,
+                    new DataShareAdapterDelegate(executor, dataShareWriteAdapter,
+                            mDataShareAdapterResourceManager));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -581,10 +724,12 @@ public final class ContentCaptureManager {
             if (resultCode == RESULT_CODE_SECURITY_EXCEPTION) {
                 throw new SecurityException(resultReceiver.getStringResult());
             }
-            return resultReceiver;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get syn run result from SyncResultReceiver.");
         }
+        return resultReceiver;
     }
 
     /** @hide */
@@ -613,5 +758,112 @@ public final class ContentCaptureManager {
 
     private interface MyRunnable {
         void run(@NonNull SyncResultReceiver receiver) throws RemoteException;
+    }
+
+    private static class DataShareAdapterDelegate extends IDataShareWriteAdapter.Stub {
+
+        private final WeakReference<LocalDataShareAdapterResourceManager> mResourceManagerReference;
+
+        private DataShareAdapterDelegate(Executor executor, DataShareWriteAdapter adapter,
+                LocalDataShareAdapterResourceManager resourceManager) {
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(adapter);
+            Preconditions.checkNotNull(resourceManager);
+
+            resourceManager.initializeForDelegate(this, adapter, executor);
+            mResourceManagerReference = new WeakReference<>(resourceManager);
+        }
+
+        @Override
+        public void write(ParcelFileDescriptor destination)
+                throws RemoteException {
+            executeAdapterMethodLocked(adapter -> adapter.onWrite(destination), "onWrite");
+        }
+
+        @Override
+        public void error(int errorCode) throws RemoteException {
+            executeAdapterMethodLocked(adapter -> adapter.onError(errorCode), "onError");
+            clearHardReferences();
+        }
+
+        @Override
+        public void rejected() throws RemoteException {
+            executeAdapterMethodLocked(DataShareWriteAdapter::onRejected, "onRejected");
+            clearHardReferences();
+        }
+
+        @Override
+        public void finish() throws RemoteException  {
+            clearHardReferences();
+        }
+
+        private void executeAdapterMethodLocked(Consumer<DataShareWriteAdapter> adapterFn,
+                String methodName) {
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), resource manager has been GC'ed");
+                return;
+            }
+
+            DataShareWriteAdapter adapter = resourceManager.getAdapter(this);
+            Executor executor = resourceManager.getExecutor(this);
+
+            if (adapter == null || executor == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), references are null");
+                return;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> adapterFn.accept(adapter));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private void clearHardReferences() {
+            LocalDataShareAdapterResourceManager resourceManager = mResourceManagerReference.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't clear references, resource manager has been GC'ed");
+                return;
+            }
+
+            resourceManager.clearHardReferences(this);
+        }
+    }
+
+    /**
+     * Wrapper class making sure dependencies on the current application stay in the application
+     * context.
+     */
+    private static class LocalDataShareAdapterResourceManager {
+
+        // Keeping hard references to the remote objects in the current process (static context)
+        // to prevent them to be gc'ed during the lifetime of the application. This is an
+        // artifact of only operating with weak references remotely: there has to be at least 1
+        // hard reference in order for this to not be killed.
+        private Map<DataShareAdapterDelegate, DataShareWriteAdapter> mWriteAdapterHardReferences =
+                new HashMap<>();
+        private Map<DataShareAdapterDelegate, Executor> mExecutorHardReferences =
+                new HashMap<>();
+
+        void initializeForDelegate(DataShareAdapterDelegate delegate, DataShareWriteAdapter adapter,
+                Executor executor) {
+            mWriteAdapterHardReferences.put(delegate, adapter);
+            mExecutorHardReferences.put(delegate, executor);
+        }
+
+        Executor getExecutor(DataShareAdapterDelegate delegate) {
+            return mExecutorHardReferences.get(delegate);
+        }
+
+        DataShareWriteAdapter getAdapter(DataShareAdapterDelegate delegate) {
+            return mWriteAdapterHardReferences.get(delegate);
+        }
+
+        void clearHardReferences(DataShareAdapterDelegate delegate) {
+            mWriteAdapterHardReferences.remove(delegate);
+            mExecutorHardReferences.remove(delegate);
+        }
     }
 }

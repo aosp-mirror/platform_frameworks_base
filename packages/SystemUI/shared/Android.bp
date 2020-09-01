@@ -12,8 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-android_library {
+genrule {
+    name: "statslog-SystemUI-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module sysui --javaPackage com.android.systemui.shared.system --javaClass SysUiStatsLog",
+    out: ["com/android/systemui/shared/system/SysUiStatsLog.java"],
+}
 
+java_library {
+    name: "SystemUI-statsd",
+
+    srcs: [
+        ":statslog-SystemUI-java-gen",
+    ],
+}
+
+android_library {
     name: "SystemUISharedLib",
     srcs: [
         "src/**/*.java",
@@ -21,12 +35,10 @@ android_library {
     ],
 
     static_libs: [
-        "PluginCoreLib"
+        "PluginCoreLib",
     ],
 
-    // Enforce that the library is built against java 7 so that there are
-    // no compatibility issues with launcher
-    java_version: "1.7",
 
+    java_version: "1.8",
     min_sdk_version: "26",
 }

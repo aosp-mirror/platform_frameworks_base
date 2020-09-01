@@ -22,7 +22,6 @@ import static com.android.server.devicepolicy.DpmTestUtils.newRestrictions;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.SparseArray;
@@ -118,156 +117,43 @@ public class UserRestrictionsUtilsTest extends AndroidTestCase {
                 UserManager.DISALLOW_ADJUST_VOLUME, user));
     }
 
-    public void testSortToGlobalAndLocal() {
-        final Bundle local = new Bundle();
-        final Bundle global = new Bundle();
-
-        UserRestrictionsUtils.sortToGlobalAndLocal(null, false /* isDeviceOwner */,
-                UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
-        assertEquals(0, global.size());
-        assertEquals(0, local.size());
-
-        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY, false /* isDeviceOwner */,
-                UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
-        assertEquals(0, global.size());
-        assertEquals(0, local.size());
-
-        // Restrictions set by DO.
-        UserRestrictionsUtils.sortToGlobalAndLocal(newRestrictions(
-                UserManager.DISALLOW_ADJUST_VOLUME,
-                UserManager.DISALLOW_UNMUTE_MICROPHONE,
-                UserManager.DISALLOW_USB_FILE_TRANSFER,
-                UserManager.DISALLOW_CONFIG_TETHERING,
-                UserManager.DISALLOW_OUTGOING_BEAM,
-                UserManager.DISALLOW_APPS_CONTROL,
-                UserManager.ENSURE_VERIFY_APPS
-        ), true /* isDeviceOwner */, UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
-
-
-        assertRestrictions(newRestrictions(
-                // This one is global no matter who sets it.
-                UserManager.ENSURE_VERIFY_APPS,
-
-                // These can be set by PO too, but when DO sets them, they're global.
-                UserManager.DISALLOW_ADJUST_VOLUME,
-                UserManager.DISALLOW_UNMUTE_MICROPHONE,
-
-                // These can only be set by DO.
-                UserManager.DISALLOW_USB_FILE_TRANSFER,
-                UserManager.DISALLOW_CONFIG_TETHERING
-        ), global);
-
-        assertRestrictions(newRestrictions(
-                // They can be set by both DO/PO.
-                UserManager.DISALLOW_OUTGOING_BEAM,
-                UserManager.DISALLOW_APPS_CONTROL
-        ), local);
-
-        local.clear();
-        global.clear();
-
-        // Restrictions set by PO.
-        UserRestrictionsUtils.sortToGlobalAndLocal(newRestrictions(
-                UserManager.DISALLOW_ADJUST_VOLUME,
-                UserManager.DISALLOW_UNMUTE_MICROPHONE,
-                UserManager.DISALLOW_USB_FILE_TRANSFER,
-                UserManager.DISALLOW_CONFIG_TETHERING,
-                UserManager.DISALLOW_OUTGOING_BEAM,
-                UserManager.DISALLOW_APPS_CONTROL,
-                UserManager.ENSURE_VERIFY_APPS
-        ), false /* isDeviceOwner */, UserManagerInternal.CAMERA_NOT_DISABLED, global, local);
-
-        assertRestrictions(newRestrictions(
-                // This one is global no matter who sets it.
-                UserManager.ENSURE_VERIFY_APPS
-        ), global);
-
-        assertRestrictions(newRestrictions(
-                // These can be set by PO too, but when PO sets them, they're local.
-                UserManager.DISALLOW_ADJUST_VOLUME,
-                UserManager.DISALLOW_UNMUTE_MICROPHONE,
-
-                // They can be set by both DO/PO.
-                UserManager.DISALLOW_OUTGOING_BEAM,
-                UserManager.DISALLOW_APPS_CONTROL,
-
-                // These can only be set by DO.
-                UserManager.DISALLOW_USB_FILE_TRANSFER,
-                UserManager.DISALLOW_CONFIG_TETHERING
-        ), local);
-
-    }
-
-    public void testSortToLocalAndGlobalWithCameraDisabled() {
-        final Bundle local = new Bundle();
-        final Bundle global = new Bundle();
-
-        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY, false,
-                UserManagerInternal.CAMERA_DISABLED_GLOBALLY, global, local);
-        assertRestrictions(newRestrictions(UserManager.DISALLOW_CAMERA), global);
-        assertEquals(0, local.size());
-        global.clear();
-
-        UserRestrictionsUtils.sortToGlobalAndLocal(Bundle.EMPTY, false,
-                UserManagerInternal.CAMERA_DISABLED_LOCALLY, global, local);
-        assertEquals(0, global.size());
-        assertRestrictions(newRestrictions(UserManager.DISALLOW_CAMERA), local);
-    }
-
-    public void testMergeAll() {
-        SparseArray<Bundle> restrictions = new SparseArray<>();
-        assertNull(UserRestrictionsUtils.mergeAll(restrictions));
-
-        restrictions.put(0, newRestrictions(UserManager.DISALLOW_ADJUST_VOLUME));
-        restrictions.put(1, newRestrictions(UserManager.DISALLOW_USB_FILE_TRANSFER));
-        restrictions.put(2, newRestrictions(UserManager.DISALLOW_APPS_CONTROL));
-
-        Bundle result = UserRestrictionsUtils.mergeAll(restrictions);
-        assertRestrictions(
-                newRestrictions(
-                        UserManager.DISALLOW_ADJUST_VOLUME,
-                        UserManager.DISALLOW_USB_FILE_TRANSFER,
-                        UserManager.DISALLOW_APPS_CONTROL),
-                result);
-    }
-
     public void testMoveRestriction() {
-        SparseArray<Bundle> localRestrictions = new SparseArray<>();
-        SparseArray<Bundle> globalRestrictions = new SparseArray<>();
+        SparseArray<RestrictionsSet> localRestrictions = new SparseArray<>();
+        RestrictionsSet globalRestrictions = new RestrictionsSet();
 
         // User 0 has only local restrictions, nothing should change.
-        localRestrictions.put(0, newRestrictions(UserManager.DISALLOW_ADJUST_VOLUME));
+        localRestrictions.put(0, newRestrictions(0, UserManager.DISALLOW_ADJUST_VOLUME));
         // User 1 has a local restriction to be moved to global and some global already. Local
         // restrictions should be removed for this user.
-        localRestrictions.put(1, newRestrictions(UserManager.ENSURE_VERIFY_APPS));
-        globalRestrictions.put(1, newRestrictions(UserManager.DISALLOW_ADD_USER));
+        localRestrictions.put(1, newRestrictions(1, UserManager.ENSURE_VERIFY_APPS));
+        globalRestrictions.updateRestrictions(1,
+                newRestrictions(UserManager.DISALLOW_ADD_USER));
         // User 2 has a local restriction to be moved and one to leave local.
-        localRestrictions.put(2, newRestrictions(
-                UserManager.ENSURE_VERIFY_APPS,
-                UserManager.DISALLOW_CONFIG_VPN));
+        localRestrictions.put(2, newRestrictions(2,
+                UserManager.ENSURE_VERIFY_APPS, UserManager.DISALLOW_CONFIG_VPN));
 
         UserRestrictionsUtils.moveRestriction(
                 UserManager.ENSURE_VERIFY_APPS, localRestrictions, globalRestrictions);
 
         // Check user 0.
         assertRestrictions(
-                newRestrictions(UserManager.DISALLOW_ADJUST_VOLUME),
+                newRestrictions(0, UserManager.DISALLOW_ADJUST_VOLUME),
                 localRestrictions.get(0));
-        assertNull(globalRestrictions.get(0));
+        assertNull(globalRestrictions.getRestrictions(0));
 
         // Check user 1.
-        assertNull(localRestrictions.get(1));
+        assertTrue(localRestrictions.get(1).isEmpty());
         assertRestrictions(
                 newRestrictions(UserManager.ENSURE_VERIFY_APPS, UserManager.DISALLOW_ADD_USER),
-                globalRestrictions.get(1));
+                globalRestrictions.getRestrictions(1));
 
         // Check user 2.
         assertRestrictions(
-                newRestrictions(UserManager.DISALLOW_CONFIG_VPN),
+                newRestrictions(2, UserManager.DISALLOW_CONFIG_VPN),
                 localRestrictions.get(2));
         assertRestrictions(
                 newRestrictions(UserManager.ENSURE_VERIFY_APPS),
-                globalRestrictions.get(2));
+                globalRestrictions.getRestrictions(2));
     }
 
     public void testAreEqual() {

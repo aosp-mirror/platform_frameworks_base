@@ -157,4 +157,10 @@ interface IOverlayManager {
      * Returns the list of default overlay packages, or an empty array if there are none.
      */
     String[] getDefaultOverlayPackages();
+
+    /**
+     * Invalidates and removes the idmap for an overlay,
+     * @param packageName The name of the overlay package whose idmap should be deleted.
+     */
+    void invalidateCachesForOverlay(in String packageName, in int userIs);
 }

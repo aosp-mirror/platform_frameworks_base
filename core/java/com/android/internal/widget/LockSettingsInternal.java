@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
+import android.app.admin.PasswordMetrics;
 
 /**
  * LockSettingsService local system service interface.
@@ -57,8 +59,58 @@ public abstract class LockSettingsInternal {
      *
      * @return true if password is set.
      */
-    public abstract boolean setLockCredentialWithToken(byte[] credential, int type,
-            long tokenHandle, byte[] token, int requestedQuality, int userId);
+    public abstract boolean setLockCredentialWithToken(LockscreenCredential credential,
+            long tokenHandle, byte[] token, int userId);
 
     public abstract boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId);
+
+    /**
+     * Returns PasswordMetrics object corresponding to the given user's lockscreen password.
+     * If the user has a password but its metrics isn't known yet (for example if the device
+     * has not been unlocked since boot), this method will return {@code null}.
+     * If the user has no password, a default PasswordMetrics (PASSWORD_QUALITY_UNSPECIFIED)
+     * will be returned.
+     *
+     * Calling this method on a managed profile user with unified challenge is undefined.
+     *
+     * @param userHandle the user for whom to provide metrics.
+     * @return the user password metrics.
+     */
+    public abstract @Nullable PasswordMetrics getUserPasswordMetrics(int userHandle);
+
+    /**
+     * Prepare for reboot escrow. This triggers the strong auth to be required. After the escrow
+     * is complete as indicated by calling to the listener registered with {@link
+     * #setRebootEscrowListener}, then {@link #armRebootEscrow()} should be called before
+     * rebooting to apply the update.
+     */
+    public abstract void prepareRebootEscrow();
+
+    /**
+     * Registers a listener for when the RebootEscrow HAL has stored its data needed for rebooting
+     * for an OTA.
+     *
+     * @see RebootEscrowListener
+     * @param listener
+     */
+    public abstract void setRebootEscrowListener(RebootEscrowListener listener);
+
+    /**
+     * Requests that any data needed for rebooting is cleared from the RebootEscrow HAL.
+     */
+    public abstract void clearRebootEscrow();
+
+    /**
+     * Should be called immediately before rebooting for an update. This depends on {@link
+     * #prepareRebootEscrow()} having been called and the escrow completing.
+     *
+     * @return true if the arming worked
+     */
+    public abstract boolean armRebootEscrow();
+
+
+    /**
+     * Refreshes pending strong auth timeout with the latest admin requirement set by device policy.
+     */
+    public abstract void refreshStrongAuthTimeout(int userId);
 }

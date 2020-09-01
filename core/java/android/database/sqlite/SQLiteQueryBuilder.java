@@ -35,8 +35,8 @@ import com.android.internal.util.ArrayUtils;
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +56,7 @@ public class SQLiteQueryBuilder {
             "(?i)(AVG|COUNT|MAX|MIN|SUM|TOTAL|GROUP_CONCAT)\\((.+)\\)");
 
     private Map<String, String> mProjectionMap = null;
-    private List<Pattern> mProjectionGreylist = null;
+    private Collection<Pattern> mProjectionGreylist = null;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String mTables = "";
@@ -196,37 +196,25 @@ public class SQLiteQueryBuilder {
      * Sets a projection greylist of columns that will be allowed through, even
      * when {@link #setStrict(boolean)} is enabled. This provides a way for
      * abusive custom columns like {@code COUNT(*)} to continue working.
-     *
-     * @hide
      */
-    public void setProjectionGreylist(@Nullable List<Pattern> projectionGreylist) {
+    public void setProjectionGreylist(@Nullable Collection<Pattern> projectionGreylist) {
         mProjectionGreylist = projectionGreylist;
     }
 
     /**
      * Gets the projection greylist for the query, as last configured by
-     * {@link #setProjectionGreylist(List)}.
-     *
-     * @hide
+     * {@link #setProjectionGreylist}.
      */
-    public @Nullable List<Pattern> getProjectionGreylist() {
+    public @Nullable Collection<Pattern> getProjectionGreylist() {
         return mProjectionGreylist;
     }
 
-    /**
-     * @deprecated Projection aggregation is now always allowed
-     *
-     * @hide
-     */
+    /** {@hide} */
     @Deprecated
     public void setProjectionAggregationAllowed(boolean projectionAggregationAllowed) {
     }
 
-    /**
-     * @deprecated Projection aggregation is now always allowed
-     *
-     * @hide
-     */
+    /** {@hide} */
     @Deprecated
     public boolean isProjectionAggregationAllowed() {
         return true;
@@ -252,25 +240,27 @@ public class SQLiteQueryBuilder {
     }
 
     /**
-     * When set, the selection is verified against malicious arguments.
-     * When using this class to create a statement using
+     * When set, the selection is verified against malicious arguments. When
+     * using this class to create a statement using
      * {@link #buildQueryString(boolean, String, String[], String, String, String, String, String)},
-     * non-numeric limits will raise an exception. If a projection map is specified, fields
-     * not in that map will be ignored.
-     * If this class is used to execute the statement directly using
+     * non-numeric limits will raise an exception. If a projection map is
+     * specified, fields not in that map will be ignored. If this class is used
+     * to execute the statement directly using
      * {@link #query(SQLiteDatabase, String[], String, String[], String, String, String)}
      * or
      * {@link #query(SQLiteDatabase, String[], String, String[], String, String, String, String)},
-     * additionally also parenthesis escaping selection are caught.
-     *
-     * To summarize: To get maximum protection against malicious third party apps (for example
-     * content provider consumers), make sure to do the following:
+     * additionally also parenthesis escaping selection are caught. To
+     * summarize: To get maximum protection against malicious third party apps
+     * (for example content provider consumers), make sure to do the following:
      * <ul>
      * <li>Set this value to true</li>
      * <li>Use a projection map</li>
-     * <li>Use one of the query overloads instead of getting the statement as a sql string</li>
+     * <li>Use one of the query overloads instead of getting the statement as a
+     * sql string</li>
      * </ul>
-     * By default, this value is false.
+     * <p>
+     * This feature is disabled by default on each newly constructed
+     * {@link SQLiteQueryBuilder} and needs to be manually enabled.
      */
     public void setStrict(boolean strict) {
         if (strict) {
@@ -295,8 +285,9 @@ public class SQLiteQueryBuilder {
      * This enforcement applies to {@link #insert}, {@link #query}, and
      * {@link #update} operations. Any enforcement failures will throw an
      * {@link IllegalArgumentException}.
-     *
-     * {@hide}
+     * <p>
+     * This feature is disabled by default on each newly constructed
+     * {@link SQLiteQueryBuilder} and needs to be manually enabled.
      */
     public void setStrictColumns(boolean strictColumns) {
         if (strictColumns) {
@@ -309,8 +300,6 @@ public class SQLiteQueryBuilder {
     /**
      * Get if the query is marked as strict, as last configured by
      * {@link #setStrictColumns(boolean)}.
-     *
-     * {@hide}
      */
     public boolean isStrictColumns() {
         return (mStrictFlags & STRICT_COLUMNS) != 0;
@@ -335,8 +324,9 @@ public class SQLiteQueryBuilder {
      * {@link #delete} operations. This enforcement does not apply to trusted
      * inputs, such as those provided by {@link #appendWhere}. Any enforcement
      * failures will throw an {@link IllegalArgumentException}.
-     *
-     * {@hide}
+     * <p>
+     * This feature is disabled by default on each newly constructed
+     * {@link SQLiteQueryBuilder} and needs to be manually enabled.
      */
     public void setStrictGrammar(boolean strictGrammar) {
         if (strictGrammar) {
@@ -349,8 +339,6 @@ public class SQLiteQueryBuilder {
     /**
      * Get if the query is marked as strict, as last configured by
      * {@link #setStrictGrammar(boolean)}.
-     *
-     * {@hide}
      */
     public boolean isStrictGrammar() {
         return (mStrictFlags & STRICT_GRAMMAR) != 0;
@@ -613,8 +601,6 @@ public class SQLiteQueryBuilder {
      *
      * @param db the database to insert on
      * @return the row ID of the newly inserted row, or -1 if an error occurred
-     *
-     * {@hide}
      */
     public long insert(@NonNull SQLiteDatabase db, @NonNull ContentValues values) {
         Objects.requireNonNull(mTables, "No tables defined");
@@ -640,7 +626,7 @@ public class SQLiteQueryBuilder {
                 Log.d(TAG, sql);
             }
         }
-        return db.executeSql(sql, sqlArgs);
+        return DatabaseUtils.executeInsert(db, sql, sqlArgs);
     }
 
     /**
@@ -716,7 +702,7 @@ public class SQLiteQueryBuilder {
                 Log.d(TAG, sql);
             }
         }
-        return db.executeSql(sql, sqlArgs);
+        return DatabaseUtils.executeUpdateDelete(db, sql, sqlArgs);
     }
 
     /**
@@ -776,7 +762,7 @@ public class SQLiteQueryBuilder {
                 Log.d(TAG, sql);
             }
         }
-        return db.executeSql(sql, sqlArgs);
+        return DatabaseUtils.executeUpdateDelete(db, sql, sqlArgs);
     }
 
     private void enforceStrictColumns(@Nullable String[] projection) {
@@ -800,58 +786,42 @@ public class SQLiteQueryBuilder {
     private void enforceStrictGrammar(@Nullable String selection, @Nullable String groupBy,
             @Nullable String having, @Nullable String sortOrder, @Nullable String limit) {
         SQLiteTokenizer.tokenize(selection, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarWhereHaving);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(groupBy, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarGroupBy);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(having, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarWhereHaving);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(sortOrder, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarOrderBy);
+                this::enforceStrictToken);
         SQLiteTokenizer.tokenize(limit, SQLiteTokenizer.OPTION_NONE,
-                this::enforceStrictGrammarLimit);
+                this::enforceStrictToken);
     }
 
-    private void enforceStrictGrammarWhereHaving(@NonNull String token) {
+    private void enforceStrictToken(@NonNull String token) {
         if (isTableOrColumn(token)) return;
         if (SQLiteTokenizer.isFunction(token)) return;
         if (SQLiteTokenizer.isType(token)) return;
 
-        // NOTE: we explicitly don't allow SELECT subqueries, since they could
-        // leak data that should have been filtered by the trusted where clause
+        // Carefully block any tokens that are attempting to jump across query
+        // clauses or create subqueries, since they could leak data that should
+        // have been filtered by the trusted where clause
+        boolean isAllowedKeyword = SQLiteTokenizer.isKeyword(token);
         switch (token.toUpperCase(Locale.US)) {
-            case "AND": case "AS": case "BETWEEN": case "BINARY":
-            case "CASE": case "CAST": case "COLLATE": case "DISTINCT":
-            case "ELSE": case "END": case "ESCAPE": case "EXISTS":
-            case "GLOB": case "IN": case "IS": case "ISNULL":
-            case "LIKE": case "MATCH": case "NOCASE": case "NOT":
-            case "NOTNULL": case "NULL": case "OR": case "REGEXP":
-            case "RTRIM": case "THEN": case "WHEN":
-                return;
+            case "SELECT":
+            case "FROM":
+            case "WHERE":
+            case "GROUP":
+            case "HAVING":
+            case "WINDOW":
+            case "VALUES":
+            case "ORDER":
+            case "LIMIT":
+                isAllowedKeyword = false;
+                break;
         }
-        throw new IllegalArgumentException("Invalid token " + token);
-    }
-
-    private void enforceStrictGrammarGroupBy(@NonNull String token) {
-        if (isTableOrColumn(token)) return;
-        throw new IllegalArgumentException("Invalid token " + token);
-    }
-
-    private void enforceStrictGrammarOrderBy(@NonNull String token) {
-        if (isTableOrColumn(token)) return;
-        switch (token.toUpperCase(Locale.US)) {
-            case "COLLATE": case "ASC": case "DESC":
-            case "BINARY": case "RTRIM": case "NOCASE":
-                return;
+        if (!isAllowedKeyword) {
+            throw new IllegalArgumentException("Invalid token " + token);
         }
-        throw new IllegalArgumentException("Invalid token " + token);
-    }
-
-    private void enforceStrictGrammarLimit(@NonNull String token) {
-        switch (token.toUpperCase(Locale.US)) {
-            case "OFFSET":
-                return;
-        }
-        throw new IllegalArgumentException("Invalid token " + token);
     }
 
     /**
@@ -1166,8 +1136,8 @@ public class SQLiteQueryBuilder {
             return maybeWithOperator(operator, column);
         }
 
-        if (mStrictFlags == 0
-                && (userColumn.contains(" AS ") || userColumn.contains(" as "))) {
+        if (mStrictFlags == 0 &&
+                (userColumn.contains(" AS ") || userColumn.contains(" as "))) {
             /* A column alias already exist */
             return maybeWithOperator(operator, userColumn);
         }

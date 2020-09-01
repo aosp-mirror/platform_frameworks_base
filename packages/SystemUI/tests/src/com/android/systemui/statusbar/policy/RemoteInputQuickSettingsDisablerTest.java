@@ -35,12 +35,14 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RemoteInputQuickSettingsDisablerTest extends SysuiTestCase {
 
+    @Mock
     private CommandQueue mCommandQueue;
     private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
 
@@ -48,11 +50,8 @@ public class RemoteInputQuickSettingsDisablerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mCommandQueue = mock(CommandQueue.class);
-        mContext.putComponent(CommandQueue.class, mCommandQueue);
-
         mRemoteInputQuickSettingsDisabler = new RemoteInputQuickSettingsDisabler(mContext,
-                mock(ConfigurationController.class));
+                mock(ConfigurationController.class), mCommandQueue);
     }
 
     @Test

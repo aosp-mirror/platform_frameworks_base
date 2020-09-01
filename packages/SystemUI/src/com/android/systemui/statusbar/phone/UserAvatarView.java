@@ -74,6 +74,12 @@ public class UserAvatarView extends View {
         this(context, null);
     }
 
+    @Override
+    public void setActivated(boolean activated) {
+        super.setActivated(activated);
+        mDrawable.invalidateSelf();
+    }
+
     /**
      * @deprecated use {@link #setAvatar(Bitmap)} instead.
      */

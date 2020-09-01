@@ -554,7 +554,7 @@ public final class ServiceState {
         pw.println();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, long now) {
         final long token = proto.start(fieldId);
         proto.write(PackageServiceStatsProto.SERVICE_NAME, mName);
 

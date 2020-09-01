@@ -18,10 +18,11 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -36,6 +37,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
+import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -206,8 +208,20 @@ public class SafeActivityOptions {
                 throw new SecurityException(msg);
             }
         }
-        // Check if someone tries to launch an activity on a private display with a different
-        // owner.
+        // Check if the caller is allowed to launch on the specified display area.
+        final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
+        final TaskDisplayArea taskDisplayArea = daToken != null
+                ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+        if (aInfo != null && taskDisplayArea != null
+                && !supervisor.isCallerAllowedToLaunchOnTaskDisplayArea(callingPid, callingUid,
+                taskDisplayArea, aInfo)) {
+            final String msg = "Permission Denial: starting " + getIntentString(intent)
+                    + " from " + callerApp + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ") with launchTaskDisplayArea=" + taskDisplayArea;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        // Check if the caller is allowed to launch on the specified display.
         final int launchDisplayId = options.getLaunchDisplayId();
         if (aInfo != null && launchDisplayId != INVALID_DISPLAY
                 && !supervisor.isCallerAllowedToLaunchOnDisplay(callingPid, callingUid,

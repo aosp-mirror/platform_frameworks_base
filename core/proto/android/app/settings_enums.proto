@@ -251,6 +251,9 @@ enum Action {
     // ACTION: Create a Settings shortcut item.
     ACTION_SETTINGS_CREATE_SHORTCUT = 829;
 
+    // ACTION: A tile in Settings information architecture is clicked
+    ACTION_SETTINGS_TILE_CLICK = 830;
+
     // ACTION: Settings advanced button is expanded
     ACTION_SETTINGS_ADVANCED_BUTTON_EXPAND = 834;
 
@@ -689,6 +692,29 @@ enum Action {
     // ACTION: Settings > Initialize Search bar > Verify Slice > Other exception
     ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
 
+    // Custom tag to evaluate the consuming time of the Controller.updateState.
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_CONTROLLER_UPDATE_STATE = 1728;
+
+    // Custom tag to evaluate the consuming time from onAttach to
+    // DashboardFragment.updatePreferenceStates.
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_DASHBOARD_VISIBLE_TIME = 1729;
+
+    // ACTION: Allow "Access all files" for an app
+    APP_SPECIAL_PERMISSION_MANAGE_EXT_STRG_ALLOW = 1730;
+
+    // ACTION: Deny "Access all files" for an app
+    APP_SPECIAL_PERMISSION_MANAGE_EXT_STRG_DENY = 1731;
+
+    // ACTION: Battery feature usage
+    ACTION_BATTERY_OPTION_FEATURE_USAGE = 1732;
+
+    // ACTION: Battery feature runtime event
+    ACTION_BATTERY_OPTION_RUNTIME_EVENT = 1733;
+
     // ACTION: Settings > Developer Options > Toggle on Wireless debugging
     // CATEGORY: SETTINGS
     // OS: R
@@ -698,6 +724,26 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: R
     ACTION_ADB_WIRELESS_OFF = 1735;
+
+    // ACTION: Change Wi-Fi hotspot name
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_SETTINGS_CHANGE_WIFI_HOTSPOT_NAME = 1736;
+
+    // ACTION: Change Wi-Fi hotspot password
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_SETTINGS_CHANGE_WIFI_HOTSPOT_PASSWORD = 1737;
+
+    // ACTION: Settings > Security > Toggle on Confirm Sim deletion
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_CONFIRM_SIM_DELETION_ON = 1738;
+
+    // ACTION: Settings > Security > Toggle off Confirm Sim deletion
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_CONFIRM_SIM_DELETION_OFF = 1739;
 }
 
 /**
@@ -712,7 +758,7 @@ enum PageId {
     // OS: 6.0
     ACCESSIBILITY = 2;
 
-    // OPEN: Settings > Accessibility > Captions
+    // OPEN: Settings > Accessibility > Captions preference
     // CATEGORY: SETTINGS
     // OS: 6.0
     ACCESSIBILITY_CAPTION_PROPERTIES = 3;
@@ -2421,16 +2467,153 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     SETTINGS_GESTURE_TAP = 1751;
+    // ---- End Q Constants, all Q constants go above this line ----
+    // OPEN: Settings > Network & Internet > Wi-Fi > Click new network
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_WIFI_CONFIGURE_NETWORK = 1800;
+
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: R
+    // Note: Shows up only when Magnify with shortcut is enabled
+    // and under accessibility button mode.
+    DIALOG_TOGGLE_SCREEN_MAGNIFICATION_ACCESSIBILITY_BUTTON = 1801;
+
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: R
+    // Note: Shows up only when Magnify with shortcut is enabled.
+    // and under gesture navigation mode.
+    DIALOG_TOGGLE_SCREEN_MAGNIFICATION_GESTURE_NAVIGATION = 1802;
 
     // OPEN: Settings > Security & screen lock -> Encryption & credentials > Install a certificate
     // CATEGORY: SETTINGS
     // OS: R
     INSTALL_CERTIFICATE_FROM_STORAGE = 1803;
 
+    // OPEN: Settings > Apps and notifications > Special app access > notification access >
+    // an app
+    // CATEGORY: SETTINGS
+    // OS: R
+    NOTIFICATION_ACCESS_DETAIL = 1804;
+
     // OPEN: Settings > Developer Options > Platform Compat
     // CATEGORY: SETTINGS
     // OS: R
     SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;
+
+    // OPEN: Settings > Location -> Work profile tab
+    // CATEGORY: SETTINGS
+    // OS: R
+    LOCATION_WORK = 1806;
+
+    // OPEN: Settings > Account -> Work profile tab
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCOUNT_WORK = 1807;
+
+    // OPEN: Settings > Developer Options > Bug report handler
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_BUGREPORT_HANDLER = 1808;
+
+    // Panel for adding Wi-Fi networks
+    // CATEGORY: SETTINGS
+    // OS: R
+    PANEL_ADD_WIFI_NETWORKS = 1809;
+
+    // OPEN: Settings > Accessibility > Enable the feature or shortcut > Show tutorial dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_ACCESSIBILITY_TUTORIAL = 1810;
+
+    // OPEN: Settings > Accessibility > Edit shortcut dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_ACCESSIBILITY_SERVICE_EDIT_SHORTCUT = 1812;
+
+    // OPEN: Settings > Accessibility > Magnification > Edit shortcut dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_MAGNIFICATION_EDIT_SHORTCUT = 1813;
+
+    // OPEN: Settings > Accessibility > Color correction > Edit shortcut dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_DALTONIZER_EDIT_SHORTCUT = 1814;
+
+    // OPEN: Settings > Accessibility > Magnification > Settings
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCESSIBILITY_MAGNIFICATION_SETTINGS = 1815;
+
+    // OPEN: Settings > Accessibility > Magnification > Settings > Magnification area dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_MAGNIFICATION_CAPABILITY = 1816;
+
+    // OPEN: Settings > Accessibility > Color inversion
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCESSIBILITY_COLOR_INVERSION_SETTINGS = 1817;
+
+    // OPEN: Settings > Accessibility > Color inversion > Edit shortcut dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    DIALOG_COLOR_INVERSION_EDIT_SHORTCUT = 1818;
+
+    // OPEN: Settings > Accessibility > Captions preference > Captions appearance
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCESSIBILITY_CAPTION_APPEARANCE = 1819;
+
+    // OPEN: Settings > Accessibility > Captions preference > More options
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCESSIBILITY_CAPTION_MORE_OPTIONS = 1820;
+
+    // OPEN: Settings > Battery > Battery share
+    // CATEGORY: SETTINGS
+    // OS: R
+    FUELGAUGE_BATTERY_SHARE = 1821;
+
+    // OPEN: Settings -> Apps & Notifications -> Special App Access
+    // CATEGORY: SETTINGS
+    // OS: R
+    MANAGE_EXTERNAL_STORAGE = 1822;
+
+    // Open: Settings > DND > People
+    // OS: R
+    DND_PEOPLE = 1823;
+
+    // OPEN: Settings > Apps and notifications > App info > one of any app > Open by default
+    //       > Open supported links
+    // CATEGORY: SETTINGS
+    // OS: R
+    OPEN_SUPPORTED_LINKS = 1824;
+
+    // OPEN: Settings > Display > Dark theme > Set start time dialog
+    DIALOG_DARK_THEME_SET_START_TIME = 1825;
+
+    // OPEN: Settings > Display > Dark theme > Set end time dialog
+    DIALOG_DARK_THEME_SET_END_TIME = 1826;
+
+    // OPEN: Settings -> Sound -> Vibrate for calls
+    // CATEGORY: SETTINGS
+    // OS: R
+    VIBRATE_FOR_CALLS = 1827;
+
+    // OPEN: Settings > Connected devices > Connection preferences > NFC
+    // CATEGORY: SETTINGS
+    // OS: R
+    CONNECTION_DEVICE_ADVANCED_NFC = 1828;
+
+    // OPEN: Settings -> Apps & Notifications -> Special App Access
+    INTERACT_ACROSS_PROFILES = 1829;
+
+    // OPEN: Settings > Notifications > (app or conversations) > conversation
+    NOTIFICATION_CONVERSATION_SETTINGS = 1830;
 
     // OPEN: Settings > Developer Options > Wireless debugging
     // CATEGORY: SETTINGS
@@ -2449,9 +2632,55 @@ enum PageId {
     // OS: R
     ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
 
+    // OPEN: Settings > apps & notifications > notifications > conversations
+    // CATEGORY: SETTINGS
+    // OS: R
+    NOTIFICATION_CONVERSATION_LIST_SETTINGS = 1834;
+
+    // Panel for Media Output Group operation
+    // CATEGORY: SETTINGS
+    // OS: R
+    PANEL_MEDIA_OUTPUT_GROUP = 1835;
+
     // OPEN: Settings > Developer Options > Wireless debugging
     //   > Click on paired device
     // CATEGORY: SETTINGS
     // OS: R
     ADB_WIRELESS_DEVICE_DETAILS = 1836;
+
+    // Open: Settings > Sound > Do Not Disturb > People > Conversations
+    // OS: R
+    DND_CONVERSATIONS = 1837;
+
+    // Open: Settings > Sound > Do Not Disturb > People > Calls
+    // OS: R
+    DND_CALLS = 1838;
+
+    // Open: Settings > Sound > Do Not Disturb > People > Messages
+    // OS: R
+    DND_MESSAGES = 1839;
+
+    // Open: Settings > Sound > Do Not Disturb > Apps > <Choose App>
+    // OS: R
+    DND_APPS_BYPASSING = 1840;
+
+    // OPEN: Settings > Battery > Advanced battery option
+    // CATEGORY: SETTINGS
+    // OS: R
+    FUELGAUGE_ADVANCED_BATTERY_OPTION = 1842;
+
+    // OPEN: Settings > System > Gestures > Power menu
+    // CATEGORY: SETTINGS
+    // OS: R
+    POWER_MENU_SETTINGS = 1843;
+
+    // OPEN: Settings > System > Gestures > Power menu > Device controls
+    // CATEGORY: SETTINGS
+    // OS: R
+    DEVICE_CONTROLS_SETTINGS = 1844;
+
+    // OPEN: Settings > Sound > Media
+    // CATEGORY: SETTINGS
+    // OS: R
+    MEDIA_CONTROLS_SETTINGS = 1845;
 }

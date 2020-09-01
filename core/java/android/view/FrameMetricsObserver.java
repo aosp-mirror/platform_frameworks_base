@@ -17,11 +17,8 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Looper;
-import android.os.MessageQueue;
-
-import com.android.internal.util.VirtualRefBasePtr;
+import android.graphics.HardwareRendererObserver;
+import android.os.Handler;
 
 import java.lang.ref.WeakReference;
 
@@ -31,47 +28,39 @@ import java.lang.ref.WeakReference;
  *
  * @hide
  */
-public class FrameMetricsObserver {
-    @UnsupportedAppUsage
-    private MessageQueue mMessageQueue;
-
-    private WeakReference<Window> mWindow;
-
-    @UnsupportedAppUsage
-    private FrameMetrics mFrameMetrics;
-
-    /* pacage */ Window.OnFrameMetricsAvailableListener mListener;
-    /** @hide */
-    public VirtualRefBasePtr mNative;
+public class FrameMetricsObserver
+        implements HardwareRendererObserver.OnFrameMetricsAvailableListener {
+    private final WeakReference<Window> mWindow;
+    private final FrameMetrics mFrameMetrics;
+    private final HardwareRendererObserver mObserver;
+    /*package*/ final Window.OnFrameMetricsAvailableListener mListener;
 
     /**
      * Creates a FrameMetricsObserver
      *
-     * @param looper the looper to use when invoking callbacks
+     * @param handler the Handler to use when invoking callbacks
      */
-    FrameMetricsObserver(@NonNull Window window, @NonNull Looper looper,
+    FrameMetricsObserver(@NonNull Window window, @NonNull Handler handler,
             @NonNull Window.OnFrameMetricsAvailableListener listener) {
-        if (looper == null) {
-            throw new NullPointerException("looper cannot be null");
-        }
-
-        mMessageQueue = looper.getQueue();
-        if (mMessageQueue == null) {
-            throw new IllegalStateException("invalid looper, null message queue\n");
-        }
-
-        mFrameMetrics = new FrameMetrics();
         mWindow = new WeakReference<>(window);
         mListener = listener;
+        mFrameMetrics = new FrameMetrics();
+        mObserver = new HardwareRendererObserver(this,  mFrameMetrics.mTimingData, handler);
     }
 
-    // Called by native on the provided Handler
-    @SuppressWarnings("unused")
-    @UnsupportedAppUsage
-    private void notifyDataAvailable(int dropCount) {
-        final Window window = mWindow.get();
-        if (window != null) {
-            mListener.onFrameMetricsAvailable(window, mFrameMetrics, dropCount);
+    /**
+     * Implementation of OnFrameMetricsAvailableListener
+     * @param dropCountSinceLastInvocation the number of reports dropped since the last time
+     * @Override
+     */
+    public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
+        if (mWindow.get() != null) {
+            mListener.onFrameMetricsAvailable(mWindow.get(), mFrameMetrics,
+                    dropCountSinceLastInvocation);
         }
+    }
+
+    /*package*/ HardwareRendererObserver getRendererObserver() {
+        return mObserver;
     }
 }

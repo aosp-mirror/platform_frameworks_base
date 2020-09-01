@@ -16,13 +16,8 @@
 package com.android.server.appprediction;
 
 import android.annotation.NonNull;
-import android.app.prediction.AppPredictionContext;
-import android.app.prediction.AppPredictionSessionId;
-import android.app.prediction.AppTargetEvent;
-import android.app.prediction.IPredictionCallback;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ParceledListSlice;
 import android.os.IBinder;
 import android.service.appprediction.IPredictionService;
 import android.text.format.DateUtils;
@@ -71,74 +66,24 @@ public class RemoteAppPredictionService extends
     }
 
     /**
-     * Notifies the service of a new prediction session.
-     */
-    public void onCreatePredictionSession(@NonNull AppPredictionContext context,
-            @NonNull AppPredictionSessionId sessionId) {
-        scheduleAsyncRequest((s) -> s.onCreatePredictionSession(context, sessionId));
-    }
-
-    /**
-     * Records an app target event to the service.
-     */
-    public void notifyAppTargetEvent(@NonNull AppPredictionSessionId sessionId,
-            @NonNull AppTargetEvent event) {
-        scheduleAsyncRequest((s) -> s.notifyAppTargetEvent(sessionId, event));
-    }
-
-    /**
-     * Records when a launch location is shown.
-     */
-    public void notifyLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
-            @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-        scheduleAsyncRequest((s)
-                -> s.notifyLaunchLocationShown(sessionId, launchLocation, targetIds));
-    }
-
-    /**
-     * Requests the service to sort a list of apps or shortcuts.
-     */
-    public void sortAppTargets(@NonNull AppPredictionSessionId sessionId,
-            @NonNull ParceledListSlice targets, @NonNull IPredictionCallback callback) {
-        scheduleAsyncRequest((s) -> s.sortAppTargets(sessionId, targets, callback));
-    }
-
-
-    /**
-     * Registers a callback for continuous updates of predicted apps or shortcuts.
-     */
-    public void registerPredictionUpdates(@NonNull AppPredictionSessionId sessionId,
-            @NonNull IPredictionCallback callback) {
-        scheduleAsyncRequest((s) -> s.registerPredictionUpdates(sessionId, callback));
-    }
-
-    /**
-     * Unregisters a callback for continuous updates of predicted apps or shortcuts.
-     */
-    public void unregisterPredictionUpdates(@NonNull AppPredictionSessionId sessionId,
-            @NonNull IPredictionCallback callback) {
-        scheduleAsyncRequest((s) -> s.unregisterPredictionUpdates(sessionId, callback));
-    }
-
-    /**
-     * Requests a new set of predicted apps or shortcuts.
-     */
-    public void requestPredictionUpdate(@NonNull AppPredictionSessionId sessionId) {
-        scheduleAsyncRequest((s) -> s.requestPredictionUpdate(sessionId));
-    }
-
-    /**
-     * Notifies the service of the end of an existing prediction session.
-     */
-    public void onDestroyPredictionSession(@NonNull AppPredictionSessionId sessionId) {
-        scheduleAsyncRequest((s) -> s.onDestroyPredictionSession(sessionId));
-    }
-
-    /**
      * Schedules a request to bind to the remote service.
      */
     public void reconnect() {
         super.scheduleBind();
+    }
+
+    /**
+     * Schedule async request on remote service.
+     */
+    public void scheduleOnResolvedService(@NonNull AsyncRequest<IPredictionService> request) {
+        scheduleAsyncRequest(request);
+    }
+
+    /**
+     * Execute async request on remote service immediately instead of sending it to Handler queue.
+     */
+    public void executeOnResolvedService(@NonNull AsyncRequest<IPredictionService> request) {
+        executeAsyncRequest(request);
     }
 
     /**

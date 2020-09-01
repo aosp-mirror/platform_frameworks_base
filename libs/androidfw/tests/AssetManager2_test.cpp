@@ -17,9 +17,9 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AssetManager.h"
 
-#include "android-base/logging.h"
-
 #include "TestHelpers.h"
+#include "android-base/file.h"
+#include "android-base/logging.h"
 #include "androidfw/ResourceUtils.h"
 #include "data/appaslib/R.h"
 #include "data/basic/R.h"
@@ -45,35 +45,43 @@ namespace android {
 class AssetManager2Test : public ::testing::Test {
  public:
   void SetUp() override {
-    basic_assets_ = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+    // Move to the test data directory so the idmap can locate the overlay APK.
+    std::string original_path = base::GetExecutableDirectory();
+    chdir(GetTestDataPath().c_str());
+
+    basic_assets_ = ApkAssets::Load("basic/basic.apk");
     ASSERT_NE(nullptr, basic_assets_);
 
-    basic_de_fr_assets_ = ApkAssets::Load(GetTestDataPath() + "/basic/basic_de_fr.apk");
+    basic_de_fr_assets_ = ApkAssets::Load("basic/basic_de_fr.apk");
     ASSERT_NE(nullptr, basic_de_fr_assets_);
 
-    style_assets_ = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
+    style_assets_ = ApkAssets::Load("styles/styles.apk");
     ASSERT_NE(nullptr, style_assets_);
 
-    lib_one_assets_ = ApkAssets::Load(GetTestDataPath() + "/lib_one/lib_one.apk");
+    lib_one_assets_ = ApkAssets::Load("lib_one/lib_one.apk");
     ASSERT_NE(nullptr, lib_one_assets_);
 
-    lib_two_assets_ = ApkAssets::Load(GetTestDataPath() + "/lib_two/lib_two.apk");
+    lib_two_assets_ = ApkAssets::Load("lib_two/lib_two.apk");
     ASSERT_NE(nullptr, lib_two_assets_);
 
-    libclient_assets_ = ApkAssets::Load(GetTestDataPath() + "/libclient/libclient.apk");
+    libclient_assets_ = ApkAssets::Load("libclient/libclient.apk");
     ASSERT_NE(nullptr, libclient_assets_);
 
-    appaslib_assets_ = ApkAssets::LoadAsSharedLibrary(GetTestDataPath() + "/appaslib/appaslib.apk");
+    appaslib_assets_ = ApkAssets::Load("appaslib/appaslib.apk", PROPERTY_DYNAMIC);
     ASSERT_NE(nullptr, appaslib_assets_);
 
-    system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk", true /*system*/);
+    system_assets_ = ApkAssets::Load("system/system.apk", PROPERTY_SYSTEM);
     ASSERT_NE(nullptr, system_assets_);
 
-    app_assets_ = ApkAssets::Load(GetTestDataPath() + "/app/app.apk");
+    app_assets_ = ApkAssets::Load("app/app.apk");
     ASSERT_THAT(app_assets_, NotNull());
 
-    overlayable_assets_ = ApkAssets::Load(GetTestDataPath() + "/overlayable/overlayable.apk");
+    overlay_assets_ = ApkAssets::LoadOverlay("overlay/overlay.idmap");
+    ASSERT_NE(nullptr, overlay_assets_);
+
+    overlayable_assets_ = ApkAssets::Load("overlayable/overlayable.apk");
     ASSERT_THAT(overlayable_assets_, NotNull());
+    chdir(original_path.c_str());
   }
 
  protected:
@@ -86,6 +94,7 @@ class AssetManager2Test : public ::testing::Test {
   std::unique_ptr<const ApkAssets> appaslib_assets_;
   std::unique_ptr<const ApkAssets> system_assets_;
   std::unique_ptr<const ApkAssets> app_assets_;
+  std::unique_ptr<const ApkAssets> overlay_assets_;
   std::unique_ptr<const ApkAssets> overlayable_assets_;
 };
 
@@ -214,6 +223,26 @@ TEST_F(AssetManager2Test, FindsResourceFromAppLoadedAsSharedLibrary) {
   EXPECT_EQ(fix_package_id(appaslib::R::array::integerArray1, 0x02), value.data);
 }
 
+TEST_F(AssetManager2Test, AssignsOverlayPackageIdLast) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets(
+      {overlayable_assets_.get(), overlay_assets_.get(), lib_one_assets_.get()});
+
+  auto apk_assets = assetmanager.GetApkAssets();
+  ASSERT_EQ(3, apk_assets.size());
+  ASSERT_EQ(overlayable_assets_.get(), apk_assets[0]);
+  ASSERT_EQ(overlay_assets_.get(), apk_assets[1]);
+  ASSERT_EQ(lib_one_assets_.get(), apk_assets[2]);
+
+  auto get_first_package_id = [&assetmanager](const ApkAssets* apkAssets) -> uint8_t {
+    return assetmanager.GetAssignedPackageId(apkAssets->GetLoadedArsc()->GetPackages()[0].get());
+  };
+
+  ASSERT_EQ(get_first_package_id(overlayable_assets_.get()), 0x7f);
+  ASSERT_EQ(get_first_package_id(overlay_assets_.get()), 0x03);
+  ASSERT_EQ(get_first_package_id(lib_one_assets_.get()), 0x02);
+}
+
 TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({lib_one_assets_.get()});
@@ -263,6 +292,27 @@ TEST_F(AssetManager2Test, FindsBagResourceFromSharedLibrary) {
   EXPECT_EQ(1, bag->entries[0].cookie);
   EXPECT_EQ(0x03, get_package_id(bag->entries[0].key));
   EXPECT_EQ(1, bag->entries[1].cookie);
+  EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
+}
+
+TEST_F(AssetManager2Test, FindsBagResourceFromMultipleSharedLibraries) {
+  AssetManager2 assetmanager;
+
+  // libclient is built with lib_one and then lib_two in order.
+  // Reverse the order to test that proper package ID re-assignment is happening.
+  assetmanager.SetApkAssets(
+      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+
+  const ResolvedBag* bag = assetmanager.GetBag(libclient::R::style::ThemeMultiLib);
+  ASSERT_NE(nullptr, bag);
+  ASSERT_EQ(bag->entry_count, 2u);
+
+  // First attribute comes from lib_two.
+  EXPECT_EQ(2, bag->entries[0].cookie);
+  EXPECT_EQ(0x02, get_package_id(bag->entries[0].key));
+
+  // The next two attributes come from lib_one.
+  EXPECT_EQ(2, bag->entries[1].cookie);
   EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
 }
 
@@ -707,7 +757,7 @@ TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {
   EXPECT_EQ("", resultDisabled);
 }
 
-TEST_F(AssetManager2Test, GetOverlayableMap) {
+TEST_F(AssetManager2Test, GetOverlayablesToString) {
   ResTable_config desired_config;
   memset(&desired_config, 0, sizeof(desired_config));
 
@@ -718,9 +768,16 @@ TEST_F(AssetManager2Test, GetOverlayableMap) {
 
   const auto map = assetmanager.GetOverlayableMapForPackage(0x7f);
   ASSERT_NE(nullptr, map);
-  ASSERT_EQ(2, map->size());
+  ASSERT_EQ(3, map->size());
   ASSERT_EQ(map->at("OverlayableResources1"), "overlay://theme");
   ASSERT_EQ(map->at("OverlayableResources2"), "overlay://com.android.overlayable");
+  ASSERT_EQ(map->at("OverlayableResources3"), "");
+
+  std::string api;
+  ASSERT_TRUE(assetmanager.GetOverlayablesToString("com.android.overlayable", &api));
+  ASSERT_EQ(api.find("not_overlayable"), std::string::npos);
+  ASSERT_NE(api.find("resource='com.android.overlayable:string/overlayable2' overlayable='OverlayableResources1' actor='overlay://theme' policy='0x0000000a'\n"),
+            std::string::npos);
 }
 
 }  // namespace android

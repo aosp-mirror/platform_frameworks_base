@@ -16,9 +16,15 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.DisplayMetrics;
 
 import java.util.Objects;
 
@@ -27,25 +33,27 @@ public class DisplayAdjustments {
     public static final DisplayAdjustments DEFAULT_DISPLAY_ADJUSTMENTS = new DisplayAdjustments();
 
     private volatile CompatibilityInfo mCompatInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-    private Configuration mConfiguration;
+    private final Configuration mConfiguration = new Configuration(Configuration.EMPTY);
+    private FixedRotationAdjustments mFixedRotationAdjustments;
 
     @UnsupportedAppUsage
     public DisplayAdjustments() {
     }
 
-    public DisplayAdjustments(Configuration configuration) {
-        mConfiguration = new Configuration(configuration != null
-                ? configuration : Configuration.EMPTY);
+    public DisplayAdjustments(@Nullable Configuration configuration) {
+        if (configuration != null) {
+            mConfiguration.setTo(configuration);
+        }
     }
 
-    public DisplayAdjustments(DisplayAdjustments daj) {
+    public DisplayAdjustments(@NonNull DisplayAdjustments daj) {
         setCompatibilityInfo(daj.mCompatInfo);
-        mConfiguration = new Configuration(daj.mConfiguration != null
-                ? daj.mConfiguration : Configuration.EMPTY);
+        mConfiguration.setTo(daj.getConfiguration());
+        mFixedRotationAdjustments = daj.mFixedRotationAdjustments;
     }
 
     @UnsupportedAppUsage
-    public void setCompatibilityInfo(CompatibilityInfo compatInfo) {
+    public void setCompatibilityInfo(@Nullable CompatibilityInfo compatInfo) {
         if (this == DEFAULT_DISPLAY_ADJUSTMENTS) {
             throw new IllegalArgumentException(
                     "setCompatbilityInfo: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS");
@@ -62,7 +70,13 @@ public class DisplayAdjustments {
         return mCompatInfo;
     }
 
-    public void setConfiguration(Configuration configuration) {
+    /**
+     * Updates the configuration for the DisplayAdjustments with new configuration.
+     * Default to EMPTY configuration if new configuration is {@code null}
+     * @param configuration new configuration
+     * @throws IllegalArgumentException if trying to modify DEFAULT_DISPLAY_ADJUSTMENTS
+     */
+    public void setConfiguration(@Nullable Configuration configuration) {
         if (this == DEFAULT_DISPLAY_ADJUSTMENTS) {
             throw new IllegalArgumentException(
                     "setConfiguration: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS");
@@ -71,8 +85,75 @@ public class DisplayAdjustments {
     }
 
     @UnsupportedAppUsage
+    @NonNull
     public Configuration getConfiguration() {
         return mConfiguration;
+    }
+
+    public void setFixedRotationAdjustments(FixedRotationAdjustments fixedRotationAdjustments) {
+        mFixedRotationAdjustments = fixedRotationAdjustments;
+    }
+
+    public FixedRotationAdjustments getFixedRotationAdjustments() {
+        return mFixedRotationAdjustments;
+    }
+
+    /** Returns {@code false} if the width and height of display should swap. */
+    private boolean noFlip(@Surface.Rotation int realRotation) {
+        final FixedRotationAdjustments rotationAdjustments = mFixedRotationAdjustments;
+        if (rotationAdjustments == null) {
+            return true;
+        }
+        // Check if the delta is rotated by 90 degrees.
+        return (realRotation - rotationAdjustments.mRotation + 4) % 2 == 0;
+    }
+
+    /** Adjusts the given size if possible. */
+    public void adjustSize(@NonNull Point size, @Surface.Rotation int realRotation) {
+        if (noFlip(realRotation)) {
+            return;
+        }
+        final int w = size.x;
+        size.x = size.y;
+        size.y = w;
+    }
+
+    /** Adjusts the given metrics if possible. */
+    public void adjustMetrics(@NonNull DisplayMetrics metrics, @Surface.Rotation int realRotation) {
+        if (noFlip(realRotation)) {
+            return;
+        }
+        int w = metrics.widthPixels;
+        metrics.widthPixels = metrics.heightPixels;
+        metrics.heightPixels = w;
+
+        w = metrics.noncompatWidthPixels;
+        metrics.noncompatWidthPixels = metrics.noncompatHeightPixels;
+        metrics.noncompatHeightPixels = w;
+
+        float x = metrics.xdpi;
+        metrics.xdpi = metrics.ydpi;
+        metrics.ydpi = x;
+
+        x = metrics.noncompatXdpi;
+        metrics.noncompatXdpi = metrics.noncompatYdpi;
+        metrics.noncompatYdpi = x;
+    }
+
+    /** Returns the adjusted cutout if available. Otherwise the original cutout is returned. */
+    @Nullable
+    public DisplayCutout getDisplayCutout(@Nullable DisplayCutout realCutout) {
+        final FixedRotationAdjustments rotationAdjustments = mFixedRotationAdjustments;
+        return rotationAdjustments != null && rotationAdjustments.mRotatedDisplayCutout != null
+                ? rotationAdjustments.mRotatedDisplayCutout
+                : realCutout;
+    }
+
+    /** Returns the adjusted rotation if available. Otherwise the original rotation is returned. */
+    @Surface.Rotation
+    public int getRotation(@Surface.Rotation int realRotation) {
+        final FixedRotationAdjustments rotationAdjustments = mFixedRotationAdjustments;
+        return rotationAdjustments != null ? rotationAdjustments.mRotation : realRotation;
     }
 
     @Override
@@ -80,6 +161,7 @@ public class DisplayAdjustments {
         int hash = 17;
         hash = hash * 31 + Objects.hashCode(mCompatInfo);
         hash = hash * 31 + Objects.hashCode(mConfiguration);
+        hash = hash * 31 + Objects.hashCode(mFixedRotationAdjustments);
         return hash;
     }
 
@@ -89,7 +171,82 @@ public class DisplayAdjustments {
             return false;
         }
         DisplayAdjustments daj = (DisplayAdjustments)o;
-        return Objects.equals(daj.mCompatInfo, mCompatInfo) &&
-                Objects.equals(daj.mConfiguration, mConfiguration);
+        return Objects.equals(daj.mCompatInfo, mCompatInfo)
+                && Objects.equals(daj.mConfiguration, mConfiguration)
+                && Objects.equals(daj.mFixedRotationAdjustments, mFixedRotationAdjustments);
+    }
+
+    /**
+     * An application can be launched in different rotation than the real display. This class
+     * provides the information to adjust the values returned by {@link #Display}.
+     * @hide
+     */
+    public static class FixedRotationAdjustments implements Parcelable {
+        /** The application-based rotation. */
+        @Surface.Rotation
+        final int mRotation;
+
+        /** Non-null if the device has cutout. */
+        @Nullable
+        final DisplayCutout mRotatedDisplayCutout;
+
+        public FixedRotationAdjustments(@Surface.Rotation int rotation, DisplayCutout cutout) {
+            mRotation = rotation;
+            mRotatedDisplayCutout = cutout;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 17;
+            hash = hash * 31 + mRotation;
+            hash = hash * 31 + Objects.hashCode(mRotatedDisplayCutout);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FixedRotationAdjustments)) {
+                return false;
+            }
+            final FixedRotationAdjustments other = (FixedRotationAdjustments) o;
+            return mRotation == other.mRotation
+                    && Objects.equals(mRotatedDisplayCutout, other.mRotatedDisplayCutout);
+        }
+
+        @Override
+        public String toString() {
+            return "FixedRotationAdjustments{rotation=" + Surface.rotationToString(mRotation)
+                    + " cutout=" + mRotatedDisplayCutout + "}";
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mRotation);
+            dest.writeTypedObject(
+                    new DisplayCutout.ParcelableWrapper(mRotatedDisplayCutout), flags);
+        }
+
+        private FixedRotationAdjustments(Parcel in) {
+            mRotation = in.readInt();
+            final DisplayCutout.ParcelableWrapper cutoutWrapper =
+                    in.readTypedObject(DisplayCutout.ParcelableWrapper.CREATOR);
+            mRotatedDisplayCutout = cutoutWrapper != null ? cutoutWrapper.get() : null;
+        }
+
+        public static final Creator<FixedRotationAdjustments> CREATOR =
+                new Creator<FixedRotationAdjustments>() {
+            public FixedRotationAdjustments createFromParcel(Parcel in) {
+                return new FixedRotationAdjustments(in);
+            }
+
+            public FixedRotationAdjustments[] newArray(int size) {
+                return new FixedRotationAdjustments[size];
+            }
+        };
     }
 }

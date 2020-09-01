@@ -21,7 +21,10 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteCallback;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,7 +75,7 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return null;
     }
 
-    public List<AccessibilityWindowInfo> getWindows() {
+    public AccessibilityWindowInfo.WindowListSparseArray getWindows() {
         return null;
     }
 
@@ -82,6 +85,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public boolean performGlobalAction(int action) {
         return false;
+    }
+
+    public List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions() {
+        return Collections.emptyList();
     }
 
     public void disableSelf() {}
@@ -125,13 +132,33 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {}
 
+    public boolean switchToInputMethod(String imeId) {
+        return false;
+    }
+
     public boolean isAccessibilityButtonAvailable() {
         return false;
     }
 
     public void sendGesture(int sequence, ParceledListSlice gestureSteps) {}
 
+    public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {}
+
     public boolean isFingerprintGestureDetectionAvailable() {
         return false;
     }
+
+    public IBinder getOverlayWindowToken(int displayId) {
+        return null;
+    }
+
+    public int getWindowIdForLeashToken(IBinder token) {
+        return -1;
+    }
+
+    public void takeScreenshot(int displayId, RemoteCallback callback) {}
+
+    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
+
+    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
 }

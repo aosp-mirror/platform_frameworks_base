@@ -29,6 +29,9 @@ import com.android.server.backup.transport.TransportClient;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
+import java.util.Map;
+import java.util.Set;
+
 @Implements(PerformUnifiedRestoreTask.class)
 public class ShadowPerformUnifiedRestoreTask {
     @Nullable private static ShadowPerformUnifiedRestoreTask sLastShadow;

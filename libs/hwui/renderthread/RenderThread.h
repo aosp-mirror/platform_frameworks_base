@@ -17,40 +17,43 @@
 #ifndef RENDERTHREAD_H_
 #define RENDERTHREAD_H_
 
-#include "RenderTask.h"
+#include <GrContext.h>
+#include <SkBitmap.h>
+#include <apex/choreographer.h>
+#include <cutils/compiler.h>
+#include <thread/ThreadBase.h>
+#include <utils/Looper.h>
+#include <utils/Thread.h>
 
-#include "../JankTracker.h"
+#include <memory>
+#include <mutex>
+#include <set>
+
 #include "CacheManager.h"
+#include "ProfileDataContainer.h"
+#include "RenderTask.h"
 #include "TimeLord.h"
 #include "WebViewFunctorManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
 
-#include <GrContext.h>
-#include <SkBitmap.h>
-#include <cutils/compiler.h>
-#include <ui/DisplayInfo.h>
-#include <utils/Looper.h>
-#include <utils/Thread.h>
-
-#include <thread/ThreadBase.h>
-#include <memory>
-#include <mutex>
-#include <set>
-
 namespace android {
 
 class Bitmap;
-class AutoBackendTextureRelease;
 
 namespace uirenderer {
 
+class AutoBackendTextureRelease;
 class Readback;
 class RenderState;
 class TestUtils;
 
 namespace skiapipeline {
 class VkFunctorDrawHandler;
+}
+
+namespace VectorDrawable {
+class Tree;
 }
 
 namespace renderthread {
@@ -71,10 +74,11 @@ protected:
 
 struct VsyncSource {
     virtual void requestNextVsync() = 0;
-    virtual nsecs_t latestVsyncEvent() = 0;
+    virtual void drainPendingEvents() = 0;
     virtual ~VsyncSource() {}
 };
 
+class ChoreographerSource;
 class DummyVsyncSource;
 
 typedef void (*JVMAttachHook)(const char* name);
@@ -134,10 +138,12 @@ private:
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
     friend class DummyVsyncSource;
-    friend class android::AutoBackendTextureRelease;
+    friend class ChoreographerSource;
+    friend class android::uirenderer::AutoBackendTextureRelease;
     friend class android::uirenderer::TestUtils;
     friend class android::uirenderer::WebViewFunctor;
     friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;
+    friend class android::uirenderer::VectorDrawable::Tree;
 
     RenderThread();
     virtual ~RenderThread();
@@ -146,13 +152,21 @@ private:
     static RenderThread& getInstance();
 
     void initThreadLocals();
-    void initializeDisplayEventReceiver();
+    void initializeChoreographer();
     void setupFrameInterval();
-    static int displayEventReceiverCallback(int fd, int events, void* data);
+    // Callbacks for choreographer events:
+    // choreographerCallback will call AChoreograper_handleEvent to call the
+    // corresponding callbacks for each display event type
+    static int choreographerCallback(int fd, int events, void* data);
+    // Callback that will be run on vsync ticks.
+    static void frameCallback(int64_t frameTimeNanos, void* data);
+    // Callback that will be run whenver there is a refresh rate change.
+    static void refreshRateCallback(int64_t vsyncPeriod, void* data);
     void drainDisplayEventQueue();
     void dispatchFrameCallbacks();
     void requestVsync();
 
+    AChoreographer* mChoreographer;
     VsyncSource* mVsyncSource;
     bool mVsyncRequested;
     std::set<IFrameCallback*> mFrameCallbacks;

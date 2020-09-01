@@ -116,7 +116,7 @@ import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
 import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
@@ -983,12 +983,12 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failingWifiTetheringLegacyApBroadcast() throws Exception {
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).startSoftAp(null);
+        verify(mWifiManager, times(1)).startTetheredHotspot(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mNetd);
 
@@ -1011,12 +1011,12 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void workingWifiTetheringEnrichedApBroadcast() throws Exception {
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).startSoftAp(null);
+        verify(mWifiManager, times(1)).startTetheredHotspot(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mNetd);
 
@@ -1087,13 +1087,13 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failureEnablingIpForwarding() throws Exception {
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
         doThrow(new RemoteException()).when(mNetd).ipfwdEnableForwarding(TETHERING_NAME);
 
         // Emulate pressing the WiFi tethering button.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
-        verify(mWifiManager, times(1)).startSoftAp(null);
+        verify(mWifiManager, times(1)).startTetheredHotspot(null);
         verifyNoMoreInteractions(mWifiManager);
         verifyNoMoreInteractions(mNetd);
 
@@ -1380,7 +1380,7 @@ public class TetheringTest {
         // 2. Enable wifi tethering.
         UpstreamNetworkState upstreamState = buildMobileDualStackUpstreamState();
         initTetheringUpstream(upstreamState);
-        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
         mTethering.interfaceStatusChanged(TEST_WLAN_IFNAME, true);
         mLooper.dispatchAll();
         tetherState = callback.pollTetherStatesChanged();

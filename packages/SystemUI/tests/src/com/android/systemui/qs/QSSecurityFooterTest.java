@@ -16,8 +16,11 @@ package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -93,6 +96,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testUnmanaged() {
         when(mSecurityController.isDeviceManaged()).thenReturn(false);
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(false);
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
@@ -314,6 +318,33 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
+    public void testProfileOwnerOfOrganizationOwnedDeviceNoName() {
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+
+        mFooter.refreshState();
+        TestableLooper.get(this).processAllMessages();
+
+        assertEquals(mContext.getString(
+                R.string.quick_settings_disclosure_management),
+                mFooterText.getText());
+    }
+
+    @Test
+    public void testProfileOwnerOfOrganizationOwnedDeviceWithName() {
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+        when(mSecurityController.getWorkProfileOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+
+        mFooter.refreshState();
+        TestableLooper.get(this).processAllMessages();
+
+        assertEquals(mContext.getString(
+                R.string.quick_settings_disclosure_named_management,
+                MANAGING_ORGANIZATION),
+                mFooterText.getText());
+    }
+
+    @Test
     public void testVpnEnabled() {
         when(mSecurityController.isVpnEnabled()).thenReturn(true);
         when(mSecurityController.getPrimaryVpnName()).thenReturn(VPN_PACKAGE);
@@ -336,13 +367,46 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetManagementMessage() {
-        assertEquals(null, mFooter.getManagementMessage(false, MANAGING_ORGANIZATION));
+    public void testGetManagementMessage_noManagement() {
+        assertEquals(null, mFooter.getManagementMessage(
+                /* isDeviceManaged= */ false,
+                MANAGING_ORGANIZATION,
+                /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                MANAGING_ORGANIZATION));
+    }
+
+    @Test
+    public void testGetManagementMessage_deviceOwner() {
         assertEquals(mContext.getString(R.string.monitoring_description_named_management,
                                         MANAGING_ORGANIZATION),
-                     mFooter.getManagementMessage(true, MANAGING_ORGANIZATION));
+                     mFooter.getManagementMessage(
+                             /* isDeviceManaged= */ true,
+                             MANAGING_ORGANIZATION,
+                             /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                             /* workProfileOrganizationName= */ null));
         assertEquals(mContext.getString(R.string.monitoring_description_management),
-                     mFooter.getManagementMessage(true, null));
+                     mFooter.getManagementMessage(
+                             /* isDeviceManaged= */ true,
+                             /* organizationName= */ null,
+                             /* isProfileOwnerOfOrganizationOwnedDevice= */ false,
+                             /* workProfileOrganizationName= */ null));
+    }
+
+    @Test
+    public void testGetManagementMessage_profileOwnerOfOrganizationOwnedDevice() {
+        assertEquals(mContext.getString(R.string.monitoring_description_named_management,
+                MANAGING_ORGANIZATION),
+                mFooter.getManagementMessage(
+                        /* isDeviceManaged= */ false,
+                        /* organizationName= */ null,
+                        /* isProfileOwnerOfOrganizationOwnedDevice= */ true,
+                        MANAGING_ORGANIZATION));
+        assertEquals(mContext.getString(R.string.monitoring_description_management),
+                mFooter.getManagementMessage(
+                        /* isDeviceManaged= */ false,
+                        /* organizationName= */ null,
+                        /* isProfileOwnerOfOrganizationOwnedDevice= */ true,
+                        /* workProfileOrganizationName= */ null));
     }
 
     @Test
@@ -445,6 +509,21 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.configSubtitleVisibility(false, false, false, true, view);
         assertEquals(View.GONE,
                 view.findViewById(R.id.vpn_subtitle).getVisibility());
+    }
+
+    @Test
+    public void testNoClickWhenGone() {
+        QSTileHost mockHost = mock(QSTileHost.class);
+        mFooter.setHostEnvironment(mockHost);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+
+        assertFalse(mFooter.hasFooter());
+        mFooter.onClick(mFooter.getView());
+
+        // Proxy for dialog being created
+        verify(mockHost, never()).collapsePanels();
     }
 
     private CharSequence addLink(CharSequence description) {

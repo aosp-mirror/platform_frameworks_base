@@ -233,6 +233,21 @@ public abstract class InputEvent implements Parcelable {
         return mSeq;
     }
 
+    /**
+     * Gets the ID of this event. This is generated when an event is created and preserved until its
+     * last stage. It won't change just because the event crosses process boundary, but should
+     * change when making a copy with modifications.
+     * <p>
+     * To avoid exposing app usage to other processes this ID is generated from a CSPRNG. Therefore
+     * there isn't 100% guarantee on the uniqueness of this ID, though the chance of ID collisions
+     * is considerably low. The rule of thumb is not to rely on the uniqueness for production logic,
+     * but a good source for tracking an event (e.g. logging and profiling).
+     *
+     * @return The ID of this event.
+     * @hide
+     */
+    public abstract int getId();
+
     public int describeContents() {
         return 0;
     }

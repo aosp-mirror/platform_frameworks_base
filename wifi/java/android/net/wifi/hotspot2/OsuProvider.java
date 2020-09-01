@@ -19,7 +19,6 @@ package android.net.wifi.hotspot2;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.net.wifi.WifiSsid;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,15 +85,16 @@ public final class OsuProvider implements Parcelable {
      */
     private final List<Integer> mMethodList;
 
-    /**
-     * Icon data for the OSU (Online Sign-Up) provider.
-     */
-    private final Icon mIcon;
+    /** @hide */
+    public OsuProvider(String osuSsid, Map<String, String> friendlyNames,
+            String serviceDescription, Uri serverUri, String nai, List<Integer> methodList) {
+        this(WifiSsid.createFromByteArray(osuSsid.getBytes(StandardCharsets.UTF_8)),
+                friendlyNames, serviceDescription, serverUri, nai, methodList);
+    }
 
     /** @hide */
     public OsuProvider(WifiSsid osuSsid, Map<String, String> friendlyNames,
-            String serviceDescription, Uri serverUri, String nai, List<Integer> methodList,
-            Icon icon) {
+            String serviceDescription, Uri serverUri, String nai, List<Integer> methodList) {
         mOsuSsid = osuSsid;
         mFriendlyNames = friendlyNames;
         mServiceDescription = serviceDescription;
@@ -104,7 +105,6 @@ public final class OsuProvider implements Parcelable {
         } else {
             mMethodList = new ArrayList<>(methodList);
         }
-        mIcon = icon;
     }
 
     /**
@@ -121,7 +121,6 @@ public final class OsuProvider implements Parcelable {
             mServerUri = null;
             mNetworkAccessIdentifier = null;
             mMethodList = new ArrayList<>();
-            mIcon = null;
             return;
         }
 
@@ -135,7 +134,6 @@ public final class OsuProvider implements Parcelable {
         } else {
             mMethodList = new ArrayList<>(source.mMethodList);
         }
-        mIcon = source.mIcon;
     }
 
     /** @hide */
@@ -196,11 +194,6 @@ public final class OsuProvider implements Parcelable {
         return mMethodList;
     }
 
-    /** @hide */
-    public Icon getIcon() {
-        return mIcon;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -213,7 +206,6 @@ public final class OsuProvider implements Parcelable {
         dest.writeParcelable(mServerUri, flags);
         dest.writeString(mNetworkAccessIdentifier);
         dest.writeList(mMethodList);
-        dest.writeParcelable(mIcon, flags);
         Bundle bundle = new Bundle();
         bundle.putSerializable("friendlyNameMap", (HashMap<String, String>) mFriendlyNames);
         dest.writeBundle(bundle);
@@ -228,21 +220,16 @@ public final class OsuProvider implements Parcelable {
             return false;
         }
         OsuProvider that = (OsuProvider) thatObject;
-        return (mOsuSsid == null ? that.mOsuSsid == null : mOsuSsid.equals(that.mOsuSsid))
-                && (mFriendlyNames == null) ? that.mFriendlyNames == null
-                            : mFriendlyNames.equals(that.mFriendlyNames)
+        return Objects.equals(mOsuSsid, that.mOsuSsid)
+                && Objects.equals(mFriendlyNames, that.mFriendlyNames)
                 && TextUtils.equals(mServiceDescription, that.mServiceDescription)
-                && (mServerUri == null ? that.mServerUri == null
-                            : mServerUri.equals(that.mServerUri))
+                && Objects.equals(mServerUri, that.mServerUri)
                 && TextUtils.equals(mNetworkAccessIdentifier, that.mNetworkAccessIdentifier)
-                && (mMethodList == null ? that.mMethodList == null
-                            : mMethodList.equals(that.mMethodList))
-                && (mIcon == null ? that.mIcon == null : mIcon.sameAs(that.mIcon));
+                && Objects.equals(mMethodList, that.mMethodList);
     }
 
     @Override
     public int hashCode() {
-        // mIcon is not hashable, skip the variable.
         return Objects.hash(mOsuSsid, mServiceDescription, mFriendlyNames,
                 mServerUri, mNetworkAccessIdentifier, mMethodList);
     }
@@ -255,8 +242,7 @@ public final class OsuProvider implements Parcelable {
                 + " mServiceDescription=" + mServiceDescription
                 + " mServerUri=" + mServerUri
                 + " mNetworkAccessIdentifier=" + mNetworkAccessIdentifier
-                + " mMethodList=" + mMethodList
-                + " mIcon=" + mIcon;
+                + " mMethodList=" + mMethodList;
     }
 
     public static final @android.annotation.NonNull Creator<OsuProvider> CREATOR =
@@ -269,12 +255,11 @@ public final class OsuProvider implements Parcelable {
                     String nai = in.readString();
                     List<Integer> methodList = new ArrayList<>();
                     in.readList(methodList, null);
-                    Icon icon = in.readParcelable(null);
                     Bundle bundle = in.readBundle();
                     Map<String, String> friendlyNamesMap = (HashMap) bundle.getSerializable(
                             "friendlyNameMap");
                     return new OsuProvider(osuSsid, friendlyNamesMap, serviceDescription,
-                            serverUri, nai, methodList, icon);
+                            serverUri, nai, methodList);
                 }
 
             @Override

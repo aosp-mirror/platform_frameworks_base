@@ -48,6 +48,11 @@ public class DockManagerFake implements DockManager {
         return false;
     }
 
+    @Override
+    public boolean isHidden() {
+        return false;
+    }
+
     public void setDockEvent(int event) {
         mCallback.onEvent(event);
     }

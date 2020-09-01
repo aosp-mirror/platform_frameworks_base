@@ -67,9 +67,9 @@ namespace android
 
 static bool wakeup_init = false;
 static sem_t wakeup_sem;
-extern sp<IPowerV1_0> getPowerHalV1_0();
-extern sp<IPowerV1_1> getPowerHalV1_1();
-extern bool processPowerHalReturn(const Return<void> &ret, const char* functionName);
+extern sp<IPowerV1_0> getPowerHalHidlV1_0();
+extern sp<IPowerV1_1> getPowerHalHidlV1_1();
+extern bool processPowerHalReturn(bool isOk, const char* functionName);
 extern sp<ISuspendControlService> getSuspendControl();
 
 // Java methods used in getLowPowerStats
@@ -596,7 +596,7 @@ static void getPowerStatsHalRailEnergyData(JNIEnv* env, jobject jrailStats) {
 
 // The caller must be holding powerHalMutex.
 static void getPowerHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
-    sp<IPowerV1_0> powerHalV1_0 = getPowerHalV1_0();
+    sp<IPowerV1_0> powerHalV1_0 = getPowerHalHidlV1_0();
     if (powerHalV1_0 == nullptr) {
         ALOGE("Power Hal not loaded");
         return;
@@ -629,12 +629,12 @@ static void getPowerHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
                 }
             }
     });
-    if (!processPowerHalReturn(ret, "getPlatformLowPowerStats")) {
+    if (!processPowerHalReturn(ret.isOk(), "getPlatformLowPowerStats")) {
         return;
     }
 
     // Trying to get IPower 1.1, this will succeed only for devices supporting 1.1
-    sp<IPowerV1_1> powerHal_1_1 = getPowerHalV1_1();
+    sp<IPowerV1_1> powerHal_1_1 = getPowerHalHidlV1_1();
     if (powerHal_1_1 == nullptr) {
         // This device does not support IPower@1.1, exiting gracefully
         return;
@@ -665,7 +665,7 @@ static void getPowerHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
             }
         }
     });
-    processPowerHalReturn(ret, "getSubsystemLowPowerStats");
+    processPowerHalReturn(ret.isOk(), "getSubsystemLowPowerStats");
 }
 
 static jint getPowerHalPlatformData(JNIEnv* env, jobject outBuf) {
@@ -675,7 +675,7 @@ static jint getPowerHalPlatformData(JNIEnv* env, jobject outBuf) {
     int total_added = -1;
 
     {
-        sp<IPowerV1_0> powerHalV1_0 = getPowerHalV1_0();
+        sp<IPowerV1_0> powerHalV1_0 = getPowerHalHidlV1_0();
         if (powerHalV1_0 == nullptr) {
             ALOGE("Power Hal not loaded");
             return -1;
@@ -733,7 +733,7 @@ static jint getPowerHalPlatformData(JNIEnv* env, jobject outBuf) {
             }
         );
 
-        if (!processPowerHalReturn(ret, "getPlatformLowPowerStats")) {
+        if (!processPowerHalReturn(ret.isOk(), "getPlatformLowPowerStats")) {
             return -1;
         }
     }
@@ -753,7 +753,7 @@ static jint getPowerHalSubsystemData(JNIEnv* env, jobject outBuf) {
 
     {
         // Trying to get 1.1, this will succeed only for devices supporting 1.1
-        powerHal_1_1 = getPowerHalV1_1();
+        powerHal_1_1 = getPowerHalHidlV1_1();
         if (powerHal_1_1 == nullptr) {
             //This device does not support IPower@1.1, exiting gracefully
             return 0;
@@ -820,7 +820,7 @@ static jint getPowerHalSubsystemData(JNIEnv* env, jobject outBuf) {
         }
         );
 
-        if (!processPowerHalReturn(ret, "getSubsystemLowPowerStats")) {
+        if (!processPowerHalReturn(ret.isOk(), "getSubsystemLowPowerStats")) {
             return -1;
         }
     }

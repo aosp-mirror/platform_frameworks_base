@@ -94,3 +94,16 @@ message LogProto {
     repeated BinaryLogEntry binary_logs = 2;
 }
 
+message PersistedLogProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    repeated TextLogEntry main_logs = 1;
+    repeated TextLogEntry radio_logs = 2;
+    repeated TextLogEntry events_logs = 3;
+    repeated TextLogEntry system_logs = 4;
+    repeated TextLogEntry crash_logs = 5;
+    repeated TextLogEntry stats_logs = 6;
+    repeated TextLogEntry security_logs = 7;
+    repeated TextLogEntry kernel_logs = 8;
+}
+

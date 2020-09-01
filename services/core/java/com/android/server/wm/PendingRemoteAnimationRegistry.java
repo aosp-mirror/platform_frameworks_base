@@ -22,12 +22,10 @@ import android.os.Handler;
 import android.util.ArrayMap;
 import android.view.RemoteAnimationAdapter;
 
-import com.android.server.am.ActivityManagerService;
-
 /**
  * Registry to keep track of remote animations to be run for activity starts from a certain package.
  *
- * @see ActivityManagerService#registerRemoteAnimationForNextActivityStart
+ * @see ActivityTaskManagerService#registerRemoteAnimationForNextActivityStart
  */
 class PendingRemoteAnimationRegistry {
 
@@ -35,10 +33,10 @@ class PendingRemoteAnimationRegistry {
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final Handler mHandler;
-    private final ActivityTaskManagerService mService;
+    private final WindowManagerGlobalLock mLock;
 
-    PendingRemoteAnimationRegistry(ActivityTaskManagerService service, Handler handler) {
-        mService = service;
+    PendingRemoteAnimationRegistry(WindowManagerGlobalLock lock, Handler handler) {
+        mLock = lock;
         mHandler = handler;
     }
 
@@ -76,7 +74,7 @@ class PendingRemoteAnimationRegistry {
             this.packageName = packageName;
             this.adapter = adapter;
             mHandler.postDelayed(() -> {
-                synchronized (mService.mGlobalLock) {
+                synchronized (mLock) {
                     final Entry entry = mEntries.get(packageName);
                     if (entry == this) {
                         mEntries.remove(packageName);

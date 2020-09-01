@@ -18,8 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.systemui.statusbar.phone.NavBarTintController.DEFAULT_COLOR_ADAPT_TRANSITION_TIME;
-import static com.android.systemui.statusbar.phone.NavBarTintController.MIN_COLOR_ADAPT_TRANSITION_TIME;
+import static com.android.systemui.util.Utils.isGesturalModeOnDefaultDisplay;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -35,12 +34,16 @@ import android.view.View;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class NavigationBarTransitions extends BarTransitions implements
         LightBarTransitionsController.DarkIntensityApplier {
+
+    public static final int MIN_COLOR_ADAPT_TRANSITION_TIME = 400;
+    public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
     /**
      * Notified when the color of nav bar elements changes.
@@ -54,7 +57,6 @@ public final class NavigationBarTransitions extends BarTransitions implements
     }
 
     private final NavigationBarView mView;
-    private final IStatusBarService mBarService;
     private final LightBarTransitionsController mLightTransitionsController;
     private final boolean mAllowAutoDimWallpaperNotVisible;
     private boolean mWallpaperVisible;
@@ -76,12 +78,11 @@ public final class NavigationBarTransitions extends BarTransitions implements
         }
     };
 
-    public NavigationBarTransitions(NavigationBarView view) {
+    public NavigationBarTransitions(NavigationBarView view, CommandQueue commandQueue) {
         super(view, R.drawable.nav_background);
         mView = view;
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mLightTransitionsController = new LightBarTransitionsController(view.getContext(), this);
+        mLightTransitionsController = new LightBarTransitionsController(
+                view.getContext(), this, commandQueue);
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();
@@ -124,7 +125,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
     @Override
     public void setAutoDim(boolean autoDim) {
         // Ensure we aren't in gestural nav if we are triggering auto dim
-        if (autoDim && NavBarTintController.isEnabled(mView.getContext(), mNavBarMode)) return;
+        if (autoDim && isGesturalModeOnDefaultDisplay(mView.getContext(), mNavBarMode)) return;
         if (mAutoDim == autoDim) return;
         mAutoDim = autoDim;
         applyLightsOut(true, false);
@@ -201,7 +202,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public int getTintAnimationDuration() {
-        if (NavBarTintController.isEnabled(mView.getContext(), mNavBarMode)) {
+        if (isGesturalModeOnDefaultDisplay(mView.getContext(), mNavBarMode)) {
             return Math.max(DEFAULT_COLOR_ADAPT_TRANSITION_TIME, MIN_COLOR_ADAPT_TRANSITION_TIME);
         }
         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;

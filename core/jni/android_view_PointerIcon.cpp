@@ -23,7 +23,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
-#include <android/graphics/GraphicsJNI.h>
+#include <android/graphics/bitmap.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
@@ -88,7 +88,7 @@ status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIcon
     ScopedLocalRef<jobject> bitmapObj(
             env, env->GetObjectField(pointerIconObj, gPointerIconClassInfo.mBitmap));
     if (bitmapObj.get()) {
-        GraphicsJNI::getSkBitmap(env, bitmapObj.get(), &(outPointerIcon->bitmap));
+        outPointerIcon->bitmap = graphics::Bitmap(env, bitmapObj.get());
     }
 
     ScopedLocalRef<jobjectArray> bitmapFramesObj(env, reinterpret_cast<jobjectArray>(
@@ -100,7 +100,7 @@ status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIcon
         outPointerIcon->bitmapFrames.resize(size);
         for (jsize i = 0; i < size; ++i) {
             ScopedLocalRef<jobject> bitmapObj(env, env->GetObjectArrayElement(bitmapFramesObj.get(), i));
-            GraphicsJNI::getSkBitmap(env, bitmapObj.get(), &(outPointerIcon->bitmapFrames[i]));
+            outPointerIcon->bitmapFrames[i] = graphics::Bitmap(env, bitmapObj.get());
         }
     }
 

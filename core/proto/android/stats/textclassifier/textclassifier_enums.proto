@@ -1,0 +1,87 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.stats.textclassifier;
+option java_multiple_files = true;
+
+enum EventType {
+    TYPE_UNKNOWN = 0;
+    // User started a new selection.
+    SELECTION_STARTED = 1;
+    // User modified an existing selection.
+    SELECTION_MODIFIED = 2;
+    // Smart selection triggered for a single token (word).
+    SMART_SELECTION_SINGLE = 3;
+    // Smart selection triggered spanning multiple tokens (words).
+    SMART_SELECTION_MULTI = 4;
+    // Something else other than user or the default TextClassifier triggered a selection.
+    AUTO_SELECTION = 5;
+    // Smart actions shown to the user.
+    ACTIONS_SHOWN = 6;
+    // User clicked a link.
+    LINK_CLICKED = 7;
+    // User typed over the selection.
+    OVERTYPE = 8;
+    // User clicked on Copy action.
+    COPY_ACTION = 9;
+    // User clicked on Paste action.
+    PASTE_ACTION = 10;
+    // User clicked on Cut action.
+    CUT_ACTION = 11;
+    // User clicked on Share action.
+    SHARE_ACTION = 12;
+    // User clicked on a Smart action.
+    SMART_ACTION = 13;
+    // User dragged+dropped the selection.
+    SELECTION_DRAG = 14;
+    // Selection is destroyed.
+    SELECTION_DESTROYED = 15;
+    // User clicked on a custom action.
+    OTHER_ACTION = 16;
+    // User clicked on Select All action
+    SELECT_ALL = 17;
+    // User reset the smart selection.
+    SELECTION_RESET = 18;
+    // User composed a reply.
+    MANUAL_REPLY = 19;
+    // TextClassifier generated some actions
+    ACTIONS_GENERATED = 20;
+    // Some text links were generated
+    LINKS_GENERATED = 21;
+}
+
+enum WidgetType {
+    WIDGET_TYPE_UNKNOWN = 0;
+    // Standard TextView
+    WIDGET_TYPE_TEXTVIEW = 1;
+    // EditText
+    WIDGET_TYPE_EDITTEXT = 2;
+    // Not selectable textview
+    WIDGET_TYPE_UNSELECTABLE_TEXTVIEW = 3;
+    // Standard Webview
+    WIDGET_TYPE_WEBVIEW = 4;
+    // Editable TextView
+    WIDGET_TYPE_EDIT_WEBVIEW = 5;
+    // Custom text widget
+    WIDGET_TYPE_CUSTOM_TEXTVIEW = 6;
+    // Custom editable text widget.
+    WIDGET_TYPE_CUSTOM_EDITTEXT = 7;
+    // Non-selectable text widget.
+    WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW = 8;
+    // Notification
+    WIDGET_TYPE_NOTIFICATION = 9;
+}

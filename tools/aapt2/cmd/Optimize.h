@@ -57,7 +57,7 @@ struct OptimizeOptions {
   std::unordered_set<std::string> kept_artifacts;
 
   // Whether or not to shorten resource paths in the APK.
-  bool shorten_resource_paths;
+  bool shorten_resource_paths = false;
 
   // Path to the output map of original resource paths to shortened paths.
   Maybe<std::string> shortened_paths_map_path;
@@ -78,10 +78,6 @@ class OptimizeCommand : public Command {
             "All the resources that would be unused on devices of the given densities will be \n"
             "removed from the APK.",
         &target_densities_);
-    AddOptionalFlag("--whitelist-path",
-        "Path to the whitelist.cfg file containing whitelisted resources \n"
-            "whose names should not be altered in final resource tables.",
-        &whitelist_path_);
     AddOptionalFlag("--resources-config-path",
         "Path to the resources.cfg file containing the list of resources and \n"
             "directives to each resource. \n"
@@ -104,11 +100,13 @@ class OptimizeCommand : public Command {
         "Enables encoding sparse entries using a binary search tree.\n"
             "This decreases APK size at the cost of resource retrieval performance.",
         &options_.table_flattener_options.use_sparse_entries);
-    AddOptionalSwitch("--enable-resource-obfuscation",
-        "Enables obfuscation of key string pool to single value",
+    AddOptionalSwitch("--collapse-resource-names",
+        "Collapses resource names to a single value in the key string pool. Resources can \n"
+            "be exempted using the \"no_collapse\" directive in a file specified by "
+            "--resources-config-path.",
         &options_.table_flattener_options.collapse_key_stringpool);
-    AddOptionalSwitch("--enable-resource-path-shortening",
-        "Enables shortening of the path of the resources inside the APK.",
+    AddOptionalSwitch("--shorten-resource-paths",
+        "Shortens the paths of resources inside the APK.",
         &options_.shorten_resource_paths);
     AddOptionalFlag("--resource-path-shortening-map",
         "Path to output the map of old resource paths to shortened paths.",
@@ -125,7 +123,6 @@ class OptimizeCommand : public Command {
                                const std::string &file_path);
 
   Maybe<std::string> config_path_;
-  Maybe<std::string> whitelist_path_;
   Maybe<std::string> resources_config_path_;
   Maybe<std::string> target_densities_;
   std::vector<std::string> configs_;

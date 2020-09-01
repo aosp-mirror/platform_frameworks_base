@@ -126,11 +126,29 @@ public class TileService extends Service {
             = "android.service.quicksettings.ACTIVE_TILE";
 
     /**
+     * Meta-data for a tile to mark is toggleable.
+     * <p>
+     * Toggleable tiles support switch tile behavior in accessibility. This is
+     * the behavior of most of the framework tiles.
+     *
+     * To indicate that a TileService is toggleable, set this meta-data to true on the
+     * TileService's manifest declaration.
+     * <pre class="prettyprint">
+     * {@literal
+     * <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+     *      android:value="true" />
+     * }
+     * </pre>
+     */
+    public static final String META_DATA_TOGGLEABLE_TILE =
+            "android.service.quicksettings.TOGGLEABLE_TILE";
+
+    /**
      * Used to notify SysUI that Listening has be requested.
      * @hide
      */
-    public static final String ACTION_REQUEST_LISTENING
-            = "android.service.quicksettings.action.REQUEST_LISTENING";
+    public static final String ACTION_REQUEST_LISTENING =
+            "android.service.quicksettings.action.REQUEST_LISTENING";
 
     /**
      * @hide
@@ -463,9 +481,12 @@ public class TileService extends Service {
      * as true on their TileService Manifest declaration, and will do nothing otherwise.
      */
     public static final void requestListeningState(Context context, ComponentName component) {
+        final ComponentName sysuiComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(
+                        com.android.internal.R.string.config_systemUIServiceComponent));
         Intent intent = new Intent(ACTION_REQUEST_LISTENING);
         intent.putExtra(Intent.EXTRA_COMPONENT_NAME, component);
-        intent.setPackage("com.android.systemui");
+        intent.setPackage(sysuiComponent.getPackageName());
         context.sendBroadcast(intent, Manifest.permission.BIND_QUICK_SETTINGS_TILE);
     }
 }

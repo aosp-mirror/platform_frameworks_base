@@ -207,6 +207,7 @@ public class AudioManagerTest extends AudioVolumesTestBase {
             int indexMax = 0;
             int index = 0;
             Exception ex = null;
+
             try {
                 indexMax = mAudioManager.getMaxVolumeIndexForAttributes(aaForUsage);
             } catch (Exception e) {

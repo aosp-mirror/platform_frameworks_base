@@ -17,11 +17,10 @@
 package android.net.wifi.aware;
 
 import android.net.NetworkSpecifier;
+import android.net.wifi.util.HexEncoding;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
-import libcore.util.HexEncoding;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -201,14 +200,14 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeBlob(mData);
+            dest.writeByteArray(mData);
         }
 
         public static final @android.annotation.NonNull Creator<ByteArrayWrapper> CREATOR =
                 new Creator<ByteArrayWrapper>() {
                     @Override
                     public ByteArrayWrapper createFromParcel(Parcel in) {
-                        return new ByteArrayWrapper(in.readBlob());
+                        return new ByteArrayWrapper(in.createByteArray());
                     }
 
                     @Override

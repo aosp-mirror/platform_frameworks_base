@@ -16,6 +16,7 @@
 package com.android.server.pm;
 
 import android.content.Context;
+import android.content.pm.CrossProfileAppsInternal;
 
 import com.android.server.SystemService;
 
@@ -30,5 +31,6 @@ public class CrossProfileAppsService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.CROSS_PROFILE_APPS_SERVICE, mServiceImpl);
+        publishLocalService(CrossProfileAppsInternal.class, mServiceImpl.getLocalService());
     }
 }

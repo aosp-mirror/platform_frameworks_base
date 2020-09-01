@@ -115,8 +115,12 @@ public final class HdmiCecMessage {
         s.append(String.format("<%s> %X%X:%02X",
                 opcodeToString(mOpcode), mSource, mDestination, mOpcode));
         if (mParams.length > 0) {
-            for (byte data : mParams) {
-                s.append(String.format(":%02X", data));
+            if (filterMessageParameters(mOpcode)) {
+                s.append(String.format(" <Redacted len=%d>", mParams.length));
+            } else {
+                for (byte data : mParams) {
+                    s.append(String.format(":%02X", data));
+                }
             }
         }
         return s.toString();
@@ -268,6 +272,22 @@ public final class HdmiCecMessage {
                 return "Abort";
             default:
                 return String.format("Opcode: %02X", opcode);
+        }
+    }
+
+    private static boolean filterMessageParameters(int opcode) {
+        switch (opcode) {
+            case Constants.MESSAGE_USER_CONTROL_PRESSED:
+            case Constants.MESSAGE_USER_CONTROL_RELEASED:
+            case Constants.MESSAGE_SET_OSD_NAME:
+            case Constants.MESSAGE_SET_OSD_STRING:
+            case Constants.MESSAGE_VENDOR_COMMAND:
+            case Constants.MESSAGE_VENDOR_REMOTE_BUTTON_DOWN:
+            case Constants.MESSAGE_VENDOR_REMOTE_BUTTON_UP:
+            case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
+                return true;
+            default:
+                return false;
         }
     }
 }

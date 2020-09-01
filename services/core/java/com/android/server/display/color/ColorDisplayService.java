@@ -44,6 +44,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
@@ -73,6 +74,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
@@ -817,9 +819,11 @@ public final class ColorDisplayService extends SystemService {
         return LocalDateTime.MIN;
     }
 
-    private boolean setAppSaturationLevelInternal(String packageName, int saturationLevel) {
+    private boolean setAppSaturationLevelInternal(String callingPackageName,
+            String affectedPackageName, int saturationLevel) {
         return mAppSaturationController
-                .setSaturationLevel(packageName, mCurrentUser, saturationLevel);
+                .setSaturationLevel(callingPackageName, affectedPackageName, mCurrentUser,
+                        saturationLevel);
     }
 
     private void setColorModeInternal(@ColorMode int colorMode) {
@@ -1533,9 +1537,11 @@ public final class ColorDisplayService extends SystemService {
             getContext().enforceCallingPermission(
                     Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
                     "Permission required to set display saturation level");
+            final String callingPackageName = LocalServices.getService(PackageManagerInternal.class)
+                    .getNameForUid(Binder.getCallingUid());
             final long token = Binder.clearCallingIdentity();
             try {
-                return setAppSaturationLevelInternal(packageName, level);
+                return setAppSaturationLevelInternal(callingPackageName, packageName, level);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

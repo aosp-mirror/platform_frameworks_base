@@ -23,9 +23,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 /**
  * Top-level interface to an input method component (implemented in a
@@ -34,6 +36,9 @@ import com.android.internal.view.IInputSessionCallback;
  */
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps);
+
+    void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
+            in IInlineSuggestionsRequestCallback cb);
 
     void bindInput(in InputBinding binding);
 
@@ -48,9 +53,9 @@ oneway interface IInputMethod {
 
     void revokeSession(IInputMethodSession session);
 
-    void showSoftInput(int flags, in ResultReceiver resultReceiver);
+    void showSoftInput(in IBinder showInputToken, int flags, in ResultReceiver resultReceiver);
 
-    void hideSoftInput(int flags, in ResultReceiver resultReceiver);
+    void hideSoftInput(in IBinder hideInputToken, int flags, in ResultReceiver resultReceiver);
 
     void changeInputMethodSubtype(in InputMethodSubtype subtype);
 }

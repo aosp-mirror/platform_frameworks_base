@@ -33,7 +33,7 @@ public class DdmHandleAppName extends ChunkHandler {
 
     public static final int CHUNK_APNM = type("APNM");
 
-    private volatile static String mAppName = "";
+    private static volatile Names sNames = new Names("", "");
 
     private static DdmHandleAppName mInstance = new DdmHandleAppName();
 
@@ -68,44 +68,80 @@ public class DdmHandleAppName extends ChunkHandler {
 
 
     /**
+     * Sets all names to the same name.
+     */
+    @UnsupportedAppUsage
+    public static void setAppName(String name, int userId) {
+        setAppName(name, name, userId);
+    }
+
+    /**
      * Set the application name.  Called when we get named, which may be
      * before or after DDMS connects.  For the latter we need to send up
      * an APNM message.
      */
     @UnsupportedAppUsage
-    public static void setAppName(String name, int userId) {
-        if (name == null || name.length() == 0)
-            return;
+    public static void setAppName(String appName, String pkgName, int userId) {
+        if (appName == null || appName.isEmpty() || pkgName == null || pkgName.isEmpty()) return;
 
-        mAppName = name;
+        sNames = new Names(appName, pkgName);
 
         // if DDMS is already connected, send the app name up
-        sendAPNM(name, userId);
+        sendAPNM(appName, pkgName, userId);
     }
 
     @UnsupportedAppUsage
-    public static String getAppName() {
-        return mAppName;
+    public static Names getNames() {
+        return sNames;
     }
 
-    /*
+    /**
      * Send an APNM (APplication NaMe) chunk.
      */
-    private static void sendAPNM(String appName, int userId) {
+    private static void sendAPNM(String appName, String pkgName, int userId) {
         if (false)
             Log.v("ddm", "Sending app name");
 
         ByteBuffer out = ByteBuffer.allocate(
                             4 /* appName's length */
-                            + appName.length()*2 /* appName */
-                            + 4 /* userId */);
+                            + appName.length() * 2 /* appName */
+                            + 4 /* userId */
+                            + 4 /* pkgName's length */
+                            + pkgName.length() * 2 /* pkgName */);
         out.order(ChunkHandler.CHUNK_ORDER);
         out.putInt(appName.length());
         putString(out, appName);
         out.putInt(userId);
+        out.putInt(pkgName.length());
+        putString(out, pkgName);
 
         Chunk chunk = new Chunk(CHUNK_APNM, out);
         DdmServer.sendChunk(chunk);
+    }
+
+    /**
+     * A class that encapsulates the app and package names into a single
+     * instance, effectively synchronizing the two names.
+     */
+    static final class Names {
+
+        private final String mAppName;
+
+        private final String mPkgName;
+
+        private Names(String appName, String pkgName) {
+            mAppName = appName;
+            mPkgName = pkgName;
+        }
+
+        public String getAppName() {
+            return mAppName;
+        }
+
+        public String getPkgName() {
+            return mPkgName;
+        }
+
     }
 
 }

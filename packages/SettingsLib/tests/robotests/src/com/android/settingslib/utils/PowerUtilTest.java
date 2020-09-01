@@ -42,7 +42,7 @@ public class PowerUtilTest {
     private static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
     private static final String NORMAL_CASE_EXPECTED_PREFIX = "Should last until about";
     private static final String ENHANCED_SUFFIX = " based on your usage";
-    private static final String EXTEND_PREFIX = "Extend battery life past";
+    private static final String BATTERY_RUN_OUT_PREFIX = "Battery may run out by";
     // matches a time (ex: '1:15 PM', '2 AM', '23:00')
     private static final String TIME_OF_DAY_REGEX = " (\\d)+:?(\\d)* ((AM)*)|((PM)*)";
     // matches a percentage with parenthesis (ex: '(10%)')
@@ -120,9 +120,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // additional battery percentage in this string
-        assertThat(info).isEqualTo("Phone may shutdown soon (10%)");
+        assertThat(info).isEqualTo("Phone may shut down soon (10%)");
         // shortened string should not have percentage
-        assertThat(info2).isEqualTo("Phone may shutdown soon");
+        assertThat(info2).isEqualTo("Phone may shut down soon");
     }
 
     @Test
@@ -137,9 +137,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo("Less than 15 min remaining");
+        assertThat(info).isEqualTo("Less than 15 min left");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo("Less than 15 min remaining (10%)");
+        assertThat(info2).isEqualTo("Less than 15 min left (10%)");
     }
 
     @Test
@@ -171,9 +171,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo("More than 2 days remaining");
+        assertThat(info).isEqualTo("More than 2 days left");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo("More than 2 days remaining (10%)");
+        assertThat(info2).isEqualTo("More than 2 days left (10%)");
     }
 
     @Test
@@ -181,7 +181,7 @@ public class PowerUtilTest {
         String info = PowerUtil.getBatteryTipStringFormatted(mContext,
                 THREE_DAYS_MILLIS);
 
-        assertThat(info).isEqualTo("More than 3 days remaining");
+        assertThat(info).isEqualTo("More than 3 days left");
     }
 
     @Test
@@ -189,9 +189,9 @@ public class PowerUtilTest {
         String info = PowerUtil.getBatteryTipStringFormatted(mContext,
                 SEVENTEEN_MIN_MILLIS);
 
-        // ex: Extend battery life past 1:15 PM
+        // ex: Battery may run out by 1:15 PM
         assertThat(info).containsMatch(Pattern.compile(
-                EXTEND_PREFIX + TIME_OF_DAY_REGEX));
+                BATTERY_RUN_OUT_PREFIX + TIME_OF_DAY_REGEX));
     }
 
     @Test

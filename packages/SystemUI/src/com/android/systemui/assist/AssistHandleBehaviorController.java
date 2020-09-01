@@ -22,7 +22,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.Nullable;
 
@@ -30,9 +32,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.ScreenDecorations;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 
@@ -45,6 +46,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * A class for managing Assistant handle logic.
@@ -59,6 +62,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private static final long DEFAULT_SHOWN_FREQUENCY_THRESHOLD_MS = 0;
     private static final long DEFAULT_SHOW_AND_GO_DURATION_MS = TimeUnit.SECONDS.toMillis(3);
+    private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
     /**
      * This is the default behavior that will be used once the system is up. It will be set once the
@@ -71,9 +75,10 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private final Handler mHandler;
     private final Runnable mHideHandles = this::hideHandles;
     private final Runnable mShowAndGo = this::showAndGoInternal;
-    private final Provider<ScreenDecorations> mScreenDecorations;
+    private final Provider<AssistHandleViewController> mAssistHandleViewController;
     private final DeviceConfigHelper mDeviceConfigHelper;
     private final Map<AssistHandleBehavior, BehaviorController> mBehaviorMap;
+    private final Lazy<AccessibilityManager> mA11yManager;
 
     private boolean mHandlesShowing = false;
     private long mHandlesLastHiddenAt;
@@ -90,17 +95,19 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             Context context,
             AssistUtils assistUtils,
             @Named(ASSIST_HANDLE_THREAD_NAME) Handler handler,
-            Provider<ScreenDecorations> screenDecorations,
+            Provider<AssistHandleViewController> assistHandleViewController,
             DeviceConfigHelper deviceConfigHelper,
             Map<AssistHandleBehavior, BehaviorController> behaviorMap,
             NavigationModeController navigationModeController,
-            DumpController dumpController) {
+            Lazy<AccessibilityManager> a11yManager,
+            DumpManager dumpManager) {
         mContext = context;
         mAssistUtils = assistUtils;
         mHandler = handler;
-        mScreenDecorations = screenDecorations;
+        mAssistHandleViewController = assistHandleViewController;
         mDeviceConfigHelper = deviceConfigHelper;
         mBehaviorMap = behaviorMap;
+        mA11yManager = a11yManager;
 
         mInGesturalMode = QuickStepContract.isGesturalMode(
                 navigationModeController.addListener(this::handleNavigationModeChange));
@@ -116,7 +123,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
                     }
                 });
 
-        dumpController.addListener(this);
+        dumpManager.registerDumpable(TAG, this);
     }
 
     @Override // AssistHandleCallbacks
@@ -157,7 +164,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         return Long.max(mShowAndGoEndsAt - SystemClock.elapsedRealtime(), 0);
     }
 
-    boolean areHandlesShowing() {
+    public boolean areHandlesShowing() {
         return mHandlesShowing;
     }
 
@@ -193,11 +200,15 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         try {
             setBehavior(AssistHandleBehavior.valueOf(behavior));
         } catch (IllegalArgumentException | NullPointerException e) {
-            Log.e(TAG, "Invalid behavior: " + behavior, e);
+            Log.e(TAG, "Invalid behavior: " + behavior);
         }
     }
 
     private boolean handlesUnblocked(boolean ignoreThreshold) {
+        if (!isUserSetupComplete()) {
+            return false;
+        }
+
         long timeSinceHidden = SystemClock.elapsedRealtime() - mHandlesLastHiddenAt;
         boolean notThrottled = ignoreThreshold || timeSinceHidden >= getShownFrequencyThreshold();
         ComponentName assistantComponent =
@@ -212,9 +223,11 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     }
 
     private long getShowAndGoDuration() {
-        return mDeviceConfigHelper.getLong(
+        long configuredTime = mDeviceConfigHelper.getLong(
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS,
                 DEFAULT_SHOW_AND_GO_DURATION_MS);
+        return mA11yManager.get().getRecommendedTimeoutMillis(
+                (int) configuredTime, AccessibilityManager.FLAG_CONTENT_ICONS);
     }
 
     private String getBehaviorMode() {
@@ -229,12 +242,13 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         }
 
         if (handlesUnblocked(ignoreThreshold)) {
-            ScreenDecorations screenDecorations = mScreenDecorations.get();
-            if (screenDecorations == null) {
-                Log.w(TAG, "Couldn't show handles, ScreenDecorations unavailable");
+            mHandlesShowing = true;
+            AssistHandleViewController assistHandleViewController =
+                    mAssistHandleViewController.get();
+            if (assistHandleViewController == null) {
+                Log.w(TAG, "Couldn't show handles, AssistHandleViewController unavailable");
             } else {
-                mHandlesShowing = true;
-                screenDecorations.setAssistHintVisible(true);
+                assistHandleViewController.setAssistHintVisible(true);
             }
         }
     }
@@ -244,13 +258,14 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             return;
         }
 
-        ScreenDecorations screenDecorations = mScreenDecorations.get();
-        if (screenDecorations == null) {
-            Log.w(TAG, "Couldn't hide handles, ScreenDecorations unavailable");
+        mHandlesShowing = false;
+        mHandlesLastHiddenAt = SystemClock.elapsedRealtime();
+        AssistHandleViewController assistHandleViewController =
+                mAssistHandleViewController.get();
+        if (assistHandleViewController == null) {
+            Log.w(TAG, "Couldn't show handles, AssistHandleViewController unavailable");
         } else {
-            mHandlesShowing = false;
-            mHandlesLastHiddenAt = SystemClock.elapsedRealtime();
-            screenDecorations.setAssistHintVisible(false);
+            assistHandleViewController.setAssistHintVisible(false);
         }
     }
 
@@ -275,6 +290,11 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mShowAndGoEndsAt = 0;
     }
 
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getInt(
+                mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+    }
+
     @VisibleForTesting
     void setInGesturalModeForTest(boolean inGesturalMode) {
         mInGesturalMode = inGesturalMode;
@@ -290,7 +310,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
         pw.println("   Phenotype Flags:");
         pw.println("      "
-                + SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS
+                + SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS + "(a11y modded)"
                 + "="
                 + getShowAndGoDuration());
         pw.println("      "

@@ -16,17 +16,23 @@
 
 package android.widget;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.internal.util.Preconditions.checkState;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
+import android.app.ITransientNotificationCallback;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PixelFormat;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,15 +41,16 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IAccessibilityManager;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A toast is a view containing a quick little message for the user.  The toast class
@@ -60,6 +67,10 @@ import java.lang.annotation.RetentionPolicy;
  * <p>
  * The easiest way to use this class is to call one of the static methods that constructs
  * everything you need and returns a new Toast object.
+ * <p>
+ * Note that
+ * <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbars</a> are
+ * preferred for brief messages while the app is in the foreground.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -94,12 +105,43 @@ public class Toast {
      */
     public static final int LENGTH_LONG = 1;
 
-    final Context mContext;
+    /**
+     * Text toasts will be rendered by SystemUI instead of in-app, so apps can't circumvent
+     * background custom toast restrictions.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long CHANGE_TEXT_TOASTS_IN_THE_SYSTEM = 147798919L;
+
+
+    private final Binder mToken;
+    private final Context mContext;
+    private final Handler mHandler;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final TN mTN;
     @UnsupportedAppUsage
     int mDuration;
-    View mNextView;
+
+    /**
+     * This is also passed to {@link TN} object, where it's also accessed with itself as its own
+     * lock.
+     */
+    @GuardedBy("mCallbacks")
+    private final List<Callback> mCallbacks;
+
+    /**
+     * View to be displayed, in case this is a custom toast (e.g. not created with {@link
+     * #makeText(Context, int, int)} or its variants).
+     */
+    @Nullable
+    private View mNextView;
+
+    /**
+     * Text to be shown, in case this is NOT a custom toast (e.g. created with {@link
+     * #makeText(Context, int, int)} or its variants).
+     */
+    @Nullable
+    private CharSequence mText;
 
     /**
      * Construct an empty Toast object.  You must call {@link #setView} before you
@@ -118,19 +160,36 @@ public class Toast {
      */
     public Toast(@NonNull Context context, @Nullable Looper looper) {
         mContext = context;
-        mTN = new TN(context.getPackageName(), looper);
+        mToken = new Binder();
+        looper = getLooper(looper);
+        mHandler = new Handler(looper);
+        mCallbacks = new ArrayList<>();
+        mTN = new TN(context, context.getPackageName(), mToken,
+                mCallbacks, looper);
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
         mTN.mGravity = context.getResources().getInteger(
                 com.android.internal.R.integer.config_toastDefaultGravity);
     }
 
+    private Looper getLooper(@Nullable Looper looper) {
+        if (looper != null) {
+            return looper;
+        }
+        return checkNotNull(Looper.myLooper(),
+                "Can't toast on a thread that has not called Looper.prepare()");
+    }
+
     /**
      * Show the view for the specified duration.
      */
     public void show() {
-        if (mNextView == null) {
-            throw new RuntimeException("setView must have been called");
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            checkState(mNextView != null || mText != null, "You must either set a text or a view");
+        } else {
+            if (mNextView == null) {
+                throw new RuntimeException("setView must have been called");
+            }
         }
 
         INotificationManager service = getService();
@@ -140,7 +199,19 @@ public class Toast {
         final int displayId = mContext.getDisplayId();
 
         try {
-            service.enqueueToast(pkg, tn, mDuration, displayId);
+            if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+                if (mNextView != null) {
+                    // It's a custom toast
+                    service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
+                } else {
+                    // It's a text toast
+                    ITransientNotificationCallback callback =
+                            new CallbackBinder(mCallbacks, mHandler);
+                    service.enqueueTextToast(pkg, mToken, mText, mDuration, displayId, callback);
+                }
+            } else {
+                service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
+            }
         } catch (RemoteException e) {
             // Empty
         }
@@ -152,22 +223,56 @@ public class Toast {
      * after the appropriate duration.
      */
     public void cancel() {
-        mTN.cancel();
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)
+                && mNextView == null) {
+            try {
+                getService().cancelToast(mContext.getOpPackageName(), mToken);
+            } catch (RemoteException e) {
+                // Empty
+            }
+        } else {
+            mTN.cancel();
+        }
     }
 
     /**
      * Set the view to show.
+     *
      * @see #getView
+     * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
+     *      {@link #makeText(Context, CharSequence, int)} method, or use a
+     *      <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbar</a>
+     *      when in the foreground. Starting from Android {@link Build.VERSION_CODES#R}, apps
+     *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
+     *      will not have custom toast views displayed.
      */
+    @Deprecated
     public void setView(View view) {
         mNextView = view;
     }
 
     /**
      * Return the view.
+     *
+     * <p>Toasts constructed with {@link #Toast(Context)} that haven't called {@link #setView(View)}
+     * with a non-{@code null} view will return {@code null} here.
+     *
+     * <p>Starting from Android {@link Build.VERSION_CODES#R}, in apps targeting API level {@link
+     * Build.VERSION_CODES#R} or higher, toasts constructed with {@link #makeText(Context,
+     * CharSequence, int)} or its variants will also return {@code null} here unless they had called
+     * {@link #setView(View)} with a non-{@code null} view. If you want to be notified when the
+     * toast is shown or hidden, use {@link #addCallback(Callback)}.
+     *
      * @see #setView
+     * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
+     *      {@link #makeText(Context, CharSequence, int)} method, or use a
+     *      <a href="{@docRoot}reference/com/google/android/material/snackbar/Snackbar">Snackbar</a>
+     *      when in the foreground. Starting from Android {@link Build.VERSION_CODES#R}, apps
+     *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
+     *      will not have custom toast views displayed.
      */
-    public View getView() {
+    @Deprecated
+    @Nullable public View getView() {
         return mNextView;
     }
 
@@ -193,6 +298,10 @@ public class Toast {
     /**
      * Set the margins of the view.
      *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method is a no-op when
+     * called on text toasts.
+     *
      * @param horizontalMargin The horizontal margin, in percentage of the
      *        container width, between the container's edges and the
      *        notification
@@ -201,30 +310,59 @@ public class Toast {
      *        notification
      */
     public void setMargin(float horizontalMargin, float verticalMargin) {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "setMargin() shouldn't be called on text toasts, the values won't be used");
+        }
         mTN.mHorizontalMargin = horizontalMargin;
         mTN.mVerticalMargin = verticalMargin;
     }
 
     /**
      * Return the horizontal margin.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public float getHorizontalMargin() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getHorizontalMargin() shouldn't be called on text toasts, the result may "
+                    + "not reflect actual values.");
+        }
         return mTN.mHorizontalMargin;
     }
 
     /**
      * Return the vertical margin.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public float getVerticalMargin() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getVerticalMargin() shouldn't be called on text toasts, the result may not"
+                    + " reflect actual values.");
+        }
         return mTN.mVerticalMargin;
     }
 
     /**
      * Set the location at which the notification should appear on the screen.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method is a no-op when
+     * called on text toasts.
+     *
      * @see android.view.Gravity
      * @see #getGravity
      */
     public void setGravity(int gravity, int xOffset, int yOffset) {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "setGravity() shouldn't be called on text toasts, the values won't be used");
+        }
         mTN.mGravity = gravity;
         mTN.mX = xOffset;
         mTN.mY = yOffset;
@@ -232,25 +370,80 @@ public class Toast {
 
      /**
      * Get the location at which the notification should appear on the screen.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
+     *
      * @see android.view.Gravity
      * @see #getGravity
      */
     public int getGravity() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getGravity() shouldn't be called on text toasts, the result may not reflect"
+                    + " actual values.");
+        }
         return mTN.mGravity;
     }
 
     /**
      * Return the X offset in pixels to apply to the gravity's location.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public int getXOffset() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getXOffset() shouldn't be called on text toasts, the result may not reflect"
+                    + " actual values.");
+        }
         return mTN.mX;
     }
 
     /**
      * Return the Y offset in pixels to apply to the gravity's location.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public int getYOffset() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getYOffset() shouldn't be called on text toasts, the result may not reflect"
+                    + " actual values.");
+        }
         return mTN.mY;
+    }
+
+    private boolean isSystemRenderedTextToast() {
+        return Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM) && mNextView == null;
+    }
+
+    /**
+     * Adds a callback to be notified when the toast is shown or hidden.
+     *
+     * Note that if the toast is blocked for some reason you won't get a call back.
+     *
+     * @see #removeCallback(Callback)
+     */
+    public void addCallback(@NonNull Callback callback) {
+        checkNotNull(callback);
+        synchronized (mCallbacks) {
+            mCallbacks.add(callback);
+        }
+    }
+
+    /**
+     * Removes a callback previously added with {@link #addCallback(Callback)}.
+     */
+    public void removeCallback(@NonNull Callback callback) {
+        synchronized (mCallbacks) {
+            mCallbacks.remove(callback);
+        }
     }
 
     /**
@@ -258,12 +451,23 @@ public class Toast {
      * @hide
      */
     @UnsupportedAppUsage
-    public WindowManager.LayoutParams getWindowParams() {
-        return mTN.mParams;
+    @Nullable public WindowManager.LayoutParams getWindowParams() {
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            if (mNextView != null) {
+                // Custom toasts
+                return mTN.mParams;
+            } else {
+                // Text toasts
+                return null;
+            }
+        } else {
+            // Text and custom toasts are app-rendered
+            return mTN.mParams;
+        }
     }
 
     /**
-     * Make a standard toast that just contains a text view.
+     * Make a standard toast that just contains text.
      *
      * @param context  The context to use.  Usually your {@link android.app.Application}
      *                 or {@link android.app.Activity} object.
@@ -279,26 +483,28 @@ public class Toast {
     /**
      * Make a standard toast to display using the specified looper.
      * If looper is null, Looper.myLooper() is used.
+     *
      * @hide
      */
     public static Toast makeText(@NonNull Context context, @Nullable Looper looper,
             @NonNull CharSequence text, @Duration int duration) {
-        Toast result = new Toast(context, looper);
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            Toast result = new Toast(context, looper);
+            result.mText = text;
+            result.mDuration = duration;
+            return result;
+        } else {
+            Toast result = new Toast(context, looper);
+            View v = ToastPresenter.getTextToastView(context, text);
+            result.mNextView = v;
+            result.mDuration = duration;
 
-        LayoutInflater inflate = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);
-        TextView tv = (TextView)v.findViewById(com.android.internal.R.id.message);
-        tv.setText(text);
-
-        result.mNextView = v;
-        result.mDuration = duration;
-
-        return result;
+            return result;
+        }
     }
 
     /**
-     * Make a standard toast that just contains a text view with the text from a resource.
+     * Make a standard toast that just contains text from a resource.
      *
      * @param context  The context to use.  Usually your {@link android.app.Application}
      *                 or {@link android.app.Activity} object.
@@ -326,14 +532,23 @@ public class Toast {
      * @param s The new text for the Toast.
      */
     public void setText(CharSequence s) {
-        if (mNextView == null) {
-            throw new RuntimeException("This Toast was not created with Toast.makeText()");
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            if (mNextView != null) {
+                throw new IllegalStateException(
+                        "Text provided for custom toast, remove previous setView() calls if you "
+                                + "want a text toast instead.");
+            }
+            mText = s;
+        } else {
+            if (mNextView == null) {
+                throw new RuntimeException("This Toast was not created with Toast.makeText()");
+            }
+            TextView tv = mNextView.findViewById(com.android.internal.R.id.message);
+            if (tv == null) {
+                throw new RuntimeException("This Toast was not created with Toast.makeText()");
+            }
+            tv.setText(s);
         }
-        TextView tv = mNextView.findViewById(com.android.internal.R.id.message);
-        if (tv == null) {
-            throw new RuntimeException("This Toast was not created with Toast.makeText()");
-        }
-        tv.setText(s);
     }
 
     // =======================================================================================
@@ -349,13 +564,14 @@ public class Toast {
         if (sService != null) {
             return sService;
         }
-        sService = INotificationManager.Stub.asInterface(ServiceManager.getService("notification"));
+        sService = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         return sService;
     }
 
     private static class TN extends ITransientNotification.Stub {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-        private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
+        private final WindowManager.LayoutParams mParams;
 
         private static final int SHOW = 0;
         private static final int HIDE = 1;
@@ -379,35 +595,30 @@ public class Toast {
 
         WindowManager mWM;
 
-        String mPackageName;
+        final String mPackageName;
+        final Binder mToken;
+        private final ToastPresenter mPresenter;
 
-        static final long SHORT_DURATION_TIMEOUT = 4000;
-        static final long LONG_DURATION_TIMEOUT = 7000;
+        @GuardedBy("mCallbacks")
+        private final List<Callback> mCallbacks;
 
-        TN(String packageName, @Nullable Looper looper) {
-            // XXX This should be changed to use a Dialog, with a Theme.Toast
-            // defined that sets up the layout params appropriately.
-            final WindowManager.LayoutParams params = mParams;
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            params.format = PixelFormat.TRANSLUCENT;
-            params.windowAnimations = com.android.internal.R.style.Animation_Toast;
-            params.type = WindowManager.LayoutParams.TYPE_TOAST;
-            params.setTitle("Toast");
-            params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-
+        /**
+         * Creates a {@link ITransientNotification} object.
+         *
+         * The parameter {@code callbacks} is not copied and is accessed with itself as its own
+         * lock.
+         */
+        TN(Context context, String packageName, Binder token, List<Callback> callbacks,
+                @Nullable Looper looper) {
+            IAccessibilityManager accessibilityManager = IAccessibilityManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
+            mPresenter = new ToastPresenter(context, accessibilityManager, getService(),
+                    packageName);
+            mParams = mPresenter.getLayoutParams();
             mPackageName = packageName;
+            mToken = token;
+            mCallbacks = callbacks;
 
-            if (looper == null) {
-                // Use Looper.myLooper() if looper is not specified.
-                looper = Looper.myLooper();
-                if (looper == null) {
-                    throw new RuntimeException(
-                            "Can't toast on a thread that has not called Looper.prepare()");
-                }
-            }
             mHandler = new Handler(looper, null) {
                 @Override
                 public void handleMessage(Message msg) {
@@ -430,7 +641,7 @@ public class Toast {
                             // handleShow()
                             mNextView = null;
                             try {
-                                getService().cancelToast(mPackageName, TN.this);
+                                getService().cancelToast(mPackageName, mToken);
                             } catch (RemoteException e) {
                             }
                             break;
@@ -438,6 +649,12 @@ public class Toast {
                     }
                 }
             };
+        }
+
+        private List<Callback> getCallbacks() {
+            synchronized (mCallbacks) {
+                return new ArrayList<>(mCallbacks);
+            }
         }
 
         /**
@@ -476,86 +693,80 @@ public class Toast {
                 // remove the old view if necessary
                 handleHide();
                 mView = mNextView;
-                Context context = mView.getContext().getApplicationContext();
-                String packageName = mView.getContext().getOpPackageName();
-                if (context == null) {
-                    context = mView.getContext();
-                }
-                mWM = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-                // We can resolve the Gravity here by using the Locale for getting
-                // the layout direction
-                final Configuration config = mView.getContext().getResources().getConfiguration();
-                final int gravity = Gravity.getAbsoluteGravity(mGravity, config.getLayoutDirection());
-                mParams.gravity = gravity;
-                if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
-                    mParams.horizontalWeight = 1.0f;
-                }
-                if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
-                    mParams.verticalWeight = 1.0f;
-                }
-                mParams.x = mX;
-                mParams.y = mY;
-                mParams.verticalMargin = mVerticalMargin;
-                mParams.horizontalMargin = mHorizontalMargin;
-                mParams.packageName = packageName;
-                mParams.hideTimeoutMilliseconds = mDuration ==
-                    Toast.LENGTH_LONG ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;
-                mParams.token = windowToken;
-                if (mView.getParent() != null) {
-                    if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
-                    mWM.removeView(mView);
-                }
-                if (localLOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
-                // Since the notification manager service cancels the token right
-                // after it notifies us to cancel the toast there is an inherent
-                // race and we may attempt to add a window after the token has been
-                // invalidated. Let us hedge against that.
-                try {
-                    mWM.addView(mView, mParams);
-                    trySendAccessibilityEvent();
-                } catch (WindowManager.BadTokenException e) {
-                    /* ignore */
-                }
+                mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
+                        mHorizontalMargin, mVerticalMargin,
+                        new CallbackBinder(getCallbacks(), mHandler));
             }
-        }
-
-        private void trySendAccessibilityEvent() {
-            AccessibilityManager accessibilityManager =
-                    AccessibilityManager.getInstance(mView.getContext());
-            if (!accessibilityManager.isEnabled()) {
-                return;
-            }
-            // treat toasts as notifications since they are used to
-            // announce a transient piece of information to the user
-            AccessibilityEvent event = AccessibilityEvent.obtain(
-                    AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
-            event.setClassName(getClass().getName());
-            event.setPackageName(mView.getContext().getPackageName());
-            mView.dispatchPopulateAccessibilityEvent(event);
-            accessibilityManager.sendAccessibilityEvent(event);
         }
 
         @UnsupportedAppUsage
         public void handleHide() {
             if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
             if (mView != null) {
-                // note: checking parent() just to make sure the view has
-                // been added...  i have seen cases where we get here when
-                // the view isn't yet added, so let's try not to crash.
-                if (mView.getParent() != null) {
-                    if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
-                    mWM.removeViewImmediate(mView);
-                }
-
-
-                // Now that we've removed the view it's safe for the server to release
-                // the resources.
-                try {
-                    getService().finishToken(mPackageName, this);
-                } catch (RemoteException e) {
-                }
-
+                checkState(mView == mPresenter.getView(),
+                        "Trying to hide toast view different than the last one displayed");
+                mPresenter.hide(new CallbackBinder(getCallbacks(), mHandler));
                 mView = null;
+            }
+        }
+    }
+
+    /**
+     * Callback object to be called when the toast is shown or hidden.
+     *
+     * @see #makeText(Context, CharSequence, int)
+     * @see #addCallback(Callback)
+     */
+    public abstract static class Callback {
+        /**
+         * Called when the toast is displayed on the screen.
+         */
+        public void onToastShown() {}
+
+        /**
+         * Called when the toast is hidden.
+         */
+        public void onToastHidden() {}
+    }
+
+    private static class CallbackBinder extends ITransientNotificationCallback.Stub {
+        private final Handler mHandler;
+
+        @GuardedBy("mCallbacks")
+        private final List<Callback> mCallbacks;
+
+        /**
+         * Creates a {@link ITransientNotificationCallback} object.
+         *
+         * The parameter {@code callbacks} is not copied and is accessed with itself as its own
+         * lock.
+         */
+        private CallbackBinder(List<Callback> callbacks, Handler handler) {
+            mCallbacks = callbacks;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onToastShown() {
+            mHandler.post(() -> {
+                for (Callback callback : getCallbacks()) {
+                    callback.onToastShown();
+                }
+            });
+        }
+
+        @Override
+        public void onToastHidden() {
+            mHandler.post(() -> {
+                for (Callback callback : getCallbacks()) {
+                    callback.onToastHidden();
+                }
+            });
+        }
+
+        private List<Callback> getCallbacks() {
+            synchronized (mCallbacks) {
+                return new ArrayList<>(mCallbacks);
             }
         }
     }

@@ -42,6 +42,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.LinearInterpolator;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.internal.R;
+
 import java.lang.ref.WeakReference;
 
 @RemoteView
@@ -1241,12 +1243,38 @@ public class StackView extends AdapterViewAnimator {
         info.setScrollable(getChildCount() > 1);
         if (isEnabled()) {
             if (getDisplayedChild() < getChildCount() - 1) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                if (mStackMode == ITEMS_SLIDE_UP) {
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_DOWN);
+                } else {
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_UP);
+                }
             }
             if (getDisplayedChild() > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                if (mStackMode == ITEMS_SLIDE_UP) {
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_UP);
+                } else {
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_DOWN);
+                }
             }
         }
+    }
+
+    private boolean goForward() {
+        if (getDisplayedChild() < getChildCount() - 1) {
+            showNext();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean goBackward() {
+        if (getDisplayedChild() > 0) {
+            showPrevious();
+            return true;
+        }
+        return false;
     }
 
     /** @hide */
@@ -1260,17 +1288,25 @@ public class StackView extends AdapterViewAnimator {
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (getDisplayedChild() < getChildCount() - 1) {
-                    showNext();
-                    return true;
-                }
-            } return false;
+                return goForward();
+            }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (getDisplayedChild() > 0) {
-                    showPrevious();
-                    return true;
+                return goBackward();
+            }
+            case R.id.accessibilityActionPageUp: {
+                if (mStackMode == ITEMS_SLIDE_UP) {
+                    return goBackward();
+                } else {
+                    return goForward();
                 }
-            } return false;
+            }
+            case R.id.accessibilityActionPageDown: {
+                if (mStackMode == ITEMS_SLIDE_UP) {
+                    return goForward();
+                } else {
+                    return goBackward();
+                }
+            }
         }
         return false;
     }

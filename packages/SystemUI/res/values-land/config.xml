@@ -31,4 +31,10 @@
 
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">1</integer>
+
+    <!-- Max number of columns for quick controls area -->
+    <integer name="controls_max_columns">4</integer>
+
+    <!-- Max number of columns for power menu -->
+    <integer name="power_menu_max_columns">4</integer>
 </resources>

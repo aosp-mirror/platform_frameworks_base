@@ -22,7 +22,7 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
  * Allows for additional sensors to be retrieved from
- * {@link com.android.systemui.util.AsyncSensorManager}.
+ * {@link com.android.systemui.util.sensors.AsyncSensorManager}.
  */
 @ProvidesInterface(action = SensorManagerPlugin.ACTION, version = SensorManagerPlugin.VERSION)
 public interface SensorManagerPlugin extends Plugin {

@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,12 +44,13 @@ public class WindowInfo implements Parcelable {
     public IBinder parentToken;
     public IBinder activityToken;
     public boolean focused;
-    public final Rect boundsInScreen = new Rect();
+    public Region regionInScreen = new Region();
     public List<IBinder> childTokens;
     public CharSequence title;
     public long accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     public boolean inPictureInPicture;
     public boolean hasFlagWatchOutsideTouch;
+    public int displayId = Display.INVALID_DISPLAY;
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -65,13 +66,14 @@ public class WindowInfo implements Parcelable {
 
     public static WindowInfo obtain(WindowInfo other) {
         WindowInfo window = obtain();
+        window.displayId = other.displayId;
         window.type = other.type;
         window.layer = other.layer;
         window.token = other.token;
         window.parentToken = other.parentToken;
         window.activityToken = other.activityToken;
         window.focused = other.focused;
-        window.boundsInScreen.set(other.boundsInScreen);
+        window.regionInScreen.set(other.regionInScreen);
         window.title = other.title;
         window.accessibilityIdOfAnchor = other.accessibilityIdOfAnchor;
         window.inPictureInPicture = other.inPictureInPicture;
@@ -100,13 +102,14 @@ public class WindowInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(displayId);
         parcel.writeInt(type);
         parcel.writeInt(layer);
         parcel.writeStrongBinder(token);
         parcel.writeStrongBinder(parentToken);
         parcel.writeStrongBinder(activityToken);
         parcel.writeInt(focused ? 1 : 0);
-        boundsInScreen.writeToParcel(parcel, flags);
+        regionInScreen.writeToParcel(parcel, flags);
         parcel.writeCharSequence(title);
         parcel.writeLong(accessibilityIdOfAnchor);
         parcel.writeInt(inPictureInPicture ? 1 : 0);
@@ -125,10 +128,12 @@ public class WindowInfo implements Parcelable {
         StringBuilder builder = new StringBuilder();
         builder.append("WindowInfo[");
         builder.append("title=").append(title);
+        builder.append(", displayId=").append(displayId);
         builder.append(", type=").append(type);
         builder.append(", layer=").append(layer);
         builder.append(", token=").append(token);
-        builder.append(", bounds=").append(boundsInScreen);
+        builder.append(", region=").append(regionInScreen);
+        builder.append(", bounds=").append(regionInScreen.getBounds());
         builder.append(", parent=").append(parentToken);
         builder.append(", focused=").append(focused);
         builder.append(", children=").append(childTokens);
@@ -140,13 +145,14 @@ public class WindowInfo implements Parcelable {
     }
 
     private void initFromParcel(Parcel parcel) {
+        displayId = parcel.readInt();
         type = parcel.readInt();
         layer = parcel.readInt();
         token = parcel.readStrongBinder();
         parentToken = parcel.readStrongBinder();
         activityToken = parcel.readStrongBinder();
         focused = (parcel.readInt() == 1);
-        boundsInScreen.readFromParcel(parcel);
+        regionInScreen = Region.CREATOR.createFromParcel(parcel);
         title = parcel.readCharSequence();
         accessibilityIdOfAnchor = parcel.readLong();
         inPictureInPicture = (parcel.readInt() == 1);
@@ -162,13 +168,14 @@ public class WindowInfo implements Parcelable {
     }
 
     private void clear() {
+        displayId = Display.INVALID_DISPLAY;
         type = 0;
         layer = 0;
         token = null;
         parentToken = null;
         activityToken = null;
         focused = false;
-        boundsInScreen.setEmpty();
+        regionInScreen.setEmpty();
         if (childTokens != null) {
             childTokens.clear();
         }

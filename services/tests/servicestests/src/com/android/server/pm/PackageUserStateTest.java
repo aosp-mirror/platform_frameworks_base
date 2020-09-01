@@ -20,16 +20,20 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
 import android.os.PersistableBundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +86,10 @@ public class PackageUserStateTest {
 
         oldUserState = new PackageUserState();
         oldUserState.suspended = true;
+        assertThat(testUserState.equals(oldUserState), is(false));
+
+        oldUserState = new PackageUserState();
+        oldUserState.uninstallReason = PackageManager.UNINSTALL_REASON_USER_TYPE;
         assertThat(testUserState.equals(oldUserState), is(false));
     }
 
@@ -175,18 +183,43 @@ public class PackageUserStateTest {
         assertThat(testUserState03.equals(oldUserState), is(false));
     }
 
+    private static PackageUserState.SuspendParams createSuspendParams(SuspendDialogInfo dialogInfo,
+            PersistableBundle appExtras, PersistableBundle launcherExtras) {
+        PackageUserState.SuspendParams obj = PackageUserState.SuspendParams.getInstanceOrNull(
+                dialogInfo, appExtras, launcherExtras);
+        return obj;
+    }
+
+    private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,
+            String sValue, String dKey, double dValue) {
+        final PersistableBundle result = new PersistableBundle(3);
+        if (lKey != null) {
+            result.putLong("com.unit_test." + lKey, lValue);
+        }
+        if (sKey != null) {
+            result.putString("com.unit_test." + sKey, sValue);
+        }
+        if (dKey != null) {
+            result.putDouble("com.unit_test." + dKey, dValue);
+        }
+        return result;
+    }
+
     @Test
     public void testPackageUserState05() {
-        PersistableBundle appExtras1 = new PersistableBundle();
-        PersistableBundle appExtras2 = new PersistableBundle();
-        appExtras1.putInt("appExtraId", 1);
-        appExtras2.putInt("appExtraId", 2);
-        PersistableBundle launcherExtras1 = new PersistableBundle();
-        PersistableBundle launcherExtras2 = new PersistableBundle();
-        launcherExtras1.putString("name", "launcherExtras1");
-        launcherExtras2.putString("name", "launcherExtras2");
+        final PersistableBundle appExtras1 = createPersistableBundle("appExtraId", 1, null, null,
+                null, 0);
+        final PersistableBundle appExtras2 = createPersistableBundle("appExtraId", 2, null, null,
+                null, 0);
+
+        final PersistableBundle launcherExtras1 = createPersistableBundle(null, 0, "name",
+                "launcherExtras1", null, 0);
+        final PersistableBundle launcherExtras2 = createPersistableBundle(null, 0, "name",
+                "launcherExtras2", null, 0);
+
         final String suspendingPackage1 = "package1";
         final String suspendingPackage2 = "package2";
+
         final SuspendDialogInfo dialogInfo1 = new SuspendDialogInfo.Builder()
                 .setMessage("dialogMessage1")
                 .build();
@@ -194,38 +227,23 @@ public class PackageUserStateTest {
                 .setMessage("dialogMessage2")
                 .build();
 
+        final ArrayMap<String, PackageUserState.SuspendParams> paramsMap1 = new ArrayMap<>();
+        paramsMap1.put(suspendingPackage1, createSuspendParams(dialogInfo1, appExtras1,
+                launcherExtras1));
+        final ArrayMap<String, PackageUserState.SuspendParams> paramsMap2 = new ArrayMap<>();
+        paramsMap2.put(suspendingPackage2, createSuspendParams(dialogInfo2,
+                appExtras2, launcherExtras2));
+
+
         final PackageUserState testUserState1 = new PackageUserState();
         testUserState1.suspended = true;
-        testUserState1.suspendedAppExtras = appExtras1;
-        testUserState1.suspendedLauncherExtras = launcherExtras1;
-        testUserState1.suspendingPackage = suspendingPackage1;
-        testUserState1.dialogInfo = dialogInfo1;
+        testUserState1.suspendParams = paramsMap1;
 
         PackageUserState testUserState2 = new PackageUserState(testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
-        testUserState2.suspendingPackage = suspendingPackage2;
+        testUserState2.suspendParams = paramsMap2;
+        // Should not be equal since suspendParams maps are different
         assertThat(testUserState1.equals(testUserState2), is(false));
-
-        testUserState2 = new PackageUserState(testUserState1);
-        testUserState2.suspendedAppExtras = appExtras2;
-        assertThat(testUserState1.equals(testUserState2), is(false));
-
-        testUserState2 = new PackageUserState(testUserState1);
-        testUserState2.suspendedLauncherExtras = launcherExtras2;
-        assertThat(testUserState1.equals(testUserState2), is(false));
-
-        testUserState2 = new PackageUserState(testUserState1);
-        testUserState2.dialogInfo = dialogInfo2;
-        assertThat(testUserState1.equals(testUserState2), is(false));
-
-        testUserState2 = new PackageUserState(testUserState1);
-        testUserState2.suspended = testUserState1.suspended = false;
-        // Everything is different but irrelevant if suspended is false
-        testUserState2.suspendingPackage = suspendingPackage2;
-        testUserState2.dialogInfo = dialogInfo2;
-        testUserState2.suspendedAppExtras = appExtras2;
-        testUserState2.suspendedLauncherExtras = launcherExtras2;
-        assertThat(testUserState1.equals(testUserState2), is(true));
     }
 
     @Test
@@ -243,4 +261,97 @@ public class PackageUserStateTest {
         assertThat(userState1.equals(userState2), is(false));
     }
 
+    @Test
+    public void testPackageUserState07() {
+        final PersistableBundle appExtras1 = createPersistableBundle("appExtraId", 1, null, null,
+                null, 0);
+        final PersistableBundle appExtras2 = createPersistableBundle("appExtraId", 2, null, null,
+                null, 0);
+
+        final PersistableBundle launcherExtras1 = createPersistableBundle(null, 0, "name",
+                "launcherExtras1", null, 0);
+        final PersistableBundle launcherExtras2 = createPersistableBundle(null, 0, "name",
+                "launcherExtras2", null, 0);
+
+        final SuspendDialogInfo dialogInfo1 = new SuspendDialogInfo.Builder()
+                .setMessage("dialogMessage1")
+                .build();
+        final SuspendDialogInfo dialogInfo2 = new SuspendDialogInfo.Builder()
+                .setMessage("dialogMessage2")
+                .build();
+
+        final PackageUserState.SuspendParams params1;
+        PackageUserState.SuspendParams params2;
+        params1 = createSuspendParams(dialogInfo1, appExtras1, launcherExtras1);
+        params2 = createSuspendParams(dialogInfo1, appExtras1, launcherExtras1);
+        // Everything is same
+        assertThat(params1.equals(params2), is(true));
+
+        params2 = createSuspendParams(dialogInfo2, appExtras1, launcherExtras1);
+        // DialogInfo is different
+        assertThat(params1.equals(params2), is(false));
+
+        params2 = createSuspendParams(dialogInfo1, appExtras2, launcherExtras1);
+        // app extras are different
+        assertThat(params1.equals(params2), is(false));
+
+        params2 = createSuspendParams(dialogInfo1, appExtras1, launcherExtras2);
+        // Launcher extras are different
+        assertThat(params1.equals(params2), is(false));
+
+        params2 = createSuspendParams(dialogInfo2, appExtras2, launcherExtras2);
+        // Everything is different
+        assertThat(params1.equals(params2), is(false));
+    }
+
+    /**
+     * Test fix for b/149772100.
+     */
+    private static void assertLastPackageUsageUnset(
+            PackageStateUnserialized state) throws Exception {
+        for (int i = state.getLastPackageUsageTimeInMills().length - 1; i >= 0; --i) {
+            assertEquals(0L, state.getLastPackageUsageTimeInMills()[i]);
+        }
+    }
+    private static void assertLastPackageUsageSet(
+            PackageStateUnserialized state, int reason, long value) throws Exception {
+        for (int i = state.getLastPackageUsageTimeInMills().length - 1; i >= 0; --i) {
+            if (i == reason) {
+                assertEquals(value, state.getLastPackageUsageTimeInMills()[i]);
+            } else {
+                assertEquals(0L, state.getLastPackageUsageTimeInMills()[i]);
+            }
+        }
+    }
+    @Test
+    public void testPackageUseReasons() throws Exception {
+        final PackageStateUnserialized testState1 = new PackageStateUnserialized();
+        testState1.setLastPackageUsageTimeInMills(-1, 10L);
+        assertLastPackageUsageUnset(testState1);
+
+        final PackageStateUnserialized testState2 = new PackageStateUnserialized();
+        testState2.setLastPackageUsageTimeInMills(
+                PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT, 20L);
+        assertLastPackageUsageUnset(testState2);
+
+        final PackageStateUnserialized testState3 = new PackageStateUnserialized();
+        testState3.setLastPackageUsageTimeInMills(Integer.MAX_VALUE, 30L);
+        assertLastPackageUsageUnset(testState3);
+
+        final PackageStateUnserialized testState4 = new PackageStateUnserialized();
+        testState4.setLastPackageUsageTimeInMills(0, 40L);
+        assertLastPackageUsageSet(testState4, 0, 40L);
+
+        final PackageStateUnserialized testState5 = new PackageStateUnserialized();
+        testState5.setLastPackageUsageTimeInMills(
+                PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER, 50L);
+        assertLastPackageUsageSet(
+                testState5, PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER, 50L);
+
+        final PackageStateUnserialized testState6 = new PackageStateUnserialized();
+        testState6.setLastPackageUsageTimeInMills(
+                PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT - 1, 60L);
+        assertLastPackageUsageSet(
+                testState6, PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT - 1, 60L);
+    }
 }

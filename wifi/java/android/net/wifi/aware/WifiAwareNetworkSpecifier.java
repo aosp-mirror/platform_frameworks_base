@@ -20,11 +20,9 @@ import static android.net.wifi.aware.WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -145,19 +143,9 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
      */
     public final int transportProtocol;
 
-    /**
-     * The UID of the process initializing this network specifier. Validated by receiver using
-     * checkUidIfNecessary() and is used by satisfiedBy() to determine whether matches the
-     * offered network.
-     *
-     * @hide
-     */
-    public final int requestorUid;
-
     /** @hide */
     public WifiAwareNetworkSpecifier(int type, int role, int clientId, int sessionId, int peerId,
-            byte[] peerMac, byte[] pmk, String passphrase, int port, int transportProtocol,
-            int requestorUid) {
+            byte[] peerMac, byte[] pmk, String passphrase, int port, int transportProtocol) {
         this.type = type;
         this.role = role;
         this.clientId = clientId;
@@ -168,7 +156,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         this.passphrase = passphrase;
         this.port = port;
         this.transportProtocol = transportProtocol;
-        this.requestorUid = requestorUid;
     }
 
     public static final @android.annotation.NonNull Creator<WifiAwareNetworkSpecifier> CREATOR =
@@ -185,8 +172,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                         in.createByteArray(), // pmk
                         in.readString(), // passphrase
                         in.readInt(), // port
-                        in.readInt(), // transportProtocol
-                        in.readInt()); // requestorUid
+                        in.readInt()); // transportProtocol
                 }
 
                 @Override
@@ -222,7 +208,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         dest.writeString(passphrase);
         dest.writeInt(port);
         dest.writeInt(transportProtocol);
-        dest.writeInt(requestorUid);
     }
 
     /** @hide */
@@ -239,7 +224,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
     @Override
     public int hashCode() {
         return Objects.hash(type, role, clientId, sessionId, peerId, Arrays.hashCode(peerMac),
-                Arrays.hashCode(pmk), passphrase, port, transportProtocol, requestorUid);
+                Arrays.hashCode(pmk), passphrase, port, transportProtocol);
     }
 
     /** @hide */
@@ -264,8 +249,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 && Arrays.equals(pmk, lhs.pmk)
                 && Objects.equals(passphrase, lhs.passphrase)
                 && port == lhs.port
-                && transportProtocol == lhs.transportProtocol
-                && requestorUid == lhs.requestorUid;
+                && transportProtocol == lhs.transportProtocol;
     }
 
     /** @hide */
@@ -284,7 +268,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 // masking PII
                 .append(", passphrase=").append((passphrase == null) ? "<null>" : "<non-null>")
                 .append(", port=").append(port).append(", transportProtocol=")
-                .append(transportProtocol).append(", requestorUid=").append(requestorUid)
+                .append(transportProtocol)
                 .append("]");
         return sb.toString();
     }
@@ -329,7 +313,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * Configure the PSK Passphrase for the Wi-Fi Aware connection being requested. This method
          * is optional - if not called, then an Open (unencrypted) connection will be created.
          *
-         * @param pskPassphrase The (optional) passphrase to be used to encrypt the link.
+         * @param pskPassphrase The (optional) passphrase to be used to encrypt the link. Use the
+         *                      {@link #setPmk(byte[])} to specify a PMK.
          * @return the current {@link Builder} builder, enabling chaining of builder
          *         methods.
          */
@@ -350,9 +335,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          *            specify a Passphrase.
          * @return the current {@link Builder} builder, enabling chaining of builder
          *         methods.
-         * @hide
          */
-        @SystemApi
         public @NonNull Builder setPmk(@NonNull byte[] pmk) {
             if (!WifiAwareUtils.validatePmk(pmk)) {
                 throw new IllegalArgumentException("PMK must 32 bytes");
@@ -369,7 +352,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * <ul>
          *     <li>The server device must be the Publisher device!
          *     <li>The port information can only be specified on secure links, specified using
-         *     {@link #setPskPassphrase(String)}.
+         *     {@link #setPskPassphrase(String)} or {@link #setPmk(byte[])}.
          * </ul>
          *
          * @param port A positive integer indicating the port to be used for communication.
@@ -392,7 +375,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * <ul>
          *     <li>The server device must be the Publisher device!
          *     <li>The transport protocol information can only be specified on secure links,
-         *     specified using {@link #setPskPassphrase(String)}.
+         *     specified using {@link #setPskPassphrase(String)} or {@link #setPmk(byte[])}.
          * </ul>
          * The transport protocol number is assigned by the Internet Assigned Numbers Authority
          * (IANA) https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
@@ -418,7 +401,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
          * <p> The default builder constructor will initialize a NetworkSpecifier which requests an
          * open (non-encrypted) link. To request an encrypted link use the
-         * {@link #setPskPassphrase(String)} builder method.
+         * {@link #setPskPassphrase(String)} or {@link #setPmk(byte[])} builder methods.
          *
          * @return A {@link NetworkSpecifier} to be used to construct
          * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass
@@ -457,7 +440,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
             return new WifiAwareNetworkSpecifier(
                     WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB, role,
                     mDiscoverySession.mClientId, mDiscoverySession.mSessionId, mPeerHandle.peerId,
-                    null, mPmk, mPskPassphrase, mPort, mTransportProtocol, Process.myUid());
+                    null, mPmk, mPskPassphrase, mPort, mTransportProtocol);
         }
     }
 }

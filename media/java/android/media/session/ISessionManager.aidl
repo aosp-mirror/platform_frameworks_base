@@ -73,4 +73,8 @@ interface ISessionManager {
     void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 
     boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid);
+    void setCustomMediaKeyDispatcherForTesting(String name);
+    void setCustomSessionPolicyProviderForTesting(String name);
+    int getSessionPolicies(in MediaSession.Token token);
+    void setSessionPolicies(in MediaSession.Token token, int policies);
 }

@@ -25,13 +25,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.ArtManager.ProfileType;
 import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -54,6 +54,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -62,6 +63,11 @@ import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 /**
  * A system service that provides access to runtime and compiler artifacts.
@@ -180,7 +186,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // Sanity checks on the arguments.
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
 
         boolean bootImageProfile = profileType == ArtManager.PROFILE_BOOT_IMAGE;
         if (!bootImageProfile) {
@@ -277,9 +283,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         try {
             fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
             if (fd == null || !fd.getFileDescriptor().valid()) {
-                Slog.wtf(TAG,
-                        "ParcelFileDescriptor.open returned an invalid descriptor for "
-                                + packageName + ":" + snapshotProfile + ". isNull=" + (fd == null));
                 postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
             } else {
                 postSuccess(packageName, fd, callback);
@@ -393,9 +396,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      *   - create the current primary profile to save time at app startup time.
      *   - copy the profiles from the associated dex metadata file to the reference profile.
      */
-    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user,
+    public void prepareAppProfiles(
+            AndroidPackage pkg, @UserIdInt int user,
             boolean updateReferenceProfileContent) {
-        final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
+        final int appId = UserHandle.getAppId(pkg.getUid());
         if (user < 0) {
             Slog.wtf(TAG, "Invalid user id: " + user);
             return;
@@ -418,23 +422,24 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                     dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
                 }
                 synchronized (mInstaller) {
-                    boolean result = mInstaller.prepareAppProfile(pkg.packageName, user, appId,
+                    boolean result = mInstaller.prepareAppProfile(pkg.getPackageName(), user, appId,
                             profileName, codePath, dexMetadataPath);
                     if (!result) {
                         Slog.e(TAG, "Failed to prepare profile for " +
-                                pkg.packageName + ":" + codePath);
+                                pkg.getPackageName() + ":" + codePath);
                     }
                 }
             }
         } catch (InstallerException e) {
-            Slog.e(TAG, "Failed to prepare profile for " + pkg.packageName, e);
+            Slog.e(TAG, "Failed to prepare profile for " + pkg.getPackageName(), e);
         }
     }
 
     /**
      * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
      */
-    public void prepareAppProfiles(PackageParser.Package pkg, int[] user,
+    public void prepareAppProfiles(
+            AndroidPackage pkg, int[] user,
             boolean updateReferenceProfileContent) {
         for (int i = 0; i < user.length; i++) {
             prepareAppProfiles(pkg, user[i], updateReferenceProfileContent);
@@ -444,12 +449,12 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Clear the profiles for the given package.
      */
-    public void clearAppProfiles(PackageParser.Package pkg) {
+    public void clearAppProfiles(AndroidPackage pkg) {
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
                 String profileName = packageProfileNames.valueAt(i);
-                mInstaller.clearAppProfiles(pkg.packageName, profileName);
+                mInstaller.clearAppProfiles(pkg.getPackageName(), profileName);
             }
         } catch (InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
@@ -459,15 +464,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Dumps the profiles for the given package.
      */
-    public void dumpProfiles(PackageParser.Package pkg) {
-        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+    public void dumpProfiles(AndroidPackage pkg) {
+        final int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
                 String codePath = packageProfileNames.keyAt(i);
                 String profileName = packageProfileNames.valueAt(i);
                 synchronized (mInstallLock) {
-                    mInstaller.dumpProfiles(sharedGid, pkg.packageName, profileName, codePath);
+                    mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath);
                 }
             }
         } catch (InstallerException e) {
@@ -478,14 +483,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Compile layout resources in a given package.
      */
-    public boolean compileLayouts(PackageParser.Package pkg) {
+    public boolean compileLayouts(AndroidPackage pkg) {
         try {
-            final String packageName = pkg.packageName;
-            final String apkPath = pkg.baseCodePath;
-            final ApplicationInfo appInfo = pkg.applicationInfo;
-            final String outDexFile = appInfo.dataDir + "/code_cache/compiled_view.dex";
-            if (appInfo.isPrivilegedApp() || appInfo.isEmbeddedDexUsed()
-                    || appInfo.isDefaultToDeviceProtectedStorage()) {
+            final String packageName = pkg.getPackageName();
+            final String apkPath = pkg.getBaseCodePath();
+            // TODO(b/143971007): Use a cross-user directory
+            File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
+            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
+            if (pkg.isPrivileged() || pkg.isUseEmbeddedDex()
+                    || pkg.isDefaultToDeviceProtectedStorage()) {
                 // Privileged apps prefer to load trusted code so they don't use compiled views.
                 // If the app is not privileged but prefers code integrity, also avoid compiling
                 // views.
@@ -499,7 +505,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                            appInfo.uid);
+                            pkg.getUid());
                 }
             } finally {
                 Binder.restoreCallingIdentity(callingId);
@@ -515,15 +521,19 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      * Build the profiles names for all the package code paths (excluding resource only paths).
      * Return the map [code path -> profile name].
      */
-    private ArrayMap<String, String> getPackageProfileNames(PackageParser.Package pkg) {
+    private ArrayMap<String, String> getPackageProfileNames(AndroidPackage pkg) {
         ArrayMap<String, String> result = new ArrayMap<>();
-        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            result.put(pkg.baseCodePath, ArtManager.getProfileName(null));
+        if (pkg.isHasCode()) {
+            result.put(pkg.getBaseCodePath(), ArtManager.getProfileName(null));
         }
-        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
-            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                if ((pkg.splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-                    result.put(pkg.splitCodePaths[i], ArtManager.getProfileName(pkg.splitNames[i]));
+
+        String[] splitCodePaths = pkg.getSplitCodePaths();
+        int[] splitFlags = pkg.getSplitFlags();
+        String[] splitNames = pkg.getSplitNames();
+        if (!ArrayUtils.isEmpty(splitCodePaths)) {
+            for (int i = 0; i < splitCodePaths.length; i++) {
+                if ((splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+                    result.put(splitCodePaths[i], ArtManager.getProfileName(splitNames[i]));
                 }
             }
         }
@@ -551,6 +561,20 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK = 12;
     private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK = 13;
     private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK = 14;
+    // Filter with IORap
+    private static final int TRON_COMPILATION_FILTER_ASSUMED_VERIFIED_IORAP = 15;
+    private static final int TRON_COMPILATION_FILTER_EXTRACT_IORAP = 16;
+    private static final int TRON_COMPILATION_FILTER_VERIFY_IORAP = 17;
+    private static final int TRON_COMPILATION_FILTER_QUICKEN_IORAP = 18;
+    private static final int TRON_COMPILATION_FILTER_SPACE_PROFILE_IORAP = 19;
+    private static final int TRON_COMPILATION_FILTER_SPACE_IORAP = 20;
+    private static final int TRON_COMPILATION_FILTER_SPEED_PROFILE_IORAP = 21;
+    private static final int TRON_COMPILATION_FILTER_SPEED_IORAP = 22;
+    private static final int TRON_COMPILATION_FILTER_EVERYTHING_PROFILE_IORAP = 23;
+    private static final int TRON_COMPILATION_FILTER_EVERYTHING_IORAP = 24;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_IORAP = 25;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK_IORAP = 26;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK_IORAP = 27;
 
     // Constants used for logging compilation reason to TRON.
     // DO NOT CHANGE existing values.
@@ -617,6 +641,22 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
             case "run-from-vdex-fallback" :
                 return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
+            case "assume-verified-iorap" : return TRON_COMPILATION_FILTER_ASSUMED_VERIFIED_IORAP;
+            case "extract-iorap" : return TRON_COMPILATION_FILTER_EXTRACT_IORAP;
+            case "verify-iorap" : return TRON_COMPILATION_FILTER_VERIFY_IORAP;
+            case "quicken-iorap" : return TRON_COMPILATION_FILTER_QUICKEN_IORAP;
+            case "space-profile-iorap" : return TRON_COMPILATION_FILTER_SPACE_PROFILE_IORAP;
+            case "space-iorap" : return TRON_COMPILATION_FILTER_SPACE_IORAP;
+            case "speed-profile-iorap" : return TRON_COMPILATION_FILTER_SPEED_PROFILE_IORAP;
+            case "speed-iorap" : return TRON_COMPILATION_FILTER_SPEED_IORAP;
+            case "everything-profile-iorap" :
+                return TRON_COMPILATION_FILTER_EVERYTHING_PROFILE_IORAP;
+            case "everything-iorap" : return TRON_COMPILATION_FILTER_EVERYTHING_IORAP;
+            case "run-from-apk-iorap" : return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_IORAP;
+            case "run-from-apk-fallback-iorap" :
+                return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK_IORAP;
+            case "run-from-vdex-fallback-iorap" :
+                return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK_IORAP;
             default: return TRON_COMPILATION_FILTER_UNKNOWN;
         }
     }
@@ -634,9 +674,12 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     private class ArtManagerInternalImpl extends ArtManagerInternal {
+        private static final String IORAP_DIR = "/data/misc/iorapd";
+        private static final String TAG = "ArtManagerInternalImpl";
+
         @Override
         public PackageOptimizationInfo getPackageOptimizationInfo(
-                ApplicationInfo info, String abi) {
+                ApplicationInfo info, String abi, String activityName) {
             String compilationReason;
             String compilationFilter;
             try {
@@ -656,11 +699,45 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 compilationReason = "error";
             }
 
+            if (checkIorapCompiledTrace(info.packageName, activityName, info.longVersionCode)) {
+                compilationFilter = compilationFilter + "-iorap";
+            }
+
             int compilationFilterTronValue = getCompilationFilterTronValue(compilationFilter);
             int compilationReasonTronValue = getCompilationReasonTronValue(compilationReason);
 
             return new PackageOptimizationInfo(
                     compilationFilterTronValue, compilationReasonTronValue);
+        }
+
+        /*
+         * Checks the existence of IORap compiled trace for an app.
+         *
+         * @return true if the compiled trace exists and the size is greater than 1kb.
+         */
+        private boolean checkIorapCompiledTrace(
+                String packageName, String activityName, long version) {
+            // For example: /data/misc/iorapd/com.google.android.GoogleCamera/
+            // 60092239/com.android.camera.CameraLauncher/compiled_traces/compiled_trace.pb
+            Path tracePath = Paths.get(IORAP_DIR,
+                                       packageName,
+                                       Long.toString(version),
+                                       activityName,
+                                       "compiled_traces",
+                                       "compiled_trace.pb");
+            try {
+                boolean exists =  Files.exists(tracePath);
+                Log.d(TAG, tracePath.toString() + (exists? " exists" : " doesn't exist"));
+                if (exists) {
+                    long bytes = Files.size(tracePath);
+                    Log.d(TAG, tracePath.toString() + " size is " + Long.toString(bytes));
+                    return bytes > 0L;
+                }
+                return exists;
+            } catch (IOException e) {
+                Log.d(TAG, e.getMessage());
+                return false;
+            }
         }
     }
 }

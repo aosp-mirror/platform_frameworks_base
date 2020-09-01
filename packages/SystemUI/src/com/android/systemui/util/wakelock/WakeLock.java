@@ -24,6 +24,8 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.HashMap;
 
+import javax.inject.Inject;
+
 /** WakeLock wrapper for testability */
 public interface WakeLock {
 
@@ -120,5 +122,33 @@ public interface WakeLock {
                 return "active clients= " + mActiveClients.toString();
             }
         };
+    }
+
+    /**
+     * An injectable Builder that wraps {@link #createPartial(Context, String, long)}.
+     */
+    class Builder {
+        private final Context mContext;
+        private String mTag;
+        private long mMaxTimeout = DEFAULT_MAX_TIMEOUT;
+
+        @Inject
+        public Builder(Context context) {
+            mContext = context;
+        }
+
+        public Builder setTag(String tag) {
+            this.mTag = tag;
+            return this;
+        }
+
+        public Builder setMaxTimeout(long maxTimeout) {
+            this.mMaxTimeout = maxTimeout;
+            return this;
+        }
+
+        public WakeLock build() {
+            return WakeLock.createPartial(mContext, mTag, mMaxTimeout);
+        }
     }
 }

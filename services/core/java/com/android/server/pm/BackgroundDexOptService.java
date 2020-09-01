@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
@@ -36,9 +37,9 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
 import com.android.server.pm.dex.DexManager;
@@ -46,6 +47,7 @@ import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -105,6 +107,8 @@ public class BackgroundDexOptService extends JobService {
     private final File mDataDir = Environment.getDataDirectory();
     private static final long mDowngradeUnusedAppsThresholdInMillis =
             getDowngradeUnusedAppsThresholdInMillis();
+
+    private static List<PackagesUpdatedListener> sPackagesUpdatedListeners = new ArrayList<>();
 
     public static void schedule(Context context) {
         if (isBackgroundDexoptDisabled()) {
@@ -244,6 +248,7 @@ public class BackgroundDexOptService extends JobService {
             }
         }
         notifyPinService(updatedPackages);
+        notifyPackagesUpdated(updatedPackages);
         // Ran to completion, so we abandon our timeslice and do not reschedule.
         jobFinished(jobParams, /* reschedule */ false);
     }
@@ -391,6 +396,7 @@ public class BackgroundDexOptService extends JobService {
         } finally {
             // Always let the pinner service know about changes.
             notifyPinService(updatedPackages);
+            notifyPackagesUpdated(updatedPackages);
         }
     }
 
@@ -429,7 +435,7 @@ public class BackgroundDexOptService extends JobService {
                 | DexoptOptions.DEXOPT_DOWNGRADE;
         long package_size_before = getPackageSize(pm, pkg);
 
-        if (isForPrimaryDex) {
+        if (isForPrimaryDex || PLATFORM_PACKAGE_NAME.equals(pkg)) {
             // This applies for system apps or if packages location is not a directory, i.e.
             // monolithic install.
             if (!pm.canHaveOatDir(pkg)) {
@@ -444,7 +450,7 @@ public class BackgroundDexOptService extends JobService {
         }
 
         if (dex_opt_performed) {
-            StatsLog.write(StatsLog.APP_DOWNGRADED, pkg, package_size_before,
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_DOWNGRADED, pkg, package_size_before,
                     getPackageSize(pm, pkg), /*aggressive=*/ false);
         }
         return dex_opt_performed;
@@ -481,7 +487,9 @@ public class BackgroundDexOptService extends JobService {
                 | DexoptOptions.DEXOPT_BOOT_COMPLETE
                 | DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
 
-        return isForPrimaryDex
+        // System server share the same code path as primary dex files.
+        // PackageManagerService will select the right optimization path for it.
+        return (isForPrimaryDex || PLATFORM_PACKAGE_NAME.equals(pkg))
             ? performDexOptPrimary(pm, pkg, reason, dexoptFlags)
             : performDexOptSecondary(pm, pkg, reason, dexoptFlags);
     }
@@ -639,6 +647,32 @@ public class BackgroundDexOptService extends JobService {
         if (pinnerService != null) {
             Log.i(TAG, "Pinning optimized code " + updatedPackages);
             pinnerService.update(updatedPackages, false /* force */);
+        }
+    }
+
+    public static interface PackagesUpdatedListener {
+        /** Callback when packages have been updated by the bg-dexopt service. */
+        public void onPackagesUpdated(ArraySet<String> updatedPackages);
+    }
+
+    public static void addPackagesUpdatedListener(PackagesUpdatedListener listener) {
+        synchronized (sPackagesUpdatedListeners) {
+            sPackagesUpdatedListeners.add(listener);
+        }
+    }
+
+    public static void removePackagesUpdatedListener(PackagesUpdatedListener listener) {
+        synchronized (sPackagesUpdatedListeners) {
+            sPackagesUpdatedListeners.remove(listener);
+        }
+    }
+
+    /** Notify all listeners (#addPackagesUpdatedListener) that packages have been updated. */
+    private void notifyPackagesUpdated(ArraySet<String> updatedPackages) {
+        synchronized (sPackagesUpdatedListeners) {
+            for (PackagesUpdatedListener listener : sPackagesUpdatedListeners) {
+                listener.onPackagesUpdated(updatedPackages);
+            }
         }
     }
 

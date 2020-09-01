@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -40,9 +41,11 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
@@ -850,7 +853,7 @@ public class RingtoneManager {
      * Adds an audio file to the list of ringtones.
      *
      * After making sure the given file is an audio file, copies the file to the ringtone storage,
-     * and asks the {@link android.media.MediaScanner} to scan that file. This call will block until
+     * and asks the system to scan that file. This call will block until
      * the scan is completed.
      *
      * The directory where the copied file is stored is the directory that matches the ringtone's
@@ -909,7 +912,7 @@ public class RingtoneManager {
         }
 
         // Tell MediaScanner about the new file. Wait for it to assign a {@link Uri}.
-        return MediaStore.scanFile(mContext, outFile);
+        return MediaStore.scanFile(mContext.getContentResolver(), outFile);
     }
 
     private static final String getExternalDirectoryForType(final int type) {
@@ -1099,6 +1102,64 @@ public class RingtoneManager {
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Unable to create package context", e);
             return null;
+        }
+    }
+
+    /**
+     * Ensure that ringtones have been set at least once on this device. This
+     * should be called after the device has finished scanned all media on
+     * {@link MediaStore#VOLUME_INTERNAL}, so that default ringtones can be
+     * configured.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
+    public static void ensureDefaultRingtones(@NonNull Context context) {
+        for (int type : new int[] {
+                TYPE_RINGTONE,
+                TYPE_NOTIFICATION,
+                TYPE_ALARM,
+        }) {
+            // Skip if we've already defined it at least once, so we don't
+            // overwrite the user changing to null
+            final String setting = getDefaultRingtoneSetting(type);
+            if (Settings.System.getInt(context.getContentResolver(), setting, 0) != 0) {
+                continue;
+            }
+
+            // Try finding the scanned ringtone
+            final String filename = getDefaultRingtoneFilename(type);
+            final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+            try (Cursor cursor = context.getContentResolver().query(baseUri,
+                    new String[] { MediaColumns._ID },
+                    MediaColumns.DISPLAY_NAME + "=?",
+                    new String[] { filename }, null)) {
+                if (cursor.moveToFirst()) {
+                    final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
+                            ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
+                    RingtoneManager.setActualDefaultRingtoneUri(context, type, ringtoneUri);
+                    Settings.System.putInt(context.getContentResolver(), setting, 1);
+                }
+            }
+        }
+    }
+
+    private static String getDefaultRingtoneSetting(int type) {
+        switch (type) {
+            case TYPE_RINGTONE: return "ringtone_set";
+            case TYPE_NOTIFICATION: return "notification_sound_set";
+            case TYPE_ALARM: return "alarm_alert_set";
+            default: throw new IllegalArgumentException();
+        }
+    }
+
+    private static String getDefaultRingtoneFilename(int type) {
+        switch (type) {
+            case TYPE_RINGTONE: return SystemProperties.get("ro.config.ringtone");
+            case TYPE_NOTIFICATION: return SystemProperties.get("ro.config.notification_sound");
+            case TYPE_ALARM: return SystemProperties.get("ro.config.alarm_alert");
+            default: throw new IllegalArgumentException();
         }
     }
 }

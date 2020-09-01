@@ -70,9 +70,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  {@link Bitmap} objects.
  *
  *  <p>To use it, first create a {@link Source Source} using one of the
- *  {@code createSource} overloads. For example, to decode from a {@link File}, call
- *  {@link #createSource(File)} and pass the result to {@link #decodeDrawable(Source)}
- *  or {@link #decodeBitmap(Source)}:
+ *  {@code createSource} overloads. For example, to decode from a {@link Uri}, call
+ *  {@link #createSource(ContentResolver, Uri)} and pass the result to
+ *  {@link #decodeDrawable(Source)} or {@link #decodeBitmap(Source)}:
  *
  *  <pre class="prettyprint">
  *  File file = new File(...);
@@ -214,7 +214,7 @@ public final class ImageDecoder implements AutoCloseable {
 
         /* @hide */
         @NonNull
-        abstract ImageDecoder createImageDecoder() throws IOException;
+        abstract ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException;
     };
 
     private static class ByteArraySource extends Source {
@@ -228,8 +228,8 @@ public final class ImageDecoder implements AutoCloseable {
         private final int    mLength;
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
-            return nCreate(mData, mOffset, mLength, this);
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
+            return nCreate(mData, mOffset, mLength, preferAnimation, this);
         }
     }
 
@@ -240,14 +240,14 @@ public final class ImageDecoder implements AutoCloseable {
         private final ByteBuffer mBuffer;
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             if (!mBuffer.isDirect() && mBuffer.hasArray()) {
                 int offset = mBuffer.arrayOffset() + mBuffer.position();
                 int length = mBuffer.limit() - mBuffer.position();
-                return nCreate(mBuffer.array(), offset, length, this);
+                return nCreate(mBuffer.array(), offset, length, preferAnimation, this);
             }
             ByteBuffer buffer = mBuffer.slice();
-            return nCreate(buffer, buffer.position(), buffer.limit(), this);
+            return nCreate(buffer, buffer.position(), buffer.limit(), preferAnimation, this);
         }
     }
 
@@ -267,16 +267,20 @@ public final class ImageDecoder implements AutoCloseable {
         Resources getResources() { return mResources; }
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             AssetFileDescriptor assetFd = null;
             try {
-                if (mUri.getScheme() == ContentResolver.SCHEME_CONTENT) {
+                if (ContentResolver.SCHEME_CONTENT.equals(mUri.getScheme())) {
                     assetFd = mResolver.openTypedAssetFileDescriptor(mUri,
                             "image/*", null);
                 } else {
                     assetFd = mResolver.openAssetFileDescriptor(mUri, "r");
                 }
             } catch (FileNotFoundException e) {
+                // Handled below, along with the case where assetFd was set to null.
+            }
+
+            if (assetFd == null) {
                 // Some images cannot be opened as AssetFileDescriptors (e.g.
                 // bmp, ico). Open them as InputStreams.
                 InputStream is = mResolver.openInputStream(mUri);
@@ -284,26 +288,27 @@ public final class ImageDecoder implements AutoCloseable {
                     throw new FileNotFoundException(mUri.toString());
                 }
 
-                return createFromStream(is, true, this);
+                return createFromStream(is, true, preferAnimation, this);
             }
-            return createFromAssetFileDescriptor(assetFd, this);
+
+            return createFromAssetFileDescriptor(assetFd, preferAnimation, this);
         }
     }
 
     @NonNull
     private static ImageDecoder createFromFile(@NonNull File file,
-            @NonNull Source source) throws IOException {
+            boolean preferAnimation, @NonNull Source source) throws IOException {
         FileInputStream stream = new FileInputStream(file);
         FileDescriptor fd = stream.getFD();
         try {
             Os.lseek(fd, 0, SEEK_CUR);
         } catch (ErrnoException e) {
-            return createFromStream(stream, true, source);
+            return createFromStream(stream, true, preferAnimation, source);
         }
 
         ImageDecoder decoder = null;
         try {
-            decoder = nCreate(fd, source);
+            decoder = nCreate(fd, preferAnimation, source);
         } finally {
             if (decoder == null) {
                 IoUtils.closeQuietly(stream);
@@ -317,12 +322,12 @@ public final class ImageDecoder implements AutoCloseable {
 
     @NonNull
     private static ImageDecoder createFromStream(@NonNull InputStream is,
-            boolean closeInputStream, Source source) throws IOException {
+            boolean closeInputStream, boolean preferAnimation, Source source) throws IOException {
         // Arbitrary size matches BitmapFactory.
         byte[] storage = new byte[16 * 1024];
         ImageDecoder decoder = null;
         try {
-            decoder = nCreate(is, storage, source);
+            decoder = nCreate(is, storage, preferAnimation, source);
         } finally {
             if (decoder == null) {
                 if (closeInputStream) {
@@ -340,7 +345,10 @@ public final class ImageDecoder implements AutoCloseable {
 
     @NonNull
     private static ImageDecoder createFromAssetFileDescriptor(@NonNull AssetFileDescriptor assetFd,
-            Source source) throws IOException {
+            boolean preferAnimation, Source source) throws IOException {
+        if (assetFd == null) {
+            throw new FileNotFoundException();
+        }
         final FileDescriptor fd = assetFd.getFileDescriptor();
         final long offset = assetFd.getStartOffset();
 
@@ -348,9 +356,9 @@ public final class ImageDecoder implements AutoCloseable {
         try {
             try {
                 Os.lseek(fd, offset, SEEK_SET);
-                decoder = nCreate(fd, source);
+                decoder = nCreate(fd, preferAnimation, source);
             } catch (ErrnoException e) {
-                decoder = createFromStream(new FileInputStream(fd), true, source);
+                decoder = createFromStream(new FileInputStream(fd), true, preferAnimation, source);
             }
         } finally {
             if (decoder == null) {
@@ -388,7 +396,7 @@ public final class ImageDecoder implements AutoCloseable {
         public int getDensity() { return mInputDensity; }
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
 
             synchronized (this) {
                 if (mInputStream == null) {
@@ -396,7 +404,7 @@ public final class ImageDecoder implements AutoCloseable {
                 }
                 InputStream is = mInputStream;
                 mInputStream = null;
-                return createFromStream(is, false, this);
+                return createFromStream(is, false, preferAnimation, this);
             }
         }
     }
@@ -434,14 +442,14 @@ public final class ImageDecoder implements AutoCloseable {
         }
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             synchronized (this) {
                 if (mAssetInputStream == null) {
                     throw new IOException("Cannot reuse AssetInputStreamSource");
                 }
                 AssetInputStream ais = mAssetInputStream;
                 mAssetInputStream = null;
-                return createFromAsset(ais, this);
+                return createFromAsset(ais, preferAnimation, this);
             }
         }
     }
@@ -469,7 +477,7 @@ public final class ImageDecoder implements AutoCloseable {
         }
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             TypedValue value = new TypedValue();
             // This is just used in order to access the underlying Asset and
             // keep it alive.
@@ -483,7 +491,7 @@ public final class ImageDecoder implements AutoCloseable {
                 }
             }
 
-            return createFromAsset((AssetInputStream) is, this);
+            return createFromAsset((AssetInputStream) is, preferAnimation, this);
         }
     }
 
@@ -491,11 +499,11 @@ public final class ImageDecoder implements AutoCloseable {
      *  ImageDecoder will own the AssetInputStream.
      */
     private static ImageDecoder createFromAsset(AssetInputStream ais,
-            Source source) throws IOException {
+            boolean preferAnimation, Source source) throws IOException {
         ImageDecoder decoder = null;
         try {
             long asset = ais.getNativeAsset();
-            decoder = nCreate(asset, source);
+            decoder = nCreate(asset, preferAnimation, source);
         } finally {
             if (decoder == null) {
                 IoUtils.closeQuietly(ais);
@@ -517,9 +525,9 @@ public final class ImageDecoder implements AutoCloseable {
         private final String mFileName;
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             InputStream is = mAssets.open(mFileName);
-            return createFromAsset((AssetInputStream) is, this);
+            return createFromAsset((AssetInputStream) is, preferAnimation, this);
         }
     }
 
@@ -531,8 +539,8 @@ public final class ImageDecoder implements AutoCloseable {
         private final File mFile;
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
-            return createFromFile(mFile, this);
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
+            return createFromFile(mFile, preferAnimation, this);
         }
     }
 
@@ -544,7 +552,7 @@ public final class ImageDecoder implements AutoCloseable {
         private final Callable<AssetFileDescriptor> mCallable;
 
         @Override
-        public ImageDecoder createImageDecoder() throws IOException {
+        public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             AssetFileDescriptor assetFd = null;
             try {
                 assetFd = mCallable.call();
@@ -555,7 +563,7 @@ public final class ImageDecoder implements AutoCloseable {
                     throw new IOException(e);
                 }
             }
-            return createFromAssetFileDescriptor(assetFd, this);
+            return createFromAssetFileDescriptor(assetFd, preferAnimation, this);
         }
     }
 
@@ -1024,7 +1032,11 @@ public final class ImageDecoder implements AutoCloseable {
 
     /**
      * Create a new {@link Source Source} from a {@link java.io.File}.
-     *
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with files hosted outside your app, use an API like
+     * {@link #createSource(Callable)} or
+     * {@link #createSource(ContentResolver, Uri)}.
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable decodeDrawable} or
      *      {@link #decodeBitmap decodeBitmap}.
@@ -1669,6 +1681,9 @@ public final class ImageDecoder implements AutoCloseable {
         if (r == null) {
             return;
         }
+        if (r.width() <= 0 || r.height() <= 0) {
+            throw new IllegalStateException("Subset " + r + " is empty/unsorted");
+        }
         if (r.left < 0 || r.top < 0 || r.right > width || r.bottom > height) {
             throw new IllegalStateException("Subset " + r + " not contained by "
                     + "scaled image bounds: (" + width + " x " + height + ")");
@@ -1740,7 +1755,7 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private static Drawable decodeDrawableImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
-        try (ImageDecoder decoder = src.createImageDecoder()) {
+        try (ImageDecoder decoder = src.createImageDecoder(true /*preferAnimation*/)) {
             decoder.mSource = src;
             decoder.callHeaderDecoded(listener, src);
 
@@ -1844,7 +1859,7 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private static Bitmap decodeBitmapImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
-        try (ImageDecoder decoder = src.createImageDecoder()) {
+        try (ImageDecoder decoder = src.createImageDecoder(false /*preferAnimation*/)) {
             decoder.mSource = src;
             decoder.callHeaderDecoded(listener, src);
 
@@ -1971,15 +1986,17 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
-    private static native ImageDecoder nCreate(long asset, Source src) throws IOException;
-    private static native ImageDecoder nCreate(ByteBuffer buffer, int position,
-                                               int limit, Source src) throws IOException;
+    private static native ImageDecoder nCreate(long asset,
+            boolean preferAnimation, Source src) throws IOException;
+    private static native ImageDecoder nCreate(ByteBuffer buffer, int position, int limit,
+            boolean preferAnimation, Source src) throws IOException;
     private static native ImageDecoder nCreate(byte[] data, int offset, int length,
-                                               Source src) throws IOException;
+            boolean preferAnimation, Source src) throws IOException;
     private static native ImageDecoder nCreate(InputStream is, byte[] storage,
-                                               Source src) throws IOException;
+            boolean preferAnimation, Source src) throws IOException;
     // The fd must be seekable.
-    private static native ImageDecoder nCreate(FileDescriptor fd, Source src) throws IOException;
+    private static native ImageDecoder nCreate(FileDescriptor fd,
+            boolean preferAnimation, Source src) throws IOException;
     @NonNull
     private static native Bitmap nDecodeBitmap(long nativePtr,
             @NonNull ImageDecoder decoder,

@@ -34,6 +34,7 @@ struct R {
   struct style {
     enum : uint32_t {
       Theme = 0x7f020000,  // default
+      ThemeMultiLib = 0x7f020001,  // default
     };
   };
 

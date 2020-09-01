@@ -1,17 +1,8 @@
 // Signature format: 2.0
 package android.app {
 
-  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
-    method @Deprecated public boolean enterPictureInPictureMode(@NonNull android.app.PictureInPictureArgs);
-    method @Deprecated public void setPictureInPictureArgs(@NonNull android.app.PictureInPictureArgs);
-  }
-
   public class ActivityManager {
     method @Deprecated public static int getMaxNumPictureInPictureActions();
-  }
-
-  public class KeyguardManager {
-    method @Deprecated public void dismissKeyguard(@NonNull android.app.Activity, @Nullable android.app.KeyguardManager.KeyguardDismissCallback, @Nullable android.os.Handler);
   }
 
   public class Notification implements android.os.Parcelable {
@@ -21,54 +12,19 @@ package android.app {
     method @Deprecated public void setLatestEventInfo(android.content.Context, CharSequence, CharSequence, android.app.PendingIntent);
   }
 
+  public static final class Notification.BubbleMetadata implements android.os.Parcelable {
+    method @Deprecated @Nullable public android.graphics.drawable.Icon getBubbleIcon();
+    method @Deprecated @Nullable public android.app.PendingIntent getBubbleIntent();
+  }
+
+  public static final class Notification.BubbleMetadata.Builder {
+    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createIntentBubble(@NonNull android.app.PendingIntent, @NonNull android.graphics.drawable.Icon);
+    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createShortcutBubble(@NonNull String);
+  }
+
   public static class Notification.Builder {
     method @Deprecated public android.app.Notification.Builder setChannel(String);
     method @Deprecated public android.app.Notification.Builder setTimeout(long);
-  }
-
-  @Deprecated public final class PictureInPictureArgs implements android.os.Parcelable {
-    method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
-    method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
-    field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
-  }
-
-  public static class PictureInPictureArgs.Builder {
-    ctor public PictureInPictureArgs.Builder();
-    method public android.app.PictureInPictureArgs build();
-    method public android.app.PictureInPictureArgs.Builder setActions(java.util.List<android.app.RemoteAction>);
-    method public android.app.PictureInPictureArgs.Builder setAspectRatio(android.util.Rational);
-    method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
-  }
-
-}
-
-package android.app.admin {
-
-  public class DevicePolicyManager {
-    method @Deprecated @Nullable public android.os.UserHandle createAndInitializeUser(@NonNull android.content.ComponentName, String, String, @NonNull android.content.ComponentName, android.os.Bundle);
-    method @Deprecated @Nullable public android.os.UserHandle createUser(@NonNull android.content.ComponentName, String);
-  }
-
-}
-
-package android.app.job {
-
-  public class JobInfo implements android.os.Parcelable {
-    method @Deprecated public long getEstimatedNetworkBytes();
-  }
-
-  public static final class JobInfo.Builder {
-    method @Deprecated public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long);
-    method @Deprecated public android.app.job.JobInfo.Builder setIsPrefetch(boolean);
-  }
-
-  public final class JobWorkItem implements android.os.Parcelable {
-    ctor @Deprecated public JobWorkItem(android.content.Intent, long);
-    method @Deprecated public long getEstimatedNetworkBytes();
   }
 
 }
@@ -123,11 +79,17 @@ package android.app.usage {
 
 package android.content {
 
-  public class ClipData implements android.os.Parcelable {
-    method @Deprecated public void addItem(android.content.ClipData.Item, android.content.ContentResolver);
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
+    method @Deprecated @Nullable public final String getCallingFeatureId();
+  }
+
+  public abstract class ContentResolver {
+    method @Deprecated public void notifyChange(@NonNull Iterable<android.net.Uri>, @Nullable android.database.ContentObserver, int);
   }
 
   public abstract class Context {
+    method @Deprecated @NonNull public android.content.Context createFeatureContext(@Nullable String);
+    method @Deprecated @Nullable public String getFeatureId();
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(String);
   }
@@ -145,24 +107,12 @@ package android.content {
 
 package android.content.pm {
 
-  public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field @Deprecated public String volumeUuid;
-  }
-
-  public class ComponentInfo extends android.content.pm.PackageItemInfo {
-    field @Deprecated public boolean encryptionAware;
-  }
-
   public class PackageInfo implements android.os.Parcelable {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
   }
 
   public abstract class PackageManager {
     method public abstract boolean setInstantAppCookie(@Nullable byte[]);
-  }
-
-  public class ResolveInfo implements android.os.Parcelable {
-    field @Deprecated public boolean instantAppAvailable;
   }
 
   public final class SharedLibraryInfo implements android.os.Parcelable {
@@ -265,17 +215,8 @@ package android.graphics.drawable {
 
 package android.hardware {
 
-  public final class HardwareBuffer implements java.lang.AutoCloseable android.os.Parcelable {
-    method @Deprecated public void destroy();
-    method @Deprecated public boolean isDestroyed();
-  }
-
   public final class SensorDirectChannel implements java.nio.channels.Channel {
     method @Deprecated public boolean isValid();
-  }
-
-  public abstract class SensorManager {
-    method @Deprecated public int configureDirectChannel(android.hardware.SensorDirectChannel, android.hardware.Sensor, int);
   }
 
 }
@@ -294,11 +235,6 @@ package android.location {
     method @Deprecated public void removeBearingAccuracy();
     method @Deprecated public void removeSpeedAccuracy();
     method @Deprecated public void removeVerticalAccuracy();
-  }
-
-  public class LocationManager {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
-    method @Deprecated public void removeNmeaListener(android.location.GpsStatus.NmeaListener);
   }
 
 }
@@ -375,7 +311,6 @@ package android.os {
   public final class SystemClock {
     method @NonNull public static java.time.Clock elapsedRealtimeClock();
     method @NonNull public static java.time.Clock uptimeClock();
-    method @Deprecated @NonNull public static java.time.Clock uptimeMillisClock();
   }
 
   public class TestLooperManager {
@@ -518,65 +453,6 @@ package android.provider {
     field @Deprecated public static final String SYNC4 = "stream_item_sync4";
     field @Deprecated public static final String TEXT = "text";
     field @Deprecated public static final String TIMESTAMP = "timestamp";
-  }
-
-  public final class MediaStore {
-    method @Deprecated @NonNull public static android.net.Uri createPending(@NonNull android.content.Context, @NonNull android.provider.MediaStore.PendingParams);
-    method @Deprecated @NonNull public static java.util.Set<java.lang.String> getAllVolumeNames(@NonNull android.content.Context);
-    method @Deprecated @NonNull public static android.provider.MediaStore.PendingSession openPending(@NonNull android.content.Context, @NonNull android.net.Uri);
-    method @Deprecated @NonNull public static android.net.Uri setIncludeTrashed(@NonNull android.net.Uri);
-    method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri);
-    method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri, long);
-    method @Deprecated public static void untrash(@NonNull android.content.Context, @NonNull android.net.Uri);
-  }
-
-  public static interface MediaStore.Audio.AudioColumns extends android.provider.MediaStore.MediaColumns {
-    field public static final String DURATION = "duration";
-  }
-
-  public static interface MediaStore.DownloadColumns extends android.provider.MediaStore.MediaColumns {
-    field @Deprecated public static final String DESCRIPTION = "description";
-  }
-
-  public static interface MediaStore.Images.ImageColumns extends android.provider.MediaStore.MediaColumns {
-    field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
-    field public static final String BUCKET_ID = "bucket_id";
-    field public static final String DATE_TAKEN = "datetaken";
-    field public static final String GROUP_ID = "group_id";
-    field public static final String ORIENTATION = "orientation";
-  }
-
-  public static interface MediaStore.MediaColumns extends android.provider.BaseColumns {
-    field @Deprecated public static final String GROUP_ID = "group_id";
-    field @Deprecated public static final String HASH = "_hash";
-    field @Deprecated public static final String IS_TRASHED = "is_trashed";
-    field @Deprecated public static final String PRIMARY_DIRECTORY = "primary_directory";
-    field @Deprecated public static final String SECONDARY_DIRECTORY = "secondary_directory";
-  }
-
-  @Deprecated public static class MediaStore.PendingParams {
-    ctor public MediaStore.PendingParams(@NonNull android.net.Uri, @NonNull String, @NonNull String);
-    method public void setDownloadUri(@Nullable android.net.Uri);
-    method public void setPrimaryDirectory(@Nullable String);
-    method public void setRefererUri(@Nullable android.net.Uri);
-    method public void setSecondaryDirectory(@Nullable String);
-  }
-
-  @Deprecated public static class MediaStore.PendingSession implements java.lang.AutoCloseable {
-    method public void abandon();
-    method public void close();
-    method public void notifyProgress(@IntRange(from=0, to=100) int);
-    method @NonNull public android.os.ParcelFileDescriptor open() throws java.io.FileNotFoundException;
-    method @NonNull public java.io.OutputStream openOutputStream() throws java.io.FileNotFoundException;
-    method @NonNull public android.net.Uri publish();
-  }
-
-  public static interface MediaStore.Video.VideoColumns extends android.provider.MediaStore.MediaColumns {
-    field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
-    field public static final String BUCKET_ID = "bucket_id";
-    field public static final String DATE_TAKEN = "datetaken";
-    field public static final String DURATION = "duration";
-    field public static final String GROUP_ID = "group_id";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

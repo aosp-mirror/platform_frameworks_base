@@ -94,7 +94,7 @@ public class RoundRectShape extends RectShape {
             for (int i = 1; i < 8; i++) {
                 if (mOuterRadii[i] != radius) {
                     // can't call simple constructors, use path
-                    outline.setConvexPath(mPath);
+                    outline.setPath(mPath);
                     return;
                 }
             }

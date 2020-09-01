@@ -18,15 +18,18 @@ package android.app;
 
 import static org.junit.Assert.fail;
 
-import android.content.res.AssetManager;
+import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
+import android.util.TypedValue;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
-import org.junit.After;
+import com.android.perftests.core.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,36 +46,123 @@ public class ResourcesPerfTest {
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    private AssetManager mAsset;
     private Resources mRes;
-
-    private int mTextId;
-    private int mColorId;
-    private int mIntegerId;
-    private int mLayoutId;
 
     @Before
     public void setUp() {
-        mAsset = new AssetManager();
-        mAsset.addAssetPath("/system/framework/framework-res.apk");
-        mRes = new Resources(mAsset, null, null);
-
-        mTextId = mRes.getIdentifier("cancel", "string", "android");
-        mColorId = mRes.getIdentifier("transparent", "color", "android");
-        mIntegerId = mRes.getIdentifier("config_shortAnimTime", "integer", "android");
-        mLayoutId = mRes.getIdentifier("two_line_list_item", "layout", "android");
+        Context context = InstrumentationRegistry.getTargetContext();
+        mRes = context.getResources();
     }
 
-    @After
-    public void tearDown() {
-        mAsset.close();
+    @Test
+    public void getValue() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        TypedValue value = new TypedValue();
+        while (state.keepRunning()) {
+            mRes.getValue(R.integer.forty_two, value, false /* resolve_refs */);
+        }
+    }
+
+    @Test
+    public void getFrameworkValue() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        TypedValue value = new TypedValue();
+        while (state.keepRunning()) {
+            mRes.getValue(com.android.internal.R.integer.autofill_max_visible_datasets, value,
+                    false /* resolve_refs */);
+        }
+    }
+
+    @Test
+    public void getValueString() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        TypedValue value = new TypedValue();
+        while (state.keepRunning()) {
+            mRes.getValue(R.string.long_text, value, false /* resolve_refs */);
+        }
+    }
+
+    @Test
+    public void getFrameworkStringValue() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        TypedValue value = new TypedValue();
+        while (state.keepRunning()) {
+            mRes.getValue(com.android.internal.R.string.cancel, value, false /* resolve_refs */);
+        }
+    }
+
+    @Test
+    public void getValueManyConfigurations() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        TypedValue value = new TypedValue();
+        while (state.keepRunning()) {
+            mRes.getValue(com.android.internal.R.string.mmcc_illegal_me, value,
+                    false /* resolve_refs */);
+        }
     }
 
     @Test
     public void getText() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mRes.getText(mTextId);
+            mRes.getText(R.string.long_text);
+        }
+    }
+
+
+    @Test
+    public void getFont() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getFont(R.font.samplefont);
+        }
+    }
+
+    @Test
+    public void getString() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getString(R.string.long_text);
+        }
+    }
+
+    @Test
+    public void getQuantityString() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getQuantityString(R.plurals.plurals_text, 5);
+        }
+    }
+
+    @Test
+    public void getQuantityText() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getQuantityText(R.plurals.plurals_text, 5);
+        }
+    }
+
+    @Test
+    public void getTextArray() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getTextArray(R.array.strings);
+        }
+    }
+
+    @Test
+    public void getStringArray() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getStringArray(R.array.strings);
+        }
+    }
+
+    @Test
+    public void getIntegerArray() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getIntArray(R.array.ints);
         }
     }
 
@@ -80,15 +170,23 @@ public class ResourcesPerfTest {
     public void getColor() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mRes.getColor(mColorId, null);
+            mRes.getColor(R.color.white, null);
         }
     }
 
     @Test
-    public void getInteger() {
+    public void getColorStateList() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mRes.getInteger(mIntegerId);
+            mRes.getColorStateList(R.color.color_state_list, null);
+        }
+    }
+
+    @Test
+    public void getVectorDrawable() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            mRes.getDrawable(R.drawable.vector_drawable01, null);
         }
     }
 
@@ -96,13 +194,32 @@ public class ResourcesPerfTest {
     public void getLayoutAndTravese() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            try (XmlResourceParser parser = mRes.getLayout(mLayoutId)) {
+            try (XmlResourceParser parser = mRes.getLayout(R.layout.test_relative_layout)) {
                 while (parser.next() != XmlPullParser.END_DOCUMENT) {
                     // Walk the entire tree
                 }
             } catch (IOException | XmlPullParserException exception) {
                 fail("Parsing of the layout failed. Something is really broken");
             }
+        }
+    }
+
+    @Test
+    public void getLayoutAndTraverseInvalidateCaches() {
+        mRes.flushLayoutCache();
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            try (XmlResourceParser parser = mRes.getLayout(R.layout.test_relative_layout)) {
+                while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                    // Walk the entire tree
+                }
+            } catch (IOException | XmlPullParserException exception) {
+                fail("Parsing of the layout failed. Something is really broken");
+            }
+
+            state.pauseTiming();
+            mRes.flushLayoutCache();
+            state.resumeTiming();
         }
     }
 }

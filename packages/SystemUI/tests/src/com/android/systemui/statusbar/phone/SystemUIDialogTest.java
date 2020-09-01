@@ -17,10 +17,10 @@ package com.android.systemui.statusbar.phone;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
-import android.content.Context;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.testing.AndroidTestingRunner;
@@ -29,11 +29,14 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -41,24 +44,32 @@ import org.mockito.ArgumentCaptor;
 public class SystemUIDialogTest extends SysuiTestCase {
 
     private SystemUIDialog mDialog;
-
-    Context mContextSpy;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     @Before
     public void setup() {
-        mContextSpy = spy(mContext);
-        mDialog = new SystemUIDialog(mContextSpy);
+        MockitoAnnotations.initMocks(this);
+
+        mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
+
+        mDialog = new SystemUIDialog(mContext);
     }
 
     @Test
     public void testRegisterReceiver() {
+        final ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
         final ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        verify(mContextSpy).registerReceiverAsUser(any(), any(),
-                intentFilterCaptor.capture(), any(), any());
+        mDialog.show();
+        verify(mBroadcastDispatcher).registerReceiver(broadcastReceiverCaptor.capture(),
+                intentFilterCaptor.capture(), eq(null), any());
 
         assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-    }
 
+        mDialog.dismiss();
+        verify(mBroadcastDispatcher).unregisterReceiver(eq(broadcastReceiverCaptor.getValue()));
+    }
 }

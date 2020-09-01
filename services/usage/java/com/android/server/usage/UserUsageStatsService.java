@@ -18,6 +18,10 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.DEVICE_STARTUP;
+import static android.app.usage.UsageEvents.HIDE_LOCUS_EVENTS;
+import static android.app.usage.UsageEvents.HIDE_SHORTCUT_EVENTS;
+import static android.app.usage.UsageEvents.OBFUSCATE_INSTANT_APPS;
+import static android.app.usage.UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
 import static android.app.usage.UsageStatsManager.INTERVAL_BEST;
 import static android.app.usage.UsageStatsManager.INTERVAL_COUNT;
 import static android.app.usage.UsageStatsManager.INTERVAL_DAILY;
@@ -36,6 +40,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -43,6 +48,8 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
@@ -51,6 +58,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -76,6 +84,8 @@ class UserUsageStatsService {
     private final String mLogPrefix;
     private String mLastBackgroundedPackage;
     private final int mUserId;
+    private long mRealTimeSnapshot;
+    private long mSystemTimeSnapshot;
 
     private static final long[] INTERVAL_LENGTH = new long[] {
             UnixCalendar.DAY_IN_MILLIS, UnixCalendar.WEEK_IN_MILLIS,
@@ -101,10 +111,16 @@ class UserUsageStatsService {
         mListener = listener;
         mLogPrefix = "User[" + Integer.toString(userId) + "] ";
         mUserId = userId;
+        mRealTimeSnapshot = SystemClock.elapsedRealtime();
+        mSystemTimeSnapshot = System.currentTimeMillis();
     }
 
-    void init(final long currentTimeMillis) {
+    void init(final long currentTimeMillis, HashMap<String, Long> installedPackages) {
+        readPackageMappingsLocked(installedPackages);
         mDatabase.init(currentTimeMillis);
+        if (mDatabase.wasUpgradePerformed()) {
+            mDatabase.prunePackagesDataOnUpgrade(installedPackages);
+        }
 
         int nullCount = 0;
         for (int i = 0; i < mCurrentStats.length; i++) {
@@ -155,10 +171,103 @@ class UserUsageStatsService {
         }
     }
 
-    void onTimeChanged(long oldTime, long newTime) {
+    void userStopped() {
+        // Flush events to disk immediately to guarantee persistence.
+        persistActiveStats();
+    }
+
+    int onPackageRemoved(String packageName, long timeRemoved) {
+        return mDatabase.onPackageRemoved(packageName, timeRemoved);
+    }
+
+    private void readPackageMappingsLocked(HashMap<String, Long> installedPackages) {
+        mDatabase.readMappingsLocked();
+        // Package mappings for the system user are updated after 24 hours via a job scheduled by
+        // UsageStatsIdleService to ensure restored data is not lost on first boot. Additionally,
+        // this makes user service initialization a little quicker on subsequent boots.
+        if (mUserId != UserHandle.USER_SYSTEM) {
+            updatePackageMappingsLocked(installedPackages);
+        }
+    }
+
+    /**
+     * Compares the package mappings on disk with the ones currently installed and removes the
+     * mappings for those packages that have been uninstalled.
+     * This will only happen once per device boot, when the user is unlocked for the first time.
+     * If the user is the system user (user 0), this is delayed to ensure data for packages
+     * that were restored isn't removed before the restore is complete.
+     *
+     * @param installedPackages map of installed packages (package_name:package_install_time)
+     * @return {@code true} on a successful mappings update, {@code false} otherwise.
+     */
+    boolean updatePackageMappingsLocked(HashMap<String, Long> installedPackages) {
+        if (ArrayUtils.isEmpty(installedPackages)) {
+            return true;
+        }
+
+        final long timeNow = System.currentTimeMillis();
+        final ArrayList<String> removedPackages = new ArrayList<>();
+        // populate list of packages that are found in the mappings but not in the installed list
+        for (int i = mDatabase.mPackagesTokenData.packagesToTokensMap.size() - 1; i >= 0; i--) {
+            final String packageName = mDatabase.mPackagesTokenData.packagesToTokensMap.keyAt(i);
+            if (!installedPackages.containsKey(packageName)) {
+                removedPackages.add(packageName);
+            }
+        }
+        if (removedPackages.isEmpty()) {
+            return true;
+        }
+
+        // remove packages in the mappings that are no longer installed and persist to disk
+        for (int i = removedPackages.size() - 1; i >= 0; i--) {
+            mDatabase.mPackagesTokenData.removePackage(removedPackages.get(i), timeNow);
+        }
+        try {
+            mDatabase.writeMappingsLocked();
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to write updated package mappings file on service initialization.");
+            return false;
+        }
+        return true;
+    }
+
+    boolean pruneUninstalledPackagesData() {
+        return mDatabase.pruneUninstalledPackagesData();
+    }
+
+    private void onTimeChanged(long oldTime, long newTime) {
         persistActiveStats();
         mDatabase.onTimeChanged(newTime - oldTime);
         loadActiveStats(newTime);
+    }
+
+    /**
+     * This should be the only way to get the time from the system.
+     */
+    private long checkAndGetTimeLocked() {
+        final long actualSystemTime = System.currentTimeMillis();
+        if (!UsageStatsService.ENABLE_TIME_CHANGE_CORRECTION) {
+            return actualSystemTime;
+        }
+        final long actualRealtime = SystemClock.elapsedRealtime();
+        final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+        final long diffSystemTime = actualSystemTime - expectedSystemTime;
+        if (Math.abs(diffSystemTime) > UsageStatsService.TIME_CHANGE_THRESHOLD_MILLIS) {
+            // The time has changed.
+            Slog.i(TAG, mLogPrefix + "Time changed in by " + (diffSystemTime / 1000) + " seconds");
+            onTimeChanged(expectedSystemTime, actualSystemTime);
+            mRealTimeSnapshot = actualRealtime;
+            mSystemTimeSnapshot = actualSystemTime;
+        }
+        return actualSystemTime;
+    }
+
+    /**
+     * Assuming the event's timestamp is measured in milliseconds since boot,
+     * convert it to a system wall time.
+     */
+    private void convertToSystemTimeLocked(Event event) {
+        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
     }
 
     void reportEvent(Event event) {
@@ -167,6 +276,9 @@ class UserUsageStatsService {
                     + "[" + event.mTimeStamp + "]: "
                     + eventToString(event.mEventType));
         }
+
+        checkAndGetTimeLocked();
+        convertToSystemTimeLocked(event);
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
@@ -288,6 +400,10 @@ class UserUsageStatsService {
                 }
             };
 
+    private static boolean validRange(long currentTime, long beginTime, long endTime) {
+        return beginTime <= currentTime && beginTime < endTime;
+    }
+
     /**
      * Generic query method that selects the appropriate IntervalStats for the specified time range
      * and bucket, then calls the {@link com.android.server.usage.UsageStatsDatabase.StatCombiner}
@@ -350,6 +466,7 @@ class UserUsageStatsService {
             if (results == null) {
                 results = new ArrayList<>();
             }
+            mDatabase.filterStats(currentStats);
             combiner.combine(currentStats, true, results);
         }
 
@@ -360,19 +477,30 @@ class UserUsageStatsService {
     }
 
     List<UsageStats> queryUsageStats(int bucketType, long beginTime, long endTime) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner);
     }
 
     List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
     }
 
     List<EventStats> queryEventStats(int bucketType, long beginTime, long endTime) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime,
-                            boolean obfuscateInstantApps) {
+    UsageEvents queryEvents(final long beginTime, final long endTime, int flags) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         final ArraySet<String> names = new ArraySet<>();
         List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, new StatCombiner<Event>() {
@@ -387,7 +515,22 @@ class UserUsageStatsService {
                             }
 
                             Event event = stats.events.get(i);
-                            if (obfuscateInstantApps) {
+                            final int eventType = event.mEventType;
+                            if (eventType == Event.SHORTCUT_INVOCATION
+                                    && (flags & HIDE_SHORTCUT_EVENTS) == HIDE_SHORTCUT_EVENTS) {
+                                continue;
+                            }
+                            if (eventType == Event.LOCUS_ID_SET
+                                    && (flags & HIDE_LOCUS_EVENTS) == HIDE_LOCUS_EVENTS) {
+                                continue;
+                            }
+                            if ((eventType == Event.NOTIFICATION_SEEN
+                                    || eventType == Event.NOTIFICATION_INTERRUPTION)
+                                    && (flags & OBFUSCATE_NOTIFICATION_EVENTS)
+                                    == OBFUSCATE_NOTIFICATION_EVENTS) {
+                                event = event.getObfuscatedNotificationEvent();
+                            }
+                            if ((flags & OBFUSCATE_INSTANT_APPS) == OBFUSCATE_INSTANT_APPS) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
                             if (event.mPackage != null) {
@@ -418,6 +561,9 @@ class UserUsageStatsService {
 
     UsageEvents queryEventsForPackage(final long beginTime, final long endTime,
             final String packageName, boolean includeTaskRoot) {
+        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+            return null;
+        }
         final ArraySet<String> names = new ArraySet<>();
         names.add(packageName);
         final List<Event> results = queryStats(INTERVAL_DAILY,
@@ -459,6 +605,8 @@ class UserUsageStatsService {
         if (mStatsChanged) {
             Slog.i(TAG, mLogPrefix + "Flushing usage stats to disk");
             try {
+                mDatabase.obfuscateCurrentStats(mCurrentStats);
+                mDatabase.writeMappingsLocked();
                 for (int i = 0; i < mCurrentStats.length; i++) {
                     mDatabase.putUsageStats(i, mCurrentStats[i]);
                 }
@@ -617,22 +765,29 @@ class UserUsageStatsService {
         });
     }
 
-    void dump(IndentingPrintWriter pw, String pkg) {
-        dump(pw, pkg, false);
+    void dump(IndentingPrintWriter pw, List<String> pkgs) {
+        dump(pw, pkgs, false);
     }
-    void dump(IndentingPrintWriter pw, String pkg, boolean compact) {
-        printLast24HrEvents(pw, !compact, pkg);
+
+    void dump(IndentingPrintWriter pw, List<String> pkgs, boolean compact) {
+        printLast24HrEvents(pw, !compact, pkgs);
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkg);
+            printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkgs);
         }
-        mDatabase.dump(pw, compact);
+        if (CollectionUtils.isEmpty(pkgs)) {
+            mDatabase.dump(pw, compact);
+        }
     }
 
     void dumpDatabaseInfo(IndentingPrintWriter ipw) {
         mDatabase.dump(ipw, false);
+    }
+
+    void dumpMappings(IndentingPrintWriter ipw) {
+        mDatabase.dumpMappings(ipw);
     }
 
     void dumpFile(IndentingPrintWriter ipw, String[] args) {
@@ -754,7 +909,8 @@ class UserUsageStatsService {
         pw.println();
     }
 
-    void printLast24HrEvents(IndentingPrintWriter pw, boolean prettyDates, final String pkg) {
+    void printLast24HrEvents(IndentingPrintWriter pw, boolean prettyDates,
+            final List<String> pkgs) {
         final long endTime = System.currentTimeMillis();
         UnixCalendar yesterday = new UnixCalendar(endTime);
         yesterday.addDays(-1);
@@ -774,7 +930,7 @@ class UserUsageStatsService {
                             }
 
                             Event event = stats.events.get(i);
-                            if (pkg != null && !pkg.equals(event.mPackage)) {
+                            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(event.mPackage)) {
                                 continue;
                             }
                             accumulatedResult.add(event);
@@ -818,7 +974,7 @@ class UserUsageStatsService {
     }
 
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
-            boolean prettyDates, boolean skipEvents, String pkg) {
+            boolean prettyDates, boolean skipEvents, List<String> pkgs) {
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -834,7 +990,7 @@ class UserUsageStatsService {
         final int pkgCount = pkgStats.size();
         for (int i = 0; i < pkgCount; i++) {
             final UsageStats usageStats = pkgStats.valueAt(i);
-            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(usageStats.mPackageName)) {
                 continue;
             }
             pw.printPair("package", usageStats.mPackageName);
@@ -858,7 +1014,7 @@ class UserUsageStatsService {
         pw.println("ChooserCounts");
         pw.increaseIndent();
         for (UsageStats usageStats : pkgStats.values()) {
-            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(usageStats.mPackageName)) {
                 continue;
             }
             pw.printPair("package", usageStats.mPackageName);
@@ -883,7 +1039,7 @@ class UserUsageStatsService {
         }
         pw.decreaseIndent();
 
-        if (pkg == null) {
+        if (CollectionUtils.isEmpty(pkgs)) {
             pw.println("configurations");
             pw.increaseIndent();
             final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
@@ -920,7 +1076,7 @@ class UserUsageStatsService {
             final int eventCount = events != null ? events.size() : 0;
             for (int i = 0; i < eventCount; i++) {
                 final Event event = events.get(i);
-                if (pkg != null && !pkg.equals(event.mPackage)) {
+                if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(event.mPackage)) {
                     continue;
                 }
                 printEvent(pw, event, prettyDates);
@@ -1020,10 +1176,13 @@ class UserUsageStatsService {
     }
 
     byte[] getBackupPayload(String key){
+        checkAndGetTimeLocked();
+        persistActiveStats();
         return mDatabase.getBackupPayload(key);
     }
 
     void applyRestoredPayload(String key, byte[] payload){
+        checkAndGetTimeLocked();
         mDatabase.applyRestoredPayload(key, payload);
     }
 }

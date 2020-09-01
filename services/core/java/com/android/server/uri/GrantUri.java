@@ -18,6 +18,7 @@ package com.android.server.uri;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.net.Uri;
 import android.util.proto.ProtoOutputStream;
 
@@ -27,12 +28,12 @@ import com.android.server.am.GrantUriProto;
 public class GrantUri {
     public final int sourceUserId;
     public final Uri uri;
-    public boolean prefix;
+    public final boolean prefix;
 
-    public GrantUri(int sourceUserId, Uri uri, boolean prefix) {
+    public GrantUri(int sourceUserId, Uri uri, int modeFlags) {
         this.sourceUserId = sourceUserId;
         this.uri = uri;
-        this.prefix = prefix;
+        this.prefix = (modeFlags & Intent.FLAG_GRANT_PREFIX_URI_PERMISSION) != 0;
     }
 
     @Override
@@ -67,19 +68,19 @@ public class GrantUri {
         return result;
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(GrantUriProto.URI, uri.toString());
         proto.write(GrantUriProto.SOURCE_USER_ID, sourceUserId);
         proto.end(token);
     }
 
-    public static GrantUri resolve(int defaultSourceUserHandle, Uri uri) {
+    public static GrantUri resolve(int defaultSourceUserHandle, Uri uri, int modeFlags) {
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             return new GrantUri(ContentProvider.getUserIdFromUri(uri, defaultSourceUserHandle),
-                    ContentProvider.getUriWithoutUserId(uri), false);
+                    ContentProvider.getUriWithoutUserId(uri), modeFlags);
         } else {
-            return new GrantUri(defaultSourceUserHandle, uri, false);
+            return new GrantUri(defaultSourceUserHandle, uri, modeFlags);
         }
     }
 }

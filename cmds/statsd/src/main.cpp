@@ -20,10 +20,9 @@
 #include "StatsService.h"
 #include "socket/StatsSocketListener.h"
 
-#include <binder/IPCThreadState.h>
-#include <binder/IServiceManager.h>
-#include <binder/ProcessState.h>
-#include <hidl/HidlTransportSupport.h>
+#include <android/binder_interface_utils.h>
+#include <android/binder_process.h>
+#include <android/binder_manager.h>
 #include <utils/Looper.h>
 
 #include <stdio.h>
@@ -33,31 +32,35 @@
 
 using namespace android;
 using namespace android::os::statsd;
+using ::ndk::SharedRefBase;
+using std::shared_ptr;
+using std::make_shared;
 
-/**
- * Thread function data.
- */
-struct log_reader_thread_data {
-    sp<StatsService> service;
-};
+shared_ptr<StatsService> gStatsService = nullptr;
+sp<StatsSocketListener> gSocketListener = nullptr;
 
-
-sp<StatsService> gStatsService = nullptr;
-
-void sigHandler(int sig) {
-    if (gStatsService != nullptr) {
-        gStatsService->Terminate();
+void signalHandler(int sig) {
+    if (sig == SIGPIPE) {
+        // ShellSubscriber uses SIGPIPE as a signal to detect the end of the
+        // client process. Don't prematurely exit(1) here. Instead, ignore the
+        // signal and allow the write call to return EPIPE.
+        ALOGI("statsd received SIGPIPE. Ignoring signal.");
+        return;
     }
+
+    if (gSocketListener != nullptr) gSocketListener->stopListener();
+    if (gStatsService != nullptr) gStatsService->Terminate();
     ALOGW("statsd terminated on receiving signal %d.", sig);
     exit(1);
 }
 
-void registerSigHandler()
+void registerSignalHandlers()
 {
     struct sigaction sa;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sa.sa_handler = sigHandler;
+    sa.sa_handler = signalHandler;
+    sigaction(SIGPIPE, &sa, nullptr);
     sigaction(SIGHUP, &sa, nullptr);
     sigaction(SIGINT, &sa, nullptr);
     sigaction(SIGQUIT, &sa, nullptr);
@@ -69,35 +72,33 @@ int main(int /*argc*/, char** /*argv*/) {
     sp<Looper> looper(Looper::prepare(0 /* opts */));
 
     // Set up the binder
-    sp<ProcessState> ps(ProcessState::self());
-    ps->setThreadPoolMaxThreadCount(9);
-    ps->startThreadPool();
-    ps->giveThreadPoolName();
-    IPCThreadState::self()->disableBackgroundScheduling(true);
+    ABinderProcess_setThreadPoolMaxThreadCount(9);
+    ABinderProcess_startThreadPool();
 
     std::shared_ptr<LogEventQueue> eventQueue =
             std::make_shared<LogEventQueue>(2000 /*buffer limit. Buffer is NOT pre-allocated*/);
 
     // Create the service
-    gStatsService = new StatsService(looper, eventQueue);
-    if (defaultServiceManager()->addService(String16("stats"), gStatsService, false,
-                IServiceManager::DUMP_FLAG_PRIORITY_NORMAL | IServiceManager::DUMP_FLAG_PROTO)
-            != 0) {
+    gStatsService = SharedRefBase::make<StatsService>(looper, eventQueue);
+    // TODO(b/149582373): Set DUMP_FLAG_PROTO once libbinder_ndk supports
+    // setting dumpsys priorities.
+    binder_status_t status = AServiceManager_addService(gStatsService->asBinder().get(), "stats");
+    if (status != STATUS_OK) {
         ALOGE("Failed to add service as AIDL service");
         return -1;
     }
 
-    registerSigHandler();
+    registerSignalHandlers();
 
     gStatsService->sayHiToStatsCompanion();
 
     gStatsService->Startup();
 
-    sp<StatsSocketListener> socketListener = new StatsSocketListener(eventQueue);
+    gSocketListener = new StatsSocketListener(eventQueue);
 
     ALOGI("Statsd starts to listen to socket.");
     // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
-    if (socketListener->startListener(600)) {
+    if (gSocketListener->startListener(600)) {
         exit(1);
     }
 

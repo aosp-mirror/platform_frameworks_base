@@ -58,7 +58,7 @@ import android.util.Log;
  * &lt;/service></pre>
  *
  *  <p> Condition providers cannot be bound by the system on
- * {@link ActivityManager#isLowRamDevice() low ram} devices</p>
+ * {@link ActivityManager#isLowRamDevice() low ram} devices running Android Q (and below)</p>
  *
  * @deprecated Instead of using an automatically bound service, use
  * {@link android.app.NotificationManager#setAutomaticZenRuleState(String, Condition)} to tell the

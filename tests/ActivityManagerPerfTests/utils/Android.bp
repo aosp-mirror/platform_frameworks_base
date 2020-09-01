@@ -18,6 +18,7 @@ java_test {
     srcs: [
         "src/**/*.java",
         "src/com/android/frameworks/perftests/am/util/ITimeReceiverCallback.aidl",
+        "src/com/android/frameworks/perftests/am/util/ICommandReceiver.aidl",
     ],
     static_libs: [
         "androidx.test.rules",

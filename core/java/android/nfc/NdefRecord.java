@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -1049,6 +1050,22 @@ public final class NdefRecord implements Parcelable {
         if (mId.length > 0) b.append(" id=").append(bytesToString(mId));
         if (mPayload.length > 0) b.append(" payload=").append(bytesToString(mPayload));
         return b.toString();
+    }
+
+    /**
+     * Dump debugging information as a NdefRecordProto
+     * @hide
+     *
+     * Note:
+     * See proto definition in frameworks/base/core/proto/android/nfc/ndef.proto
+     * When writing a nested message, must call {@link ProtoOutputStream#start(long)} before and
+     * {@link ProtoOutputStream#end(long)} after.
+     * Never reuse a proto field number. When removing a field, mark it as reserved.
+     */
+    public void dumpDebug(ProtoOutputStream proto) {
+        proto.write(NdefRecordProto.TYPE, mType);
+        proto.write(NdefRecordProto.ID, mId);
+        proto.write(NdefRecordProto.PAYLOAD_BYTES, mPayload.length);
     }
 
     private static StringBuilder bytesToString(byte[] bs) {

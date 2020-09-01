@@ -52,5 +52,10 @@
         }
       ]
     }
+  ],
+  "postsubmit-managedprofile-stress": [
+    {
+      "name": "ManagedProfileLifecycleStressTest"
+    }
   ]
 }

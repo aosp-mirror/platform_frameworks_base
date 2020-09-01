@@ -39,6 +39,11 @@ public class NullVibrator extends Vibrator {
     }
 
     @Override
+    public boolean isVibrating() {
+        return false;
+    }
+
+    @Override
     public boolean hasAmplitudeControl() {
         return false;
     }

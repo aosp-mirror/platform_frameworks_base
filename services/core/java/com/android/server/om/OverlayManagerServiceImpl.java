@@ -18,7 +18,6 @@ package com.android.server.om;
 
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
-import static android.content.om.OverlayInfo.STATE_ENABLED_STATIC;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
 import static android.content.om.OverlayInfo.STATE_NO_IDMAP;
 import static android.content.om.OverlayInfo.STATE_OVERLAY_IS_BEING_REPLACED;
@@ -37,6 +36,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
@@ -69,6 +69,7 @@ final class OverlayManagerServiceImpl {
     private final PackageManagerHelper mPackageManager;
     private final IdmapManager mIdmapManager;
     private final OverlayManagerSettings mSettings;
+    private final OverlayConfig mOverlayConfig;
     private final String[] mDefaultOverlays;
     private final OverlayChangeListener mListener;
 
@@ -83,7 +84,7 @@ final class OverlayManagerServiceImpl {
      * should either scrap the overlay manager's previous settings or merge the old
      * settings with the new.
      */
-    private static boolean mustReinitializeOverlay(@NonNull final PackageInfo theTruth,
+    private boolean mustReinitializeOverlay(@NonNull final PackageInfo theTruth,
             @Nullable final OverlayInfo oldSettings) {
         if (oldSettings == null) {
             return true;
@@ -94,27 +95,31 @@ final class OverlayManagerServiceImpl {
         if (!Objects.equals(theTruth.targetOverlayableName, oldSettings.targetOverlayableName)) {
             return true;
         }
-        if (theTruth.isStaticOverlayPackage() != oldSettings.isStatic) {
+
+        boolean isMutable = isPackageConfiguredMutable(theTruth.packageName);
+        if (isMutable != oldSettings.isMutable) {
             return true;
         }
-        // a change in priority is only relevant for static RROs: specifically,
-        // a regular RRO should not have its state reset only because a change
-        // in priority
-        if (theTruth.isStaticOverlayPackage()
-                && theTruth.overlayPriority != oldSettings.priority) {
+
+        // If an immutable overlay changes its configured enabled state, reinitialize the overlay.
+        if (!isMutable && isPackageConfiguredEnabled(theTruth.packageName)
+                != oldSettings.isEnabled()) {
             return true;
         }
+
         return false;
     }
 
     OverlayManagerServiceImpl(@NonNull final PackageManagerHelper packageManager,
             @NonNull final IdmapManager idmapManager,
             @NonNull final OverlayManagerSettings settings,
+            @NonNull final OverlayConfig overlayConfig,
             @NonNull final String[] defaultOverlays,
             @NonNull final OverlayChangeListener listener) {
         mPackageManager = packageManager;
         mIdmapManager = idmapManager;
         mSettings = settings;
+        mOverlayConfig = overlayConfig;
         mDefaultOverlays = defaultOverlays;
         mListener = listener;
     }
@@ -151,6 +156,7 @@ final class OverlayManagerServiceImpl {
             final PackageInfo overlayPackage = overlayPackages.get(i);
             final OverlayInfo oi = storedOverlayInfos.get(overlayPackage.packageName);
 
+            int priority = getPackageConfiguredPriority(overlayPackage.packageName);
             if (mustReinitializeOverlay(overlayPackage, oi)) {
                 // if targetPackageName has changed the package that *used* to
                 // be the target must also update its assets
@@ -162,9 +168,12 @@ final class OverlayManagerServiceImpl {
                         overlayPackage.overlayTarget,
                         overlayPackage.targetOverlayableName,
                         overlayPackage.applicationInfo.getBaseCodePath(),
-                        overlayPackage.isStaticOverlayPackage(),
-                        overlayPackage.overlayPriority,
-                        overlayPackage.overlayCategory);
+                        isPackageConfiguredMutable(overlayPackage.packageName),
+                        isPackageConfiguredEnabled(overlayPackage.packageName),
+                        priority, overlayPackage.overlayCategory);
+            } else if (priority != oi.priority) {
+                mSettings.setPriority(overlayPackage.packageName, newUserId, priority);
+                packagesToUpdateAssets.add(oi.targetPackageName);
             }
 
             storedOverlayInfos.remove(overlayPackage.packageName);
@@ -374,7 +383,9 @@ final class OverlayManagerServiceImpl {
         mSettings.init(packageName, userId, overlayPackage.overlayTarget,
                 overlayPackage.targetOverlayableName,
                 overlayPackage.applicationInfo.getBaseCodePath(),
-                overlayPackage.isStaticOverlayPackage(), overlayPackage.overlayPriority,
+                isPackageConfiguredMutable(overlayPackage.packageName),
+                isPackageConfiguredEnabled(overlayPackage.packageName),
+                getPackageConfiguredPriority(overlayPackage.packageName),
                 overlayPackage.overlayCategory);
         try {
             if (updateState(overlayPackage.overlayTarget, packageName, userId, 0)) {
@@ -439,8 +450,10 @@ final class OverlayManagerServiceImpl {
                     mListener.onOverlaysChanged(pkg.overlayTarget, userId);
                 }
                 mSettings.init(packageName, userId, pkg.overlayTarget, pkg.targetOverlayableName,
-                        pkg.applicationInfo.getBaseCodePath(), pkg.isStaticOverlayPackage(),
-                        pkg.overlayPriority, pkg.overlayCategory);
+                        pkg.applicationInfo.getBaseCodePath(),
+                        isPackageConfiguredMutable(pkg.packageName),
+                        isPackageConfiguredEnabled(pkg.packageName),
+                        getPackageConfiguredPriority(pkg.packageName), pkg.overlayCategory);
             }
 
             if (updateState(pkg.overlayTarget, packageName, userId, 0)) {
@@ -492,13 +505,13 @@ final class OverlayManagerServiceImpl {
             return false;
         }
 
-        // Ignore static overlays.
-        if (overlayPackage.isStaticOverlayPackage()) {
-            return false;
-        }
-
         try {
             final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
+            if (!oi.isMutable) {
+                // Ignore immutable overlays.
+                return false;
+            }
+
             boolean modified = mSettings.setEnabled(packageName, userId, enable);
             modified |= updateState(oi.targetPackageName, oi.packageName, userId, 0);
 
@@ -534,7 +547,8 @@ final class OverlayManagerServiceImpl {
             // Disable all other overlays.
             allOverlays.remove(oi);
             for (int i = 0; i < allOverlays.size(); i++) {
-                final String disabledOverlayPackageName = allOverlays.get(i).packageName;
+                final OverlayInfo disabledInfo = allOverlays.get(i);
+                final String disabledOverlayPackageName = disabledInfo.packageName;
                 final PackageInfo disabledOverlayPackageInfo = mPackageManager.getPackageInfo(
                         disabledOverlayPackageName, userId);
                 if (disabledOverlayPackageInfo == null) {
@@ -542,8 +556,8 @@ final class OverlayManagerServiceImpl {
                     continue;
                 }
 
-                if (disabledOverlayPackageInfo.isStaticOverlayPackage()) {
-                    // Don't touch static overlays.
+                if (!disabledInfo.isMutable) {
+                    // Don't touch immutable overlays.
                     continue;
                 }
                 if (withinCategory && !Objects.equals(disabledOverlayPackageInfo.overlayCategory,
@@ -570,12 +584,16 @@ final class OverlayManagerServiceImpl {
         }
     }
 
-    private boolean isPackageUpdatableOverlay(@NonNull final String packageName, final int userId) {
-        final PackageInfo overlayPackage = mPackageManager.getPackageInfo(packageName, userId);
-        if (overlayPackage == null || overlayPackage.isStaticOverlayPackage()) {
-            return false;
-        }
-        return true;
+    private boolean isPackageConfiguredMutable(@NonNull final String packageName) {
+        return mOverlayConfig.isMutable(packageName);
+    }
+
+    private int getPackageConfiguredPriority(@NonNull final String packageName) {
+        return mOverlayConfig.getPriority(packageName);
+    }
+
+    private boolean isPackageConfiguredEnabled(@NonNull final String packageName) {
+        return mOverlayConfig.isEnabled(packageName);
     }
 
     boolean setPriority(@NonNull final String packageName,
@@ -585,7 +603,7 @@ final class OverlayManagerServiceImpl {
                     + newParentPackageName + " userId=" + userId);
         }
 
-        if (!isPackageUpdatableOverlay(packageName, userId)) {
+        if (!isPackageConfiguredMutable(packageName)) {
             return false;
         }
 
@@ -605,7 +623,7 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "setHighestPriority packageName=" + packageName + " userId=" + userId);
         }
 
-        if (!isPackageUpdatableOverlay(packageName, userId)) {
+        if (!isPackageConfiguredMutable(packageName)) {
             return false;
         }
 
@@ -625,7 +643,7 @@ final class OverlayManagerServiceImpl {
             Slog.d(TAG, "setLowestPriority packageName=" + packageName + " userId=" + userId);
         }
 
-        if (!isPackageUpdatableOverlay(packageName, userId)) {
+        if (!isPackageConfiguredMutable(packageName)) {
             return false;
         }
 
@@ -649,6 +667,11 @@ final class OverlayManagerServiceImpl {
 
     @NonNull String[] getDefaultOverlayPackages() {
         return mDefaultOverlays;
+    }
+
+    void removeIdmapForOverlay(String packageName, int userId) {
+        final OverlayInfo oi = mSettings.getOverlayInfo(packageName, userId);
+        removeIdmapIfPossible(oi);
     }
 
     List<String> getEnabledOverlayPackageNames(@NonNull final String targetPackageName,
@@ -677,14 +700,15 @@ final class OverlayManagerServiceImpl {
         final PackageInfo overlayPackage = mPackageManager.getPackageInfo(overlayPackageName,
                 userId);
 
-        // Static RROs targeting to "android", ie framework-res.apk, are handled by native layers.
+        // Immutable RROs targeting to "android", ie framework-res.apk, are handled by native
+        // layers.
+        boolean modified = false;
         if (targetPackage != null && overlayPackage != null
                 && !("android".equals(targetPackageName)
-                        && overlayPackage.isStaticOverlayPackage())) {
-            mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
+                    && !isPackageConfiguredMutable(overlayPackageName))) {
+            modified |= mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
         }
 
-        boolean modified = false;
         if (overlayPackage != null) {
             modified |= mSettings.setBaseCodePath(overlayPackageName, userId,
                     overlayPackage.applicationInfo.getBaseCodePath());
@@ -698,9 +722,9 @@ final class OverlayManagerServiceImpl {
         if (currentState != newState) {
             if (DEBUG) {
                 Slog.d(TAG, String.format("%s:%d: %s -> %s",
-                            overlayPackageName, userId,
-                            OverlayInfo.stateToString(currentState),
-                            OverlayInfo.stateToString(newState)));
+                        overlayPackageName, userId,
+                        OverlayInfo.stateToString(currentState),
+                        OverlayInfo.stateToString(newState)));
             }
             modified |= mSettings.setState(overlayPackageName, userId, newState);
         }
@@ -730,10 +754,6 @@ final class OverlayManagerServiceImpl {
 
         if (!mIdmapManager.idmapExists(overlayPackage, userId)) {
             return STATE_NO_IDMAP;
-        }
-
-        if (overlayPackage.isStaticOverlayPackage()) {
-            return STATE_ENABLED_STATIC;
         }
 
         final boolean enabled = mSettings.getEnabled(overlayPackage.packageName, userId);
@@ -784,12 +804,5 @@ final class OverlayManagerServiceImpl {
          * add or remove target packages of overlays.
          **/
         void onOverlaysChanged(@NonNull String targetPackage, int userId);
-    }
-
-    interface PackageManagerHelper {
-        PackageInfo getPackageInfo(@NonNull String packageName, int userId);
-        boolean signaturesMatching(@NonNull String packageName1, @NonNull String packageName2,
-                                   int userId);
-        List<PackageInfo> getOverlayPackages(int userId);
     }
 }

@@ -18,7 +18,9 @@
 
 #include <fcntl.h>  // For tests.
 #include <pthread.h>
+#ifndef _WIN32
 #include <sys/mman.h>  // For tests.
+#endif
 #include <sys/stat.h>  // For tests.
 
 #include "MinikinSkia.h"
@@ -171,6 +173,7 @@ void Typeface::setDefault(const Typeface* face) {
 }
 
 void Typeface::setRobotoTypefaceForTest() {
+#ifndef _WIN32
     const char* kRobotoFont = "/system/fonts/Roboto-Regular.ttf";
 
     int fd = open(kRobotoFont, O_RDONLY);
@@ -198,5 +201,6 @@ void Typeface::setRobotoTypefaceForTest() {
     hwTypeface->fStyle = minikin::FontStyle();
 
     Typeface::setDefault(hwTypeface);
+#endif
 }
 }  // namespace android

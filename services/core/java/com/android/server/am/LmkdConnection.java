@@ -48,8 +48,8 @@ public class LmkdConnection {
 
     // connection listener interface
     interface LmkdConnectionListener {
-        boolean onConnect(OutputStream ostream);
-        void onDisconnect();
+        public boolean onConnect(OutputStream ostream);
+        public void onDisconnect();
         /**
          * Check if received reply was expected (reply to an earlier request)
          *
@@ -60,8 +60,8 @@ public class LmkdConnection {
          * @param dataReceived The buffer holding received data
          * @param receivedLen Size of the data received
          */
-        boolean isReplyExpected(ByteBuffer replyBuf, ByteBuffer dataReceived,
-                int receivedLen);
+        public boolean isReplyExpected(ByteBuffer replyBuf, ByteBuffer dataReceived,
+            int receivedLen);
 
         /**
          * Handle the received message if it's unsolicited.
@@ -109,7 +109,7 @@ public class LmkdConnection {
         mListener = listener;
     }
 
-    boolean connect() {
+    public boolean connect() {
         synchronized (mLmkdSocketLock) {
             if (mLmkdSocket != null) {
                 return true;
@@ -142,12 +142,12 @@ public class LmkdConnection {
             mLmkdOutputStream = ostream;
             mLmkdInputStream = istream;
             mMsgQueue.addOnFileDescriptorEventListener(mLmkdSocket.getFileDescriptor(),
-                    EVENT_INPUT | EVENT_ERROR,
-                    new MessageQueue.OnFileDescriptorEventListener() {
-                        public int onFileDescriptorEvents(FileDescriptor fd, int events) {
-                            return fileDescriptorEventHandler(fd, events);
-                        }
+                EVENT_INPUT | EVENT_ERROR,
+                new MessageQueue.OnFileDescriptorEventListener() {
+                    public int onFileDescriptorEvents(FileDescriptor fd, int events) {
+                        return fileDescriptorEventHandler(fd, events);
                     }
+                }
             );
             mLmkdSocketLock.notifyAll();
         }
@@ -210,13 +210,13 @@ public class LmkdConnection {
         }
     }
 
-    boolean isConnected() {
+    public boolean isConnected() {
         synchronized (mLmkdSocketLock) {
             return (mLmkdSocket != null);
         }
     }
 
-    boolean waitForConnection(long timeoutMs) {
+    public boolean waitForConnection(long timeoutMs) {
         synchronized (mLmkdSocketLock) {
             if (mLmkdSocket != null) {
                 return true;
@@ -236,7 +236,7 @@ public class LmkdConnection {
         try {
             socket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
             socket.connect(
-                    new LocalSocketAddress("lmkd",
+                new LocalSocketAddress("lmkd",
                         LocalSocketAddress.Namespace.RESERVED));
         } catch (IOException ex) {
             Slog.e(TAG, "Connection failed: " + ex.toString());

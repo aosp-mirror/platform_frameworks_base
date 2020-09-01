@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.content.Context;
@@ -28,6 +30,7 @@ import android.os.UserHandle;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,9 +39,9 @@ import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.util.EmergencyDialerConstants;
 
 /**
@@ -48,14 +51,6 @@ import com.android.systemui.util.EmergencyDialerConstants;
  * allows the user to return to the call.
  */
 public class EmergencyButton extends Button {
-    private static final Intent INTENT_EMERGENCY_DIAL = new Intent()
-            .setAction(EmergencyDialerConstants.ACTION_DIAL)
-            .setPackage("com.android.phone")
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
-                    EmergencyDialerConstants.ENTRY_TYPE_LOCKSCREEN_BUTTON);
 
     private static final String LOG_TAG = "EmergencyButton";
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
@@ -65,7 +60,7 @@ public class EmergencyButton extends Button {
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onSimStateChanged(int subId, int slotId, State simState) {
+        public void onSimStateChanged(int subId, int slotId, int simState) {
             updateEmergencyCallButton();
         }
 
@@ -106,13 +101,13 @@ public class EmergencyButton extends Button {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mInfoCallback);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+        Dependency.get(KeyguardUpdateMonitor.class).removeCallback(mInfoCallback);
     }
 
     @Override
@@ -120,23 +115,18 @@ public class EmergencyButton extends Button {
         super.onFinishInflate();
         mLockPatternUtils = new LockPatternUtils(mContext);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                takeEmergencyCallAction();
-            }
-        });
-        setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+        setOnClickListener(v -> takeEmergencyCallAction());
+        if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+            setOnLongClickListener(v -> {
                 if (!mLongPressWasDragged
                         && mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mEmergencyAffordanceManager.performEmergencyCall();
                     return true;
                 }
                 return false;
-            }
-        });
-        updateEmergencyCallButton();
+            });
+        }
+        whitelistIpcs(this::updateEmergencyCallButton);
     }
 
     @Override
@@ -174,9 +164,9 @@ public class EmergencyButton extends Button {
      */
     public void takeEmergencyCallAction() {
         MetricsLogger.action(mContext, MetricsEvent.ACTION_EMERGENCY_CALL);
-        // TODO: implement a shorter timeout once new PowerManager API is ready.
-        // should be the equivalent to the old userActivity(EMERGENCY_CALL_TIMEOUT)
-        mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
+        if (mPowerManager != null) {
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
+        }
         try {
             ActivityTaskManager.getService().stopSystemLockTaskMode();
         } catch (RemoteException e) {
@@ -188,9 +178,26 @@ public class EmergencyButton extends Button {
                 mEmergencyButtonCallback.onEmergencyButtonClickedWhenInCall();
             }
         } else {
-            KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(
-                    true /* bypassHandler */);
-            getContext().startActivityAsUser(INTENT_EMERGENCY_DIAL,
+            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+            if (updateMonitor != null) {
+                updateMonitor.reportEmergencyCallAction(true /* bypassHandler */);
+            } else {
+                Log.w(LOG_TAG, "KeyguardUpdateMonitor was null, launching intent anyway.");
+            }
+            TelecomManager telecomManager = getTelecommManager();
+            if (telecomManager == null) {
+                Log.wtf(LOG_TAG, "TelecomManager was null, cannot launch emergency dialer");
+                return;
+            }
+            Intent emergencyDialIntent =
+                    telecomManager.createLaunchEmergencyDialerIntent(null /* number*/)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                                    | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
+                                    EmergencyDialerConstants.ENTRY_TYPE_LOCKSCREEN_BUTTON);
+
+            getContext().startActivityAsUser(emergencyDialIntent,
                     ActivityOptions.makeCustomAnimation(getContext(), 0, 0).toBundle(),
                     new UserHandle(KeyguardUpdateMonitor.getCurrentUser()));
         }
@@ -203,7 +210,7 @@ public class EmergencyButton extends Button {
             if (isInCall()) {
                 visible = true; // always show "return to call" if phone is off-hook
             } else {
-                final boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext)
+                final boolean simLocked = Dependency.get(KeyguardUpdateMonitor.class)
                         .isSimPinVoiceSecure();
                 if (simLocked) {
                     // Some countries can't handle emergency calls while SIM is locked.

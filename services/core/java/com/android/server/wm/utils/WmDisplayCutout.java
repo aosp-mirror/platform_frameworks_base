@@ -21,7 +21,6 @@ import android.util.Size;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -41,12 +40,17 @@ public class WmDisplayCutout {
         mFrameSize = frameSize;
     }
 
-    public static WmDisplayCutout computeSafeInsets(DisplayCutout inner,
-            int displayWidth, int displayHeight) {
-        if (inner == DisplayCutout.NO_CUTOUT || inner.isBoundsEmpty()) {
+    /**
+     * Compute the safe insets according to the given DisplayCutout and the display size.
+     *
+     * @return return a WmDisplayCutout with calculated safe insets.
+     * @hide
+     */
+    public static WmDisplayCutout computeSafeInsets(
+            DisplayCutout inner, int displayWidth, int displayHeight) {
+        if (inner == DisplayCutout.NO_CUTOUT) {
             return NO_CUTOUT;
         }
-
         final Size displaySize = new Size(displayWidth, displayHeight);
         final Rect safeInsets = computeSafeInsets(displaySize, inner);
         return new WmDisplayCutout(inner.replaceSafeInsets(safeInsets), displaySize);
@@ -112,57 +116,42 @@ public class WmDisplayCutout {
     }
 
     private static Rect computeSafeInsets(Size displaySize, DisplayCutout cutout) {
-        if (displaySize.getWidth() < displaySize.getHeight()) {
-            final List<Rect> boundingRects = cutout.replaceSafeInsets(
-                    new Rect(0, displaySize.getHeight() / 2, 0, displaySize.getHeight() / 2))
-                    .getBoundingRects();
-            int topInset = findInsetForSide(displaySize, boundingRects, Gravity.TOP);
-            int bottomInset = findInsetForSide(displaySize, boundingRects, Gravity.BOTTOM);
-            return new Rect(0, topInset, 0, bottomInset);
-        } else if (displaySize.getWidth() > displaySize.getHeight()) {
-            final List<Rect> boundingRects = cutout.replaceSafeInsets(
-                    new Rect(displaySize.getWidth() / 2, 0, displaySize.getWidth() / 2, 0))
-                    .getBoundingRects();
-            int leftInset = findInsetForSide(displaySize, boundingRects, Gravity.LEFT);
-            int right = findInsetForSide(displaySize, boundingRects, Gravity.RIGHT);
-            return new Rect(leftInset, 0, right, 0);
-        } else {
+        if (displaySize.getWidth() == displaySize.getHeight()) {
             throw new UnsupportedOperationException("not implemented: display=" + displaySize +
                     " cutout=" + cutout);
         }
+
+        int leftInset = Math.max(cutout.getWaterfallInsets().left,
+                findCutoutInsetForSide(displaySize, cutout.getBoundingRectLeft(), Gravity.LEFT));
+        int topInset = Math.max(cutout.getWaterfallInsets().top,
+                findCutoutInsetForSide(displaySize, cutout.getBoundingRectTop(), Gravity.TOP));
+        int rightInset = Math.max(cutout.getWaterfallInsets().right,
+                findCutoutInsetForSide(displaySize, cutout.getBoundingRectRight(), Gravity.RIGHT));
+        int bottomInset = Math.max(cutout.getWaterfallInsets().bottom,
+                findCutoutInsetForSide(displaySize, cutout.getBoundingRectBottom(),
+                        Gravity.BOTTOM));
+
+        return new Rect(leftInset, topInset, rightInset, bottomInset);
     }
 
-    private static int findInsetForSide(Size display, List<Rect> boundingRects, int gravity) {
-        int inset = 0;
-        final int size = boundingRects.size();
-        for (int i = 0; i < size; i++) {
-            Rect boundingRect = boundingRects.get(i);
-            switch (gravity) {
-                case Gravity.TOP:
-                    if (boundingRect.top == 0) {
-                        inset = Math.max(inset, boundingRect.bottom);
-                    }
-                    break;
-                case Gravity.BOTTOM:
-                    if (boundingRect.bottom == display.getHeight()) {
-                        inset = Math.max(inset, display.getHeight() - boundingRect.top);
-                    }
-                    break;
-                case Gravity.LEFT:
-                    if (boundingRect.left == 0) {
-                        inset = Math.max(inset, boundingRect.right);
-                    }
-                    break;
-                case Gravity.RIGHT:
-                    if (boundingRect.right == display.getWidth()) {
-                        inset = Math.max(inset, display.getWidth() - boundingRect.left);
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("unknown gravity: " + gravity);
-            }
+    private static int findCutoutInsetForSide(Size display, Rect boundingRect, int gravity) {
+        if (boundingRect.isEmpty()) {
+            return 0;
         }
-        return inset;
+
+        int inset = 0;
+        switch (gravity) {
+            case Gravity.TOP:
+                return Math.max(inset, boundingRect.bottom);
+            case Gravity.BOTTOM:
+                return Math.max(inset, display.getHeight() - boundingRect.top);
+            case Gravity.LEFT:
+                return Math.max(inset, boundingRect.right);
+            case Gravity.RIGHT:
+                return Math.max(inset, display.getWidth() - boundingRect.left);
+            default:
+                throw new IllegalArgumentException("unknown gravity: " + gravity);
+        }
     }
 
     public DisplayCutout getDisplayCutout() {
