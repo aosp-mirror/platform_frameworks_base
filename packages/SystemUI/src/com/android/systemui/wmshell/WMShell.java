@@ -21,6 +21,7 @@ import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_
 import android.app.ActivityManager;
 import android.content.Context;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SystemUI;
@@ -48,11 +49,11 @@ import javax.inject.Inject;
  * Proxy in SysUiScope to delegate events to controllers in WM Shell library.
  */
 @SysUISingleton
-public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTraceProto>,
-        CommandQueue.Callbacks {
+public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTraceProto> {
     private final CommandQueue mCommandQueue;
     private final DisplayImeController mDisplayImeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final ActivityManagerWrapper mActivityManagerWrapper;
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final ProtoTracer mProtoTracer;
@@ -60,6 +61,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            ActivityManagerWrapper activityManagerWrapper,
             DisplayImeController displayImeController,
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
@@ -67,6 +69,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
         super(context);
         mCommandQueue = commandQueue;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mActivityManagerWrapper = activityManagerWrapper;
         mDisplayImeController = displayImeController;
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
@@ -79,14 +82,14 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
         // This is to prevent circular init problem by separating registration step out of its
         // constructor. And make sure the initialization of DisplayImeController won't depend on
         // specific feature anymore.
-        mCommandQueue.addCallback(this);
         mDisplayImeController.startMonitorDisplays();
 
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
     }
 
-    private void initPip(Pip pip) {
+    @VisibleForTesting
+    void initPip(Pip pip) {
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void showPictureInPictureMenu() {
@@ -95,7 +98,8 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
         });
     }
 
-    private void initSplitScreen(SplitScreen splitScreen) {
+    @VisibleForTesting
+    void initSplitScreen(SplitScreen splitScreen) {
         mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
@@ -107,7 +111,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             }
         });
 
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(
+        mActivityManagerWrapper.registerTaskStackListener(
                 new TaskStackChangeListener() {
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
