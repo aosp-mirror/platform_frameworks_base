@@ -141,7 +141,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
     }
 
     @Override
-    protected boolean shouldShowNavigationBar() {
+    protected boolean shouldShowNavigationBarInsets() {
         return true;
     }
 
@@ -177,7 +177,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mKeyguardStateController.notifyKeyguardState(mShowing, /* occluded= */ false);
         mCarNavigationBarController.showAllKeyguardButtons(/* isSetUp= */ true);
         start();
-        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ true);
         reset(/* hideBouncerWhenShowing= */ false);
         notifyKeyguardUpdateMonitor();
     }
@@ -192,7 +191,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mBouncer.hide(/* destroyView= */ true);
         mCarNavigationBarController.hideAllKeyguardButtons(/* isSetUp= */ true);
         stop();
-        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         mKeyguardStateController.notifyKeyguardDoneFading();
         mHandler.post(mViewMediatorCallback::keyguardGone);
         notifyKeyguardUpdateMonitor();
@@ -237,7 +235,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
     public void onCancelClicked() {
         if (mBouncer == null) return;
 
-        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         getOverlayViewGlobalStateController().setWindowNeedsInput(/* needsInput= */ false);
 
         mBouncer.hide(/* destroyView= */ true);

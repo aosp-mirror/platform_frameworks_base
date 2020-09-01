@@ -18,7 +18,6 @@ package com.android.systemui.car.window;
 
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
 import android.annotation.Nullable;
 import android.util.Log;
@@ -118,6 +117,7 @@ public class OverlayViewGlobalStateController {
 
         updateInternalsWhenShowingView(viewController);
         refreshInsetTypesToFit();
+        refreshWindowFocus();
         refreshNavigationBarVisibility();
         refreshStatusBarVisibility();
 
@@ -190,6 +190,7 @@ public class OverlayViewGlobalStateController {
         mZOrderVisibleSortedMap.remove(mZOrderMap.get(viewController));
         refreshHighestZOrderWhenHidingView(viewController);
         refreshInsetTypesToFit();
+        refreshWindowFocus();
         refreshNavigationBarVisibility();
         refreshStatusBarVisibility();
 
@@ -214,21 +215,35 @@ public class OverlayViewGlobalStateController {
     }
 
     private void refreshNavigationBarVisibility() {
-        mWindowInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        if (mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowNavigationBar()) {
+        if (mZOrderVisibleSortedMap.isEmpty()) {
             mWindowInsetsController.show(navigationBars());
-        } else {
+            return;
+        }
+
+        // Do not hide navigation bar insets if the window is not focusable.
+        if (mHighestZOrder.shouldFocusWindow() && !mHighestZOrder.shouldShowNavigationBarInsets()) {
             mWindowInsetsController.hide(navigationBars());
+        } else {
+            mWindowInsetsController.show(navigationBars());
         }
     }
 
     private void refreshStatusBarVisibility() {
-        mWindowInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        if (mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowStatusBar()) {
+        if (mZOrderVisibleSortedMap.isEmpty()) {
             mWindowInsetsController.show(statusBars());
-        } else {
-            mWindowInsetsController.hide(statusBars());
+            return;
         }
+
+        // Do not hide status bar insets if the window is not focusable.
+        if (mHighestZOrder.shouldFocusWindow() && !mHighestZOrder.shouldShowStatusBarInsets()) {
+            mWindowInsetsController.hide(statusBars());
+        } else {
+            mWindowInsetsController.show(statusBars());
+        }
+    }
+
+    private void refreshWindowFocus() {
+        setWindowFocusable(mHighestZOrder == null ? false : mHighestZOrder.shouldFocusWindow());
     }
 
     private void refreshInsetTypesToFit() {
