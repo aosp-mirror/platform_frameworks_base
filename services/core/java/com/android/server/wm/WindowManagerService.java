@@ -490,6 +490,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final Map<IBinder, KeyInterceptionInfo> mKeyInterceptionInfoForToken =
             Collections.synchronizedMap(new ArrayMap<>());
 
+    final StartingSurfaceController mStartingSurfaceController;
 
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
@@ -1375,6 +1376,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mContext.getResources());
 
         setGlobalShadowSettings();
+
+        mStartingSurfaceController = new StartingSurfaceController(this);
     }
 
     private void setGlobalShadowSettings() {
@@ -1559,7 +1562,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     ProtoLog.w(WM_ERROR, "Attempted to add window with exiting application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_APP_EXITING;
-                } else if (type == TYPE_APPLICATION_STARTING && activity.startingWindow != null) {
+                } else if (type == TYPE_APPLICATION_STARTING && activity.mStartingWindow != null) {
                     ProtoLog.w(WM_ERROR,
                             "Attempted to add starting window to token with already existing"
                                     + " starting window");
@@ -1708,7 +1711,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final ActivityRecord tokenActivity = token.asActivityRecord();
             if (type == TYPE_APPLICATION_STARTING && tokenActivity != null) {
-                tokenActivity.startingWindow = win;
+                tokenActivity.mStartingWindow = win;
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
                         activity, win);
             }

@@ -551,7 +551,7 @@ public class WindowStateTests extends WindowTestsBase {
                 TYPE_BASE_APPLICATION, "startingApp");
         final WindowState startingWindow = createWindow(null /* parent */,
                 TYPE_APPLICATION_STARTING, startingApp.mToken, "starting");
-        startingApp.mActivityRecord.startingWindow = startingWindow;
+        startingApp.mActivityRecord.mStartingWindow = startingWindow;
         final WindowState keyguardHostWindow = mNotificationShadeWindow;
         final WindowState allDrawnApp = mAppWindow;
         allDrawnApp.mActivityRecord.allDrawn = true;

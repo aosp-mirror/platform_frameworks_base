@@ -26,6 +26,21 @@ import android.window.WindowContainerToken;
  */
 oneway interface ITaskOrganizer {
     /**
+     * Called when a Task is starting and the system would like to show a UI to indicate that an
+     * application is starting. The client is responsible to add/remove the starting window if it
+     * has create a starting window for the Task.
+     *
+     * @param taskInfo The information about the Task that's available
+     * @param appToken Token of the application being started.
+     */
+    void addStartingWindow(in ActivityManager.RunningTaskInfo taskInfo, IBinder appToken);
+
+    /**
+     * Called when the Task want to remove the starting window.
+     */
+    void removeStartingWindow(in ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
      * A callback when the Task is available for the registered organizer. The client is responsible
      * for releasing the SurfaceControl in the callback. For non-root tasks, the leash may initially
      * be hidden so it is up to the organizer to show this task.

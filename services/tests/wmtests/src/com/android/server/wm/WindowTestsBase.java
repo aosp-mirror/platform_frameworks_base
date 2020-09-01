@@ -1075,6 +1075,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mMoveToSecondaryOnEnter = move;
         }
         @Override
+        public void addStartingWindow(ActivityManager.RunningTaskInfo info, IBinder appToken) {
+        }
+        @Override
+        public void removeStartingWindow(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         }
         @Override
