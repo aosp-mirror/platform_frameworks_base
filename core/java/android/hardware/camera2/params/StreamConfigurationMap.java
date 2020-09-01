@@ -1320,6 +1320,8 @@ public final class StreamConfigurationMap {
                 return ImageFormat.DEPTH16;
             case HAL_PIXEL_FORMAT_RAW16:
                 return ImageFormat.RAW_DEPTH;
+            case HAL_PIXEL_FORMAT_RAW10:
+                return ImageFormat.RAW_DEPTH10;
             case ImageFormat.JPEG:
                 throw new IllegalArgumentException(
                         "ImageFormat.JPEG is an unknown internal format");
@@ -1393,6 +1395,8 @@ public final class StreamConfigurationMap {
                 return HAL_PIXEL_FORMAT_Y16;
             case ImageFormat.RAW_DEPTH:
                 return HAL_PIXEL_FORMAT_RAW16;
+            case ImageFormat.RAW_DEPTH10:
+                return HAL_PIXEL_FORMAT_RAW10;
             default:
                 return format;
         }
@@ -1437,6 +1441,7 @@ public final class StreamConfigurationMap {
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.DEPTH16:
             case ImageFormat.RAW_DEPTH:
+            case ImageFormat.RAW_DEPTH10:
                 return HAL_DATASPACE_DEPTH;
             case ImageFormat.DEPTH_JPEG:
                 return HAL_DATASPACE_DYNAMIC_DEPTH;
@@ -1878,6 +1883,8 @@ public final class StreamConfigurationMap {
                 return "DEPTH_JPEG";
             case ImageFormat.RAW_DEPTH:
                 return "RAW_DEPTH";
+            case ImageFormat.RAW_DEPTH10:
+                return "RAW_DEPTH10";
             case ImageFormat.PRIVATE:
                 return "PRIVATE";
             case ImageFormat.HEIC:

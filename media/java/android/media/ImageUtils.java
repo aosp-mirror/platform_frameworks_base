@@ -63,6 +63,7 @@ class ImageUtils {
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.RAW_DEPTH:
+            case ImageFormat.RAW_DEPTH10:
             case ImageFormat.DEPTH_JPEG:
             case ImageFormat.HEIC:
                 return 1;
@@ -109,6 +110,10 @@ class ImageUtils {
         if (src.getFormat() == ImageFormat.RAW_DEPTH) {
             throw new IllegalArgumentException(
                     "Copy of RAW_DEPTH format has not been implemented");
+        }
+        if (src.getFormat() == ImageFormat.RAW_DEPTH10) {
+            throw new IllegalArgumentException(
+                    "Copy of RAW_DEPTH10 format has not been implemented");
         }
         if (!(dst.getOwner() instanceof ImageWriter)) {
             throw new IllegalArgumentException("Destination image is not from ImageWriter. Only"
@@ -202,6 +207,7 @@ class ImageUtils {
                 estimatedBytePerPixel = 1.0;
                 break;
             case ImageFormat.RAW10:
+            case ImageFormat.RAW_DEPTH10:
                 estimatedBytePerPixel = 1.25;
                 break;
             case ImageFormat.YV12:
@@ -264,6 +270,7 @@ class ImageUtils {
             case ImageFormat.RAW10:
             case ImageFormat.RAW12:
             case ImageFormat.RAW_DEPTH:
+            case ImageFormat.RAW_DEPTH10:
             case ImageFormat.HEIC:
                 return new Size(image.getWidth(), image.getHeight());
             case ImageFormat.PRIVATE:
