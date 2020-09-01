@@ -80,11 +80,11 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     mConfigValid = initStatsdConfig(
             key, config, uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchingTrackers, mAtomMatchingTrackerMap,
-            mAllConditionTrackers, mConditionTrackerMap, mAllMetricProducers, mAllAnomalyTrackers,
-            mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
-            mTrackerToConditionMap, mActivationAtomTrackerToMetricMap,
+            mAllConditionTrackers, mConditionTrackerMap, mAllMetricProducers, mMetricProducerMap,
+            mAllAnomalyTrackers, mAllPeriodicAlarmTrackers, mConditionToMetricMap,
+            mTrackerToMetricMap, mTrackerToConditionMap, mActivationAtomTrackerToMetricMap,
             mDeactivationAtomTrackerToMetricMap, mAlertTrackerMap, mMetricIndexesWithActivation,
-            mNoReportMetricIds);
+            mStateProtoHashes, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
     mVersionStringsInReport = config.version_strings_in_metric_report();

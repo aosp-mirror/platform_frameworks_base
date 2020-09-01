@@ -59,10 +59,11 @@ public:
     GaugeMetricProducer(
             const ConfigKey& key, const GaugeMetric& gaugeMetric, const int conditionIndex,
             const vector<ConditionState>& initialConditionCache,
-            const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
-            const sp<EventMatcherWizard>& matcherWizard, const int pullTagId,
-            const int triggerAtomId, const int atomId, const int64_t timeBaseNs,
-            const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
+            const sp<ConditionWizard>& conditionWizard, const uint64_t protoHash,
+            const int whatMatcherIndex, const sp<EventMatcherWizard>& matcherWizard,
+            const int pullTagId, const int triggerAtomId, const int atomId,
+            const int64_t timeBaseNs, const int64_t startTimeNs,
+            const sp<StatsPullerManager>& pullerManager,
             const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
             const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                     eventDeactivationMap = {});
@@ -95,6 +96,10 @@ public:
             pullAndMatchEventsLocked(eventTimeNs);
         }
     };
+
+    MetricType getMetricType() const override {
+        return METRIC_TYPE_GAUGE;
+    }
 
 protected:
     void onMatchedLogEventInternalLocked(
