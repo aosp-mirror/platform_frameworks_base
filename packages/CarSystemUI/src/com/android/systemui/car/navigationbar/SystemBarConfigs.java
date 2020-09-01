@@ -29,6 +29,8 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.car.notification.BottomNotificationPanelViewMediator;
+import com.android.systemui.car.notification.TopNotificationPanelViewMediator;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import java.lang.annotation.ElementType;
@@ -95,6 +97,7 @@ public class SystemBarConfigs {
         populateMaps();
         readConfigs();
         checkEnabledBarsHaveUniqueBarTypes();
+        checkSystemBarEnabledForNotificationPanel();
         setInsetPaddingsForOverlappingCorners();
         sortSystemBarSidesByZOrder();
     }
@@ -221,6 +224,34 @@ public class SystemBarConfigs {
         }
     }
 
+    private void checkSystemBarEnabledForNotificationPanel() throws RuntimeException {
+
+        String notificationPanelMediatorName =
+                mResources.getString(R.string.config_notificationPanelViewMediator);
+        if (notificationPanelMediatorName == null) {
+            return;
+        }
+
+        Class<?> notificationPanelMediatorUsed = null;
+        try {
+            notificationPanelMediatorUsed = Class.forName(notificationPanelMediatorName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (!mTopNavBarEnabled && notificationPanelMediatorUsed.isAssignableFrom(
+                TopNotificationPanelViewMediator.class)) {
+            throw new RuntimeException(
+                    "Top System Bar must be enabled to use " + notificationPanelMediatorName);
+        }
+
+        if (!mBottomNavBarEnabled && notificationPanelMediatorUsed.isAssignableFrom(
+                BottomNotificationPanelViewMediator.class)) {
+            throw new RuntimeException("Bottom System Bar must be enabled to use "
+                    + notificationPanelMediatorName);
+        }
+    }
+
     private void setInsetPaddingsForOverlappingCorners() {
         setInsetPaddingForOverlappingCorner(TOP, LEFT);
         setInsetPaddingForOverlappingCorner(TOP, RIGHT);
@@ -277,7 +308,7 @@ public class SystemBarConfigs {
     }
 
     private static boolean isHorizontalBar(@SystemBarSide int side) {
-        return  side == TOP || side == BOTTOM;
+        return side == TOP || side == BOTTOM;
     }
 
     private static boolean isVerticalBar(@SystemBarSide int side) {
