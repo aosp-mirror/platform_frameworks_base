@@ -434,18 +434,17 @@ class LocationProviderManager extends
             }
 
             LocationRequest newRequest = calculateProviderLocationRequest();
-            if (!mProviderLocationRequest.equals(newRequest)) {
-                LocationRequest oldRequest = mProviderLocationRequest;
-                mProviderLocationRequest = newRequest;
-                onHighPowerUsageChanged();
-                updateService();
-
-                // if location settings ignored has changed then the active state may have changed
-                return oldRequest.isLocationSettingsIgnored()
-                        != newRequest.isLocationSettingsIgnored();
+            if (mProviderLocationRequest.equals(newRequest)) {
+                return false;
             }
 
-            return false;
+            LocationRequest oldRequest = mProviderLocationRequest;
+            mProviderLocationRequest = newRequest;
+            onHighPowerUsageChanged();
+            updateService();
+
+            // if location settings ignored has changed then the active state may have changed
+            return oldRequest.isLocationSettingsIgnored() != newRequest.isLocationSettingsIgnored();
         }
 
         private LocationRequest calculateProviderLocationRequest() {
@@ -1229,10 +1228,8 @@ class LocationProviderManager extends
     }
 
     @Nullable
-    public Location getLastLocation(LocationRequest request, CallerIdentity identity,
-            @PermissionLevel int permissionLevel) {
-        Preconditions.checkArgument(mName.equals(request.getProvider()));
-
+    public Location getLastLocation(CallerIdentity identity, @PermissionLevel int permissionLevel,
+            boolean ignoreLocationSettings) {
         if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
                 identity.getPackageName())) {
             return null;
@@ -1240,12 +1237,12 @@ class LocationProviderManager extends
         if (!mUserInfoHelper.isCurrentUserId(identity.getUserId())) {
             return null;
         }
-        if (!request.isLocationSettingsIgnored() && !isEnabled(identity.getUserId())) {
+        if (!ignoreLocationSettings && !isEnabled(identity.getUserId())) {
             return null;
         }
 
-        Location location = getLastLocation(identity.getUserId(), permissionLevel,
-                request.isLocationSettingsIgnored());
+        Location location = getLastLocationUnsafe(identity.getUserId(), permissionLevel,
+                ignoreLocationSettings);
 
         // we don't note op here because we don't know what the client intends to do with the
         // location, the client is responsible for noting if necessary
@@ -1259,9 +1256,30 @@ class LocationProviderManager extends
         }
     }
 
+    /**
+     * This function does not perform any permissions or safety checks, by calling it you are
+     * committing to performing all applicable checks yourself. Prefer
+     * {@link #getLastLocation(CallerIdentity, int, boolean)} where possible.
+     */
     @Nullable
-    private Location getLastLocation(int userId, @PermissionLevel int permissionLevel,
+    public Location getLastLocationUnsafe(int userId, @PermissionLevel int permissionLevel,
             boolean ignoreLocationSettings) {
+        if (userId == UserHandle.USER_ALL) {
+            Location lastLocation = null;
+            final int[] runningUserIds = mUserInfoHelper.getRunningUserIds();
+            for (int i = 0; i < runningUserIds.length; i++) {
+                Location next = getLastLocationUnsafe(runningUserIds[i], permissionLevel,
+                        ignoreLocationSettings);
+                if (lastLocation == null || (next != null && next.getElapsedRealtimeNanos()
+                        > lastLocation.getElapsedRealtimeNanos())) {
+                    lastLocation = next;
+                }
+            }
+            return lastLocation;
+        }
+
+        Preconditions.checkArgument(userId >= 0);
+
         synchronized (mLock) {
             LastLocation lastLocation = mLastLocations.get(userId);
             if (lastLocation == null) {
@@ -1273,7 +1291,7 @@ class LocationProviderManager extends
 
     public void injectLastLocation(Location location, int userId) {
         synchronized (mLock) {
-            if (getLastLocation(userId, PERMISSION_FINE, false) == null) {
+            if (getLastLocationUnsafe(userId, PERMISSION_FINE, false) == null) {
                 setLastLocation(location, userId);
             }
         }
@@ -1322,7 +1340,22 @@ class LocationProviderManager extends
                         permissionLevel);
 
         synchronized (mLock) {
-            Location lastLocation = getLastLocation(request, callerIdentity, permissionLevel);
+            if (mSettingsHelper.isLocationPackageBlacklisted(callerIdentity.getUserId(),
+                    callerIdentity.getPackageName())) {
+                registration.deliverLocation(null);
+                return;
+            }
+            if (!mUserInfoHelper.isCurrentUserId(callerIdentity.getUserId())) {
+                registration.deliverLocation(null);
+                return;
+            }
+            if (!request.isLocationSettingsIgnored() && !isEnabled(callerIdentity.getUserId())) {
+                registration.deliverLocation(null);
+                return;
+            }
+
+            Location lastLocation = getLastLocationUnsafe(callerIdentity.getUserId(),
+                    permissionLevel, request.isLocationSettingsIgnored());
             if (lastLocation != null) {
                 long locationAgeMs = NANOSECONDS.toMillis(
                         SystemClock.elapsedRealtimeNanos()
@@ -1346,17 +1379,17 @@ class LocationProviderManager extends
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
 
-            CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
-                    cancellationTransport);
-            if (cancellationSignal != null) {
-                cancellationSignal.setOnCancelListener(
-                        () -> {
-                            synchronized (mLock) {
-                                removeRegistration(callback.asBinder(), registration);
-                            }
-                        });
-            }
+        CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
+                cancellationTransport);
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(SingleUseCallback.wrap(
+                    () -> {
+                        synchronized (mLock) {
+                            removeRegistration(callback.asBinder(), registration);
+                        }
+                    }));
         }
     }
 
@@ -1934,7 +1967,8 @@ class LocationProviderManager extends
                     ipw.println("user " + userId + ":");
                     ipw.increaseIndent();
                 }
-                ipw.println("last location=" + getLastLocation(userId, PERMISSION_FINE, false));
+                ipw.println(
+                        "last location=" + getLastLocationUnsafe(userId, PERMISSION_FINE, false));
                 ipw.println("enabled=" + isEnabled(userId));
                 if (userIds.length != 1) {
                     ipw.decreaseIndent();
@@ -2007,7 +2041,7 @@ class LocationProviderManager extends
             }
             // update last coarse interval only if enough time has passed
             long timeDeltaMs = NANOSECONDS.toMillis(newCoarse.getElapsedRealtimeNanos())
-                        - NANOSECONDS.toMillis(oldCoarse.getElapsedRealtimeNanos());
+                    - NANOSECONDS.toMillis(oldCoarse.getElapsedRealtimeNanos());
             if (timeDeltaMs > FASTEST_COARSE_INTERVAL_MS) {
                 return newCoarse;
             } else {
@@ -2016,10 +2050,11 @@ class LocationProviderManager extends
         }
     }
 
-    private static class SingleUseCallback extends IRemoteCallback.Stub {
+    private static class SingleUseCallback extends IRemoteCallback.Stub implements Runnable,
+            CancellationSignal.OnCancelListener {
 
         @Nullable
-        public static IRemoteCallback wrap(@Nullable Runnable callback) {
+        public static SingleUseCallback wrap(@Nullable Runnable callback) {
             return callback == null ? null : new SingleUseCallback(callback);
         }
 
@@ -2032,6 +2067,16 @@ class LocationProviderManager extends
 
         @Override
         public void sendResult(Bundle data) {
+            run();
+        }
+
+        @Override
+        public void onCancel() {
+            run();
+        }
+
+        @Override
+        public void run() {
             Runnable callback;
             synchronized (this) {
                 callback = mCallback;

@@ -697,7 +697,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return null;
         }
 
-        Location location = manager.getLastLocation(request, identity, permissionLevel);
+        Location location = manager.getLastLocation(identity, permissionLevel,
+                request.isLocationSettingsIgnored());
 
         // lastly - note app ops
         if (!mInjector.getAppOpsHelper().noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
@@ -740,13 +741,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return null;
             }
 
-            // create a location request that works in almost all circumstances
-            LocationRequest request = LocationRequest.createFromDeprecatedProvider(GPS_PROVIDER, 0,
-                    0, true);
-
-            // use our own identity rather than the caller
-            CallerIdentity identity = CallerIdentity.fromContext(mContext);
-            Location location = gpsManager.getLastLocation(request, identity, PERMISSION_FINE);
+            // use fine permission level to avoid creating unnecessary coarse locations
+            Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
+                    PERMISSION_FINE, false);
             if (location == null) {
                 return null;
             }
