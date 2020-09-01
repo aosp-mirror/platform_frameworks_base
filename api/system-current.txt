@@ -7823,6 +7823,8 @@ package android.net.wifi.nl80211 {
     field public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 8; // 0x8
     field public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 128; // 0x80
     field public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 16384; // 0x4000
+    field public static final int BSS_CAPABILITY_DMG_ESS = 3; // 0x3
+    field public static final int BSS_CAPABILITY_DMG_IBSS = 1; // 0x1
     field public static final int BSS_CAPABILITY_DSSS_OFDM = 8192; // 0x2000
     field public static final int BSS_CAPABILITY_ESS = 1; // 0x1
     field public static final int BSS_CAPABILITY_IBSS = 2; // 0x2
