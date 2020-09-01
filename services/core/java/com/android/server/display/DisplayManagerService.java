@@ -83,6 +83,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -2176,6 +2177,8 @@ public final class DisplayManagerService extends SystemService {
 
             if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
                 if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+                    EventLog.writeEvent(0x534e4554, "162627132", callingUid,
+                            "Attempt to create a trusted display without holding permission!");
                     throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                             + "create a trusted virtual display.");
                 }
