@@ -20,18 +20,18 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.PipUiEventLogger;
+import com.android.systemui.pip.phone.PipAppOpsListener;
 import com.android.systemui.pip.phone.PipController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.pip.phone.PipMediaController;
+import com.android.systemui.pip.phone.PipMenuActivityController;
+import com.android.systemui.pip.phone.PipTouchHandler;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -66,21 +66,17 @@ public class WMShellModule {
     @SysUISingleton
     @Provides
     static Pip providePipController(Context context,
-            BroadcastDispatcher broadcastDispatcher,
-            ConfigurationController configController,
-            DeviceConfigProxy deviceConfig,
             DisplayController displayController,
-            FloatingContentCoordinator floatingContentCoordinator,
-            SysUiState sysUiState,
+            PipAppOpsListener pipAppOpsListener,
             PipBoundsHandler pipBoundsHandler,
-            PipSurfaceTransactionHelper surfaceTransactionHelper,
+            PipMediaController pipMediaController,
+            PipMenuActivityController pipMenuActivityController,
             PipTaskOrganizer pipTaskOrganizer,
-            PipUiEventLogger pipUiEventLogger) {
-        return new PipController(context, broadcastDispatcher, configController, deviceConfig,
-                displayController, floatingContentCoordinator, sysUiState, pipBoundsHandler,
-                surfaceTransactionHelper,
-                pipTaskOrganizer,
-                pipUiEventLogger);
+            PipTouchHandler pipTouchHandler,
+            WindowManagerShellWrapper windowManagerShellWrapper) {
+        return new PipController(context, displayController,
+                pipAppOpsListener, pipBoundsHandler, pipMediaController, pipMenuActivityController,
+                pipTaskOrganizer, pipTouchHandler, windowManagerShellWrapper);
     }
 
     @SysUISingleton
@@ -97,6 +93,24 @@ public class WMShellModule {
     @Provides
     static PipBoundsHandler providesPipBoundsHandler(Context context) {
         return new PipBoundsHandler(context);
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipMenuActivityController providesPipMenuActivityController(Context context,
+            PipMediaController pipMediaController, PipTaskOrganizer pipTaskOrganizer) {
+        return new PipMenuActivityController(context, pipMediaController, pipTaskOrganizer);
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipTouchHandler providesPipTouchHandler(Context context,
+            PipMenuActivityController menuActivityController, PipBoundsHandler pipBoundsHandler,
+            PipTaskOrganizer pipTaskOrganizer,
+            FloatingContentCoordinator floatingContentCoordinator,
+            PipUiEventLogger pipUiEventLogger) {
+        return new PipTouchHandler(context, menuActivityController, pipBoundsHandler,
+                pipTaskOrganizer, floatingContentCoordinator, pipUiEventLogger);
     }
 
     @SysUISingleton

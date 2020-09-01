@@ -16,24 +16,40 @@
 
 package com.android.systemui.wmshell;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
+import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -42,9 +58,12 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.phone.PipUtils;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -70,8 +89,20 @@ import javax.inject.Inject;
 @SysUISingleton
 public final class WMShell extends SystemUI
         implements CommandQueue.Callbacks, ProtoTraceable<SystemUiTraceProto> {
+    private static final String TAG = WMShell.class.getName();
+    private static final int INVALID_SYSUI_STATE_MASK =
+            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
+                    | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+                    | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
+                    | SYSUI_STATE_BOUNCER_SHOWING
+                    | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
+                    | SYSUI_STATE_BUBBLES_EXPANDED
+                    | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
+
     private final CommandQueue mCommandQueue;
+    private final ConfigurationController mConfigurationController;
     private final DisplayImeController mDisplayImeController;
+    private final InputConsumerController mInputConsumerController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final NavigationModeController mNavigationModeController;
@@ -84,13 +115,15 @@ public final class WMShell extends SystemUI
     // are non-optional windowing features like FULLSCREEN.
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final ProtoTracer mProtoTracer;
-
+    private boolean mIsSysUiStateValid;
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
 
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
+            ConfigurationController configurationController,
+            InputConsumerController inputConsumerController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ActivityManagerWrapper activityManagerWrapper,
             DisplayImeController displayImeController,
@@ -104,6 +137,8 @@ public final class WMShell extends SystemUI
             ProtoTracer protoTracer) {
         super(context);
         mCommandQueue = commandQueue;
+        mConfigurationController = configurationController;
+        mInputConsumerController = inputConsumerController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mActivityManagerWrapper = activityManagerWrapper;
         mDisplayImeController = displayImeController;
@@ -141,6 +176,7 @@ public final class WMShell extends SystemUI
                 pip.showPictureInPictureMenu();
             }
         });
+
         mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
@@ -150,6 +186,80 @@ public final class WMShell extends SystemUI
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);
+
+        mSysUiState.addCallback(sysUiStateFlag -> {
+            mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
+            pip.onSystemUiStateChanged(mIsSysUiStateValid, sysUiStateFlag);
+        });
+
+        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
+            @Override
+            public void onDensityOrFontScaleChanged() {
+                pip.onDensityOrFontScaleChanged();
+            }
+
+            @Override
+            public void onOverlayChanged() {
+                pip.onOverlayChanged();
+            }
+        });
+
+        // Handle for system task stack changes.
+        mActivityManagerWrapper.registerTaskStackListener(
+                new TaskStackChangeListener() {
+                    @Override
+                    public void onTaskStackChanged() {
+                        pip.onTaskStackChanged();
+                    }
+
+                    @Override
+                    public void onActivityPinned(String packageName, int userId, int taskId,
+                            int stackId) {
+                        pip.onActivityPinned(packageName);
+                        mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
+                    }
+
+                    @Override
+                    public void onActivityUnpinned() {
+                        final Pair<ComponentName, Integer> topPipActivityInfo =
+                                PipUtils.getTopPipActivity(
+                                        mContext, ActivityManager.getService());
+                        final ComponentName topActivity = topPipActivityInfo.first;
+                        pip.onActivityUnpinned(topActivity);
+                        mInputConsumerController.unregisterInputConsumer();
+                    }
+
+                    @Override
+                    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                            boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                        pip.onActivityRestartAttempt(task, clearedTask);
+                    }
+                });
+
+        try {
+            RootTaskInfo taskInfo = ActivityTaskManager.getService().getRootTaskInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            if (taskInfo != null) {
+                // If SystemUI restart, and it already existed a pinned stack,
+                // register the pip input consumer to ensure touch can send to it.
+                mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
+            }
+        } catch (RemoteException | UnsupportedOperationException e) {
+            Log.e(TAG, "Failed to register pinned stack listener", e);
+            e.printStackTrace();
+        }
+
+        // Register the listener for input consumer touch events. Only for Phone
+        if (pip.getPipTouchHandler() != null) {
+            mInputConsumerController.setInputListener(pip.getPipTouchHandler()::handleTouchEvent);
+            mInputConsumerController.setRegistrationListener(
+                    pip.getPipTouchHandler()::onRegistrationChanged);
+        }
+
+        // The media session listener needs to be re-registered when switching users
+        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
+        userInfoController.addCallback((String name, Drawable picture, String userAccount) ->
+                pip.registerSessionListenerForCurrentUser());
     }
 
     @VisibleForTesting

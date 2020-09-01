@@ -130,7 +130,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         }
     }
 
-    private final Context mContext;
     private final Handler mMainHandler;
     private final Handler mUpdateHandler;
     private final PipBoundsHandler mPipBoundsHandler;
@@ -249,7 +248,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer) {
-        mContext = context;
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
@@ -565,8 +563,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
         if (Looper.getMainLooper() != Looper.myLooper()) {
             throw new RuntimeException("PipMenuView needs to be attached on the main thread.");
         }
-
-        mPipViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(),
+        final Context context = menuView.getContext();
+        mPipViewHost = new SurfaceControlViewHost(context, context.getDisplay(),
                 (android.os.Binder) null);
         mPipMenuSurface = mPipViewHost.getSurfacePackage().getSurfaceControl();
         SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
@@ -656,6 +654,13 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             enterPipWithAlphaAnimation(destinationBounds, 0 /* durationMs */);
         }
         mShouldDeferEnteringPip = false;
+    }
+
+    /**
+     * Called when display size or font size of settings changed
+     */
+    public void onDensityOrFontScaleChanged(Context context) {
+        mSurfaceTransactionHelper.onDensityOrFontScaleChanged(context);
     }
 
     /**
