@@ -21,6 +21,7 @@ import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.StatsLog;
@@ -236,6 +237,13 @@ class GnssConfiguration {
         logConfigurations();
 
         final HalInterfaceVersion gnssConfigurationIfaceVersion = getHalInterfaceVersion();
+
+        TelephonyManager phone = (TelephonyManager)
+                mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
+        String simOperator = SubscriptionManager.isValidSubscriptionId(ddSubId)
+                ? phone.getSimOperator(ddSubId) : phone.getSimOperator();
+
         if (gnssConfigurationIfaceVersion != null) {
             // Set to a range checked value.
             if (isConfigEsExtensionSecSupported(gnssConfigurationIfaceVersion)
@@ -271,7 +279,7 @@ class GnssConfiguration {
                     try {
                         int propertyValueInt = Integer.decode(propertyValueString);
                         boolean result = entry.getValue().set(propertyValueInt);
-                        if (!result) {
+                        if (!result && !TextUtils.isEmpty(simOperator)) {
                             Log.e(TAG, "Unable to set " + propertyName);
                         }
                     } catch (NumberFormatException e) {

@@ -46,7 +46,7 @@ public class DataUsageUtils {
         }
 
         final String[] mergedSubscriberIds = telephonyManager.createForSubscriptionId(subId)
-                .getMergedSubscriberIdsFromGroup();
+                .getMergedImsisFromGroup();
 
         if (ArrayUtils.isEmpty(mergedSubscriberIds)) {
             Log.i(TAG, "mergedSubscriberIds is null.");
