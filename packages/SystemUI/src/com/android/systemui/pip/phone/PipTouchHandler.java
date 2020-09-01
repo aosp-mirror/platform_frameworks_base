@@ -232,7 +232,7 @@ public class PipTouchHandler {
                 mSnapAlgorithm, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
-                        deviceConfig, pipTaskOrganizer, this::getMovementBounds,
+                        deviceConfig, pipTaskOrganizer, menuController, this::getMovementBounds,
                         this::updateMovementBounds, sysUiState, pipUiEventLogger);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
