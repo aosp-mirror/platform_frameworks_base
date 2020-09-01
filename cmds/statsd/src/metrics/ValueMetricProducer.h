@@ -52,9 +52,9 @@ public:
     ValueMetricProducer(
             const ConfigKey& key, const ValueMetric& valueMetric, const int conditionIndex,
             const vector<ConditionState>& initialConditionCache,
-            const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
-            const sp<EventMatcherWizard>& matcherWizard, const int pullTagId,
-            const int64_t timeBaseNs, const int64_t startTimeNs,
+            const sp<ConditionWizard>& conditionWizard, const uint64_t protoHash,
+            const int whatMatcherIndex, const sp<EventMatcherWizard>& matcherWizard,
+            const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
             const sp<StatsPullerManager>& pullerManager,
             const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
             const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
@@ -91,6 +91,10 @@ public:
 
     void onStateChanged(int64_t eventTimeNs, int32_t atomId, const HashableDimensionKey& primaryKey,
                         const FieldValue& oldState, const FieldValue& newState) override;
+
+    MetricType getMetricType() const override {
+        return METRIC_TYPE_VALUE;
+    }
 
 protected:
     void onMatchedLogEventInternalLocked(

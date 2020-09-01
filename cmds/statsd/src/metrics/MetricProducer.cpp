@@ -46,13 +46,14 @@ const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_STATE = 3;
 MetricProducer::MetricProducer(
         const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
         const int conditionIndex, const vector<ConditionState>& initialConditionCache,
-        const sp<ConditionWizard>& wizard,
+        const sp<ConditionWizard>& wizard, const uint64_t protoHash,
         const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
         const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                 eventDeactivationMap,
         const vector<int>& slicedStateAtoms,
         const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
     : mMetricId(metricId),
+      mProtoHash(protoHash),
       mConfigKey(key),
       mTimeBaseNs(timeBaseNs),
       mCurrentBucketStartTimeNs(timeBaseNs),

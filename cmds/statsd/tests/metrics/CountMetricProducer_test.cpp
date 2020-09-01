@@ -41,6 +41,7 @@ namespace statsd {
 
 namespace {
 const ConfigKey kConfigKey(0, 12345);
+const uint64_t protoHash = 0x1234567890;
 
 void makeLogEvent(LogEvent* logEvent, int64_t timestampNs, int atomId) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
@@ -75,7 +76,7 @@ TEST(CountMetricProducerTest, TestFirstBucket) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2);
+                                      wizard, protoHash, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2);
     EXPECT_EQ(600500000000, countProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(10, countProducer.mCurrentBucketNum);
     EXPECT_EQ(660000000005, countProducer.getCurrentBucketEndTimeNs());
@@ -95,7 +96,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, bucketStartTimeNs, bucketStartTimeNs);
+                                      wizard, protoHash, bucketStartTimeNs, bucketStartTimeNs);
 
     // 2 events in bucket 1.
     LogEvent event1(/*uid=*/0, /*pid=*/0);
@@ -158,7 +159,7 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, 0, {ConditionState::kUnknown}, wizard,
-                                      bucketStartTimeNs, bucketStartTimeNs);
+                                      protoHash, bucketStartTimeNs, bucketStartTimeNs);
 
     countProducer.onConditionChanged(true, bucketStartTimeNs);
 
@@ -226,8 +227,8 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     EXPECT_CALL(*wizard, query(_, key2, _)).WillOnce(Return(ConditionState::kTrue));
 
     CountMetricProducer countProducer(kConfigKey, metric, 0 /*condition tracker index*/,
-                                      {ConditionState::kUnknown}, wizard, bucketStartTimeNs,
-                                      bucketStartTimeNs);
+                                      {ConditionState::kUnknown}, wizard, protoHash,
+                                      bucketStartTimeNs, bucketStartTimeNs);
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     countProducer.flushIfNeededLocked(bucketStartTimeNs + 1);
@@ -265,7 +266,7 @@ TEST_P(CountMetricProducerTest_PartialBucket, TestSplitInCurrentBucket) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, {}, wizard,
-                                      bucketStartTimeNs, bucketStartTimeNs);
+                                      protoHash, bucketStartTimeNs, bucketStartTimeNs);
 
     sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
@@ -332,7 +333,7 @@ TEST_P(CountMetricProducerTest_PartialBucket, TestSplitInNextBucket) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, {}, wizard,
-                                      bucketStartTimeNs, bucketStartTimeNs);
+                                      protoHash, bucketStartTimeNs, bucketStartTimeNs);
 
     // Bucket is flushed yet.
     LogEvent event1(/*uid=*/0, /*pid=*/0);
@@ -397,7 +398,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, bucketStartTimeNs, bucketStartTimeNs);
+                                      wizard, protoHash, bucketStartTimeNs, bucketStartTimeNs);
 
     sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert, alarmMonitor);
 
@@ -459,7 +460,7 @@ TEST(CountMetricProducerTest, TestOneWeekTimeUnit) {
     int64_t fiveWeeksNs = 5 * 7 * oneDayNs;
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* meaning no condition */, {}, wizard,
-                                      oneDayNs, fiveWeeksNs);
+                                      protoHash, oneDayNs, fiveWeeksNs);
 
     int64_t fiveWeeksOneDayNs = fiveWeeksNs + oneDayNs;
 
