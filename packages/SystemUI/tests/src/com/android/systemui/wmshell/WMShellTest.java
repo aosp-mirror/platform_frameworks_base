@@ -16,21 +16,19 @@
 
 package com.android.systemui.wmshell;
 
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.app.Instrumentation;
-import android.content.Context;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.pip.Pip;
-import com.android.systemui.pip.tv.PipController;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
@@ -48,29 +46,43 @@ import java.util.Optional;
 @RunWith(AndroidJUnit4.class)
 public class WMShellTest extends SysuiTestCase {
 
-    Instrumentation mInstrumentation;
     WMShell mWMShell;
-    @Mock Context mContext;
     @Mock CommandQueue mCommandQueue;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock ActivityManagerWrapper mActivityManagerWrapper;
     @Mock DisplayImeController mDisplayImeController;
-    @Mock Optional<Pip> mPipOptional;
-    @Mock Optional<SplitScreen> mSplitScreenOptional;
-    @Mock PipController mPipController;
+    @Mock Pip mPip;
+    @Mock SplitScreen mSplitScreen;
     @Mock ProtoTracer mProtoTracer;
 
     @Before
-    public void setUp() throws Exception {
-        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         mWMShell = new WMShell(mContext, mCommandQueue, mKeyguardUpdateMonitor,
-                mDisplayImeController, mPipOptional, mSplitScreenOptional, mProtoTracer);
-        mWMShell.start();
-        when(mPipOptional.get()).thenReturn(mPipController);
+                mActivityManagerWrapper, mDisplayImeController, Optional.of(mPip),
+                Optional.of(mSplitScreen), mProtoTracer);
     }
 
     @Test
-    public void testWMShellRegisterCommandQueue() {
-        verify(mCommandQueue, times(1)).addCallback(mWMShell);
+    public void start_startsMonitorDisplays() {
+        mWMShell.start();
+
+        verify(mDisplayImeController).startMonitorDisplays();
+    }
+
+    @Test
+    public void initPip_registersCommandQueueCallback() {
+        mWMShell.initPip(mPip);
+
+        verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
+    }
+
+    @Test
+    public void initSplitScreen_registersCallbacks() {
+        mWMShell.initSplitScreen(mSplitScreen);
+
+        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
+        verify(mActivityManagerWrapper).registerTaskStackListener(
+                any(TaskStackChangeListener.class));
     }
 }
