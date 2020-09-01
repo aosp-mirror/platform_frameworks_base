@@ -1586,7 +1586,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
 
-        info.taskAffinity = getTaskAffinityWithUid(info.taskAffinity, info.applicationInfo.uid);
+        info.taskAffinity = computeTaskAffinity(info.taskAffinity, info.applicationInfo.uid,
+                launchMode);
         taskAffinity = info.taskAffinity;
         final String uid = Integer.toString(info.applicationInfo.uid);
         if (info.windowLayout != null && info.windowLayout.windowLayoutAffinity != null
@@ -1647,17 +1648,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Generate the task affinity with uid. For b/35954083, Limit task affinity to uid to avoid
-     * issues associated with sharing affinity across uids.
+     * Generate the task affinity with uid and activity launch mode. For b/35954083, Limit task
+     * affinity to uid to avoid issues associated with sharing affinity across uids.
      *
      * @param affinity The affinity of the activity.
      * @param uid The user-ID that has been assigned to this application.
-     * @return The task affinity with uid.
+     * @param launchMode The activity launch mode
+     * @return The task affinity
      */
-    static String getTaskAffinityWithUid(String affinity, int uid) {
+    static String computeTaskAffinity(String affinity, int uid, int launchMode) {
         final String uidStr = Integer.toString(uid);
         if (affinity != null && !affinity.startsWith(uidStr)) {
-            affinity = uidStr + ":" + affinity;
+            affinity = uidStr + (launchMode == LAUNCH_SINGLE_INSTANCE ? "-si:" : ":") + affinity;
         }
         return affinity;
     }
