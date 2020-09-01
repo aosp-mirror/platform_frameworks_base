@@ -51,13 +51,14 @@ public class MyContentCaptureService extends ContentCaptureService {
         sServiceWatcher = null;
     }
 
-    public static void clearServiceWatcher() {
-        if (sServiceWatcher != null) {
-            if (sServiceWatcher.mReadyToClear) {
-                sServiceWatcher.mService = null;
+    private static void clearServiceWatcher() {
+        final ServiceWatcher sw = sServiceWatcher;
+        if (sw != null) {
+            if (sw.mReadyToClear) {
+                sw.mService = null;
                 sServiceWatcher = null;
             } else {
-                sServiceWatcher.mReadyToClear = true;
+                sw.mReadyToClear = true;
             }
         }
     }
