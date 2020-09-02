@@ -334,6 +334,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             throw new IOException(
                     "Failed to start installation with requested size: " + mUserdataSize);
         }
+        // Reset installation session and verify that installation completes successfully.
+        mInstallationSession = null;
+        if (!mDynSystem.closePartition()) {
+            throw new IOException("Failed to complete partition installation: userdata");
+        }
     }
 
     private void installImages()
@@ -502,6 +507,12 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
             if (mKeyRevocationList.isRevoked(publicKey)) {
                 imageValidationThrowOrWarning(new KeyRevokedException(publicKey));
             }
+        }
+
+        // Reset installation session and verify that installation completes successfully.
+        mInstallationSession = null;
+        if (!mDynSystem.closePartition()) {
+            throw new IOException("Failed to complete partition installation: " + partitionName);
         }
     }
 
