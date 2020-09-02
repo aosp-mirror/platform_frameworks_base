@@ -24,11 +24,11 @@ import android.util.Log;
 import android.view.FrameMetrics;
 import android.view.ThreadedRenderer;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor.Session;
 import com.android.internal.util.FrameworkStatsLog;
 
 /**
+ * A class that allows the app to get the frame metrics from HardwareRendererObserver.
  * @hide
  */
 public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvailableListener {
@@ -45,28 +45,21 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     private long mBeginTime = UNKNOWN_TIMESTAMP;
     private long mEndTime = UNKNOWN_TIMESTAMP;
     private boolean mShouldTriggerTrace;
+    private boolean mSessionEnd;
     private int mTotalFramesCount = 0;
     private int mMissedFramesCount = 0;
     private long mMaxFrameTimeNanos = 0;
 
     private Session mSession;
 
-    public FrameTracker(@NonNull Session session,
-            @NonNull Handler handler, @NonNull ThreadedRenderer renderer) {
-        mSession = session;
-        mRendererWrapper = new ThreadedRendererWrapper(renderer);
-        mMetricsWrapper = new FrameMetricsWrapper();
-        mObserver = new HardwareRendererObserver(this, mMetricsWrapper.getTiming(), handler);
-    }
-
     /**
-     * This constructor is only for unit tests.
+     * Constructor of FrameTracker.
      * @param session a trace session.
-     * @param renderer a test double for ThreadedRenderer
-     * @param metrics a test double for FrameMetrics
+     * @param handler a handler for handling callbacks.
+     * @param renderer a ThreadedRendererWrapper instance.
+     * @param metrics a FrameMetricsWrapper instance.
      */
-    @VisibleForTesting
-    public FrameTracker(@NonNull Session session, Handler handler,
+    public FrameTracker(@NonNull Session session, @NonNull Handler handler,
             @NonNull ThreadedRendererWrapper renderer, @NonNull FrameMetricsWrapper metrics) {
         mSession = session;
         mRendererWrapper = renderer;
@@ -77,15 +70,11 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     /**
      * Begin a trace session of the CUJ.
      */
-    public void begin() {
+    public synchronized void begin() {
         long timestamp = System.nanoTime();
         if (DEBUG) {
             Log.d(TAG, "begin: time(ns)=" + timestamp + ", begin(ns)=" + mBeginTime
-                    + ", end(ns)=" + mEndTime + ", session=" + mSession);
-        }
-        if (mBeginTime != UNKNOWN_TIMESTAMP && mEndTime == UNKNOWN_TIMESTAMP) {
-            // We have an ongoing tracing already, skip subsequent calls.
-            return;
+                    + ", end(ns)=" + mEndTime + ", session=" + mSession.getName());
         }
         mBeginTime = timestamp;
         mEndTime = UNKNOWN_TIMESTAMP;
@@ -96,32 +85,48 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     /**
      * End the trace session of the CUJ.
      */
-    public void end() {
+    public synchronized void end() {
         long timestamp = System.nanoTime();
         if (DEBUG) {
             Log.d(TAG, "end: time(ns)=" + timestamp + ", begin(ns)=" + mBeginTime
-                    + ", end(ns)=" + mEndTime + ", session=" + mSession);
-        }
-        if (mBeginTime == UNKNOWN_TIMESTAMP || mEndTime != UNKNOWN_TIMESTAMP) {
-            // We haven't started a trace yet.
-            return;
+                    + ", end(ns)=" + mEndTime + ", session=" + mSession.getName());
         }
         mEndTime = timestamp;
         Trace.endAsyncSection(mSession.getName(), (int) mBeginTime);
+        // We don't remove observer here,
+        // will remove it when all the frame metrics in this duration are called back.
+        // See onFrameMetricsAvailable for the logic of removing the observer.
+    }
+
+    /**
+     * Cancel the trace session of the CUJ.
+     */
+    public synchronized void cancel() {
+        if (mBeginTime == UNKNOWN_TIMESTAMP || mEndTime != UNKNOWN_TIMESTAMP) return;
+        if (DEBUG) {
+            Log.d(TAG, "cancel: time(ns)=" + System.nanoTime() + ", begin(ns)=" + mBeginTime
+                    + ", end(ns)=" + mEndTime + ", session=" + mSession.getName());
+        }
+        Trace.endAsyncSection(mSession.getName(), (int) mBeginTime);
+        mRendererWrapper.removeObserver(mObserver);
+        mBeginTime = UNKNOWN_TIMESTAMP;
+        mEndTime = UNKNOWN_TIMESTAMP;
+        mShouldTriggerTrace = false;
     }
 
     @Override
-    public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
+    public synchronized void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
         // Since this callback might come a little bit late after the end() call.
         // We should keep tracking the begin / end timestamp.
         // Then compare with vsync timestamp to check if the frame is in the duration of the CUJ.
 
-        if (mBeginTime == UNKNOWN_TIMESTAMP) return; // We haven't started tracing yet.
         long vsyncTimestamp = mMetricsWrapper.getMetric(FrameMetrics.VSYNC_TIMESTAMP);
-        if (vsyncTimestamp < mBeginTime) return; // The tracing has been started.
+        // Discard the frame metrics which is not in the trace session.
+        if (vsyncTimestamp < mBeginTime) return;
 
-        // If the end time has not been set, we are still in the tracing.
-        if (mEndTime != UNKNOWN_TIMESTAMP && vsyncTimestamp > mEndTime) {
+        // We stop getting callback when the vsync is later than the end calls.
+        if (mEndTime != UNKNOWN_TIMESTAMP && vsyncTimestamp > mEndTime && !mSessionEnd) {
+            mSessionEnd = true;
             // The tracing has been ended, remove the observer, see if need to trigger perfetto.
             mRendererWrapper.removeObserver(mObserver);
 
@@ -170,9 +175,8 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     /**
      * Trigger the prefetto daemon.
      */
-    @VisibleForTesting
     public void triggerPerfetto() {
-        InteractionJankMonitor.trigger();
+        InteractionJankMonitor.getInstance().trigger();
     }
 
     /**

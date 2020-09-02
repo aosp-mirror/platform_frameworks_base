@@ -16,7 +16,7 @@
 
 package com.android.internal.jank;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_GESTURE;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -75,17 +75,10 @@ public class FrameTrackerTest {
         doNothing().when(mRenderer).addObserver(any());
         doNothing().when(mRenderer).removeObserver(any());
 
-        Session session = new Session(CUJ_NOTIFICATION_SHADE_GESTURE);
-        mTracker = Mockito.spy(new FrameTracker(session, handler, mRenderer, mWrapper));
+        Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        mTracker = Mockito.spy(
+                new FrameTracker(session, handler, mRenderer, mWrapper));
         doNothing().when(mTracker).triggerPerfetto();
-    }
-
-    @Test
-    public void testIgnoresSecondBegin() {
-        // Observer should be only added once in continuous calls.
-        mTracker.begin();
-        mTracker.begin();
-        verify(mRenderer, only()).addObserver(any());
     }
 
     @Test
@@ -168,6 +161,29 @@ public class FrameTrackerTest {
 
         // We detected a janky frame - trigger Perfetto
         verify(mTracker).triggerPerfetto();
+    }
+
+    @Test
+    public void testBeginCancel() {
+        mTracker.begin();
+        verify(mRenderer).addObserver(any());
+
+        // First frame - not janky
+        setupFirstFrameMockWithDuration(4);
+        mTracker.onFrameMetricsAvailable(0);
+
+        // normal frame - not janky
+        setupOtherFrameMockWithDuration(12);
+        mTracker.onFrameMetricsAvailable(0);
+
+        // a janky frame
+        setupOtherFrameMockWithDuration(30);
+        mTracker.onFrameMetricsAvailable(0);
+
+        mTracker.cancel();
+        verify(mRenderer).removeObserver(any());
+        // Since the tracker has been cancelled, shouldn't trigger perfetto.
+        verify(mTracker, never()).triggerPerfetto();
     }
 
     private void setupFirstFrameMockWithDuration(long durationMillis) {
