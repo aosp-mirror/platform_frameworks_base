@@ -87,11 +87,11 @@ import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.controllers.BackgroundJobsController;
 import com.android.server.job.controllers.BatteryController;
+import com.android.server.job.controllers.ComponentController;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.ContentObserverController;
 import com.android.server.job.controllers.DeviceIdleJobsController;
@@ -1484,6 +1484,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(mDeviceIdleJobsController);
         mQuotaController = new QuotaController(this);
         mControllers.add(mQuotaController);
+        mControllers.add(new ComponentController(this));
 
         mRestrictiveControllers = new ArrayList<>();
         mRestrictiveControllers.add(mBatteryController);
@@ -2300,21 +2301,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             return false;
         }
 
-        // The expensive check: validate that the defined package+service is
-        // still present & viable.
+        // Validate that the defined package+service is still present & viable.
         return isComponentUsable(job);
     }
 
     private boolean isComponentUsable(@NonNull JobStatus job) {
-        final ServiceInfo service;
-        try {
-            // TODO: cache result until we're notified that something in the package changed.
-            service = AppGlobals.getPackageManager().getServiceInfo(
-                    job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    job.getUserId());
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
+        final ServiceInfo service = job.serviceInfo;
 
         if (service == null) {
             if (DEBUG) {
@@ -3104,7 +3096,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 try {
                     componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
                             js.getServiceComponent(),
-                            PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                            PackageManager.MATCH_DIRECT_BOOT_AUTO,
                             js.getUserId()) != null);
                 } catch (RemoteException e) {
                 }
