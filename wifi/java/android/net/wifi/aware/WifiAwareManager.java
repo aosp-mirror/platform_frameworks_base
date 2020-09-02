@@ -179,6 +179,22 @@ public class WifiAwareManager {
     }
 
     /**
+     * Return the current status of the Aware service: whether ot not the device is already attached
+     * to an Aware cluster. To attach to an Aware cluster, please use
+     * {@link #attach(AttachCallback, Handler)} or
+     * {@link #attach(AttachCallback, IdentityChangedListener, Handler)}.
+     * @return A boolean indicating whether the device is attached to a cluster at this time (true)
+     *         or not (false).
+     */
+    public boolean isDeviceAttached() {
+        try {
+            return mService.isDeviceAttached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the characteristics of the Wi-Fi Aware interface: a set of parameters which specify
      * limitations on configurations, e.g. the maximum service name length.
      *
