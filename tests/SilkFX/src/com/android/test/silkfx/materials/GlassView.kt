@@ -70,6 +70,12 @@ class GlassView(context: Context, attributeSet: AttributeSet) : View(context, at
             invalidate()
         }
 
+    var zoom = 0.0f
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     var color = Color.BLACK
     set(value) {
         field = value
@@ -107,7 +113,12 @@ class GlassView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     override fun onDraw(canvas: Canvas?) {
-        src.set(left, top, right, bottom)
+        src.set(-width/2, -height/2, width/2, height/2)
+        src.scale(1.0f + zoom)
+        val centerX = left + width / 2
+        val centerY = top + height / 2
+        src.set(src.left + centerX, src.top + centerY, src.right + centerX, src.bottom + centerY)
+
         dst.set(0, 0, width, height)
         canvas?.drawBitmap(backgroundBitmap, src, dst, blurPaint)
         canvas?.drawRect(dst, materialPaint)

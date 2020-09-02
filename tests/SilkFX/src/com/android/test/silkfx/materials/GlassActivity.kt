@@ -39,11 +39,13 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
     lateinit var noiseOpacitySeekBar: SeekBar
     lateinit var materialOpacitySeekBar: SeekBar
     lateinit var scrimOpacitySeekBar: SeekBar
+    lateinit var zoomSeekBar: SeekBar
     lateinit var blurRadiusSeekBar: SeekBar
     lateinit var noiseOpacityValue: TextView
     lateinit var materialOpacityValue: TextView
     lateinit var scrimOpacityValue: TextView
     lateinit var blurRadiusValue: TextView
+    lateinit var zoomValue: TextView
 
     lateinit var background: Bitmap
 
@@ -58,12 +60,14 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
         materialView = requireViewById(R.id.materialView)
         materialOpacitySeekBar = requireViewById(R.id.materialOpacity)
         blurRadiusSeekBar = requireViewById(R.id.blurRadius)
+        zoomSeekBar = requireViewById(R.id.zoom)
         noiseOpacitySeekBar = requireViewById(R.id.noiseOpacity)
         scrimOpacitySeekBar = requireViewById(R.id.scrimOpacity)
         noiseOpacityValue = requireViewById(R.id.noiseOpacityValue)
         materialOpacityValue = requireViewById(R.id.materialOpacityValue)
         scrimOpacityValue = requireViewById(R.id.scrimOpacityValue)
         blurRadiusValue = requireViewById(R.id.blurRadiusValue)
+        zoomValue = requireViewById(R.id.zoomValue)
 
         background = BitmapFactory.decodeResource(resources, R.drawable.background1)
         backgroundView.setImageBitmap(background)
@@ -75,7 +79,7 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
         scrimOpacitySeekBar.setOnSeekBarChangeListener(this)
 
         arrayOf(blurRadiusSeekBar, materialOpacitySeekBar, noiseOpacitySeekBar,
-                scrimOpacitySeekBar).forEach {
+                scrimOpacitySeekBar, zoomSeekBar).forEach {
             it.setOnSeekBarChangeListener(this)
             onProgressChanged(it, it.progress, fromUser = false)
         }
@@ -103,6 +107,10 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
             scrimOpacitySeekBar -> {
                 materialView.scrimOpacity = progress / seekBar.max.toFloat()
                 scrimOpacityValue.text = progress.toString()
+            }
+            zoomSeekBar -> {
+                materialView.zoom = progress / seekBar.max.toFloat()
+                zoomValue.text = progress.toString()
             }
             else -> throw IllegalArgumentException("Unknown seek bar")
         }
