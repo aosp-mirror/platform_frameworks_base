@@ -1,6 +1,12 @@
 {
   "version": "1.0.0",
   "messages": {
+    "-1501874464": {
+      "message": "Fullscreen Task Appeared: #%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/FullscreenTaskListener.java"
+    },
     "-1340279385": {
       "message": "Remove listener=%s",
       "level": "VERBOSE",
@@ -30,6 +36,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "564235578": {
+      "message": "Fullscreen Task Vanished: #%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/FullscreenTaskListener.java"
     },
     "980952660": {
       "message": "Task root back pressed taskId=%d",

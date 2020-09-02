@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
@@ -308,10 +309,13 @@ final class InputMonitor {
          * This means we need to make sure that these changes in crop are reflected
          * in the input windows, and so ensure this flag is set so that
          * the input crop always reflects the surface hierarchy.
-         * we may have some issues with modal-windows, but I guess we can
-         * cross that bridge when we come to implementing full-screen TaskOrg
+         *
+         * TODO(b/168252846): we have some issues with modal-windows, so we need to
+         * cross that bridge now that we organize full-screen Tasks.
          */
-        if (child.getTask() != null && child.getTask().isOrganized()) {
+        if (child.getTask() != null
+                && child.getTask().isOrganized()
+                && child.getTask().getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
             inputWindowHandle.replaceTouchableRegionWithCrop(null /* Use this surfaces crop */);
         }
 

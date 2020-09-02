@@ -1394,7 +1394,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (display != null) {
-            // TODO(NOW!): Chat with the erosky@ of this code to see if this really makes sense here...
+            // TODO(b/168037178): Chat with the erosky@ of this code to see if this really makes
+            //                    sense here...
             // Rotations are relative to the display. This means if there are 2 displays rotated
             // differently (eg. 2 monitors with one landscape and one portrait), moving a stack
             // from one to the other could look like a rotation change. To prevent this
@@ -1408,11 +1409,16 @@ class Task extends WindowContainer<WindowContainer> {
 
         super.onParentChanged(newParent, oldParent);
 
-        // TODO(NOW): The check for null display content and setting it to null doesn't really
-        //  make sense here...
+        // Call this again after super onParentChanged in-case the surface wasn't created yet
+        // (happens when the task is first inserted into the hierarchy). It's a no-op if it
+        // already ran fully within super.onParentChanged
+        updateTaskOrganizerState(false /* forceUpdate */);
 
-        // TODO(stack-merge): This is mostly taking care of the case where the stask is removing from
-        // the display, so we should probably consolidate it there instead.
+        // TODO(b/168037178): The check for null display content and setting it to null doesn't
+        //                    really make sense here...
+
+        // TODO(b/168037178): This is mostly taking care of the case where the stask is removing
+        //                    from the display, so we should probably consolidate it there instead.
 
         if (getParent() == null && mDisplayContent != null) {
             EventLogTags.writeWmStackRemoved(getRootTaskId());
@@ -4850,6 +4856,11 @@ class Task extends WindowContainer<WindowContainer> {
      * @return {@code true} if task organizer changed.
      */
     boolean updateTaskOrganizerState(boolean forceUpdate) {
+        if (getSurfaceControl() == null) {
+            // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
+            // is created.
+            return false;
+        }
         if (!isRootTask()) {
             return setTaskOrganizer(null);
         }

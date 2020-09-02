@@ -96,8 +96,8 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
-    static ShellTaskOrganizer provideShellTaskOrganizer() {
-        ShellTaskOrganizer organizer = new ShellTaskOrganizer();
+    static ShellTaskOrganizer provideShellTaskOrganizer(TransactionPool transactionPool) {
+        ShellTaskOrganizer organizer = new ShellTaskOrganizer(transactionPool);
         organizer.registerOrganizer();
         return organizer;
     }
