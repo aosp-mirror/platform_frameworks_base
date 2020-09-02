@@ -532,7 +532,7 @@ public class MediaTranscodeManagerTest
                     int mPreviousProgress = 0;
 
                     @Override
-                    public void onProgressUpdate(int newProgress) {
+                    public void onProgressUpdate(TranscodingJob job, int newProgress) {
                         assertTrue("Invalid proress update", newProgress > mPreviousProgress);
                         assertTrue("Invalid proress update", newProgress <= 100);
                         if (newProgress > 0) {
