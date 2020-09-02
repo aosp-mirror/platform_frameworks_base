@@ -109,10 +109,8 @@ java_defaults {
 
     annotations_enabled: true,
 
-    // The stub libraries must be visible to frameworks/base so they can be combined
-    // into API specific libraries.
     stubs_library_visibility: [
-        "//frameworks/base", // Framework
+        "//visibility:public",
     ],
 
     // Set the visibility of the modules creating the stubs source.
