@@ -273,7 +273,6 @@ public final class PowerManager {
 
     /**
      * Brightness value for fully off in float.
-     * TODO(brightnessfloat): rename this to BRIGHTNES_OFF and remove the integer-based constant.
      * @hide
      */
     public static final float BRIGHTNESS_OFF_FLOAT = -1.0f;
