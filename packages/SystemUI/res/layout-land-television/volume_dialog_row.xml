@@ -37,6 +37,7 @@
             android:layout_height="@dimen/tv_volume_dialog_bubble_size"
             android:maxLength="2"
             android:gravity="center"
+            android:fontFeatureSettings="tnum"
             android:background="@drawable/tv_volume_dialog_circle"
             android:textSize="@dimen/tv_volume_number_text_size"
             android:textColor="@color/accent_tint_color_selector"/>

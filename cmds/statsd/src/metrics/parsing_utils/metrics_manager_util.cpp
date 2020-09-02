@@ -38,6 +38,7 @@
 #include "state/StateManager.h"
 #include "stats_util.h"
 
+using google::protobuf::MessageLite;
 using std::set;
 using std::unordered_map;
 using std::vector;
@@ -56,6 +57,20 @@ bool hasLeafNode(const FieldMatcher& matcher) {
         if (hasLeafNode(matcher.child(i))) {
             return true;
         }
+    }
+    return true;
+}
+
+bool getMetricProtoHash(const MessageLite& metric, const int64_t id, const bool hasActivation,
+                        const uint64_t activationHash, uint64_t& metricHash) {
+    string serializedMetric;
+    if (!metric.SerializeToString(&serializedMetric)) {
+        ALOGE("Unable to serialize metric %lld", (long long)id);
+        return false;
+    }
+    metricHash = Hash64(serializedMetric);
+    if (hasActivation) {
+        metricHash = Hash64(to_string(metricHash).append(to_string(activationHash)));
     }
     return true;
 }
@@ -228,18 +243,30 @@ bool handleMetricWithStateLink(const FieldMatcher& stateMatcher,
 bool handleMetricActivation(
         const StatsdConfig& config, const int64_t metricId, const int metricIndex,
         const unordered_map<int64_t, int>& metricToActivationMap,
-        const unordered_map<int64_t, int>& atomMatchingTrackerMap,
+        const unordered_map<int64_t, int>& atomMatchingTrackerMap, bool& hasActivation,
         unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
         unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
         vector<int>& metricsWithActivation,
         unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
-        unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap) {
+        unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
+        uint64_t& activationHash) {
     // Check if metric has an associated activation
     auto itr = metricToActivationMap.find(metricId);
-    if (itr == metricToActivationMap.end()) return true;
+    if (itr == metricToActivationMap.end()) {
+        hasActivation = false;
+        return true;
+    }
 
+    hasActivation = true;
     int activationIndex = itr->second;
     const MetricActivation& metricActivation = config.metric_activation(activationIndex);
+
+    string serializedActivation;
+    if (!metricActivation.SerializeToString(&serializedActivation)) {
+        ALOGE("Unable to serialize metric activation for metric %lld", (long long)metricId);
+        return false;
+    }
+    activationHash = Hash64(serializedActivation);
 
     for (int i = 0; i < metricActivation.event_activation_size(); i++) {
         const EventActivation& activation = metricActivation.event_activation(i);
@@ -357,11 +384,19 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 }
 
 bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAtomIdMap,
-                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps) {
+                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
+                map<int64_t, uint64_t>& stateProtoHashes) {
     for (int i = 0; i < config.state_size(); i++) {
         const State& state = config.state(i);
         const int64_t stateId = state.id();
         stateAtomIdMap[stateId] = state.atom_id();
+
+        string serializedState;
+        if (!state.SerializeToString(&serializedState)) {
+            ALOGE("Unable to serialize state %lld", (long long)stateId);
+            return false;
+        }
+        stateProtoHashes[stateId] = Hash64(serializedState);
 
         const StateMap& stateMap = state.map();
         for (auto group : stateMap.group()) {
@@ -457,18 +492,25 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        bool hasActivation = false;
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        uint64_t activationHash;
         bool success = handleMetricActivation(
                 config, metric.id(), metricIndex, metricToActivationMap, atomMatchingTrackerMap,
-                activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                metricsWithActivation, eventActivationMap, eventDeactivationMap);
+                hasActivation, activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                metricsWithActivation, eventActivationMap, eventDeactivationMap, activationHash);
         if (!success) return false;
 
-        sp<MetricProducer> countProducer =
-                new CountMetricProducer(key, metric, conditionIndex, initialConditionCache, wizard,
-                                        timeBaseTimeNs, currentTimeNs, eventActivationMap,
-                                        eventDeactivationMap, slicedStateAtoms, stateGroupMap);
+        uint64_t metricHash;
+        if (!getMetricProtoHash(metric, metric.id(), hasActivation, activationHash, metricHash)) {
+            return false;
+        }
+
+        sp<MetricProducer> countProducer = new CountMetricProducer(
+                key, metric, conditionIndex, initialConditionCache, wizard, metricHash,
+                timeBaseTimeNs, currentTimeNs, eventActivationMap, eventDeactivationMap,
+                slicedStateAtoms, stateGroupMap);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -566,19 +608,26 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        bool hasActivation = false;
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        uint64_t activationHash;
         bool success = handleMetricActivation(
                 config, metric.id(), metricIndex, metricToActivationMap, atomMatchingTrackerMap,
-                activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                metricsWithActivation, eventActivationMap, eventDeactivationMap);
+                hasActivation, activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                metricsWithActivation, eventActivationMap, eventDeactivationMap, activationHash);
         if (!success) return false;
+
+        uint64_t metricHash;
+        if (!getMetricProtoHash(metric, metric.id(), hasActivation, activationHash, metricHash)) {
+            return false;
+        }
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 key, metric, conditionIndex, initialConditionCache, trackerIndices[0],
-                trackerIndices[1], trackerIndices[2], nesting, wizard, internalDimensions,
-                timeBaseTimeNs, currentTimeNs, eventActivationMap, eventDeactivationMap,
-                slicedStateAtoms, stateGroupMap);
+                trackerIndices[1], trackerIndices[2], nesting, wizard, metricHash,
+                internalDimensions, timeBaseTimeNs, currentTimeNs, eventActivationMap,
+                eventDeactivationMap, slicedStateAtoms, stateGroupMap);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -614,17 +663,24 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        bool hasActivation = false;
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        uint64_t activationHash;
         bool success = handleMetricActivation(
                 config, metric.id(), metricIndex, metricToActivationMap, atomMatchingTrackerMap,
-                activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                metricsWithActivation, eventActivationMap, eventDeactivationMap);
+                hasActivation, activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                metricsWithActivation, eventActivationMap, eventDeactivationMap, activationHash);
         if (!success) return false;
 
-        sp<MetricProducer> eventMetric =
-                new EventMetricProducer(key, metric, conditionIndex, initialConditionCache, wizard,
-                                        timeBaseTimeNs, eventActivationMap, eventDeactivationMap);
+        uint64_t metricHash;
+        if (!getMetricProtoHash(metric, metric.id(), hasActivation, activationHash, metricHash)) {
+            return false;
+        }
+
+        sp<MetricProducer> eventMetric = new EventMetricProducer(
+                key, metric, conditionIndex, initialConditionCache, wizard, metricHash,
+                timeBaseTimeNs, eventActivationMap, eventDeactivationMap);
 
         allMetricProducers.push_back(eventMetric);
     }
@@ -703,18 +759,26 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        bool hasActivation = false;
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        uint64_t activationHash;
         bool success = handleMetricActivation(
                 config, metric.id(), metricIndex, metricToActivationMap, atomMatchingTrackerMap,
-                activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                metricsWithActivation, eventActivationMap, eventDeactivationMap);
+                hasActivation, activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                metricsWithActivation, eventActivationMap, eventDeactivationMap, activationHash);
         if (!success) return false;
 
+        uint64_t metricHash;
+        if (!getMetricProtoHash(metric, metric.id(), hasActivation, activationHash, metricHash)) {
+            return false;
+        }
+
         sp<MetricProducer> valueProducer = new ValueMetricProducer(
-                key, metric, conditionIndex, initialConditionCache, wizard, trackerIndex,
-                matcherWizard, pullTagId, timeBaseTimeNs, currentTimeNs, pullerManager,
-                eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap);
+                key, metric, conditionIndex, initialConditionCache, wizard, metricHash,
+                trackerIndex, matcherWizard, pullTagId, timeBaseTimeNs, currentTimeNs,
+                pullerManager, eventActivationMap, eventDeactivationMap, slicedStateAtoms,
+                stateGroupMap);
         allMetricProducers.push_back(valueProducer);
     }
 
@@ -799,18 +863,25 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        bool hasActivation = false;
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        uint64_t activationHash;
         bool success = handleMetricActivation(
                 config, metric.id(), metricIndex, metricToActivationMap, atomMatchingTrackerMap,
-                activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                metricsWithActivation, eventActivationMap, eventDeactivationMap);
+                hasActivation, activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                metricsWithActivation, eventActivationMap, eventDeactivationMap, activationHash);
         if (!success) return false;
 
+        uint64_t metricHash;
+        if (!getMetricProtoHash(metric, metric.id(), hasActivation, activationHash, metricHash)) {
+            return false;
+        }
+
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, initialConditionCache, wizard, trackerIndex,
-                matcherWizard, pullTagId, triggerAtomId, atomTagId, timeBaseTimeNs, currentTimeNs,
-                pullerManager, eventActivationMap, eventDeactivationMap);
+                key, metric, conditionIndex, initialConditionCache, wizard, metricHash,
+                trackerIndex, matcherWizard, pullTagId, triggerAtomId, atomTagId, timeBaseTimeNs,
+                currentTimeNs, pullerManager, eventActivationMap, eventDeactivationMap);
         allMetricProducers.push_back(gaugeProducer);
     }
     for (int i = 0; i < config.no_report_metric_size(); ++i) {
@@ -945,6 +1016,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       unordered_map<int64_t, int>& conditionTrackerMap,
                       vector<sp<MetricProducer>>& allMetricProducers,
+                      unordered_map<int64_t, int>& metricProducerMap,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
                       vector<sp<AlarmTracker>>& allPeriodicAlarmTrackers,
                       unordered_map<int, std::vector<int>>& conditionToMetricMap,
@@ -953,9 +1025,9 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
                       unordered_map<int64_t, int>& alertTrackerMap,
-                      vector<int>& metricsWithActivation, std::set<int64_t>& noReportMetricIds) {
+                      vector<int>& metricsWithActivation, map<int64_t, uint64_t>& stateProtoHashes,
+                      set<int64_t>& noReportMetricIds) {
     vector<ConditionState> initialConditionCache;
-    unordered_map<int64_t, int> metricProducerMap;
     unordered_map<int64_t, int> stateAtomIdMap;
     unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
 
@@ -972,7 +1044,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
         return false;
     }
 
-    if (!initStates(config, stateAtomIdMap, allStateGroupMaps)) {
+    if (!initStates(config, stateAtomIdMap, allStateGroupMaps, stateProtoHashes)) {
         ALOGE("initStates failed");
         return false;
     }

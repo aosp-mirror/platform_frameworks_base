@@ -37,8 +37,8 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";

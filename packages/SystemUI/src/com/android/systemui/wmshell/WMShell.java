@@ -21,14 +21,17 @@ import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_
 import android.app.ActivityManager;
 import android.content.Context;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.pip.Pip;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.stackdivider.SplitScreen;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.common.DisplayImeController;
@@ -47,19 +50,28 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTraceProto> {
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final CommandQueue mCommandQueue;
     private final DisplayImeController mDisplayImeController;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final ActivityManagerWrapper mActivityManagerWrapper;
+    private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final ProtoTracer mProtoTracer;
 
     @Inject
-    WMShell(Context context, KeyguardUpdateMonitor keyguardUpdateMonitor,
+    public WMShell(Context context, CommandQueue commandQueue,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            ActivityManagerWrapper activityManagerWrapper,
             DisplayImeController displayImeController,
+            Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             ProtoTracer protoTracer) {
         super(context);
+        mCommandQueue = commandQueue;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mActivityManagerWrapper = activityManagerWrapper;
         mDisplayImeController = displayImeController;
+        mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
@@ -72,10 +84,22 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
         // specific feature anymore.
         mDisplayImeController.startMonitorDisplays();
 
+        mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
     }
 
-    private void initSplitScreen(SplitScreen splitScreen) {
+    @VisibleForTesting
+    void initPip(Pip pip) {
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void showPictureInPictureMenu() {
+                pip.showPictureInPictureMenu();
+            }
+        });
+    }
+
+    @VisibleForTesting
+    void initSplitScreen(SplitScreen splitScreen) {
         mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
@@ -87,7 +111,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             }
         });
 
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(
+        mActivityManagerWrapper.registerTaskStackListener(
                 new TaskStackChangeListener() {
                     @Override
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,

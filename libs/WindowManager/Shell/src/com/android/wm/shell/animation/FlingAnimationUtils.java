@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.wm.shell.animation;
 
 import android.animation.Animator;
 import android.util.DisplayMetrics;
@@ -22,11 +22,6 @@ import android.util.Log;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-
-import com.android.systemui.Interpolators;
-import com.android.systemui.statusbar.notification.NotificationUtils;
-
-import javax.inject.Inject;
 
 /**
  * Utility class to calculate general fling animation when the finger is released.
@@ -63,9 +58,9 @@ public class FlingAnimationUtils {
 
     /**
      * @param maxLengthSeconds the longest duration an animation can become in seconds
-     * @param speedUpFactor a factor from 0 to 1 how much the slow down should be shifted towards
-     *                      the end of the animation. 0 means it's at the beginning and no
-     *                      acceleration will take place.
+     * @param speedUpFactor    a factor from 0 to 1 how much the slow down should be shifted towards
+     *                         the end of the animation. 0 means it's at the beginning and no
+     *                         acceleration will take place.
      */
     public FlingAnimationUtils(DisplayMetrics displayMetrics, float maxLengthSeconds,
             float speedUpFactor) {
@@ -74,19 +69,19 @@ public class FlingAnimationUtils {
 
     /**
      * @param maxLengthSeconds the longest duration an animation can become in seconds
-     * @param speedUpFactor a factor from 0 to 1 how much the slow down should be shifted towards
-     *                      the end of the animation. 0 means it's at the beginning and no
-     *                      acceleration will take place.
-     * @param x2 the x value to take for the second point of the bezier spline. If a value below 0
-     *           is provided, the value is automatically calculated.
-     * @param y2 the y value to take for the second point of the bezier spline
+     * @param speedUpFactor    a factor from 0 to 1 how much the slow down should be shifted towards
+     *                         the end of the animation. 0 means it's at the beginning and no
+     *                         acceleration will take place.
+     * @param x2               the x value to take for the second point of the bezier spline. If a
+     *                         value below 0 is provided, the value is automatically calculated.
+     * @param y2               the y value to take for the second point of the bezier spline
      */
     public FlingAnimationUtils(DisplayMetrics displayMetrics, float maxLengthSeconds,
             float speedUpFactor, float x2, float y2) {
         mMaxLengthSeconds = maxLengthSeconds;
         mSpeedUpFactor = speedUpFactor;
         if (x2 < 0) {
-            mLinearOutSlowInX2 = NotificationUtils.interpolate(LINEAR_OUT_SLOW_IN_X2,
+            mLinearOutSlowInX2 = interpolate(LINEAR_OUT_SLOW_IN_X2,
                     LINEAR_OUT_SLOW_IN_X2_MAX,
                     mSpeedUpFactor);
         } else {
@@ -102,10 +97,10 @@ public class FlingAnimationUtils {
      * Applies the interpolator and length to the animator, such that the fling animation is
      * consistent with the finger motion.
      *
-     * @param animator the animator to apply
+     * @param animator  the animator to apply
      * @param currValue the current value
-     * @param endValue the end value of the animator
-     * @param velocity the current velocity of the motion
+     * @param endValue  the end value of the animator
+     * @param velocity  the current velocity of the motion
      */
     public void apply(Animator animator, float currValue, float endValue, float velocity) {
         apply(animator, currValue, endValue, velocity, Math.abs(endValue - currValue));
@@ -115,10 +110,10 @@ public class FlingAnimationUtils {
      * Applies the interpolator and length to the animator, such that the fling animation is
      * consistent with the finger motion.
      *
-     * @param animator the animator to apply
+     * @param animator  the animator to apply
      * @param currValue the current value
-     * @param endValue the end value of the animator
-     * @param velocity the current velocity of the motion
+     * @param endValue  the end value of the animator
+     * @param velocity  the current velocity of the motion
      */
     public void apply(ViewPropertyAnimator animator, float currValue, float endValue,
             float velocity) {
@@ -129,10 +124,10 @@ public class FlingAnimationUtils {
      * Applies the interpolator and length to the animator, such that the fling animation is
      * consistent with the finger motion.
      *
-     * @param animator the animator to apply
-     * @param currValue the current value
-     * @param endValue the end value of the animator
-     * @param velocity the current velocity of the motion
+     * @param animator    the animator to apply
+     * @param currValue   the current value
+     * @param endValue    the end value of the animator
+     * @param velocity    the current velocity of the motion
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
@@ -140,18 +135,18 @@ public class FlingAnimationUtils {
             float maxDistance) {
         AnimatorProperties properties = getProperties(currValue, endValue, velocity,
                 maxDistance);
-        animator.setDuration(properties.duration);
-        animator.setInterpolator(properties.interpolator);
+        animator.setDuration(properties.mDuration);
+        animator.setInterpolator(properties.mInterpolator);
     }
 
     /**
      * Applies the interpolator and length to the animator, such that the fling animation is
      * consistent with the finger motion.
      *
-     * @param animator the animator to apply
-     * @param currValue the current value
-     * @param endValue the end value of the animator
-     * @param velocity the current velocity of the motion
+     * @param animator    the animator to apply
+     * @param currValue   the current value
+     * @param endValue    the end value of the animator
+     * @param velocity    the current velocity of the motion
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
@@ -159,8 +154,8 @@ public class FlingAnimationUtils {
             float velocity, float maxDistance) {
         AnimatorProperties properties = getProperties(currValue, endValue, velocity,
                 maxDistance);
-        animator.setDuration(properties.duration);
-        animator.setInterpolator(properties.interpolator);
+        animator.setDuration(properties.mDuration);
+        animator.setInterpolator(properties.mInterpolator);
     }
 
     private AnimatorProperties getProperties(float currValue,
@@ -171,28 +166,28 @@ public class FlingAnimationUtils {
         float velAbs = Math.abs(velocity);
         float velocityFactor = mSpeedUpFactor == 0.0f
                 ? 1.0f : Math.min(velAbs / HIGH_VELOCITY_DP_PER_SECOND, 1.0f);
-        float startGradient = NotificationUtils.interpolate(LINEAR_OUT_SLOW_IN_START_GRADIENT,
+        float startGradient = interpolate(LINEAR_OUT_SLOW_IN_START_GRADIENT,
                 mY2 / mLinearOutSlowInX2, velocityFactor);
         float durationSeconds = startGradient * diff / velAbs;
         Interpolator slowInInterpolator = getInterpolator(startGradient, velocityFactor);
         if (durationSeconds <= maxLengthSeconds) {
-            mAnimatorProperties.interpolator = slowInInterpolator;
+            mAnimatorProperties.mInterpolator = slowInInterpolator;
         } else if (velAbs >= mMinVelocityPxPerSecond) {
 
             // Cross fade between fast-out-slow-in and linear interpolator with current velocity.
             durationSeconds = maxLengthSeconds;
-            VelocityInterpolator velocityInterpolator
-                    = new VelocityInterpolator(durationSeconds, velAbs, diff);
+            VelocityInterpolator velocityInterpolator = new VelocityInterpolator(
+                    durationSeconds, velAbs, diff);
             InterpolatorInterpolator superInterpolator = new InterpolatorInterpolator(
                     velocityInterpolator, slowInInterpolator, Interpolators.LINEAR_OUT_SLOW_IN);
-            mAnimatorProperties.interpolator = superInterpolator;
+            mAnimatorProperties.mInterpolator = superInterpolator;
         } else {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
             durationSeconds = maxLengthSeconds;
-            mAnimatorProperties.interpolator = Interpolators.FAST_OUT_SLOW_IN;
+            mAnimatorProperties.mInterpolator = Interpolators.FAST_OUT_SLOW_IN;
         }
-        mAnimatorProperties.duration = (long) (durationSeconds * 1000);
+        mAnimatorProperties.mDuration = (long) (durationSeconds * 1000);
         return mAnimatorProperties;
     }
 
@@ -225,10 +220,10 @@ public class FlingAnimationUtils {
      * consistent with the finger motion for the case when the animation is making something
      * disappear.
      *
-     * @param animator the animator to apply
-     * @param currValue the current value
-     * @param endValue the end value of the animator
-     * @param velocity the current velocity of the motion
+     * @param animator    the animator to apply
+     * @param currValue   the current value
+     * @param endValue    the end value of the animator
+     * @param velocity    the current velocity of the motion
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
@@ -236,8 +231,8 @@ public class FlingAnimationUtils {
             float velocity, float maxDistance) {
         AnimatorProperties properties = getDismissingProperties(currValue, endValue, velocity,
                 maxDistance);
-        animator.setDuration(properties.duration);
-        animator.setInterpolator(properties.interpolator);
+        animator.setDuration(properties.mDuration);
+        animator.setInterpolator(properties.mInterpolator);
     }
 
     /**
@@ -245,10 +240,10 @@ public class FlingAnimationUtils {
      * consistent with the finger motion for the case when the animation is making something
      * disappear.
      *
-     * @param animator the animator to apply
-     * @param currValue the current value
-     * @param endValue the end value of the animator
-     * @param velocity the current velocity of the motion
+     * @param animator    the animator to apply
+     * @param currValue   the current value
+     * @param endValue    the end value of the animator
+     * @param velocity    the current velocity of the motion
      * @param maxDistance the maximum distance for this interaction; the maximum animation length
      *                    gets multiplied by the ratio between the actual distance and this value
      */
@@ -256,8 +251,8 @@ public class FlingAnimationUtils {
             float velocity, float maxDistance) {
         AnimatorProperties properties = getDismissingProperties(currValue, endValue, velocity,
                 maxDistance);
-        animator.setDuration(properties.duration);
-        animator.setInterpolator(properties.interpolator);
+        animator.setDuration(properties.mDuration);
+        animator.setInterpolator(properties.mInterpolator);
     }
 
     private AnimatorProperties getDismissingProperties(float currValue, float endValue,
@@ -272,24 +267,24 @@ public class FlingAnimationUtils {
         Interpolator mLinearOutFasterIn = new PathInterpolator(0, 0, LINEAR_OUT_FASTER_IN_X2, y2);
         float durationSeconds = startGradient * diff / velAbs;
         if (durationSeconds <= maxLengthSeconds) {
-            mAnimatorProperties.interpolator = mLinearOutFasterIn;
+            mAnimatorProperties.mInterpolator = mLinearOutFasterIn;
         } else if (velAbs >= mMinVelocityPxPerSecond) {
 
             // Cross fade between linear-out-faster-in and linear interpolator with current
             // velocity.
             durationSeconds = maxLengthSeconds;
-            VelocityInterpolator velocityInterpolator
-                    = new VelocityInterpolator(durationSeconds, velAbs, diff);
+            VelocityInterpolator velocityInterpolator = new VelocityInterpolator(
+                    durationSeconds, velAbs, diff);
             InterpolatorInterpolator superInterpolator = new InterpolatorInterpolator(
                     velocityInterpolator, mLinearOutFasterIn, Interpolators.LINEAR_OUT_SLOW_IN);
-            mAnimatorProperties.interpolator = superInterpolator;
+            mAnimatorProperties.mInterpolator = superInterpolator;
         } else {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
             durationSeconds = maxLengthSeconds;
-            mAnimatorProperties.interpolator = Interpolators.FAST_OUT_LINEAR_IN;
+            mAnimatorProperties.mInterpolator = Interpolators.FAST_OUT_LINEAR_IN;
         }
-        mAnimatorProperties.duration = (long) (durationSeconds * 1000);
+        mAnimatorProperties.mDuration = (long) (durationSeconds * 1000);
         return mAnimatorProperties;
     }
 
@@ -361,10 +356,11 @@ public class FlingAnimationUtils {
     }
 
     private static class AnimatorProperties {
-        Interpolator interpolator;
-        long duration;
+        Interpolator mInterpolator;
+        long mDuration;
     }
 
+    /** Builder for {@link #FlingAnimationUtils}. */
     public static class Builder {
         private final DisplayMetrics mDisplayMetrics;
         float mMaxLengthSeconds;
@@ -372,32 +368,39 @@ public class FlingAnimationUtils {
         float mX2;
         float mY2;
 
-        @Inject
         public Builder(DisplayMetrics displayMetrics) {
             mDisplayMetrics = displayMetrics;
             reset();
         }
 
+        /** Sets the longest duration an animation can become in seconds. */
         public Builder setMaxLengthSeconds(float maxLengthSeconds) {
             mMaxLengthSeconds = maxLengthSeconds;
             return this;
         }
 
+        /**
+         * Sets the factor for how much the slow down should be shifted towards the end of the
+         * animation.
+         */
         public Builder setSpeedUpFactor(float speedUpFactor) {
             mSpeedUpFactor = speedUpFactor;
             return this;
         }
 
+        /** Sets the x value to take for the second point of the bezier spline. */
         public Builder setX2(float x2) {
             mX2 = x2;
             return this;
         }
 
+        /** Sets the y value to take for the second point of the bezier spline. */
         public Builder setY2(float y2) {
             mY2 = y2;
             return this;
         }
 
+        /** Resets all parameters of the builder. */
         public Builder reset() {
             mMaxLengthSeconds = 0;
             mSpeedUpFactor = 0.0f;
@@ -407,9 +410,14 @@ public class FlingAnimationUtils {
             return this;
         }
 
+        /** Builds {@link #FlingAnimationUtils}. */
         public FlingAnimationUtils build() {
             return new FlingAnimationUtils(mDisplayMetrics, mMaxLengthSeconds, mSpeedUpFactor,
                     mX2, mY2);
         }
+    }
+
+    private static float interpolate(float start, float end, float amount) {
+        return start * (1.0f - amount) + end * amount;
     }
 }

@@ -6637,7 +6637,8 @@ class Task extends WindowContainer<WindowContainer> {
         // Basic case: for simple app-centric recents, we need to recreate
         // the task if the affinity has changed.
 
-        final String affinity = ActivityRecord.getTaskAffinityWithUid(destAffinity, srec.getUid());
+        final String affinity = ActivityRecord.computeTaskAffinity(destAffinity, srec.getUid(),
+                srec.launchMode);
         if (srec == null || srec.getTask().affinity == null
                 || !srec.getTask().affinity.equals(affinity)) {
             return true;

@@ -20,7 +20,6 @@ import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.SystemUIModule;
-import com.android.systemui.pip.phone.dagger.PipModule;
 
 import dagger.Subcomponent;
 
@@ -31,7 +30,6 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {
         CarComponentBinder.class,
         DependencyProvider.class,
-        PipModule.class,
         SystemUIModule.class,
         CarSystemUIModule.class,
         CarSystemUIBinder.class})

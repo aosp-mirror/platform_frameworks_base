@@ -21,7 +21,7 @@ import android.util.Rational
 import android.view.Surface
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.LargeTest
+import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import com.android.server.wm.flicker.FlickerTestBase
 import com.android.server.wm.flicker.StandardAppHelper
@@ -52,7 +52,7 @@ import org.junit.runners.MethodSorters
  *
  * Currently it runs only in 0 degrees because of b/156100803
  */
-@LargeTest
+@RequiresDevice
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 159096424)

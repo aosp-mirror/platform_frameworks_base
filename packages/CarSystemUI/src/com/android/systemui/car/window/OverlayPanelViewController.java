@@ -34,7 +34,7 @@ import androidx.annotation.CallSuper;
 import com.android.systemui.R;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

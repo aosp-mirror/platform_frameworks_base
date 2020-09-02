@@ -407,6 +407,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mUsersLock")
     private int[] mUserIds;
+
+    @GuardedBy("mUsersLock")
+    private int[] mUserIdsIncludingPreCreated;
+
     @GuardedBy("mPackagesLock")
     private int mNextSerialNumber;
     private int mUserVersion = 0;
@@ -2496,13 +2500,32 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Returns an array of user ids. This array is cached here for quick access, so do not modify or
-     * cache it elsewhere.
+     * Returns an array of user ids.
+     *
+     * <p>This array is cached here for quick access, so do not modify or cache it elsewhere.
+     *
      * @return the array of user ids.
      */
-    public int[] getUserIds() {
+    public @NonNull int[] getUserIds() {
         synchronized (mUsersLock) {
             return mUserIds;
+        }
+    }
+
+    /**
+     * Returns an array of user ids, including pre-created users.
+     *
+     * <p>This method should only used for the specific cases that need to handle pre-created users;
+     * most callers should call {@link #getUserIds()} instead.
+     *
+     * <p>This array is cached here for quick access, so do not modify or
+     * cache it elsewhere.
+     *
+     * @return the array of user ids.
+     */
+    public @NonNull int[] getUserIdsIncludingPreCreated() {
+        synchronized (mUsersLock) {
+            return mUserIdsIncludingPreCreated;
         }
     }
 
@@ -4361,23 +4384,43 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void updateUserIds() {
         int num = 0;
+        int numIncludingPreCreated = 0;
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
-                UserInfo userInfo = mUsers.valueAt(i).info;
-                if (!userInfo.partial && !userInfo.preCreated) {
-                    num++;
+                final UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial) {
+                    numIncludingPreCreated++;
+                    if (!userInfo.preCreated) {
+                        num++;
+                    }
                 }
             }
+            if (DBG) {
+                Slog.d(LOG_TAG, "updateUserIds(): numberUsers= " + num
+                        + " includingPreCreated=" + numIncludingPreCreated);
+            }
             final int[] newUsers = new int[num];
+            final int[] newUsersIncludingPreCreated = new int[numIncludingPreCreated];
+
             int n = 0;
+            int nIncludingPreCreated = 0;
             for (int i = 0; i < userSize; i++) {
-                UserInfo userInfo = mUsers.valueAt(i).info;
-                if (!userInfo.partial && !userInfo.preCreated) {
-                    newUsers[n++] = mUsers.keyAt(i);
+                final UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial) {
+                    final int userId = mUsers.keyAt(i);
+                    newUsersIncludingPreCreated[nIncludingPreCreated++] = userId;
+                    if (!userInfo.preCreated) {
+                        newUsers[n++] = userId;
+                    }
                 }
             }
             mUserIds = newUsers;
+            mUserIdsIncludingPreCreated = newUsersIncludingPreCreated;
+            if (DBG) {
+                Slog.d(LOG_TAG, "updateUserIds(): userIds= " + Arrays.toString(mUserIds)
+                        + " includingPreCreated=" + Arrays.toString(mUserIdsIncludingPreCreated));
+            }
         }
     }
 
@@ -4841,6 +4884,8 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUsersLock) {
                 pw.print("  Cached user IDs: ");
                 pw.println(Arrays.toString(mUserIds));
+                pw.print("  Cached user IDs (including pre-created): ");
+                pw.println(Arrays.toString(mUserIdsIncludingPreCreated));
             }
 
         } // synchronized (mPackagesLock)

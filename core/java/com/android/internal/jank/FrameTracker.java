@@ -26,6 +26,7 @@ import android.view.ThreadedRenderer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor.Session;
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * @hide
@@ -34,18 +35,19 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     private static final String TAG = FrameTracker.class.getSimpleName();
     private static final boolean DEBUG = false;
     //TODO (163431584): need also consider other refresh rates.
-    private static final long CRITERIA = 1000000000 / 60;
-    @VisibleForTesting
-    public static final long UNKNOWN_TIMESTAMP = -1;
+    private static final long JANK_THRESHOLD_NANOS = 1000000000 / 60;
+    private static final long UNKNOWN_TIMESTAMP = -1;
 
-    @VisibleForTesting
-    public long mBeginTime = UNKNOWN_TIMESTAMP;
-    @VisibleForTesting
-    public long mEndTime = UNKNOWN_TIMESTAMP;
-    public boolean mShouldTriggerTrace;
-    public HardwareRendererObserver mObserver;
-    public ThreadedRendererWrapper mRendererWrapper;
-    public FrameMetricsWrapper mMetricsWrapper;
+    private final HardwareRendererObserver mObserver;
+    private final ThreadedRendererWrapper mRendererWrapper;
+    private final FrameMetricsWrapper mMetricsWrapper;
+
+    private long mBeginTime = UNKNOWN_TIMESTAMP;
+    private long mEndTime = UNKNOWN_TIMESTAMP;
+    private boolean mShouldTriggerTrace;
+    private long mTotalFramesCount = 0;
+    private long mMissedFramesCount = 0;
+    private long mMaxFrameTimeNanos = 0;
 
     private Session mSession;
 
@@ -108,37 +110,6 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         Trace.endAsyncSection(mSession.getName(), (int) mBeginTime);
     }
 
-    /**
-     * Check if we had a janky frame according to the metrics.
-     * @param metrics frame metrics
-     * @return true if it is a janky frame
-     */
-    @VisibleForTesting
-    public boolean isJankyFrame(FrameMetricsWrapper metrics) {
-        long totalDurationMs = metrics.getMetric(FrameMetrics.TOTAL_DURATION);
-        boolean isFirstFrame = metrics.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
-        boolean isJanky = !isFirstFrame && totalDurationMs - CRITERIA > 0;
-
-        if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(isJanky).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.FIRST_DRAW_FRAME)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.INPUT_HANDLING_DURATION)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.ANIMATION_DURATION)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.LAYOUT_MEASURE_DURATION)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.DRAW_DURATION)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.SYNC_DURATION)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.COMMAND_ISSUE_DURATION)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.SWAP_BUFFERS_DURATION)).append(",");
-            sb.append(totalDurationMs).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.INTENDED_VSYNC_TIMESTAMP)).append(",");
-            sb.append(metrics.getMetric(FrameMetrics.VSYNC_TIMESTAMP)).append(",");
-            Log.v(TAG, "metrics=" + sb.toString());
-        }
-
-        return isJanky;
-    }
-
     @Override
     public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
         // Since this callback might come a little bit late after the end() call.
@@ -160,11 +131,29 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 }
                 triggerPerfetto();
             }
+            if (mSession.logToStatsd()) {
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.UI_INTERACTION_FRAME_INFO_REPORTED,
+                        mSession.getStatsdInteractionType(),
+                        mTotalFramesCount,
+                        mMissedFramesCount,
+                        mMaxFrameTimeNanos);
+            }
             return;
         }
 
-        // The frame is in the duration of the CUJ, check if it catches the deadline.
-        if (isJankyFrame(mMetricsWrapper)) {
+        long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
+        boolean isFirstFrame = mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
+        boolean isJankyFrame = !isFirstFrame && totalDurationNanos > JANK_THRESHOLD_NANOS;
+
+        mTotalFramesCount += 1;
+
+        if (!isFirstFrame) {
+            mMaxFrameTimeNanos = Math.max(totalDurationNanos, mMaxFrameTimeNanos);
+        }
+
+        if (isJankyFrame) {
+            mMissedFramesCount += 1;
             mShouldTriggerTrace = true;
         }
     }

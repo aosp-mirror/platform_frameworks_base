@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.view.Surface
-import androidx.test.filters.LargeTest
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
  * Test cold launch app from launcher.
  * To run this test: `atest FlickerTests:OpenAppColdTest`
  */
-@LargeTest
+@RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenAppColdTest(

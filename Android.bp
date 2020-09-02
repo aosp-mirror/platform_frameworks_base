@@ -333,7 +333,6 @@ filegroup {
         ":installd_aidl",
         ":keystore_aidl",
         ":libaudioclient_aidl",
-        ":mediatranscoding_aidl_interface-java-source",
         ":libbinder_aidl",
         ":libbluetooth-binder-aidl",
         ":libcamera_client_aidl",
@@ -577,6 +576,7 @@ java_library {
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
+        "mediatranscoding_aidl_interface-java",
     ],
     // For backwards compatibility.
     stem: "framework",
@@ -623,6 +623,7 @@ java_library {
     static_libs: [
         "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
+        "mediatranscoding_aidl_interface-java",
 
         // Additional dependencies needed to build the ike API classes.
         "ike-internals",

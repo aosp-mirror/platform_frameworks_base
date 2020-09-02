@@ -14,13 +14,9 @@
 
 package com.android.internal.util;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.EventLog;
 import android.util.Log;
@@ -29,18 +25,14 @@ import android.util.SparseLongArray;
 import com.android.internal.logging.EventLogTags;
 
 /**
- * Class to track various latencies in SystemUI. It then outputs the latency to logcat so these
- * latencies can be captured by tests and then used for dashboards.
+ * Class to track various latencies in SystemUI. It then writes the latency to statsd and also
+ * outputs it to logcat so these latencies can be captured by tests and then used for dashboards.
  * <p>
  * This is currently only in Keyguard so it can be shared between SystemUI and Keyguard, but
  * eventually we'd want to merge these two packages together so Keyguard can use common classes
  * that are shared with SystemUI.
  */
 public class LatencyTracker {
-
-    private static final String ACTION_RELOAD_PROPERTY =
-            "com.android.systemui.RELOAD_LATENCY_TRACKER_PROPERTY";
-
     private static final String TAG = "LatencyTracker";
 
     /**
@@ -82,7 +74,7 @@ public class LatencyTracker {
     /*
      * Time between we get a face acquired signal until we start with the unlock animation
      */
-    public static final int ACTION_FACE_WAKE_AND_UNLOCK = 6;
+    public static final int ACTION_FACE_WAKE_AND_UNLOCK = 7;
 
     private static final String[] NAMES = new String[] {
             "expand panel",
@@ -94,30 +86,26 @@ public class LatencyTracker {
             "rotate the screen",
             "face wake-and-unlock" };
 
+    private static final int[] STATSD_ACTION = new int[] {
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TURN_ON_SCREEN,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK,
+    };
+
     private static LatencyTracker sLatencyTracker;
 
     private final SparseLongArray mStartRtc = new SparseLongArray();
-    private boolean mEnabled;
 
     public static LatencyTracker getInstance(Context context) {
         if (sLatencyTracker == null) {
-            sLatencyTracker = new LatencyTracker(context.getApplicationContext());
+            sLatencyTracker = new LatencyTracker();
         }
         return sLatencyTracker;
-    }
-
-    private LatencyTracker(Context context) {
-        context.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                reloadProperty();
-            }
-        }, new IntentFilter(ACTION_RELOAD_PROPERTY));
-        reloadProperty();
-    }
-
-    private void reloadProperty() {
-        mEnabled = SystemProperties.getBoolean("debug.systemui.latency_tracking", false);
     }
 
     public static boolean isEnabled(Context ctx) {
@@ -125,7 +113,7 @@ public class LatencyTracker {
     }
 
     public boolean isEnabled() {
-        return Build.IS_DEBUGGABLE && mEnabled;
+        return Build.IS_DEBUGGABLE;
     }
 
     /**
@@ -134,7 +122,7 @@ public class LatencyTracker {
      * @param action The action to start. One of the ACTION_* values.
      */
     public void onActionStart(int action) {
-        if (!mEnabled) {
+        if (!isEnabled()) {
             return;
         }
         Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, NAMES[action], 0);
@@ -147,7 +135,7 @@ public class LatencyTracker {
      * @param action The action to end. One of the ACTION_* values.
      */
     public void onActionEnd(int action) {
-        if (!mEnabled) {
+        if (!isEnabled()) {
             return;
         }
         long endRtc = SystemClock.elapsedRealtime();
@@ -169,5 +157,7 @@ public class LatencyTracker {
     public static void logAction(int action, int duration) {
         Log.i(TAG, "action=" + action + " latency=" + duration);
         EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, duration);
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.UI_ACTION_LATENCY_REPORTED, STATSD_ACTION[action], duration);
     }
 }
