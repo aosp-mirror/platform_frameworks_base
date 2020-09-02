@@ -2128,8 +2128,8 @@ public class DisplayPolicy {
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             final boolean attachedInParent = attached != null && !layoutInScreen;
             final InsetsState requestedInsetsState = win.getRequestedInsetsState();
-            final boolean requestedFullscreen =
-                    !requestedInsetsState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR);
+            final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
+                    || !requestedInsetsState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR);
             final boolean requestedHideNavigation =
                     !requestedInsetsState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR);
 
