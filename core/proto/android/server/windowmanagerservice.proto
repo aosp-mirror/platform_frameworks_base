@@ -316,6 +316,7 @@ message ActivityRecordProto {
     optional bool front_of_task = 28;
     optional int32 proc_id = 29;
     optional bool translucent = 30;
+    optional bool pip_auto_enter_allowed = 31;
 }
 
 /* represents WindowToken */

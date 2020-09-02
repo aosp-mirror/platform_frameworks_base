@@ -133,6 +133,7 @@ import static com.android.server.wm.ActivityRecordProto.LAST_SURFACE_SHOWING;
 import static com.android.server.wm.ActivityRecordProto.NAME;
 import static com.android.server.wm.ActivityRecordProto.NUM_DRAWN_WINDOWS;
 import static com.android.server.wm.ActivityRecordProto.NUM_INTERESTING_WINDOWS;
+import static com.android.server.wm.ActivityRecordProto.PIP_AUTO_ENTER_ALLOWED;
 import static com.android.server.wm.ActivityRecordProto.PROC_ID;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
@@ -4741,6 +4742,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
+            if (deferHidingClient && pictureInPictureArgs.isAutoEnterAllowed()) {
+                // Go ahead and just put the activity in pip if it supports auto-pip.
+                mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
+                return;
+            }
             setDeferHidingClient(deferHidingClient);
             setVisibility(false);
 
@@ -7678,6 +7684,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (hasProcess()) {
             proto.write(PROC_ID, app.getPid());
         }
+        proto.write(PIP_AUTO_ENTER_ALLOWED, pictureInPictureArgs.isAutoEnterAllowed());
     }
 
     @Override
