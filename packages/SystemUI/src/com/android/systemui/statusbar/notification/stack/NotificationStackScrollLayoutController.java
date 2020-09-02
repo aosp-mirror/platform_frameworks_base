@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -61,6 +63,8 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.NotificationGroup;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
+import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -117,6 +121,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: StatusBar should be encapsulated behind a Controller
     private final StatusBar mStatusBar;
+    private final SectionHeaderController mSilentHeaderController;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -359,10 +364,6 @@ public class NotificationStackScrollLayoutController {
                                 row.performDismissWithBlockingHelper(false /* fromAccessibility */);
                     }
 
-                    if (view instanceof PeopleHubView) {
-                        mNotificationSectionsManager.hidePeopleRow();
-                    }
-
                     if (!isBlockingHelperShown) {
                         mView.addSwipedOutView(view);
                     }
@@ -523,7 +524,8 @@ public class NotificationStackScrollLayoutController {
             StatusBar statusBar,
             ScrimController scrimController,
             NotificationGroupManagerLegacy legacyGroupManager,
-            GroupExpansionManager groupManager) {
+            GroupExpansionManager groupManager,
+            @SilentHeader SectionHeaderController silentHeaderController) {
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
@@ -559,6 +561,7 @@ public class NotificationStackScrollLayoutController {
                 mStatusBar.requestNotificationUpdate("onGroupsChanged");
             }
         });
+        mSilentHeaderController = silentHeaderController;
     }
 
     public void attach(NotificationStackScrollLayout view) {
@@ -624,6 +627,7 @@ public class NotificationStackScrollLayoutController {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
+        mSilentHeaderController.setOnClearAllClickListener(v -> clearSilentNotifications());
     }
 
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
@@ -1132,6 +1136,12 @@ public class NotificationStackScrollLayoutController {
                     false /* resetMenu */);
             mSwipeHelper.resetExposedMenuView(true /* animate */, true /* force */);
         }
+    }
+
+    public void clearSilentNotifications() {
+        // Leave the shade open if there will be other notifs left over to clear
+        final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
+        mView.clearNotifications(ROWS_GENTLE, closeShade);
     }
 
     private class NotificationListContainerImpl implements NotificationListContainer {
