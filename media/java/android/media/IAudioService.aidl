@@ -26,6 +26,7 @@ import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
+import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
@@ -307,4 +308,16 @@ interface IAudioService {
     // code via IAudioManager.h need to be added to the top section.
 
     oneway void setMultiAudioFocusEnabled(in boolean enabled);
+
+    int setPreferredDevicesForCapturePreset(
+            in int capturePreset, in List<AudioDeviceAttributes> devices);
+
+    int clearPreferredDevicesForCapturePreset(in int capturePreset);
+
+    List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(in int capturePreset);
+
+    void registerCapturePresetDevicesRoleDispatcher(ICapturePresetDevicesRoleDispatcher dispatcher);
+
+    oneway void unregisterCapturePresetDevicesRoleDispatcher(
+            ICapturePresetDevicesRoleDispatcher dispatcher);
 }
