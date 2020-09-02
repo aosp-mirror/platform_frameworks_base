@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"កម្មវិធីនេះ​អាចស្គាល់សកម្មភាព​រាងកាយ​របស់អ្នក។"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ថត​រូប និងវីដេអូ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​ថត​វីដេអូ​ ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"កម្មវិធី​នេះ​អាច​ទទួល​ការហៅត្រឡប់វិញ​បាន នៅពេល​កំពុងបិទ ឬ​បើក​កាមេរ៉ា (ដោយ​កម្មវិធី)​។"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ពិនិត្យ​ការ​ញ័រ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​បន្ត​ការ​ហៅ​ទូរសព្ទ​ ដែល​បាន​ចាប់ផ្តើម​នៅក្នុង​កម្មវិធី​ផ្សេង​។"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"អាន​លេខ​ទូរសព្ទ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"អនុញ្ញាត​ឲ្យ​កម្មវិធីនេះ​ចូលប្រើប្រាស់​លេខទូរសព្ទ​របស់​ឧបករណ៍​នេះ។"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"បន្តបើក​អេក្រង់​រថយន្ត"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ការពារ​​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"បង្ការទូរទស្សន៍ពីការបិទពន្លឺ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"អនុញ្ញាតឱ្យ​កម្មវិធី​បន្តបើក​អេក្រង់​រថយន្ត។"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ឲ្យ​​កម្មវិធី​ការពារ​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក។"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"អនុញ្ញាតឲ្យកម្មវិធីបង្ការទូរទស្សន៍ពីការបិទពន្លឺ។"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ឲ្យ​កម្មវិធី​ការពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក។"</string>
@@ -1245,7 +1249,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"មិនអាច​ភ្ជាប់​ជាមួយ <xliff:g id="SSID">%1$s</xliff:g> បានទេ"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"ចុច ដើម្បី​ប្ដូរ​ការកំណត់​ឯកជនភាព រួច​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ប្ដូរ​ការកំណត់​ឯកជនភាព​ឬ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ប្រហែលជា​ចង់ភ្ជាប់ ដោយប្រើ​អាសយដ្ឋាន MAC របស់​ឧបករណ៍អ្នក ដែលជា​ព័ត៌មាន​សម្គាល់​ពិសេស។ សកម្មភាពនេះ​អាចអនុញ្ញាតឱ្យ​ឧបករណ៍​នៅជិត​តាមដាន​ទីតាំង​ឧបករណ៍​របស់អ្នក។ \n\nប្រសិនបើអ្នកបន្ត <xliff:g id="SSID_1">%1$s</xliff:g> នឹងប្ដូរការកំណត់​ឯកជនភាព​របស់អ្នក រួចព្យាយាមភ្ជាប់ម្ដងទៀត។"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ដើម្បីភ្ជាប់ <xliff:g id="SSID">%1$s</xliff:g> ត្រូវការប្រើ​អាសយដ្ឋាន MAC របស់​ឧបករណ៍អ្នក ដែលជា​ព័ត៌មាន​សម្គាល់​ពិសេស។ បច្ចុប្បន្ន ការកំណត់​ឯកជនភាពរបស់អ្នកសម្រាប់បណ្ដាញនេះប្រើព័ត៌មានសម្គាល់ចៃដន្យ។ \n\nការផ្លាស់ប្ដូរនេះ​អាចអនុញ្ញាតឱ្យ​ឧបករណ៍​នៅជិតតាមដានទីតាំង​ឧបករណ៍​របស់អ្នក។"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ប្ដូរការ​កំណត់"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"បាន​ធ្វើ​បច្ចុប្បន្នភាព​ការ​កំណត់។ សូម​សាកល្បង​ភ្ជាប់ម្ដងទៀត។"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"មិនអាច​ប្ដូរ​ការកំណត់​ឯកជនភាព​បានទេ"</string>

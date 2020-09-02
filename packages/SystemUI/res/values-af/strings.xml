@@ -528,7 +528,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Toestel sal gesluit bly totdat jy dit handmatig ontsluit"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Kry kennisgewings vinniger"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Sien hulle voordat jy ontsluit"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Nee dankie"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Nee, dankie"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Stel op"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"Skakel nou af"</string>

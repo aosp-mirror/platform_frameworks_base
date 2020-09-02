@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Esta aplicação consegue reconhecer a sua atividade física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tirar fotos e vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta aplicação pode tirar fotos e gravar vídeos através da câmara em qualquer altura."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que uma app ou um serviço receba chamadas de retorno sobre dispositivos de câmara que estão a ser abertos ou fechados"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta app pode receber chamadas de retorno quando qualquer dispositivo de câmara está a ser aberto (e por que aplicação) ou fechado."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite à aplicação controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"marcar números de telefone diretamente"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite à aplicação continuar uma chamada iniciada noutra aplicação."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ler os números de telefone"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Permite à aplicação aceder aos números de telefone do dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"manter o ecrã do automóvel ligado"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"impedir que o tablet entre em inactividade"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"impedir a TV de entrar no modo de suspensão"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"impedir modo de inactividade do telefone"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite que a app mantenha o ecrã do automóvel ligado."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite que a aplicação impeça o tablet de entrar no modo de suspensão."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Permite à aplicação impedir a TV de entrar em modo de suspensão."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite que a aplicação impeça o telemóvel de entrar em inatividade."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Não é possível ligar a <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toque para alterar as definições de privacidade e tente novamente."</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Pretende alterar a definição de privacidade?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> pode pretender estabelecer ligação através do endereço MAC do dispositivo, um identificador exclusivo. Isto pode permitir que a localização do seu dispositivo seja monitorizada por dispositivos próximos. \n\nSe continuar, <xliff:g id="SSID_1">%1$s</xliff:g> irá alterar a definição de privacidade e tentar estabelecer ligação novamente."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para associar, o <xliff:g id="SSID">%1$s</xliff:g> tem de utilizar o endereço MAC do seu dispositivo, um identificador único. Atualmente, a sua definição de privacidade para esta rede utiliza um identificador aleatorizado. \n\nEsta alteração pode permitir que a localização do seu dispositivo seja monitorizada por dispositivos próximos."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Alterar definição"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Definição atualizada. Tente ligar novamente."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Não é possível alterar a definição de privacidade."</string>

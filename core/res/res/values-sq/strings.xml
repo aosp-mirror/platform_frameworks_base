@@ -227,7 +227,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Kyçja e ekranit"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Fik"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Urgjenca"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Raporti i defekteve në kod"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Raport i defektit në kod"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Jepi fund sesionit"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Pamja e ekranit"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Raporti i defekteve në kod"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ky aplikacion mund të njohë aktivitetin tënd fizik."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"bëj fotografi dhe video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ky aplikacion mund të nxjerrë fotografi dhe të regjistrojë video me kamerën tënde në çdo kohë."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lejo që një aplikacion ose shërbim të marrë telefonata mbrapsht për pajisjet e kamerës që hapen ose mbyllen."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ky aplikacion mund të marrë telefonata mbrapsht kur hapet ose mbyllet një pajisje e kamerës (nga një aplikacion)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrollo dridhjen"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefono drejtpërdrejt numrat e telefonit"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Lejon që aplikacioni të vazhdojë një telefonatë që është nisur në një aplikacion tjetër."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lexo numrat e telefonit"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Lejon që aplikacioni të ketë qasje te numrat e telefonit të pajisjes."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"të mbajë ekranin e makinës të aktivizuar"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"parandalo kalimin e tabletit në fjetje"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"parandalo kalimin e televizorit në fjetje"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"parandalo kalimin e telefonit në fjetje"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lejon që aplikacioni të mbajë ekranin e makinës të aktivizuar."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Lejon aplikacionin të parandalojë tabletin nga fjetja."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Lejon aplikacionin të parandalojë televizorin nga fjetja."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Lejon aplikacionin të parandalojë telefonin nga fjetja."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Nuk mund të lidhet me <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Trokit për të ndryshuar cilësimet e privatësisë dhe provo përsëri"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Do ta ndryshosh cilësimin e privatësisë?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> mund të dëshirojë të lidhet duke përdorur adresën MAC të pajisjes sate, një identifikues unik. Kjo mund të lejojë monitorimin e vendndodhjes së pajisjes sate nga pajisjet në afërsi. \n\nNëse vazhdon, <xliff:g id="SSID_1">%1$s</xliff:g> do të ndryshojë cilësimin tënd të privatësisë dhe do të provojë të lidhet përsëri."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Për t\'u lidhur, <xliff:g id="SSID">%1$s</xliff:g> ka nevojë të përdorë adresën MAC të pajisjes sate, një identifikues unik. Aktualisht, cilësimi yt i privatësisë për këtë rrjet përdor një identifikues të rastësishëm. \n\nKy ndryshim mund të lejojë monitorimin e vendndodhjes së pajisjes sate nga pajisjet në afërsi."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ndrysho cilësimin"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Cilësimi u përditësua. Provo të lidhesh përsëri."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Cilësimi i privatësisë nuk mund të ndryshohet"</string>
@@ -1333,7 +1337,7 @@
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Mos lejo asnjëherë"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"Karta SIM u hoq"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"Rrjeti celular nuk do të mundësohet derisa ta rinisësh pajisjen me një kartë të vlefshme SIM në të."</string>
-    <string name="sim_done_button" msgid="6464250841528410598">"U krye!"</string>
+    <string name="sim_done_button" msgid="6464250841528410598">"U krye"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"Karta SIM u shtua"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Rinise pajisjen për të pasur qasje në rrjetin celular."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Rifillo"</string>
@@ -1346,7 +1350,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Cakto kohën"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Vendos datën"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Cakto"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"U krye!"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"U krye"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"E RE: "</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"Ofruar nga <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"Nuk kërkohen leje"</string>
@@ -1447,7 +1451,7 @@
     <string name="ime_action_search" msgid="4501435960587287668">"Kërko"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Dërgo"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"Përpara"</string>
-    <string name="ime_action_done" msgid="6299921014822891569">"U krye!"</string>
+    <string name="ime_action_done" msgid="6299921014822891569">"U krye"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"I mëparshëm"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Ekzekuto"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Telefono numrin\nduke përdorur <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1498,7 +1502,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> nga gjithsej <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="one">1 përputhje</item>
     </plurals>
-    <string name="action_mode_done" msgid="2536182504764803222">"U krye!"</string>
+    <string name="action_mode_done" msgid="2536182504764803222">"U krye"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Po fshin hapësirën ruajtëse të brendshme…"</string>
     <string name="share" msgid="4157615043345227321">"Shpërndaj"</string>
     <string name="find" msgid="5015737188624767706">"Gjej"</string>
@@ -1539,7 +1543,7 @@
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Anulo"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Fshi"</string>
-    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"U krye!"</string>
+    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"U krye"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Ndryshim modaliteti"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
@@ -1799,7 +1803,7 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Po shikon ekranin e plotë"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Për të dalë, rrëshqit nga lart poshtë."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"E kuptova"</string>
-    <string name="done_label" msgid="7283767013231718521">"U krye!"</string>
+    <string name="done_label" msgid="7283767013231718521">"U krye"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Rrëshqitësi rrethor i orëve"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Rrëshqitësi rrethor i minutave"</string>
     <string name="select_hours" msgid="5982889657313147347">"Përzgjidh orët"</string>

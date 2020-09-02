@@ -1151,6 +1151,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_camera">This app can take pictures and record videos using the camera at any time.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_cameraOpenCloseListener">Allow an application or service to receive callbacks about camera devices being opened or closed.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_cameraOpenCloseListener">This app can receive callbacks when any camera device is being opened (by what application) or closed.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1212,11 +1217,15 @@
     <string name="permdesc_readPhoneNumbers">Allows the app to access the phone numbers of the device.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_wakeLock" product="automotive">keep car screen turned on</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tv">prevent TV from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_wakeLock" product="automotive">Allows the app to keep the car screen turned on.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_wakeLock" product="tablet">Allows the app to prevent the tablet from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -3350,8 +3359,8 @@
     <!-- Title of the dialog which pops up when the notification is tapped. [CHAR_LIMIT=NONE]-->
     <string name="wifi_disable_mac_randomization_dialog_title">Change privacy setting?</string>
     <!-- Dialog text [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_message"><xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> may want to connect using your device MAC address, a unique identifier. This may allow your device\u2019s location to be tracked by nearby devices.
-        \n\nIf you continue, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> will change your privacy setting and try to connect again.</string>
+    <string name="wifi_disable_mac_randomization_dialog_message"> To connect, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> needs to use your device MAC address, a unique identifier. Currently, your privacy setting for this network uses a randomized identifier.
+        \n\nThis change may allow your device\u2019s location to be tracked by nearby devices.</string>
     <!-- Text of the button that will disable MAC randomization for the network when tapped. [CHAR_LIMIT=NONE]-->
     <string name="wifi_disable_mac_randomization_dialog_confirm_text">Change setting</string>
     <!-- Toast message which shows up after MAC randomization for the network is disabled. [CHAR_LIMIT=NONE]-->

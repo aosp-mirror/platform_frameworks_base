@@ -134,7 +134,7 @@ public class OperatorNameView extends TextView implements DemoMode, DarkReceiver
 
     private void updateText() {
         CharSequence displayText = null;
-        List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
+        List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(false);
         final int N = subs.size();
         for (int i = 0; i < N; i++) {
             int subId = subs.get(i).getSubscriptionId();

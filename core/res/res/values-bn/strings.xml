@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"আপনি এই অ্যাপ ব্যবহার করার সময়েই শুধু সেটি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অ্যাপকে এই ডিভাইসের লোকেশন &lt;b&gt;সব সময়&lt;/b&gt; অ্যাক্সেস করার অনুমতি দিতে চান?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"আপনি যখন অ্যাপটি ব্যবহার করবেন শুধুমাত্র তখনই অ্যাপটি বর্তমান লোকেশন অ্যাক্সেস করতে পারবে।"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ক্যালেন্ডার"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার ক্যালেন্ডারে অ্যাক্সেস দেবেন?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"এই অ্যাপ আপনার শারীরিক অ্যাক্টিভিটি শনাক্ত করতে পারবে।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"এই অ্যাপটি যে কোনো সময় ক্যামেরা ব্যবহার করে ছবি তুলতে বা ভিডিও রেকর্ড করতে পারে৷"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনও অ্যাপ্লিকেশন বা পরিষেবাকে ক্যামেরা ডিভাইসগুলি খোলা বা বন্ধ হওয়া সম্পর্কে কলব্যাকগুলি গ্রহণ করার অনুমতি দিন।"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"কোনও ক্যামেরা ডিভাইস খোলা (অ্যাপ্লিকেশনের সাহায্যে) বা বন্ধ করা হলে এই অ্যাপ কলব্যাক গ্রহণ করতে পারে।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"অন্য কোনও অ্যাপ দিয়ে কল করলে এই অ্যাপটিকে সেটি চালিয়ে যেতে দেয়।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ফোন নম্বরগুলি পড়া হোক"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"অ্যাপটিকে এই ডিভাইসের ফোন নম্বরগুলি অ্যাক্সেস করতে দেয়।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"গাড়ির স্ক্রিন চালু রাখা আছে"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ঘুমানো থেকে ট্যাবলেটকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"টিভিকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ঘুমানো থেকে ফোনটিকে প্রতিরোধ করে"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"গাড়ির স্ক্রিন চালু রাখতে অ্যাপকে অনুমতি দেয়।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"অ্যাপ্লিকেশানকে ট্যাবলেট নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"অ্যাপ্লিকেশানকে টিভিকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"অ্যাপ্লিকেশানকে ফোনকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
@@ -746,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"অফিসের মোবাইল"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"কার্যক্ষেত্রের পেজার"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"সহায়ক"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"কাস্টম"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"জন্মদিন"</string>
@@ -779,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"অন্যান্য"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"কাস্টম"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"কাস্টম"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"সহায়ক"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ভাই"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"সন্তান"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"জীবনসাথি"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g>-এর সাথে কানেক্ট করা যাচ্ছে না"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"গোপনীয়তা সেটিংস পরিবর্তন করতে এবং আবার চেষ্টা করতে ট্যাপ করুন"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"গোপনীয়তা সেটিংস পরিবর্তন করবেন?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> আপনার ডিভাইসের MAC অ্যাড্রেস ব্যবহার করে কানেক্ট করার চেষ্টা করতে পারে, এটি হল একটি অনন্য শনাক্তকারী। এর ফলে আশেপাশে থাকা ডিভাইস থেকে আপনার ডিভাইসের লোকেশন ট্র্যাক করার অনুমতি থাকতে পারে। \n\nআপনি যদি এটি ব্যবহার করা চালিয়ে যান, <xliff:g id="SSID_1">%1$s</xliff:g> আপনার গোপনীয়তা সেটিং পরিবর্তন করে আবার কানেক্ট করার চেষ্টা করবে।"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"কানেক্ট করার জন্য, একটি অনন্য শনাক্তকারী হিসেবে <xliff:g id="SSID">%1$s</xliff:g> আপনার ডিভাইসের MAC অ্যাড্রেস ব্যবহার করবে। আপনার গোপনীয়তা সেটিংস এখন এই নেটওয়ার্কের জন্য একটি র‌্যান্ডামাইজ করা শনাক্তকারী ব্যবহার করে। \n\nএই পরিবর্তনটি আশেপাশের ডিভাইসগুলিকে আপনার ডিভাইসের লোকেশন ট্র্যাক করার অনুমতি দিতে পারে।"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"সেটিং পরিবর্তন করুন"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"সেটিং আপডেট করা হয়েছে। আবার কানেক্ট করার চেষ্টা করুন।"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"গোপনীয়তা সেটিং পরিবর্তন করা যাবে না"</string>
@@ -1352,7 +1356,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"কোনো অনুমতির প্রয়োজন নেই"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"এর জন্য অর্থপ্রদান করতে হতে পারে"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ঠিক আছে"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"এই ডিভাইসটি USB এর মাধ্যমে চার্জ করুন"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"এই ডিভাইসটি USB দিয়ে চার্জ করা হচ্ছে"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"সংযুক্ত ডিভাইসটি USB এর মাধ্যমে চার্জ করা হচ্ছে"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ফাইল ট্রান্সফার চালু করা হয়েছে"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB এর মাধ্যমে PTP চালু করা হয়েছে"</string>

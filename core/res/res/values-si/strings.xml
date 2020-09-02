@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"මෙම යෙදුමට ඔබේ ශාරීරික ක්‍රියාකාරකම හඳුනා ගැනීමට නොහැකිය"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"පින්තූර සහ වීඩියෝ ගන්න"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"මෙම යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"විවෘත වෙමින් හෝ වැසෙමින් පවතින කැමරා උපාංග පිළිබඳ පසු ඇමතුම් ලබා ගැනීමට යෙදුමකට හෝ සේවාවකට ඉඩ දෙන්න."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"මෙම යෙදුමට ඕනෑම කැමරා උපාංගයක් විවෘත වෙමින් පවතින විට (කුමන යෙදුමකින්) හෝ වැසෙමින් පවතින විට පසු ඇමතුම් ලබා ගැනීමට හැකිය."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"වෙනත් යෙදුමක ආරම්භ කරන ලද ඇමතුමක් දිගටම කරගෙන යාමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"දුරකථන අංක කියවන්න"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"උපාංගයේ දුරකථන අංක වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"මෝටර් රථ තිරය ක්‍රියාත්මකව තබා ගන්න"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"රූපවාහිනිය නින්දට යාමෙන් නවත්වන්න"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"දුරකථනය නින්දට යාමෙන් වළකන්න"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"යෙදුමට මෝටර් රථ තිරය ක්‍රියාත්මකව තබා ගැනීමට ඉඩ දෙයි."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ටැබ්ලටය නින්දට යාමෙන් වැලැක්වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"යෙදුමට රූපවාහිනිය නින්දට යාමට නැවැත්වීම අවසර දෙයි."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"දුරකථනය නින්දට යාමෙන් වැලැක්වීමට යෙදුමට අවසර දෙන්න."</string>
@@ -1245,7 +1249,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> වෙත සම්බන්ධ විය නොහැකිය"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"රහස්‍යතා සැකසීම් වෙනස් කිරීමට තට්ටු කර යළි උත්සාහ කරන්න"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"රහස්‍යතා සැකසීම වෙනස් කරන්නද?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"අනුපම අනන්‍යකාරකයක් වන ඔබේ උපාංග MAC ලිපිනය භාවිතයෙන් <xliff:g id="SSID_0">%1$s</xliff:g> හට සම්බන්ධ වීමට අවශ්‍ය විය හැකිය. මෙය ඔබේ උපාංගයේ ස්ථානය අවට උපාංග මගින් නිරීක්ෂණය කිරීමට ඉඩ දිය හැකිය. \n\nඔබ ඉදිරියට යන්නේ නම්, <xliff:g id="SSID_1">%1$s</xliff:g> මගින් ඔබේ රහස්‍යතා සැකසීම වෙනස් කර නැවත සම්බන්ධ වීමට උත්සාහ කරනු ඇත."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"සම්බන්ධ වීමට, <xliff:g id="SSID">%1$s</xliff:g> හට ඔබේ උපාංග MAC ලිපිනය, අනන්‍ය අනන්‍යකාරකයක් භාවිත කිරීමට අවශ්‍යය. දැනට, මෙම ජාලය සඳහා ඔබේ රහස්‍යතා සැකසීම සසම්භාවීකරණය කළ අනන්‍යකාරකයක් භාවිත කරයි. \n\nමෙය ඔබේ උපාංගයේ ස්ථානය අවට උපාංග මගින් නිරීක්ෂණය කිරීමට ඉඩ දිය හැකිය."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"සැකසීම වෙනස් කරන්න"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"සැකසීම යාවත්කාලීනයි. නැවත සබැඳීමට උත්සාහ කරන්න."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"රහස්‍යතා සැකසීම වෙනස් කළ නොහැකිය"</string>

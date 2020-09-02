@@ -111,8 +111,9 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mInitialTouchY = y;
                     int startHeight = (int) (mPickedChild.getActualHeight()
                                                 + mPickedChild.getTranslationY());
-                    mPanel.setPanelScrimMinFraction((float) startHeight
-                            / mPanel.getMaxPanelHeight());
+                    float maxPanelHeight = mPanel.getMaxPanelHeight();
+                    mPanel.setPanelScrimMinFraction(maxPanelHeight > 0f
+                            ? (float) startHeight / maxPanelHeight : 0f);
                     mPanel.startExpandMotion(x, y, true /* startTracking */, startHeight);
                     mPanel.startExpandingFromPeek();
                     // This call needs to be after the expansion start otherwise we will get a

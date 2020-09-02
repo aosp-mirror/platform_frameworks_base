@@ -40,6 +40,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -403,29 +404,28 @@ public class StagingManager {
         } else {
             params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
-        int apkSessionId = mPi.createSession(
-                params, originalSession.getInstallerPackageName(),
-                0 /* UserHandle.SYSTEM */);
-        PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
-
         try {
+            int apkSessionId = mPi.createSession(
+                    params, originalSession.getInstallerPackageName(),
+                    0 /* UserHandle.SYSTEM */);
+            PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
             apkSession.open();
             for (String apkFilePath : apkFilePaths) {
                 File apkFile = new File(apkFilePath);
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
                         ParcelFileDescriptor.MODE_READ_ONLY);
-                long sizeBytes = pfd.getStatSize();
+                long sizeBytes = (pfd == null) ? -1 : pfd.getStatSize();
                 if (sizeBytes < 0) {
                     Slog.e(TAG, "Unable to get size of: " + apkFilePath);
                     return null;
                 }
                 apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
             }
-        } catch (IOException e) {
+            return apkSession;
+        } catch (IOException | ParcelableException e) {
             Slog.e(TAG, "Failure to install APK staged session " + originalSession.sessionId, e);
             return null;
         }
-        return apkSession;
     }
 
     private boolean commitApkSession(@NonNull PackageInstallerSession apkSession,
@@ -619,7 +619,7 @@ public class StagingManager {
         return false;
     }
 
-    void restoreSession(@NonNull PackageInstallerSession session) {
+    void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
         PackageInstallerSession sessionToResume = session;
         synchronized (mStagedSessions) {
             mStagedSessions.append(session.sessionId, session);
@@ -635,6 +635,13 @@ public class StagingManager {
                     sessionToResume = mStagedSessions.get(session.getParentSessionId());
                 }
             }
+        }
+        // The preconditions used during pre-reboot verification might have changed when device
+        // is upgrading. Updated staged sessions to activation failed before we resume the session.
+        if (isDeviceUpgrading && !sessionToResume.isStagedAndInTerminalState()) {
+            sessionToResume.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Build fingerprint has changed");
+            return;
         }
         checkStateAndResume(sessionToResume);
     }

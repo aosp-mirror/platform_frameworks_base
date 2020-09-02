@@ -224,7 +224,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tùy chọn máy tính bảng"</string>
     <string name="global_actions" product="tv" msgid="2020669784083287370">"Tùy chọn TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Tùy chọn điện thoại"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Phương thức khoá màn hình"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Cách khóa màn hình"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Tắt nguồn"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Báo cáo lỗi"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ứng dụng này có thể nhận dạng hoạt động thể chất của bạn."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"chụp ảnh và quay video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ứng dụng này có thể chụp ảnh và quay video bằng máy ảnh bất cứ lúc nào."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Cho phép một ứng dụng hoặc dịch vụ nhận lệnh gọi lại khi các thiết bị máy ảnh đang được mở/đóng."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ứng dụng này có thể nhận các lệnh gọi lại khi có bất kỳ thiết bị camera nào đang được mở (bằng ứng dụng) hoặc đóng."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"gọi trực tiếp số điện thoại"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"đọc số điện thoại"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Cho phép ứng dụng truy cập số điện thoại của thiết bị."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"duy trì trạng thái bật của màn hình ô tô"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ngăn TV chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Cho phép ứng dụng này duy trì trạng thái bật của màn hình ô tô."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Cho phép ứng dụng ngăn TV chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Cho phép ứng dụng ngăn điện thoại chuyển sang chế độ ngủ."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Không kết nối được với <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Nhấn để thay đổi các tùy chọn cài đặt quyền riêng tư rồi thử lại"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Thay đổi tùy chọn cài đặt quyền riêng tư?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> có thể muốn kết nối bằng địa chỉ MAC (một mã nhận dạng duy nhất) của thiết bị. Nhờ đó, các thiết bị lân cận có thể theo dõi vị trí thiết bị của bạn. \n\nNếu bạn tiếp tục, <xliff:g id="SSID_1">%1$s</xliff:g> sẽ thay đổi tùy chọn cài đặt quyền riêng tư của bạn rồi tìm cách kết nối lại."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Để kết nối, <xliff:g id="SSID">%1$s</xliff:g> cần phải dùng địa chỉ MAC (mã nhận dạng duy nhất) của thiết bị. Hiện tại, tùy chọn cài đặt quyền riêng tư của mạng này đang dùng mã nhận dạng ngẫu nhiên. \n\nVới sự thay đổi này, các thiết bị ở gần có thể theo dõi vị trí thiết bị của bạn."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Thay đổi tùy chọn cài đặt"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Đã cập nhật tùy chọn cài đặt. Hãy thử kết nối lại."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Không thể thay đổi tùy chọn cài đặt quyền riêng tư"</string>

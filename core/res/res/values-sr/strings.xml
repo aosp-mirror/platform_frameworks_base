@@ -297,7 +297,7 @@
     <string name="permgrouprequest_sms" msgid="3985338150822482831">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; шаље и прегледа SMS-ове?"</string>
     <string name="permgrouplab_storage" msgid="1121695277384787841">"Меморијски простор"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"приступа сликама, медијима и датотекама на уређају"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа сликама, медијским датотекама и датотекама на уређају?"</string>
+    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа сликама, медијским и другим датотекама на уређају?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима звук"</string>
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима звук?"</string>
@@ -306,7 +306,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Желите ли да дозволите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа физичким активностима?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"снима слике и видео"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима слике и видео снимке?"</string>
+    <string name="permgrouprequest_camera" msgid="2697305443703328372">"Желите да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима слике и видео снимке?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Евиденције позива"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"читање и писање евиденције позива на телефону"</string>
     <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа евиденцијама позива на телефону?"</string>
@@ -437,6 +437,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ова апликација може да препозна физичке активности."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"снимање фотографија и видео снимака"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ова апликација може да снима фотографије и видео снимке помоћу камере у било ком тренутку."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволите апликацији или услузи да добија повратне позиве о отварању или затварању уређаја са камером."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ова апликација може да добија повратне позиве када се било који уређај са камером отвара или затвара (помоћу неке апликације)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контрола вибрације"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно позивање бројева телефона"</string>
@@ -453,9 +455,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Дозвољава апликацији да настави позив који је започет у другој апликацији."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"читање бројева телефона"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Дозвољава апликацији да приступа бројевима телефона на уређају."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"не искључуј екран у аутомобилу"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"спречавање преласка таблета у стање спавања"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"спречавање ТВ-а да пређе у стање спавања"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"спречавање преласка телефона у стање спавања"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дозвољава апликацији да не искључује екран у аутомобилу."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дозвољава апликацији да спречи таблет да пређе у стање спавања."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Дозвољава апликацији да спречи ТВ да пређе у стање спавања."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дозвољава апликацији да спречи телефон да пређе у стање спавања."</string>
@@ -1263,7 +1267,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Повезивање на мрежу <xliff:g id="SSID">%1$s</xliff:g> није успело"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Додирните да бисте променили подешавања приватности и пробали поново"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Желите ли да промените подешавања приватности?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> можда жели да се повеже помоћу MAC адресе уређаја, јединственог идентификатора. То може да омогући уређајима у близини да прате локацију уређаја. \n\nАко наставите, <xliff:g id="SSID_1">%1$s</xliff:g> ће променити подешавања приватности и поново пробати да се повеже."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> треба да се повеже помоћу MAC адресе уређаја, јединственог идентификатора. Подешавање приватности за ову мрежу тренутно користи насумични идентификатор. \n\nОва измена може да омогући уређајима у близини да прате локацију уређаја."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Промени подешавање"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Подешавање је ажурирано. Пробајте поново да се повежете."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Промена подешавања приватности није успела"</string>

@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"అవలోకనం."</string>
+    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"ఓవర్‌వ్యూ."</string>
     <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"<xliff:g id="APP">%s</xliff:g>ని తీసివేయండి."</string>
     <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"<xliff:g id="APP">%s</xliff:g> తీసివేయబడింది."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"అన్ని ఇటీవలి యాప్‌లు తీసివేయబడ్డాయి."</string>

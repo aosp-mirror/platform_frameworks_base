@@ -416,7 +416,8 @@ public class FocusRequester {
     }
 
     int dispatchFocusChange(int focusChange) {
-        if (mFocusDispatcher == null) {
+        final IAudioFocusDispatcher fd = mFocusDispatcher;
+        if (fd == null) {
             if (MediaFocusControl.DEBUG) { Log.e(TAG, "dispatchFocusChange: no focus dispatcher"); }
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
@@ -436,7 +437,7 @@ public class FocusRequester {
             mFocusLossReceived = focusChange;
         }
         try {
-            mFocusDispatcher.dispatchAudioFocusChange(focusChange, mClientId);
+            fd.dispatchAudioFocusChange(focusChange, mClientId);
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "dispatchFocusChange: error talking to focus listener " + mClientId, e);
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
@@ -445,16 +446,18 @@ public class FocusRequester {
     }
 
     void dispatchFocusResultFromExtPolicy(int requestResult) {
-        if (mFocusDispatcher == null) {
+        final IAudioFocusDispatcher fd = mFocusDispatcher;
+        if (fd == null) {
             if (MediaFocusControl.DEBUG) {
                 Log.e(TAG, "dispatchFocusResultFromExtPolicy: no focus dispatcher");
             }
+            return;
         }
         if (DEBUG) {
             Log.v(TAG, "dispatching result" + requestResult + " to " + mClientId);
         }
         try {
-            mFocusDispatcher.dispatchFocusResultFromExtPolicy(requestResult, mClientId);
+            fd.dispatchFocusResultFromExtPolicy(requestResult, mClientId);
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "dispatchFocusResultFromExtPolicy: error talking to focus listener"
                     + mClientId, e);

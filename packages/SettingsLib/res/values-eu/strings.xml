@@ -27,7 +27,7 @@
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Desgaituta"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Ezin izan da konfiguratu IP helbidea"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ez dago konektatuta sarearen kalitate eskasagatik"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Ezin izan da konektatu Wi-Fi sarera"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Ezin izan da konektatu wifi-sarera"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Autentifikazio-arazoa"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Ezin da konektatu"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Ezin da konektatu \"<xliff:g id="AP_NAME">%1$s</xliff:g>\" sarera"</string>
@@ -122,7 +122,7 @@
     <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"Mikrofonodun entzungailua"</string>
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"Telefonoa"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Irudietarako gailua"</string>
-    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Aurikularra"</string>
+    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Entzungailua"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Idazteko gailua"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth gailua"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Ezkerreko audifonoa parekatzen…"</string>
@@ -205,7 +205,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Gaitu arazketa modua USBa konektatzean"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Baliogabetu USB bidezko arazketarako baimenak"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Akatsen txostenerako lasterbidea"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Bateriaren menuan, erakutsi akatsen txostena sortzeko botoia"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Pizteko menuan, erakutsi akatsen txostena sortzeko botoia"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Mantendu aktibo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Pantaila ez da ezarriko inoiz inaktibo kargatu bitartean"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Gaitu Bluetooth HCI miatze-erregistroa"</string>
@@ -223,7 +223,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren muga"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth gailuak izenik gabe"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Hautatu Bluetooth AVRCP bertsioa"</string>
@@ -270,7 +270,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ezarpen hauek garapen-xedeetarako pentsatu dira soilik. Baliteke ezarpenen eraginez gailua matxuratzea edo funtzionamendu okerra izatea."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Egiaztatu USBko aplikazioak"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak atzemateko"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth bidezko gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>

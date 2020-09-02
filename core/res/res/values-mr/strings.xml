@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"तुम्ही अ‍ॅप वापरत असताना अ‍ॅपला फक्त स्थानाचा अ‍ॅक्सेस असेल"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला &lt;b&gt;प्रत्येक वेळी&lt;/b&gt; या डिव्हाइसच्या स्थानाचा अ‍ॅक्सेस द्यायचा?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"अ‍ॅप सध्या फक्त तुम्ही अ‍ॅप वापरत असतानाच स्थान अ‍ॅक्सेस करू शकते"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"कॅलेंडर"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपल्या कॅलेंडरवर प्रवेश"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
@@ -294,7 +294,7 @@
     <string name="permgrouprequest_sms" msgid="3985338150822482831">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला एसएमएस पाठवू आणि पाहू द्यायचे?"</string>
     <string name="permgrouplab_storage" msgid="1121695277384787841">"स्टोरेज"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अ‍ॅक्सेस"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फायली अ‍ॅक्सेस करू द्यायचे?"</string>
+    <string name="permgrouprequest_storage" msgid="1594774620878445266">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फाइल अ‍ॅक्सेस करू द्यायच्या?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ऑडिओ रेकॉर्ड"</string>
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला ऑडिओ रेकॉर्ड करू द्यायचा?"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"हे अ‍ॅप तुमच्या शारीरिक ॲक्टिव्हिटी ओळखू शकते."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"चित्रे आणि व्हिडिओ घ्या"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"हा अ‍ॅप कोणत्याही वेळी कॅमेरा वापरून चित्रेे घेऊ आणि व्ह‍िडिओ रेकॉर्ड करू शकतो."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"एखाद्या अ‍ॅप्लिकेशन किंवा सेवेला कॅमेरा डिव्हाइस सुरू किंवा बंद केल्याची कॉलबॅक मिळवण्याची अनुमती द्या."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कोणतेही कॅमेरा डिव्हाइस (कोणत्या अ‍ॅप्लिकेशनने) सुरू किंवा बंद केले जाते तेव्हा हे ॲप कॉलबॅक मिळवू शकते."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"व्हायब्रेट नियंत्रित करा"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"दुसऱ्या ॲपमध्ये सुरू झालेल्या कॉलला पुढे सुरू ठेवण्याची ॲपला अनुमती देते."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फोन नंबर वाचा"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ॲपला डिव्हाइसच्या फोन नंबरमध्ये प्रवेश करण्याची अनुमती देते."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कारची स्क्रीन सुरू ठेवा"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"टॅबलेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"निष्क्रिय होण्यापासून प्रतिबंध करा"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"फोन निष्‍क्रिय होण्‍यापासून प्रतिबंधित करा"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ॲपला कारची स्क्रीन सुरू ठेवण्याची अनुमती देते."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"टॅब्लेटला निष्क्रिय होण्यापासून प्रतिबंधित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"निष्क्रिय होण्यापासून टीव्हीला प्रतिबंध करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"फोनला निष्क्रिय होण्यापासून प्रतिबंधित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
@@ -779,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"असिस्टंट"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"भाऊ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"मूल"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"घरातील जोडीदार"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> शी कनेक्ट करता आले नाही"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"गोपनीयता सेटिंग्ज बदलण्यासाठी टॅप करा आणि पुन्हा प्रयत्न करा"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"गोपनीयता सेटिंग्ज बदलायची आहे का?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ला तुमच्या डिव्हाइसला MAC अ‍ॅड्रेस (एक युनिक आयडेंटिफायर) वापरून कदाचित कनेक्ट करायचे आहे. यामुळे तुमच्या डिव्हाइसचे स्थान जवळपासच्या डिव्हाइसद्वारे ट्रॅक करण्यास अनुमती देऊ शकते. \n\nतुम्ही पुढे सुरू ठेवल्यास, <xliff:g id="SSID_1">%1$s</xliff:g> तुमची गोपनीयता सेटिंग्ज बदलेल आणि पुन्हा कनेक्ट करण्याचा प्रयत्न करेल."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"कनेक्ट करण्यासाठी <xliff:g id="SSID">%1$s</xliff:g> ला तुमच्या डिव्हाइसचा MAC अ‍ॅड्रेस, एक युनिक आयडेंटिफायर वापरणे आवश्यक आहे. सध्या, या नेटवर्कसाठी तुमचे गोपनीयता सेटिंग रँडमाइझ केलेला आयडेंटिफायर वापरत आहे. \n\nहा बदल कदाचित जवळपासच्या डिव्हाइसना तुमच्या डिव्हाइसचे स्थान ट्रॅक करण्याची अनुमती देऊ शकतो."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"सेटिंग बदला"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"सेटिंग अपडेट केले. पुन्हा कनेक्ट करण्याचा प्रयत्न करा."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"गोपनीयता सेटिंग्ज बदलू शकत नाही"</string>

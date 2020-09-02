@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Questa app può riconoscere la tua attività fisica."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"acquisizione di foto e video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Questa app può scattare foto e registrare video tramite la fotocamera in qualsiasi momento."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Consenti a un\'applicazione o a un servizio di ricevere callback relativi all\'apertura o alla chiusura di videocamere."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Questa app può ricevere callback quando una videocamera viene aperta (da una specifica applicazione) o chiusa."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controllo vibrazione"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"chiamata diretta n. telefono"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Consente all\'app di continuare una chiamata che è stata iniziata in un\'altra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lettura dei numeri di telefono"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Consente all\'app di accedere ai numeri di telefono del dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"Mantenere attivo lo schermo dell\'auto"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"disattivazione stand-by del tablet"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"disattivazione della modalità di sospensione della TV"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"disattivazione stand-by del telefono"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Consente all\'app di mantenere attivo lo schermo dell\'auto."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Consente all\'applicazione di impedire lo stand-by del tablet."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Consente all\'app di impedire l\'attivazione della modalità di sospensione della TV."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Consente all\'applicazione di impedire lo stand-by del telefono."</string>
@@ -1187,7 +1191,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostra sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> è stata realizzata per una versione non compatibile del sistema operativo Android e potrebbe avere un comportamento imprevisto. Potrebbe essere disponibile una versione aggiornata dell\'app."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostra sempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verifica la presenza di aggiornamenti"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Cerca aggiornamenti"</string>
     <string name="smv_application" msgid="3775183542777792638">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="1398801497130695446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Aggiornamento del telefono…"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Impossibile connettersi alla rete <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tocca per cambiare le impostazioni sulla privacy e riprova"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vuoi cambiare l\'impostazione sulla privacy?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> potrebbe richiedere la connessione usando l\'indirizzo MAC del dispositivo, ossia un identificatore univoco. In questo caso la posizione del dispositivo potrebbe essere monitorata da dispositivi nelle vicinanze. \n\nSe continui, <xliff:g id="SSID_1">%1$s</xliff:g> cambierà la tua impostazione sulla privacy e riproverà a connettersi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Per la connessione, la rete <xliff:g id="SSID">%1$s</xliff:g> deve usare l\'indirizzo MAC del dispositivo, ossia un identificatore univoco. L\'impostazione sulla privacy attuale relativa a questa rete prevede l\'uso di un identificatore casuale. \n\nQuesta modifica potrebbe consentire il monitoraggio della posizione del tuo dispositivo da parte di dispositivi nelle vicinanze."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Cambia l\'impostazione"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Impostazione aggiornata. Riprova a connetterti."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Impossibile cambiare l\'impostazione sulla privacy"</string>
@@ -1913,7 +1917,7 @@
     <string name="work_mode_off_message" msgid="8417484421098563803">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Attiva"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Questa app è stata realizzata per una versione precedente di Android e potrebbe non funzionare correttamente. Prova a verificare la disponibilità di aggiornamenti o contatta lo sviluppatore."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verifica la presenza di aggiornamenti"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Apri l\'app SMS per la visualizzazione"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Alcune funzionalità sono limitate"</string>

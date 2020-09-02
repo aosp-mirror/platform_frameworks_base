@@ -259,6 +259,10 @@ interface IAudioService {
 
     boolean hasHapticChannels(in Uri uri);
 
+    int setAllowedCapturePolicy(in int capturePolicy);
+
+    int getAllowedCapturePolicy();
+
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.
 }

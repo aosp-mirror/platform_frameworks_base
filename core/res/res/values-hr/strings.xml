@@ -437,6 +437,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ova aplikacija može prepoznati vašu tjelesnu aktivnost."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"snimi fotografije i videozapise"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikacija u svakom trenutku može snimati fotografije i videozapise fotoaparatom."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Dopustite aplikaciji ili usluzi da prima povratne pozive o otvaranju ili zatvaranju fotoaparata."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacija može primati povratne pozive prilikom otvaranja (putem neke aplikacije) ili zatvaranja fotoaparata."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"upravljanje vibracijom"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Aplikaciji omogućuje nadzor nad vibratorom."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"izravno pozivanje telefonskog broja"</string>
@@ -453,9 +455,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Omogućuje aplikaciji da nastavi poziv započet u nekoj drugoj aplikaciji."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"čitati telefonske brojeve"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Aplikaciji omogućuje da pristupi telefonskim brojevima na uređaju."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"zadržati zaslon automobila uključenim"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"spriječi mirovanje tabletnog uređaja"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"sprječavanje mirovanja televizora"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"sprečava telefon da prijeđe u stanje mirovanja"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Aplikaciji omogućuje da zaslon automobila zadrži uključenim."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Aplikaciji omogućuje sprječavanje prelaska tabletnog računala u mirovanje."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Aplikaciji omogućuje sprječavanje prelaska televizora u stanje mirovanja."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Aplikaciji omogućuje da spriječi prelazak telefona u mirovanje."</string>
@@ -1263,7 +1267,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Povezivanje s mrežom <xliff:g id="SSID">%1$s</xliff:g> nije uspjelo"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Dodirnite da biste promijenili postavke privatnosti i pokušajte ponovo"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Želite li promijeniti postavku privatnosti?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Mreža <xliff:g id="SSID_0">%1$s</xliff:g> možda će se htjeti povezati pomoću MAC adrese, jedinstvenog identifikatora, vašeg uređaja. To može omogućiti uređajima u blizini da prate lokaciju vašeg uređaja. \n\nAko nastavite, mreža <xliff:g id="SSID_1">%1$s</xliff:g> promijenit će vašu postavku privatnosti i pokušati se povezati ponovo."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Da biste se povezali, <xliff:g id="SSID">%1$s</xliff:g> treba upotrijebiti MAC adresu, jedinstveni identifikator vašeg uređaja. Vaša postavka privatnosti za tu mrežu trenutačno upotrebljava nasumični identifikator. \n\nTa promjena može omogućiti uređajima u blizini da prate lokaciju vašeg uređaja."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Promijenite postavku"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Postavka je ažurirana. Pokušajte se ponovo povezati."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Promjena postavke privatnosti nije uspjela"</string>

@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"यो अनुप्रयोगले तपाईंको शारीरिक गतिविधिको पहिचान गर्न सक्छ।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"तस्बिरहरू र भिडियोहरू लिनुहोस्।"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"यस अनुप्रयोगले जुनसुकै समय क्यामेराको प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"कुनै अनुप्रयोग वा सेवालाई खोलिँदै वा बन्द गरिँदै गरेका क्यामेरा यन्त्रहरूका बारेमा कलब्याक प्राप्त गर्ने अनुमति दिनुहोस्।"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कुनै क्यामेरा यन्त्र खोलिँदा (कुन अनुप्रयोगले खोलेको भन्ने बारेमा) वा बन्द गरिँदा यो अनुप्रयोगले कलब्याक प्राप्त गर्न सक्छ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कम्पन नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अनुप्रयोगलाई भाइब्रेटर नियन्त्रण गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नम्बरहरूमा सीधै कल गर्नुहोस्"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"यस अनुप्रयोगलाई अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फोन नम्बरहरू पढ्ने"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"उक्त अनुप्रयोगलाई यस यन्त्रको फोन नम्बरहरूमाथि पहुँच राख्न दिनुहोस्।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कारको स्क्रिन सक्रिय राख्नुहोस्"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ट्याब्लेटलाई निन्द्रामा जानबाट रोक्नुहोस्"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"TV निभ्नबाट जोगाउनुहोस्"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"फोनलाई निदाउनबाट रोक्नुहोस्"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"यो अनुमतिले यस अनुप्रयोगलाई कारको स्क्रिन सक्रिय राख्न दिन्छ।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ट्याब्लेटलाई निस्क्रिय हुनबाट रोक्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"अनुप्रयोगलाई अनुमति दिन्छ TV लाई निभ्नबाट जोगाउन।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"फोनलाई निस्क्रिय हुनबाट रोक्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
@@ -1249,7 +1253,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> मा जोड्न सकिएन"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"गोपनीयता सेटिङ परिवर्तन गर्न ट्याप गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"गोपनीयतासम्बन्धी सेटिङ परिवर्तन गर्ने हो?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ले तपाईंका यन्त्रको MAC ठेगाना अर्थात् अद्वितीय पहिचानकर्ता प्रयोग गरेर सम्पर्क गर्न सक्ने सम्भावना छ। यसो गर्नाले तपाईंका यन्त्रको स्थान वरपरका यन्त्रहरूले ट्र्याक गर्न सक्ने सम्भावना छ। \n\nतपाईंले यो कार्य जारी राख्नुभएमा, <xliff:g id="SSID_1">%1$s</xliff:g> ले तपाईंको गोपनीयता सेटिङ परिवर्तन गरेर फेरि जोडिन प्रयास गर्ने छ।"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Wi-Fi मा जोड्नका लागि <xliff:g id="SSID">%1$s</xliff:g> ले तपाईंको यन्त्रको MAC ठेगाना अर्थात् एउटा अद्वितीय पहिचानकर्ता प्रयोग गर्नु पर्ने हुन्छ। हाल, यो नेटवर्कमा लागू हुने तपाईंको गोपनीयतासम्बन्धी सेटिङले अनियमित पहिचानकर्ताको प्रयोग गर्छ। \n\nयो परिवर्तन गर्नाले वरपरका यन्त्रहरूलाई तपाईंको यन्त्रको स्थान ट्र्याक गर्न दिने सम्भावना हुन्छ।"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"सेटिङ परिवर्तन गर्नुहोस्"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"सेटिङ अद्यावधिक गरियो। फेरि जोडी हेर्नुहोस्"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"गोपनीयता सेटिङ परिवर्तन गर्न सकिएन"</string>

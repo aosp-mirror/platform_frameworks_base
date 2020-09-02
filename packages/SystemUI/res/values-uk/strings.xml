@@ -199,7 +199,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Відкрити деталі акумулятора"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Заряд акумулятора у відсотках: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Згідно з даними про використання залишилося <xliff:g id="PERCENTAGE">%1$s</xliff:g> заряду акумулятора – близько <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Акумулятор заряджається: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Акумулятор заряджається, поточний заряд <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> відсотків."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Налаштування системи."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Сповіщення."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Переглянути всі сповіщення"</string>
@@ -915,7 +915,7 @@
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Може виконувати дії в додатку <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> показувати фрагменти будь-якого додатка"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Дозволити"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"Відмовити"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"Заборонити"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Торкніться, щоб увімкнути автоматичний режим економії заряду акумулятора"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Вмикати, коли заряд акумулятора закінчується"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ні, дякую"</string>

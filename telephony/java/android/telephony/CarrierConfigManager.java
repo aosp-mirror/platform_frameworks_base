@@ -100,6 +100,17 @@ public class CarrierConfigManager {
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
     /**
+     * Boolean indicating the Supplementary Services(SS) is disable when airplane mode on in the
+     * Call Settings menu.
+     * {@code true}: SS is disable when airplane mode on.
+     * {@code false}: SS is enable when airplane mode on.
+     * The default value for this key is {@code false}
+     * @hide
+     */
+    public static final String KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL =
+            "disable_supplementary_services_in_airplane_mode_bool";
+
+    /**
      * Boolean indicating if the "Call forwarding" item is visible in the Call Settings menu.
      * true means visible. false means gone.
      * @hide
@@ -2235,6 +2246,21 @@ public class CarrierConfigManager {
             "use_only_rsrp_for_lte_signal_bar_bool";
 
     /**
+     * String array of default bandwidth values per network type.
+     * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_STRING_ARRAY = "bandwidth_string_array";
+
+    /**
+     * For NR (non-standalone), whether to use the LTE value instead of NR value as the default for
+     * upstream bandwidth. Downstream bandwidth will still use the NR value as the default.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL =
+            "bandwidth_nr_nsa_use_lte_value_for_upstream_bool";
+
+    /**
      * Key identifying if voice call barring notification is required to be shown to the user.
      * @hide
      */
@@ -2684,6 +2710,34 @@ public class CarrierConfigManager {
      */
     public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT =
             "5g_icon_display_grace_period_sec_int";
+
+    /**
+     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
+     * @hide
+     */
+    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_long";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
 
     /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
@@ -3140,6 +3194,25 @@ public class CarrierConfigManager {
             "subscription_group_uuid_string";
 
     /**
+     * Data switch validation minimal gap time, in milliseconds.
+     *
+     * Which means, if the same subscription on the same network (based on MCC+MNC+TAC+subId)
+     * was recently validated (within this time gap), and Telephony receives a request to switch to
+     * it again, Telephony will skip the validation part and switch to it as soon as connection
+     * is setup, as if it's already validated.
+     *
+     * If the network was validated within the gap but the latest validation result is false, the
+     * validation will not be skipped.
+     *
+     * If not set or set to 0, validation will never be skipped.
+     * The max acceptable value of this config is 24 hours.
+     *
+     * @hide
+     */
+    public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
+            "data_switch_validation_min_gap_long";
+
+    /**
     * A boolean property indicating whether this subscription should be managed as an opportunistic
     * subscription.
     *
@@ -3255,6 +3328,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
@@ -3551,6 +3625,13 @@ public class CarrierConfigManager {
                         -95, /* SIGNAL_STRENGTH_GOOD */
                         -85  /* SIGNAL_STRENGTH_GREAT */
                 });
+        sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
+                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
+                "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550:", "eHRPD:750,48",
+                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
+                "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
+        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
@@ -3566,6 +3647,11 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G");
         sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
+        /* Default value is 1 hour. */
+        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
@@ -3616,6 +3702,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, 0);
     }
 
     /**

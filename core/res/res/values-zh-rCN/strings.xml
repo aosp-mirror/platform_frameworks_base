@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"此应用可以识别您的身体活动。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"此应用可随时使用相机拍摄照片和录制视频。"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允许应用或服务接收与打开或关闭摄像头设备有关的回调。"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"此应用可在任何摄像头设备（被某些应用）打开或关闭时收到相应回调。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允许应用控制振动器。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"拨打电话"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"允许该应用继续进行在其他应用中发起的通话。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"读取电话号码"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"允许该应用访问设备上的电话号码。"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"使车载显示屏保持开启状态"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"阻止平板电脑进入休眠状态"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"阻止电视进入休眠状态"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"防止手机休眠"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"允许该应用使车载显示屏保持开启状态。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"允许应用阻止平板电脑进入休眠状态。"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"允许应用阻止电视进入休眠状态。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"允许应用阻止手机进入休眠状态。"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"无法连接到“<xliff:g id="SSID">%1$s</xliff:g>”"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"点按以更改隐私设置并重试"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"要更改隐私设置吗？"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"“<xliff:g id="SSID_0">%1$s</xliff:g>”可能想使用您设备的 MAC 地址（一个唯一标识符）来进行连接。这可能会让附近的设备可以跟踪您设备的位置信息。\n\n如果您继续操作，“<xliff:g id="SSID_1">%1$s</xliff:g>”将会更改您的隐私设置并尝试重新连接。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"“<xliff:g id="SSID">%1$s</xliff:g>”需要使用您设备的 MAC 地址（一个唯一标识符）才能连接。目前，该网络的隐私设置使用的是随机标识符。\n\n这项变更可能会让附近的设备可以跟踪您设备的位置信息。"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"更改设置"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"设置已更新。请尝试重新连接。"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"无法更改隐私设置"</string>

@@ -209,7 +209,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Förbereder uppdatering …"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Uppdateringspaketet behandlas ..."</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Startar om …"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Återställ standardinställning"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Återställer standardinställning"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Startar om …"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Din surfplatta stängs av."</string>
@@ -298,7 +298,7 @@
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"spela in ljud"</string>
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysiska aktivitet"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"åtkomst till data om fysisk aktivitet"</string>
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till data om fysisk aktivitet?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Den här appen kan känna igen fysisk aktivitet."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Appen kan ta kort och spela in video med kameran när som helst."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillåt att en app eller tjänst får återanrop när en kameraenhet öppnas eller stängs."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Den här appen kan få återanrop när en kameraenhet öppnas (efter app) eller stängs."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillåter att appen styr vibrationen."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringa telefonnummer direkt"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tillåter att appen fortsätter ett samtal som har startats i en annan app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"läsa telefonnummer"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Appen beviljas åtkomst till enhetens telefonnummer."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"låta bilens skärm vara på"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"förhindra att surfplattan går in i viloläge"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"förhindra att TV:n försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"förhindra att telefonen sätts i viloläge"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tillåter appen att låta bilens skärm vara på."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tillåter att appen förhindrar att surfplattan går in i viloläge."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Tillåter att appen förhindrar att TV:n försätts i viloläge."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tillåter att appen förhindrar att mobilen går in i viloläge."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Det gick inte att ansluta till <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tryck för att ändra sekretessinställningar och försök igen"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vill du ändra sekretessinställningar?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Det kan vara så att enhetens MAC-adress (en unik identifierare) används vid anslutningen till <xliff:g id="SSID_0">%1$s</xliff:g>. Det kan göra det möjligt för enheter i närheten att spåra enhetens plats. \n\nOm du fortsätter ändras sekretessinställningen och <xliff:g id="SSID_1">%1$s</xliff:g> testar att ansluta på nytt."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> måste använda enhetens MAC-adress (en unik identifierare) vid anslutningen. Just nu används en slumpgenererad identifierare enligt integritetsinställningarna för nätverket. \n\nDetta kan göra det möjligt för enheter i närheten att spåra enhetens plats."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ändra inställning"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Inställningen har uppdaterats. Försök att ansluta igen."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Det gick inte att ändra sekretessinställningen"</string>

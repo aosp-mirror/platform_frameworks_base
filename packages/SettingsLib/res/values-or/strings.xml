@@ -412,7 +412,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"ଚାର୍ଜ ସମ୍ପୂର୍ଣ୍ଣ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ଆଡ୍‌ମିନ୍‌ ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ"</string>
     <string name="disabled" msgid="8017887509554714950">"ଅକ୍ଷମ ହୋଇଛି"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମୋଦିତ"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମତି ଦିଆଯାଇଛି"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ଅନୁମତି ନାହିଁ"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"ଅଜଣା ଆପ୍‌ ଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
     <string name="home" msgid="973834627243661438">"ସେଟିଙ୍ଗ ହୋମ୍‌"</string>

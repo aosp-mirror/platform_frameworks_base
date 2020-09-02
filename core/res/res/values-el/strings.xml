@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Αυτή η εφαρμογή μπορεί να αναγνωρίσει τη σωματική σας δραστηριότητα."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"κάνει λήψη φωτογραφιών και βίντεο"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Αυτή η εφαρμογή μπορεί να τραβήξει φωτογραφίες και βίντεο χρησιμοποιώντας την κάμερα, ανά πάσα στιγμή."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Επιτρέψτε σε μια εφαρμογή ή μια υπηρεσία να λαμβάνει επανάκλησεις σχετικά με το άνοιγμα ή το κλείσιμο συσκευών κάμερας."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Αυτή η εφαρμογή μπορεί να λαμβάνει επανακλήσεις κατά το άνοιγμα οποιασδήποτε συσκευής κάμερας (από οποιαδήποτε εφαρμογή) ή κατά το κλείσιμο."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ελέγχει τη δόνηση"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"πραγματοποιεί απευθείας κλήση τηλεφωνικών αριθμών"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ανάγνωση αριθμών τηλεφώνου"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στους αριθμούς τηλεφώνου της συσκευής"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"διατήρηση ενεργοποίησης οθόνης αυτοκινήτου"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"αποτρέπει την μετάβαση του tablet σε κατάσταση αδράνειας"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"αποτρέπει την μετάβαση της τηλεόρασης σε κατάσταση αδράνειας"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"αποτρέπει το τηλεφώνο να μεταβεί σε κατάσταση αδράνειας"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Επιτρέπει στην εφαρμογή να διατηρεί την οθόνη του αυτοκινήτου ενεργοποιημένη."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Επιτρέπει στην εφαρμογή την παρεμπόδιση της μετάβασης του tablet σε κατάσταση αδράνειας."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Επιτρέπει στην εφαρμογή να εμποδίζει τη μετάβαση της τηλεόρασης στην κατάσταση αδράνειας."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Επιτρέπει στην εφαρμογή την παρεμπόδιση της μετάβασης του τηλεφώνου σε κατάσταση αδράνειας."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Δεν είναι δυνατή η σύνδεση με το <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Πατήστε για αλλαγή των ρυθμίσεων απορρήτου και δοκιμάστε ξανά"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Αλλαγή της ρύθμισης απορρήτου;"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Το <xliff:g id="SSID_0">%1$s</xliff:g> μπορεί να θέλει να συνδεθεί χρησιμοποιώντας τη διεύθυνση MAC της συσκευής σας, η οποία είναι ένα μοναδικό αναγνωριστικό. Αυτό μπορεί να επιτρέψει την παρακολούθηση της τοποθεσίας της συσκευής σας από συσκευές σε κοντινή απόσταση. \n\nΕάν συνεχίσετε, το <xliff:g id="SSID_1">%1$s</xliff:g> θα αλλάξει τη ρύθμιση απορρήτου σας και θα δοκιμάσει να συνδεθεί ξανά."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Για να συνδεθεί, το <xliff:g id="SSID">%1$s</xliff:g> θα πρέπει να χρησιμοποιήσει τη διεύθυνση της συσκευής MAC, η οποία είναι ένα μοναδικό αναγνωριστικό. Αυτήν τη στιγμή, η ρύθμιση απορρήτου σας για αυτό το δίκτυο χρησιμοποιεί ένα τυχαίο αναγνωριστικό. \n\nΑυτή η αλλαγή μπορεί να επιτρέψει την παρακολούθηση της τοποθεσίας της συσκευής σας από συσκευές σε κοντινή απόσταση."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Αλλαγή ρύθμισης"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Η ρύθμιση ενημερώθηκε. Δοκιμάστε να συνδεθείτε ξανά."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Δεν είναι δυνατή η αλλαγή της ρύθμισης απορρήτου"</string>

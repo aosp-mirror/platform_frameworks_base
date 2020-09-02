@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Lolu hlelo lokusebenza lingabona umsebenzi wakho."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"thatha izithombe namavidiyo"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Lolu hlelo lokusebenza lungathatha izithombe futhi lirekhode amavidiyo lusebenzisa ikhamera noma kunini."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Vumela uhlelo lokusebenza noma isevisi ukwamukela ukuphinda ufonelwe mayelana namadivayisi wekhamera avuliwe noma avaliwe."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Lolu hlelo lokusebenza lungakwazi ukuthola ukuphinda ufonelwe uma noma iyiphi idivayisi yekhamera ivulwa (ngephakheji yohlelo lokusebenza) noma ivalwa."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"lawula ukudlidliza"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ivumela uhlelo lokusebenza ukulawula isidlidlizi."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ngokuqondile shayela izinombolo zocingo"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Ivumela uhlelo lokusebenza ukuze luqhube ikholi eqalwe kolunye uhlelo lokusebenza."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"funda izinombolo zefoni"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Ivumela uhlelo lokusebenza ukufinyelela izinombolo zefoni zedivayisi."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"gcina isikrini semoto sivuliwe"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"gwema ithebhulethi ukuba ingalali"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"vimbela i-TV kusukela ekulaleni"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"gwema ifoni ukuba ingalali"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Ivumela uhlelo lokusebenza ukuthi lugcine isikrini semoto sivuliwe."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Ivumela uhlelo lokusebenza ukuthi linqande ithebulethi yakho ukuthi ilale."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Ivumela uhlelo lokusebenza ukuvimbela i-TV ukuthi ilale."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Ivumela uhlelo lokusebenza ukuthi inqande ucingo ukuthi lulale."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Ayikwazi ukuxhumeka ku-<xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Thepha ukuze ushintshe izilungiselelo zobumfihlo uphinde uzame futhi"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Shintsha isilungiselelo sobumfihlo?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"I-<xliff:g id="SSID_0">%1$s</xliff:g> ingafuna ukuxhumeka isebenzisa ikheli lakho ledivayisi ye-MAC, inkomba ehlukile. Lokhu kungavumela indawo yedivayisi yakho ukuthi ilandelelwe amadivayisi aseduze. \n\nUma uqhubeka, i-<xliff:g id="SSID_1">%1$s</xliff:g> izoshintsha isilungiselelo sakho sobumfihlo iphinde izame ukuxhumeka futhi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Ukuze uxhume, i-<xliff:g id="SSID">%1$s</xliff:g> idinga ukusebenzisa ikheli lakho ledivayisi ye-MAC, inkomba ehlukile. Okwamanje, izilungiselelo zemfihlo yakho ngale nethiwekhi zisebenzisa inkomba engahleliwe. \n\nLokhu kungavumela indawo yedivayisi yakho ukuthi ilandelelwe amadivayisi aseduze."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Shintsha isilungiselelo"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Isilungiselelo sibuyekeziwe. Zama ukuxhuma futhi."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Ayikwazi ukushintsha isilungiselelo sobumfihlo"</string>

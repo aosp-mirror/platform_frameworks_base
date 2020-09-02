@@ -197,11 +197,9 @@
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Няма SIM-карты."</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"Змяненне аператара сеткі"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Паказаць падрабязную інфармацыю пра акумулятар"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (5143715405241138822) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"Працэнт зараду акумулятара: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Зарад акумулятара ў працэнтах: <xliff:g id="PERCENTAGE">%1$s</xliff:g>. Пры такім выкарыстанні яго хопіць прыблізна на <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Зарадка акумулятара: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Акумулятар зараджаецца. Бягучы зарад: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Сістэмныя налады."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"Апавяшчэнні."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Паказаць усе апавяшчэнні"</string>

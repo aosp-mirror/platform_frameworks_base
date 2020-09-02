@@ -199,7 +199,9 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"बैटरी का विवरण खोलें"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> प्रतिशत बैटरी बची है और आपके इस्तेमाल के हिसाब से यह <xliff:g id="TIME">%2$s</xliff:g> में खत्म हो जाएगी"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level_charging (8892191177774027364) -->
+    <skip />
     <string name="accessibility_settings_button" msgid="2197034218538913880">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"सूचनाएं."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"पूरी सूचनाएं देखें"</string>
@@ -876,7 +878,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"जगह"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"संकेत"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"इंस्टेंट ऐप"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"झटपट ऐप्लिकेशन"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है. ज़्यादा जानने के लिए टैप करें."</string>

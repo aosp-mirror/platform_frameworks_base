@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Apl ini dapat mengecam aktiviti fizikal anda."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Apl ini boleh mengambil gambar dan merakam video menggunakan kamera pada bila-bila masa."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Benarkan aplikasi atau perkhidmatan menerima panggilan balik tentang peranti kamera yang dibuka atau ditutup."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Apl ini boleh menerima panggilan balik apabila mana-mana peranti kamera dibuka (oleh aplikasi) atau ditutup."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kawal getaran"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Membenarkan apl mengawal penggetar."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"panggil terus nombor telefon"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Membenarkan apl meneruskan panggilan yang dimulakan dalam apl lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"baca nombor telefon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Membenarkan apl mengakses nombor telefon peranti."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"pastikan skrin kereta sentiasa hidup"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"menghalang tablet daripada tidur"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"halang TV daripada tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"halang telefon daripada tidur"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Membenarkan apl memastikan skrin kereta sentiasa hidup."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Membenarkan apl menghalang tablet daripada tidur."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Membenarkan apl menghalang TV daripada tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Membenarkan apl menghalang telefon daripada tidur."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Tidak dapat menyambung ke <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Ketik untuk menukar tetapan privasi, kemudian cuba semula"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Tukar tetapan privasi?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> mungkin mahu menyambung menggunakan alamat MAC peranti anda, iaitu pengecam unik. Tindakan ini mungkin membenarkan lokasi peranti anda dijejaki oleh peranti yang berdekatan. \n\nJika anda meneruskan, <xliff:g id="SSID_1">%1$s</xliff:g> akan menukar tetapan privasi anda dan cuba menyambung lagi."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Untuk bersambung, <xliff:g id="SSID">%1$s</xliff:g> perlu menggunakan alamat MAC peranti anda, iaitu pengecam unik. Pada masa ini, tetapan privasi anda untuk rangkaian ini menggunakan pengecam terawak. \n\nPerubahan ini mungkin membenarkan lokasi peranti anda dijejaki oleh peranti yang berdekatan."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Tukar tetapan"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Tetapan dikemas kini. Cuba sambung lagi."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Tidak boleh menukar tetapan privasi"</string>

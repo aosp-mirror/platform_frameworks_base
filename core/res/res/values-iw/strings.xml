@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"האפליקציה מזהה את הפעילות הגופנית שלך."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"אפליקציה זו יכולה להשתמש במצלמה כדי לצלם תמונות ולהקליט סרטונים בכל עת."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"‏אפליקציה או שירות יוכלו לקבל קריאות חוזרות (callback) כשמכשירי מצלמה ייפתחו או ייסגרו."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"‏האפליקציה הזו יכולה לקבל קריאות חוזרות (callback) כשמכשיר מצלמה כלשהו נפתח (באמצעות אפליקציה) או נסגר."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"שליטה ברטט"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"מאפשר לאפליקציה לשלוט ברטט."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"התקשר ישירות למספרי טלפון"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"הרשאה זו מתירה לאפליקציה להמשיך שיחה שהחלה באפליקציה אחרת."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"גישה למספרי הטלפון"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"מתירה לאפליקציה גישה למספרי הטלפון במכשיר."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"מסך המכונית יישאר דלוק"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"מנע מהטאבלט לעבור למצב שינה"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"מניעת מעבר למצב שינה בטלוויזיה"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"מניעת מעבר הטלפון למצב שינה"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"מסך המכונית יישאר דלוק כשהאפליקציה פועלת."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"מאפשר לאפליקציה למנוע מהטאבלט לעבור למצב שינה."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"מאפשרת לאפליקציה למנוע מהטלוויזיה לעבור למצב שינה."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"מאפשר לאפליקציה למנוע מהטלפון לעבור למצב שינה."</string>
@@ -1283,7 +1287,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"לא ניתן להתחבר אל <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"יש להקיש כדי לשנות את הגדרות הפרטיות ולנסות שוב"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"לשנות את הגדרות הפרטיות?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"‏ייתכן שיידרש ל-<xliff:g id="SSID_0">%1$s</xliff:g> חיבור באמצעות כתובת ה-MAC של המכשיר, שמהווה מזהה ייחודי. באופן זה, מכשירים בקרבת מקום עשויים לקבל הרשאה לעקוב אחר מיקום המכשיר שלך. \n\nהמשך הפעולה יאפשר ל-<xliff:g id="SSID_1">%1$s</xliff:g> לשנות את הגדרות הפרטיות ולנסות להתחבר שוב."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"‏כדי לחבר, עליך לאפשר ל-<xliff:g id="SSID">%1$s</xliff:g> להשתמש בכתובת ה-MAC של המכשיר, מזהה ייחודי. הגדרת הפרטיות לרשת זו משתמשת כרגע במזהה רנדומלי. \n\nשינוי זה עשוי לאפשר למכשירים בקרבת מקום לעקוב אחר מיקום המכשיר שלך."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"שינוי ההגדרות"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ההגדרה עודכנה. אפשר לנסות שוב להתחבר."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"לא ניתן לשנות את הגדרות הפרטיות"</string>

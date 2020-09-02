@@ -286,7 +286,7 @@
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಬಳಸುವಾಗ, ಆ್ಯಪ್ ಮಾತ್ರ ಸ್ಥಳಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರುತ್ತದೆ"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"&lt;b&gt;ಎಲ್ಲಾ ಸಮಯದಲ್ಲೂ&lt;/b&gt; ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಬಳಸುವಾಗ ಮಾತ್ರ, ಅದು ಪ್ರಸ್ತುತವಾಗಿ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ಕ್ಯಾಲೆಂಡರ್"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ಈ ಆ್ಯಪ್‌ ನಿಮ್ಮ ದೈಹಿಕ ಚಟುವಟಿಕೆಯನ್ನು ಗುರುತಿಸಬಹುದು."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ಚಿತ್ರಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಯಾವ ಸಮಯದಲ್ಲಾದರೂ ಕ್ಯಾಮರಾ ಬಳಸಿಕೊಂಡು ಚಿತ್ರಗಳು ಮತ್ತು ವಿಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ಕ್ಯಾಮರಾ ಸಾಧನಗಳನ್ನು ತೆರೆಯುತ್ತಿರುವ ಅಥವಾ ಮುಚ್ಚುತ್ತಿರುವ ಕುರಿತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಆ್ಯಪ್‌ ಅಥವಾ ಸೇವೆಗೆ ಅನುಮತಿಸಿ."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ಯಾವುದೇ ಕ್ಯಾಮರಾ ಸಾಧನವನ್ನು ತೆರೆಯುತ್ತಿರುವಾಗ ಅಥವಾ ಮುಚ್ಚುತ್ತಿರುವಾಗ (ಯಾವ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಎಂಬ ಮಾಹಿತಿಯ ಮೂಲಕ) ಈ ಆ್ಯಪ್, ಕಾಲ್‌ಬ್ಯಾಕ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ವೈಬ್ರೇಷನ್‌‌ ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ವೈಬ್ರೇಟರ್‌ ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ನೇರವಾಗಿ ಕರೆ ಮಾಡಿ"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಪ್ರಾರಂಭವಾದ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡಿ."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ಫೋನ್‌ ಸಂಖ್ಯೆಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ಸಾಧನದ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ಕಾರ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್‌ನಲ್ಲೇ ಇರಿಸಿ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ಟ್ಯಾಬ್ಲೆಟ್ ನಿದ್ರಾವಸ್ಥೆಯನ್ನು ತಡೆಯಿರಿ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ಟಿವಿಗೆ ನಿದ್ರಿಸುವುದನ್ನು ತಪ್ಪಿಸಿ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ಫೋನ್ ಆಫ್ ಆಗುವುದರಿಂದ ತಡೆಯಿರಿ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ಕಾರ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್‌ನಲ್ಲೇ ಇರಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ಟ್ಯಾಬ್ಲೆಟ್‌ ನಿದ್ರೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ಟಿವಿ ನಿದ್ರೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಗಟ್ಟಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ಫೋನ್‌ ನಿದ್ರೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -746,7 +750,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ಕಚೇರಿ ಮೊಬೈಲ್"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ಕಚೇರಿ ಪೇಜರ್"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"ಸಹಾಯಕ"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"ಕಸ್ಟಮ್"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ಜನ್ಮದಿನ"</string>
@@ -779,7 +783,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ಇತರೆ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"ಕಸ್ಟಮ್"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"ಕಸ್ಟಮ್"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"ಸಹಾಯಕ"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"ಸಹೋದರ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"ಮಗು"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ಸ್ಥಳೀಯ ಪಾಲುದಾರ"</string>
@@ -874,7 +878,7 @@
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"ಪ್ಯಾಟರ್ನ್ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"ಪ್ಯಾಟರ್ನ್ ಪ್ರದೇಶ."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s.%3$d ರಲ್ಲಿ %2$d ವಿಜೆಟ್."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"ವಿಜೆಟ್ ಸೇರಿಸು."</string>
+    <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"ವಿಜೆಟ್ ಸೇರಿಸಿ."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"ಖಾಲಿ"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"ಅನ್‌ಲಾಕ್ ಪ್ರದೇಶವನ್ನು ವಿಸ್ತರಿಸಲಾಗಿದೆ."</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"ಅನ್‌ಲಾಕ್ ಪ್ರದೇಶವನ್ನು ಸಂಕುಚಿಸಲಾಗಿದೆ."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ ಮತ್ತು ಮರುಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಬೇಕೆ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ನಿಮ್ಮ ಸಾಧನದ MAC ವಿಳಾಸವನ್ನು ಬಳಸಿಕೊಂಡು ಕನೆಕ್ಟ್ ಮಾಡಲು ಬಯಸಬಹುದು, ಅದು ಅನನ್ಯ ಗುರುತಿಸುವಿಕೆಯಾಗಿದೆ. ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಹತ್ತಿರದ ಸಾಧನವನ್ನು ಇದು ಅನುಮತಿಸಬಹುದು. \n\nನೀವು ಮುಂದುವರಿಸಿದರೆ, <xliff:g id="SSID_1">%1$s</xliff:g> ನಿಮ್ಮ ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ ಮತ್ತು ಪುನಃ ಕನೆಕ್ಟ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ಕನೆಕ್ಟ್ ಮಾಡಲು, <xliff:g id="SSID">%1$s</xliff:g> ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಅನನ್ಯ ಗುರುತು MAC ವಿಳಾಸವನ್ನು ಬಳಸುವ ಅಗತ್ಯವಿದೆ. ಪ್ರಸ್ತುತವಾಗಿ, ಈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಗೌಪ್ಯತೆಯ ಸೆಟ್ಟಿಂಗ್ \'ಯಾದೃಚ್ಛಿಕ\' ಗುರುತಿಸುವಿಕೆಯನ್ನು ಬಳಸುತ್ತದೆ. \n\nಈ ಬದಲಾವಣೆಯು, ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಸಮೀಪದಲ್ಲಿನ ಸಾಧನಗಳಿಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ಸೆಟ್ಟಿಂಗ್‌‌ ಬದಲಾಯಿಸಿ"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ. ಪುನಃ ಕನೆಕ್ಟ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್‌ ಅನ್ನು ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>

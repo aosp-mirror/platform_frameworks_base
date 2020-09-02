@@ -368,7 +368,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Denne app kan vises oven på andre apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Denne app kan vises oven på andre apps eller andre dele af skærmen. Dette kan forstyrre den normale brug af appen og ændre visningen af andre apps."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"kør i baggrunden"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Denne app kan køre i baggrunden. Dette kan aflade batteriet hurtigere."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Denne app kan køre i baggrunden. Dette kan dræne batteriet hurtigere."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"brug data i baggrunden"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Denne app kan bruge data i baggrunden. Dette kan øge dataforbruget."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"sørge for, at appen altid kører"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Denne app kan genkende din fysiske aktivitet."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tage billeder og optage video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Med denne app kan du tage billeder og optage video med kameraet når som helst."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillad, at en app eller tjeneste modtager tilbagekald om kameraenheder, der åbnes eller lukkes."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Denne app kan modtage tilbagekald, når en kameraenhed åbnes (via appen) eller lukkes."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"administrere vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe direkte op til telefonnumre"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tillader, at appen fortsætter et opkald, der blev startet i en anden app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"læse telefonnumre"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Tillader, at appen får adgang til telefonnumrene på denne enhed."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hold bilens skærm tændt"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"afholde tabletcomputeren fra at gå i dvale"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"forhindre tv i at gå i dvale"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"afholde telefonen fra at gå i dvale"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tillader, at appen holder bilens skærm tændt."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tillader, at appen kan forhindre tabletten i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Giver appen lov til at forhindre fjernsynet i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tillader, at appen kan forhindre, at telefonen går i dvale."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Der kan ikke oprettes forbindelse til <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tryk for at ændre privatlivsindstillingerne, og prøv igen"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vil du ændre privatlivsindstillingen?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> vil muligvis gerne oprette forbindelse via din enheds MAC-adresse, som er et unikt id. Dette kan give enheder i nærheden tilladelse til at spore din enheds placering. \n\nHvis du fortsætter, ændrer <xliff:g id="SSID_1">%1$s</xliff:g> din privatlivsindstilling, og den prøver at oprette forbindelse igen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> skal bruge din enheds MAC-adresse (som er et unikt id) for at oprette forbindelse. I øjeblikket bruges et tilfældigt id i henhold til dine privatlivsindstillinger for dette netværk. \n\nDenne ændring kan gøre det muligt for enheder i nærheden at spore din enheds placering."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Skift indstilling"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Indstillingen er opdateret. Prøv at oprette forbindelse igen."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Privatlivsindstillingen kan ikke ændres"</string>

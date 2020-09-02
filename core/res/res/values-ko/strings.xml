@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"이 앱에서 내 신체 활동을 확인할 수 있습니다."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"이 앱은 언제든지 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"애플리케이션 또는 서비스에서 카메라 기기 열림 또는 닫힘에 대한 콜백을 수신하도록 허용"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"이 앱은 애플리케이션이 카메라 기기를 열거나 닫을 때 콜백을 수신할 수 있습니다."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"전화번호 자동 연결"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"다른 앱에서 수신한 전화를 계속하려면 앱을 허용합니다."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"전화번호 읽기"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"앱에서 기기의 전화번호에 액세스하도록 허용합니다."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"차량 화면 켜진 상태로 유지"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"TV의 절전 모드 전환 방지"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"앱에서 차량 화면을 켜진 상태로 유지하도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"앱이 TV가 절전 모드로 전환되는 것을 방지할 수 있도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"앱이 휴대전화의 절전 모드 전환을 막도록 허용합니다."</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"\'<xliff:g id="SSID">%1$s</xliff:g>\'에 연결할 수 없음"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"탭하여 개인정보 보호 설정을 변경하고 다시 시도하세요."</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"개인정보 보호 설정을 변경하시겠습니까?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g>에서 기기의 고유한 식별자인 MAC 주소를 사용하여 연결을 시도할 수도 있습니다. 이 경우 근처 기기가 내 기기의 위치를 추적할 수도 있습니다. \n\n계속하면 <xliff:g id="SSID_1">%1$s</xliff:g>에서 개인정보 보호 설정을 변경한 다음 연결을 다시 시도합니다."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"연결하려면 <xliff:g id="SSID">%1$s</xliff:g>에서 기기의 고유 식별자인 MAC 주소를 사용해야 합니다. 현재 이 네트워크의 개인정보 보호 설정에서는 무작위 식별자를 사용합니다. \n\n변경할 경우 근처 기기가 내 기기의 위치 정보를 추적할 수도 있습니다."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"설정 변경"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"설정이 업데이트되었습니다. 다시 연결해 보세요."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"개인정보 보호 설정을 변경할 수 없습니다."</string>

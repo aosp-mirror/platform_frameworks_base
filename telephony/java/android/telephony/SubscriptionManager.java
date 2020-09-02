@@ -2425,8 +2425,12 @@ public class SubscriptionManager {
      * @param plans the list of plans. The first plan is always the primary and
      *            most important plan. Any additional plans are secondary and
      *            may not be displayed or used by decision making logic.
+     *            The list of all plans must meet the requirements defined in
+     *            SubscriptionPlan.Builder#setNetworkTypes(int[]).
      * @throws SecurityException if the caller doesn't meet the requirements
      *             outlined above.
+     * @throws IllegalArgumentException if plans don't meet the requirements
+     *             mentioned above.
      */
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         try {

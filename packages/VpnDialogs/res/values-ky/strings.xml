@@ -26,7 +26,7 @@
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> байт / <xliff:g id="NUMBER_1">%2$s</xliff:g> пакет"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"Ар дайым күйүк VPN\'ге туташа албай жатат"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> тармагына ар дайым туташып турсун деп жөндөлгөн, бирок учурда телефонуңуз ага туташа албай жатат. <xliff:g id="VPN_APP_1">%1$s</xliff:g> тармагына кайра туташканга чейин телефонуңуз жалпыга ачык тармакты пайдаланып турат."</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> тармагына ар дайым туташып турсун деп жөндөлгөн, бирок учурда телефонуңуз ага туташа албай жатат. VPN тармагына кайра туташмайынча, Интернет байланышыңыз жок болот."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"<xliff:g id="VPN_APP">%1$s</xliff:g> тармагына ар дайым туташып турсун деп жөндөлгөн, бирок учурда телефонуңуз ага туташа албай жатат. VPN тармагына кайра туташмайынча, Интернет жок болот."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"VPN жөндөөлөрүн өзгөртүү"</string>
     <string name="configure" msgid="4905518375574791375">"Конфигурациялоо"</string>

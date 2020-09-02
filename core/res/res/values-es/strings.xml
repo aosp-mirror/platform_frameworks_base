@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Esta aplicación puede reconocer tu actividad física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"realizar fotografías y vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta aplicación puede hacer fotografías y grabar vídeos con la cámara en cualquier momento."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que una aplicación o servicio reciba retrollamadas cada vez que se abra o cierre una cámara."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta aplicación puede recibir retrollamadas cuando se abre o se cierra la cámara con cualquier aplicación."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite que la aplicación continúe una llamada que se ha iniciado en otra aplicación."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"leer números de teléfono"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Permite que la aplicación acceda a los números de teléfono del dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantener la pantalla del coche encendida"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"impedir que el tablet entre en modo de suspensión"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"evitar que la TV entre en suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"impedir que el teléfono entre en modo de suspensión"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite que la aplicación deje la pantalla del coche encendida."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite que la aplicación impida que el tablet entre en modo de suspensión."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Permite que la aplicación evite que la TV entre en modo de suspensión."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite que la aplicación impida que el teléfono entre en modo de suspensión."</string>
@@ -807,7 +811,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Introduce el código PIN para desbloquear."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"Código PIN incorrecto"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Para desbloquear el teléfono, pulsa la tecla de menú y, a continuación, pulsa 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Número de emergencia"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Llamada de emergencia"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Sin servicio"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"Pantalla bloqueada"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Pulsa la tecla de menú para desbloquear el teléfono o realizar una llamada de emergencia."</string>
@@ -1223,9 +1227,9 @@
     <string name="volume_music" msgid="7727274216734955095">"Volumen de multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Tono de silencio establecido"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Volumen de la llamada"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volumen de la llamada de Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volumen de la alarma"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Volumen de llamada"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volumen de llamada Bluetooth"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volumen de alarma"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volumen de notificaciones"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volumen"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volumen de Bluetooth"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"No se ha podido conectar a <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toca para cambiar los ajustes de privacidad y vuelve a intentarlo"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"¿Quieres cambiar el ajuste de privacidad?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Puede que <xliff:g id="SSID_0">%1$s</xliff:g> vaya conectarse mediante la dirección MAC de tu dispositivo, un identificador único. De esta forma, es posible que se permita que dispositivos cercanos registren la ubicación de tu dispositivo. \n\nSi continúas, <xliff:g id="SSID_1">%1$s</xliff:g> cambiará tu ajuste de privacidad e intentará conectarse de nuevo."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para conectarse, <xliff:g id="SSID">%1$s</xliff:g> necesita la dirección MAC de tu dispositivo, que es un identificador único; no obstante, el ajuste de privacidad de esta red utiliza un identificador aleatorio. \n\nEs posible que este cambio permita que los dispositivos cercanos conozcan la ubicación de tu dispositivo."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Cambiar ajuste"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Se ha cambiado el ajuste. Prueba a conectarte de nuevo."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"No se ha podido cambiar el ajuste de privacidad"</string>
@@ -1817,8 +1821,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado por el administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\nActiva el tema oscuro\nDesactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\nActiva el tema oscuro\nDesactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se mostrarán hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>

@@ -1,5 +1,9 @@
 package com.android.systemui.assist;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -39,13 +43,12 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
-import com.android.systemui.ConfigurationChangedReceiver;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import javax.inject.Inject;
@@ -55,7 +58,7 @@ import javax.inject.Singleton;
  * Class to manage everything related to assist in SystemUI.
  */
 @Singleton
-public class AssistManager implements ConfigurationChangedReceiver {
+public class AssistManager {
 
     /**
      * Controls the UI for showing Assistant invocation progress.
@@ -103,6 +106,9 @@ public class AssistManager implements ConfigurationChangedReceiver {
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
     protected static final String ACTION_KEY = "action";
     protected static final String SHOW_ASSIST_HANDLES_ACTION = "show_assist_handles";
+    protected static final String SET_ASSIST_GESTURE_CONSTRAINED_ACTION =
+            "set_assist_gesture_constrained";
+    protected static final String CONSTRAINED_KEY = "should_constrain";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
     public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
@@ -125,6 +131,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private final PhoneStateMonitor mPhoneStateMonitor;
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
+    protected final OverviewProxyService mOverviewProxyService;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -153,12 +160,41 @@ public class AssistManager implements ConfigurationChangedReceiver {
         }
     };
 
+    private ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    if (!mInterestingConfigChanges.applyNewConfig(mContext.getResources())) {
+                        return;
+                    }
+                    boolean visible = false;
+                    if (mView != null) {
+                        visible = mView.isShowing();
+                        mWindowManager.removeView(mView);
+                    }
+
+                    mView = (AssistOrbContainer) LayoutInflater.from(mContext).inflate(
+                            R.layout.assist_orb, null);
+                    mView.setVisibility(View.GONE);
+                    mView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+                    WindowManager.LayoutParams lp = getLayoutParams();
+                    mWindowManager.addView(mView, lp);
+                    if (visible) {
+                        mView.show(true /* show */, false /* animate */);
+                    }
+                }
+            };
+
     @Inject
     public AssistManager(
             DeviceProvisionedController controller,
             Context context,
             AssistUtils assistUtils,
-            AssistHandleBehaviorController handleController) {
+            AssistHandleBehaviorController handleController,
+            ConfigurationController configurationController,
+            OverviewProxyService overviewProxyService) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -167,17 +203,19 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mPhoneStateMonitor = new PhoneStateMonitor(context);
         mHandleController = handleController;
 
+        configurationController.addCallback(mConfigurationListener);
+
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
                 | ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_UI_MODE
                 | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
-        onConfigurationChanged(context.getResources().getConfiguration());
+        mConfigurationListener.onConfigChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
         mUiController = new DefaultUiController(mContext);
 
-        OverviewProxyService overviewProxy = Dependency.get(OverviewProxyService.class);
-        overviewProxy.addCallback(new OverviewProxyService.OverviewProxyListener() {
+        mOverviewProxyService = overviewProxyService;
+        mOverviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
             @Override
             public void onAssistantProgress(float progress) {
                 // Progress goes from 0 to 1 to indicate how close the assist gesture is to
@@ -214,34 +252,18 @@ public class AssistManager implements ConfigurationChangedReceiver {
                         if (VERBOSE) {
                             Log.v(TAG, "UI hints received");
                         }
-                        if (SHOW_ASSIST_HANDLES_ACTION.equals(hints.getString(ACTION_KEY))) {
+
+                        String action = hints.getString(ACTION_KEY);
+                        if (SHOW_ASSIST_HANDLES_ACTION.equals(action)) {
                             requestAssistHandles();
+                        } else if (SET_ASSIST_GESTURE_CONSTRAINED_ACTION.equals(action)) {
+                            mOverviewProxyService.setSystemUiStateFlag(
+                                    SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
+                                    hints.getBoolean(CONSTRAINED_KEY, false),
+                                    DEFAULT_DISPLAY);
                         }
                     }
                 });
-    }
-
-    public void onConfigurationChanged(Configuration newConfiguration) {
-        if (!mInterestingConfigChanges.applyNewConfig(mContext.getResources())) {
-            return;
-        }
-        boolean visible = false;
-        if (mView != null) {
-            visible = mView.isShowing();
-            mWindowManager.removeView(mView);
-        }
-
-        mView = (AssistOrbContainer) LayoutInflater.from(mContext).inflate(
-                R.layout.assist_orb, null);
-        mView.setVisibility(View.GONE);
-        mView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        WindowManager.LayoutParams lp = getLayoutParams();
-        mWindowManager.addView(mView, lp);
-        if (visible) {
-            mView.show(true /* show */, false /* animate */);
-        }
     }
 
     protected boolean shouldShowOrb() {

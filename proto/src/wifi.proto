@@ -635,6 +635,66 @@ message RouterFingerPrint {
     ROUTER_TECH_OTHER = 6;
   }
 
+  enum EapMethod {
+
+    // No EAP method used
+    TYPE_EAP_UNKNOWN = 0;
+
+    // EAP with Transport Layer Security
+    TYPE_EAP_TLS = 1;
+
+    // EAP with Tunneled Transport Layer Security
+    TYPE_EAP_TTLS = 2;
+
+    // EAP with Subscriber Identity Module [RFC-4186]
+    TYPE_EAP_SIM = 3;
+
+    // EAP with Authentication and Key Agreement [RFC-4187]
+    TYPE_EAP_AKA = 4;
+
+    // EAP with Authentication and Key Agreement Prime [RFC-5448]
+    TYPE_EAP_AKA_PRIME = 5;
+
+    // Protected EAP
+    TYPE_EAP_PEAP = 6;
+
+    // EAP for Hotspot 2.0 r2 OSEN
+    TYPE_EAP_UNAUTH_TLS = 7;
+
+    // EAP with Password
+    TYPE_EAP_PWD = 8;
+
+    // EAP with WAPI certifcate
+    TYPE_EAP_WAPI_CERT = 9;
+  }
+
+  enum AuthPhase2Method {
+
+    // No phase2 method
+    TYPE_PHASE2_NONE = 0;
+
+    // Password Authentication Protocol
+    TYPE_PHASE2_PAP = 1;
+
+    // Microsoft Challenge Handshake Authentication Protocol
+    TYPE_PHASE2_MSCHAP = 2;
+
+    // Microsoft Challenge Handshake Authentication Protocol v2
+    TYPE_PHASE2_MSCHAPV2 = 3;
+
+    // Generic Token Card
+    TYPE_PHASE2_GTC = 4;
+
+    // EAP-Subscriber Identity Module [RFC-4186]
+    TYPE_PHASE2_SIM = 5;
+
+    // EAP-Authentication and Key Agreement [RFC-4187]
+    TYPE_PHASE2_AKA = 6;
+
+    // EAP-Authentication and Key Agreement Prime [RFC-5448]
+    TYPE_PHASE2_AKA_PRIME   = 7;
+  }
+
   optional RoamType roam_type = 1;
 
   // Channel on which the connection takes place.
@@ -657,6 +717,12 @@ message RouterFingerPrint {
 
   // If the router is a passpoint / hotspot 2.0 network
   optional bool passpoint = 8;
+
+  // EAP method used by the enterprise network
+  optional EapMethod eap_method = 9;
+
+  // Phase 2 authentication method after setting up a secure channel
+  optional AuthPhase2Method auth_phase2_method = 10;
 }
 
 message ConnectionEvent {

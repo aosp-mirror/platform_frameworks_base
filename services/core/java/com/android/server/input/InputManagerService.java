@@ -59,6 +59,7 @@ import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -125,6 +126,9 @@ public class InputManagerService extends IInputManager.Stub
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
     private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
+
+    // Feature flag name for the deep press feature
+    private static final String DEEP_PRESS_ENABLED = "deep_press_enabled";
 
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 2;
@@ -241,6 +245,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
     private static native void nativeSetPointerCapture(long ptr, boolean detached);
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
+    private static native void nativeSetMotionClassifierEnabled(long ptr, boolean enabled);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -346,6 +351,7 @@ public class InputManagerService extends IInputManager.Stub
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
         registerAccessibilityLargePointerSettingObserver();
+        registerLongPressTimeoutObserver();
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -353,12 +359,14 @@ public class InputManagerService extends IInputManager.Stub
                 updatePointerSpeedFromSettings();
                 updateShowTouchesFromSettings();
                 updateAccessibilityLargePointerFromSettings();
+                updateDeepPressStatusFromSettings("user switched");
             }
         }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
 
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
         updateAccessibilityLargePointerFromSettings();
+        updateDeepPressStatusFromSettings("just booted");
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -1572,7 +1580,7 @@ public class InputManagerService extends IInputManager.Stub
         setPointerSpeedUnchecked(speed);
     }
 
-    public void updatePointerSpeedFromSettings() {
+    private void updatePointerSpeedFromSettings() {
         int speed = getPointerSpeedSetting();
         setPointerSpeedUnchecked(speed);
     }
@@ -1604,7 +1612,7 @@ public class InputManagerService extends IInputManager.Stub
         return speed;
     }
 
-    public void updateShowTouchesFromSettings() {
+    private void updateShowTouchesFromSettings() {
         int setting = getShowTouchesSetting(0);
         nativeSetShowTouches(mPtr, setting != 0);
     }
@@ -1620,7 +1628,7 @@ public class InputManagerService extends IInputManager.Stub
                 }, UserHandle.USER_ALL);
     }
 
-    public void updateAccessibilityLargePointerFromSettings() {
+    private void updateAccessibilityLargePointerFromSettings() {
         final int accessibilityConfig = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 0, UserHandle.USER_CURRENT);
@@ -1635,6 +1643,34 @@ public class InputManagerService extends IInputManager.Stub
                     @Override
                     public void onChange(boolean selfChange) {
                         updateAccessibilityLargePointerFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateDeepPressStatusFromSettings(String reason) {
+        // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value
+        final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
+                UserHandle.USER_CURRENT);
+        final boolean featureEnabledFlag =
+                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
+                        DEEP_PRESS_ENABLED, true /* default */);
+        final boolean enabled =
+                featureEnabledFlag && timeout <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
+        Log.i(TAG,
+                (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
+                + ": feature " + (featureEnabledFlag ? "enabled" : "disabled")
+                + ", long press timeout = " + timeout);
+        nativeSetMotionClassifierEnabled(mPtr, enabled);
+    }
+
+    private void registerLongPressTimeoutObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LONG_PRESS_TIMEOUT), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateDeepPressStatusFromSettings("timeout changed");
                     }
                 }, UserHandle.USER_ALL);
     }

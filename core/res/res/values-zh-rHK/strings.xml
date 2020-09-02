@@ -280,7 +280,7 @@
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"通訊錄"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"存取您的通訊錄"</string>
     <string name="permgrouprequest_contacts" msgid="7755354139254094668">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取您的聯絡人嗎？"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"位置資訊"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"位置"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"存取此裝置的位置"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取此裝置的位置資訊嗎？"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"此應用程式目前只有您在使用時才能存取位置資訊"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"此應用程式可識別您的體能活動。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"拍照和拍攝影片"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"此應用程式可以隨時使用相機拍照和攝錄。"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允許應用程式或服務接收相機裝置開啟或關閉的相關回電。"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"當任何相機裝置在開啟 (由應用程式) 或關閉時，此應用程式就能接收回電。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"直接撥打電話號碼"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"允許應用程式繼續進行在其他應用程式中開始的通話。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"讀取電話號碼"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"允許應用程式存取裝置上的電話號碼。"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"保持汽車螢幕開啟"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"防止平板電腦進入休眠狀態"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"阻止電視進入休眠狀態"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"防止手機進入休眠狀態"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"允許應用程式保持汽車螢幕開啟。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"允許應用程式防止平板電腦進入休眠狀態。"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"允許應用程式阻止電視進入休眠狀態。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"允許應用程式防止手機進入休眠狀態。"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"無法連接「<xliff:g id="SSID">%1$s</xliff:g>」"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"輕按以更改私隱設定，然後重試"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"要更改私隱設定嗎？"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"「<xliff:g id="SSID_0">%1$s</xliff:g>」可能想透過您裝置的 MAC 位址 (不重複的識別碼) 連接。這可能會令附近裝置能夠追蹤您裝置的位置。\n\n如果繼續操作，「<xliff:g id="SSID_1">%1$s</xliff:g>」會更改您的私隱設定並再嘗試連接。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> 需要使用您裝置的 MAC 位址 (不重複的識別碼) 連接。此網絡的私隱設定目前使用隨機識別碼。\n\n此變更可能會令附近裝置能夠追蹤您裝置的位置。"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"更改設定"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"已更新設定，請嘗試重新連線。"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"無法更改私隱設定"</string>

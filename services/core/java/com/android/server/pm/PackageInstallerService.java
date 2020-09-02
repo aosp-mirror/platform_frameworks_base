@@ -258,12 +258,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
         // Don't hold mSessions lock when calling restoreSession, since it might trigger an APK
         // atomic install which needs to query sessions, which requires lock on mSessions.
+        boolean isDeviceUpgrading = mPm.isDeviceUpgrading();
         for (PackageInstallerSession session : stagedSessionsToRestore) {
-            if (mPm.isDeviceUpgrading() && !session.isStagedAndInTerminalState()) {
+            if (!session.isStagedAndInTerminalState() && session.hasParentSessionId()
+                    && getSession(session.getParentSessionId()) == null) {
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Build fingerprint has changed");
+                        "An orphan staged session " + session.sessionId + " is found, "
+                                + "parent " + session.getParentSessionId() + " is missing");
             }
-            mStagingManager.restoreSession(session);
+            mStagingManager.restoreSession(session, isDeviceUpgrading);
         }
         // Broadcasts are not sent while we restore sessions on boot, since no processes would be
         // ready to listen to them. From now on, we greedily assume that broadcasts requests are

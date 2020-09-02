@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Апликацијава може да ја препознава вашата физичка активност."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"снимај слики и видеа"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Апликацијава може да фотографира и да снима видеа со камерата во секое време."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволете апликацијатa или услугата да прима повратни повици за отворањето или затворањето на уредите со камера."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Оваа апликација може да прима повратни повици кога кој било уред со камера се отвора (од некоја апликација) или затвора."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролирај вибрации"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно избирај телефонски броеви"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Овозможува апликацијата да продолжи повик започнат на друга апликација."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"да чита телефонски броеви"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Ѝ дозволува на апликацијата да пристапи до телефонските броеви на уредот."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"оставете го екранот на автомобилот вклучен"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"спречи режим на штедење кај таблет"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"спречи го телевизорот да премине во режим на мирување"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"спречи телефон од режим на штедење"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дозволува апликацијата да го држи екранот на автомобилот вклучен."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дозволува апликацијата да го спречи таблетот да не заспие."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Дозволува апликацијата да го спречи телевизорот да оди во режим на мирување."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дозволува апликацијата да го спречи телефонот да не заспие."</string>
@@ -1115,7 +1119,7 @@
     <string name="define_desc" msgid="6916651934713282645">"Дефинирајте го избраниот текст"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Капацитетот е речиси полн"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Некои системски функции може да не работат"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 МБ и рестартирајте."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 MB и рестартирајте."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> работи"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Допрете за повеќе информации или за сопирање на апликацијата."</string>
     <string name="ok" msgid="2646370155170753815">"Во ред"</string>
@@ -1163,7 +1167,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> постојано запира"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> постојано запира"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Отвори ја апликацијата повторно"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Испрати повратни информации"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Испратете повратни информации"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Затвори"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Исклучи го звукот додека уредот не се рестартира"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Почекај"</string>
@@ -1243,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Не може да се поврзе на „<xliff:g id="SSID">%1$s</xliff:g>“"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Допрете за да ги промените поставките за приватност и обидете се повторно"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Да се променат поставките за приватност?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> можно е да сака да се поврзе со MAC-адресата на вашиот уред, којашто е уникатен идентификатор. Ова може да дозволи уреди во близина да ја следат локацијата на вашиот уред. \n\nАко продолжите, „<xliff:g id="SSID_1">%1$s</xliff:g>“ ќе ги промени поставките за приватност и ќе се обиде да се поврзе повторно."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"За да се поврзе, <xliff:g id="SSID">%1$s</xliff:g> треба да ја користи MAC-адресата на вашиот уред, којашто е уникатен идентификатор. Поставките за приватност за мрежава користат рандомизиран идентификатор во моментов. \n\nПроменава може да им дозволи на уредите во близина да ја следат локацијата на вашиот уред."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Променете ги поставките"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Поставките се ажурирани. Обидете се да се поврзете повторно."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Не може да се променат поставките за приватност"</string>
@@ -1515,7 +1519,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Избриши ги ставките"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Врати ги избришаните"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Не прави ништо засега"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Избери сметка"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Изберете сметка"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Додај сметка"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Додај сметка"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Зголеми"</string>
