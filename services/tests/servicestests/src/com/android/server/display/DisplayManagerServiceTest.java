@@ -19,6 +19,7 @@ package com.android.server.display;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -28,18 +29,23 @@ import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.content.Context;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
+import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -282,6 +288,68 @@ public class DisplayManagerServiceTest {
     }
 
     /**
+     * Tests that there should be a display change notification to WindowManager to update its own
+     * internal state for things like display cutout when nonOverrideDisplayInfo is changed.
+     */
+    @Test
+    public void testShouldNotifyChangeWhenNonOverrideDisplayInfoChanged() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        // Add the FakeDisplayDevice
+        FakeDisplayDevice displayDevice = new FakeDisplayDevice();
+        DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
+        displayDeviceInfo.width = 100;
+        displayDeviceInfo.height = 200;
+        final Rect zeroRect = new Rect();
+        displayDeviceInfo.displayCutout = new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                zeroRect, new Rect(0, 0, 10, 10), zeroRect, zeroRect);
+        displayDeviceInfo.flags = DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY;
+        displayDevice.setDisplayDeviceInfo(displayDeviceInfo);
+        displayManager.handleDisplayDeviceAdded(displayDevice);
+
+        // Find the display id of the added FakeDisplayDevice
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+        final int[] displayIds = bs.getDisplayIds();
+        assertTrue(displayIds.length > 0);
+        int displayId = Display.INVALID_DISPLAY;
+        for (int i = 0; i < displayIds.length; i++) {
+            DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayIds[i]);
+            if (displayDeviceInfo.equals(ddi)) {
+                displayId = displayIds[i];
+                break;
+            }
+        }
+        assertFalse(displayId == Display.INVALID_DISPLAY);
+
+        // Setup override DisplayInfo
+        DisplayInfo overrideInfo = bs.getDisplayInfo(displayId);
+        displayManager.setDisplayInfoOverrideFromWindowManagerInternal(displayId, overrideInfo);
+
+        Handler handler = displayManager.getDisplayHandler();
+        handler.runWithScissors(() -> {
+        }, 0 /* now */);
+
+        // register display listener callback
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback(displayId);
+        bs.registerCallback(callback);
+
+        // Simulate DisplayDevice change
+        DisplayDeviceInfo displayDeviceInfo2 = new DisplayDeviceInfo();
+        displayDeviceInfo2.copyFrom(displayDeviceInfo);
+        displayDeviceInfo2.displayCutout = null;
+        displayDevice.setDisplayDeviceInfo(displayDeviceInfo2);
+        displayManager.handleDisplayDeviceChanged(displayDevice);
+
+        handler.runWithScissors(() -> {
+        }, 0 /* now */);
+        assertTrue(callback.mCalled);
+    }
+
+    /**
      * Tests that we get a Runtime exception when we cannot initialize the default display.
      */
     @Test
@@ -511,5 +579,43 @@ public class DisplayManagerServiceTest {
         handler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
         // flush the handler
         handler.runWithScissors(() -> {}, 0 /* now */);
+    }
+
+    private class FakeDisplayManagerCallback extends IDisplayManagerCallback.Stub {
+        int mDisplayId;
+        boolean mCalled = false;
+
+        FakeDisplayManagerCallback(int displayId) {
+            mDisplayId = displayId;
+        }
+
+        @Override
+        public void onDisplayEvent(int displayId, int event) {
+            if (displayId == mDisplayId && event == DisplayManagerGlobal.EVENT_DISPLAY_CHANGED) {
+                mCalled = true;
+            }
+        }
+    }
+
+    private class FakeDisplayDevice extends DisplayDevice {
+        private DisplayDeviceInfo mDisplayDeviceInfo;
+
+        FakeDisplayDevice() {
+            super(null, null, "");
+        }
+
+        public void setDisplayDeviceInfo(DisplayDeviceInfo displayDeviceInfo) {
+            mDisplayDeviceInfo = displayDeviceInfo;
+        }
+
+        @Override
+        public boolean hasStableUniqueId() {
+            return false;
+        }
+
+        @Override
+        public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+            return mDisplayDeviceInfo;
+        }
     }
 }
