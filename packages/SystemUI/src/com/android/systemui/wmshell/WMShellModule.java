@@ -24,6 +24,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.onehanded.OneHanded;
+import com.android.systemui.onehanded.OneHandedController;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
@@ -109,4 +111,10 @@ public class WMShellModule {
                 pipUiEventLogger, shellTaskOrganizer);
     }
 
+    @SysUISingleton
+    @Provides
+    static OneHanded provideOneHandedController(Context context,
+            DisplayController displayController) {
+        return OneHandedController.create(context, displayController);
+    }
 }

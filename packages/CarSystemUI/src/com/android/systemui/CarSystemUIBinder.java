@@ -28,7 +28,6 @@ import com.android.systemui.car.window.SystemUIOverlayWindowManager;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
-import com.android.systemui.onehanded.OneHandedUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
@@ -93,12 +92,6 @@ public abstract class CarSystemUIBinder {
     @IntoMap
     @ClassKey(LatencyTester.class)
     public abstract SystemUI bindLatencyTester(LatencyTester sysui);
-
-    /** Inject into OneHandedUI. */
-    @Binds
-    @IntoMap
-    @ClassKey(OneHandedUI.class)
-    public abstract SystemUI bindOneHandedUI(OneHandedUI sysui);
 
     /** Inject into PowerUI. */
     @Binds

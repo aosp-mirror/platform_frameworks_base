@@ -23,9 +23,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -44,32 +41,23 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     OneHandedGestureHandler mGestureHandler;
     OneHandedController mOneHandedController;
     @Mock
-    CommandQueue mCommandQueue;
-    @Mock
     DisplayController mMockDisplayController;
     @Mock
-    NavigationModeController mMockNavigationModeController;
-    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
-    @Mock
-    SysUiState mMockSysUiState;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new OneHandedTouchHandler();
         mTutorialHandler = Mockito.spy(new OneHandedTutorialHandler(mContext));
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
-                mMockNavigationModeController);
+        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController);
         mOneHandedController = new OneHandedController(
                 getContext(),
-                mCommandQueue,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
                 mTutorialHandler,
-                mGestureHandler,
-                mMockSysUiState);
+                mGestureHandler);
     }
 
     @Test

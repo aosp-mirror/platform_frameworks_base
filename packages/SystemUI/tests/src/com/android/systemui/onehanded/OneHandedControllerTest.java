@@ -22,21 +22,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.model.SysUiState;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -52,8 +51,6 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     OneHandedTimeoutHandler mTimeoutHandler;
 
     @Mock
-    CommandQueue mCommandQueue;
-    @Mock
     DisplayController mMockDisplayController;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
@@ -64,21 +61,20 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     OneHandedGestureHandler mMockGestureHandler;
     @Mock
-    SysUiState mMockSysUiState;
+    OneHandedTimeoutHandler mMockTimeoutHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
-        mOneHandedController = new OneHandedController(
-                getContext(),
-                mCommandQueue,
+        OneHandedController oneHandedController = new OneHandedController(
+                mContext,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
-                mMockGestureHandler,
-                mMockSysUiState);
+                mMockGestureHandler);
+        mOneHandedController = Mockito.spy(oneHandedController);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
@@ -97,7 +93,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRegisterOrganizer() {
-        verify(mMockDisplayAreaOrganizer).registerOrganizer(anyInt());
+        verify(mMockDisplayAreaOrganizer, atLeastOnce()).registerOrganizer(anyInt());
     }
 
     @Test
@@ -132,7 +128,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         final boolean enabled = true;
         mOneHandedController.setOneHandedEnabled(enabled);
 
-        verify(mMockTouchHandler, times(2)).onOneHandedEnabled(enabled);
+        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
     }
 
     @Test
@@ -140,6 +136,44 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         final boolean enabled = true;
         mOneHandedController.setSwipeToNotificationEnabled(enabled);
 
-        verify(mMockTouchHandler, times(2)).onOneHandedEnabled(enabled);
+        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
+    }
+
+    @Ignore("b/161980408, fix it after migration finished")
+    @Test
+    public void tesSettingsObserver_updateTapAppToExit() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.TAPS_APP_TO_EXIT, 1);
+
+        verify(mOneHandedController).setTaskChangeToExit(true);
+    }
+
+    @Ignore("b/161980408, fix it after migration finished")
+    @Test
+    public void tesSettingsObserver_updateEnabled() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
+
+        verify(mOneHandedController).setOneHandedEnabled(true);
+    }
+
+    @Ignore("b/161980408, fix it after migration finished")
+    @Test
+    public void tesSettingsObserver_updateTimeout() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
+                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+
+        verify(mMockTimeoutHandler).setTimeout(
+                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+    }
+
+    @Ignore("b/161980408, fix it after migration finished")
+    @Test
+    public void tesSettingsObserver_updateSwipeToNotification() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
+
+        verify(mOneHandedController).setSwipeToNotificationEnabled(true);
     }
 }
