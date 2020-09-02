@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"正在连接到 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="3028983857109369308">"正在通过 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 进行身份验证..."</item>
     <item msgid="4287401332778341890">"正在从<xliff:g id="NETWORK_NAME">%1$s</xliff:g>获取IP地址..."</item>
-    <item msgid="1043944043827424501">"已连接到 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1043944043827424501">"已连接到“<xliff:g id="NETWORK_NAME">%1$s</xliff:g>”"</item>
     <item msgid="7445993821842009653">"已暂停"</item>
     <item msgid="1175040558087735707">"正在断开与 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 的连接..."</item>
     <item msgid="699832486578171722">"已断开连接"</item>

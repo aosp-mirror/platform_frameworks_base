@@ -249,7 +249,7 @@
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="1968128556747588800">"ပိတ်ရန်"</item>
     <item msgid="3033215374382962216">"ရှိရင်းစွဲထက်ပိုသော ဧရိယာများကိုပြရန်"</item>
-    <item msgid="3474333938380896988">"အရောင်ရောနှောသောဧရိယာများပြရန်"</item>
+    <item msgid="3474333938380896988">"အစိမ်းရောင် မမြင်ရသောဧရိယာများ ပြရန်"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="794656271086646068">"သတ်မှတ်စံနှုန်း"</item>
