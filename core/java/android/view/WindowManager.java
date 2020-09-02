@@ -2967,7 +2967,7 @@ public interface WindowManager extends ViewManager {
         public IBinder token = null;
 
         /**
-         * The token of {@link android.app.WindowContext}. It is usually a
+         * The token of {@link android.window.WindowContext}. It is usually a
          * {@link android.app.WindowTokenClient} and is used for associating the params with an
          * existing node in the WindowManager hierarchy and getting the corresponding
          * {@link Configuration} and {@link android.content.res.Resources} values with updates

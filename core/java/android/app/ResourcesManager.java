@@ -39,13 +39,13 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -168,7 +167,7 @@ public class ResourcesManager {
 
     /**
      * Class containing the base configuration override and set of resources associated with an
-     * Activity or {@link WindowContext}.
+     * {@link Activity} or a {@link WindowContext}.
      */
     private static class ActivityResources {
         /**

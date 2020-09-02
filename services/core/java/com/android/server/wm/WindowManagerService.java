@@ -2707,7 +2707,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Registers a listener for a {@link android.app.WindowContext} to subscribe to configuration
+     * Registers a listener for a {@link android.window.WindowContext} to subscribe to configuration
      * changes of a {@link DisplayArea}.
      *
      * @param clientToken the window context's token
