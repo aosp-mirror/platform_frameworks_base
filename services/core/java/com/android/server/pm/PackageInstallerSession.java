@@ -978,7 +978,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private ParcelFileDescriptor doWriteInternal(String name, long offsetBytes, long lengthBytes,
             ParcelFileDescriptor incomingFd) throws IOException {
-        // Quick sanity check of state, and allocate a pipe for ourselves. We
+        // Quick validity check of state, and allocate a pipe for ourselves. We
         // then do heavy disk allocation outside the lock, but this open pipe
         // will block any attempted install transitions.
         final RevocableFileDescriptor fd;
@@ -3744,7 +3744,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         out.endTag(null, TAG_SESSION);
     }
 
-    // Sanity check to be performed when the session is restored from an external file. Only one
+    // Validity check to be performed when the session is restored from an external file. Only one
     // of the session states should be true, or none of them.
     private static boolean isStagedSessionStateValid(boolean isReady, boolean isApplied,
                                                      boolean isFailed) {
