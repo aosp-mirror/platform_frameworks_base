@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -28,43 +28,41 @@ import android.util.AttributeSet;
 import android.util.Property;
 import android.view.View;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 
 /**
  * View for the handle in the docked stack divider.
  */
-class DividerHandleView extends View {
+public class DividerHandleView extends View {
 
-    private final static Property<DividerHandleView, Integer> WIDTH_PROPERTY
-            = new Property<DividerHandleView, Integer>(Integer.class, "width") {
+    private static final Property<DividerHandleView, Integer> WIDTH_PROPERTY =
+            new Property<DividerHandleView, Integer>(Integer.class, "width") {
+                @Override
+                public Integer get(DividerHandleView object) {
+                    return object.mCurrentWidth;
+                }
 
-        @Override
-        public Integer get(DividerHandleView object) {
-            return object.mCurrentWidth;
-        }
+                @Override
+                public void set(DividerHandleView object, Integer value) {
+                    object.mCurrentWidth = value;
+                    object.invalidate();
+                }
+            };
 
-        @Override
-        public void set(DividerHandleView object, Integer value) {
-            object.mCurrentWidth = value;
-            object.invalidate();
-        }
-    };
+    private static final Property<DividerHandleView, Integer> HEIGHT_PROPERTY =
+            new Property<DividerHandleView, Integer>(Integer.class, "height") {
+                @Override
+                public Integer get(DividerHandleView object) {
+                    return object.mCurrentHeight;
+                }
 
-    private final static Property<DividerHandleView, Integer> HEIGHT_PROPERTY
-            = new Property<DividerHandleView, Integer>(Integer.class, "height") {
-
-        @Override
-        public Integer get(DividerHandleView object) {
-            return object.mCurrentHeight;
-        }
-
-        @Override
-        public void set(DividerHandleView object, Integer value) {
-            object.mCurrentHeight = value;
-            object.invalidate();
-        }
-    };
+                @Override
+                public void set(DividerHandleView object, Integer value) {
+                    object.mCurrentHeight = value;
+                    object.invalidate();
+                }
+            };
 
     private final Paint mPaint = new Paint();
     private final int mWidth;
@@ -86,7 +84,7 @@ class DividerHandleView extends View {
         mCircleDiameter = (mWidth + mHeight) / 3;
     }
 
-    public void setTouching(boolean touching, boolean animate) {
+    void setTouching(boolean touching, boolean animate) {
         if (touching == mTouching) {
             return;
         }

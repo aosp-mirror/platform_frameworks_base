@@ -11,13 +11,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
-import static com.android.systemui.stackdivider.ForcedResizableInfoActivity
-        .EXTRA_FORCED_RESIZEABLE_REASON;
+
+import static com.android.wm.shell.splitscreen.ForcedResizableInfoActivity.EXTRA_FORCED_RESIZEABLE_REASON;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -27,7 +27,7 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.widget.Toast;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 import java.util.function.Consumer;
 
@@ -55,20 +55,20 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
 
     /** Record of force resized task that's pending to be handled. */
     private class PendingTaskRecord {
-        int taskId;
+        int mTaskId;
         /**
          * {@link android.app.ITaskStackListener#FORCED_RESIZEABLE_REASON_SPLIT_SCREEN} or
          * {@link android.app.ITaskStackListener#FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY}
          */
-        int reason;
+        int mReason;
 
         PendingTaskRecord(int taskId, int reason) {
-            this.taskId = taskId;
-            this.reason = reason;
+            this.mTaskId = taskId;
+            this.mReason = reason;
         }
     }
 
-    public ForcedResizableInfoActivityController(Context context,
+    ForcedResizableInfoActivityController(Context context,
             SplitScreenController splitScreenController) {
         mContext = context;
         splitScreenController.registerInSplitScreenListener(mDockedStackExistsListener);
@@ -116,11 +116,11 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
             PendingTaskRecord pendingRecord = mPendingTasks.valueAt(i);
             Intent intent = new Intent(mContext, ForcedResizableInfoActivity.class);
             ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchTaskId(pendingRecord.taskId);
+            options.setLaunchTaskId(pendingRecord.mTaskId);
             // Set as task overlay and allow to resume, so that when an app enters split-screen and
             // becomes paused, the overlay will still be shown.
             options.setTaskOverlay(true, true /* canResume */);
-            intent.putExtra(EXTRA_FORCED_RESIZEABLE_REASON, pendingRecord.reason);
+            intent.putExtra(EXTRA_FORCED_RESIZEABLE_REASON, pendingRecord.mReason);
             mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
         }
         mPendingTasks.clear();
