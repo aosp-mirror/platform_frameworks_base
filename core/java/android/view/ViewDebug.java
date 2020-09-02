@@ -33,7 +33,6 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -755,11 +754,7 @@ public class ViewDebug {
 
         try {
             Rect outRect = new Rect();
-            try {
-                root.mAttachInfo.mSession.getDisplayFrame(root.mAttachInfo.mWindow, outRect);
-            } catch (RemoteException e) {
-                // Ignore
-            }
+            root.mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
 
             clientStream.writeInt(outRect.width());
             clientStream.writeInt(outRect.height());

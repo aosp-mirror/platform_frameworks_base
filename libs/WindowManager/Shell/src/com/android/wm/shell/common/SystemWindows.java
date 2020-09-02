@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -32,7 +31,6 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.DragEvent;
 import android.view.IScrollCaptureController;
 import android.view.IWindow;
@@ -47,6 +45,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -274,22 +273,20 @@ public class SystemWindows {
         @Override
         public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
                 int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-                long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-                Rect outVisibleInsets, Rect outStableInsets,
-                DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
+                long frameNumber, ClientWindowFrames outFrames,
+                MergedConfiguration mergedConfiguration,
                 SurfaceControl outSurfaceControl, InsetsState outInsetsState,
                 InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
                 SurfaceControl outBLASTSurfaceControl) {
             int res = super.relayout(window, seq, attrs, requestedWidth, requestedHeight,
-                    viewVisibility, flags, frameNumber, outFrame, outOverscanInsets,
-                    outContentInsets, outVisibleInsets, outStableInsets,
-                    cutout, mergedConfiguration, outSurfaceControl, outInsetsState,
+                    viewVisibility, flags, frameNumber, outFrames,
+                    mergedConfiguration, outSurfaceControl, outInsetsState,
                     outActiveControls, outSurfaceSize, outBLASTSurfaceControl);
             if (res != 0) {
                 return res;
             }
             DisplayLayout dl = mDisplayController.getDisplayLayout(mDisplayId);
-            outStableInsets.set(dl.stableInsets());
+            outFrames.stableInsets.set(dl.stableInsets());
             return 0;
         }
 
@@ -314,10 +311,9 @@ public class SystemWindows {
         ContainerWindow() {}
 
         @Override
-        public void resized(Rect frame, Rect contentInsets, Rect visibleInsets, Rect stableInsets,
-                boolean reportDraw, MergedConfiguration newMergedConfiguration, Rect backDropFrame,
-                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-                DisplayCutout.ParcelableWrapper displayCutout) {}
+        public void resized(ClientWindowFrames frames, boolean reportDraw,
+                MergedConfiguration newMergedConfiguration, boolean forceLayout,
+                boolean alwaysConsumeSystemBars, int displayId) {}
 
         @Override
         public void locationInParentDisplayChanged(Point offset) {}

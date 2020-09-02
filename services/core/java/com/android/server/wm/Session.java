@@ -56,6 +56,7 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.protolog.common.ProtoLog;
@@ -201,9 +202,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
-            Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
-            Rect outStableInsets, Rect outBackdropFrame,
-            DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
+            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
             SurfaceControl outBLASTSurfaceControl) {
@@ -212,10 +211,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
-                outFrame, outContentInsets, outVisibleInsets,
-                outStableInsets, outBackdropFrame, cutout,
-                mergedConfiguration, outSurfaceControl, outInsetsState, outActiveControls,
-                outSurfaceSize, outBLASTSurfaceControl);
+                outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
+                outActiveControls, outSurfaceSize, outBLASTSurfaceControl);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
@@ -237,11 +234,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             Rect contentInsets, Rect visibleInsets, Region touchableArea) {
         mService.setInsetsWindow(this, window, touchableInsets, contentInsets,
                 visibleInsets, touchableArea);
-    }
-
-    @Override
-    public void getDisplayFrame(IWindow window, Rect outDisplayFrame) {
-        mService.getWindowDisplayFrame(this, window, outDisplayFrame);
     }
 
     @Override

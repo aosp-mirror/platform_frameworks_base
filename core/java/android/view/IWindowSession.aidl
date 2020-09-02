@@ -34,6 +34,7 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.window.ClientWindowFrames;
 
 import java.util.List;
 
@@ -107,10 +108,7 @@ interface IWindowSession {
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out Rect outFrame,
-            out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outBackdropFrame,
-            out DisplayCutout.ParcelableWrapper displayCutout,
+            int flags, long frameNumber, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
             out Point outSurfaceSize, out SurfaceControl outBlastSurfaceControl);
@@ -150,12 +148,6 @@ interface IWindowSession {
      */
     void setInsets(IWindow window, int touchableInsets, in Rect contentInsets,
             in Rect visibleInsets, in Region touchableRegion);
-
-    /**
-     * Return the current display size in which the window is being laid out,
-     * accounting for screen decorations around it.
-     */
-    void getDisplayFrame(IWindow window, out Rect outDisplayFrame);
 
     /**
      * Called when the client has finished drawing the surface, if needed.

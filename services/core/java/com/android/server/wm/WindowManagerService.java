@@ -258,6 +258,7 @@ import android.view.WindowManager.RemoveContentMode;
 import android.view.WindowManager.TransitionType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2065,21 +2066,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void getWindowDisplayFrame(Session session, IWindow client,
-            Rect outDisplayFrame) {
-        synchronized (mGlobalLock) {
-            WindowState win = windowForClientLocked(session, client, false);
-            if (win == null) {
-                outDisplayFrame.setEmpty();
-                return;
-            }
-            outDisplayFrame.set(win.getDisplayFrame());
-            if (win.inSizeCompatMode()) {
-                outDisplayFrame.scale(win.mInvGlobalScale);
-            }
-        }
-    }
-
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
         synchronized (mGlobalLock) {
             if (mAccessibilityController != null) {
@@ -2115,9 +2101,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int relayoutWindow(Session session, IWindow client, int seq, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-            long frameNumber, Rect outFrame, Rect outContentInsets,
-            Rect outVisibleInsets, Rect outStableInsets, Rect outBackdropFrame,
-            DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
+            long frameNumber, ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
             SurfaceControl outBLASTSurfaceControl) {
@@ -2419,18 +2403,14 @@ public class WindowManagerService extends IWindowManager.Stub
             // The last inset values represent the last client state
             win.updateLastInsetValues();
 
-            win.getCompatFrame(outFrame);
-            win.getInsetsForRelayout(outContentInsets, outVisibleInsets,
-                    outStableInsets);
-            outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
-            outBackdropFrame.set(win.getBackdropFrame(win.getFrame()));
+            win.fillClientWindowFrames(outFrames);
             outInsetsState.set(win.getInsetsState(), win.isClientLocal());
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth
                         + ", requestedHeight=" + requestedHeight
                         + ", viewVisibility=" + viewVisibility
-                        + "\nRelayout returning frame=" + outFrame
+                        + "\nRelayout returning frame=" + outFrames.frame
                         + ", surface=" + outSurfaceControl);
             }
 
@@ -2440,8 +2420,7 @@ public class WindowManagerService extends IWindowManager.Stub
             result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
 
             if (DEBUG_LAYOUT) {
-                Slog.v(TAG_WM,
-                        "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
+                Slog.v(TAG_WM, "Relayout complete " + win + ": outFrames=" + outFrames);
             }
             win.mInRelayout = false;
 

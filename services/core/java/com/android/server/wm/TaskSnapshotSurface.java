@@ -67,7 +67,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.view.DisplayCutout;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -79,6 +78,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -159,12 +159,8 @@ class TaskSnapshotSurface implements StartingSurface {
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
         window.setSession(session);
         final SurfaceControl surfaceControl = new SurfaceControl();
-        final Rect tmpRect = new Rect();
-        final DisplayCutout.ParcelableWrapper tmpCutout = new DisplayCutout.ParcelableWrapper();
-        final Rect tmpFrame = new Rect();
+        final ClientWindowFrames tmpFrames = new ClientWindowFrames();
         final Rect taskBounds;
-        final Rect tmpContentInsets = new Rect();
-        final Rect tmpStableInsets = new Rect();
         final InsetsState mTmpInsetsState = new InsetsState();
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
@@ -254,8 +250,9 @@ class TaskSnapshotSurface implements StartingSurface {
         }
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
-                    View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrame, tmpRect,
-                    tmpRect, tmpCutout, null, mTmpInsetsState, mTempControls);
+                    View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrames.frame,
+                    tmpFrames.contentInsets, tmpFrames.stableInsets, tmpFrames.displayCutout,
+                    null /* outInputChannel */, mTmpInsetsState, mTempControls);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -270,15 +267,14 @@ class TaskSnapshotSurface implements StartingSurface {
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
-                    tmpFrame, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect,
-                    tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
+                    tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
                     mTempControls, sTmpSurfaceSize, sTmpSurfaceControl);
         } catch (RemoteException e) {
             // Local call.
         }
 
-        final Rect systemBarInsets = getSystemBarInsets(tmpFrame, insetsState);
-        snapshotSurface.setFrames(tmpFrame, systemBarInsets);
+        final Rect systemBarInsets = getSystemBarInsets(tmpFrames.frame, insetsState);
+        snapshotSurface.setFrames(tmpFrames.frame, systemBarInsets);
         snapshotSurface.drawSnapshot();
         return snapshotSurface;
     }
@@ -528,11 +524,9 @@ class TaskSnapshotSurface implements StartingSurface {
         }
 
         @Override
-        public void resized(Rect frame, Rect contentInsets, Rect visibleInsets,
-                Rect stableInsets, boolean reportDraw,
-                MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId,
-                DisplayCutout.ParcelableWrapper displayCutout) {
+        public void resized(ClientWindowFrames frames, boolean reportDraw,
+                MergedConfiguration mergedConfiguration, boolean forceLayout,
+                boolean alwaysConsumeSystemBars, int displayId) {
             if (mergedConfiguration != null && mOuter != null
                     && mOuter.mOrientationOnCreation
                             != mergedConfiguration.getMergedConfiguration().orientation) {
