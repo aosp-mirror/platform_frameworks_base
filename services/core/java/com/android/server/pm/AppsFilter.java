@@ -290,7 +290,8 @@ public class AppsFilter {
 
         private void updateEnabledState(@NonNull AndroidPackage pkg) {
             // TODO(b/135203078): Do not use toAppInfo
-            final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternal(
+            // TODO(b/167551701): Make changeId non-logging
+            final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternalNoLogging(
                     PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
             if (enabled) {
                 mDisabledPackages.remove(pkg.getPackageName());
