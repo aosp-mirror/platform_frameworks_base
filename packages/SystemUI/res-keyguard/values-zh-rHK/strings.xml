@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"沒有服務。"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"轉換輸入方法"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"飛行模式"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"必須提供 PIN 碼，才能準備進行更新"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"必須畫出上鎖圖案，才能準備進行更新"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"必須輸入密碼，才能準備進行更新"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"裝置重新啟動後，必須畫出上鎖圖案才能使用"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"裝置重新啟動後，必須輸入 PIN 碼才能使用"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"裝置重新啟動後，必須輸入密碼才能使用"</string>

@@ -29,11 +29,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.service.storage.ExternalStorageService;
@@ -62,19 +64,27 @@ import java.util.concurrent.TimeoutException;
 public final class StorageUserConnection {
     private static final String TAG = "StorageUserConnection";
 
-    public static final int REMOTE_TIMEOUT_SECONDS = 20;
+    private static final int DEFAULT_REMOTE_TIMEOUT_SECONDS = 20;
 
     private final Object mLock = new Object();
     private final Context mContext;
     private final int mUserId;
     private final StorageSessionController mSessionController;
     private final ActiveConnection mActiveConnection = new ActiveConnection();
+    private final boolean mIsDemoUser;
     @GuardedBy("mLock") private final Map<String, Session> mSessions = new HashMap<>();
+    @GuardedBy("mLock") @Nullable private HandlerThread mHandlerThread;
 
     public StorageUserConnection(Context context, int userId, StorageSessionController controller) {
         mContext = Objects.requireNonNull(context);
         mUserId = Preconditions.checkArgumentNonnegative(userId);
         mSessionController = controller;
+        mIsDemoUser = LocalServices.getService(UserManagerInternal.class)
+                .getUserInfo(userId).isDemo();
+        if (mIsDemoUser) {
+            mHandlerThread = new HandlerThread("StorageUserConnectionThread-" + mUserId);
+            mHandlerThread.start();
+        }
     }
 
     /**
@@ -181,6 +191,9 @@ public final class StorageUserConnection {
      */
     public void close() {
         mActiveConnection.close();
+        if (mIsDemoUser) {
+            mHandlerThread.quit();
+        }
     }
 
     /** Returns all created sessions. */
@@ -200,7 +213,7 @@ public final class StorageUserConnection {
 
     private void waitForLatch(CountDownLatch latch, String reason) throws TimeoutException {
         try {
-            if (!latch.await(REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            if (!latch.await(DEFAULT_REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 // TODO(b/140025078): Call ActivityManager ANR API?
                 Slog.wtf(TAG, "Failed to bind to the ExternalStorageService for user " + mUserId);
                 throw new TimeoutException("Latch wait for " + reason + " elapsed");
@@ -416,15 +429,32 @@ public final class StorageUserConnection {
                 };
 
                 Slog.i(TAG, "Binding to the ExternalStorageService for user " + mUserId);
-                if (mContext.bindServiceAsUser(new Intent().setComponent(name), mServiceConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
-                        UserHandle.of(mUserId))) {
-                    Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
-                    return mLatch;
+                if (mIsDemoUser) {
+                    // Schedule on a worker thread for demo user to avoid deadlock
+                    if (mContext.bindServiceAsUser(new Intent().setComponent(name),
+                                    mServiceConnection,
+                                    Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                                    mHandlerThread.getThreadHandler(),
+                                    UserHandle.of(mUserId))) {
+                        Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
+                        return mLatch;
+                    } else {
+                        mIsConnecting = false;
+                        throw new ExternalStorageServiceException(
+                                "Failed to bind to the ExternalStorageService for user " + mUserId);
+                    }
                 } else {
-                    mIsConnecting = false;
-                    throw new ExternalStorageServiceException(
-                            "Failed to bind to the ExternalStorageService for user " + mUserId);
+                    if (mContext.bindServiceAsUser(new Intent().setComponent(name),
+                                    mServiceConnection,
+                                    Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                                    UserHandle.of(mUserId))) {
+                        Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
+                        return mLatch;
+                    } else {
+                        mIsConnecting = false;
+                        throw new ExternalStorageServiceException(
+                                "Failed to bind to the ExternalStorageService for user " + mUserId);
+                    }
                 }
             }
         }

@@ -304,6 +304,7 @@ public final class VibrationAttributes implements Parcelable {
                 @Nullable VibrationEffect effect) {
             mAudioAttributes = audio;
             setUsage(audio);
+            setFlags(audio);
             applyHapticFeedbackHeuristics(effect);
         }
 
@@ -357,6 +358,12 @@ public final class VibrationAttributes implements Parcelable {
                     break;
                 default:
                     mUsage = USAGE_UNKNOWN;
+            }
+        }
+
+        private void setFlags(@NonNull AudioAttributes audio) {
+            if ((audio.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
+                mFlags |= FLAG_BYPASS_INTERRUPTION_POLICY;
             }
         }
 

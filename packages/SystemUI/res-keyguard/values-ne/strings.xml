@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"सेवा उपलब्ध छैन।"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"इनपुट विधिलाई स्विच गर्नुहोस्"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"हवाइजहाज मोड"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"अद्यावधिक गर्ने कार्यका लागि तयार पार्न PIN चाहिन्छ"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"अद्यावधिक गर्ने कार्यका लागि तयार पार्न प्याटर्न चाहिन्छ"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"अद्यावधिक गर्ने कार्यका लागि तयार पार्न पासवर्ड चाहिन्छ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"यन्त्र पुनः सुरु भएपछि ढाँचा आवश्यक पर्दछ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"यन्त्र पुनः सुरु भएपछि PIN आवश्यक पर्दछ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"यन्त्र पुनः सुरु भएपछि पासवर्ड आवश्यक पर्दछ"</string>

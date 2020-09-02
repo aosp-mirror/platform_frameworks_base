@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"ဝန်ဆောင်မှု မရှိပါ။"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"စာရိုက်စနစ်ပြောင်းရန်"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"လေယာဉ်ပျံမုဒ်"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"အပ်ဒိတ်အတွက် ပြင်ဆင်ရန် ပင်နံပါတ် လိုပါသည်"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"အပ်ဒိတ်အတွက် ပြင်ဆင်ရန် ပုံစံလိုပါသည်"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"အပ်ဒိတ်အတွက် ပြင်ဆင်ရန် စကားဝှက် လိုပါသည်"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"စက်ပစ္စည်းကို ပိတ်ပြီးပြန်ဖွင့်လိုက်သည့်အခါတွင် ပုံစံ လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"စက်ပစ္စည်းကို ပိတ်ပြီးပြန်ဖွင့်လိုက်သည့်အခါတွင် ပင်နံပါတ် လိုအပ်ပါသည်"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"စက်ပစ္စည်းကို ပိတ်ပြီးပြန်ဖွင့်လိုက်သည့်အခါတွင် စကားဝှက် လိုအပ်ပါသည်"</string>

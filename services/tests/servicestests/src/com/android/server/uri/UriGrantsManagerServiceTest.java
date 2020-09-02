@@ -43,11 +43,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
@@ -61,6 +69,12 @@ import java.util.Set;
 public class UriGrantsManagerServiceTest {
     private UriGrantsMockContext mContext;
     private UriGrantsManagerInternal mService;
+
+    // we expect the following only during grant if a grant is expected
+    private void verifyNoVisibilityGrant() {
+        verify(mContext.mPmInternal, never())
+                .grantImplicitAccess(anyInt(), any(), anyInt(), anyInt(), anyBoolean());
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -83,6 +97,7 @@ public class UriGrantsManagerServiceTest {
         assertEquals(UID_PRIMARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
         assertEquals(asSet(expectedGrant), needed.uris);
+        verifyNoVisibilityGrant();
     }
 
     /**
@@ -100,6 +115,7 @@ public class UriGrantsManagerServiceTest {
         assertEquals(UID_SECONDARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
         assertEquals(asSet(expectedGrant), needed.uris);
+        verifyNoVisibilityGrant();
     }
 
     /**
@@ -111,6 +127,8 @@ public class UriGrantsManagerServiceTest {
         final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
                 intent, UID_PRIMARY_PUBLIC, PKG_SOCIAL, USER_PRIMARY);
         assertNull(needed);
+        verify(mContext.mPmInternal).grantImplicitAccess(eq(USER_PRIMARY), isNull(), eq(
+                UserHandle.getAppId(UID_PRIMARY_SOCIAL)), eq(UID_PRIMARY_PUBLIC), eq(false));
     }
 
     /**
@@ -128,6 +146,7 @@ public class UriGrantsManagerServiceTest {
         assertEquals(UID_SECONDARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
         assertEquals(asSet(expectedGrant), needed.uris);
+        verifyNoVisibilityGrant();
     }
 
     /**

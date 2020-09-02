@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Ingen tilkobling."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Bytt inndatametode"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Flymodus"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"PIN-koden kreves for å klargjøre for oppdateringen"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Mønsteret kreves for å klargjøre for oppdateringen"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Passordet kreves for å klargjøre for oppdateringen"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Du må tegne mønsteret etter at enheten har startet på nytt"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Du må skrive inn PIN-koden etter at enheten har startet på nytt"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Du må skrive inn passordet etter at enheten har startet på nytt"</string>

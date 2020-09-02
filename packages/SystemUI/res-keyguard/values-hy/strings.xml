@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"Ծառայությունն անհասանելի է։"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Փոխել ներածման եղանակը"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Ավիառեժիմ"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"Թարմացմանը պատրաստվելու համար անհրաժեշտ է մուտքագրել PIN-ը"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"Թարմացմանը պատրաստվելու համար անհրաժեշտ է մուտքագրել նախշը"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"Թարմացմանը պատրաստվելու համար անհրաժեշտ է մուտքագրել գաղտնաբառը"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել նախշը"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել PIN կոդը"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Սարքը վերագործարկելուց հետո անհրաժեշտ է մուտքագրել գաղտնաբառը"</string>

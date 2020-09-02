@@ -27,6 +27,7 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Printer;
@@ -567,7 +568,8 @@ public class EditorInfo implements InputType, Parcelable {
      *                      editor wants to trim out the first 10 chars, subTextStart should be 10.
      */
     public void setInitialSurroundingSubText(@NonNull CharSequence subText, int subTextStart) {
-        Objects.requireNonNull(subText);
+        CharSequence newSubText = Editable.Factory.getInstance().newEditable(subText);
+        Objects.requireNonNull(newSubText);
 
         // Swap selection start and end if necessary.
         final int subTextSelStart = initialSelStart > initialSelEnd
@@ -575,7 +577,7 @@ public class EditorInfo implements InputType, Parcelable {
         final int subTextSelEnd = initialSelStart > initialSelEnd
                 ? initialSelStart - subTextStart : initialSelEnd - subTextStart;
 
-        final int subTextLength = subText.length();
+        final int subTextLength = newSubText.length();
         // Unknown or invalid selection.
         if (subTextStart < 0 || subTextSelStart < 0 || subTextSelEnd > subTextLength) {
             mInitialSurroundingText = new InitialSurroundingText();
@@ -589,12 +591,12 @@ public class EditorInfo implements InputType, Parcelable {
         }
 
         if (subTextLength <= MEMORY_EFFICIENT_TEXT_LENGTH) {
-            mInitialSurroundingText = new InitialSurroundingText(subText, subTextSelStart,
+            mInitialSurroundingText = new InitialSurroundingText(newSubText, subTextSelStart,
                     subTextSelEnd);
             return;
         }
 
-        trimLongSurroundingText(subText, subTextSelStart, subTextSelEnd);
+        trimLongSurroundingText(newSubText, subTextSelStart, subTextSelEnd);
     }
 
     /**

@@ -101,9 +101,6 @@
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"无服务。"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"切换输入法"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"飞行模式"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pin" msgid="8878724145347297575">"需要输入 PIN 码才能让设备做好更新准备"</string>
-    <string name="kg_prompt_reason_prepare_for_update_pattern" msgid="4873394344883271519">"需要绘制解锁图案才能让设备做好更新准备"</string>
-    <string name="kg_prompt_reason_prepare_for_update_password" msgid="5625446803865598337">"需要输入密码才能让设备做好更新准备"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"重启设备后需要绘制解锁图案"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"重启设备后需要输入 PIN 码"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"重启设备后需要输入密码"</string>
