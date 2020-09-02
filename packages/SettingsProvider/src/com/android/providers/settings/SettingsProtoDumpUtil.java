@@ -58,10 +58,14 @@ class SettingsProtoDumpUtil {
                 ConfigSettingsProto.CONNECTIVITY_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ConfigSettingsProto.CONTENT_CAPTURE_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_DEVICE_IDLE,
+                ConfigSettingsProto.DEVICE_IDLE_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_GAME_DRIVER,
                 ConfigSettingsProto.GAME_DRIVER_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
                 ConfigSettingsProto.INPUT_NATIVE_BOOT_SETTINGS);
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                ConfigSettingsProto.JOB_SCHEDULER_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_NETD_NATIVE,
                 ConfigSettingsProto.NETD_NATIVE_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_PRIVACY,
@@ -563,9 +567,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                 GlobalSettingsProto.Device.PROVISIONING_MOBILE_DATA_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.DEVICE_IDLE_CONSTANTS,
-                GlobalSettingsProto.Device.IDLE_CONSTANTS);
         dumpSetting(s, p,
                 Settings.Global.DEVICE_POLICY_CONSTANTS,
                 GlobalSettingsProto.Device.POLICY_CONSTANTS);

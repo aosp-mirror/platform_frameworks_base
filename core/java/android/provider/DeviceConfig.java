@@ -145,6 +145,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
 
     /**
+     * Namespace for device idle configurations.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
+
+    /**
      * Namespace for how dex runs. The feature requires a reboot to reach a clean state.
      *
      * @deprecated No longer used
