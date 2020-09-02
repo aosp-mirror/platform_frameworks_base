@@ -111,10 +111,6 @@ Plays ringtones.
 
 Shows UI for keyboard shortcuts (triggered by keyboard shortcut).
 
-### [com.android.systemui.onehanded.OneHandedUI](/packages/SystemUI/src/com/android/systemui/onehanded/OneHandedUI.java)
-
-Shows the overlay controls when One handed is triggered.
-
 ### [com.android.systemui.shortcut.ShortcutKeyDispatcher](/packages/SystemUI/src/com/android/systemui/shortcut/ShortcutKeyDispatcher.java)
 
 Dispatches shortcut to System UI components.

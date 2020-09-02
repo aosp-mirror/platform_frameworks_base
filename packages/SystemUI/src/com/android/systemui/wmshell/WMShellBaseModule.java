@@ -24,6 +24,7 @@ import android.view.IWindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.onehanded.OneHanded;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipUiEventLogger;
@@ -101,16 +102,19 @@ public abstract class WMShellBaseModule {
         return organizer;
     }
 
-    @BindsOptionalOf
-    abstract Pip optionalPip();
-
-    @BindsOptionalOf
-    abstract SplitScreen optionalSplitScreen();
-
     @SysUISingleton
     @Provides
     static FlingAnimationUtils.Builder provideFlingAnimationUtilsBuilder(
             DisplayMetrics displayMetrics) {
         return new FlingAnimationUtils.Builder(displayMetrics);
     }
+
+    @BindsOptionalOf
+    abstract Pip optionalPip();
+
+    @BindsOptionalOf
+    abstract SplitScreen optionalSplitScreen();
+
+    @BindsOptionalOf
+    abstract OneHanded optionalOneHanded();
 }

@@ -17,7 +17,6 @@
 package com.android.systemui.onehanded;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -40,7 +39,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.R;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
@@ -49,7 +47,6 @@ import com.android.wm.shell.common.DisplayController;
  * others(e.g, 2-button, full gesture mode) are handled by Launcher quick steps.
  */
 public class OneHandedGestureHandler implements OneHandedTransitionCallback,
-        NavigationModeController.ModeChangedListener,
         DisplayChangeController.OnDisplayChangingListener {
     private static final String TAG = "OneHandedGestureHandler";
     private static final boolean DEBUG_GESTURE = false;
@@ -66,7 +63,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     private boolean mAllowGesture;
     private boolean mIsEnabled;
     private int mNavGestureHeight;
-    private boolean mIsThreeButtonModeEnable;
+    private boolean mIsThreeButtonModeEnabled;
     private int mRotation = Surface.ROTATION_0;
 
     @VisibleForTesting
@@ -85,14 +82,10 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      *
      * @param context                  {@link Context}
      * @param displayController        {@link DisplayController}
-     * @param navigationModeController {@link NavigationModeController}
      */
-    public OneHandedGestureHandler(Context context, DisplayController displayController,
-            NavigationModeController navigationModeController) {
+    public OneHandedGestureHandler(Context context, DisplayController displayController) {
         mDisplayController = displayController;
         displayController.addDisplayChangingController(this);
-        final int NavBarMode = navigationModeController.addListener(this);
-        mIsThreeButtonModeEnable = (NavBarMode == NAV_BAR_MODE_3BUTTON);
         mNavGestureHeight = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_gesture_height);
         mDragDistThreshold = context.getResources().getDimensionPixelSize(
@@ -112,6 +105,11 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
             Log.d(TAG, "onOneHandedEnabled, isEnabled = " + isEnabled);
         }
         mIsEnabled = isEnabled;
+        updateIsEnabled();
+    }
+
+    void onThreeButtonModeEnabled(boolean isEnabled) {
+        mIsThreeButtonModeEnabled = isEnabled;
         updateIsEnabled();
     }
 
@@ -199,7 +197,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     private void updateIsEnabled() {
         disposeInputChannel();
 
-        if (mIsEnabled && mIsThreeButtonModeEnable) {
+        if (mIsEnabled && mIsThreeButtonModeEnabled) {
             final Point displaySize = new Point();
             if (mDisplayController != null) {
                 final Display display = mDisplayController.getDisplay(DEFAULT_DISPLAY);
@@ -221,15 +219,6 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         if (ev instanceof MotionEvent) {
             onMotionEvent((MotionEvent) ev);
         }
-    }
-
-    @Override
-    public void onNavigationModeChanged(int mode) {
-        if (DEBUG_GESTURE) {
-            Log.d(TAG, "onNavigationModeChanged, mode =" + mode);
-        }
-        mIsThreeButtonModeEnable = (mode == NAV_BAR_MODE_3BUTTON);
-        updateIsEnabled();
     }
 
     @Override

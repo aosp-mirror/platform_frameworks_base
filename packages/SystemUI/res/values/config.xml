@@ -320,7 +320,6 @@
         <item>com.android.systemui.accessibility.WindowMagnification</item>
         <item>com.android.systemui.accessibility.SystemActions</item>
         <item>com.android.systemui.toast.ToastUI</item>
-        <item>com.android.systemui.onehanded.OneHandedUI</item>
         <item>com.android.systemui.wmshell.WMShell</item>
     </string-array>
 
