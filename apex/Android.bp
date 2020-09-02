@@ -66,9 +66,9 @@ mainline_service_stubs_args =
     "--hide-annotation android.annotation.Hide " +
     "--hide InternalClasses " // com.android.* classes are okay in this interface
 
-// Defaults for mainline module provided java_sdk_library instances.
+// Defaults common to all mainline module java_sdk_library instances.
 java_defaults {
-    name: "framework-module-defaults",
+    name: "framework-module-common-defaults",
 
     // Additional annotations used for compiling both the implementation and the
     // stubs libraries.
@@ -92,14 +92,6 @@ java_defaults {
 
     // The API scope specific properties.
     public: {
-        enabled: true,
-        sdk_version: "module_current",
-    },
-    system: {
-        enabled: true,
-        sdk_version: "module_current",
-    },
-    module_lib: {
         enabled: true,
         sdk_version: "module_current",
     },
@@ -132,17 +124,51 @@ java_defaults {
     sdk_version: "module_current",
 }
 
+// Defaults for mainline module provided java_sdk_library instances.
+java_defaults {
+    name: "framework-module-defaults",
+    defaults: ["framework-module-common-defaults"],
+
+    system: {
+        enabled: true,
+        sdk_version: "module_current",
+    },
+    module_lib: {
+        enabled: true,
+        sdk_version: "module_current",
+    },
+}
+
+// Defaults for mainline module system server provided java_sdk_library instances.
+java_defaults {
+    name: "framework-system-server-module-defaults",
+    defaults: ["framework-module-common-defaults"],
+
+    system_server: {
+        enabled: true,
+        sdk_version: "module_current",
+    },
+}
+
 stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
     args: mainline_framework_stubs_args,
     installable: false,
-    sdk_version: "current",
+    sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/current.txt",
             removed_api_file: "api/removed.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public/api",
     },
 }
 
@@ -151,7 +177,11 @@ stubs_defaults {
     args: mainline_framework_stubs_args + priv_apps,
     libs: ["framework-annotations-lib"],
     installable: false,
-    sdk_version: "system_current",
+    sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
     check_api: {
         current: {
@@ -159,24 +189,43 @@ stubs_defaults {
             removed_api_file: "api/system-removed.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system/api",
+    },
 }
 
 java_defaults {
     name: "framework-module-stubs-lib-defaults-publicapi",
     installable: false,
     sdk_version: "module_current",
+    libs: [ "stub-annotations" ],
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public",
+    },
 }
 
 java_defaults {
     name: "framework-module-stubs-lib-defaults-systemapi",
     installable: false,
     sdk_version: "module_current",
+    libs: [ "stub-annotations" ],
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system",
+    },
 }
 
 java_defaults {
     name: "framework-module-stubs-lib-defaults-module_libs_api",
     installable: false,
     sdk_version: "module_current",
+    libs: [ "stub-annotations" ],
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib",
+    },
 }
 
 // The defaults for module_libs comes in two parts - defaults for API checks
@@ -190,6 +239,10 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
 
     // Do not generate stubs as they are not needed
@@ -201,6 +254,10 @@ stubs_defaults {
             removed_api_file: "api/module-lib-removed.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib/api",
+    },
 }
 
 stubs_defaults {
@@ -209,6 +266,10 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
 }
 
@@ -216,6 +277,10 @@ stubs_defaults {
     name: "service-module-stubs-srcs-defaults",
     args: mainline_service_stubs_args,
     installable: false,
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: ["com.android."],
     check_api: {
         current: {
@@ -223,10 +288,18 @@ stubs_defaults {
             removed_api_file: "api/removed.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system-server/api",
+    },
 }
 
 // Empty for now, but a convenient place to add rules for all
 // module java_library system_server stub libs.
 java_defaults {
     name: "service-module-stubs-defaults",
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system-server",
+    },
 }
