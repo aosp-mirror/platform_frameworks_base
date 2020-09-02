@@ -36,8 +36,8 @@ public class MediaTranscodingTestRunner extends InstrumentationTestRunner {
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
+        suite.addTestSuite(MediaTranscodeManagerDiedTest.class);
         suite.addTestSuite(MediaTranscodeManagerTest.class);
-        suite.addTestSuite(MediaTranscodeManagerWithMockServiceTest.class);
         suite.addTestSuite(MediaTranscodingBenchmark.class);
         return suite;
     }
