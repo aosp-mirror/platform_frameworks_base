@@ -1456,7 +1456,7 @@ public final class ViewRootImpl implements ViewParent,
                         | (oldSoftInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST);
             }
 
-            if ((changes & LayoutParams.SOFT_INPUT_MODE_CHANGED) != 0) {
+            if (mWindowAttributes.softInputMode != oldSoftInputMode) {
                 requestFitSystemWindows();
             }
 
