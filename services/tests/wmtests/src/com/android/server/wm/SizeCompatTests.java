@@ -35,7 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -216,22 +218,50 @@ public class SizeCompatTests extends WindowTestsBase {
 
         final Rect origBounds = new Rect(mActivity.getBounds());
         final Rect currentBounds = mActivity.getWindowConfiguration().getBounds();
+        final DisplayContent display = mActivity.mDisplayContent;
 
         // Change the size of current display.
-        resizeDisplay(mStack.mDisplayContent, 1000, 2000);
-
+        resizeDisplay(display, 1000, 2000);
+        // The bounds should be [100, 0 - 1100, 2500].
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
         assertScaled();
+
+        // The scale is 2000/2500=0.8. The horizontal centered offset is (1000-(1000*0.8))/2=100.
+        final float scale = (float) display.mBaseDisplayHeight / currentBounds.height();
+        final int offsetX = (int) (display.mBaseDisplayWidth - (origBounds.width() * scale)) / 2;
+        assertEquals(offsetX, currentBounds.left);
 
         // The position of configuration bounds should be the same as compat bounds.
         assertEquals(mActivity.getBounds().left, currentBounds.left);
         assertEquals(mActivity.getBounds().top, currentBounds.top);
 
         // Change display size to a different orientation
-        resizeDisplay(mStack.mDisplayContent, 2000, 1000);
+        resizeDisplay(display, 2000, 1000);
+        // The bounds should be [800, 0 - 1800, 2500].
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, display.getConfiguration().orientation);
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, mActivity.getConfiguration().orientation);
+
+        // The previous resize operation doesn't consider the rotation change after size changed.
+        // These setups apply the requested orientation to rotation as real case that the top fixed
+        // portrait activity will determine the display rotation.
+        final DisplayRotation displayRotation = display.getDisplayRotation();
+        doCallRealMethod().when(displayRotation).updateRotationUnchecked(anyBoolean());
+        // Skip unrelated layout procedures.
+        mAtm.deferWindowLayout();
+        display.reconfigureDisplayLocked();
+        displayRotation.updateOrientation(display.getOrientation(), true /* forceUpdate */);
+        display.sendNewConfiguration();
+
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, display.getConfiguration().orientation);
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, mActivity.getConfiguration().orientation);
+        // The size should still be in portrait [100, 0 - 1100, 2500] = 1000x2500.
+        assertEquals(origBounds.width(), currentBounds.width());
+        assertEquals(origBounds.height(), currentBounds.height());
+        assertEquals(offsetX, currentBounds.left);
+        assertScaled();
     }
 
     @Test
