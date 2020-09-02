@@ -23,7 +23,6 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
-import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
@@ -35,7 +34,6 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -82,7 +80,6 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
-import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
@@ -456,12 +453,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int ANIMATION_DURATION_SCALE = 2;
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
-
-    /** The maximum count of window tokens without surface that an app can register. */
-    private static final int MAXIMUM_WINDOW_TOKEN_COUNT_WITHOUT_SURFACE = 5;
-
-    /** System UI can create more window context... */
-    private static final int SYSTEM_UI_MULTIPLIER = 2;
 
     /**
      * Override of task letterbox aspect ratio that is set via ADB with
@@ -1610,7 +1601,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final Bundle options = mWindowContextListenerController
                             .getOptions(windowContextToken);
                     token = new WindowToken(this, binder, type, false /* persistOnEmpty */,
-                            displayContent, session.mCanAddInternalSystemWindow, callingUid,
+                            displayContent, session.mCanAddInternalSystemWindow,
                             isRoundedCornerOverlay, true /* fromClientToken */, options);
                 } else {
                     final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
@@ -2713,91 +2704,36 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void addWindowToken(IBinder binder, int type, int displayId) {
-        addWindowTokenWithOptions(binder, type, displayId, null /* options */,
-                null /* packageName */, false /* fromClientToken */);
-    }
-
-    @Override
-    public int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
-            String packageName) {
-        if (tokenCountExceed()) {
-            return ADD_TOO_MANY_TOKENS;
+    public void addWindowToken(@NonNull IBinder binder, int type, int displayId,
+            @Nullable Bundle options) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-        return addWindowTokenWithOptions(binder, type, displayId, options, packageName,
-                true /* fromClientToken */);
-    }
 
-    private boolean tokenCountExceed() {
-        final int callingUid = Binder.getCallingUid();
-        // Don't check if caller is from system server.
-        if (callingUid == myPid()) {
-            return false;
-        }
-        final int limit =
-                (checkCallingPermission(STATUS_BAR_SERVICE, "addWindowTokenWithOptions"))
-                        ?  MAXIMUM_WINDOW_TOKEN_COUNT_WITHOUT_SURFACE * SYSTEM_UI_MULTIPLIER
-                        : MAXIMUM_WINDOW_TOKEN_COUNT_WITHOUT_SURFACE;
         synchronized (mGlobalLock) {
-            int[] count = new int[1];
-            mRoot.forAllDisplays(d -> count[0] += d.getWindowTokensWithoutSurfaceCount(callingUid));
-            return count[0] >= limit;
-        }
-    }
+            final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
+            if (dc == null) {
+                ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add token: %s"
+                        + " for non-exiting displayId=%d", binder, displayId);
+                return;
+            }
 
-    private int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
-            String packageName, boolean fromClientToken) {
-        final boolean callerCanManageAppTokens =
-                checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
-        // WindowContext users usually don't hold MANAGE_APP_TOKEN permission. Check permissions
-        // by checkAddPermission.
-        if (!callerCanManageAppTokens) {
-            final int res = mPolicy.checkAddPermission(type, false /* isRoundedCornerOverlay */,
-                    packageName, new int[1]);
-            if (res != ADD_OKAY) {
-                return res;
+            WindowToken token = dc.getWindowToken(binder);
+            if (token != null) {
+                ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add binder token: %s"
+                        + " for already created window token: %s"
+                        + " displayId=%d", binder, token, displayId);
+                return;
+            }
+            if (type == TYPE_WALLPAPER) {
+                new WallpaperWindowToken(this, binder, true, dc,
+                        true /* ownerCanManageAppTokens */, options);
+            } else {
+                new WindowToken(this, binder, type, true /* persistOnEmpty */, dc,
+                        true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
+                        false /* fromClientToken */, options);
             }
         }
-
-        final int callingUid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                if (!callerCanManageAppTokens) {
-                    if (packageName == null || !unprivilegedAppCanCreateTokenWith(
-                            null /* parentWindow */, callingUid, type, type, binder,
-                            packageName)) {
-                        throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
-                    }
-                }
-
-                final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
-                if (dc == null) {
-                    ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add token: %s"
-                            + " for non-exiting displayId=%d", binder, displayId);
-                    return WindowManagerGlobal.ADD_INVALID_DISPLAY;
-                }
-
-                WindowToken token = dc.getWindowToken(binder);
-                if (token != null) {
-                    ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add binder token: %s"
-                            + " for already created window token: %s"
-                            + " displayId=%d", binder, token, displayId);
-                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
-                }
-                // TODO(window-container): Clean up dead tokens
-                if (type == TYPE_WALLPAPER) {
-                    new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens,
-                            options);
-                } else {
-                    new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens,
-                            callingUid, false /* roundedCornerOverlay */, fromClientToken, options);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-        return WindowManagerGlobal.ADD_OKAY;
     }
 
     /**
@@ -2877,38 +2813,26 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void removeWindowToken(IBinder binder, int displayId) {
-        final boolean callerCanManageAppTokens =
-                checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()");
-        final WindowToken windowToken;
-        synchronized (mGlobalLock) {
-            windowToken = mRoot.getWindowToken(binder);
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-        if (windowToken == null) {
-            ProtoLog.w(WM_ERROR,
-                    "removeWindowToken: Attempted to remove non-existing token: %s", binder);
-            return;
-        }
-        final int callingUid = Binder.getCallingUid();
-
-        // If MANAGE_APP_TOKEN permission is not held(usually from WindowContext), callers can only
-        // remove the window tokens which they added themselves.
-        if (!callerCanManageAppTokens && (windowToken.getOwnerUid() == INVALID_UID
-                || callingUid != windowToken.getOwnerUid())) {
-            throw new SecurityException("removeWindowToken: Requires MANAGE_APP_TOKENS permission"
-                    + " to remove token owned by another uid");
-        }
-
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
+
                 if (dc == null) {
                     ProtoLog.w(WM_ERROR, "removeWindowToken: Attempted to remove token: %s"
                             + " for non-exiting displayId=%d", binder, displayId);
                     return;
                 }
-
-                dc.removeWindowToken(binder);
+                final WindowToken token = dc.removeWindowToken(binder);
+                if (token == null) {
+                    ProtoLog.w(WM_ERROR,
+                            "removeWindowToken: Attempted to remove non-existing token: %s",
+                            binder);
+                    return;
+                }
                 dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             }
         } finally {
@@ -7716,8 +7640,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void addWindowToken(IBinder token, int type, int displayId) {
-            WindowManagerService.this.addWindowToken(token, type, displayId);
+        public void addWindowToken(IBinder token, int type, int displayId,
+                @Nullable Bundle options) {
+            WindowManagerService.this.addWindowToken(token, type, displayId, options);
         }
 
         @Override

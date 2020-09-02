@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -37,12 +36,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -75,37 +72,11 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     @Test
     public void testAddWindowToken() {
         IBinder token = mock(IBinder.class);
-        mWm.addWindowToken(token, TYPE_TOAST, mDisplayContent.getDisplayId());
+        mWm.addWindowToken(token, TYPE_TOAST, mDisplayContent.getDisplayId(), null /* options */);
 
         WindowToken windowToken = mWm.mRoot.getWindowToken(token);
         assertFalse(windowToken.mRoundedCornerOverlay);
         assertFalse(windowToken.isFromClient());
-    }
-
-    @Test
-    public void testAddWindowTokenWithOptions() {
-        IBinder token = mock(IBinder.class);
-        mWm.addWindowTokenWithOptions(token, TYPE_TOAST, mDisplayContent.getDisplayId(),
-                null /* options */, null /* options */);
-
-        WindowToken windowToken = mWm.mRoot.getWindowToken(token);
-        assertFalse(windowToken.mRoundedCornerOverlay);
-        assertTrue(windowToken.isFromClient());
-    }
-
-    @Test(expected = SecurityException.class)
-    public void testRemoveWindowToken_ownerUidNotMatch_throwException() {
-        IBinder token = mock(IBinder.class);
-        mWm.addWindowTokenWithOptions(token, TYPE_TOAST, mDisplayContent.getDisplayId(),
-                null /* options */, null /* options */);
-
-        spyOn(mWm);
-        when(mWm.checkCallingPermission(anyString(), anyString())).thenReturn(false);
-        WindowToken windowToken = mWm.mRoot.getWindowToken(token);
-        spyOn(windowToken);
-        when(windowToken.getOwnerUid()).thenReturn(INVALID_UID);
-
-        mWm.removeWindowToken(token, mDisplayContent.getDisplayId());
     }
 
     @Test
