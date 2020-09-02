@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -37,7 +37,7 @@ import com.android.wm.shell.common.SystemWindows;
 /**
  * Manages the window parameters of the docked stack divider.
  */
-public class DividerWindowManager {
+final class DividerWindowManager {
 
     private static final String WINDOW_TITLE = "DockedStackDivider";
 
@@ -45,12 +45,12 @@ public class DividerWindowManager {
     private WindowManager.LayoutParams mLp;
     private View mView;
 
-    public DividerWindowManager(SystemWindows systemWindows) {
+    DividerWindowManager(SystemWindows systemWindows) {
         mSystemWindows = systemWindows;
     }
 
     /** Add a divider view */
-    public void add(View view, int width, int height, int displayId) {
+    void add(View view, int width, int height, int displayId) {
         mLp = new WindowManager.LayoutParams(
                 width, height, TYPE_DOCK_DIVIDER,
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL
@@ -67,14 +67,14 @@ public class DividerWindowManager {
         mView = view;
     }
 
-    public void remove() {
+    void remove() {
         if (mView != null) {
             mSystemWindows.removeView(mView);
         }
         mView = null;
     }
 
-    public void setSlippery(boolean slippery) {
+    void setSlippery(boolean slippery) {
         boolean changed = false;
         if (slippery && (mLp.flags & FLAG_SLIPPERY) == 0) {
             mLp.flags |= FLAG_SLIPPERY;
@@ -88,7 +88,7 @@ public class DividerWindowManager {
         }
     }
 
-    public void setTouchable(boolean touchable) {
+    void setTouchable(boolean touchable) {
         if (mView == null) {
             return;
         }
@@ -106,7 +106,7 @@ public class DividerWindowManager {
     }
 
     /** Sets the touch region to `touchRegion`. Use null to unset.*/
-    public void setTouchRegion(Region touchRegion) {
+    void setTouchRegion(Region touchRegion) {
         if (mView == null) {
             return;
         }

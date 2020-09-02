@@ -28,7 +28,6 @@ import com.android.systemui.onehanded.OneHanded;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipUiEventLogger;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -37,6 +36,7 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import dagger.BindsOptionalOf;
 import dagger.Module;

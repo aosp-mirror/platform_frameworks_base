@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-** Copyright 2012, The Android Open Source Project
+** Copyright 2020, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -20,16 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- The maximum number of rows in the QuickSettings -->
-    <integer name="quick_settings_max_rows">4</integer>
-
-    <!-- The number of columns that the top level tiles span in the QuickSettings -->
-    <integer name="quick_settings_user_time_settings_tile_span">1</integer>
-
-    <!-- Nav bar button default ordering/layout -->
-    <string name="config_navBarLayout" translatable="false">left;back,home,recent;right</string>
-
-    <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
-    <integer name="navigation_bar_deadzone_orientation">0</integer>
-
+    <!-- Animation duration when using long press on recents to dock -->
+    <integer name="long_press_dock_anim_duration">290</integer>
 </resources>

@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
@@ -29,7 +29,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 /**
  * Translucent activity that gets started on top of a task in multi-window to inform the user that
