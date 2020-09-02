@@ -25,12 +25,14 @@ import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.IFaceServiceReceiver;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -109,6 +111,9 @@ class Face10 implements IHwBinder.DeathRecipient {
         @Override
         public void onUserSwitching(int newUserId) {
             scheduleInternalCleanup(newUserId);
+            scheduleGetFeature(new Binder(), newUserId,
+                    BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
+                    null, mContext.getOpPackageName());
         }
     };
 
@@ -360,6 +365,9 @@ class Face10 implements IHwBinder.DeathRecipient {
         if (halId != 0) {
             scheduleLoadAuthenticatorIds();
             scheduleInternalCleanup(ActivityManager.getCurrentUser());
+            scheduleGetFeature(new Binder(), ActivityManager.getCurrentUser(),
+                    BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
+                    null, mContext.getOpPackageName());
         } else {
             Slog.e(TAG, "Unable to set callback");
             mDaemon = null;
@@ -450,7 +458,7 @@ class Face10 implements IHwBinder.DeathRecipient {
     }
 
     void scheduleGetFeature(@NonNull IBinder token, int userId, int feature,
-            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
+            @Nullable ClientMonitorCallbackConverter listener, @NonNull String opPackageName) {
         mHandler.post(() -> {
             final List<Face> faces = getEnrolledFaces(userId);
             if (faces.isEmpty()) {
@@ -461,10 +469,22 @@ class Face10 implements IHwBinder.DeathRecipient {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final int faceId = faces.get(0).getBiometricId();
-            final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext,
-                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    opPackageName, mSensorId, feature, faceId);
-            mScheduler.scheduleClientMonitor(client);
+            final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext, mLazyDaemon,
+                    token, listener, userId, opPackageName, mSensorId, feature, faceId);
+            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(
+                        @NonNull ClientMonitor<?> clientMonitor, boolean success) {
+                    if (success && feature == BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION) {
+                        final int settingsValue = client.getValue() ? 1 : 0;
+                        Slog.d(TAG, "Updating attention value for user: " + userId
+                                + " to value: " + settingsValue);
+                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
+                                settingsValue, userId);
+                    }
+                }
+            });
         });
     }
 

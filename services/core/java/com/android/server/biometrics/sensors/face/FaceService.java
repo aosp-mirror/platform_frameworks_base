@@ -25,9 +25,9 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.Face;
+import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
-import android.hardware.face.FaceSensorProperties;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.NativeHandle;
@@ -303,7 +303,8 @@ public class FaceService extends SystemService {
         public void getFeature(final IBinder token, int userId, int feature,
                 IFaceServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
-            mFace10.scheduleGetFeature(token, userId, feature, receiver, opPackageName);
+            mFace10.scheduleGetFeature(token, userId, feature,
+                    new ClientMonitorCallbackConverter(receiver), opPackageName);
         }
 
         @Override // Binder call
