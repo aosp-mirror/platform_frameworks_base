@@ -11534,38 +11534,6 @@ public final class Settings {
         public static final String APP_OPS_CONSTANTS = "app_ops_constants";
 
         /**
-         * Device Idle (Doze) specific settings.
-         * This is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "inactive_to=60000,sensing_to=400000"
-         *
-         * The following keys are supported:
-         *
-         * <pre>
-         * inactive_to                      (long)
-         * sensing_to                       (long)
-         * motion_inactive_to               (long)
-         * idle_after_inactive_to           (long)
-         * idle_pending_to                  (long)
-         * max_idle_pending_to              (long)
-         * idle_pending_factor              (float)
-         * quick_doze_delay_to              (long)
-         * idle_to                          (long)
-         * max_idle_to                      (long)
-         * idle_factor                      (float)
-         * min_time_to_alarm                (long)
-         * max_temp_app_whitelist_duration  (long)
-         * notification_whitelist_duration  (long)
-         * </pre>
-         *
-         * <p>
-         * Type: string
-         * @hide
-         * @see com.android.server.DeviceIdleController.Constants
-         */
-        public static final String DEVICE_IDLE_CONSTANTS = "device_idle_constants";
-
-        /**
          * Battery Saver specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
          *

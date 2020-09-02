@@ -129,6 +129,14 @@ package android.os {
 
 }
 
+package android.provider {
+
+  public final class DeviceConfig {
+    field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
+  }
+
+}
+
 package android.util {
 
   public class AtomicFile {

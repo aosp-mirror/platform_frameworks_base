@@ -230,7 +230,6 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
                     Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
                     Settings.Global.DEVICE_DEMO_MODE,
-                    Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.BATTERY_TIP_CONSTANTS,
