@@ -1,74 +1,88 @@
 // Baseline format: 1.0
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
-    Method should return Collection<CharSequence> (or subclass) instead of raw array; was `java.lang.CharSequence[]`
+    
+
+
+BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
+    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
 
 
 GenericException: android.app.prediction.AppPredictor#finalize():
-    Methods must not throw generic exceptions (`java.lang.Throwable`)
+    
 GenericException: android.hardware.location.ContextHubClient#finalize():
-    Methods must not throw generic exceptions (`java.lang.Throwable`)
+    
 GenericException: android.net.IpSecManager.IpSecTunnelInterface#finalize():
-    Methods must not throw generic exceptions (`java.lang.Throwable`)
+    
 GenericException: android.service.autofill.augmented.FillWindow#finalize():
-    Methods must not throw generic exceptions (`java.lang.Throwable`)
+    
 
 
 KotlinKeyword: android.app.Notification#when:
-    Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
+    
+
+
+MissingGetterMatchingBuilder: android.security.keystore.KeyGenParameterSpec.Builder#setUid(int):
+    android.security.keystore.KeyGenParameterSpec does not declare a `getUid()` method matching method android.security.keystore.KeyGenParameterSpec.Builder.setUid(int)
+MissingGetterMatchingBuilder: android.service.autofill.Dataset.Builder#setFieldInlinePresentation(android.view.autofill.AutofillId, android.view.autofill.AutofillValue, java.util.regex.Pattern, android.service.autofill.InlinePresentation):
+    android.service.autofill.Dataset does not declare a `getFieldInlinePresentation()` method matching method android.service.autofill.Dataset.Builder.setFieldInlinePresentation(android.view.autofill.AutofillId,android.view.autofill.AutofillValue,java.util.regex.Pattern,android.service.autofill.InlinePresentation)
+MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
+    android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
+MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    android.telephony.mbms.DownloadRequest does not declare a `getServiceId()` method matching method android.telephony.mbms.DownloadRequest.Builder.setServiceId(String)
 
 
 MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
-    Missing nullability on parameter `intent` in method `onUnbind`
+    
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #0:
-    Missing nullability on parameter `inputId` in method `onEvent`
+    
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #1:
-    Missing nullability on parameter `eventType` in method `onEvent`
+    
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #2:
-    Missing nullability on parameter `eventArgs` in method `onEvent`
+    
 MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
-    Missing nullability on parameter `base` in method `attachBaseContext`
+    
 MissingNullability: android.provider.ContactsContract.MetadataSync#CONTENT_URI:
-    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSync`
+    
 MissingNullability: android.provider.ContactsContract.MetadataSync#METADATA_AUTHORITY_URI:
-    Missing nullability on field `METADATA_AUTHORITY_URI` in class `class android.provider.ContactsContract.MetadataSync`
+    
 MissingNullability: android.provider.ContactsContract.MetadataSyncState#CONTENT_URI:
-    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSyncState`
+    
 MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #0:
-    Missing nullability on parameter `context` in method `attachInfo`
+    
 MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #1:
-    Missing nullability on parameter `info` in method `attachInfo`
+    
 MissingNullability: android.service.autofill.augmented.AugmentedAutofillService#onUnbind(android.content.Intent) parameter #0:
-    Missing nullability on parameter `intent` in method `onUnbind`
+    
 MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
-    Missing nullability on parameter `fd` in method `dump`
+    
 MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #1:
-    Missing nullability on parameter `pw` in method `dump`
+    
 MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #2:
-    Missing nullability on parameter `args` in method `dump`
+    
 MissingNullability: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context) parameter #0:
-    Missing nullability on parameter `base` in method `attachBaseContext`
+    
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
-    Missing nullability on parameter `intent` in method `onUnbind`
+    
 MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringDaily(java.time.ZonedDateTime) parameter #0:
-    Missing nullability on parameter `start` in method `createRecurringDaily`
+    
 MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringMonthly(java.time.ZonedDateTime) parameter #0:
-    Missing nullability on parameter `start` in method `createRecurringMonthly`
+    
 MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringWeekly(java.time.ZonedDateTime) parameter #0:
-    Missing nullability on parameter `start` in method `createRecurringWeekly`
+    
 MissingNullability: android.telephony.data.DataService#onUnbind(android.content.Intent) parameter #0:
-    Missing nullability on parameter `intent` in method `onUnbind`
+    
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
-    Missing nullability on method `setServiceId` return
+    
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
-    Missing nullability on parameter `serviceId` in method `setServiceId`
+    
 
 
 ProtectedMember: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context):
-    Protected methods not allowed; must be public: method android.printservice.recommendation.RecommendationService.attachBaseContext(android.content.Context)}
+    
 ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]):
-    Protected methods not allowed; must be public: method android.service.contentcapture.ContentCaptureService.dump(java.io.FileDescriptor,java.io.PrintWriter,String[])}
+    
 ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
-    Protected methods not allowed; must be public: method android.service.notification.NotificationAssistantService.attachBaseContext(android.content.Context)}
+    
 
 
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
@@ -168,7 +182,7 @@ SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallb
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+    
 SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
 SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
