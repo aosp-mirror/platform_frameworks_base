@@ -72,6 +72,11 @@ public final class AudioDeviceAttributes implements Parcelable {
     private final @Role int mRole;
 
     /**
+     * The internal audio device type
+     */
+    private final int mNativeType;
+
+    /**
      * @hide
      * Constructor from a valid {@link AudioDeviceInfo}
      * @param deviceInfo the connected audio device from which to obtain the device-identifying
@@ -83,6 +88,7 @@ public final class AudioDeviceAttributes implements Parcelable {
         mRole = deviceInfo.isSink() ? ROLE_OUTPUT : ROLE_INPUT;
         mType = deviceInfo.getType();
         mAddress = deviceInfo.getAddress();
+        mNativeType = deviceInfo.getPort().type();
     }
 
     /**
@@ -109,12 +115,14 @@ public final class AudioDeviceAttributes implements Parcelable {
         mRole = role;
         mType = type;
         mAddress = address;
+        mNativeType = AudioSystem.DEVICE_NONE;
     }
 
     /*package*/ AudioDeviceAttributes(int nativeType, @NonNull String address) {
         mRole = (nativeType & AudioSystem.DEVICE_BIT_IN) != 0 ? ROLE_INPUT : ROLE_OUTPUT;
         mType = AudioDeviceInfo.convertInternalDeviceToDeviceType(nativeType);
         mAddress = address;
+        mNativeType = nativeType;
     }
 
     /**
@@ -145,6 +153,15 @@ public final class AudioDeviceAttributes implements Parcelable {
     @SystemApi
     public @NonNull String getAddress() {
         return mAddress;
+    }
+
+    /**
+     * @hide
+     * Returns the internal device type of a device
+     * @return the internal device type
+     */
+    public int getInternalType() {
+        return mNativeType;
     }
 
     @Override
@@ -189,12 +206,14 @@ public final class AudioDeviceAttributes implements Parcelable {
         dest.writeInt(mRole);
         dest.writeInt(mType);
         dest.writeString(mAddress);
+        dest.writeInt(mNativeType);
     }
 
     private AudioDeviceAttributes(@NonNull Parcel in) {
         mRole = in.readInt();
         mType = in.readInt();
         mAddress = in.readString();
+        mNativeType = in.readInt();
     }
 
     public static final @NonNull Parcelable.Creator<AudioDeviceAttributes> CREATOR =
