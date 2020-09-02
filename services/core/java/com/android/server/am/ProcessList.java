@@ -1528,15 +1528,18 @@ public final class ProcessList {
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY
                 && proc.lastCachedPss >= 4000) {
             // Turn this condition on to cause killing to happen regularly, for testing.
-            if (proc.baseProcessTracker != null) {
-                proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList, proc.lastCachedPss);
-                for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                    ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                    FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                            proc.info.uid,
-                            holder.state.getName(),
-                            holder.state.getPackage(),
-                            proc.lastCachedPss, holder.appVersion);
+            synchronized (mService.mProcessStats.mLock) {
+                if (proc.baseProcessTracker != null) {
+                    proc.baseProcessTracker.reportCachedKill(
+                            proc.pkgList.mPkgList, proc.lastCachedPss);
+                    for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                        ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+                        FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
+                                proc.info.uid,
+                                holder.state.getName(),
+                                holder.state.getPackage(),
+                                proc.lastCachedPss, holder.appVersion);
+                    }
                 }
             }
             proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
@@ -1549,16 +1552,18 @@ public final class ProcessList {
             if (DEBUG_PSS) Slog.d(TAG_PSS, "May not keep " + proc + ": pss=" + proc
                     .lastCachedPss);
             if (proc.lastCachedPss >= getCachedRestoreThresholdKb()) {
-                if (proc.baseProcessTracker != null) {
-                    proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList,
-                            proc.lastCachedPss);
-                    for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                        ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                        FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                                proc.info.uid,
-                                holder.state.getName(),
-                                holder.state.getPackage(),
-                                proc.lastCachedPss, holder.appVersion);
+                synchronized (mService.mProcessStats.mLock) {
+                    if (proc.baseProcessTracker != null) {
+                        proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList,
+                                proc.lastCachedPss);
+                        for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                            ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+                            FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
+                                    proc.info.uid,
+                                    holder.state.getName(),
+                                    holder.state.getPackage(),
+                                    proc.lastCachedPss, holder.appVersion);
+                        }
                     }
                 }
                 proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
