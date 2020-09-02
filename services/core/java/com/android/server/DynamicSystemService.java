@@ -126,6 +126,16 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
     }
 
     @Override
+    public boolean closePartition() throws RemoteException {
+        IGsiService service = getGsiService();
+        if (service.closePartition() != 0) {
+            Slog.i(TAG, "Partition installation completes with error");
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean finishInstallation() throws RemoteException {
         IGsiService service = getGsiService();
         if (service.closeInstall() != 0) {
