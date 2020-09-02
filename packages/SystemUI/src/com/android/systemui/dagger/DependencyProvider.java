@@ -288,6 +288,7 @@ public class DependencyProvider {
 
     /** */
     @Provides
+    @SysUISingleton
     public LockPatternUtils provideLockPatternUtils(Context context) {
         return new LockPatternUtils(context);
     }
