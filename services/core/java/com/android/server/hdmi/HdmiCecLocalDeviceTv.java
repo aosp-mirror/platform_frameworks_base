@@ -1569,10 +1569,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // When the device is not unplugged but reawaken from standby, we check if the System
         // Audio Control Feature is enabled or not then decide if turning SAM on/off accordingly.
         if (getAvrDeviceInfo() != null && portId == getAvrDeviceInfo().getPortId()) {
+            HdmiLogger.debug("Port ID:%d, 5v=%b", portId, connected);
             if (!connected) {
                 setSystemAudioMode(false);
-            } else if (mSystemAudioControlFeatureEnabled != mService.isSystemAudioActivated()){
-                setSystemAudioMode(mSystemAudioControlFeatureEnabled);
+            } else {
+                onNewAvrAdded(getAvrDeviceInfo());
             }
         }
 
