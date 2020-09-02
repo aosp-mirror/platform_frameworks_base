@@ -21242,7 +21242,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // Prior to enabling the package, we need to decompress the APK(s) to the
             // data partition and then replace the version on the system partition.
             final AndroidPackage deletedPkg = pkgSetting.pkg;
-            final boolean isSystemStub = deletedPkg.isStub()
+            final boolean isSystemStub = (deletedPkg != null)
+                    && deletedPkg.isStub()
                     && deletedPkg.isSystem();
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
