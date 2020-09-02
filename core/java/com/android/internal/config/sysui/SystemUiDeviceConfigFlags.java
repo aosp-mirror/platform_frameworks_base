@@ -390,9 +390,9 @@ public final class SystemUiDeviceConfigFlags {
     public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
 
     /**
-     * (boolean) Whether to enable user-drag resizing for PIP.
+     * (boolean) Whether to enable pinch resizing for PIP.
      */
-    public static final String PIP_USER_RESIZE = "pip_user_resize";
+    public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
 
     /**
      * (float) Bottom height in DP for Back Gesture.
