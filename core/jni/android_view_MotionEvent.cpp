@@ -21,12 +21,13 @@
 #include <android/graphics/matrix.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-#include <utils/Log.h>
+#include <attestation/HmacKeyManager.h>
 #include <input/Input.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <utils/Log.h>
 #include "android_os_Parcel.h"
-#include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"
+#include "android_view_MotionEvent.h"
 
 #include "core_jni_helpers.h"
 
