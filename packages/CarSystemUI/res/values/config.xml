@@ -123,7 +123,6 @@
         <item>com.android.systemui.volume.VolumeUI</item>
         <item>com.android.systemui.statusbar.phone.StatusBar</item>
         <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.pip.PipUI</item>
         <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>

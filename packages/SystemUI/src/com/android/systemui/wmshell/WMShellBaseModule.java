@@ -18,16 +18,21 @@ package com.android.systemui.wmshell;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.pip.Pip;
+import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.stackdivider.SplitScreen;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
@@ -76,6 +81,13 @@ public abstract class WMShellBaseModule {
 
     @SysUISingleton
     @Provides
+    static PipSurfaceTransactionHelper providesPipSurfaceTransactionHelper(Context context,
+            ConfigurationController configController) {
+        return new PipSurfaceTransactionHelper(context, configController);
+    }
+
+    @SysUISingleton
+    @Provides
     static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
         return new SystemWindows(displayController, wmService);
@@ -90,5 +102,15 @@ public abstract class WMShellBaseModule {
     }
 
     @BindsOptionalOf
+    abstract Pip optionalPip();
+
+    @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();
+
+    @SysUISingleton
+    @Provides
+    static FlingAnimationUtils.Builder provideFlingAnimationUtilsBuilder(
+            DisplayMetrics displayMetrics) {
+        return new FlingAnimationUtils.Builder(displayMetrics);
+    }
 }

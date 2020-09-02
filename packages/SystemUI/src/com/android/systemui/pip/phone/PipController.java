@@ -18,6 +18,7 @@ package com.android.systemui.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static com.android.systemui.pip.PipAnimationController.isOutPipDirection;
 
@@ -28,11 +29,14 @@ import android.app.IActivityManager;
 import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
@@ -44,7 +48,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.pip.BasePipManager;
+import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
@@ -55,25 +59,20 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
-import java.util.Optional;
-
-import javax.inject.Inject;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 @SysUISingleton
-public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitionCallback {
-    private static final String TAG = "PipManager";
+public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallback {
+    private static final String TAG = "PipController";
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -87,15 +86,15 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private DisplayController mDisplayController;
     private InputConsumerController mInputConsumerController;
     private PipAppOpsListener mAppOpsListener;
+    private PipBoundsHandler mPipBoundsHandler;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
-    private PipTaskOrganizer mPipTaskOrganizer;
     private PipSurfaceTransactionHelper mPipSurfaceTransactionHelper;
     private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
     private boolean mIsInFixedRotation;
 
-    protected PipBoundsHandler mPipBoundsHandler;
     protected PipMenuActivityController mMenuController;
+    protected PipTaskOrganizer mPipTaskOrganizer;
 
     /**
      * Handler for display rotation changes.
@@ -127,7 +126,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             // not during the fixed rotation. In fixed rotation case, app is about to enter PiP
             // and we need the offsets preserved to calculate the destination bounds.
             if (!mIsInFixedRotation) {
-                mPipBoundsHandler.setShelfHeight(false , 0);
+                mPipBoundsHandler.setShelfHeight(false, 0);
                 mPipBoundsHandler.onImeVisibilityChanged(false, 0);
                 mTouchHandler.onShelfVisibilityChanged(false, 0);
                 mTouchHandler.onImeVisibilityChanged(false, 0);
@@ -201,7 +200,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     /**
      * Handler for messages from the PIP controller.
      */
-    private class PipManagerPinnedStackListener extends PinnedStackListener {
+    private class PipControllerPinnedStackListener extends PinnedStackListener {
         @Override
         public void onListenerRegistered(IPinnedStackController controller) {
             mHandler.post(() -> mTouchHandler.setPinnedStackController(controller));
@@ -253,44 +252,56 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     public ConfigurationController.ConfigurationListener mOverlayChangedListener =
             new ConfigurationController.ConfigurationListener() {
-        @Override
-        public void onOverlayChanged() {
-            mHandler.post(() -> {
-                mPipBoundsHandler.onOverlayChanged(mContext, mContext.getDisplay());
-                updateMovementBounds(null /* toBounds */,
-                        false /* fromRotation */, false /* fromImeAdjustment */,
-                        false /* fromShelfAdjustment */, null /* windowContainerTransaction */);
-            });
-        }
-    };
+                @Override
+                public void onOverlayChanged() {
+                    mHandler.post(() -> {
+                        mPipBoundsHandler.onOverlayChanged(mContext, mContext.getDisplay());
+                        updateMovementBounds(null /* toBounds */,
+                                false /* fromRotation */, false /* fromImeAdjustment */,
+                                false /* fromShelfAdjustment */,
+                                null /* windowContainerTransaction */);
+                    });
+                }
+            };
 
-    @Inject
-    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
+    public PipController(Context context, BroadcastDispatcher broadcastDispatcher,
             ConfigurationController configController,
             DeviceConfigProxy deviceConfig,
             DisplayController displayController,
-            Optional<SplitScreen> splitScreenOptional,
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
-            PipUiEventLogger pipUiEventLogger,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            PipBoundsHandler pipBoundsHandler,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            PipTaskOrganizer pipTaskOrganizer,
+            PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
+        PackageManager pm = context.getPackageManager();
+        boolean supportsPip = pm.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
+        if (!supportsPip) {
+            Log.w(TAG, "Device not support PIP feature");
+            return;
+        }
+
+        // Ensure that we are the primary user's SystemUI.
+        final int processUser = UserManager.get(context).getUserHandle();
+        if (processUser != UserHandle.USER_SYSTEM) {
+            throw new IllegalStateException("Non-primary Pip component not currently supported.");
+        }
+
         try {
             WindowManagerWrapper.getInstance().addPinnedStackListener(
-                    new PipManagerPinnedStackListener());
+                    new PipControllerPinnedStackListener());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
         mDisplayController = displayController;
-        mPipBoundsHandler = new PipBoundsHandler(mContext);
-        mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
-        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                mPipSurfaceTransactionHelper, splitScreenOptional, mDisplayController,
-                pipUiEventLogger, shellTaskOrganizer);
+        mPipBoundsHandler = pipBoundsHandler;
+        mPipSurfaceTransactionHelper = pipSurfaceTransactionHelper;
+        mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
@@ -450,6 +461,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mTmpDisplayInfo.rotation);
     }
 
+    @Override
     public void dump(PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG);

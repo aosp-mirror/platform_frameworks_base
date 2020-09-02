@@ -44,7 +44,7 @@ public:
     CountMetricProducer(
             const ConfigKey& key, const CountMetric& countMetric, const int conditionIndex,
             const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
-            const int64_t timeBaseNs, const int64_t startTimeNs,
+            const uint64_t protoHash, const int64_t timeBaseNs, const int64_t startTimeNs,
             const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
             const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                     eventDeactivationMap = {},
@@ -56,6 +56,10 @@ public:
     void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
                         const HashableDimensionKey& primaryKey, const FieldValue& oldState,
                         const FieldValue& newState) override;
+
+    MetricType getMetricType() const override {
+        return METRIC_TYPE_COUNT;
+    }
 
 protected:
     void onMatchedLogEventInternalLocked(

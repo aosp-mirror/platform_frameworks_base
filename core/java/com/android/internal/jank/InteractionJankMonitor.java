@@ -16,6 +16,8 @@
 
 package com.android.internal.jank;
 
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.HandlerThread;
@@ -37,8 +39,19 @@ public class InteractionJankMonitor {
     private static final String TAG = InteractionJankMonitor.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final Object LOCK = new Object();
+
+    // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_MOTION = 0;
     public static final int CUJ_NOTIFICATION_SHADE_GESTURE = 1;
+
+    private static final int NO_STATSD_LOGGING = -1;
+
+    // Used to convert CujType to InteractionType enum value for statsd logging.
+    // Use NO_STATSD_LOGGING in case the measurement for a given CUJ should not be logged to statsd.
+    private static final int[] CUJ_TO_STATSD_INTERACTION_TYPE = {
+            NO_STATSD_LOGGING,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE,
+    };
 
     private static ThreadedRenderer sRenderer;
     private static Map<String, FrameTracker> sRunningTracker;
@@ -171,6 +184,15 @@ public class InteractionJankMonitor {
 
         public int getId() {
             return mId;
+        }
+
+        public int getStatsdInteractionType() {
+            return CUJ_TO_STATSD_INTERACTION_TYPE[mId];
+        }
+
+        /** Describes whether the measurement from this session should be written to statsd. */
+        public boolean logToStatsd() {
+            return getStatsdInteractionType() != NO_STATSD_LOGGING;
         }
 
         public String getName() {

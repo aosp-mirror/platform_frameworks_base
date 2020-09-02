@@ -329,6 +329,10 @@ public class PipResizeGestureHandler {
                         mInputMonitor.pilferPointers();
                     }
                     if (mThresholdCrossed) {
+                        if (mPipMenuActivityController.isMenuVisible()) {
+                            mPipMenuActivityController.hideMenuWithoutResize();
+                            mPipMenuActivityController.hideMenu();
+                        }
                         final Rect currentPipBounds = mMotionHelper.getBounds();
                         mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(x, y,
                                 mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,

@@ -87,6 +87,13 @@ enum BucketDropReason {
     NO_DATA = 9
 };
 
+enum MetricType {
+    METRIC_TYPE_EVENT = 1,
+    METRIC_TYPE_COUNT = 2,
+    METRIC_TYPE_DURATION = 3,
+    METRIC_TYPE_GAUGE = 4,
+    METRIC_TYPE_VALUE = 5,
+};
 struct Activation {
     Activation(const ActivationType& activationType, const int64_t ttlNs)
         : ttl_ns(ttlNs),
@@ -130,7 +137,7 @@ class MetricProducer : public virtual android::RefBase, public virtual StateList
 public:
     MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
                    const int conditionIndex, const vector<ConditionState>& initialConditionCache,
-                   const sp<ConditionWizard>& wizard,
+                   const sp<ConditionWizard>& wizard, const uint64_t protoHash,
                    const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
                    const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                            eventDeactivationMap,
@@ -259,9 +266,15 @@ public:
             int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
 
     // Start: getters/setters
-    inline const int64_t& getMetricId() const {
+    inline int64_t getMetricId() const {
         return mMetricId;
     }
+
+    inline uint64_t getProtoHash() const {
+        return mProtoHash;
+    }
+
+    virtual MetricType getMetricType() const = 0;
 
     // For test only.
     inline int64_t getCurrentBucketNum() const {
@@ -399,6 +412,10 @@ protected:
     bool maxDropEventsReached();
 
     const int64_t mMetricId;
+
+    // Hash of the Metric's proto bytes from StatsdConfig, including any activations.
+    // Used to determine if the definition of this metric has changed across a config update.
+    const uint64_t mProtoHash;
 
     const ConfigKey mConfigKey;
 

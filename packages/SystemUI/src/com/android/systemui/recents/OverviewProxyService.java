@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
@@ -75,8 +76,8 @@ import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.onehanded.OneHandedUI;
+import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipAnimationController;
-import com.android.systemui.pip.PipUI;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -122,7 +123,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final PipUI mPipUI;
+    private final Optional<Pip> mPipOptional;
     private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private SysUiState mSysUiState;
@@ -143,6 +144,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private int mConnectionBackoffAttempts;
     private boolean mBound;
     private boolean mIsEnabled;
+    private boolean mHasPipFeature;
     private int mCurrentBoundedUserId = -1;
     private float mNavBarButtonAlpha;
     private boolean mInputFocusTransferStarted;
@@ -383,12 +385,15 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setShelfHeight(boolean visible, int shelfHeight) {
-            if (!verifyCaller("setShelfHeight")) {
+            if (!verifyCaller("setShelfHeight") || !mHasPipFeature) {
+                Log.w(TAG_OPS,
+                        "ByPass setShelfHeight, FEATURE_PICTURE_IN_PICTURE:" + mHasPipFeature);
                 return;
             }
             long token = Binder.clearCallingIdentity();
             try {
-                mPipUI.setShelfHeight(visible, shelfHeight);
+                mPipOptional.ifPresent(
+                        pip -> pip.setShelfHeight(visible, shelfHeight));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -408,12 +413,16 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void notifySwipeToHomeFinished() {
-            if (!verifyCaller("notifySwipeToHomeFinished")) {
+            if (!verifyCaller("notifySwipeToHomeFinished") || !mHasPipFeature) {
+                Log.w(TAG_OPS, "ByPass notifySwipeToHomeFinished, FEATURE_PICTURE_IN_PICTURE:"
+                        + mHasPipFeature);
                 return;
             }
             long token = Binder.clearCallingIdentity();
             try {
-                mPipUI.setPinnedStackAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
+                mPipOptional.ifPresent(
+                        pip -> pip.setPinnedStackAnimationType(
+                                PipAnimationController.ANIM_TYPE_ALPHA));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -421,12 +430,15 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
-            if (!verifyCaller("setPinnedStackAnimationListener")) {
+            if (!verifyCaller("setPinnedStackAnimationListener") || !mHasPipFeature) {
+                Log.w(TAG_OPS, "ByPass setPinnedStackAnimationListener, FEATURE_PICTURE_IN_PICTURE:"
+                        + mHasPipFeature);
                 return;
             }
             long token = Binder.clearCallingIdentity();
             try {
-                mPipUI.setPinnedStackAnimationListener(listener);
+                mPipOptional.ifPresent(
+                        pip -> pip.setPinnedStackAnimationListener(listener));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -603,14 +615,17 @@ public class OverviewProxyService extends CurrentUserTracker implements
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyService(Context context, CommandQueue commandQueue,
-            Lazy<NavigationBarController> navBarControllerLazy, NavigationModeController navModeController,
+            Lazy<NavigationBarController> navBarControllerLazy,
+            NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
-            PipUI pipUI, Optional<SplitScreen> splitScreenOptional,
+            Optional<Pip> pipOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy, OneHandedUI oneHandedUI,
             BroadcastDispatcher broadcastDispatcher) {
         super(broadcastDispatcher);
         mContext = context;
-        mPipUI = pipUI;
+        mPipOptional = pipOptional;
+        mHasPipFeature = mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
@@ -916,6 +931,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     /**
      * Notifies the Launcher of split screen size changes
+     *
      * @param secondaryWindowBounds Bounds of the secondary window including the insets
      * @param secondaryWindowInsets stable insets received by the secondary window
      */

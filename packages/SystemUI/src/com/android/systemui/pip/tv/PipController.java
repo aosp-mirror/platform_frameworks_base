@@ -20,7 +20,6 @@ import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
@@ -51,34 +50,31 @@ import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.pip.BasePipManager;
+import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
-import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.SplitScreen;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.DisplayController;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
 @SysUISingleton
-public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitionCallback {
-    private static final String TAG = "PipManager";
+public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallback {
+    private static final String TAG = "PipController";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    /**
+     * Unknown or invalid state
+     */
+    public static final int STATE_UNKNOWN = -1;
     /**
      * State when there's no PIP.
      */
@@ -147,7 +143,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private boolean mImeVisible;
     private int mImeHeightAdjustment;
 
-    private final PinnedStackListener mPinnedStackListener = new PipManagerPinnedStackListener();
+    private final PinnedStackListener mPinnedStackListener = new PipControllerPinnedStackListener();
 
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
@@ -189,7 +185,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     /**
      * Handler for messages from the PIP controller.
      */
-    private class PipManagerPinnedStackListener extends PinnedStackListener {
+    private class PipControllerPinnedStackListener extends PinnedStackListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mHandler.post(() -> {
@@ -231,20 +227,19 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
     }
 
-    @Inject
-    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
-            ConfigurationController configController,
-            DisplayController displayController,
-            Optional<SplitScreen> splitScreenOptional,
-            @NonNull PipUiEventLogger pipUiEventLogger,
-            ShellTaskOrganizer shellTaskOrganizer) {
+    public PipController(Context context, BroadcastDispatcher broadcastDispatcher,
+            PipBoundsHandler pipBoundsHandler,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            PipTaskOrganizer pipTaskOrganizer) {
         if (mInitialized) {
             return;
         }
 
         mInitialized = true;
         mContext = context;
-        mPipBoundsHandler = new PipBoundsHandler(mContext);
+        mPipNotification = new PipNotification(context, broadcastDispatcher,
+                Optional.of(this).get());
+        mPipBoundsHandler = pipBoundsHandler;
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back
         final DisplayInfo displayInfo = new DisplayInfo();
@@ -253,10 +248,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         mResizeAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
-        mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context, configController);
-        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                mPipSurfaceTransactionHelper, splitScreenOptional, displayController,
-                pipUiEventLogger, shellTaskOrganizer);
+        mPipSurfaceTransactionHelper = pipSurfaceTransactionHelper;
+        mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
@@ -278,8 +271,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         } catch (RemoteException | UnsupportedOperationException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
-
-        mPipNotification = new PipNotification(context, broadcastDispatcher, this);
     }
 
     private void loadConfigurationsAndApply(Configuration newConfig) {
@@ -359,7 +350,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     /**
      * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
-    void movePipToFullscreen() {
+    public void movePipToFullscreen() {
         if (DEBUG) Log.d(TAG, "movePipToFullscreen(), current state=" + getStateDescription());
 
         mPipTaskId = TASK_ID_NO_PIP;
@@ -372,34 +363,41 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     /**
      * Suspends resizing operation on the Pip until {@link #resumePipResizing} is called
+     *
      * @param reason The reason for suspending resizing operations on the Pip.
      */
     public void suspendPipResizing(int reason) {
-        if (DEBUG) Log.d(TAG,
-                "suspendPipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+        if (DEBUG) {
+            Log.d(TAG,
+                    "suspendPipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+        }
 
         mSuspendPipResizingReason |= reason;
     }
 
     /**
      * Resumes resizing operation on the Pip that was previously suspended.
+     *
      * @param reason The reason resizing operations on the Pip was suspended.
      */
     public void resumePipResizing(int reason) {
         if ((mSuspendPipResizingReason & reason) == 0) {
             return;
         }
-        if (DEBUG) Log.d(TAG,
-                "resumePipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+        if (DEBUG) {
+            Log.d(TAG,
+                    "resumePipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+        }
         mSuspendPipResizingReason &= ~reason;
         mHandler.post(mResizePinnedStackRunnable);
     }
 
     /**
      * Resize the Pip to the appropriate size for the input state.
+     *
      * @param state In Pip state also used to determine the new size for the Pip.
      */
-    void resizePinnedStack(int state) {
+    public void resizePinnedStack(int state) {
         if (DEBUG) {
             Log.d(TAG, "resizePinnedStack() state=" + stateToName(state) + ", current state="
                     + getStateDescription(), new Exception());
@@ -411,10 +409,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
         if (mSuspendPipResizingReason != 0) {
             mResumeResizePinnedStackRunnableState = state;
-            if (DEBUG) Log.d(TAG, "resizePinnedStack() deferring"
-                    + " mSuspendPipResizingReason=" + mSuspendPipResizingReason
-                    + " mResumeResizePinnedStackRunnableState="
-                    + stateToName(mResumeResizePinnedStackRunnableState));
+            if (DEBUG) {
+                Log.d(TAG, "resizePinnedStack() deferring"
+                        + " mSuspendPipResizingReason=" + mSuspendPipResizingReason
+                        + " mResumeResizePinnedStackRunnableState="
+                        + stateToName(mResumeResizePinnedStackRunnableState));
+            }
             return;
         }
         mState = state;
@@ -471,28 +471,28 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     }
 
     /**
-     * Adds a {@link Listener} to PipManager.
+     * Adds a {@link Listener} to PipController.
      */
     public void addListener(Listener listener) {
         mListeners.add(listener);
     }
 
     /**
-     * Removes a {@link Listener} from PipManager.
+     * Removes a {@link Listener} from PipController.
      */
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
     }
 
     /**
-     * Adds a {@link MediaListener} to PipManager.
+     * Adds a {@link MediaListener} to PipController.
      */
     public void addMediaListener(MediaListener listener) {
         mMediaListeners.add(listener);
     }
 
     /**
-     * Removes a {@link MediaListener} from PipManager.
+     * Removes a {@link MediaListener} from PipController.
      */
     public void removeMediaListener(MediaListener listener) {
         mMediaListeners.remove(listener);
@@ -568,8 +568,13 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     /**
      * Gets the {@link android.media.session.MediaController} for the PIPed activity.
      */
-    MediaController getMediaController() {
+    public MediaController getMediaController() {
         return mPipMediaController;
+    }
+
+    @Override
+    public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
+
     }
 
     /**
@@ -577,7 +582,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      * This returns one of {@link #PLAYBACK_STATE_PLAYING}, {@link #PLAYBACK_STATE_PAUSED},
      * or {@link #PLAYBACK_STATE_UNAVAILABLE}.
      */
-    int getPlaybackState() {
+    public int getPlaybackState() {
         if (mPipMediaController == null || mPipMediaController.getPlaybackState() == null) {
             return PLAYBACK_STATE_UNAVAILABLE;
         }
@@ -673,7 +678,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     };
 
     @Override
-    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) { }
+    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
+    }
 
     @Override
     public void onPipTransitionFinished(ComponentName activity, int direction) {
@@ -701,7 +707,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
          * Invoked when an activity is pinned and PIP manager is set corresponding information.
          * Classes must use this instead of {@link android.app.ITaskStackListener.onActivityPinned}
          * because there's no guarantee for the PIP manager be return relavent information
-         * correctly. (e.g. {@link isPipShown}).
+         * correctly. (e.g. {@link Pip.isPipShown}).
          */
         void onPipEntered(String packageName);
         /** Invoked when a PIPed activity is closed. */

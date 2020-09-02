@@ -524,6 +524,7 @@ public class AudioSystem
     /** @hide Media server died. see ErrorCallback */
     public static final int AUDIO_STATUS_SERVER_DIED = 100;
 
+    // all accesses must be synchronized (AudioSystem.class)
     private static ErrorCallback sErrorCallback;
 
     /** @hide
@@ -560,11 +561,9 @@ public class AudioSystem
     @UnsupportedAppUsage
     private static void errorCallbackFromNative(int error)
     {
-        ErrorCallback errorCallback = null;
+        ErrorCallback errorCallback;
         synchronized (AudioSystem.class) {
-            if (sErrorCallback != null) {
-                errorCallback = sErrorCallback;
-            }
+            errorCallback = sErrorCallback;
         }
         if (errorCallback != null) {
             errorCallback.onError(error);
@@ -584,6 +583,7 @@ public class AudioSystem
     //keep in sync with include/media/AudioPolicy.h
     private final static int DYNAMIC_POLICY_EVENT_MIX_STATE_UPDATE = 0;
 
+    // all accesses must be synchronized (AudioSystem.class)
     private static DynamicPolicyCallback sDynPolicyCallback;
 
     /** @hide */
@@ -598,11 +598,9 @@ public class AudioSystem
     @UnsupportedAppUsage
     private static void dynamicPolicyCallbackFromNative(int event, String regId, int val)
     {
-        DynamicPolicyCallback cb = null;
+        DynamicPolicyCallback cb;
         synchronized (AudioSystem.class) {
-            if (sDynPolicyCallback != null) {
-                cb = sDynPolicyCallback;
-            }
+            cb = sDynPolicyCallback;
         }
         if (cb != null) {
             switch(event) {
@@ -646,6 +644,7 @@ public class AudioSystem
                         int activeSource, String packName);
     }
 
+    // all accesses must be synchronized (AudioSystem.class)
     private static AudioRecordingCallback sRecordingCallback;
 
     /** @hide */
@@ -678,7 +677,7 @@ public class AudioSystem
                           int source, int portId, boolean silenced, int[] recordingFormat,
                           AudioEffect.Descriptor[] clientEffects, AudioEffect.Descriptor[] effects,
                           int activeSource) {
-        AudioRecordingCallback cb = null;
+        AudioRecordingCallback cb;
         synchronized (AudioSystem.class) {
             cb = sRecordingCallback;
         }

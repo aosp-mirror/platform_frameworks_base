@@ -98,8 +98,10 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 // [stateAtomIdMap]: this map should contain the mapping from state ids to atom ids
 // [allStateGroupMaps]: this map should contain the mapping from states ids and state
 //                      values to state group ids for all states
+// [stateProtoHashes]: contains a map of state id to the hash of the State proto from the config
 bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAtomIdMap,
-                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps);
+                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
+                std::map<int64_t, uint64_t>& stateProtoHashes);
 
 // Initialize MetricProducers.
 // input:
@@ -146,6 +148,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::unordered_map<int64_t, int>& conditionTrackerMap,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
+                      std::unordered_map<int64_t, int>& metricProducerMap,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,
                       vector<sp<AlarmTracker>>& allPeriodicAlarmTrackers,
                       std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
@@ -154,7 +157,9 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp
                       unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
                       std::unordered_map<int64_t, int>& alertTrackerMap,
-                      vector<int>& metricsWithActivation, std::set<int64_t>& noReportMetricIds);
+                      vector<int>& metricsWithActivation,
+                      std::map<int64_t, uint64_t>& stateProtoHashes,
+                      std::set<int64_t>& noReportMetricIds);
 
 }  // namespace statsd
 }  // namespace os

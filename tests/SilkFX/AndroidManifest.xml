@@ -39,5 +39,8 @@
         <activity android:name=".hdr.GlowActivity"
             android:label="Glow Examples"/>
 
+        <activity android:name=".materials.GlassActivity"
+            android:label="Glass Examples"/>
+
     </application>
 </manifest>

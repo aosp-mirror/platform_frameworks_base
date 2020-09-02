@@ -27,12 +27,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.pip.Pip;
 import com.android.wm.shell.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Controller for {@link PipControlsView}.
@@ -43,9 +45,9 @@ public class PipControlsViewController {
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private final PipControlsView mView;
-    private final PipManager mPipManager;
     private final LayoutInflater mLayoutInflater;
     private final Handler mHandler;
+    private final Optional<Pip> mPipOptional;
     private final PipControlButtonView mPlayPauseButtonView;
     private MediaController mMediaController;
     private PipControlButtonView mFocusedChild;
@@ -73,12 +75,14 @@ public class PipControlsViewController {
                 @Override
                 public void onViewAttachedToWindow(View v) {
                     updateMediaController();
-                    mPipManager.addMediaListener(mPipMediaListener);
+                    mPipOptional.ifPresent(
+                            pip -> pip.addMediaListener(mPipMediaListener));
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
-                    mPipManager.removeMediaListener(mPipMediaListener);
+                    mPipOptional.ifPresent(
+                            pip -> pip.removeMediaListener(mPipMediaListener));
                 }
             };
 
@@ -89,7 +93,7 @@ public class PipControlsViewController {
         }
     };
 
-    private final PipManager.MediaListener mPipMediaListener = this::updateMediaController;
+    private final PipController.MediaListener mPipMediaListener = this::updateMediaController;
 
     private final View.OnFocusChangeListener
             mFocusChangeListener =
@@ -105,12 +109,11 @@ public class PipControlsViewController {
             };
 
 
-    @Inject
-    public PipControlsViewController(PipControlsView view, PipManager pipManager,
+    public PipControlsViewController(PipControlsView view, Optional<Pip> pipOptional,
             LayoutInflater layoutInflater, @Main Handler handler) {
         super();
         mView = view;
-        mPipManager = pipManager;
+        mPipOptional = pipOptional;
         mLayoutInflater = layoutInflater;
         mHandler = handler;
 
@@ -121,12 +124,14 @@ public class PipControlsViewController {
 
         View fullButtonView = mView.getFullButtonView();
         fullButtonView.setOnFocusChangeListener(mFocusChangeListener);
-        fullButtonView.setOnClickListener(v -> mPipManager.movePipToFullscreen());
+        fullButtonView.setOnClickListener(
+                v -> mPipOptional.ifPresent(pip -> pip.movePipToFullscreen())
+        );
 
         View closeButtonView = mView.getCloseButtonView();
         closeButtonView.setOnFocusChangeListener(mFocusChangeListener);
         closeButtonView.setOnClickListener(v -> {
-            mPipManager.closePip();
+            mPipOptional.ifPresent(pip -> pip.closePip());
             if (mListener != null) {
                 mListener.onClosed();
             }
@@ -139,24 +144,29 @@ public class PipControlsViewController {
             if (mMediaController == null || mMediaController.getPlaybackState() == null) {
                 return;
             }
-            if (mPipManager.getPlaybackState() == PipManager.PLAYBACK_STATE_PAUSED) {
-                mMediaController.getTransportControls().play();
-            } else if (mPipManager.getPlaybackState() == PipManager.PLAYBACK_STATE_PLAYING) {
-                mMediaController.getTransportControls().pause();
-            }
+            mPipOptional.ifPresent(pip -> {
+                if (pip.getPlaybackState() == PipController.PLAYBACK_STATE_PAUSED) {
+                    mMediaController.getTransportControls().play();
+                } else if (pip.getPlaybackState() == PipController.PLAYBACK_STATE_PLAYING) {
+                    mMediaController.getTransportControls().pause();
+                }
+            });
+
             // View will be updated later in {@link mMediaControllerCallback}
         });
     }
 
     private void updateMediaController() {
-        MediaController newController = mPipManager.getMediaController();
-        if (mMediaController == newController) {
+        AtomicReference<MediaController> newController = new AtomicReference<>();
+        mPipOptional.ifPresent(pip -> newController.set(pip.getMediaController()));
+
+        if (newController.get() == null || mMediaController == newController.get()) {
             return;
         }
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
-        mMediaController = newController;
+        mMediaController = newController.get();
         if (mMediaController != null) {
             mMediaController.registerCallback(mMediaControllerCallback);
         }
@@ -210,12 +220,14 @@ public class PipControlsViewController {
             // Hide the media session buttons
             mPlayPauseButtonView.setVisibility(View.GONE);
         } else {
-            int state = mPipManager.getPlaybackState();
-            if (state == PipManager.PLAYBACK_STATE_UNAVAILABLE) {
+            AtomicInteger state = new AtomicInteger(PipController.STATE_UNKNOWN);
+            mPipOptional.ifPresent(pip -> state.set(pip.getPlaybackState()));
+            if (state.get() == PipController.STATE_UNKNOWN
+                    || state.get() == PipController.PLAYBACK_STATE_UNAVAILABLE) {
                 mPlayPauseButtonView.setVisibility(View.GONE);
             } else {
                 mPlayPauseButtonView.setVisibility(View.VISIBLE);
-                if (state == PipManager.PLAYBACK_STATE_PLAYING) {
+                if (state.get() == PipController.PLAYBACK_STATE_PLAYING) {
                     mPlayPauseButtonView.setImageResource(R.drawable.pip_ic_pause_white);
                     mPlayPauseButtonView.setText(R.string.pip_pause);
                 } else {

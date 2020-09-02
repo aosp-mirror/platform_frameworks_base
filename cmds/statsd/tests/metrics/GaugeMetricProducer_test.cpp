@@ -47,6 +47,7 @@ namespace {
 const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
+const uint64_t protoHash = 0x123456789;
 const int logEventMatcherIndex = 0;
 const int64_t bucketStartTimeNs = 10 * NS_PER_SEC;
 const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
@@ -101,8 +102,9 @@ TEST(GaugeMetricProducerTest, TestFirstBucket) {
     // statsd started long ago.
     // The metric starts in the middle of the bucket
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, -1, -1,
-                                      tagId, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2, pullerManager);
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      -1, -1, tagId, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2,
+                                      pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     EXPECT_EQ(600500000000, gaugeProducer.mCurrentBucketStartTimeNs);
@@ -139,8 +141,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId, -1,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
@@ -213,7 +216,7 @@ TEST_P(GaugeMetricProducerTest_PartialBucket, TestPushedEvents) {
             createEventMatcherWizard(tagId, logEventMatcherIndex);
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard,
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
                                       -1 /* -1 means no pulling */, -1, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
     gaugeProducer.prepareFirstBucket();
@@ -306,8 +309,9 @@ TEST_P(GaugeMetricProducerTest_PartialBucket, TestPulled) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId, -1,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
@@ -373,8 +377,9 @@ TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
             .WillOnce(Return(false));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId, -1,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
@@ -426,9 +431,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 0 /*condition index*/,
-                                      {ConditionState::kUnknown}, wizard, logEventMatcherIndex,
-                                      eventMatcherWizard, tagId, -1, tagId, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+                                      {ConditionState::kUnknown}, wizard, protoHash,
+                                      logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     gaugeProducer.onConditionChanged(true, conditionChangeNs);
@@ -509,9 +514,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 0 /*condition index*/,
-                                      {ConditionState::kUnknown}, wizard, logEventMatcherIndex,
-                                      eventMatcherWizard, tagId, -1, tagId, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+                                      {ConditionState::kUnknown}, wizard, protoHash,
+                                      logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     gaugeProducer.onSlicedConditionMayChange(true, sliceConditionChangeNs);
@@ -554,8 +559,9 @@ TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection) {
             createEventMatcherWizard(tagId, logEventMatcherIndex);
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId, -1,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
     gaugeProducer.prepareFirstBucket();
 
     Alert alert;
@@ -649,8 +655,8 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
 
     int triggerId = 5;
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId,
-                                      triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
     gaugeProducer.prepareFirstBucket();
 
@@ -724,8 +730,8 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
 
     int triggerId = 5;
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId,
-                                      triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
     gaugeProducer.prepareFirstBucket();
 
@@ -783,8 +789,8 @@ TEST(GaugeMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
 
     int triggerId = 5;
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
-                                      wizard, logEventMatcherIndex, eventMatcherWizard, tagId,
-                                      triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
+                                      wizard, protoHash, logEventMatcherIndex, eventMatcherWizard,
+                                      tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
     gaugeProducer.prepareFirstBucket();
 

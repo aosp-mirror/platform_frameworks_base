@@ -51,7 +51,7 @@ public class ActiveSourceAction extends HdmiCecFeatureAction {
                             Constants.MENU_STATE_ACTIVATED));
         }
 
-        source().setActiveSource(logicalAddress, physicalAddress);
+        source().setActiveSource(logicalAddress, physicalAddress, "ActiveSourceAction");
         mState = STATE_FINISHED;
         finish();
         return true;

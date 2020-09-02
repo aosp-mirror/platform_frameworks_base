@@ -20,15 +20,28 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.pip.Pip;
+import com.android.systemui.pip.PipBoundsHandler;
+import com.android.systemui.pip.PipSurfaceTransactionHelper;
+import com.android.systemui.pip.PipTaskOrganizer;
+import com.android.systemui.pip.PipUiEventLogger;
+import com.android.systemui.pip.phone.PipController;
 import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.stackdivider.SplitScreenController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
+
+import java.util.Optional;
 
 import dagger.Module;
 import dagger.Provides;
@@ -50,6 +63,26 @@ public class WMShellModule {
 
     @SysUISingleton
     @Provides
+    static Pip providePipController(Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            ConfigurationController configController,
+            DeviceConfigProxy deviceConfig,
+            DisplayController displayController,
+            FloatingContentCoordinator floatingContentCoordinator,
+            SysUiState sysUiState,
+            PipBoundsHandler pipBoundsHandler,
+            PipSurfaceTransactionHelper surfaceTransactionHelper,
+            PipTaskOrganizer pipTaskOrganizer,
+            PipUiEventLogger pipUiEventLogger) {
+        return new PipController(context, broadcastDispatcher, configController, deviceConfig,
+                displayController, floatingContentCoordinator, sysUiState, pipBoundsHandler,
+                surfaceTransactionHelper,
+                pipTaskOrganizer,
+                pipUiEventLogger);
+    }
+
+    @SysUISingleton
+    @Provides
     static SplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
@@ -57,4 +90,23 @@ public class WMShellModule {
         return new SplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer);
     }
+
+    @SysUISingleton
+    @Provides
+    static PipBoundsHandler providesPipBoundsHandler(Context context) {
+        return new PipBoundsHandler(context);
+    }
+
+    @SysUISingleton
+    @Provides
+    static PipTaskOrganizer providesPipTaskOrganizer(Context context,
+            PipBoundsHandler pipBoundsHandler,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
+            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
+        return new PipTaskOrganizer(context, pipBoundsHandler,
+                pipSurfaceTransactionHelper, splitScreenOptional, displayController,
+                pipUiEventLogger, shellTaskOrganizer);
+    }
+
 }

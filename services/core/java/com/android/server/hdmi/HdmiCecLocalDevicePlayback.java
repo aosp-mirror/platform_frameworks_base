@@ -190,7 +190,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         boolean wasActiveSource = mIsActiveSource;
         // Invalidate the internal active source record when goes to standby
         // This set will also update mIsActiveSource
-        mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
+        mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS,
+                "HdmiCecLocalDevicePlayback#onStandby()");
         if (initiatedByCec || !mAutoTvOff || !wasActiveSource) {
             return;
         }
@@ -399,7 +400,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (physicalAddress != mService.getPhysicalAddress()) {
-            setActiveSource(physicalAddress);
+            setActiveSource(physicalAddress,
+                    "HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation()");
             return;
         }
         switch (mPlaybackDeviceActionOnRoutingControl) {

@@ -248,6 +248,9 @@ private:
     // Maps the id of a condition tracker to its index in mAllConditionTrackers.
     std::unordered_map<int64_t, int> mConditionTrackerMap;
 
+    // Maps the id of a metric producer to its index in mAllMetricProducers.
+    std::unordered_map<int64_t, int> mMetricProducerMap;
+
     // To make the log processing more efficient, we want to do as much filtering as possible
     // before we go into individual trackers and conditions to match.
 
@@ -294,6 +297,9 @@ private:
 
     // The config is always active if any metric in the config does not have an activation signal.
     bool mIsAlwaysActive;
+
+    // Hashes of the States used in this config, keyed by the state id, used in config updates.
+    std::map<int64_t, uint64_t> mStateProtoHashes;
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
