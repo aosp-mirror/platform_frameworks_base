@@ -5752,19 +5752,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setPipVisibility(boolean visible) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
-
-        synchronized (mGlobalLock) {
-            mPolicy.setPipVisibilityLw(visible);
-        }
-    }
-
-    @Override
     public void statusBarVisibilityChanged(int displayId, int visibility) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
