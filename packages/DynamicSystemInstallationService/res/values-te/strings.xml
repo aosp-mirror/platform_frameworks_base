@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"దయచేసి మీ పాస్‌వర్డ్‌ను ఎంటర్ చేసి, డైనమిక్ సిస్టమ్ అప్‌డేట్స్‌ను కొనసాగించండి"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"డైనమిక్ సిస్టమ్ సిద్ధంగా ఉంది. దీనిని ఉపయోగించడానికి, మీ పరికరాన్ని రీస్టార్ట్ చేయండి."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"ఇన్‌స్టాల్ అవుతోంది"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"ఇన్‌స్టాల్ చేయడం విఫలమైంది"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ఇమేజ్ నిర్ధారణ విఫలమైంది. ఇన్‌స్టాలేషన్‌ను రద్దు చేయండి."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"ప్రస్తుతం డైనమిక్ సిస్టమ్ రన్నవుతోంది. ఒరిజినల్ Android వెర్షన్‌ను ఉపయోగించడానికి రీస్టార్ట్ చేయండి."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"రద్దు చేయండి"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"విస్మరించండి"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"రీస్టార్ట్ చేయి"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"రీస్టార్ట్ చేయి"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"డైనమిక్ సిస్టమ్ విస్మరించబడింది"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"డైనమిక్ సిస్టమ్‌ను రీస్టార్ట్ చేయడం లేదా లోడ్ చేయడం సాధ్యపడలేదు"</string>
+</resources>

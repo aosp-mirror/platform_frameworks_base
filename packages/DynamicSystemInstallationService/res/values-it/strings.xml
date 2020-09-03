@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"Inserisci la password e continua su Aggiornamenti di sistema dinamici"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Sistema dinamico pronto. Per iniziare a usarlo, riavvia il dispositivo."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"Installazione in corso"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"Installazione non riuscita"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Impossibile convalidare l\'immagine. Interrompi l\'installazione."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Sistema dinamico in uso. Riavvia per usare la versione di Android originale."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"Annulla"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"Annulla"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Riavvia"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Riavvia"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Sistema dinamico annullato"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Impossibile riavviare o caricare il sistema dinamico"</string>
+</resources>
