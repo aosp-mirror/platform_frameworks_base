@@ -1410,7 +1410,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!displayContent.hasAccess(session.mUid)) {
                 ProtoLog.w(WM_ERROR,
                         "Attempted to add window to a display for which the application "
-                                + "does not have access: %d.  Aborting.", displayId);
+                                + "does not have access: %d.  Aborting.",
+                        displayContent.getDisplayId());
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 

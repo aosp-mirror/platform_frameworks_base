@@ -29,9 +29,6 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left;back,home,recent;right</string>
 
-    <!-- Animation duration when using long press on recents to dock -->
-    <integer name="long_press_dock_anim_duration">290</integer>
-
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">0</integer>
 

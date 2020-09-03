@@ -133,6 +133,7 @@ import static com.android.server.wm.ActivityRecordProto.LAST_SURFACE_SHOWING;
 import static com.android.server.wm.ActivityRecordProto.NAME;
 import static com.android.server.wm.ActivityRecordProto.NUM_DRAWN_WINDOWS;
 import static com.android.server.wm.ActivityRecordProto.NUM_INTERESTING_WINDOWS;
+import static com.android.server.wm.ActivityRecordProto.PIP_AUTO_ENTER_ALLOWED;
 import static com.android.server.wm.ActivityRecordProto.PROC_ID;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
@@ -4741,6 +4742,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
+            if (deferHidingClient && pictureInPictureArgs.isAutoEnterAllowed()) {
+                // Go ahead and just put the activity in pip if it supports auto-pip.
+                mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
+                return;
+            }
             setDeferHidingClient(deferHidingClient);
             setVisibility(false);
 
@@ -7678,6 +7684,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (hasProcess()) {
             proto.write(PROC_ID, app.getPid());
         }
+        proto.write(PIP_AUTO_ENTER_ALLOWED, pictureInPictureArgs.isAutoEnterAllowed());
     }
 
     @Override
@@ -7786,42 +7793,40 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         /** Gets the horizontal centered container bounds for size compatibility mode. */
         void getContainerBounds(Rect outAppBounds, Rect outBounds, int rotation, int orientation,
                 boolean orientationRequested, boolean canChangeOrientation) {
+            getFrameByOrientation(outBounds, orientation);
             if (mIsFloating) {
-                getFrameByOrientation(outBounds, orientation);
                 outAppBounds.set(outBounds);
                 return;
             }
 
-            if (canChangeOrientation) {
-                getBoundsByRotation(outBounds, rotation);
-                if (orientationRequested) {
-                    getFrameByOrientation(outAppBounds, orientation);
-                } else {
-                    outAppBounds.set(outBounds);
-                }
-            } else {
-                if (orientationRequested) {
-                    getFrameByOrientation(outBounds, orientation);
-                    if ((outBounds.width() > outBounds.height()) != (mWidth > mHeight)) {
-                        // The orientation is mismatched but the display cannot rotate. The bounds
-                        // will fit to the short side of display.
-                        if (orientation == ORIENTATION_LANDSCAPE) {
-                            outBounds.bottom = (int) ((float) mWidth * mWidth / mHeight);
-                            outBounds.right = mWidth;
-                        } else {
-                            outBounds.bottom = mHeight;
-                            outBounds.right = (int) ((float) mHeight * mHeight / mWidth);
-                        }
-                        outBounds.offset(
-                                getHorizontalCenterOffset(mWidth, outBounds.width()), 0 /* dy */);
-                    }
-                } else {
-                    outBounds.set(0, 0, mWidth, mHeight);
-                }
-                outAppBounds.set(outBounds);
-            }
+            getBoundsByRotation(outAppBounds, rotation);
+            final int dW = outAppBounds.width();
+            final int dH = outAppBounds.height();
+            final boolean isOrientationMismatched =
+                    ((outBounds.width() > outBounds.height()) != (dW > dH));
 
-            if (rotation != ROTATION_UNDEFINED) {
+            if (isOrientationMismatched && !canChangeOrientation && orientationRequested) {
+                // The orientation is mismatched but the display cannot rotate. The bounds will fit
+                // to the short side of container.
+                if (orientation == ORIENTATION_LANDSCAPE) {
+                    outBounds.bottom = (int) ((float) dW * dW / dH);
+                    outBounds.right = dW;
+                } else {
+                    outBounds.bottom = dH;
+                    outBounds.right = (int) ((float) dH * dH / dW);
+                }
+                outBounds.offset(getHorizontalCenterOffset(mWidth, outBounds.width()), 0 /* dy */);
+            }
+            outAppBounds.set(outBounds);
+
+            if (isOrientationMismatched) {
+                // One side of container is smaller than the requested size, then it will be scaled
+                // and the final position will be calculated according to the parent container and
+                // scale, so the original size shouldn't be shrunk by insets.
+                final Rect insets = mNonDecorInsets[rotation];
+                outBounds.offset(insets.left, insets.top);
+                outAppBounds.offset(insets.left, insets.top);
+            } else if (rotation != ROTATION_UNDEFINED) {
                 // Ensure the app bounds won't overlap with insets.
                 Task.intersectWithInsetsIfFits(outAppBounds, outBounds, mNonDecorInsets[rotation]);
             }

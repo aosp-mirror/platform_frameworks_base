@@ -56,4 +56,10 @@
     <dimen name="pip_resize_handle_size">12dp</dimen>
     <dimen name="pip_resize_handle_margin">4dp</dimen>
     <dimen name="pip_resize_handle_padding">0dp</dimen>
+
+    <!-- How high we lift the divider when touching -->
+    <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
+
+    <dimen name="docked_divider_handle_width">16dp</dimen>
+    <dimen name="docked_divider_handle_height">2dp</dimen>
 </resources>

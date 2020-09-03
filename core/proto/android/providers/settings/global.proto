@@ -292,7 +292,7 @@ message GlobalSettingsProto {
         optional SettingProto name = 1;
         optional SettingProto provisioned = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto provisioning_mobile_data_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto idle_constants = 4;
+        reserved 4; // idle_constants
         optional SettingProto policy_constants = 5;
         optional SettingProto demo_mode = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }

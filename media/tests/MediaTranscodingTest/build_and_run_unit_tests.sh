@@ -31,6 +31,9 @@ do
 adb push --sync $file /data/user/0/com.android.mediatranscodingtest/cache/
 done
 
-echo "[==========] running real transcoding tests"
+echo "[==========] running MediaTranscodeManagerTest"
 adb shell am instrument -e class com.android.mediatranscodingtest.MediaTranscodeManagerTest -w com.android.mediatranscodingtest/.MediaTranscodingTestRunner
+
+echo "[==========] running MediaTranscodeManagerDiedTest"
+adb shell am instrument -e class com.android.mediatranscodingtest.MediaTranscodeManagerDiedTest -w com.android.mediatranscodingtest/.MediaTranscodingTestRunner
 

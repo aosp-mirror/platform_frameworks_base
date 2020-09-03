@@ -24,14 +24,14 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.onehanded.OneHanded;
+import com.android.systemui.onehanded.OneHandedController;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.pip.PipUiEventLogger;
 import com.android.systemui.pip.phone.PipController;
-import com.android.systemui.stackdivider.SplitScreen;
-import com.android.systemui.stackdivider.SplitScreenController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -40,6 +40,8 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.Optional;
 
@@ -109,4 +111,10 @@ public class WMShellModule {
                 pipUiEventLogger, shellTaskOrganizer);
     }
 
+    @SysUISingleton
+    @Provides
+    static OneHanded provideOneHandedController(Context context,
+            DisplayController displayController) {
+        return OneHandedController.create(context, displayController);
+    }
 }

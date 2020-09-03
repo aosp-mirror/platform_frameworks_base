@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
@@ -62,7 +62,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.animation.Interpolators;
 
@@ -76,7 +76,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final String TAG = "DividerView";
     private static final boolean DEBUG = SplitScreenController.DEBUG;
 
-    public interface DividerCallbacks {
+    interface DividerCallbacks {
         void onDraggingStart();
         void onDraggingEnd();
     }
@@ -187,7 +187,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 if (snapAlgorithm.showMiddleSplitTargetForAccessibility()) {
                     // Only show the middle target if there are more than 1 split target
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
-                        mContext.getString(R.string.accessibility_action_divider_top_50)));
+                            mContext.getString(R.string.accessibility_action_divider_top_50)));
                 }
                 if (snapAlgorithm.isLastSplitTargetAvailable()) {
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
@@ -205,7 +205,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 if (snapAlgorithm.showMiddleSplitTargetForAccessibility()) {
                     // Only show the middle target if there are more than 1 split target
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
-                        mContext.getString(R.string.accessibility_action_divider_left_50)));
+                            mContext.getString(R.string.accessibility_action_divider_left_50)));
                 }
                 if (snapAlgorithm.isLastSplitTargetAvailable()) {
                     info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
@@ -373,6 +373,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
+    /** Gets non-minimized secondary bounds of split screen. */
     public Rect getNonMinimizedSplitScreenSecondaryBounds() {
         mOtherTaskRect.set(mSplitLayout.mSecondary);
         return mOtherTaskRect;
@@ -409,6 +410,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mSurfaceHidden;
     }
 
+    /** Starts dragging the divider bar. */
     public boolean startDragging(boolean animate, boolean touching) {
         cancelFlingAnimation();
         if (touching) {
@@ -427,6 +429,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return inSplitMode();
     }
 
+    /** Stops dragging the divider bar. */
     public void stopDragging(int position, float velocity, boolean avoidDismissStart,
             boolean logMetrics) {
         mHandle.setTouching(false, true /* animate */);
@@ -889,7 +892,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         WindowManagerProxy.applyResizeSplits(midPos, mSplitLayout);
     }
 
-    public void setMinimizedDockStack(boolean minimized, long animDuration,
+    void setMinimizedDockStack(boolean minimized, long animDuration,
             boolean isHomeStackResizable) {
         if (DEBUG) Slog.d(TAG, "setMinDock: " + mDockedStackMinimized + "->" + minimized);
         mHomeStackResizable = isHomeStackResizable;
@@ -925,7 +928,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
-    public void setAdjustedForIme(boolean adjustedForIme, long animDuration) {
+    void setAdjustedForIme(boolean adjustedForIme, long animDuration) {
         if (mAdjustedForIme == adjustedForIme) {
             return;
         }
@@ -952,8 +955,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private void saveSnapTargetBeforeMinimized(SnapTarget target) {
         mSnapTargetBeforeMinimized = target;
-        mState.mRatioPositionBeforeMinimized = (float) target.position /
-                (isHorizontalDivision() ? mSplitLayout.mDisplayLayout.height()
+        mState.mRatioPositionBeforeMinimized = (float) target.position
+                / (isHorizontalDivision() ? mSplitLayout.mDisplayLayout.height()
                         : mSplitLayout.mDisplayLayout.width());
     }
 
@@ -971,8 +974,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     private void repositionSnapTargetBeforeMinimized() {
-        int position = (int) (mState.mRatioPositionBeforeMinimized *
-                (isHorizontalDivision() ? mSplitLayout.mDisplayLayout.height()
+        int position = (int) (mState.mRatioPositionBeforeMinimized
+                * (isHorizontalDivision() ? mSplitLayout.mDisplayLayout.height()
                         : mSplitLayout.mDisplayLayout.width()));
 
         // Set the snap target before minimized but do not save until divider is attached and not
@@ -1011,7 +1014,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 containingRect.right, containingRect.bottom);
     }
 
-    public void calculateBoundsForPosition(int position, int dockSide, Rect outRect) {
+    private void calculateBoundsForPosition(int position, int dockSide, Rect outRect) {
         DockedDividerUtils.calculateBoundsForPosition(position, dockSide, outRect,
                 mSplitLayout.mDisplayLayout.width(), mSplitLayout.mDisplayLayout.height(),
                 mDividerSize);
@@ -1240,8 +1243,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (dismissTarget != null && fraction > 0f
                 && isDismissing(splitTarget, position, dockSide)) {
             fraction = calculateParallaxDismissingFraction(fraction, dockSide);
-            int offsetPosition = (int) (start +
-                    fraction * (dismissTarget.position - splitTarget.position));
+            int offsetPosition = (int) (start + fraction
+                    * (dismissTarget.position - splitTarget.position));
             int width = taskRect.width();
             int height = taskRect.height();
             switch (dockSide) {

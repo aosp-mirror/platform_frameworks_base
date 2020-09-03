@@ -239,6 +239,10 @@ public abstract class DocumentsProvider extends ContentProvider {
         }
     }
 
+    private Uri validateIncomingNullableUri(@Nullable Uri uri) {
+        return uri == null ? null : validateIncomingUri(uri);
+    }
+
     /**
      * Create a new document and return its newly generated
      * {@link Document#COLUMN_DOCUMENT_ID}. You must allocate a new
@@ -1086,11 +1090,18 @@ public abstract class DocumentsProvider extends ContentProvider {
         // If the URI is a tree URI performs some validation.
         enforceTreeForExtraUris(extras);
 
+        final Uri extraUri = validateIncomingNullableUri(
+                extras.getParcelable(DocumentsContract.EXTRA_URI));
+        final Uri extraTargetUri = validateIncomingNullableUri(
+                extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI));
+        final Uri extraParentUri = validateIncomingNullableUri(
+                extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI));
+
         if (METHOD_EJECT_ROOT.equals(method)) {
             // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
             // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
             // MANAGE_DOCUMENTS or associated URI permission here instead
-            final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+            final Uri rootUri = extraUri;
             enforceWritePermissionInner(rootUri, getCallingPackage(), getCallingAttributionTag(),
                     null);
 
@@ -1100,7 +1111,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             return out;
         }
 
-        final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+        final Uri documentUri = extraUri;
         final String authority = documentUri.getAuthority();
         final String documentId = DocumentsContract.getDocumentId(documentUri);
 
@@ -1113,7 +1124,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             enforceReadPermissionInner(documentUri, getCallingPackage(),
                     getCallingAttributionTag(), null);
 
-            final Uri childUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
+            final Uri childUri = extraTargetUri;
             final String childAuthority = childUri.getAuthority();
             final String childId = DocumentsContract.getDocumentId(childUri);
 
@@ -1180,7 +1191,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             revokeDocumentPermission(documentId);
 
         } else if (METHOD_COPY_DOCUMENT.equals(method)) {
-            final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
+            final Uri targetUri = extraTargetUri;
             final String targetId = DocumentsContract.getDocumentId(targetUri);
 
             enforceReadPermissionInner(documentUri, getCallingPackage(),
@@ -1204,9 +1215,9 @@ public abstract class DocumentsProvider extends ContentProvider {
             }
 
         } else if (METHOD_MOVE_DOCUMENT.equals(method)) {
-            final Uri parentSourceUri = extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI);
+            final Uri parentSourceUri = extraParentUri;
             final String parentSourceId = DocumentsContract.getDocumentId(parentSourceUri);
-            final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
+            final Uri targetUri = extraTargetUri;
             final String targetId = DocumentsContract.getDocumentId(targetUri);
 
             enforceWritePermissionInner(documentUri, getCallingPackage(),
@@ -1232,7 +1243,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             }
 
         } else if (METHOD_REMOVE_DOCUMENT.equals(method)) {
-            final Uri parentSourceUri = extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI);
+            final Uri parentSourceUri = extraParentUri;
             final String parentSourceId = DocumentsContract.getDocumentId(parentSourceUri);
 
             enforceReadPermissionInner(parentSourceUri, getCallingPackage(),

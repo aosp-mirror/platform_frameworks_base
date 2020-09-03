@@ -30,9 +30,6 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dumpable;
-
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -40,7 +37,7 @@ import java.io.PrintWriter;
  * to exit, reset timer when user is in one-handed mode.
  * Refer {@link OneHandedGestureHandler} to see start and stop one handed gesture
  */
-public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpable {
+public class OneHandedTouchHandler implements OneHandedTransitionCallback {
     private static final String TAG = "OneHandedTouchHandler";
     private final Rect mLastUpdatedBounds = new Rect();
 
@@ -146,8 +143,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
         mIsOnStopTransitioning = false;
     }
 
-    @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mLastUpdatedBounds=");
@@ -169,11 +165,6 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback, Dumpa
      * The touch(gesture) events to notify {@link OneHandedController} start or stop one handed
      */
     public interface OneHandedTouchEventCallback {
-        /**
-         * Handle the start event.
-         */
-        void onStart();
-
         /**
          * Handle the exit event.
          */

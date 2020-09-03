@@ -2784,7 +2784,11 @@
              exactly one parameter of type View. For instance, if you specify
              <code>android:onClick="sayHello"</code>, you must declare a
              <code>public void sayHello(View v)</code> method of your context
-             (typically, your Activity). -->
+             (typically, your Activity).
+             {@deprecated View actually traverses the Context
+             hierarchy looking for the relevant method, which is fragile (an intermediate 
+             ContextWrapper adding a same-named method would change behavior) and restricts
+             bytecode optimizers such as R8. Instead, use View.setOnClickListener.}-->
         <attr name="onClick" format="string" />
 
         <!-- Defines over-scrolling behavior. This property is used only if the
@@ -7505,7 +7509,11 @@
         <attr name="enabled" />
 
         <!-- Name of a method on the Context used to inflate the menu that will be
-             called when the item is clicked. -->
+             called when the item is clicked.
+             {@deprecated Menu actually traverses the Context hierarchy looking for the 
+             relevant method, which is fragile (an intermediate ContextWrapper adding a
+             same-named method would change behavior) and restricts bytecode optimizers
+             such as R8. Instead, use MenuItem.setOnMenuItemClickListener.} -->
         <attr name="onClick" />
 
         <!-- How this item should display in the Action Bar, if present. -->

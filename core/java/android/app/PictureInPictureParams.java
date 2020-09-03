@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.graphics.Rect;
@@ -45,6 +46,8 @@ public final class PictureInPictureParams implements Parcelable {
 
         @Nullable
         private Rect mSourceRectHint;
+
+        private boolean mAutoEnterAllowed;
 
         /**
          * Sets the aspect ratio.  This aspect ratio is defined as the desired width / height, and
@@ -103,6 +106,25 @@ public final class PictureInPictureParams implements Parcelable {
         }
 
         /**
+         * Sets whether the system is allowed to automatically put the activity in
+         * picture-in-picture mode without needing/waiting for the activity to call
+         * {@link Activity#enterPictureInPictureMode(PictureInPictureParams)}.
+         *
+         * If true, {@link Activity#onPictureInPictureRequested()} will never be called.
+         *
+         * This property is false by default.
+         * @param autoEnterAllowed {@code true} if the system is allowed to automatically put the
+         *                                  activity in picture-in-picture mode.
+         *
+         * @return this builder instance.
+         */
+        @NonNull
+        public Builder setAutoEnterAllowed(boolean autoEnterAllowed) {
+            mAutoEnterAllowed = autoEnterAllowed;
+            return this;
+        }
+
+        /**
          * @return an immutable {@link PictureInPictureParams} to be used when entering or updating
          * the activity in picture-in-picture.
          *
@@ -111,7 +133,7 @@ public final class PictureInPictureParams implements Parcelable {
          */
         public PictureInPictureParams build() {
             PictureInPictureParams params = new PictureInPictureParams(mAspectRatio, mUserActions,
-                    mSourceRectHint);
+                    mSourceRectHint, mAutoEnterAllowed);
             return params;
         }
     }
@@ -136,6 +158,11 @@ public final class PictureInPictureParams implements Parcelable {
     @Nullable
     private Rect mSourceRectHint;
 
+    /**
+     * Whether the system is allowed to automatically put the activity in picture-in-picture mode.
+     */
+    private boolean mAutoEnterAllowed;
+
     /** {@hide} */
     PictureInPictureParams() {
     }
@@ -152,14 +179,18 @@ public final class PictureInPictureParams implements Parcelable {
         if (in.readInt() != 0) {
             mSourceRectHint = Rect.CREATOR.createFromParcel(in);
         }
+        if (in.readInt() != 0) {
+            mAutoEnterAllowed = in.readBoolean();
+        }
     }
 
     /** {@hide} */
     PictureInPictureParams(Rational aspectRatio, List<RemoteAction> actions,
-            Rect sourceRectHint) {
+            Rect sourceRectHint, boolean autoEnterAllowed) {
         mAspectRatio = aspectRatio;
         mUserActions = actions;
         mSourceRectHint = sourceRectHint;
+        mAutoEnterAllowed = autoEnterAllowed;
     }
 
     /**
@@ -176,6 +207,7 @@ public final class PictureInPictureParams implements Parcelable {
         if (otherArgs.hasSourceBoundsHint()) {
             mSourceRectHint = new Rect(otherArgs.getSourceRectHint());
         }
+        mAutoEnterAllowed = otherArgs.mAutoEnterAllowed;
     }
 
     /**
@@ -248,11 +280,20 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
+     * @return whether auto pip allowed.
+     * @hide
+     */
+    public boolean isAutoEnterAllowed() {
+        return mAutoEnterAllowed;
+    }
+
+    /**
      * @return True if no parameters are set
      * @hide
      */
     public boolean empty() {
-        return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio();
+        return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio()
+                && !mAutoEnterAllowed;
     }
 
     @Override
@@ -281,6 +322,8 @@ public final class PictureInPictureParams implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        out.writeInt(1);
+        out.writeBoolean(mAutoEnterAllowed);
     }
 
     public static final @android.annotation.NonNull Creator<PictureInPictureParams> CREATOR =

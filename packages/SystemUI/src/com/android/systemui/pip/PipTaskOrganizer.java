@@ -63,10 +63,10 @@ import com.android.internal.os.SomeArgs;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.pip.phone.PipMenuActivityController;
 import com.android.systemui.pip.phone.PipUpdateThread;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
