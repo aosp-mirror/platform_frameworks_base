@@ -92,6 +92,10 @@
             android:label="@string/keyboard_layout_czech"
             android:keyboardLayout="@raw/keyboard_layout_czech" />
 
+    <keyboard-layout android:name="keyboard_layout_czech_qwerty"
+            android:label="@string/keyboard_layout_czech_qwerty"
+            android:keyboardLayout="@raw/keyboard_layout_czech_qwerty" />
+
     <keyboard-layout android:name="keyboard_layout_estonian"
             android:label="@string/keyboard_layout_estonian"
             android:keyboardLayout="@raw/keyboard_layout_estonian" />
