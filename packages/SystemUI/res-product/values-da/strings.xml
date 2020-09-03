@@ -40,4 +40,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Du har forsøgt at låse telefonen op med den forkerte adgangskode <xliff:g id="NUMBER">%d</xliff:g> gange. Arbejdsprofilen fjernes, hvilket sletter alle profildata."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%2$d</xliff:g> mislykkede forsøg bliver du bedt om at låse din tablet op ved hjælp af en mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%2$d</xliff:g> mislykkede forsøg bliver du bedt om at låse din telefon op ved hjælp af en mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Lås din telefon op for at se flere valgmuligheder"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Lås din tablet op for at se flere valgmuligheder"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Lås din enhed op for at se flere valgmuligheder"</string>
 </resources>
