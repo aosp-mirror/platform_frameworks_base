@@ -24,5 +24,5 @@
     <string name="pip_close" msgid="5775212044472849930">"Lukk PIP"</string>
     <string name="pip_fullscreen" msgid="3877997489869475181">"Fullskjerm"</string>
     <string name="mic_active" msgid="5766614241012047024">"Mikrofonen er aktiv"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s brukte mikrofonen din"</string>
+    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s fikk tilgang til mikrofonen din"</string>
 </resources>
