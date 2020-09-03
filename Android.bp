@@ -527,6 +527,7 @@ java_library {
         "android.hardware.vibrator-V1.3-java",
         "android.system.keystore2-java",
         "android.system.suspend.control.internal-java",
+        "cameraprotosnano",
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",

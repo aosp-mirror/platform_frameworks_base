@@ -6750,6 +6750,7 @@ android.sysprop.-$$Lambda$TelephonyProperties$illdaSIVv8AlxP9uc8NqC3Ta1tA
 android.sysprop.-$$Lambda$TelephonyProperties$klELuV5zVSqFveC5l6c3FSJmLAU
 android.sysprop.-$$Lambda$TelephonyProperties$pFU8zg4eHAdooeRLJg1WBG52cKk
 android.sysprop.-$$Lambda$TelephonyProperties$sXc3eBCFirzHWb9pvClH7EsiM_Q
+android.stats.camera.nano.CameraStreamProto
 android.sysprop.AdbProperties
 android.sysprop.ApexProperties
 android.sysprop.ContactsProperties
