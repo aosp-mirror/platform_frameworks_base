@@ -61,6 +61,7 @@ import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -269,10 +270,11 @@ public class DependencyProvider {
             @Background Looper backgroundLooper,
             @Background Executor backgroundExecutor,
             DumpManager dumpManager,
-            BroadcastDispatcherLogger logger
+            BroadcastDispatcherLogger logger,
+            UserTracker userTracker
     ) {
         BroadcastDispatcher bD = new BroadcastDispatcher(context, backgroundLooper,
-                backgroundExecutor, dumpManager, logger);
+                backgroundExecutor, dumpManager, logger, userTracker);
         bD.initialize();
         return bD;
     }
