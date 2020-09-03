@@ -206,18 +206,33 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     unordered_map<int64_t, int> newAtomMatchingTrackerMap;
     vector<sp<ConditionTracker>> newConditionTrackers;
     unordered_map<int64_t, int> newConditionTrackerMap;
+    map<int64_t, uint64_t> newStateProtoHashes;
+    vector<sp<MetricProducer>> newMetricProducers;
+    unordered_map<int64_t, int> newMetricProducerMap;
     mTagIds.clear();
+    mConditionToMetricMap.clear();
+    mTrackerToMetricMap.clear();
     mTrackerToConditionMap.clear();
+    mActivationAtomTrackerToMetricMap.clear();
+    mDeactivationAtomTrackerToMetricMap.clear();
+    mMetricIndexesWithActivation.clear();
+    mNoReportMetricIds.clear();
     mConfigValid = updateStatsdConfig(
             mConfigKey, config, mUidMap, mPullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, currentTimeNs, mAllAtomMatchingTrackers, mAtomMatchingTrackerMap,
-            mAllConditionTrackers, mConditionTrackerMap, mTagIds, newAtomMatchingTrackers,
-            newAtomMatchingTrackerMap, newConditionTrackers, newConditionTrackerMap,
-            mTrackerToConditionMap);
+            mAllConditionTrackers, mConditionTrackerMap, mAllMetricProducers, mMetricProducerMap,
+            mStateProtoHashes, mTagIds, newAtomMatchingTrackers, newAtomMatchingTrackerMap,
+            newConditionTrackers, newConditionTrackerMap, newMetricProducers, newMetricProducerMap,
+            mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
+            mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
+            mMetricIndexesWithActivation, newStateProtoHashes, mNoReportMetricIds);
     mAllAtomMatchingTrackers = newAtomMatchingTrackers;
     mAtomMatchingTrackerMap = newAtomMatchingTrackerMap;
     mAllConditionTrackers = newConditionTrackers;
     mConditionTrackerMap = newConditionTrackerMap;
+    mAllMetricProducers = newMetricProducers;
+    mMetricProducerMap = newMetricProducerMap;
+    mStateProtoHashes = newStateProtoHashes;
     return mConfigValid;
 }
 

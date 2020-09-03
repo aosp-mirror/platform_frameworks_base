@@ -21,6 +21,7 @@
 
 #include "external/StatsPullerManager.h"
 #include "hash.h"
+#include "matchers/EventMatcherWizard.h"
 #include "metrics_manager_util.h"
 
 namespace android {
@@ -394,6 +395,210 @@ bool updateConditions(const ConfigKey& key, const StatsdConfig& config,
     return true;
 }
 
+// Returns true if any matchers in the metric activation were replaced.
+bool metricActivationDepsChange(const StatsdConfig& config,
+                                const unordered_map<int64_t, int>& metricToActivationMap,
+                                const int64_t metricId, const set<int64_t>& replacedMatchers) {
+    const auto& metricActivationIt = metricToActivationMap.find(metricId);
+    if (metricActivationIt == metricToActivationMap.end()) {
+        return false;
+    }
+    const MetricActivation& metricActivation = config.metric_activation(metricActivationIt->second);
+    for (int i = 0; i < metricActivation.event_activation_size(); i++) {
+        const EventActivation& activation = metricActivation.event_activation(i);
+        if (replacedMatchers.find(activation.atom_matcher_id()) != replacedMatchers.end()) {
+            return true;
+        }
+        if (activation.has_deactivation_atom_matcher_id()) {
+            if (replacedMatchers.find(activation.deactivation_atom_matcher_id()) !=
+                replacedMatchers.end()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool determineEventMetricUpdateStatus(const StatsdConfig& config, const EventMetric& metric,
+                                      const unordered_map<int64_t, int>& oldMetricProducerMap,
+                                      const vector<sp<MetricProducer>>& oldMetricProducers,
+                                      const unordered_map<int64_t, int>& metricToActivationMap,
+                                      const set<int64_t>& replacedMatchers,
+                                      const set<int64_t>& replacedConditions,
+                                      UpdateStatus& updateStatus) {
+    int64_t id = metric.id();
+    // Check if new metric
+    const auto& oldMetricProducerIt = oldMetricProducerMap.find(id);
+    if (oldMetricProducerIt == oldMetricProducerMap.end()) {
+        updateStatus = UPDATE_NEW;
+        return true;
+    }
+
+    // This is an existing metric, check if it has changed.
+    uint64_t metricHash;
+    if (!getMetricProtoHash(config, metric, id, metricToActivationMap, metricHash)) {
+        return false;
+    }
+    const sp<MetricProducer> oldMetricProducer = oldMetricProducers[oldMetricProducerIt->second];
+    if (oldMetricProducer->getMetricType() != METRIC_TYPE_EVENT ||
+        oldMetricProducer->getProtoHash() != metricHash) {
+        updateStatus = UPDATE_REPLACE;
+        return true;
+    }
+
+    // Metric type and definition are the same. Need to check dependencies to see if they changed.
+    if (replacedMatchers.find(metric.what()) != replacedMatchers.end()) {
+        updateStatus = UPDATE_REPLACE;
+        return true;
+    }
+
+    if (metric.has_condition()) {
+        if (replacedConditions.find(metric.condition()) != replacedConditions.end()) {
+            updateStatus = UPDATE_REPLACE;
+            return true;
+        }
+    }
+
+    if (metricActivationDepsChange(config, metricToActivationMap, id, replacedMatchers)) {
+        updateStatus = UPDATE_REPLACE;
+        return true;
+    }
+
+    for (const auto& metricConditionLink : metric.links()) {
+        if (replacedConditions.find(metricConditionLink.condition()) != replacedConditions.end()) {
+            updateStatus = UPDATE_REPLACE;
+            return true;
+        }
+    }
+    updateStatus = UPDATE_PRESERVE;
+    return true;
+}
+
+bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseNs,
+                   const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
+                   const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
+                   const unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
+                   const set<int64_t>& replacedMatchers,
+                   const vector<sp<AtomMatchingTracker>>& allAtomMatchingTrackers,
+                   const unordered_map<int64_t, int>& conditionTrackerMap,
+                   const set<int64_t>& replacedConditions,
+                   vector<sp<ConditionTracker>>& allConditionTrackers,
+                   const vector<ConditionState>& initialConditionCache,
+                   const unordered_map<int64_t, int>& stateAtomIdMap,
+                   const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
+                   const set<int64_t>& replacedStates,
+                   const unordered_map<int64_t, int>& oldMetricProducerMap,
+                   const vector<sp<MetricProducer>>& oldMetricProducers,
+                   unordered_map<int64_t, int>& newMetricProducerMap,
+                   vector<sp<MetricProducer>>& newMetricProducers,
+                   unordered_map<int, vector<int>>& conditionToMetricMap,
+                   unordered_map<int, vector<int>>& trackerToMetricMap,
+                   set<int64_t>& noReportMetricIds,
+                   unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
+                   unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
+                   vector<int>& metricsWithActivation) {
+    sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
+    sp<EventMatcherWizard> matcherWizard = new EventMatcherWizard(allAtomMatchingTrackers);
+    const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
+                                config.event_metric_size() + config.gauge_metric_size() +
+                                config.value_metric_size();
+    newMetricProducers.reserve(allMetricsCount);
+
+    // Construct map from metric id to metric activation index. The map will be used to determine
+    // the metric activation corresponding to a metric.
+    unordered_map<int64_t, int> metricToActivationMap;
+    for (int i = 0; i < config.metric_activation_size(); i++) {
+        const MetricActivation& metricActivation = config.metric_activation(i);
+        int64_t metricId = metricActivation.metric_id();
+        if (metricToActivationMap.find(metricId) != metricToActivationMap.end()) {
+            ALOGE("Metric %lld has multiple MetricActivations", (long long)metricId);
+            return false;
+        }
+        metricToActivationMap.insert({metricId, i});
+    }
+
+    vector<UpdateStatus> metricsToUpdate(allMetricsCount, UPDATE_UNKNOWN);
+    int metricIndex = 0;
+    for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
+        newMetricProducerMap[config.event_metric(i).id()] = metricIndex;
+        if (!determineEventMetricUpdateStatus(config, config.event_metric(i), oldMetricProducerMap,
+                                              oldMetricProducers, metricToActivationMap,
+                                              replacedMatchers, replacedConditions,
+                                              metricsToUpdate[metricIndex])) {
+            return false;
+        }
+    }
+
+    // TODO: determine update status for count, gauge, value, duration metrics.
+
+    // Now, perform the update. Must iterate the metric types in the same order
+    metricIndex = 0;
+    for (int i = 0; i < config.event_metric_size(); i++, metricIndex++) {
+        const EventMetric& metric = config.event_metric(i);
+        switch (metricsToUpdate[metricIndex]) {
+            case UPDATE_PRESERVE: {
+                const auto& oldMetricProducerIt = oldMetricProducerMap.find(metric.id());
+                if (oldMetricProducerIt == oldMetricProducerMap.end()) {
+                    ALOGE("Could not find Metric %lld in the previous config, but expected it "
+                          "to be there",
+                          (long long)metric.id());
+                    return false;
+                }
+                const int oldIndex = oldMetricProducerIt->second;
+                sp<MetricProducer> producer = oldMetricProducers[oldIndex];
+                producer->onConfigUpdated(
+                        config, i, metricIndex, allAtomMatchingTrackers, oldAtomMatchingTrackerMap,
+                        newAtomMatchingTrackerMap, matcherWizard, allConditionTrackers,
+                        conditionTrackerMap, wizard, metricToActivationMap, trackerToMetricMap,
+                        conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                newMetricProducers.push_back(producer);
+                break;
+            }
+            case UPDATE_REPLACE:
+            case UPDATE_NEW: {
+                sp<MetricProducer> producer = createEventMetricProducerAndUpdateMetadata(
+                        key, config, timeBaseNs, metric, metricIndex, allAtomMatchingTrackers,
+                        newAtomMatchingTrackerMap, allConditionTrackers, conditionTrackerMap,
+                        initialConditionCache, wizard, metricToActivationMap, trackerToMetricMap,
+                        conditionToMetricMap, activationAtomTrackerToMetricMap,
+                        deactivationAtomTrackerToMetricMap, metricsWithActivation);
+                if (producer == nullptr) {
+                    return false;
+                }
+                newMetricProducers.push_back(producer);
+                break;
+            }
+            default: {
+                ALOGE("Metric \"%lld\" update state is unknown. This should never happen",
+                      (long long)metric.id());
+                return false;
+            }
+        }
+    }
+    // TODO: perform update for count, gauge, value, duration metric.
+
+    const set<int> atomsAllowedFromAnyUid(config.whitelisted_atom_ids().begin(),
+                                          config.whitelisted_atom_ids().end());
+    for (int i = 0; i < allMetricsCount; i++) {
+        sp<MetricProducer> producer = newMetricProducers[i];
+        // Register metrics to StateTrackers
+        for (int atomId : producer->getSlicedStateAtoms()) {
+            // Register listener for atoms that use allowed_log_sources.
+            // Using atoms allowed from any uid as a sliced state atom is not allowed.
+            // Redo this check for all metrics in case the atoms allowed from any uid changed.
+            if (atomsAllowedFromAnyUid.find(atomId) != atomsAllowedFromAnyUid.end()) {
+                return false;
+                // Preserved metrics should've already registered.`
+            } else if (metricsToUpdate[i] != UPDATE_PRESERVE) {
+                StateManager::getInstance().registerListener(atomId, producer);
+            }
+        }
+    }
+
+    return true;
+}
+
 bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const sp<UidMap>& uidMap,
                         const sp<StatsPullerManager>& pullerManager,
                         const sp<AlarmMonitor>& anomalyAlarmMonitor,
@@ -403,15 +608,28 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
                         const unordered_map<int64_t, int>& oldAtomMatchingTrackerMap,
                         const vector<sp<ConditionTracker>>& oldConditionTrackers,
                         const unordered_map<int64_t, int>& oldConditionTrackerMap,
-                        set<int>& allTagIds,
+                        const vector<sp<MetricProducer>>& oldMetricProducers,
+                        const unordered_map<int64_t, int>& oldMetricProducerMap,
+                        const map<int64_t, uint64_t>& oldStateProtoHashes, set<int>& allTagIds,
                         vector<sp<AtomMatchingTracker>>& newAtomMatchingTrackers,
                         unordered_map<int64_t, int>& newAtomMatchingTrackerMap,
                         vector<sp<ConditionTracker>>& newConditionTrackers,
                         unordered_map<int64_t, int>& newConditionTrackerMap,
-                        unordered_map<int, vector<int>>& trackerToConditionMap) {
+                        vector<sp<MetricProducer>>& newMetricProducers,
+                        unordered_map<int64_t, int>& newMetricProducerMap,
+                        unordered_map<int, vector<int>>& conditionToMetricMap,
+                        unordered_map<int, vector<int>>& trackerToMetricMap,
+                        unordered_map<int, vector<int>>& trackerToConditionMap,
+                        unordered_map<int, vector<int>>& activationTrackerToMetricMap,
+                        unordered_map<int, vector<int>>& deactivationTrackerToMetricMap,
+                        vector<int>& metricsWithActivation,
+                        map<int64_t, uint64_t>& newStateProtoHashes,
+                        set<int64_t>& noReportMetricIds) {
     set<int64_t> replacedMatchers;
     set<int64_t> replacedConditions;
     vector<ConditionState> conditionCache;
+    unordered_map<int64_t, int> stateAtomIdMap;
+    unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
 
     if (!updateAtomMatchingTrackers(config, uidMap, oldAtomMatchingTrackerMap,
                                     oldAtomMatchingTrackers, allTagIds, newAtomMatchingTrackerMap,
@@ -429,6 +647,31 @@ bool updateStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const 
         return false;
     }
     VLOG("updateConditions succeeded");
+
+    // Share with metrics_manager_util,
+    if (!initStates(config, stateAtomIdMap, allStateGroupMaps, newStateProtoHashes)) {
+        ALOGE("initStates failed");
+        return false;
+    }
+
+    set<int64_t> replacedStates;
+    for (const auto& [stateId, stateHash] : oldStateProtoHashes) {
+        const auto& it = newStateProtoHashes.find(stateId);
+        if (it != newStateProtoHashes.end() && it->second != stateHash) {
+            replacedStates.insert(stateId);
+        }
+    }
+    if (!updateMetrics(key, config, timeBaseNs, currentTimeNs, pullerManager,
+                       oldAtomMatchingTrackerMap, newAtomMatchingTrackerMap, replacedMatchers,
+                       newAtomMatchingTrackers, newConditionTrackerMap, replacedConditions,
+                       newConditionTrackers, conditionCache, stateAtomIdMap, allStateGroupMaps,
+                       replacedStates, oldMetricProducerMap, oldMetricProducers,
+                       newMetricProducerMap, newMetricProducers, conditionToMetricMap,
+                       trackerToMetricMap, noReportMetricIds, activationTrackerToMetricMap,
+                       deactivationTrackerToMetricMap, metricsWithActivation)) {
+        ALOGE("initMetricProducers failed");
+        return false;
+    }
 
     return true;
 }
