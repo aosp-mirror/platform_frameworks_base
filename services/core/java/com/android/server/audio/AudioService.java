@@ -3680,13 +3680,15 @@ public class AudioService extends IAudioService.Stub
         private final IBinder mCb; // To be notified of client's death
         private final int mPid;
         private final int mUid;
-        private String mPackage;
+        private final boolean mIsPrivileged;
+        private final String mPackage;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
 
-        SetModeDeathHandler(IBinder cb, int pid, int uid, String caller) {
+        SetModeDeathHandler(IBinder cb, int pid, int uid, boolean isPrivileged, String caller) {
             mCb = cb;
             mPid = pid;
             mUid = uid;
+            mIsPrivileged = isPrivileged;
             mPackage = caller;
         }
 
@@ -3698,12 +3700,13 @@ public class AudioService extends IAudioService.Stub
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
                 } else {
-                    newModeOwnerPid = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid, mUid, TAG);
+                    newModeOwnerPid = setModeInt(
+                            AudioSystem.MODE_NORMAL, mCb, mPid, mUid, mIsPrivileged, TAG);
                 }
             }
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode when pid changes
-            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
+            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid, AudioService.this.getMode());
         }
 
         public int getPid() {
@@ -3728,6 +3731,10 @@ public class AudioService extends IAudioService.Stub
 
         public String getPackage() {
             return mPackage;
+        }
+
+        public boolean isPrivileged() {
+            return mIsPrivileged;
         }
     }
 
@@ -3780,18 +3787,19 @@ public class AudioService extends IAudioService.Stub
                         + " without permission or being mode owner");
                 return;
             }
-            newModeOwnerPid = setModeInt(
-                mode, cb, callingPid, Binder.getCallingUid(), callingPackage);
+            newModeOwnerPid = setModeInt(mode, cb, callingPid, Binder.getCallingUid(),
+                    hasModifyPhoneStatePermission, callingPackage);
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
-        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
+        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid, getMode());
     }
 
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
     @GuardedBy("mDeviceBroker.mSetModeLock")
-    private int setModeInt(int mode, IBinder cb, int pid, int uid, String caller) {
+    private int setModeInt(
+            int mode, IBinder cb, int pid, int uid, boolean isPrivileged, String caller) {
         if (DEBUG_MODE) {
             Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid
                     + ", uid=" + uid + ", caller=" + caller + ")");
@@ -3843,7 +3851,7 @@ public class AudioService extends IAudioService.Stub
                 }
             } else {
                 if (hdlr == null) {
-                    hdlr = new SetModeDeathHandler(cb, pid, uid, caller);
+                    hdlr = new SetModeDeathHandler(cb, pid, uid, isPrivileged, caller);
                 }
                 // Register for client death notification
                 try {
@@ -3902,7 +3910,8 @@ public class AudioService extends IAudioService.Stub
             // change of mode may require volume to be re-applied on some devices
             updateAbsVolumeMultiModeDevices(oldMode, actualMode);
 
-            if (actualMode == AudioSystem.MODE_IN_COMMUNICATION) {
+            if (actualMode == AudioSystem.MODE_IN_COMMUNICATION
+                    && !hdlr.isPrivileged()) {
                 sendMsg(mAudioHandler,
                         MSG_CHECK_MODE_FOR_UID,
                         SENDMSG_QUEUE,
@@ -6419,8 +6428,8 @@ public class AudioService extends IAudioService.Stub
                                     CHECK_MODE_FOR_UID_PERIOD_MS);
                             break;
                         }
-                        // For now just log the fact that an app is hogging the audio mode.
-                        // TODO(b/160260850): remove abusive app from audio mode stack.
+                        setModeInt(AudioSystem.MODE_NORMAL, h.getBinder(), h.getPid(), h.getUid(),
+                                h.isPrivileged(), "MSG_CHECK_MODE_FOR_UID");
                         mModeLogger.log(new PhoneStateEvent(h.getPackage(), h.getPid()));
                     }
                     break;
