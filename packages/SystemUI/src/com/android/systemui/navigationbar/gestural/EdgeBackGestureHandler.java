@@ -38,11 +38,11 @@ import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Choreographer;
 import android.view.ISystemGestureExclusionListener;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -67,6 +67,7 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -169,7 +170,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private boolean mGestureBlockingActivityRunning;
 
     private InputMonitor mInputMonitor;
-    private InputEventReceiver mInputEventReceiver;
+    private InputChannelCompat.InputEventReceiver mInputEventReceiver;
 
     private NavigationEdgeBackPlugin mEdgeBackPlugin;
     private int mLeftInset;
@@ -383,8 +384,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             // Register input event receiver
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "edge-swipe", mDisplayId);
-            mInputEventReceiver = new SysUiInputEventReceiver(
-                    mInputMonitor.getInputChannel(), Looper.getMainLooper());
+            mInputEventReceiver = new InputChannelCompat.InputEventReceiver(
+                    mInputMonitor.getInputChannel(), Looper.getMainLooper(),
+                    Choreographer.getInstance(), this::onInputEvent);
 
             // Add a nav bar panel window
             setEdgeBackPlugin(new NavigationBarEdgePanel(mContext));
@@ -520,6 +522,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         if (action == MotionEvent.ACTION_DOWN) {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
+            mInputEventReceiver.setBatchingEnabled(false);
             mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
             mLogGesture = false;
             mInRejectedExclusion = false;
@@ -571,6 +574,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                             mThresholdCrossed = true;
                             // Capture inputs
                             mInputMonitor.pilferPointers();
+                            mInputEventReceiver.setBatchingEnabled(true);
                         } else {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_FAR_FROM_EDGE);
                         }
@@ -671,16 +675,5 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             proto.edgeBackGestureHandler = new EdgeBackGestureHandlerProto();
         }
         proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
-    }
-
-    class SysUiInputEventReceiver extends InputEventReceiver {
-        SysUiInputEventReceiver(InputChannel channel, Looper looper) {
-            super(channel, looper);
-        }
-
-        public void onInputEvent(InputEvent event) {
-            EdgeBackGestureHandler.this.onInputEvent(event);
-            finishInputEvent(event, true);
-        }
     }
 }
