@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
@@ -24,6 +25,7 @@ import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -308,8 +310,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                 false /* isScreenRound */,
                 false /* alwaysConsumeSystemBars */, null /* displayCutout */,
                 LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
-                0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, typeSideMap)
-               .getInsets(mTypes);
+                0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, TYPE_APPLICATION,
+                WINDOWING_MODE_UNDEFINED, typeSideMap).getInsets(mTypes);
     }
 
     private Insets sanitize(Insets insets) {

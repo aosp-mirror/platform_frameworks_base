@@ -16,9 +16,11 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.ImeInsetsSourceConsumer.areEditorsSimilar;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -86,6 +88,7 @@ public class ImeInsetsSourceConsumerTest {
                     false,
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
+                    TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mImeConsumer = (ImeInsetsSourceConsumer) mController.getSourceConsumer(ITYPE_IME);
         });
