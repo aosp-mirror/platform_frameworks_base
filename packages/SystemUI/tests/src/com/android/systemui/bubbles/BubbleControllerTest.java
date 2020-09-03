@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 
@@ -276,7 +277,9 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mWindowManager,
                 mWindowManagerShellWrapper,
                 mLauncherApps,
-                mBubbleLogger);
+                mBubbleLogger,
+                mock(Handler.class),
+                mock(ShellTaskOrganizer.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         // Get a reference to the BubbleController's entry listener

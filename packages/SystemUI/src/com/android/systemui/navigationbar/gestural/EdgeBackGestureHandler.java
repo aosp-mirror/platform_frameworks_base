@@ -15,8 +15,6 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.Display.INVALID_DISPLAY;
-
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -57,7 +55,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -734,13 +731,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
 
-        // Bubbles will give us a valid display id if it should get the back event
-        final int bubbleDisplayId = Dependency.get(Bubbles.class).getExpandedDisplayId(mContext);
-        if (bubbleDisplayId != INVALID_DISPLAY) {
-            ev.setDisplayId(bubbleDisplayId);
-        } else {
-            ev.setDisplayId(mContext.getDisplay().getDisplayId());
-        }
+        ev.setDisplayId(mContext.getDisplay().getDisplayId());
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 

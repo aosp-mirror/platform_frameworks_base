@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles
 
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -37,8 +38,8 @@ class BubbleOverflow(
     private val stack: BubbleStackView
 ) : BubbleViewProvider {
 
-    private lateinit var bitmap : Bitmap
-    private lateinit var dotPath : Path
+    private lateinit var bitmap: Bitmap
+    private lateinit var dotPath: Path
 
     private var bitmapSize = 0
     private var iconBitmapSize = 0
@@ -167,8 +168,8 @@ class BubbleOverflow(
         return KEY
     }
 
-    override fun getDisplayId(): Int {
-        return expandedView.virtualDisplayId
+    override fun getTaskId(): Int {
+        return if (expandedView != null) expandedView.getTaskId() else INVALID_TASK_ID
     }
 
     companion object {

@@ -3539,8 +3539,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
             if (mNotificationPanelViewController.canPanelBeCollapsed()) {
                 mShadeController.animateCollapsePanels();
-            } else if (mBubblesOptional.isPresent()) {
-                mBubblesOptional.get().performBackPressIfNeeded();
             }
             return true;
         }
