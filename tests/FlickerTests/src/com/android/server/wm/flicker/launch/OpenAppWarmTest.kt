@@ -88,7 +88,7 @@ class OpenAppWarmTest(
                     noUncoveredRegions(Surface.ROTATION_0, rotation, bugId = 141361128)
                     navBarLayerRotatesAndScales(Surface.ROTATION_0, rotation)
                     statusBarLayerRotatesScales(Surface.ROTATION_0, rotation)
-                    navBarLayerIsAlwaysVisible(bugId = 140855415)
+                    navBarLayerIsAlwaysVisible(enabled = rotation == Surface.ROTATION_0)
                     statusBarLayerIsAlwaysVisible(enabled = false)
                     wallpaperLayerBecomesInvisible()
                 }
