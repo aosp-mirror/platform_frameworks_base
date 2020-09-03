@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF ಗೆ ಉಳಿಸು"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ಪ್ರಿಂಟ್ ಆಯ್ಕೆಗಳನ್ನು ವಿಸ್ತರಿಸಲಾಗಿದೆ"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ಪ್ರಿಂಟ್ ಆಯ್ಕೆಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
-    <string name="search" msgid="5421724265322228497">"ಹುಡುಕಿ"</string>
+    <string name="search" msgid="5421724265322228497">"Search"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ಎಲ್ಲಾ ಪ್ರಿಂಟರ್‌ಗಳು"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ಸೇವೆಯನ್ನು ಸೇರಿಸು"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ಹುಡುಕಾಟ ಪೆಟ್ಟಿಗೆಯನ್ನು ತೋರಿಸಲಾಗಿದೆ"</string>
@@ -104,7 +104,7 @@
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ಫೈಲ್‌ಗೆ ರೈಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"ಕ್ಷಮಿಸಿ, ಅದು ಕೆಲಸ ಮಾಡುತ್ತಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"ಮರುಪ್ರಯತ್ನಿಸು"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"ಮರುಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ಈ ಪ್ರಿಂಟರ್ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"ಪೂರ್ವವೀಕ್ಷಣೆ ಪ್ರದರ್ಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"ಪೂರ್ವವೀಕ್ಷಣೆ ತಯಾರಾಗುತ್ತಿದೆ…"</string>
