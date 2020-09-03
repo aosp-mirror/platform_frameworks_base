@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -98,6 +99,17 @@ public class ShellTaskOrganizerTests {
         mOrganizer.registerOrganizer();
 
         verify(mTaskOrganizerController).registerTaskOrganizer(any(ITaskOrganizer.class));
+    }
+
+    @Test
+    public void testOneListenerPerMode() {
+        mOrganizer.addListener(new TrackingTaskListener(), WINDOWING_MODE_MULTI_WINDOW);
+        try {
+            mOrganizer.addListener(new TrackingTaskListener(), WINDOWING_MODE_MULTI_WINDOW);
+            fail("Expected exception due to already registered listener");
+        } catch (Exception e) {
+            // Expected failure
+        }
     }
 
     @Test
