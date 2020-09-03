@@ -720,10 +720,9 @@
         <service android:name=".controls.controller.AuxiliaryPersistenceWrapper$DeletionJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE"/>
 
-        <!-- started from ControlsFavoritingActivity -->
+        <!-- started from ControlsRequestReceiver -->
         <activity
             android:name=".controls.management.ControlsRequestDialog"
-            android:exported="true"
             android:theme="@style/Theme.ControlsRequestDialog"
             android:finishOnCloseSystemDialogs="true"
             android:showForAllUsers="true"
