@@ -1819,11 +1819,8 @@ package android.media {
     method @NonNull public String getOriginalId();
   }
 
-  public final class MediaTranscodeManager implements java.lang.AutoCloseable {
-    method public void close();
+  public final class MediaTranscodeManager {
     method @NonNull public android.media.MediaTranscodeManager.TranscodingJob enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException;
-    method protected void finalize();
-    field public static final int PRIORITY_OFFLINE = 2; // 0x2
     field public static final int PRIORITY_REALTIME = 1; // 0x1
     field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
   }
@@ -1852,7 +1849,7 @@ package android.media {
   }
 
   @java.lang.FunctionalInterface public static interface MediaTranscodeManager.TranscodingJob.OnProgressUpdateListener {
-    method public void onProgressUpdate(@IntRange(from=0, to=100) int);
+    method public void onProgressUpdate(@NonNull android.media.MediaTranscodeManager.TranscodingJob, @IntRange(from=0, to=100) int);
   }
 
   public static final class MediaTranscodeManager.TranscodingRequest {
@@ -3294,6 +3291,7 @@ package android.provider {
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_BIOMETRICS = "biometrics";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+    field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
     field public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
     field public static final String NAMESPACE_PERMISSIONS = "permissions";
     field public static final String NAMESPACE_PRIVACY = "privacy";

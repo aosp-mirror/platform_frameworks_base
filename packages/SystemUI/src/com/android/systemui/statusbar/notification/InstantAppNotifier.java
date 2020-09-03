@@ -55,10 +55,10 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.List;
 import java.util.Optional;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -40,6 +40,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 
 import java.util.ArrayList;

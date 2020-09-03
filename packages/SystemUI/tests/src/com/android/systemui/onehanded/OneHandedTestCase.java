@@ -16,8 +16,12 @@
 
 package com.android.systemui.onehanded;
 
+import static com.android.systemui.onehanded.OneHandedController.SUPPORT_ONE_HANDED_MODE;
 import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
 
+import static org.junit.Assume.assumeTrue;
+
+import android.os.SystemProperties;
 import android.provider.Settings;
 
 import com.android.systemui.SysuiTestCase;
@@ -52,6 +56,11 @@ public abstract class OneHandedTestCase extends SysuiTestCase {
                 Settings.Secure.TAPS_APP_TO_EXIT, 1);
         Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
+    }
+
+    @Before
+    public void assumeOneHandedModeSupported() {
+        assumeTrue(SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false));
     }
 
     @After

@@ -28,6 +28,7 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
+import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.MediaMetrics;
 import android.os.Binder;
@@ -546,6 +547,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
         mDeviceInventory.unregisterStrategyPreferredDevicesDispatcher(dispatcher);
     }
 
+    /*package*/ int setPreferredDevicesForCapturePresetSync(int capturePreset,
+            @NonNull List<AudioDeviceAttributes> devices) {
+        return mDeviceInventory.setPreferredDevicesForCapturePresetSync(capturePreset, devices);
+    }
+
+    /*package*/ int clearPreferredDevicesForCapturePresetSync(int capturePreset) {
+        return mDeviceInventory.clearPreferredDevicesForCapturePresetSync(capturePreset);
+    }
+
+    /*package*/ void registerCapturePresetDevicesRoleDispatcher(
+            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
+        mDeviceInventory.registerCapturePresetDevicesRoleDispatcher(dispatcher);
+    }
+
+    /*package*/ void unregisterCapturePresetDevicesRoleDispatcher(
+            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
+        mDeviceInventory.unregisterCapturePresetDevicesRoleDispatcher(dispatcher);
+    }
+
     //---------------------------------------------------------------------
     // Communication with (to) AudioService
     //TODO check whether the AudioService methods are candidates to move here
@@ -692,6 +712,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /*package*/ void postSaveRemovePreferredDevicesForStrategy(int strategy) {
         sendIMsgNoDelay(MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_QUEUE, strategy);
+    }
+
+    /*package*/ void postSaveSetPreferredDevicesForCapturePreset(
+            int capturePreset, List<AudioDeviceAttributes> devices) {
+        sendILMsgNoDelay(
+                MSG_IL_SAVE_PREF_DEVICES_FOR_CAPTURE_PRESET, SENDMSG_QUEUE, capturePreset, devices);
+    }
+
+    /*package*/ void postSaveClearPreferredDevicesForCapturePreset(int capturePreset) {
+        sendIMsgNoDelay(
+                MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET, SENDMSG_QUEUE, capturePreset);
     }
 
     //---------------------------------------------------------------------
@@ -1098,6 +1129,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_CHECK_MUTE_MUSIC:
                     checkMessagesMuteMusic(0);
                     break;
+                case MSG_IL_SAVE_PREF_DEVICES_FOR_CAPTURE_PRESET: {
+                    final int capturePreset = msg.arg1;
+                    final List<AudioDeviceAttributes> devices =
+                            (List<AudioDeviceAttributes>) msg.obj;
+                    mDeviceInventory.onSaveSetPreferredDevicesForCapturePreset(
+                            capturePreset, devices);
+                } break;
+                case MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET: {
+                    final int capturePreset = msg.arg1;
+                    mDeviceInventory.onSaveClearPreferredDevicesForCapturePreset(capturePreset);
+                } break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -1173,6 +1215,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_L_SPEAKERPHONE_CLIENT_DIED = 35;
     private static final int MSG_CHECK_MUTE_MUSIC = 36;
     private static final int MSG_REPORT_NEW_ROUTES_A2DP = 37;
+
+    private static final int MSG_IL_SAVE_PREF_DEVICES_FOR_CAPTURE_PRESET = 38;
+    private static final int MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET = 39;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {

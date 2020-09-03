@@ -164,7 +164,7 @@ public class BubbleExpandedView extends LinearLayout {
                     ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                             0 /* enterResId */, 0 /* exitResId */);
                     options.setTaskAlwaysOnTop(true);
-                    options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+                    // Soptions.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
                     // Post to keep the lifecycle normal
                     post(() -> {
                         if (DEBUG_BUBBLE_EXPANDED_VIEW) {

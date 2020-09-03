@@ -83,6 +83,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -283,6 +284,7 @@ public final class DisplayManagerService extends SystemService {
 
     // Temporary display info, used for comparing display configurations.
     private final DisplayInfo mTempDisplayInfo = new DisplayInfo();
+    private final DisplayInfo mTempNonOverrideDisplayInfo = new DisplayInfo();
 
     // Temporary viewports, used when sending new viewport information to the
     // input system.  May be used outside of the lock but only on the handler thread.
@@ -507,7 +509,8 @@ public final class DisplayManagerService extends SystemService {
         mDisplayTransactionListeners.remove(listener);
     }
 
-    private void setDisplayInfoOverrideFromWindowManagerInternal(
+    @VisibleForTesting
+    void setDisplayInfoOverrideFromWindowManagerInternal(
             int displayId, DisplayInfo info) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
@@ -935,7 +938,8 @@ public final class DisplayManagerService extends SystemService {
         adapter.registerLocked();
     }
 
-    private void handleDisplayDeviceAdded(DisplayDevice device) {
+    @VisibleForTesting
+    void handleDisplayDeviceAdded(DisplayDevice device) {
         synchronized (mSyncRoot) {
             handleDisplayDeviceAddedLocked(device);
         }
@@ -947,7 +951,6 @@ public final class DisplayManagerService extends SystemService {
             Slog.w(TAG, "Attempted to add already added display device: " + info);
             return;
         }
-
         Slog.i(TAG, "Display device added: " + info);
         device.mDebugLastLoggedDeviceInfo = info;
 
@@ -960,7 +963,8 @@ public final class DisplayManagerService extends SystemService {
         scheduleTraversalLocked(false);
     }
 
-    private void handleDisplayDeviceChanged(DisplayDevice device) {
+    @VisibleForTesting
+    void handleDisplayDeviceChanged(DisplayDevice device) {
         synchronized (mSyncRoot) {
             DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
             if (!mDisplayDevices.contains(device)) {
@@ -1234,6 +1238,7 @@ public final class DisplayManagerService extends SystemService {
             LogicalDisplay display = mLogicalDisplays.valueAt(i);
 
             mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
+            display.getNonOverrideDisplayInfoLocked(mTempNonOverrideDisplayInfo);
             display.updateLocked(mDisplayDevices);
             if (!display.isValidLocked()) {
                 mLogicalDisplays.removeAt(i);
@@ -1242,6 +1247,15 @@ public final class DisplayManagerService extends SystemService {
             } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
                 handleLogicalDisplayChanged(displayId, display);
                 changed = true;
+            } else {
+                // While applications shouldn't know nor care about the non-overridden info, we
+                // still need to let WindowManager know so it can update its own internal state for
+                // things like display cutouts.
+                display.getNonOverrideDisplayInfoLocked(mTempDisplayInfo);
+                if (!mTempNonOverrideDisplayInfo.equals(mTempDisplayInfo)) {
+                    handleLogicalDisplayChanged(displayId, display);
+                    changed = true;
+                }
             }
         }
         return changed;
@@ -2176,6 +2190,8 @@ public final class DisplayManagerService extends SystemService {
 
             if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
                 if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+                    EventLog.writeEvent(0x534e4554, "162627132", callingUid,
+                            "Attempt to create a trusted display without holding permission!");
                     throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                             + "create a trusted virtual display.");
                 }

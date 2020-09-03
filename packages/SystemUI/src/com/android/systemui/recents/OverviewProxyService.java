@@ -75,7 +75,8 @@ import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.onehanded.OneHandedUI;
+import com.android.systemui.onehanded.OneHanded;
+import com.android.systemui.onehanded.OneHandedEvents;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -87,12 +88,12 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -135,7 +136,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
-    private final OneHandedUI mOneHandedUI;
+    private final Optional<OneHanded> mOneHandedOptional;
     private final CommandQueue mCommandQueue;
 
     private Region mActiveNavBarRegion;
@@ -464,9 +465,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
             long token = Binder.clearCallingIdentity();
             try {
-                if (mOneHandedUI != null) {
-                    mOneHandedUI.startOneHanded();
-                }
+                mOneHandedOptional.ifPresent(oneHanded -> oneHanded.startOneHanded());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -479,9 +478,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
             long token = Binder.clearCallingIdentity();
             try {
-                if (mOneHandedUI != null) {
-                    mOneHandedUI.stopOneHanded();
-                }
+                mOneHandedOptional.ifPresent(oneHanded -> oneHanded.stopOneHanded(
+                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -620,7 +618,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
-            Optional<Lazy<StatusBar>> statusBarOptionalLazy, OneHandedUI oneHandedUI,
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy,
+            Optional<OneHanded> oneHandedOptional,
             BroadcastDispatcher broadcastDispatcher) {
         super(broadcastDispatcher);
         mContext = context;
@@ -640,7 +639,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 .supportsRoundedCornersOnWindows(mContext.getResources());
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
-        mOneHandedUI = oneHandedUI;
+        mOneHandedOptional = oneHandedOptional;
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;

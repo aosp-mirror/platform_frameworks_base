@@ -30,8 +30,8 @@ import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.stackdivider.DividerView;
-import com.android.systemui.stackdivider.SplitScreen;
+import com.android.wm.shell.splitscreen.DividerView;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
 

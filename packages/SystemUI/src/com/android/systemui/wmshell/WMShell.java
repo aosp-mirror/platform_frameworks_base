@@ -16,27 +16,43 @@
 
 package com.android.systemui.wmshell;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.Rect;
+import android.inputmethodservice.InputMethodService;
+import android.os.IBinder;
+import android.view.KeyEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.onehanded.OneHanded;
+import com.android.systemui.onehanded.OneHandedEvents;
+import com.android.systemui.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
+import com.android.systemui.onehanded.OneHandedTransitionCallback;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.tracing.ProtoTraceable;
-import com.android.systemui.stackdivider.SplitScreen;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -54,8 +70,12 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
     private final DisplayImeController mDisplayImeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ActivityManagerWrapper mActivityManagerWrapper;
+    private final NavigationModeController mNavigationModeController;
+    private final ScreenLifecycle mScreenLifecycle;
+    private final SysUiState mSysUiState;
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<OneHanded> mOneHandedOptional;
     private final ProtoTracer mProtoTracer;
 
     @Inject
@@ -63,16 +83,24 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ActivityManagerWrapper activityManagerWrapper,
             DisplayImeController displayImeController,
+            NavigationModeController navigationModeController,
+            ScreenLifecycle screenLifecycle,
+            SysUiState sysUiState,
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
+            Optional<OneHanded> oneHandedOptional,
             ProtoTracer protoTracer) {
         super(context);
         mCommandQueue = commandQueue;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mActivityManagerWrapper = activityManagerWrapper;
         mDisplayImeController = displayImeController;
+        mNavigationModeController = navigationModeController;
+        mScreenLifecycle = screenLifecycle;
+        mSysUiState = sysUiState;
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
+        mOneHandedOptional = oneHandedOptional;
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
     }
@@ -83,9 +111,9 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
         // constructor. And make sure the initialization of DisplayImeController won't depend on
         // specific feature anymore.
         mDisplayImeController.startMonitorDisplays();
-
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
+        mOneHandedOptional.ifPresent(this::initOneHanded);
     }
 
     @VisibleForTesting
@@ -141,6 +169,104 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
                     @Override
                     public void onActivityLaunchOnSecondaryDisplayFailed() {
                         splitScreen.onActivityLaunchOnSecondaryDisplayFailed();
+                    }
+                });
+    }
+
+    @VisibleForTesting
+    void initOneHanded(OneHanded oneHanded) {
+        if (!oneHanded.hasOneHandedFeature()) {
+            return;
+        }
+
+        int currentMode = mNavigationModeController.addListener(mode ->
+                oneHanded.setThreeButtonModeEnabled(mode == NAV_BAR_MODE_3BUTTON));
+        oneHanded.setThreeButtonModeEnabled(currentMode == NAV_BAR_MODE_3BUTTON);
+
+        oneHanded.registerTransitionCallback(new OneHandedTransitionCallback() {
+            @Override
+            public void onStartFinished(Rect bounds) {
+                mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
+                        true).commitUpdate(DEFAULT_DISPLAY);
+            }
+
+            @Override
+            public void onStopFinished(Rect bounds) {
+                mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
+                        false).commitUpdate(DEFAULT_DISPLAY);
+            }
+        });
+
+        oneHanded.registerGestureCallback(new OneHandedGestureEventCallback() {
+            @Override
+            public void onStart() {
+                if (oneHanded.isOneHandedEnabled()) {
+                    oneHanded.startOneHanded();
+                } else if (oneHanded.isSwipeToNotificationEnabled()) {
+                    mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
+                }
+            }
+
+            @Override
+            public void onStop() {
+                if (oneHanded.isOneHandedEnabled()) {
+                    oneHanded.stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
+                } else if (oneHanded.isSwipeToNotificationEnabled()) {
+                    mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP);
+                }
+            }
+        });
+
+        mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardBouncerChanged(boolean bouncer) {
+                if (bouncer) {
+                    oneHanded.stopOneHanded();
+                }
+            }
+
+            @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                oneHanded.stopOneHanded();
+            }
+        });
+
+        mScreenLifecycle.addObserver(new ScreenLifecycle.Observer() {
+            @Override
+            public void onScreenTurningOff() {
+                oneHanded.stopOneHanded(
+                        OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
+            }
+        });
+
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void onCameraLaunchGestureDetected(int source) {
+                oneHanded.stopOneHanded();
+            }
+
+            @Override
+            public void setImeWindowStatus(int displayId, IBinder token, int vis,
+                    int backDisposition, boolean showImeSwitcher) {
+                if (displayId != DEFAULT_DISPLAY && (vis & InputMethodService.IME_VISIBLE) == 0) {
+                    return;
+                }
+                oneHanded.stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
+            }
+        });
+
+        mActivityManagerWrapper.registerTaskStackListener(
+                new TaskStackChangeListener() {
+                    @Override
+                    public void onTaskCreated(int taskId, ComponentName componentName) {
+                        oneHanded.stopOneHanded(
+                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
+                    }
+
+                    @Override
+                    public void onTaskMovedToFront(int taskId) {
+                        oneHanded.stopOneHanded(
+                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
                     }
                 });
     }

@@ -102,7 +102,7 @@ import java.util.concurrent.Executors;
  */
 @TestApi
 @SystemApi
-public final class MediaTranscodeManager implements AutoCloseable {
+public final class MediaTranscodeManager {
     private static final String TAG = "MediaTranscodeManager";
 
     private static final String MEDIA_TRANSCODING_SERVICE = "media.transcoding";
@@ -130,28 +130,6 @@ public final class MediaTranscodeManager implements AutoCloseable {
      * @hide
      */
     public static final int TRANSCODING_TYPE_IMAGE = 2;
-
-    @Override
-    public void close() {
-        release();
-    }
-
-    /**
-     * Releases the MediaTranscodeManager.
-     */
-    private void release() {
-        synchronized (mLock) {
-            try {
-                if (mTranscodingClient != null) {
-                    mTranscodingClient.unregister();
-                }
-            } catch (Exception ex) {
-                Log.e(TAG, "Failed to unregister the client");
-            } finally {
-                mTranscodingClient = null;
-            }
-        }
-    }
 
     /** @hide */
     @IntDef(prefix = {"TRANSCODING_TYPE_"}, value = {
@@ -182,6 +160,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
      * <p>Jobs with PRIORITY_OFFLINE will be scheduled behind PRIORITY_REALTIME. Always set to
      * PRIORITY_OFFLINE if client does not need the result as soon as possible and could accept
      * delay of the transcoding result.
+     * @hide
      * TODO(hkuang): Add more description of this when priority is finalized.
      */
     public static final int PRIORITY_OFFLINE = 2;
@@ -287,7 +266,7 @@ public final class MediaTranscodeManager implements AutoCloseable {
             // Notifies client the progress update.
             if (job.mProgressUpdateExecutor != null && job.mProgressUpdateListener != null) {
                 job.mProgressUpdateExecutor.execute(
-                        () -> job.mProgressUpdateListener.onProgressUpdate(newProgress));
+                        () -> job.mProgressUpdateListener.onProgressUpdate(job, newProgress));
             }
         }
     }
@@ -501,11 +480,6 @@ public final class MediaTranscodeManager implements AutoCloseable {
         mUid = Os.getpid();
         IMediaTranscodingService service = getService(false /*retry*/);
         mTranscodingClient = registerClient(service);
-    }
-
-    @Override
-    protected void finalize() {
-        release();
     }
 
     public static final class TranscodingRequest {
@@ -892,9 +866,12 @@ public final class MediaTranscodeManager implements AutoCloseable {
             /**
              * Called when the progress changes. The progress is in percentage between 0 and 1,
              * where 0 means that the job has not yet started and 100 means that it has finished.
+             *
+             * @param job      The job associated with the progress.
              * @param progress The new progress ranging from 0 ~ 100 inclusive.
              */
-            void onProgressUpdate(@IntRange(from = 0, to = 100) int progress);
+            void onProgressUpdate(@NonNull TranscodingJob job,
+                    @IntRange(from = 0, to = 100) int progress);
         }
 
         private final ITranscodingClient mJobOwner;

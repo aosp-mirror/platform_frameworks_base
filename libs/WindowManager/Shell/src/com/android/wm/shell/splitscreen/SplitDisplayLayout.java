@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.stackdivider;
+package com.android.wm.shell.splitscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -34,7 +34,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;

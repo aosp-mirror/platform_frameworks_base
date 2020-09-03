@@ -19,7 +19,8 @@ package com.android.systemui.onehanded;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
@@ -27,9 +28,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.wm.shell.common.DisplayController;
 
 import org.junit.Before;
@@ -48,31 +46,22 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
     OneHandedGestureHandler mGestureHandler;
     OneHandedController mOneHandedController;
     @Mock
-    CommandQueue mCommandQueue;
-    @Mock
     DisplayController mMockDisplayController;
     @Mock
-    NavigationModeController mMockNavigationModeController;
-    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
-    @Mock
-    SysUiState mMockSysUiState;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTouchHandler = Mockito.spy(new OneHandedTouchHandler());
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
-                mMockNavigationModeController);
+        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController);
         mOneHandedController = new OneHandedController(
                 getContext(),
-                mCommandQueue,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mTouchHandler,
                 mTutorialHandler,
-                mGestureHandler,
-                mMockSysUiState);
+                mGestureHandler);
     }
 
     @Test
@@ -102,10 +91,10 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testReceiveNewConfig_whenSetOneHandedEnabled() {
-        // 1st called at init
-        verify(mTouchHandler).onOneHandedEnabled(true);
+        // Called at init
+        verify(mTouchHandler, atLeastOnce()).onOneHandedEnabled(true);
         mOneHandedController.setOneHandedEnabled(true);
-        // 2nd called by setOneHandedEnabled()
-        verify(mTouchHandler, times(2)).onOneHandedEnabled(true);
+        // Called by setOneHandedEnabled()
+        verify(mTouchHandler, atLeast(2)).onOneHandedEnabled(true);
     }
 }

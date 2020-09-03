@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -366,6 +367,24 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_insetParentFrameByIme() {
+        final InsetsState state =
+                mDisplayContent.getInsetsStateController().getRawInsetsState();
+        state.getSource(InsetsState.ITYPE_IME).setVisible(true);
+        state.getSource(InsetsState.ITYPE_IME).setFrame(
+                0, DISPLAY_HEIGHT - IME_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+        mWindow.mBehindIme = true;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, IME_HEIGHT);
     }
 
     @Test

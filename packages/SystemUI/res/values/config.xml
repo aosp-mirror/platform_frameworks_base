@@ -161,9 +161,6 @@
     <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
     <integer name="ambient_notification_extension_time">10000</integer>
 
-    <!-- Animation duration when using long press on recents to dock -->
-    <integer name="long_press_dock_anim_duration">250</integer>
-
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
 
@@ -320,7 +317,6 @@
         <item>com.android.systemui.accessibility.WindowMagnification</item>
         <item>com.android.systemui.accessibility.SystemActions</item>
         <item>com.android.systemui.toast.ToastUI</item>
-        <item>com.android.systemui.onehanded.OneHandedUI</item>
         <item>com.android.systemui.wmshell.WMShell</item>
     </string-array>
 
