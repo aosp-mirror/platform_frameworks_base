@@ -5205,16 +5205,19 @@ package android.media.tv.tuner.filter {
     method @NonNull public static android.media.tv.tuner.filter.IpFilterConfiguration.Builder builder();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
     method public int getDstPort();
+    method public int getIpFilterContextId();
     method @NonNull @Size(min=4, max=16) public byte[] getSrcIpAddress();
     method public int getSrcPort();
     method public int getType();
     method public boolean isPassthrough();
+    field public static final int INVALID_IP_FILTER_CONTEXT_ID = -1; // 0xffffffff
   }
 
   public static final class IpFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setDstIpAddress(@NonNull byte[]);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setDstPort(int);
+    method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setIpFilterContextId(int);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setPassthrough(boolean);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSrcIpAddress(@NonNull byte[]);
