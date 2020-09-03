@@ -80,33 +80,33 @@ public final class DataCallResponse implements Parcelable {
     /**
      * Data handover failure mode is unknown.
      */
-    public static final int HANDOVER_FAILURE_MODE_UNKNOWN = 0;
+    public static final int HANDOVER_FAILURE_MODE_UNKNOWN = -1;
 
     /**
      * Perform fallback to the source data transport on data handover failure using
      * the legacy logic, which is fallback if the fail cause is
      * {@link DataFailCause#HANDOFF_PREFERENCE_CHANGED}.
      */
-    public static final int HANDOVER_FAILURE_MODE_LEGACY = 1;
+    public static final int HANDOVER_FAILURE_MODE_LEGACY = 0;
 
     /**
      * Perform fallback to the source data transport on data handover failure.
      */
-    public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 2;
+    public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 1;
 
     /**
      * Do not perform fallback to the source data transport on data handover failure.
-     * Frameworks should keep retrying handover by sending
+     * Framework will retry setting up a new data connection by sending
      * {@link DataService#REQUEST_REASON_HANDOVER} request to the underlying {@link DataService}.
      */
-    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 3;
+    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 2;
 
     /**
      * Do not perform fallback to the source transport on data handover failure.
-     * Frameworks should retry setup a new data connection by sending
+     * Framework will retry setting up a new data connection by sending
      * {@link DataService#REQUEST_REASON_NORMAL} request to the underlying {@link DataService}.
      */
-    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 4;
+    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 3;
 
     private final @DataFailureCause int mCause;
     private final int mSuggestedRetryTime;
@@ -332,6 +332,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" mtu=").append(getMtu())
            .append(" mtuV4=").append(getMtuV4())
            .append(" mtuV6=").append(getMtuV6())
+           .append(" handoverFailureMode=").append(getHandoverFailureMode())
            .append("}");
         return sb.toString();
     }
@@ -361,14 +362,15 @@ public final class DataCallResponse implements Parcelable {
                 && mPcscfAddresses.containsAll(other.mPcscfAddresses)
                 && mMtu == other.mMtu
                 && mMtuV4 == other.mMtuV4
-                && mMtuV6 == other.mMtuV6;
+                && mMtuV6 == other.mMtuV6
+                && mHandoverFailureMode == other.mHandoverFailureMode;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
-                mMtu, mMtuV4, mMtuV6);
+                mMtu, mMtuV4, mMtuV6, mHandoverFailureMode);
     }
 
     @Override
