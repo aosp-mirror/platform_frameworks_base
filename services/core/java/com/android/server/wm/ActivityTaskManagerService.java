@@ -4864,7 +4864,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             "Requested PIP on an activity that doesn't support it");
                 }
 
-                if (activity.pictureInPictureArgs.isAutoEnterAllowed()) {
+                if (activity.pictureInPictureArgs.isAutoEnterEnabled()) {
                     enterPictureInPictureMode(activity, activity.pictureInPictureArgs);
                     return;
                 }
