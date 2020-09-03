@@ -110,4 +110,11 @@ public abstract class ListEntry {
         mPreviousAttachState.clone(mAttachState);
         mAttachState.reset();
     }
+
+    /**
+     * True if this entry was attached in the last pass, else false.
+     */
+    public boolean wasAttachedInPreviousPass() {
+        return getPreviousAttachState().getParent() != null;
+    }
 }

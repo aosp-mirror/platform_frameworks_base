@@ -174,8 +174,19 @@ class ShadeListBuilderLogger @Inject constructor(
             str1 = suppressedParent?.key
             str2 = keepingParent?.key
         }, {
-            "(Build $long1)     Change of parent to '$str1' suppressed; " +
-                "keeping parent '$str2'"
+            "(Build $long1)     Change of parent to '$str1' suppressed; keeping parent '$str2'"
+        })
+    }
+
+    fun logGroupPruningSuppressed(
+        buildId: Int,
+        keepingParent: GroupEntry?
+    ) {
+        buffer.log(TAG, INFO, {
+            int1 = buildId
+            str1 = keepingParent?.key
+        }, {
+            "(Build $long1)     Group pruning suppressed; keeping parent '$str1'"
         })
     }
 

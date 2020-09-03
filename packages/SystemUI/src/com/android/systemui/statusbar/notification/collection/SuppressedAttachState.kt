@@ -24,28 +24,37 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.NotifS
  */
 data class SuppressedAttachState private constructor(
     /**
-     * Null if not attached to the current shade list. If top-level, then the shade list root. If
-     * part of a group, then that group's GroupEntry.
+     * The suppressed section assignment for this ListEntry.
+     * Null if no section change was suppressed.
+     */
+    var section: NotifSection?,
+
+    /**
+     * The suppressed parent assignment for this ListEntry.
+     *  - Null if no parent change was suppressed.
+     *  - Root if suppressing group change to top-level
+     *  - GroupEntry if suppressing group change to a different group
      */
     var parent: GroupEntry?,
 
     /**
-     * The assigned section for this ListEntry. If the child of the group, this will be the
-     * parent's section. Null if not attached to the list.
+     * Whether the ListEntry would have been pruned had its group change not been suppressed.
      */
-    var section: NotifSection?
+    var wasPruneSuppressed: Boolean
 ) {
 
     /** Copies the state of another instance. */
     fun clone(other: SuppressedAttachState) {
         parent = other.parent
         section = other.section
+        wasPruneSuppressed = other.wasPruneSuppressed
     }
 
     /** Resets back to a "clean" state (the same as created by the factory method) */
     fun reset() {
         parent = null
         section = null
+        wasPruneSuppressed = false
     }
 
     companion object {
@@ -53,7 +62,8 @@ data class SuppressedAttachState private constructor(
         fun create(): SuppressedAttachState {
             return SuppressedAttachState(
                 null,
-                null)
+                null,
+                false)
         }
     }
 }
