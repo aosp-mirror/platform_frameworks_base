@@ -458,6 +458,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         mSavedBubbleKeysPerUser = new SparseSetArray<>();
         mCurrentUserId = mNotifUserManager.getCurrentUserId();
+        mBubbleData.setCurrentUserId(mCurrentUserId);
+
         mNotifUserManager.addUserChangedListener(
                 new NotificationLockscreenUserManager.UserChangedListener() {
                     @Override
@@ -466,6 +468,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         mBubbleData.dismissAll(DISMISS_USER_CHANGED);
                         BubbleController.this.restoreBubbles(newUserId);
                         mCurrentUserId = newUserId;
+                        mBubbleData.setCurrentUserId(newUserId);
                     }
                 });
 
