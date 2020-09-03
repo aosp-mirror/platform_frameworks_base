@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -49,6 +51,7 @@ public class HvacController {
     public static final String TAG = "HvacController";
     private static final boolean DEBUG = true;
 
+    private final Executor mBackgroundExecutor;
     private final CarServiceProvider mCarServiceProvider;
     private final Set<TemperatureView> mRegisteredViews = new HashSet<>();
 
@@ -68,7 +71,7 @@ public class HvacController {
                                 Log.d(TAG, "onChangeEvent: " + areaId + ":" + value);
                             }
                             for (TemperatureView view : temperatureViews) {
-                                view.setTemperatureView(newTemp);
+                                view.setTemp(newTemp);
                             }
                         }
                     } catch (Exception e) {
@@ -117,8 +120,10 @@ public class HvacController {
             };
 
     @Inject
-    public HvacController(CarServiceProvider carServiceProvider) {
+    public HvacController(CarServiceProvider carServiceProvider,
+            @UiBackground Executor backgroundExecutor) {
         mCarServiceProvider = carServiceProvider;
+        mBackgroundExecutor = backgroundExecutor;
     }
 
     /**
@@ -171,14 +176,14 @@ public class HvacController {
             }
             if (mCarPropertyManager == null || !mCarPropertyManager.isPropertyAvailable(
                     HVAC_TEMPERATURE_SET, zone)) {
-                view.setTemperatureView(Float.NaN);
+                view.setTemp(Float.NaN);
                 return;
             }
-            view.setTemperatureView(
+            view.setTemp(
                     mCarPropertyManager.getFloatProperty(HVAC_TEMPERATURE_SET, zone));
             view.setHvacController(this);
         } catch (Exception e) {
-            view.setTemperatureView(Float.NaN);
+            view.setTemp(Float.NaN);
             Log.e(TAG, "Failed to get value from hvac service", e);
         }
     }
@@ -213,7 +218,8 @@ public class HvacController {
     public void setTemperature(float tempC, int zone) {
         if (mCarPropertyManager != null) {
             // Internally, all temperatures are represented in floating point Celsius
-            mCarPropertyManager.setFloatProperty(HVAC_TEMPERATURE_SET, zone, tempC);
+            mBackgroundExecutor.execute(
+                    () -> mCarPropertyManager.setFloatProperty(HVAC_TEMPERATURE_SET, zone, tempC));
         }
     }
 
@@ -234,6 +240,6 @@ public class HvacController {
      * @return Temperature in Celsius.
      */
     public static float convertToCelsius(float tempF) {
-        return (float) ((tempF - 32) * 0.55555555556);
+        return (tempF - 32) * 5f / 9f;
     }
 }

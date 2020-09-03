@@ -27,20 +27,20 @@
                     android:width="@dimen/system_bar_icon_drawing_size"
                     android:height="@dimen/system_bar_icon_drawing_size"/>
                 <solid
-                    android:color="#3C4043"/>
+                    android:color="@color/hvac_temperature_adjust_button_color"/>
             </shape>
         </aapt:attr>
     </item>
     <item android:gravity="center"
-          android:width="48dp"
-          android:height="48dp">
+          android:width="@dimen/system_bar_icon_drawing_size"
+          android:height="@dimen/system_bar_icon_drawing_size">
         <aapt:attr name="android:drawable">
-            <vector android:width="48dp"
-                    android:height="48dp"
+            <vector android:width="@dimen/system_bar_icon_drawing_size"
+                    android:height="@dimen/system_bar_icon_drawing_size"
                     android:viewportWidth="24.0"
                     android:viewportHeight="24.0">
                 <path
-                    android:fillColor="#8AB4F8"
+                    android:fillColor="@color/hvac_temperature_decrease_arrow_color"
                     android:pathData="M14,7l-5,5 5,5V7z"/>
             </vector>
         </aapt:attr>

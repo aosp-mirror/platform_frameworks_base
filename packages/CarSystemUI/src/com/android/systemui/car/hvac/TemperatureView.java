@@ -33,7 +33,7 @@ public interface TemperatureView {
      *
      * @param temp - The current temp in Celsius or NaN
      */
-    void setTemperatureView(float temp);
+    void setTemp(float temp);
 
     /**
      * Render the displayed temperature in Fahrenheit
