@@ -26,7 +26,9 @@ BlurShader::BlurShader(float radiusX, float radiusY, Shader* inputShader, const 
             SkImageFilters::Blur(
                     Blur::convertRadiusToSigma(radiusX),
                     Blur::convertRadiusToSigma(radiusY),
-                    inputShader ? inputShader->asSkImageFilter() : nullptr)
+                    SkTileMode::kClamp,
+                    inputShader ? inputShader->asSkImageFilter() : nullptr,
+                    nullptr)
             ) { }
 
 sk_sp<SkImageFilter> BlurShader::makeSkImageFilter() {
