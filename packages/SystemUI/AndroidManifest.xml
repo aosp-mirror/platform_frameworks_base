@@ -518,7 +518,7 @@
 
         <!-- started from PipController -->
         <activity
-            android:name=".pip.tv.PipMenuActivity"
+            android:name="com.android.wm.shell.pip.tv.PipMenuActivity"
             android:permission="com.android.systemui.permission.SELF"
             android:exported="false"
             android:theme="@style/PipTheme"

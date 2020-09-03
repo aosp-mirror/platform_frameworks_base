@@ -31,7 +31,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.util.animation.PhysicsAnimator;
+import com.android.wm.shell.animation.PhysicsAnimator;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}

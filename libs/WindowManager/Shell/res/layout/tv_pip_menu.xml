@@ -15,15 +15,15 @@
     limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:paddingTop="350dp"
-    android:background="#CC000000"
-    android:gravity="top|center_horizontal"
-    android:clipChildren="false">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              android:paddingTop="350dp"
+              android:background="#CC000000"
+              android:gravity="top|center_horizontal"
+              android:clipChildren="false">
 
-    <com.android.systemui.pip.tv.PipControlsView
+    <com.android.wm.shell.pip.tv.PipControlsView
         android:id="@+id/pip_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

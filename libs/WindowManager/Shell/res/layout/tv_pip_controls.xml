@@ -14,17 +14,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<!-- Layout for {@link com.android.systemui.pip.tv.PipControlsView}. -->
+<!-- Layout for {@link com.android.wm.shell.pip.tv.PipControlsView}. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.android.systemui.pip.tv.PipControlButtonView
+    <com.android.wm.shell.pip.tv.PipControlButtonView
         android:id="@+id/full_button"
         android:layout_width="@dimen/picture_in_picture_button_width"
         android:layout_height="wrap_content"
         android:src="@drawable/pip_ic_fullscreen_white"
         android:text="@string/pip_fullscreen" />
 
-    <com.android.systemui.pip.tv.PipControlButtonView
+    <com.android.wm.shell.pip.tv.PipControlButtonView
         android:id="@+id/close_button"
         android:layout_width="@dimen/picture_in_picture_button_width"
         android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
         android:src="@drawable/pip_ic_close_white"
         android:text="@string/pip_close" />
 
-    <com.android.systemui.pip.tv.PipControlButtonView
+    <com.android.wm.shell.pip.tv.PipControlButtonView
         android:id="@+id/play_pause_button"
         android:layout_width="@dimen/picture_in_picture_button_width"
         android:layout_height="wrap_content"

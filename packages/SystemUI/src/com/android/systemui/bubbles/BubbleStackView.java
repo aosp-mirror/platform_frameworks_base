@@ -16,6 +16,13 @@
 
 package com.android.systemui.bubbles;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
+import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -78,10 +85,10 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.RelativeTouchListener;
-import com.android.systemui.util.animation.PhysicsAnimator;
-import com.android.systemui.util.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.animation.PhysicsAnimator;
+import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -91,12 +98,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
-import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
-import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
