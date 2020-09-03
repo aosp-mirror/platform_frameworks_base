@@ -102,7 +102,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
-import com.android.server.pm.Installer.Batch;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -307,8 +306,8 @@ public final class Settings {
     private final ArrayMap<String, KernelPackageState> mKernelMapping = new ArrayMap<>();
 
     // List of replaced system applications
-    private final ArrayMap<String, PackageSetting> mDisabledSysPackages =
-        new ArrayMap<String, PackageSetting>();
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    final ArrayMap<String, PackageSetting> mDisabledSysPackages = new ArrayMap<>();
 
     /** List of packages that are blocked for uninstall for specific users */
     private final SparseArray<ArraySet<String>> mBlockUninstallPackages = new SparseArray<>();
@@ -2175,32 +2174,24 @@ public final class Settings {
 
     void readUsesStaticLibLPw(XmlPullParser parser, PackageSetting outPs)
             throws IOException, XmlPullParserException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            String libName = parser.getAttributeValue(null, ATTR_NAME);
-            String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
+        String libName = parser.getAttributeValue(null, ATTR_NAME);
+        String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
 
-            long libVersion = -1;
-            try {
-                libVersion = Long.parseLong(libVersionStr);
-            } catch (NumberFormatException e) {
-                // ignore
-            }
-
-            if (libName != null && libVersion >= 0) {
-                outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
-                        outPs.usesStaticLibraries, libName);
-                outPs.usesStaticLibrariesVersions = ArrayUtils.appendLong(
-                        outPs.usesStaticLibrariesVersions, libVersion);
-            }
-
-            XmlUtils.skipCurrentTag(parser);
+        long libVersion = -1;
+        try {
+            libVersion = Long.parseLong(libVersionStr);
+        } catch (NumberFormatException e) {
+            // ignore
         }
+
+        if (libName != null && libVersion >= 0) {
+            outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
+                    outPs.usesStaticLibraries, libName);
+            outPs.usesStaticLibrariesVersions = ArrayUtils.appendLong(
+                    outPs.usesStaticLibrariesVersions, libVersion);
+        }
+
+        XmlUtils.skipCurrentTag(parser);
     }
 
     void writeUsesStaticLibLPw(XmlSerializer serializer, String[] usesStaticLibraries,
@@ -3855,6 +3846,8 @@ public final class Settings {
                     readDomainVerificationLPw(parser, packageSetting);
                 } else if (tagName.equals(TAG_MIME_GROUP)) {
                     packageSetting.mimeGroups = readMimeGroupLPw(parser, packageSetting.mimeGroups);
+                } else if (tagName.equals(TAG_USES_STATIC_LIB)) {
+                    readUsesStaticLibLPw(parser, packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
