@@ -4099,6 +4099,15 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return The target SDK version for the given package name.
+     * @throws NameNotFoundException if a package with the given name cannot be found on the system.
+     */
+    @IntRange(from = 0)
+    public int getTargetSdkVersion(@NonNull String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Retrieve all of the information we know about a particular activity
      * class.
      *
