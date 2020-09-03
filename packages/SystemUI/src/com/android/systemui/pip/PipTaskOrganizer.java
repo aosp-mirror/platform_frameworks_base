@@ -360,8 +360,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
                 public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                     t.apply();
                     scheduleAnimateResizePip(mLastReportedBounds, destinationBounds,
-                            null /* sourceHintRect */, direction, animationDurationMs,
-                            null /* updateBoundsCallback */);
+                            getValidSourceHintRect(mTaskInfo, destinationBounds), direction,
+                            animationDurationMs, null /* updateBoundsCallback */);
                     mState = State.EXITING_PIP;
                 }
             });
@@ -986,7 +986,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             return;
         }
         mPipAnimationController
-                .getAnimator(mLeash, currentBounds, destinationBounds, sourceHintRect)
+                .getAnimator(mLeash, currentBounds, destinationBounds, sourceHintRect, direction)
                 .setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(durationMs)
