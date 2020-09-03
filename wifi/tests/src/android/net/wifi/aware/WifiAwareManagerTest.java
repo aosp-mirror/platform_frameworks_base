@@ -360,12 +360,18 @@ public class WifiAwareManagerTest {
                 eq(publishConfig));
         inOrder.verify(mockSessionCallback).onSessionConfigFailed();
 
-        // (5) terminate
+        // (5) discovery session is no longer visible
+        sessionProxyCallback.getValue().onMatchExpired(peerHandle.peerId);
+        mMockLooper.dispatchAll();
+        inOrder.verify(mockSessionCallback).onServiceLost(peerIdCaptor.capture());
+        assertEquals(peerHandle.peerId, peerIdCaptor.getValue().peerId);
+
+        // (6) terminate
         publishSession.getValue().close();
         mMockLooper.dispatchAll();
         inOrder.verify(mockAwareService).terminateSession(clientId, sessionId);
 
-        // (6) try an update (nothing)
+        // (7) try an update (nothing)
         publishSession.getValue().updatePublish(publishConfig);
         mMockLooper.dispatchAll();
 
@@ -502,12 +508,18 @@ public class WifiAwareManagerTest {
                 eq(subscribeConfig));
         inOrder.verify(mockSessionCallback).onSessionConfigFailed();
 
-        // (5) terminate
+        // (5) discovery session is no longer visible
+        sessionProxyCallback.getValue().onMatchExpired(peerHandle.peerId);
+        mMockLooper.dispatchAll();
+        inOrder.verify(mockSessionCallback).onServiceLost(peerIdCaptor.capture());
+        assertEquals(peerHandle.peerId, peerIdCaptor.getValue().peerId);
+
+        // (6) terminate
         subscribeSession.getValue().close();
         mMockLooper.dispatchAll();
         inOrder.verify(mockAwareService).terminateSession(clientId, sessionId);
 
-        // (6) try an update (nothing)
+        // (7) try an update (nothing)
         subscribeSession.getValue().updateSubscribe(subscribeConfig);
         mMockLooper.dispatchAll();
 
