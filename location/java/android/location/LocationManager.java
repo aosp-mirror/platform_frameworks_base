@@ -162,7 +162,7 @@ public class LocationManager {
     /**
      * The fused location provider.
      *
-     * <p>This provider combines may combine inputs from several location sources to provide the
+     * <p>This provider may combine inputs from several location sources to provide the
      * best possible location fix. It is implicitly used for all API's that involve the
      * {@link LocationRequest} object.
      *
