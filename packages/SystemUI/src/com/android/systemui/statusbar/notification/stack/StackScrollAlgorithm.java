@@ -91,7 +91,7 @@ public class StackScrollAlgorithm {
     /**
      * Updates the state of all children in the hostview based on this algorithm.
      */
-    public void resetViewStates(AmbientState ambientState) {
+    public void resetViewStates(AmbientState ambientState, int speedBumpIndex) {
         // The state of the local variables are saved in an algorithmState to easily subdivide it
         // into multiple phases.
         StackScrollAlgorithmState algorithmState = mTempAlgorithmState;
@@ -110,7 +110,7 @@ public class StackScrollAlgorithm {
 
         updateDimmedActivatedHideSensitive(ambientState, algorithmState);
         updateClipping(algorithmState, ambientState);
-        updateSpeedBumpState(algorithmState, ambientState);
+        updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(ambientState);
         getNotificationChildrenStates(algorithmState, ambientState);
     }
@@ -136,9 +136,9 @@ public class StackScrollAlgorithm {
     }
 
     private void updateSpeedBumpState(StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
+            int speedBumpIndex) {
         int childCount = algorithmState.visibleChildren.size();
-        int belowSpeedBump = ambientState.getSpeedBumpIndex();
+        int belowSpeedBump = speedBumpIndex;
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();

@@ -248,6 +248,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mChangePositionInProgress;
     private boolean mChildTransferInProgress;
 
+    private int mSpeedBumpIndex = -1;
+    private boolean mSpeedBumpIndexDirty = true;
+
     /**
      * The raw amount of the overScroll on the top, which is not rubber-banded.
      */
@@ -444,7 +447,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mMaxDisplayedNotifications = -1;
     private int mStatusBarHeight;
     private int mMinInteractionHeight;
-    private boolean mNoAmbient;
     private final Rect mClipRect = new Rect();
     private boolean mIsClipped;
     private Rect mRequestedClipBounds;
@@ -1010,7 +1012,33 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public int getSpeedBumpIndex() {
-        return mAmbientState.getSpeedBumpIndex();
+        if (mSpeedBumpIndexDirty) {
+            mSpeedBumpIndexDirty = false;
+            int speedBumpIndex = 0;
+            int currentIndex = 0;
+            final int n = getChildCount();
+            for (int i = 0; i < n; i++) {
+                View view = getChildAt(i);
+                if (view.getVisibility() == View.GONE
+                        || !(view instanceof ExpandableNotificationRow)) {
+                    continue;
+                }
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                currentIndex++;
+                boolean beforeSpeedBump;
+                if (mHighPriorityBeforeSpeedBump) {
+                    beforeSpeedBump = row.getEntry().getBucket() < BUCKET_SILENT;
+                } else {
+                    beforeSpeedBump = !row.getEntry().isAmbient();
+                }
+                if (beforeSpeedBump) {
+                    speedBumpIndex = currentIndex;
+                }
+            }
+
+            mSpeedBumpIndex = speedBumpIndex;
+        }
+        return mSpeedBumpIndex;
     }
 
     @Override
@@ -1064,12 +1092,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mNeedViewResizeAnimation = true;
             mNeedsAnimation = true;
         }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    private void setSpeedBumpIndex(int newIndex, boolean noAmbient) {
-        mAmbientState.setSpeedBumpIndex(newIndex);
-        mNoAmbient = noAmbient;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -1135,7 +1157,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             mAmbientState.setScrollY(mOwnScrollY);
         }
-        mStackScrollAlgorithm.resetViewStates(mAmbientState);
+        mStackScrollAlgorithm.resetViewStates(mAmbientState, getSpeedBumpIndex());
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
             applyCurrentState();
         } else {
@@ -5785,32 +5807,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param open     Should the fling open or close the overscroll view.
      */
     void flingTopOverscroll(float velocity, boolean open);
-  }
+    }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateSpeedBumpIndex() {
-        int speedBumpIndex = 0;
-        int currentIndex = 0;
-        final int N = getChildCount();
-        for (int i = 0; i < N; i++) {
-            View view = getChildAt(i);
-            if (view.getVisibility() == View.GONE || !(view instanceof ExpandableNotificationRow)) {
-                continue;
-            }
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            currentIndex++;
-            boolean beforeSpeedBump;
-            if (mHighPriorityBeforeSpeedBump) {
-                beforeSpeedBump = row.getEntry().getBucket() < BUCKET_SILENT;
-            } else {
-                beforeSpeedBump = !row.getEntry().isAmbient();
-            }
-            if (beforeSpeedBump) {
-                speedBumpIndex = currentIndex;
-            }
-        }
-        boolean noAmbient = speedBumpIndex == N;
-        setSpeedBumpIndex(speedBumpIndex, noAmbient);
+        mSpeedBumpIndexDirty = true;
     }
 
     /** Updates the indices of the boundaries between sections. */

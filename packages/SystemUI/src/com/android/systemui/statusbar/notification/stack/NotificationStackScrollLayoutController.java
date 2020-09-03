@@ -713,6 +713,10 @@ public class NotificationStackScrollLayoutController {
         return mView.getWakeUpHeight();
     }
 
+    public int getSpeedBumpIndex() {
+        return mView.getSpeedBumpIndex();
+    }
+
     public void setHideAmount(float linearAmount, float amount) {
         mView.setHideAmount(linearAmount, amount);
     }

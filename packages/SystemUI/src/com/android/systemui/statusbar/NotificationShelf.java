@@ -188,7 +188,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.openedAmount = openedAmount;
             viewState.clipTopAmount = 0;
             viewState.alpha = 1;
-            viewState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
+            viewState.belowSpeedBump = mHostLayoutController.getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
             viewState.xTranslation = getTranslationX();
             if (mNotGoneIndex != -1) {
@@ -352,7 +352,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         setBackgroundTop(backgroundTop);
         setFirstElementRoundness(firstElementRoundness);
-        mShelfIcons.setSpeedBumpIndex(mAmbientState.getSpeedBumpIndex());
+        mShelfIcons.setSpeedBumpIndex(mHostLayoutController.getSpeedBumpIndex());
         mShelfIcons.calculateIconTranslations();
         mShelfIcons.applyIconStates();
         for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
