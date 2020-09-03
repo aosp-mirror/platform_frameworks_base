@@ -17,6 +17,9 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
@@ -29,9 +32,11 @@ import java.util.Objects;
 /**
  * @hide
  */
+@SystemApi
 public final class PhysicalChannelConfig implements Parcelable {
 
     // TODO(b/72993578) consolidate these enums in a central location.
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CONNECTION_PRIMARY_SERVING, CONNECTION_SECONDARY_SERVING, CONNECTION_UNKNOWN})
     public @interface ConnectionStatus {}
@@ -47,7 +52,13 @@ public final class PhysicalChannelConfig implements Parcelable {
     public static final int CONNECTION_SECONDARY_SERVING = 2;
 
     /** Connection status is unknown. */
-    public static final int CONNECTION_UNKNOWN = Integer.MAX_VALUE;
+    public static final int CONNECTION_UNKNOWN = -1;
+
+    /** Channel number is unknown. */
+    public static final int CHANNEL_NUMBER_UNKNOWN = -1;
+
+    /** Physical Cell Id is unknown. */
+    public static final int PHYSICAL_CELL_ID_UNKNOWN = -1;
 
     /**
      * Connection status of the cell.
@@ -75,7 +86,7 @@ public final class PhysicalChannelConfig implements Parcelable {
     private int mFrequencyRange;
 
     /**
-     * The absolute radio frequency channel number, {@link Integer#MAX_VALUE} if unknown.
+     * The absolute radio frequency channel number, {@link CHANNEL_NUMBER_UNKNOWN} if unknown.
      */
     private int mChannelNumber;
 
@@ -86,7 +97,8 @@ public final class PhysicalChannelConfig implements Parcelable {
     private int[] mContextIds;
 
     /**
-     * The physical cell identifier for this cell - PCI, PSC, {@link Integer#MAX_VALUE} if known.
+     * The physical cell identifier for this cell - PCI, PSC, {@link PHYSICAL_CELL_ID_UNKNOWN}
+     * if unknown.
      */
     private int mPhysicalCellId;
 
@@ -96,7 +108,7 @@ public final class PhysicalChannelConfig implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mCellConnectionStatus);
         dest.writeInt(mCellBandwidthDownlinkKhz);
         dest.writeInt(mRat);
@@ -120,6 +132,7 @@ public final class PhysicalChannelConfig implements Parcelable {
      * physical channel has no data call mapped to it.
      *
      * @return an integer list indicates the data call ids.
+     * @hide
      */
     public int[] getContextIds() {
         return mContextIds;
@@ -131,6 +144,7 @@ public final class PhysicalChannelConfig implements Parcelable {
      * @see {@link ServiceState#FREQUENCY_RANGE_MID}
      * @see {@link ServiceState#FREQUENCY_RANGE_HIGH}
      * @see {@link ServiceState#FREQUENCY_RANGE_MMWAVE}
+     * @hide
      */
     @ServiceState.FrequencyRange
     public int getFrequencyRange() {
@@ -139,7 +153,7 @@ public final class PhysicalChannelConfig implements Parcelable {
 
     /**
      * @return the absolute radio frequency channel number for this physical channel,
-     * {@link Integer#MAX_VALUE} if unknown.
+     * {@link CHANNEL_NUMBER_UNKNOWN} if unknown.
      */
     public int getChannelNumber() {
         return mChannelNumber;
@@ -152,18 +166,20 @@ public final class PhysicalChannelConfig implements Parcelable {
      * In EUTRAN, this value is physical layer cell identity. The range is [0, 503].
      * Reference: 3GPP TS 36.211 section 6.11.
      *
-     * In 5G RAN, this value is physical layer cell identity. The range is [0, 1008].
+     * In 5G RAN, this value is physical layer cell identity. The range is [0, 1007].
      * Reference: 3GPP TS 38.211 section 7.4.2.1.
      *
-     * @return the physical cell identifier for this cell, {@link Integer#MAX_VALUE} if unknown.
+     * @return the physical cell identifier for this cell, {@link PHYSICAL_CELL_ID_UNKNOWN}
+     * if {@link android.telephony.CellInfo#UNAVAILABLE}.
      */
+    @IntRange(from = 0, to = 1007)
     public int getPhysicalCellId() {
         return mPhysicalCellId;
     }
 
     /**The radio technology for this physical channel. */
     @NetworkType
-    public int getRat() {
+    public int getNetworkType() {
         return mRat;
     }
 
@@ -181,7 +197,10 @@ public final class PhysicalChannelConfig implements Parcelable {
         return mCellConnectionStatus;
     }
 
-    /** @return String representation of the connection status */
+    /**
+     * @return String representation of the connection status
+     * @hide
+     */
     private String getConnectionStatusString() {
         switch(mCellConnectionStatus) {
             case CONNECTION_PRIMARY_SERVING:
@@ -254,6 +273,12 @@ public final class PhysicalChannelConfig implements Parcelable {
                 .toString();
     }
 
+    /** @hide */
+    public PhysicalChannelConfig(int status, int bandwidth) {
+        mCellConnectionStatus = status;
+        mCellBandwidthDownlinkKhz = bandwidth;
+    }
+
     private PhysicalChannelConfig(Parcel in) {
         mCellConnectionStatus = in.readInt();
         mCellBandwidthDownlinkKhz = in.readInt();
@@ -274,7 +299,10 @@ public final class PhysicalChannelConfig implements Parcelable {
         mPhysicalCellId = builder.mPhysicalCellId;
     }
 
-    /** The builder of {@code PhysicalChannelConfig}. */
+    /**
+     * The builder of {@code PhysicalChannelConfig}.
+     * @hide
+     */
     public static final class Builder {
         private int mRat;
         private int mFrequencyRange;
@@ -284,60 +312,51 @@ public final class PhysicalChannelConfig implements Parcelable {
         private int[] mContextIds;
         private int mPhysicalCellId;
 
-        /** @hide */
         public Builder() {
             mRat = ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN;
             mFrequencyRange = ServiceState.FREQUENCY_RANGE_UNKNOWN;
-            mChannelNumber = Integer.MAX_VALUE;
+            mChannelNumber = CHANNEL_NUMBER_UNKNOWN;
             mCellBandwidthDownlinkKhz = 0;
             mCellConnectionStatus = CONNECTION_UNKNOWN;
             mContextIds = new int[0];
-            mPhysicalCellId = Integer.MAX_VALUE;
+            mPhysicalCellId = PHYSICAL_CELL_ID_UNKNOWN;
         }
 
-        /** @hide */
         public PhysicalChannelConfig build() {
             return new PhysicalChannelConfig(this);
         }
 
-        /** @hide */
         public Builder setRat(int rat) {
             this.mRat = rat;
             return this;
         }
 
-        /** @hide */
         public Builder setFrequencyRange(int frequencyRange) {
             this.mFrequencyRange = frequencyRange;
             return this;
         }
 
-        /** @hide */
         public Builder setChannelNumber(int channelNumber) {
             this.mChannelNumber = channelNumber;
             return this;
         }
 
-        /** @hide */
         public Builder setCellBandwidthDownlinkKhz(int cellBandwidthDownlinkKhz) {
             this.mCellBandwidthDownlinkKhz = cellBandwidthDownlinkKhz;
             return this;
         }
 
-        /** @hide */
         public Builder setCellConnectionStatus(int connectionStatus) {
             this.mCellConnectionStatus = connectionStatus;
             return this;
         }
 
-        /** @hide */
         public Builder setContextIds(int[] contextIds) {
             if (contextIds != null) Arrays.sort(contextIds);
             this.mContextIds = contextIds;
             return this;
         }
 
-        /** @hide */
         public Builder setPhysicalCellId(int physicalCellId) {
             this.mPhysicalCellId = physicalCellId;
             return this;

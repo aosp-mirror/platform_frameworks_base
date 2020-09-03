@@ -291,6 +291,22 @@ package android.telephony {
     method public static boolean isVoiceMailNumber(@NonNull android.content.Context, int, @Nullable String);
   }
 
+  public final class PhysicalChannelConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCellBandwidthDownlink();
+    method public int getChannelNumber();
+    method public int getConnectionStatus();
+    method public int getNetworkType();
+    method @IntRange(from=0, to=1007) public int getPhysicalCellId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CHANNEL_NUMBER_UNKNOWN = -1; // 0xffffffff
+    field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
+    field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
+    field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhysicalChannelConfig> CREATOR;
+    field public static final int PHYSICAL_CELL_ID_UNKNOWN = -1; // 0xffffffff
+  }
+
   public final class PreciseCallState implements android.os.Parcelable {
     ctor public PreciseCallState(int, int, int, int, int);
     method public int describeContents();
