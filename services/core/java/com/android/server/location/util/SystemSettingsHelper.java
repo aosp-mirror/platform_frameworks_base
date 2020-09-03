@@ -29,6 +29,7 @@ import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 
 import android.app.ActivityManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -330,11 +331,13 @@ public class SystemSettingsHelper extends SettingsHelper {
     @Override
     public float getCoarseLocationAccuracyM() {
         long identity = Binder.clearCallingIdentity();
+        final ContentResolver cr = mContext.getContentResolver();
         try {
-            return Settings.Secure.getFloat(
-                    mContext.getContentResolver(),
+            return Settings.Secure.getFloatForUser(
+                    cr,
                     LOCATION_COARSE_ACCURACY_M,
-                    DEFAULT_COARSE_LOCATION_ACCURACY_M);
+                    DEFAULT_COARSE_LOCATION_ACCURACY_M,
+                    cr.getUserId());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
