@@ -48,8 +48,14 @@
 
     <dimen name="system_bar_user_icon_padding">16dp</dimen>
     <dimen name="system_bar_user_icon_drawing_size">36dp</dimen>
+    <!-- Padding on either side of the group of all system bar buttons -->
     <dimen name="system_bar_button_group_padding">64dp</dimen>
     <dimen name="system_bar_icon_drawing_size">44dp</dimen>
+    <dimen name="system_bar_button_size">76dp</dimen>
+    <!-- Margin between the system bar buttons -->
+    <dimen name="system_bar_button_margin">32dp</dimen>
+    <!-- Padding between the system bar button and the icon within it -->
+    <dimen name="system_bar_button_padding">16dp</dimen>
 
     <!-- The amount by which to scale up the status bar icons. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.75</item>
@@ -61,8 +67,8 @@
     <dimen name="hvac_temperature_text_padding">8dp</dimen>
     <dimen name="hvac_temperature_button_size">76dp</dimen>
     <!--These values represent MIN and MAX for hvac-->
-    <item name="hvac_min_value_celsius" format="float" type="dimen">0</item>
-    <item name="hvac_max_value_celsius" format="float" type="dimen">126</item>
+    <item name="hvac_min_value_celsius" format="float" type="dimen">10</item>
+    <item name="hvac_max_value_celsius" format="float" type="dimen">35</item>
 
     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
          quick settings header -->

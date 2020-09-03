@@ -56,7 +56,7 @@ public class TemperatureTextView extends TextView implements TemperatureView {
      * @param temp - The current temp or NaN
      */
     @Override
-    public void setTemperatureView(float temp) {
+    public void setTemp(float temp) {
         if (Float.isNaN(temp)) {
             setText("--");
             return;

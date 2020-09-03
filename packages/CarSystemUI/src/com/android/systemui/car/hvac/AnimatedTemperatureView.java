@@ -189,7 +189,7 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
      * @param temp - The current temp or NaN
      */
     @Override
-    public void setTemperatureView(float temp) {
+    public void setTemp(float temp) {
         if (mDisplayInFahrenheit) {
             temp = convertToFahrenheit(temp);
         }
