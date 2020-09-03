@@ -1528,7 +1528,7 @@ public class DisplayPolicy {
                             if (mInputConsumer == null) {
                                 return;
                             }
-                            showNavigationBar();
+                            showSystemBars();
                             // Any user activity always causes us to show the
                             // navigation controls, if they had been hidden.
                             // We also clear the low profile and only content
@@ -1563,13 +1563,13 @@ public class DisplayPolicy {
             }
         }
 
-        private void showNavigationBar() {
+        private void showSystemBars() {
             final InsetsSourceProvider provider = mDisplayContent.getInsetsStateController()
                     .peekSourceProvider(ITYPE_NAVIGATION_BAR);
             final InsetsControlTarget target =
                     provider != null ? provider.getControlTarget() : null;
             if (target != null) {
-                target.showInsets(Type.navigationBars(), false /* fromIme */);
+                target.showInsets(Type.systemBars(), false /* fromIme */);
             }
         }
     }
