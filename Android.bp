@@ -1029,6 +1029,7 @@ filegroup {
     name: "incremental_manager_aidl",
     srcs: [
         "core/java/android/os/incremental/IIncrementalService.aidl",
+        "core/java/android/os/incremental/IStorageLoadingProgressListener.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IStorageHealthListener.aidl",
         "core/java/android/os/incremental/StorageHealthCheckParams.aidl",

@@ -357,6 +357,10 @@ std::unique_ptr<TimedQueueWrapper> RealServiceManager::getTimedQueue() {
     return std::make_unique<RealTimedQueueWrapper>(mJvm);
 }
 
+std::unique_ptr<TimedQueueWrapper> RealServiceManager::getProgressUpdateJobQueue() {
+    return std::make_unique<RealTimedQueueWrapper>(mJvm);
+}
+
 std::unique_ptr<FsWrapper> RealServiceManager::getFs() {
     return std::make_unique<RealFsWrapper>();
 }

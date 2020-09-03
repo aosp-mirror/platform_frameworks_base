@@ -22,6 +22,7 @@
 #include <android/content/pm/IDataLoaderStatusListener.h>
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
 #include <android/os/incremental/BnStorageHealthListener.h>
+#include <android/os/incremental/BnStorageLoadingProgressListener.h>
 #include <android/os/incremental/StorageHealthCheckParams.h>
 #include <binder/IAppOpsCallback.h>
 #include <utils/String16.h>
@@ -65,6 +66,8 @@ using DataLoaderStatusListener = ::android::sp<IDataLoaderStatusListener>;
 using StorageHealthCheckParams = ::android::os::incremental::StorageHealthCheckParams;
 using IStorageHealthListener = ::android::os::incremental::IStorageHealthListener;
 using StorageHealthListener = ::android::sp<IStorageHealthListener>;
+using IStorageLoadingProgressListener = ::android::os::incremental::IStorageLoadingProgressListener;
+using StorageLoadingProgressListener = ::android::sp<IStorageLoadingProgressListener>;
 
 class IncrementalService final {
 public:
@@ -134,6 +137,9 @@ public:
 
     int isFileFullyLoaded(StorageId storage, const std::string& path) const;
     float getLoadingProgress(StorageId storage) const;
+    bool registerLoadingProgressListener(StorageId storage,
+                                         const StorageLoadingProgressListener& progressListener);
+    bool unregisterLoadingProgressListener(StorageId storage);
 
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
@@ -354,8 +360,10 @@ private:
 
     void runCmdLooper();
 
-    void addTimedJob(MountId id, Milliseconds after, Job what);
-    void removeTimedJobs(MountId id);
+    bool addTimedJob(TimedQueueWrapper& timedQueue, MountId id, Milliseconds after, Job what);
+    bool removeTimedJobs(TimedQueueWrapper& timedQueue, MountId id);
+    bool updateLoadingProgress(int32_t storageId,
+                               const StorageLoadingProgressListener& progressListener);
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
@@ -365,6 +373,7 @@ private:
     const std::unique_ptr<JniWrapper> mJni;
     const std::unique_ptr<LooperWrapper> mLooper;
     const std::unique_ptr<TimedQueueWrapper> mTimedQueue;
+    const std::unique_ptr<TimedQueueWrapper> mProgressUpdateJobQueue;
     const std::unique_ptr<FsWrapper> mFs;
     const std::string mIncrementalDir;
 
