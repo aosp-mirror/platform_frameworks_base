@@ -42,6 +42,10 @@ package android.media {
 
 package android.media.session {
 
+  public static final class MediaController.PlaybackInfo implements android.os.Parcelable {
+    ctor public MediaController.PlaybackInfo(int, int, @IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.media.AudioAttributes, @Nullable String);
+  }
+
   public final class MediaSession {
     field public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 65536; // 0x10000
   }
