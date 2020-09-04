@@ -107,5 +107,5 @@
     <string name="print_error_retry" msgid="1426421728784259538">"Jaribu tena"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Printa hii haipatikani kwa sasa."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Haiwezi kupakia onyesho la kuchungulia"</string>
-    <string name="print_preparing_preview" msgid="3939930735671364712">"Inaandaa onyesho la kuchungulia..."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Inaandaa onyesho ili ukague kwanza..."</string>
 </resources>

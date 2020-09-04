@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4469836075319831821">"File d\'att. impr."</string>
+    <string name="app_label" msgid="4469836075319831821">"File d\'attente d\'impression"</string>
     <string name="more_options_button" msgid="2243228396432556771">"Plus d\'options"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destination"</string>
     <string name="label_copies" msgid="3634531042822968308">"Copies"</string>

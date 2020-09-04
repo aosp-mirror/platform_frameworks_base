@@ -84,7 +84,7 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"ਪ੍ਰਿੰਟਰ ਅਸ਼ੁੱਧੀ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"ਪ੍ਰਿੰਟਰ ਬਲੌਕ ਕੀਤਾ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancel" msgid="4373674107267141885">"ਰੱਦ ਕਰੋ"</string>
-    <string name="restart" msgid="2472034227037808749">"ਰੀਸਟਾਰਟ ਕਰੋ"</string>
+    <string name="restart" msgid="2472034227037808749">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ਪ੍ਰਿੰਟਰ ਲਈ ਕੋਈ ਕਨੈਕਸ਼ਨ ਨਹੀਂ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ਅਗਿਆਤ"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"ਕੀ <xliff:g id="SERVICE">%1$s</xliff:g> ਵਰਤਣੀ ਹੈ?"</string>
