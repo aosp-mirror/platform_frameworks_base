@@ -22,6 +22,7 @@ import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OPEN;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OWE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_PSK;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_SAE;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_WAPI_CERT;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_WAPI_PSK;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -536,5 +537,53 @@ public class WifiConfigurationTest {
 
         configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
         assertFalse(configuration.needsPreSharedKey());
+    }
+
+    @Test
+    public void testGetAuthType() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+
+        configuration.setSecurityParams(SECURITY_TYPE_PSK);
+        assertEquals(KeyMgmt.WPA_PSK, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_SAE);
+        assertEquals(KeyMgmt.SAE, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_WAPI_PSK);
+        assertEquals(KeyMgmt.WAPI_PSK, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_OPEN);
+        assertEquals(KeyMgmt.NONE, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_OWE);
+        assertEquals(KeyMgmt.OWE, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_EAP);
+        assertEquals(KeyMgmt.WPA_EAP, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
+        assertEquals(KeyMgmt.SUITE_B_192, configuration.getAuthType());
+
+        configuration.setSecurityParams(SECURITY_TYPE_WAPI_CERT);
+        assertEquals(KeyMgmt.WAPI_CERT, configuration.getAuthType());
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void testGetAuthTypeFailure1() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+
+        configuration.setSecurityParams(SECURITY_TYPE_PSK);
+        configuration.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
+        configuration.getAuthType();
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void testGetAuthTypeFailure2() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+
+        configuration.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
+        configuration.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        configuration.allowedKeyManagement.set(KeyMgmt.SAE);
+        configuration.getAuthType();
     }
 }
