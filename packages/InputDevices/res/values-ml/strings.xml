@@ -44,4 +44,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"പേര്‍ഷ്യന്‍"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"അസര്‍ബൈജാനി"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"പോളിഷ്"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"ബെലാറുഷ്യൻ"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"മംഗോളിയൻ"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ജോര്‍ജ്ജിയൻ"</string>
 </resources>

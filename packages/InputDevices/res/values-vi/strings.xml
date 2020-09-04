@@ -44,4 +44,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"Tiếng Ba Tư"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"Tiếng Azerbaijan"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"Tiếng Ba Lan"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Tiếng Belarus"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Tiếng Mông Cổ"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Tiếng Georgia"</string>
 </resources>
