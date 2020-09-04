@@ -46,8 +46,11 @@ import com.android.systemui.car.CarSystemUiTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
 
 @CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
@@ -64,6 +67,8 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
     private Car mCar;
     @Mock
     private CarPropertyManager mCarPropertyManager;
+    @Mock
+    private Executor mExecutor;
 
     @Before
     public void setUp() {
@@ -72,9 +77,10 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
         when(mCar.getCarManager(Car.PROPERTY_SERVICE)).thenReturn(mCarPropertyManager);
 
         CarServiceProvider carServiceProvider = new CarServiceProvider(mContext, mCar);
-        mHvacController = new HvacController(carServiceProvider);
+        mHvacController = new HvacController(carServiceProvider, mExecutor);
         mHvacController.connectToCarService();
         mAdjustableTemperatureView = new AdjustableTemperatureView(getContext(), /* attrs= */ null);
+        mAdjustableTemperatureView.onFinishInflate();
         mAdjustableTemperatureView.setHvacController(mHvacController);
     }
 
@@ -118,6 +124,9 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
 
         mAdjustableTemperatureView.findViewById(R.id.hvac_increase_button).callOnClick();
 
+        ArgumentCaptor<Runnable> setTempRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(setTempRunnableCaptor.capture());
+        setTempRunnableCaptor.getValue().run();
         verify(mCarPropertyManager).setFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt(),
                 eq(TEMP_CELSIUS + 1));
     }
@@ -132,6 +141,9 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
 
         mAdjustableTemperatureView.findViewById(R.id.hvac_decrease_button).callOnClick();
 
+        ArgumentCaptor<Runnable> setTempRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(setTempRunnableCaptor.capture());
+        setTempRunnableCaptor.getValue().run();
         verify(mCarPropertyManager).setFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt(),
                 eq(TEMP_CELSIUS - 1));
     }
@@ -150,6 +162,9 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
 
         mAdjustableTemperatureView.findViewById(R.id.hvac_increase_button).callOnClick();
 
+        ArgumentCaptor<Runnable> setTempRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(setTempRunnableCaptor.capture());
+        setTempRunnableCaptor.getValue().run();
         verify(mCarPropertyManager).setFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt(),
                 eq(convertToCelsius(convertToFahrenheit(TEMP_CELSIUS) + 1)));
     }
@@ -168,6 +183,9 @@ public class AdjustableTemperatureViewTest extends SysuiTestCase {
 
         mAdjustableTemperatureView.findViewById(R.id.hvac_decrease_button).callOnClick();
 
+        ArgumentCaptor<Runnable> setTempRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mExecutor).execute(setTempRunnableCaptor.capture());
+        setTempRunnableCaptor.getValue().run();
         verify(mCarPropertyManager).setFloatProperty(eq(HVAC_TEMPERATURE_SET), anyInt(),
                 eq(convertToCelsius(convertToFahrenheit(TEMP_CELSIUS) - 1)));
     }

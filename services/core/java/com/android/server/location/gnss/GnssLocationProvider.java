@@ -85,7 +85,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
@@ -181,7 +183,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int INJECT_NTP_TIME = 5;
     // PSDS stands for Predicted Satellite Data Service
     private static final int DOWNLOAD_PSDS_DATA = 6;
-    private static final int DOWNLOAD_PSDS_DATA_FINISHED = 11;
     private static final int INITIALIZE_HANDLER = 13;
     private static final int REQUEST_LOCATION = 16;
     private static final int REPORT_LOCATION = 17; // HAL reports location
@@ -288,6 +289,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final long DOWNLOAD_PSDS_DATA_TIMEOUT_MS = 60 * 1000;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 30 * 1000;
 
+    @GuardedBy("mLock")
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
 
@@ -297,14 +299,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private boolean mShutdown;
 
-    // states for injecting ntp and downloading psds data
-    private static final int STATE_PENDING_NETWORK = 0;
-    private static final int STATE_DOWNLOADING = 1;
-    private static final int STATE_IDLE = 2;
-
-    // flags to trigger NTP or PSDS data download when network becomes available
-    // initialized to true so we do NTP and PSDS when the network comes up after booting
-    private int mDownloadPsdsDataPending = STATE_PENDING_NETWORK;
+    @GuardedBy("mLock")
+    private Set<Integer> mPendingDownloadPsdsTypes = new HashSet<>();
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -610,6 +606,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mNIHandler = new GpsNetInitiatedHandler(context,
                 mNetInitiatedListener,
                 mSuplEsEnabled);
+        // Trigger PSDS data download when the network comes up after booting.
+        mPendingDownloadPsdsTypes.add(GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
         mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
                 GnssLocationProvider.this::onNetworkAvailable, mLooper, mNIHandler);
 
@@ -670,10 +668,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      */
     private void onNetworkAvailable() {
         mNtpTimeHelper.onNetworkAvailable();
-        if (mDownloadPsdsDataPending == STATE_PENDING_NETWORK) {
-            if (mSupportsPsds) {
-                // Download only if supported, (prevents an unnecessary on-boot download)
-                psdsDownloadRequest(/* psdsType= */ GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
+        // Download only if supported, (prevents an unnecessary on-boot download)
+        if (mSupportsPsds) {
+            synchronized (mLock) {
+                for (int psdsType : mPendingDownloadPsdsTypes) {
+                    downloadPsdsData(psdsType);
+                }
+                mPendingDownloadPsdsTypes.clear();
             }
         }
     }
@@ -799,17 +800,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             Log.d(TAG, "handleDownloadPsdsData() called when PSDS not supported");
             return;
         }
-        if (mDownloadPsdsDataPending == STATE_DOWNLOADING) {
-            // already downloading data
-            return;
-        }
         if (!mNetworkConnectivityHandler.isDataNetworkConnected()) {
             // try again when network is up
-            mDownloadPsdsDataPending = STATE_PENDING_NETWORK;
+            synchronized (mLock) {
+                mPendingDownloadPsdsTypes.add(psdsType);
+            }
             return;
         }
-        mDownloadPsdsDataPending = STATE_DOWNLOADING;
-
         synchronized (mLock) {
             // hold wake lock while task runs
             mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
@@ -820,20 +817,24 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     mGnssConfiguration.getProperties());
             byte[] data = psdsDownloader.downloadPsdsData(psdsType);
             if (data != null) {
-                if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
-                native_inject_psds_data(data, data.length, psdsType);
-                mPsdsBackOff.reset();
-            }
-
-            sendMessage(DOWNLOAD_PSDS_DATA_FINISHED, 0, null);
-
-            if (data == null) {
-                // try again later
-                // since this is delayed and not urgent we do not hold a wake lock here
-                // the arg2 below should not be 1 otherwise the wakelock will be under-locked.
+                mHandler.post(() -> {
+                    if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
+                    native_inject_psds_data(data, data.length, psdsType);
+                    synchronized (mLock) {
+                        mPsdsBackOff.reset();
+                    }
+                });
+            } else {
+                // Try download PSDS data again later according to backoff time.
+                // Since this is delayed and not urgent, we do not hold a wake lock here.
+                // The arg2 below should not be 1 otherwise the wakelock will be under-locked.
+                long backoffMillis;
+                synchronized (mLock) {
+                    backoffMillis = mPsdsBackOff.nextBackoffMillis();
+                }
                 mHandler.sendMessageDelayed(
                         mHandler.obtainMessage(DOWNLOAD_PSDS_DATA, psdsType, 0, null),
-                        mPsdsBackOff.nextBackoffMillis());
+                        backoffMillis);
             }
 
             // Release wake lock held by task, synchronize on mLock in case multiple
@@ -1128,7 +1129,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 requestUtcTime();
             } else if ("force_psds_injection".equals(command)) {
                 if (mSupportsPsds) {
-                    psdsDownloadRequest(/* psdsType= */
+                    downloadPsdsData(/* psdsType= */
                             GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
                 }
             } else {
@@ -1581,8 +1582,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         reportLocation(locations);
     }
 
-    void psdsDownloadRequest(int psdsType) {
-        if (DEBUG) Log.d(TAG, "psdsDownloadRequest. psdsType: " + psdsType);
+    void downloadPsdsData(int psdsType) {
+        if (DEBUG) Log.d(TAG, "downloadPsdsData. psdsType: " + psdsType);
         sendMessage(DOWNLOAD_PSDS_DATA, psdsType, null);
     }
 
@@ -1896,9 +1897,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case DOWNLOAD_PSDS_DATA:
                     handleDownloadPsdsData(msg.arg1);
                     break;
-                case DOWNLOAD_PSDS_DATA_FINISHED:
-                    mDownloadPsdsDataPending = STATE_IDLE;
-                    break;
                 case INITIALIZE_HANDLER:
                     handleInitialize();
                     break;
@@ -2007,8 +2005,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 return "REQUEST_LOCATION";
             case DOWNLOAD_PSDS_DATA:
                 return "DOWNLOAD_PSDS_DATA";
-            case DOWNLOAD_PSDS_DATA_FINISHED:
-                return "DOWNLOAD_PSDS_DATA_FINISHED";
             case INITIALIZE_HANDLER:
                 return "INITIALIZE_HANDLER";
             case REPORT_LOCATION:

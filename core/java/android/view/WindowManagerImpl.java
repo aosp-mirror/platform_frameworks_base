@@ -29,6 +29,7 @@ import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -271,13 +272,14 @@ public final class WindowManagerImpl implements WindowManager {
             final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
                     .getWindowInsets(attrs, mContext.getDisplayId(), systemWindowInsets,
                     stableInsets, displayCutout, insetsState);
-            final boolean isScreenRound =
-                    mContext.getResources().getConfiguration().isScreenRound();
+            final Configuration config = mContext.getResources().getConfiguration();
+            final boolean isScreenRound = config.isScreenRound();
+            final int windowingMode = config.windowConfiguration.getWindowingMode();
             if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
                 return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
                         isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
-                        SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
-                        SYSTEM_UI_FLAG_VISIBLE, null /* typeSideMap */);
+                        SOFT_INPUT_ADJUST_NOTHING, attrs.flags, SYSTEM_UI_FLAG_VISIBLE, attrs.type,
+                        windowingMode, null /* typeSideMap */);
             } else {
                 return new WindowInsets.Builder()
                         .setAlwaysConsumeSystemBars(alwaysConsumeSystemBars)

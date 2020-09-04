@@ -28,6 +28,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.FLAG_PRIVATE;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
@@ -95,6 +96,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
@@ -1520,6 +1522,28 @@ public class DisplayContentTests extends WindowTestsBase {
         }).when(stack).onConfigurationChanged(any());
         dc.setWindowingMode(WINDOWING_MODE_FREEFORM);
         dc.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void testForceDesktopMode() {
+        mWm.mForceDesktopModeOnExternalDisplays = true;
+        // Not applicable for default display
+        assertFalse(mDefaultDisplay.forceDesktopMode());
+
+        // Not applicable for private secondary display.
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.flags = FLAG_PRIVATE;
+        final DisplayContent privateDc = createNewDisplay(displayInfo);
+        assertFalse(privateDc.forceDesktopMode());
+
+        // Applicable for public secondary display.
+        final DisplayContent publicDc = createNewDisplay();
+        assertTrue(publicDc.forceDesktopMode());
+
+        // Make sure forceDesktopMode() is false when the force config is disabled.
+        mWm.mForceDesktopModeOnExternalDisplays = false;
+        assertFalse(publicDc.forceDesktopMode());
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

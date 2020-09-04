@@ -35,22 +35,27 @@ import com.android.systemui.R;
  */
 public class AdjustableTemperatureView extends LinearLayout implements TemperatureView {
 
-    private HvacController mHvacController;
-    private float mCurrentTempC;
+    private final int mAreaId;
     private TextView mTempTextView;
+    private float mMinTempC;
+    private float mMaxTempC;
+    private String mTempFormat;
     private boolean mDisplayInFahrenheit = false;
 
-    private final float mMinTempC;
-    private final float mMaxTempC;
-    private final int mAreaId;
-    private final String mTempFormat;
+    private HvacController mHvacController;
+    private float mCurrentTempC;
 
     public AdjustableTemperatureView(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TemperatureView);
         mAreaId = typedArray.getInt(R.styleable.TemperatureView_hvacAreaId, -1);
+    }
 
-        LayoutInflater.from(context).inflate(R.layout.adjustable_temperature_view, /* root= */this);
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
+        LayoutInflater.from(getContext()).inflate(R.layout.adjustable_temperature_view,
+                /* root= */ this);
         mTempFormat = getResources().getString(R.string.hvac_temperature_format);
         mMinTempC = getResources().getFloat(R.dimen.hvac_min_value_celsius);
         mMaxTempC = getResources().getFloat(R.dimen.hvac_max_value_celsius);
@@ -63,7 +68,7 @@ public class AdjustableTemperatureView extends LinearLayout implements Temperatu
     }
 
     @Override
-    public void setTemperatureView(float tempC) {
+    public void setTemp(float tempC) {
         if (tempC > mMaxTempC || tempC < mMinTempC) {
             return;
         }
@@ -78,7 +83,7 @@ public class AdjustableTemperatureView extends LinearLayout implements Temperatu
     @Override
     public void setDisplayInFahrenheit(boolean displayFahrenheit) {
         mDisplayInFahrenheit = displayFahrenheit;
-        setTemperatureView(mCurrentTempC);
+        setTemp(mCurrentTempC);
     }
 
     @Override

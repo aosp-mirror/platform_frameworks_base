@@ -30,11 +30,15 @@ import static android.view.WindowInsets.Type.isVisibleInsetsType;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -174,6 +178,7 @@ public class InsetsState implements Parcelable {
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
             boolean isScreenRound, boolean alwaysConsumeSystemBars, DisplayCutout cutout,
             int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
+            int windowType, @WindowConfiguration.WindowingMode int windowingMode,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
@@ -227,6 +232,9 @@ public class InsetsState implements Parcelable {
         }
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
+        }
+        if (clearCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
+            compatInsetsTypes = 0;
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
@@ -447,6 +455,12 @@ public class InsetsState implements Parcelable {
 
     public void addSource(InsetsSource source) {
         mSources[source.getType()] = source;
+    }
+
+    public static boolean clearCompatInsets(int windowType, int windowFlags, int windowingMode) {
+        return (windowFlags & FLAG_LAYOUT_NO_LIMITS) != 0
+                && windowType != TYPE_WALLPAPER && windowType != TYPE_SYSTEM_ERROR
+                && !WindowConfiguration.inMultiWindowMode(windowingMode);
     }
 
     public static @InternalInsetsType ArraySet<Integer> toInternalType(@InsetsType int types) {

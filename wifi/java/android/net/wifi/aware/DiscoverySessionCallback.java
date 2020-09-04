@@ -189,4 +189,16 @@ public class DiscoverySessionCallback {
     public void onMessageReceived(PeerHandle peerHandle, byte[] message) {
         /* empty */
     }
+
+    /**
+     * Called when the discovered peer is no longer visible. All further operations on this
+     * discovery session will fail. If the peer is visible again,
+     * {@link #onServiceDiscovered(PeerHandle, byte[], List)} or
+     * {@link #onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)} will be called.
+     *
+     * @param peerHandle An opaque handle to the peer matching our discovery operation.
+     */
+    public void onServiceLost(@NonNull PeerHandle peerHandle) {
+        /* empty */
+    }
 }

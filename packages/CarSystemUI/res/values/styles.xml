@@ -43,10 +43,10 @@
     </style>
 
     <style name="NavigationBarButton">
-        <item name="android:layout_height">76dp</item>
-        <item name="android:layout_width">76dp</item>
-        <item name="android:layout_marginEnd">32dp</item>
-        <item name="android:padding">16dp</item>
+        <item name="android:layout_height">@dimen/system_bar_button_size</item>
+        <item name="android:layout_width">@dimen/system_bar_button_size</item>
+        <item name="android:layout_marginEnd">@dimen/system_bar_button_margin</item>
+        <item name="android:padding">@dimen/system_bar_button_padding</item>
         <item name="android:gravity">center</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
