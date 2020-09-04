@@ -17758,12 +17758,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (parsedPackage.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
                     // and cannot be updated as an update would get a new package name,
-                    // unless this is the exact same version code which is useful for
-                    // development.
+                    // unless this is installed from adb which is useful for development.
                     AndroidPackage existingPkg = mPackages.get(parsedPackage.getPackageName());
                     if (existingPkg != null
-                            && existingPkg.getLongVersionCode()
-                            != parsedPackage.getLongVersionCode()) {
+                            && (installFlags & PackageManager.INSTALL_FROM_ADB) == 0) {
                         throw new PrepareFailure(INSTALL_FAILED_DUPLICATE_PACKAGE,
                                 "Packages declaring "
                                         + "static-shared libs cannot be updated");
