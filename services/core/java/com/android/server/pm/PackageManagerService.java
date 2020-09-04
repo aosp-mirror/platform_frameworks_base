@@ -19203,7 +19203,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // We need to get the permission state before package state is (potentially) destroyed.
         final SparseBooleanArray hadSuspendAppsPermission = new SparseBooleanArray();
-        for (int userId : allUserHandles) {
+        // allUserHandles could be null, so call mUserManager.getUserIds() directly which is cached anyway.
+        for (int userId : mUserManager.getUserIds()) {
             hadSuspendAppsPermission.put(userId, checkPermission(Manifest.permission.SUSPEND_APPS,
                     packageName, userId) == PERMISSION_GRANTED);
         }
