@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Implemented the shell command interface for {@link TimeZoneDetectorService}. */
+/** Implements the shell command interface for {@link TimeZoneDetectorService}. */
 class TimeZoneDetectorShellCommand extends ShellCommand {
 
     private final TimeZoneDetectorService mInterface;
