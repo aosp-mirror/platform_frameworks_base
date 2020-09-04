@@ -31,6 +31,7 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -242,8 +243,9 @@ public final class PermissionPolicyService extends SystemService {
             public void onReceive(Context context, Intent intent) {
                 boolean hasSetupRun = true;
                 try {
-                    hasSetupRun = Settings.Secure.getInt(getContext().getContentResolver(),
-                            Settings.Secure.USER_SETUP_COMPLETE) != 0;
+                    final ContentResolver cr = getContext().getContentResolver();
+                    hasSetupRun = Settings.Secure.getIntForUser(cr,
+                            Settings.Secure.USER_SETUP_COMPLETE, cr.getUserId()) != 0;
                 } catch (Settings.SettingNotFoundException e) {
                     // Ignore error, assume setup has run
                 }
