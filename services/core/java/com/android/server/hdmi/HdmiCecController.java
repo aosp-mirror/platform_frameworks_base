@@ -893,7 +893,7 @@ final class HdmiCecController {
         @Override
         public void serviceDied(long cookie) {
             if (cookie == HDMI_CEC_HAL_DEATH_COOKIE) {
-                HdmiLogger.error(TAG, "Service died cokkie : " + cookie + "; reconnecting");
+                HdmiLogger.error("Service died cookie : " + cookie + "; reconnecting");
                 connectToHal();
             }
         }

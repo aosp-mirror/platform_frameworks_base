@@ -2253,9 +2253,11 @@ public final class ViewRootImpl implements ViewParent,
 
     /* package */ WindowInsets getWindowInsets(boolean forceConstruct) {
         if (mLastWindowInsets == null || forceConstruct) {
+            final Configuration config = mContext.getResources().getConfiguration();
             mLastWindowInsets = mInsetsController.calculateInsets(
-                    mContext.getResources().getConfiguration().isScreenRound(),
-                    mAttachInfo.mAlwaysConsumeSystemBars, mPendingDisplayCutout.get(),
+                    config.isScreenRound(), mAttachInfo.mAlwaysConsumeSystemBars,
+                    mPendingDisplayCutout.get(), mWindowAttributes.type,
+                    config.windowConfiguration.getWindowingMode(),
                     mWindowAttributes.softInputMode, mWindowAttributes.flags,
                     (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));

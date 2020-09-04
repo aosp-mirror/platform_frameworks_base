@@ -57,10 +57,12 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillManagerInternal;
+import android.widget.Toast;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
+import com.android.server.UiThread;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -391,7 +393,9 @@ public class ClipboardService extends SystemService {
                     return null;
                 }
                 addActiveOwnerLocked(intendingUid, pkg);
-                return getClipboard(intendingUserId).primaryClip;
+                PerUserClipboard clipboard = getClipboard(intendingUserId);
+                maybeNotify(pkg, intendingUid, intendingUserId, clipboard);
+                return clipboard.primaryClip;
             }
         }
 
@@ -820,5 +824,66 @@ public class ClipboardService extends SystemService {
         }
 
         return appOpsResult == AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
+     * Potentially notifies the user (via a toast) about an app accessing the clipboard.
+     * TODO(b/167676460): STOPSHIP as we don't want this code as-is to launch. Just an experiment.
+     */
+    private void maybeNotify(String callingPackage, int uid, @UserIdInt int userId,
+            PerUserClipboard clipboard) {
+        if (clipboard.primaryClip == null) {
+            return;
+        }
+        if (Settings.Global.getInt(getContext().getContentResolver(),
+                "clipboard_access_toast_enabled", 0) == 0) {
+            return;
+        }
+        // Don't notify if the app accessing the clipboard is the same as the current owner.
+        if (UserHandle.isSameApp(uid, clipboard.primaryClipUid)) {
+            return;
+        }
+        // Exclude some special cases. It's a bit wasteful to check these again here, but for now
+        // beneficial to have all the logic contained in this single (probably temporary) method.
+        String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
+                Settings.Secure.DEFAULT_INPUT_METHOD, userId);
+        if (!TextUtils.isEmpty(defaultIme)) {
+            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
+            if (imePkg.equals(callingPackage)) {
+                return;
+            }
+        }
+        if (mContentCaptureInternal != null
+                && mContentCaptureInternal.isContentCaptureServiceForUser(uid, userId)) {
+            return;
+        }
+        if (mAutofillInternal != null
+                && mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId)) {
+            return;
+        }
+        // Load the labels for the calling app and the app that set the clipboard content.
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final IPackageManager pm = AppGlobals.getPackageManager();
+            String message;
+            final CharSequence callingLabel = mPm.getApplicationLabel(
+                    pm.getApplicationInfo(callingPackage, 0, userId));
+            final String[] packagesForUid = pm.getPackagesForUid(clipboard.primaryClipUid);
+            if (packagesForUid != null && packagesForUid.length > 0) {
+                final CharSequence clipLabel = mPm.getApplicationLabel(
+                        pm.getApplicationInfo(packagesForUid[0], 0,
+                                UserHandle.getUserId(clipboard.primaryClipUid)));
+                message = callingLabel + " pasted from " + clipLabel;
+            } else {
+                message = callingLabel + " pasted from clipboard";
+            }
+            Slog.i(TAG, message);
+            Toast.makeText(getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_SHORT)
+                    .show();
+        } catch (RemoteException e) {
+            /* ignore */
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 }

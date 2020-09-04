@@ -84,7 +84,6 @@ VulkanManager::~VulkanManager() {
 
     mGraphicsQueue = VK_NULL_HANDLE;
     mAHBUploadQueue = VK_NULL_HANDLE;
-    mPresentQueue = VK_NULL_HANDLE;
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
     mInstance = VK_NULL_HANDLE;
@@ -192,10 +191,6 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     }
     LOG_ALWAYS_FATAL_IF(mGraphicsQueueIndex == queueCount);
 
-    // All physical devices and queue families on Android must be capable of
-    // presentation with any native window. So just use the first one.
-    mPresentQueueIndex = 0;
-
     {
         uint32_t extensionCount = 0;
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
@@ -289,31 +284,21 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         queueNextPtr = &queuePriorityCreateInfo;
     }
 
-    const VkDeviceQueueCreateInfo queueInfo[2] = {
-            {
-                    VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,  // sType
-                    queueNextPtr,                                // pNext
-                    0,                                           // VkDeviceQueueCreateFlags
-                    mGraphicsQueueIndex,                         // queueFamilyIndex
-                    2,                                           // queueCount
-                    queuePriorities,                             // pQueuePriorities
-            },
-            {
-                    VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,  // sType
-                    queueNextPtr,                                // pNext
-                    0,                                           // VkDeviceQueueCreateFlags
-                    mPresentQueueIndex,                          // queueFamilyIndex
-                    1,                                           // queueCount
-                    queuePriorities,                             // pQueuePriorities
-            }};
-    uint32_t queueInfoCount = (mPresentQueueIndex != mGraphicsQueueIndex) ? 2 : 1;
+    const VkDeviceQueueCreateInfo queueInfo = {
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,  // sType
+            queueNextPtr,                                // pNext
+            0,                                           // VkDeviceQueueCreateFlags
+            mGraphicsQueueIndex,                         // queueFamilyIndex
+            2,                                           // queueCount
+            queuePriorities,                             // pQueuePriorities
+    };
 
     const VkDeviceCreateInfo deviceInfo = {
             VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,  // sType
             &features,                             // pNext
             0,                                     // VkDeviceCreateFlags
-            queueInfoCount,                        // queueCreateInfoCount
-            queueInfo,                             // pQueueCreateInfos
+            1,                                     // queueCreateInfoCount
+            &queueInfo,                            // pQueueCreateInfos
             0,                                     // layerCount
             nullptr,                               // ppEnabledLayerNames
             (uint32_t)mDeviceExtensions.size(),    // extensionCount
@@ -360,8 +345,6 @@ void VulkanManager::initialize() {
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
-
-    mGetDeviceQueue(mDevice, mPresentQueueIndex, 0, &mPresentQueue);
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;
@@ -555,8 +538,8 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
 
 void VulkanManager::destroySurface(VulkanSurface* surface) {
     // Make sure all submit commands have finished before starting to destroy objects.
-    if (VK_NULL_HANDLE != mPresentQueue) {
-        mQueueWaitIdle(mPresentQueue);
+    if (VK_NULL_HANDLE != mGraphicsQueue) {
+        mQueueWaitIdle(mGraphicsQueue);
     }
     mDeviceWaitIdle(mDevice);
 

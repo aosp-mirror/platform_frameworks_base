@@ -211,7 +211,7 @@ public class TelephonyRegistryManager {
      * @param notifyNow Whether to notify instantly
      */
     public void listenForSubscriber(int subId, @NonNull String pkg, @NonNull String featureId,
-            @NonNull PhoneStateListener listener, int events, boolean notifyNow) {
+            @NonNull PhoneStateListener listener, long events, boolean notifyNow) {
         try {
             // subId from PhoneStateListener is deprecated Q on forward, use the subId from
             // TelephonyManager instance. Keep using subId from PhoneStateListener for pre-Q.
@@ -749,6 +749,21 @@ public class TelephonyRegistryManager {
             int slotIndex, int subId, @NonNull BarringInfo barringInfo) {
         try {
             sRegistry.notifyBarringInfoChanged(slotIndex, subId, barringInfo);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Notify {@link PhysicalChannelConfig} has changed for a specific subscription.
+     *
+     * @param subId the subId
+     * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
+     */
+    public void notifyPhysicalChannelConfigurationForSubscriber(
+            int subId, List<PhysicalChannelConfig> configs) {
+        try {
+            sRegistry.notifyPhysicalChannelConfigurationForSubscriber(subId, configs);
         } catch (RemoteException ex) {
             // system server crash
         }

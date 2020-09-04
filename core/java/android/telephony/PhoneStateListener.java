@@ -486,6 +486,16 @@ public class PhoneStateListener {
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_BARRING_INFO = 0x80000000;
 
+    /**
+     *  Listen for changes to the physical channel configuration.
+     *
+     * @see #onPhysicalChannelConfigurationChanged
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public static final long LISTEN_PHYSICAL_CHANNEL_CONFIGURATION = 0x100000000L;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -1145,6 +1155,18 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when the current physical channel configuration has changed
+     *
+     * @param configs List of the current {@link PhysicalChannelConfig}s
+     * @hide
+     */
+    @SystemApi
+    public void onPhysicalChannelConfigurationChanged(
+            @NonNull List<PhysicalChannelConfig> configs) {
+        // default implementation empty
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      *
@@ -1446,6 +1468,15 @@ public class PhoneStateListener {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> psl.onBarringInfoChanged(barringInfo)));
+        }
+
+        public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onPhysicalChannelConfigurationChanged(configs)));
         }
     }
 

@@ -4139,10 +4139,8 @@ package android.media {
   public class AudioManager {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDevicesForCapturePresetChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDevicesForCapturePresetChangedListener) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDevicesForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDevicesForStrategyChangedListener) throws java.lang.SecurityException;
     method public void clearAudioServerStateCallback();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean clearPreferredDevicesForCapturePreset(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @IntRange(from=0) public long getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
@@ -4153,7 +4151,6 @@ package android.media {
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAttributes getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getPreferredDevicesForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int[] getSupportedSystemUsages();
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
@@ -4162,7 +4159,6 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDeviceForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDevicesForCapturePresetChangedListener(@NonNull android.media.AudioManager.OnPreferredDevicesForCapturePresetChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDevicesForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDevicesForStrategyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean removePreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
@@ -4172,7 +4168,6 @@ package android.media {
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForCapturePreset(int, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDevicesForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull java.util.List<android.media.AudioDeviceAttributes>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setSupportedSystemUsages(@NonNull int[]);
@@ -4200,10 +4195,6 @@ package android.media {
 
   @Deprecated public static interface AudioManager.OnPreferredDeviceForStrategyChangedListener {
     method @Deprecated public void onPreferredDeviceForStrategyChanged(@NonNull android.media.audiopolicy.AudioProductStrategy, @Nullable android.media.AudioDeviceAttributes);
-  }
-
-  public static interface AudioManager.OnPreferredDevicesForCapturePresetChangedListener {
-    method public void onPreferredDevicesForCapturePresetChanged(int, @NonNull java.util.List<android.media.AudioDeviceAttributes>);
   }
 
   public static interface AudioManager.OnPreferredDevicesForStrategyChangedListener {
@@ -9748,6 +9739,7 @@ package android.telephony {
     method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
     method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
     method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
+    method public void onPhysicalChannelConfigurationChanged(@NonNull java.util.List<android.telephony.PhysicalChannelConfig>);
     method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
@@ -9755,10 +9747,27 @@ package android.telephony {
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
+    field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final long LISTEN_PHYSICAL_CHANNEL_CONFIGURATION = 4294967296L; // 0x100000000L
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
+  }
+
+  public final class PhysicalChannelConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCellBandwidthDownlink();
+    method public int getChannelNumber();
+    method public int getConnectionStatus();
+    method public int getNetworkType();
+    method @IntRange(from=0, to=1007) public int getPhysicalCellId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CHANNEL_NUMBER_UNKNOWN = -1; // 0xffffffff
+    field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
+    field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
+    field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhysicalChannelConfig> CREATOR;
+    field public static final int PHYSICAL_CELL_ID_UNKNOWN = -1; // 0xffffffff
   }
 
   public final class PreciseCallState implements android.os.Parcelable {

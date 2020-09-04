@@ -101,20 +101,13 @@ java_defaults {
 
     annotations_enabled: true,
 
-    stubs_library_visibility: [
-        "//visibility:public",
-    ],
+    // Allow access to the stubs from anywhere
+    visibility: ["//visibility:public"],
+    stubs_library_visibility: ["//visibility:public"],
 
-    // Set the visibility of the modules creating the stubs source.
-    stubs_source_visibility: [
-        // Ignore any visibility rules specified on the java_sdk_library when
-        // setting the visibility of the stubs source modules.
-        "//visibility:override",
-
-        // Currently, the stub source is not required for anything other than building
-        // the stubs library so is private to avoid misuse.
-        "//visibility:private",
-    ],
+    // Hide impl library and stub sources
+    impl_library_visibility: [":__package__"],
+    stubs_source_visibility: ["//visibility:private"],
 
     // Collates API usages from each module for further analysis.
     plugins: ["java_api_finder"],

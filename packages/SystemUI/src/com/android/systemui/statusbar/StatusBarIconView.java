@@ -390,17 +390,21 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private Drawable getIcon(StatusBarIcon icon) {
-        return getIcon(getContext(), icon);
+        Context notifContext = mNotification != null ?
+                mNotification.getPackageContext(getContext()) : getContext();
+        return getIcon(getContext(), notifContext, icon);
     }
 
     /**
      * Returns the right icon to use for this item
      *
-     * @param context Context to use to get resources
+     * @param sysuiContext Context to use to get scale factor
+     * @param context Context to use to get resources of notification icon
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
-    public static Drawable getIcon(Context context, StatusBarIcon statusBarIcon) {
+    public static Drawable getIcon(Context sysuiContext,
+            Context context, StatusBarIcon statusBarIcon) {
         int userId = statusBarIcon.user.getIdentifier();
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
@@ -409,7 +413,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         Drawable icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
 
         TypedValue typedValue = new TypedValue();
-        context.getResources().getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        sysuiContext.getResources().getValue(R.dimen.status_bar_icon_scale_factor,
+                typedValue, true);
         float scaleFactor = typedValue.getFloat();
 
         // No need to scale the icon, so return it as is.

@@ -30,6 +30,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECParameterSpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -1441,5 +1444,51 @@ public class WifiEnterpriseConfig implements Parcelable {
             return false;
         }
         return TextUtils.isEmpty(getCaPath());
+    }
+
+    /**
+     * Check if a given certificate Get the Suite-B cipher from the certificate
+     *
+     * @param x509Certificate Certificate to process
+     * @return true if the certificate OID matches the Suite-B requirements for RSA or ECDSA
+     * certificates, or false otherwise.
+     * @hide
+     */
+    public static boolean isSuiteBCipherCert(@Nullable X509Certificate x509Certificate) {
+        if (x509Certificate == null) {
+            return false;
+        }
+        final String sigAlgOid = x509Certificate.getSigAlgOID();
+
+        // Wi-Fi alliance requires the use of both ECDSA secp384r1 and RSA 3072 certificates
+        // in WPA3-Enterprise 192-bit security networks, which are also known as Suite-B-192
+        // networks, even though NSA Suite-B-192 mandates ECDSA only. The use of the term
+        // Suite-B was already coined in the IEEE 802.11-2016 specification for
+        // AKM 00-0F-AC but the test plan for WPA3-Enterprise 192-bit for APs mandates
+        // support for both RSA and ECDSA, and for STAs it mandates ECDSA and optionally
+        // RSA. In order to be compatible with all WPA3-Enterprise 192-bit deployments,
+        // we are supporting both types here.
+        if (sigAlgOid.equals("1.2.840.113549.1.1.12")) {
+            // sha384WithRSAEncryption
+            if (x509Certificate.getPublicKey() instanceof RSAPublicKey) {
+                final RSAPublicKey rsaPublicKey = (RSAPublicKey) x509Certificate.getPublicKey();
+                if (rsaPublicKey.getModulus() != null
+                        && rsaPublicKey.getModulus().bitLength() >= 3072) {
+                    return true;
+                }
+            }
+        } else if (sigAlgOid.equals("1.2.840.10045.4.3.3")) {
+            // ecdsa-with-SHA384
+            if (x509Certificate.getPublicKey() instanceof ECPublicKey) {
+                final ECPublicKey ecPublicKey = (ECPublicKey) x509Certificate.getPublicKey();
+                final ECParameterSpec ecParameterSpec = ecPublicKey.getParams();
+
+                if (ecParameterSpec != null && ecParameterSpec.getOrder() != null
+                        && ecParameterSpec.getOrder().bitLength() >= 384) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

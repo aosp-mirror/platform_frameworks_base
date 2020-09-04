@@ -39,6 +39,7 @@ import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 
@@ -78,7 +79,7 @@ public abstract class SysuiTestCase {
         Dependency.setInstance(mDependency);
         mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Looper.class),
                 mock(Executor.class), mock(DumpManager.class),
-                mock(BroadcastDispatcherLogger.class));
+                mock(BroadcastDispatcherLogger.class), mock(UserTracker.class));
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);

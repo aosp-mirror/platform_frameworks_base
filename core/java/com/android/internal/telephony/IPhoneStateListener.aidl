@@ -23,6 +23,7 @@ import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.PhoneCapability;
+import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
@@ -68,4 +69,6 @@ oneway interface IPhoneStateListener {
     void onRegistrationFailed(in CellIdentity cellIdentity,
              String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
     void onBarringInfoChanged(in BarringInfo barringInfo);
+    void onPhysicalChannelConfigurationChanged(in List<PhysicalChannelConfig> configs);
+
 }

@@ -3344,6 +3344,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Remove disable package settings for updated system apps that were
                 // removed via an OTA. If the update is no longer present, remove the
                 // app completely. Otherwise, revoke their system privileges.
+                final int[] userIds = mUserManager.getUserIds();
                 for (int i = possiblyDeletedUpdatedSystemApps.size() - 1; i >= 0; --i) {
                     final String packageName = possiblyDeletedUpdatedSystemApps.get(i);
                     final AndroidPackage pkg = mPackages.get(packageName);
@@ -3386,7 +3387,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // partition], completely remove the package data.
                     final PackageSetting ps = mSettings.mPackages.get(packageName);
                     if (ps != null && mPackages.get(packageName) == null) {
-                        removePackageDataLIF(ps, null, null, 0, false);
+                        removePackageDataLIF(ps, userIds, null, 0, false);
 
                     }
                     logCriticalInfo(Log.WARN, msg);
@@ -3853,8 +3854,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         // If we don't, installing the system package fails during scan
                         enableSystemPackageLPw(stubPkg);
                     }
-                    installPackageFromSystemLIF(stubPkg.getCodePath(), null /*allUserHandles*/,
-                            null /*origUserHandles*/, true /*writeSettings*/);
+                    installPackageFromSystemLIF(stubPkg.getCodePath(),
+                            mUserManager.getUserIds() /*allUserHandles*/, null /*origUserHandles*/,
+                            true /*writeSettings*/);
                 } catch (PackageManagerException pme) {
                     // Serious WTF; we have to be able to install the stub
                     Slog.wtf(TAG, "Failed to restore system package:" + stubPkg.getPackageName(),
@@ -9582,8 +9584,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 try (@SuppressWarnings("unused") PackageFreezer freezer = freezePackage(
                         parsedPackage.getPackageName(),
                         "scanPackageInternalLI")) {
-                    deletePackageLIF(parsedPackage.getPackageName(), null, true, null, 0, null,
-                            false, null);
+                    deletePackageLIF(parsedPackage.getPackageName(), null, true,
+                            mUserManager.getUserIds(), 0, null, false, null);
                 }
                 pkgSetting = null;
             } else if (newPkgVersionGreater) {
@@ -16388,9 +16390,11 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static class CommitRequest {
         final Map<String, ReconciledPackage> reconciledPackages;
+        @NonNull
         final int[] mAllUsers;
 
-        private CommitRequest(Map<String, ReconciledPackage> reconciledPackages, int[] allUsers) {
+        private CommitRequest(Map<String, ReconciledPackage> reconciledPackages,
+                @NonNull int[] allUsers) {
             this.reconciledPackages = reconciledPackages;
             this.mAllUsers = allUsers;
         }
@@ -18903,7 +18907,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.
      */
-    private void removePackageDataLIF(final PackageSetting deletedPs, int[] allUserHandles,
+    private void removePackageDataLIF(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
             PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = deletedPs.name;
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
@@ -18991,7 +18995,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             // make sure to preserve per-user disabled state if this removal was just
             // a downgrade of a system app to the factory package
-            if (allUserHandles != null && outInfo != null && outInfo.origUsers != null) {
+            if (outInfo != null && outInfo.origUsers != null) {
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Propagating install state across downgrade");
                 }
@@ -19044,11 +19048,10 @@ public class PackageManagerService extends IPackageManager.Stub
      * Tries to delete system package.
      */
     private void deleteSystemPackageLIF(DeletePackageAction action, PackageSetting deletedPs,
-            int[] allUserHandles, int flags, @Nullable PackageRemovedInfo outInfo,
+            @NonNull int[] allUserHandles, int flags, @Nullable PackageRemovedInfo outInfo,
             boolean writeSettings)
             throws SystemDeleteException {
-        final boolean applyUserRestrictions =
-                (allUserHandles != null) && outInfo != null && (outInfo.origUsers != null);
+        final boolean applyUserRestrictions = outInfo != null && (outInfo.origUsers != null);
         final AndroidPackage deletedPkg = deletedPs.pkg;
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
@@ -19132,7 +19135,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Installs a package that's already on the system partition.
      */
     private AndroidPackage installPackageFromSystemLIF(@NonNull String codePathString,
-            @Nullable int[] allUserHandles, @Nullable int[] origUserHandles, boolean writeSettings)
+            @NonNull int[] allUserHandles, @Nullable int[] origUserHandles, boolean writeSettings)
             throws PackageManagerException {
         final File codePath = new File(codePathString);
         @ParseFlags int parseFlags =
@@ -19174,8 +19177,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // and granting install permissions.
             mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
 
-            final boolean applyUserRestrictions
-                    = (allUserHandles != null) && (origUserHandles != null);
+            final boolean applyUserRestrictions = origUserHandles != null;
             if (applyUserRestrictions) {
                 boolean installedStateChanged = false;
                 if (DEBUG_REMOVE) {
@@ -19212,7 +19214,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void deleteInstalledPackageLIF(PackageSetting ps,
-            boolean deleteCodeAndResources, int flags, int[] allUserHandles,
+            boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
             PackageRemovedInfo outInfo, boolean writeSettings) {
         synchronized (mLock) {
             if (outInfo != null) {
@@ -19332,7 +19334,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * This method handles package deletion in general
      */
     private boolean deletePackageLIF(@NonNull String packageName, UserHandle user,
-            boolean deleteCodeAndResources, int[] allUserHandles, int flags,
+            boolean deleteCodeAndResources, @NonNull int[] allUserHandles, int flags,
             PackageRemovedInfo outInfo, boolean writeSettings,
             ParsedPackage replacingPackage) {
         final DeletePackageAction action;
@@ -19369,7 +19371,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /** Deletes a package. Only throws when install of a disabled package fails. */
     private void executeDeletePackageLIF(DeletePackageAction action,
             String packageName, boolean deleteCodeAndResources,
-            int[] allUserHandles, boolean writeSettings,
+            @NonNull int[] allUserHandles, boolean writeSettings,
             ParsedPackage replacingPackage) throws SystemDeleteException {
         final PackageSetting ps = action.deletingPs;
         final PackageRemovedInfo outInfo = action.outInfo;
@@ -22784,6 +22786,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
 
+        final int[] userIds = mUserManager.getUserIds();
         final ArrayList<AndroidPackage> unloaded = new ArrayList<>();
         synchronized (mInstallLock) {
             synchronized (mLock) {
@@ -22797,7 +22800,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     try (PackageFreezer freezer = freezePackageForDelete(ps.name, deleteFlags,
                             "unloadPrivatePackagesInner")) {
-                        if (deletePackageLIF(ps.name, null, false, null, deleteFlags, outInfo,
+                        if (deletePackageLIF(ps.name, null, false, userIds, deleteFlags, outInfo,
                                 false, null)) {
                             unloaded.add(pkg);
                         } else {
