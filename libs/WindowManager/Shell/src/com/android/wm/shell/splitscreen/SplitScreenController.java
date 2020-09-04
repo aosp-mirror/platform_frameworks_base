@@ -29,9 +29,9 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
@@ -71,6 +71,7 @@ public class SplitScreenController implements SplitScreen,
     private final SystemWindows mSystemWindows;
     final TransactionPool mTransactionPool;
     private final WindowManagerProxy mWindowManagerProxy;
+    private final TaskOrganizer mTaskOrganizer;
 
     private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
             new ArrayList<>();
@@ -106,9 +107,12 @@ public class SplitScreenController implements SplitScreen,
         mHandler = handler;
         mForcedResizableController = new ForcedResizableInfoActivityController(context, this);
         mTransactionPool = transactionPool;
-        mWindowManagerProxy = new WindowManagerProxy(mTransactionPool, mHandler);
+        mWindowManagerProxy = new WindowManagerProxy(mTransactionPool, mHandler,
+                shellTaskOrganizer);
+        mTaskOrganizer = shellTaskOrganizer;
         mSplits = new SplitScreenTaskOrganizer(this, shellTaskOrganizer);
-        mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler);
+        mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
+                shellTaskOrganizer);
         mRotationController =
                 (display, fromRotation, toRotation, wct) -> {
                     if (!mSplits.isSplitScreenSupported() || mWindowManagerProxy == null) {
@@ -132,7 +136,7 @@ public class SplitScreenController implements SplitScreen,
                     sdl.resizeSplits(target.position, t);
 
                     if (isSplitActive() && mHomeStackResizable) {
-                        WindowManagerProxy
+                        mWindowManagerProxy
                                 .applyHomeTasksMinimized(sdl, mSplits.mSecondary.token, t);
                     }
                     if (mWindowManagerProxy.queueSyncTransactionIfWaiting(t)) {
@@ -189,7 +193,7 @@ public class SplitScreenController implements SplitScreen,
             final WindowContainerTransaction tct = new WindowContainerTransaction();
             int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
             mSplitLayout.resizeSplits(midPos, tct);
-            WindowOrganizer.applyTransaction(tct);
+            mTaskOrganizer.applyTransaction(tct);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to register docked stack listener", e);
             removeDivider();
@@ -208,7 +212,7 @@ public class SplitScreenController implements SplitScreen,
             int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
             final WindowContainerTransaction tct = new WindowContainerTransaction();
             mSplitLayout.resizeSplits(midPos, tct);
-            WindowOrganizer.applyTransaction(tct);
+            mTaskOrganizer.applyTransaction(tct);
         } else if (mSplitLayout.mDisplayLayout.rotation()
                 == mRotateSplitLayout.mDisplayLayout.rotation()) {
             mSplitLayout.mPrimary = new Rect(mRotateSplitLayout.mPrimary);
@@ -372,7 +376,7 @@ public class SplitScreenController implements SplitScreen,
         // If we are only setting focusability, a sync transaction isn't necessary (in fact it
         // can interrupt other animations), so see if it can be submitted on pending instead.
         if (!mWindowManagerProxy.queueSyncTransactionIfWaiting(wct)) {
-            WindowOrganizer.applyTransaction(wct);
+            mTaskOrganizer.applyTransaction(wct);
         }
     }
 

@@ -20,10 +20,14 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.content.res.Configuration;
+import android.os.RemoteException;
 import android.view.SurfaceControl;
+import android.window.ITaskOrganizer;
+import android.window.ITaskOrganizerController;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -31,6 +35,8 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
@@ -40,6 +46,9 @@ import java.util.ArrayList;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ShellTaskOrganizerTests {
+
+    @Mock
+    private ITaskOrganizerController mTaskOrganizerController;
 
     ShellTaskOrganizer mOrganizer;
 
@@ -71,7 +80,15 @@ public class ShellTaskOrganizerTests {
 
     @Before
     public void setUp() {
-        mOrganizer = new ShellTaskOrganizer();
+        MockitoAnnotations.initMocks(this);
+        mOrganizer = new ShellTaskOrganizer(mTaskOrganizerController);
+    }
+
+    @Test
+    public void registerOrganizer_sendRegisterTaskOrganizer() throws RemoteException {
+        mOrganizer.registerOrganizer();
+
+        verify(mTaskOrganizerController).registerTaskOrganizer(any(ITaskOrganizer.class));
     }
 
     @Test
