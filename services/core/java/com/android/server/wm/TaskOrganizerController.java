@@ -38,7 +38,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
@@ -54,7 +53,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 

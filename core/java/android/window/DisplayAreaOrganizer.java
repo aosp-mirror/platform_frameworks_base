@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.os.RemoteException;
-import android.util.Singleton;
 import android.view.SurfaceControl;
 
 /**
@@ -135,22 +134,12 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     };
 
-    private static IDisplayAreaOrganizerController getController() {
-        return IDisplayAreaOrganizerControllerSingleton.get();
+    private IDisplayAreaOrganizerController getController() {
+        try {
+            return getWindowOrganizerController().getDisplayAreaOrganizerController();
+        } catch (RemoteException e) {
+            return null;
+        }
     }
-
-    private static final Singleton<IDisplayAreaOrganizerController>
-            IDisplayAreaOrganizerControllerSingleton =
-            new Singleton<IDisplayAreaOrganizerController>() {
-                @Override
-                protected IDisplayAreaOrganizerController create() {
-                    try {
-                        return getWindowOrganizerController()
-                                .getDisplayAreaOrganizerController();
-                    } catch (RemoteException e) {
-                        return null;
-                    }
-                }
-            };
 
 }
