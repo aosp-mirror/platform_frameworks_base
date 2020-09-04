@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"Dynamic System Updatesஸுக்குத் தொடர உங்கள் கடவுச்சொல்லை உள்ளிடவும்"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Dynamic system தயாராக உள்ளது. இதைப் பயன்படுத்தத் தொடங்க உங்கள் சாதனத்தை மீண்டும் தொடங்கவும்."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"நிறுவப்படுகிறது"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"நிறுவ முடியவில்லை"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"படத்தைச் சரிபார்க்க முடியவில்லை. நிறுவலை ரத்துசெய்யவும்."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Dynamic system தற்போது இயக்கத்தில் உள்ளது. அசல் Android பதிப்பைப் பயன்படுத்த மீண்டும் தொடங்கவும்."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"ரத்துசெய்"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"நிராகரி"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"மீண்டும் தொடங்கு"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"மீண்டும் தொடங்கு"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Dynamic system நிராகரிக்கப்பட்டது"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Dynamic systemமை மீண்டும் தொடங்கவோ ஏற்றவோ முடியவில்லை"</string>
+</resources>

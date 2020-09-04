@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"कृपया आफ्नो पासवर्ड प्रविष्टि गर्नुहोस् र Dynamic System Updates को प्रक्रियालाई निरन्तरता दिनुहोस्"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Dynamic System तयार छ। यसको प्रयोग सुरु गर्न आफ्नो यन्त्र रिस्टार्ट गर्नुहोस्।"</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"इन्स्टल हुँदै छ"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"स्थापना गर्न सकिएन"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"छवि पुष्टि गर्न सकिएन। स्थापना गर्ने प्रक्रिया रद्द गर्नुहोस्।"</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"हाल Dynamic System चलिरहेको छ। Android को मूल संस्करण प्रयोग गर्न यन्त्र रिस्टार्ट गर्नुहोस्।"</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"रद्द गर्नुहोस्"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"खारेज गर्नुहोस्"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"रिस्टार्ट गर्नु…"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"रिस्टार्ट गर्नु…"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Dynamic System खारेज गरियो"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"रिस्टार्ट गर्न वा Dynamic System लोड गर्न सकिएन"</string>
+</resources>
