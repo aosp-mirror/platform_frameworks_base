@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="8016145283189546017">"ਇਨਪੁਟ ਡਿਵਾਈਸਾਂ"</string>
+    <string name="app_label" msgid="8016145283189546017">"ਇਨਪੁੱਟ ਡੀਵਾਈਸਾਂ"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android ਕੀ-ਬੋਰਡ"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ਅੰਗ੍ਰੇਜ਼ੀ (ਯੂਕੇ)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ਅੰਗ੍ਰੇਜੀ (ਅਮ੍ਰੀਕਾ)"</string>
@@ -44,4 +44,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"ਫ਼ਾਰਸੀ"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"ਅਜ਼ੇਰਬੈਜਾਨੀ"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"ਪੋਲਿਸ਼"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"ਬੇਲਾਰੂਸੀ"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"ਮੰਗੋਲੀਆਈ"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ਜਾਰਜੀਆਈ"</string>
 </resources>
