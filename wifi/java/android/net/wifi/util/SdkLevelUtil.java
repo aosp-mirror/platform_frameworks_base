@@ -30,8 +30,13 @@ public class SdkLevelUtil {
     /** This class is instantiable to allow easy mocking. */
     public SdkLevelUtil() { }
 
+    /** See {@link #isAtLeastS()}. This version is non-static to allow easy mocking. */
+    public boolean isAtLeastSMockable() {
+        return isAtLeastS();
+    }
+
     /** Returns true if the Android platform SDK is at least "S", false otherwise. */
-    public boolean isAtLeastS() {
+    public static boolean isAtLeastS() {
         // TODO(b/167575586): after S SDK finalization, this method should just be
         //  `return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;`
 
