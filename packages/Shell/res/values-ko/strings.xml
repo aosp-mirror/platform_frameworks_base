@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"스크린샷 없이 버그 신고를 공유하려면 선택하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"스크린샷 없이 버그 신고서를 공유하려면 탭하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"스크린샷 없이 버그 신고서를 공유하려면 탭하고 그렇지 않으면 스크린샷이 완료될 때까지 기다려 주세요."</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"버그 신고서에는 시스템의 다양한 로그 파일 데이터가 포함되며 여기에는 사용자가 중요하다고 생각하는 데이터(예: 앱 사용 및 위치 데이터)가 포함되었을 수 있습니다. 신뢰할 수 있는 앱과 사용자에게만 버그 신고서를 공유하세요."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"버그 신고서에는 시스템의 다양한 로그 파일 데이터가 포함되며 여기에는 사용자가 민감하다고 생각하는 데이터(예: 앱 사용 및 위치 데이터)가 포함되었을 수 있습니다. 신뢰할 수 있는 앱과 사용자에게만 버그 신고서를 공유하세요."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"다시 표시 안함"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"버그 신고"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"버그 신고 파일을 읽을 수 없습니다."</string>

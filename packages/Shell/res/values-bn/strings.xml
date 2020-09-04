@@ -35,7 +35,7 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"জিপ ফাইলে ত্রুটি প্রতিবেদনের বিশদ বিবরণ যোগ করা যায়নি"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"নামবিহীন"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"বিশদ বিবরণ"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"স্ক্রিনশট"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"স্ক্রিনশট নিন"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"স্ক্রিনশট সফলভাবে নেওয়া হয়েছে৷"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"স্ক্রিনশট নেওয়া যায়নি৷"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ত্রুটির প্রতিবেদন <xliff:g id="ID">#%d</xliff:g> এর বিশদ বিবরণ"</string>
