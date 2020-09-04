@@ -2509,7 +2509,18 @@ public class WifiConfiguration implements Parcelable {
     @KeyMgmt.KeyMgmtScheme
     public int getAuthType() {
         if (allowedKeyManagement.cardinality() > 1) {
-            throw new IllegalStateException("More than one auth type set");
+            if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
+                if (allowedKeyManagement.cardinality() == 2
+                        && allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+                    return KeyMgmt.WPA_EAP;
+                }
+                if (allowedKeyManagement.cardinality() == 3
+                        && allowedKeyManagement.get(KeyMgmt.IEEE8021X)
+                        && allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+                    return KeyMgmt.SUITE_B_192;
+                }
+            }
+            throw new IllegalStateException("Invalid auth type set: " + allowedKeyManagement);
         }
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return KeyMgmt.WPA_PSK;
