@@ -31,7 +31,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.TaskOrganizer;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 
@@ -64,9 +63,9 @@ class SplitScreenTaskOrganizer implements ShellTaskOrganizer.TaskListener {
     void init() throws RemoteException {
         synchronized (this) {
             try {
-                mPrimary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
+                mPrimary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
                         WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-                mSecondary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
+                mSecondary = mTaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
                         WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
             } catch (Exception e) {
                 // teardown to prevent callbacks

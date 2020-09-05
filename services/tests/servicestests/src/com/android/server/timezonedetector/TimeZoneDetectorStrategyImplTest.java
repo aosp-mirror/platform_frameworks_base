@@ -54,7 +54,6 @@ import org.junit.Test;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -991,55 +990,6 @@ public class TimeZoneDetectorStrategyImplTest {
         void commitAllChanges() {
             mTimeZoneId.commitLatest();
             mConfigurationInternal.commitLatest();
-        }
-    }
-
-    /** Some piece of state that tests want to track. */
-    private static class TestState<T> {
-        private T mInitialValue;
-        private LinkedList<T> mValues = new LinkedList<>();
-
-        void init(T value) {
-            mValues.clear();
-            mInitialValue = value;
-        }
-
-        void set(T value) {
-            mValues.addFirst(value);
-        }
-
-        boolean hasBeenSet() {
-            return mValues.size() > 0;
-        }
-
-        void assertHasNotBeenSet() {
-            assertFalse(hasBeenSet());
-        }
-
-        void assertHasBeenSet() {
-            assertTrue(hasBeenSet());
-        }
-
-        void commitLatest() {
-            if (hasBeenSet()) {
-                mInitialValue = mValues.getLast();
-                mValues.clear();
-            }
-        }
-
-        void assertLatestEquals(T expected) {
-            assertEquals(expected, getLatest());
-        }
-
-        void assertChangeCount(int expectedCount) {
-            assertEquals(expectedCount, mValues.size());
-        }
-
-        public T getLatest() {
-            if (hasBeenSet()) {
-                return mValues.getFirst();
-            }
-            return mInitialValue;
         }
     }
 

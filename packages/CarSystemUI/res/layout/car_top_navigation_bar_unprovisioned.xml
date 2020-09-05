@@ -56,8 +56,6 @@
           android:textAppearance="@style/TextAppearance.CarStatus"
           systemui:hvacAreaId="49"
           systemui:hvacPivotOffset="60dp"
-          systemui:hvacPropertyId="358614275"
-          systemui:hvacTempFormat="%.0f\u00B0"
           />
     </FrameLayout>
 
@@ -130,8 +128,6 @@
           android:textAppearance="@style/TextAppearance.CarStatus"
           systemui:hvacAreaId="68"
           systemui:hvacPivotOffset="60dp"
-          systemui:hvacPropertyId="358614275"
-          systemui:hvacTempFormat="%.0f\u00B0"
           />
     </FrameLayout>
   </RelativeLayout>

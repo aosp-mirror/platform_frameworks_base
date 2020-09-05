@@ -166,6 +166,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private String mAddress;
     private String mName;
     private final ContentResolver mContentResolver;
+    private final int mUserId;
     private final RemoteCallbackList<IBluetoothManagerCallback> mCallbacks;
     private final RemoteCallbackList<IBluetoothStateChangeCallback> mStateChangeCallbacks;
     private IBinder mBluetoothBinder;
@@ -481,6 +482,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mName = null;
         mErrorRecoveryRetryCounter = 0;
         mContentResolver = context.getContentResolver();
+        mUserId = mContentResolver.getUserId();
         // Observe BLE scan only mode settings change.
         registerForBleScanModeChange();
         mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
@@ -625,7 +627,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
         if (mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_bluetooth_address_validation)
-                && Settings.Secure.getInt(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 0)
+                && Settings.Secure.getIntForUser(mContentResolver,
+                SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 0, mUserId)
                 == 0) {
             // if the valid flag is not set, don't load the address and name
             if (DBG) {
@@ -633,8 +636,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
             return;
         }
-        mName = Settings.Secure.getString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME);
-        mAddress = Settings.Secure.getString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS);
+        mName = Settings.Secure.getStringForUser(
+                mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME, mUserId);
+        mAddress = Settings.Secure.getStringForUser(
+                mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS, mUserId);
         if (DBG) {
             Slog.d(TAG, "Stored bluetooth Name=" + mName + ",Address=" + mAddress);
         }
@@ -648,26 +653,31 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private void storeNameAndAddress(String name, String address) {
         if (name != null) {
-            Settings.Secure.putString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME, name);
+            Settings.Secure.putStringForUser(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME, name,
+                    mUserId);
             mName = name;
             if (DBG) {
-                Slog.d(TAG, "Stored Bluetooth name: " + Settings.Secure.getString(mContentResolver,
-                        SECURE_SETTINGS_BLUETOOTH_NAME));
+                Slog.d(TAG, "Stored Bluetooth name: " + Settings.Secure.getStringForUser(
+                        mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME,
+                        mUserId));
             }
         }
 
         if (address != null) {
-            Settings.Secure.putString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS, address);
+            Settings.Secure.putStringForUser(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS,
+                    address, mUserId);
             mAddress = address;
             if (DBG) {
                 Slog.d(TAG,
-                        "Stored Bluetoothaddress: " + Settings.Secure.getString(mContentResolver,
-                                SECURE_SETTINGS_BLUETOOTH_ADDRESS));
+                        "Stored Bluetoothaddress: " + Settings.Secure.getStringForUser(
+                                mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS,
+                                mUserId));
             }
         }
 
         if ((name != null) && (address != null)) {
-            Settings.Secure.putInt(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 1);
+            Settings.Secure.putIntForUser(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 1,
+                    mUserId);
         }
     }
 

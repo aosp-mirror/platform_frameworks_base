@@ -30,7 +30,6 @@ import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.TransactionPool;
@@ -44,6 +43,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     private final SplitScreenTaskOrganizer mSplits;
     private final TransactionPool mTransactionPool;
     private final Handler mHandler;
+    private final TaskOrganizer mTaskOrganizer;
 
     /**
      * These are the y positions of the top of the IME surface when it is hidden and when it is
@@ -92,10 +92,12 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     private boolean mPausedTargetAdjusted = false;
     private boolean mAdjustedWhileHidden = false;
 
-    DividerImeController(SplitScreenTaskOrganizer splits, TransactionPool pool, Handler handler) {
+    DividerImeController(SplitScreenTaskOrganizer splits, TransactionPool pool, Handler handler,
+            TaskOrganizer taskOrganizer) {
         mSplits = splits;
         mTransactionPool = pool;
         mHandler = handler;
+        mTaskOrganizer = taskOrganizer;
     }
 
     private DividerView getView() {
@@ -111,7 +113,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     }
 
     private boolean getSecondaryHasFocus(int displayId) {
-        WindowContainerToken imeSplit = TaskOrganizer.getImeTarget(displayId);
+        WindowContainerToken imeSplit = mTaskOrganizer.getImeTarget(displayId);
         return imeSplit != null
                 && (imeSplit.asBinder() == mSplits.mSecondary.token.asBinder());
     }
@@ -236,7 +238,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             }
 
             if (!mSplits.mSplitScreenController.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
-                WindowOrganizer.applyTransaction(wct);
+                mTaskOrganizer.applyTransaction(wct);
             }
         }
 

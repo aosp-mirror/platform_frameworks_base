@@ -35,7 +35,8 @@ import java.util.Objects;
  */
 public final class LocationTimeZoneEvent implements Parcelable {
 
-    @IntDef({ EVENT_TYPE_UNKNOWN, EVENT_TYPE_SUCCESS, EVENT_TYPE_SUCCESS })
+    @IntDef({ EVENT_TYPE_UNKNOWN, EVENT_TYPE_PERMANENT_FAILURE, EVENT_TYPE_SUCCESS,
+            EVENT_TYPE_UNCERTAIN })
     @interface EventType {}
 
     /** Uninitialized value for {@link #mEventType} - must not be used for real events. */
@@ -43,7 +44,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
 
     /**
      * Indicates there was a permanent failure. This is not generally expected, and probably means a
-     * required backend service is no longer supported / available.
+     * required backend service has been turned down, or the client is unreasonably old.
      */
     public static final int EVENT_TYPE_PERMANENT_FAILURE = 1;
 
@@ -54,8 +55,9 @@ public final class LocationTimeZoneEvent implements Parcelable {
     public static final int EVENT_TYPE_SUCCESS = 2;
 
     /**
-     * Indicates the time zone is not known because there was a (temporary) error, e.g. when
-     * detecting location, or when resolving the location to a time zone.
+     * Indicates the time zone is not known because of an expected runtime state or error, e.g. when
+     * the provider is unable to detect location, or there was a problem when resolving the location
+     * to a time zone.
      */
     public static final int EVENT_TYPE_UNCERTAIN = 3;
 
