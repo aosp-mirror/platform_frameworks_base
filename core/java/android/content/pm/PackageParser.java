@@ -30,7 +30,6 @@ import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
@@ -159,8 +158,6 @@ public class PackageParser {
             SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
 
     public static final float DEFAULT_PRE_O_MAX_ASPECT_RATIO = 1.86f;
-    public static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO = 1.333f;
-    public static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH = 1f;
 
     private static final int DEFAULT_MIN_SDK_VERSION = 1;
     private static final int DEFAULT_TARGET_SDK_VERSION = 0;
@@ -4683,20 +4680,8 @@ public class PackageParser {
      * ratio set.
      */
     private void setMinAspectRatio(Package owner) {
-        final float minAspectRatio;
-        if (owner.applicationInfo.minAspectRatio != 0) {
-            // Use the application max aspect ration as default if set.
-            minAspectRatio = owner.applicationInfo.minAspectRatio;
-        } else {
-            // Default to (1.33) 4:3 aspect ratio for pre-Q apps and unset for Q and greater.
-            // NOTE: 4:3 was the min aspect ratio Android devices can support pre-Q per the CDD,
-            // except for watches which always supported 1:1.
-            minAspectRatio = owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q
-                    ? 0
-                    : (mCallback != null && mCallback.hasFeature(FEATURE_WATCH))
-                            ? DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH
-                            : DEFAULT_PRE_Q_MIN_ASPECT_RATIO;
-        }
+        // Use the application max aspect ration as default if set.
+        final float minAspectRatio = owner.applicationInfo.minAspectRatio;
 
         for (Activity activity : owner.activities) {
             if (activity.hasMinAspectRatio()) {
