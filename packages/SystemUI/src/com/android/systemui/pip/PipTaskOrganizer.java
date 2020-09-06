@@ -57,7 +57,6 @@ import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
-import android.window.WindowOrganizer;
 
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.dagger.SysUISingleton;
@@ -309,7 +308,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             // Don't bother doing an animation if the display rotation differs or if it's in
             // a non-supported windowing mode
             applyWindowingModeChangeOnExit(wct, direction);
-            WindowOrganizer.applyTransaction(wct);
+            mTaskOrganizer.applyTransaction(wct);
             // Send finished callback though animation is ignored.
             sendOnPipTransitionFinished(direction);
             mInPip = false;
@@ -379,7 +378,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
             // Reset the task bounds first to ensure the activity configuration is reset as well
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.setBounds(mToken, null);
-            WindowOrganizer.applyTransaction(wct);
+            mTaskOrganizer.applyTransaction(wct);
 
             ActivityTaskManager.getService().removeStacksInWindowingModes(
                     new int[]{ WINDOWING_MODE_PINNED });
@@ -932,7 +931,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements ShellTaskOrganize
      */
     public void applyFinishBoundsResize(@NonNull WindowContainerTransaction wct,
             @PipAnimationController.TransitionDirection int direction) {
-        WindowOrganizer.applyTransaction(wct);
+        mTaskOrganizer.applyTransaction(wct);
     }
 
     /**

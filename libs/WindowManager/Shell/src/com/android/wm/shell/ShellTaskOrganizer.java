@@ -17,23 +17,23 @@
 package com.android.wm.shell;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.WindowConfiguration;
-import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.window.ITaskOrganizerController;
 import android.window.TaskOrganizer;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.protolog.ShellProtoLogImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
  * Unified task organizer for all components in the shell.
+ * TODO(b/167582004): may consider consolidating this class and TaskOrganizer
  */
 public class ShellTaskOrganizer extends TaskOrganizer {
 
@@ -55,6 +55,15 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     // Keeps track of all the tasks reported to this organizer (changes in windowing mode will
     // require us to report to both old and new listeners)
     private final SparseArray<Pair<RunningTaskInfo, SurfaceControl>> mTasks = new SparseArray<>();
+
+    public ShellTaskOrganizer() {
+        super();
+    }
+
+    @VisibleForTesting
+    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController) {
+        super(taskOrganizerController);
+    }
 
     /**
      * Adds a listener for tasks in a specific windowing mode.

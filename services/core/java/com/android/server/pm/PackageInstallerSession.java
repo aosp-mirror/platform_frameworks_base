@@ -249,6 +249,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final PackageManagerService mPm;
     private final Handler mHandler;
     private final PackageSessionProvider mSessionProvider;
+    /**
+     * Note all calls must be done outside {@link #mLock} to prevent lock inversion.
+     */
     private final StagingManager mStagingManager;
 
     final int sessionId;
@@ -387,6 +390,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private int mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
     @GuardedBy("mLock")
     private String mStagedSessionErrorMessage;
+
+    /**
+     * The callback to run when pre-reboot verification has ended. Used by {@link #abandonStaged()}
+     * to delay session clean-up until it is safe to do so.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private Runnable mPendingAbandonCallback;
+    /**
+     * {@code true} if pre-reboot verification is ongoing which means it is not safe for
+     * {@link #abandon()} to clean up staging directories.
+     */
+    @GuardedBy("mLock")
+    private boolean mInPreRebootVerification;
 
     /**
      * Path to the validated base APK for this session, which may point at an
@@ -1454,26 +1471,54 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // TODO(patb): since the work done here for a parent session in a multi-package install is
         //             mostly superficial, consider splitting this method for the parent and
         //             single / child sessions.
-        synchronized (mLock) {
-            if (mCommitted) {
-                return true;
+        try {
+            synchronized (mLock) {
+                if (mCommitted) {
+                    return true;
+                }
+                // Read transfers from the original owner stay open, but as the session's data
+                // cannot be modified anymore, there is no leak of information. For staged sessions,
+                // further validation is performed by the staging manager.
+                if (!params.isMultiPackage) {
+                    if (!prepareDataLoaderLocked()) {
+                        return false;
+                    }
+
+                    if (isApexInstallation()) {
+                        validateApexInstallLocked();
+                    } else {
+                        validateApkInstallLocked();
+                    }
+                }
             }
 
-            if (!streamAndValidateLocked()) {
-                return false;
+            if (params.isStaged) {
+                mStagingManager.checkNonOverlappingWithStagedSessions(this);
             }
 
-            // Client staging is fully done at this point
-            mClientProgress = 1f;
-            computeProgressLocked(true);
+            synchronized (mLock) {
+                if (mDestroyed) {
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "Session destroyed");
+                }
+                // Client staging is fully done at this point
+                mClientProgress = 1f;
+                computeProgressLocked(true);
 
-            // This ongoing commit should keep session active, even though client
-            // will probably close their end.
-            mActiveCount.incrementAndGet();
+                // This ongoing commit should keep session active, even though client
+                // will probably close their end.
+                mActiveCount.incrementAndGet();
 
-            mCommitted = true;
+                mCommitted = true;
+            }
+            return true;
+        } catch (PackageManagerException e) {
+            throw onSessionValidationFailure(e);
+        } catch (Throwable e) {
+            // Convert all exceptions into package manager exceptions as only those are handled
+            // in the code above.
+            throw onSessionValidationFailure(new PackageManagerException(e));
         }
-        return true;
     }
 
     @GuardedBy("mLock")
@@ -1511,44 +1556,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    /**
-     * Prepare DataLoader and stream content for DataLoader sessions.
-     * Validate the contents of all session.
-     *
-     * @return false if the data loader could not be prepared.
-     * @throws PackageManagerException when an unrecoverable exception is encountered
-     */
-    @GuardedBy("mLock")
-    private boolean streamAndValidateLocked() throws PackageManagerException {
-        try {
-            // Read transfers from the original owner stay open, but as the session's data cannot
-            // be modified anymore, there is no leak of information. For staged sessions, further
-            // validation is performed by the staging manager.
-            if (!params.isMultiPackage) {
-                if (!prepareDataLoaderLocked()) {
-                    return false;
-                }
-
-                if (isApexInstallation()) {
-                    validateApexInstallLocked();
-                } else {
-                    validateApkInstallLocked();
-                }
-            }
-
-            if (params.isStaged) {
-                mStagingManager.checkNonOverlappingWithStagedSessions(this);
-            }
-            return true;
-        } catch (PackageManagerException e) {
-            throw onSessionValidationFailure(e);
-        } catch (Throwable e) {
-            // Convert all exceptions into package manager exceptions as only those are handled
-            // in the code above.
-            throw onSessionValidationFailure(new PackageManagerException(e));
-        }
-    }
-
     private PackageManagerException onSessionValidationFailure(PackageManagerException e) {
         onSessionValidationFailure(e.error, ExceptionUtils.getCompleteMessage(e));
         return e;
@@ -1571,7 +1578,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyVerificationComplete(sessionId);
+            mStagingManager.notifyVerificationComplete(this);
         } else {
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
@@ -1837,21 +1844,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
-        synchronized (mLock) {
-            if (mRelinquished) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session relinquished");
-            }
-            if (mDestroyed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session destroyed");
-            }
-            if (!mSealed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session not sealed");
-            }
-        }
-
         // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
         if (!params.isMultiPackage && needToAskForPermissions()) {
             // User needs to confirm installation;
@@ -1881,6 +1873,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private PackageManagerService.VerificationParams makeVerificationParamsLocked()
             throws PackageManagerException {
+        if (mRelinquished) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session relinquished");
+        }
+        if (mDestroyed) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session destroyed");
+        }
+        if (!mSealed) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session not sealed");
+        }
+
         // TODO(b/136257624): Some logic in this if block probably belongs in
         //  makeInstallParams().
         if (!params.isMultiPackage && !isApexInstallation()) {
@@ -2787,14 +2792,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void abandonStaged() {
+        final Runnable r;
         synchronized (mLock) {
-            if (mDestroyed) {
-                // If a user abandons staged session in an unsafe state, then system will try to
-                // abandon the destroyed staged session when it is safe on behalf of the user.
-                assertCallerIsOwnerOrRootOrSystemLocked();
-            } else {
-                assertCallerIsOwnerOrRootLocked();
-            }
+            assertCallerIsOwnerOrRootLocked();
             if (isStagedAndInTerminalState()) {
                 // We keep the session in the database if it's in a finalized state. It will be
                 // removed by PackageInstallerService when the last update time is old enough.
@@ -2803,17 +2803,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return;
             }
             mDestroyed = true;
-            if (mCommitted) {
-                if (!mStagingManager.abortCommittedSessionLocked(this)) {
-                    // Do not clean up the staged session from system. It is not safe yet.
-                    mCallback.onStagedSessionChanged(this);
-                    return;
+            boolean isCommitted = mCommitted;
+            List<PackageInstallerSession> childSessions = getChildSessionsLocked();
+            r = () -> {
+                assertNotLocked("abandonStaged");
+                if (isCommitted) {
+                    mStagingManager.abortCommittedSession(this);
                 }
+                cleanStageDir(childSessions);
+                destroyInternal();
+                dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+            };
+            if (mInPreRebootVerification) {
+                // Pre-reboot verification is ongoing. It is not safe to clean up the session yet.
+                mPendingAbandonCallback = r;
+                mCallback.onStagedSessionChanged(this);
+                return;
             }
-            cleanStageDir(getChildSessionsLocked());
-            destroyInternal();
         }
-        dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+        r.run();
     }
 
     @Override
@@ -2828,6 +2836,50 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } else {
             abandonNonStaged();
         }
+    }
+
+    /**
+     * Notified by the staging manager that pre-reboot verification is about to start. The return
+     * value should be checked to decide whether it is OK to start pre-reboot verification. In
+     * the case of a destroyed session, {@code false} is returned and there is no need to start
+     * pre-reboot verification.
+     */
+    boolean notifyStagedStartPreRebootVerification() {
+        synchronized (mLock) {
+            if (mInPreRebootVerification) {
+                throw new IllegalStateException("Pre-reboot verification has started");
+            }
+            if (mDestroyed) {
+                return false;
+            }
+            mInPreRebootVerification = true;
+            return true;
+        }
+    }
+
+    private void dispatchPendingAbandonCallback() {
+        final Runnable callback;
+        synchronized (mLock) {
+            callback = mPendingAbandonCallback;
+            mPendingAbandonCallback = null;
+        }
+        if (callback != null) {
+            callback.run();
+        }
+    }
+
+    /**
+     * Notified by the staging manager that pre-reboot verification has ended. Now it is safe to
+     * clean up the session if {@link #abandon()} has been called previously.
+     */
+    void notifyStagedEndPreRebootVerification() {
+        synchronized (mLock) {
+            if (!mInPreRebootVerification) {
+                throw new IllegalStateException("Pre-reboot verification not started");
+            }
+            mInPreRebootVerification = false;
+        }
+        dispatchPendingAbandonCallback();
     }
 
     @Override

@@ -83,8 +83,12 @@ class WindowManagerProxy {
         }
     };
 
-    WindowManagerProxy(TransactionPool transactionPool, Handler handler) {
+    private final TaskOrganizer mTaskOrganizer;
+
+    WindowManagerProxy(TransactionPool transactionPool, Handler handler,
+            TaskOrganizer taskOrganizer) {
         mSyncTransactionQueue = new SyncTransactionQueue(transactionPool, handler);
+        mTaskOrganizer = taskOrganizer;
     }
 
     void dismissOrMaximizeDocked(final SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout,
@@ -113,18 +117,18 @@ class WindowManagerProxy {
         mExecutor.execute(mSetTouchableRegionRunnable);
     }
 
-    static void applyResizeSplits(int position, SplitDisplayLayout splitLayout) {
+    void applyResizeSplits(int position, SplitDisplayLayout splitLayout) {
         WindowContainerTransaction t = new WindowContainerTransaction();
         splitLayout.resizeSplits(position, t);
-        WindowOrganizer.applyTransaction(t);
+        new WindowOrganizer().applyTransaction(t);
     }
 
-    private static boolean getHomeAndRecentsTasks(List<ActivityManager.RunningTaskInfo> out,
+    private boolean getHomeAndRecentsTasks(List<ActivityManager.RunningTaskInfo> out,
             WindowContainerToken parent) {
         boolean resizable = false;
         List<ActivityManager.RunningTaskInfo> rootTasks = parent == null
-                ? TaskOrganizer.getRootTasks(Display.DEFAULT_DISPLAY, HOME_AND_RECENTS)
-                : TaskOrganizer.getChildTasks(parent, HOME_AND_RECENTS);
+                ? mTaskOrganizer.getRootTasks(Display.DEFAULT_DISPLAY, HOME_AND_RECENTS)
+                : mTaskOrganizer.getChildTasks(parent, HOME_AND_RECENTS);
         for (int i = 0, n = rootTasks.size(); i < n; ++i) {
             final ActivityManager.RunningTaskInfo ti = rootTasks.get(i);
             out.add(ti);
@@ -140,7 +144,7 @@ class WindowManagerProxy {
      * split is minimized. This actually "sticks out" of the secondary split area, but when in
      * minimized mode, the secondary split gets a 'negative' crop to expose it.
      */
-    static boolean applyHomeTasksMinimized(SplitDisplayLayout layout, WindowContainerToken parent,
+    boolean applyHomeTasksMinimized(SplitDisplayLayout layout, WindowContainerToken parent,
             @NonNull WindowContainerTransaction wct) {
         // Resize the home/recents stacks to the larger minimized-state size
         final Rect homeBounds;
@@ -192,9 +196,9 @@ class WindowManagerProxy {
         // Set launchtile first so that any stack created after
         // getAllStackInfos and before reparent (even if unlikely) are placed
         // correctly.
-        TaskOrganizer.setLaunchRoot(DEFAULT_DISPLAY, tiles.mSecondary.token);
+        mTaskOrganizer.setLaunchRoot(DEFAULT_DISPLAY, tiles.mSecondary.token);
         List<ActivityManager.RunningTaskInfo> rootTasks =
-                TaskOrganizer.getRootTasks(DEFAULT_DISPLAY, null /* activityTypes */);
+                mTaskOrganizer.getRootTasks(DEFAULT_DISPLAY, null /* activityTypes */);
         WindowContainerTransaction wct = new WindowContainerTransaction();
         if (rootTasks.isEmpty()) {
             return false;
@@ -230,7 +234,7 @@ class WindowManagerProxy {
         return isHomeResizable;
     }
 
-    static boolean isHomeOrRecentTask(ActivityManager.RunningTaskInfo ti) {
+    boolean isHomeOrRecentTask(ActivityManager.RunningTaskInfo ti) {
         final int atype = ti.configuration.windowConfiguration.getActivityType();
         return atype == ACTIVITY_TYPE_HOME || atype == ACTIVITY_TYPE_RECENTS;
     }
@@ -245,18 +249,18 @@ class WindowManagerProxy {
             boolean dismissOrMaximize) {
         // Set launch root first so that any task created after getChildContainers and
         // before reparent (pretty unlikely) are put into fullscreen.
-        TaskOrganizer.setLaunchRoot(Display.DEFAULT_DISPLAY, null);
+        mTaskOrganizer.setLaunchRoot(Display.DEFAULT_DISPLAY, null);
         // TODO(task-org): Once task-org is more complete, consider using Appeared/Vanished
         //                 plus specific APIs to clean this up.
         List<ActivityManager.RunningTaskInfo> primaryChildren =
-                TaskOrganizer.getChildTasks(tiles.mPrimary.token, null /* activityTypes */);
+                mTaskOrganizer.getChildTasks(tiles.mPrimary.token, null /* activityTypes */);
         List<ActivityManager.RunningTaskInfo> secondaryChildren =
-                TaskOrganizer.getChildTasks(tiles.mSecondary.token, null /* activityTypes */);
+                mTaskOrganizer.getChildTasks(tiles.mSecondary.token, null /* activityTypes */);
         // In some cases (eg. non-resizable is launched), system-server will leave split-screen.
         // as a result, the above will not capture any tasks; yet, we need to clean-up the
         // home task bounds.
         List<ActivityManager.RunningTaskInfo> freeHomeAndRecents =
-                TaskOrganizer.getRootTasks(DEFAULT_DISPLAY, HOME_AND_RECENTS);
+                mTaskOrganizer.getRootTasks(DEFAULT_DISPLAY, HOME_AND_RECENTS);
         // Filter out the root split tasks
         freeHomeAndRecents.removeIf(p -> p.token.equals(tiles.mSecondary.token)
                 || p.token.equals(tiles.mPrimary.token));

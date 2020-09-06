@@ -18,7 +18,6 @@ package android.content.pm.parsing;
 
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
@@ -2375,21 +2374,8 @@ public class ParsingPackageUtils {
      * ratio set.
      */
     private void setMinAspectRatio(ParsingPackage pkg) {
-        final float minAspectRatio;
-        float packageMinAspectRatio = pkg.getMinAspectRatio();
-        if (packageMinAspectRatio != 0) {
-            // Use the application max aspect ration as default if set.
-            minAspectRatio = packageMinAspectRatio;
-        } else {
-            // Default to (1.33) 4:3 aspect ratio for pre-Q apps and unset for Q and greater.
-            // NOTE: 4:3 was the min aspect ratio Android devices can support pre-Q per the CDD,
-            // except for watches which always supported 1:1.
-            minAspectRatio = pkg.getTargetSdkVersion() >= Build.VERSION_CODES.Q
-                    ? 0
-                    : (mCallback != null && mCallback.hasFeature(FEATURE_WATCH))
-                            ? PackageParser.DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH
-                            : PackageParser.DEFAULT_PRE_Q_MIN_ASPECT_RATIO;
-        }
+        // Use the application max aspect ration as default if set.
+        final float minAspectRatio = pkg.getMinAspectRatio();
 
         List<ParsedActivity> activities = pkg.getActivities();
         int activitiesSize = activities.size();

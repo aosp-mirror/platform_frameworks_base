@@ -109,7 +109,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, false /* hidden */);
-        WindowOrganizer.applyTransaction(wct);
+        mTaskOrganizer.applyTransaction(wct);
         // TODO(b/151449487): Only call callback once we enable synchronization
         if (mListener != null) {
             mListener.onTaskVisibilityChanged(getTaskId(), true);
@@ -133,7 +133,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(mTaskToken, true /* hidden */);
-        WindowOrganizer.applyTransaction(wct);
+        mTaskOrganizer.applyTransaction(wct);
         // TODO(b/151449487): Only call callback once we enable synchronization
         if (mListener != null) {
             mListener.onTaskVisibilityChanged(getTaskId(), false);
@@ -165,7 +165,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mTaskToken, screenBounds);
         // TODO(b/151449487): Enable synchronization
-        WindowOrganizer.applyTransaction(wct);
+        mTaskOrganizer.applyTransaction(wct);
     }
 
     /**

@@ -162,9 +162,9 @@ public final class TimeZoneConfiguration implements Parcelable {
 
     @Override
     public String toString() {
-        return "TimeZoneDetectorConfiguration{"
+        return "TimeZoneConfiguration{"
                 + "mUserId=" + mUserId
-                + "mBundle=" + mBundle
+                + ", mBundle=" + mBundle
                 + '}';
     }
 

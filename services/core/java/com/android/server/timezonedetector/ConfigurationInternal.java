@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.timezonedetector.TimeZoneCapabilities;
 import android.app.timezonedetector.TimeZoneConfiguration;
+import android.os.UserHandle;
 
 import java.util.Objects;
 
@@ -54,6 +55,12 @@ public final class ConfigurationInternal {
     /** Returns the ID of the user this configuration is associated with. */
     public @UserIdInt int getUserId() {
         return mUserId;
+    }
+
+    /** Returns the handle of the user this configuration is associated with. */
+    @NonNull
+    public UserHandle getUserHandle() {
+        return UserHandle.of(mUserId);
     }
 
     /** Returns true if the user allowed to modify time zone configuration. */
@@ -198,13 +205,13 @@ public final class ConfigurationInternal {
 
     @Override
     public String toString() {
-        return "TimeZoneDetectorConfiguration{"
+        return "ConfigurationInternal{"
                 + "mUserId=" + mUserId
-                + "mUserConfigAllowed=" + mUserConfigAllowed
-                + "mAutoDetectionSupported=" + mAutoDetectionSupported
-                + "mAutoDetectionEnabled=" + mAutoDetectionEnabled
-                + "mLocationEnabled=" + mLocationEnabled
-                + "mGeoDetectionEnabled=" + mGeoDetectionEnabled
+                + ", mUserConfigAllowed=" + mUserConfigAllowed
+                + ", mAutoDetectionSupported=" + mAutoDetectionSupported
+                + ", mAutoDetectionEnabled=" + mAutoDetectionEnabled
+                + ", mLocationEnabled=" + mLocationEnabled
+                + ", mGeoDetectionEnabled=" + mGeoDetectionEnabled
                 + '}';
     }
 
