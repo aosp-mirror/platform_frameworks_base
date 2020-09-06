@@ -243,7 +243,7 @@
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="634406443901014984">"OFF"</item>
-    <item msgid="1288760936356000927">"バーとして画面に表示"</item>
+    <item msgid="1288760936356000927">"棒グラフとして画面に表示"</item>
     <item msgid="5023908510820531131">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> 内"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
