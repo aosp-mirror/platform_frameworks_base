@@ -396,8 +396,8 @@
     <item msgid="1282170165150762976">"Санарип мазмун үчүн оптималдаштырылган түстөр"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Көшүү режиминдеги колдонмолор"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Иштеген жок. Которуштуруу үчүн таптап коюңуз."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Иштеп турат. Которуштуруу үчүн таптап коюңуз."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Иштеген жок. Күйгүзүү үчүн басып коюңуз."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Иштеп турат. Өчүрүү үчүн басып коюңуз."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Көшүү режиминдеги колдонмонун абалы:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Иштеп жаткан кызматтар"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Учурда иштеп жаткан кызматтарды көрүп, көзөмөлдөп турасыз"</string>

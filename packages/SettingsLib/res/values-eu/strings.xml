@@ -400,7 +400,7 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktibo. Aldatzeko, sakatu hau."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Egonean moduko aplikazioaren egoera: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Abian diren zerbitzuak"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ikusi eta kontrolatu unean abian diren zerbitzuak"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ikusi eta kontrolatu une honetan abian diren zerbitzuak"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView inplementazioa"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Ezarri WebView inplementazioa"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Jada ez dago erabilgarri aukera hori. Saiatu berriro."</string>
