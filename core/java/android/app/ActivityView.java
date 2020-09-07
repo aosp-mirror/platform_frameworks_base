@@ -85,16 +85,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     }
 
     public ActivityView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0 /* defStyle */);
-    }
-
-    public ActivityView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, false /*singleTaskInstance*/);
-    }
-
-    public ActivityView(Context context, AttributeSet attrs, int defStyle,
-            boolean singleTaskInstance) {
-        this(context, attrs, defStyle, singleTaskInstance, false /* usePublicVirtualDisplay */);
+        this(context, attrs, 0 /* defStyle */, false /* singleTaskInstance */,
+                false /* usePublicVirtualDisplay */,
+                false /* disableSurfaceViewBackgroundLayer */, false /* useTrustedDisplay */);
     }
 
     /**
@@ -106,21 +99,11 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
             boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
         this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay,
-                false /* disableSurfaceViewBackgroundLayer */);
+                false /* disableSurfaceViewBackgroundLayer */,
+                false /* useTrustedDisplay */);
     }
 
-    /** @hide */
-    public ActivityView(
-            @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
-            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
-            boolean disableSurfaceViewBackgroundLayer) {
-        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay,
-                disableSurfaceViewBackgroundLayer, false /* useTrustedDisplay */);
-    }
-
-    // TODO(b/162901735): Refactor ActivityView with Builder
-    /** @hide */
-    public ActivityView(
+    private ActivityView(
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
             boolean singleTaskInstance, boolean usePublicVirtualDisplay,
             boolean disableSurfaceViewBackgroundLayer, boolean useTrustedDisplay) {
@@ -652,4 +635,97 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             mCallback.onBackPressedOnTaskRoot(taskId);
         }
     }
+
+    /** The builder of {@link ActivityView} */
+    public static final class Builder {
+        private final Context mContext;
+        private AttributeSet mAttrs;
+        private int mDefStyle;
+        private boolean mSingleInstance;
+        private boolean mUsePublicVirtualDisplay;
+        private boolean mDisableSurfaceViewBackgroundLayer;
+        private boolean mUseTrustedDisplay;
+
+        public Builder(@NonNull Context context) {
+            mContext = context;
+            mAttrs = null;
+            mDefStyle = 0;
+            mSingleInstance = false;
+            mUsePublicVirtualDisplay = false;
+            mDisableSurfaceViewBackgroundLayer = false;
+            mUseTrustedDisplay = false;
+        }
+
+        /** Sets {@link AttributeSet} to the {@link ActivityView}. */
+        @NonNull
+        public Builder setAttributeSet(@Nullable AttributeSet attrs) {
+            mAttrs = attrs;
+            return this;
+        }
+
+        /**
+         * Sets {@code defStyle} to the {@link ActivityView}.
+         *
+         * @param defaultStyle  An attribute in the current theme that contains a
+         *                      reference to a style resource that supplies default values for
+         *                      the view. Can be {@code 0} to not look for defaults.
+         */
+        @NonNull
+        public Builder setDefaultStyle(int defaultStyle) {
+            mDefStyle = defaultStyle;
+            return this;
+        }
+
+        /** Sets to {@code true} to make the {@link ActivityView} single instance. */
+        @NonNull
+        public Builder setSingleInstance(boolean singleInstance) {
+            mSingleInstance = singleInstance;
+            return this;
+        }
+
+        /**
+         * Sets to {@code true} to use public virtual display for the {@link ActivityView}.
+         * <p>
+         * Note that using a public display is not recommended as it exposes it to other
+         * applications, but it might be needed for backwards compatibility.
+         * </p>
+         */
+        @NonNull
+        public Builder setUsePublicVirtualDisplay(boolean usePublicVirtualDisplay) {
+            mUsePublicVirtualDisplay = usePublicVirtualDisplay;
+            return this;
+        }
+
+        /**
+         * Sets to {@code true} to disable {@link SurfaceView} background for the
+         * {@link ActivityView}.
+         */
+        @NonNull
+        public Builder setDisableSurfaceViewBackgroundLayer(
+                boolean disableSurfaceViewBackgroundLayer) {
+            mDisableSurfaceViewBackgroundLayer = disableSurfaceViewBackgroundLayer;
+            return this;
+        }
+
+        /**
+         * Sets to {@code true} to use trusted display for the {@link ActivityView}.
+         * <p>
+         * It enables the {@link ActivityView} to be focused without users' first touches.
+         * </p>
+         */
+        @NonNull
+        public Builder setUseTrustedDisplay(boolean useTrustedDisplay) {
+            mUseTrustedDisplay = useTrustedDisplay;
+            return this;
+        }
+
+        /** Creates an {@link ActivityView} */
+        @NonNull
+        public ActivityView build() {
+            return new ActivityView(mContext, mAttrs, mDefStyle, mSingleInstance,
+                    mUsePublicVirtualDisplay, mDisableSurfaceViewBackgroundLayer,
+                    mUseTrustedDisplay);
+        }
+    }
 }
+
