@@ -232,7 +232,7 @@
     <string name="not_default_data_content_description" msgid="6757881730711522517">"لم يتم الضبط على استخدام البيانات"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"غير مفعّلة"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"التوصيل عبر البلوتوث"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطائرة."</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطيران."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"‏ليس هناك شريحة SIM."</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
@@ -267,10 +267,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تفعيل Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"الجوّال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطيران."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"كتم الصوت تمامًا"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"المنبِّهات فقط"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"عدم الإزعاج"</string>
@@ -664,7 +664,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطائرة"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="add_tile" msgid="6239678623873086686">"إضافة فئة"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"إرسال فئة"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد"</string>
