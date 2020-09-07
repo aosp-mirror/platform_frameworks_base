@@ -128,6 +128,19 @@ public class MagnificationController {
         setDisableMagnificationCallbackLocked(displayId, animationEndCallback);
     }
 
+    void onRequestMagnificationSpec(int displayId, int serviceId) {
+        synchronized (mLock) {
+            if (serviceId == AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID) {
+                return;
+            }
+            if (mWindowMagnificationMgr == null
+                    || !mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId)) {
+                return;
+            }
+            mWindowMagnificationMgr.disableWindowMagnification(displayId, false);
+        }
+    }
+
     /**
      * Updates the active user ID of {@link FullScreenMagnificationController} and {@link
      * WindowMagnificationManager}.
@@ -184,7 +197,7 @@ public class MagnificationController {
         synchronized (mLock) {
             if (mFullScreenMagnificationController == null) {
                 mFullScreenMagnificationController = new FullScreenMagnificationController(mContext,
-                        mAms, mLock);
+                        mAms, mLock, this::onRequestMagnificationSpec);
                 mFullScreenMagnificationController.setUserId(mAms.getCurrentUserIdLocked());
             }
         }

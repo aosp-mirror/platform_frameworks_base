@@ -53,6 +53,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationRequestObserver;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler.ScaleChangedListener;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -126,6 +127,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     FullScreenMagnificationController mFullScreenMagnificationController;
     @Mock
     ScaleChangedListener mMockScaleChangedListener;
+    @Mock
+    MagnificationRequestObserver mMagnificationRequestObserver;
 
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
@@ -148,7 +151,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         when(mockController.getAnimationDuration()).thenReturn(1000L);
         when(mockWindowManager.setMagnificationCallbacks(eq(DISPLAY_0), any())).thenReturn(true);
         mFullScreenMagnificationController = new FullScreenMagnificationController(mockController,
-                new Object()) {
+                new Object(), mMagnificationRequestObserver) {
             @Override
             public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;
