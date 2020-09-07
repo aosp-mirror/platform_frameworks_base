@@ -4407,7 +4407,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Caller is Profile Owner, but no supervision app is configured.
         setAsProfileOwner(admin1);
-        assertExpectException(SecurityException.class, "no default supervision component defined",
+        assertExpectException(SecurityException.class, "is not the default supervision component",
                 () -> dpm.setSecondaryLockscreenEnabled(admin1, true));
         assertFalse(dpm.isSecondaryLockscreenEnabled(UserHandle.of(CALLER_USER_HANDLE)));
 
