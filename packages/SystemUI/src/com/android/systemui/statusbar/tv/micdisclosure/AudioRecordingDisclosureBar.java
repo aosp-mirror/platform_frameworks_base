@@ -21,7 +21,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
@@ -82,13 +81,12 @@ public class AudioRecordingDisclosureBar implements
     private static final int STATE_SHOWN = 2;
     private static final int STATE_DISAPPEARING = 3;
 
-    private static final int ANIMATION_DURATION = 600;
+    private static final int ANIMATION_DURATION_MS = 200;
 
     private final Context mContext;
     private boolean mIsEnabled;
 
     private View mIndicatorView;
-    private boolean mIsLtr;
 
     @State private int mState = STATE_STOPPED;
 
@@ -207,17 +205,15 @@ public class AudioRecordingDisclosureBar implements
         if (mState != STATE_NOT_SHOWN) return;
         if (DEBUG) Log.d(TAG, "Showing indicator");
 
-        mIsLtr = mContext.getResources().getConfiguration().getLayoutDirection()
-                == View.LAYOUT_DIRECTION_LTR;
-
         // Inflate the indicator view
         mIndicatorView = LayoutInflater.from(mContext).inflate(
                 R.layout.tv_audio_recording_indicator,
                 null);
 
-        // Initially change the visibility to INVISIBLE, wait until and receives the size and
-        // then animate it moving from "off" the screen correctly
-        mIndicatorView.setVisibility(View.INVISIBLE);
+        // 1. Set alpha to 0.
+        // 2. Wait until the window is shown and the view is laid out.
+        // 3. Start a "fade in" (alpha) animation.
+        mIndicatorView.setAlpha(0f);
         mIndicatorView
                 .getViewTreeObserver()
                 .addOnGlobalLayoutListener(
@@ -232,44 +228,29 @@ public class AudioRecordingDisclosureBar implements
                                 mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
 
-                                // Now that the width of the indicator has been assigned, we can
-                                // move it in from off the screen.
-                                final int initialOffset =
-                                        (mIsLtr ? 1 : -1) * mIndicatorView.getWidth();
-                                final AnimatorSet set = new AnimatorSet();
-                                set.setDuration(ANIMATION_DURATION);
-                                set.playTogether(
-                                        ObjectAnimator.ofFloat(mIndicatorView,
-                                                View.TRANSLATION_X, initialOffset, 0),
-                                        ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f,
-                                                1f));
-                                set.addListener(
+                                final ObjectAnimator anim =
+                                        ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 1f)
+                                                .setDuration(ANIMATION_DURATION_MS);
+                                anim.addListener(
                                         new AnimatorListenerAdapter() {
-                                            @Override
-                                            public void onAnimationStart(Animator animation,
-                                                    boolean isReverse) {
-                                                if (mState == STATE_STOPPED) return;
-
-                                                // Indicator is INVISIBLE at the moment, change it.
-                                                mIndicatorView.setVisibility(View.VISIBLE);
-                                            }
-
                                             @Override
                                             public void onAnimationEnd(Animator animation) {
                                                 onAppeared();
                                             }
                                         });
-                                set.start();
+                                anim.start();
                             }
                         });
 
+        final boolean isLtr = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_LTR;
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 WRAP_CONTENT,
                 WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP | (mIsLtr ? Gravity.RIGHT : Gravity.LEFT);
+        layoutParams.gravity = Gravity.TOP | (isLtr ? Gravity.RIGHT : Gravity.LEFT);
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
@@ -283,20 +264,16 @@ public class AudioRecordingDisclosureBar implements
     private void hide() {
         if (DEBUG) Log.d(TAG, "Hide indicator");
 
-        final int targetOffset = (mIsLtr ? 1 : -1) * mIndicatorView.getWidth();
-        final AnimatorSet set = new AnimatorSet();
-        set.playTogether(
-                ObjectAnimator.ofFloat(mIndicatorView, View.TRANSLATION_X, targetOffset),
-                ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f));
-        set.setDuration(ANIMATION_DURATION);
-        set.addListener(
+        final ObjectAnimator anim = ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f)
+                .setDuration(ANIMATION_DURATION_MS);
+        anim.addListener(
                 new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         onHidden();
                     }
                 });
-        set.start();
+        anim.start();
 
         mState = STATE_DISAPPEARING;
     }
