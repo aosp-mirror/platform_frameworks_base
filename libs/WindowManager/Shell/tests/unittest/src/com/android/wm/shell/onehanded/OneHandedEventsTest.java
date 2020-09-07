@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,7 +22,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
-import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +33,7 @@ import java.util.Collection;
 
 @RunWith(Parameterized.class)
 @SmallTest
-public class OneHandedEventsTest extends SysuiTestCase {
+public class OneHandedEventsTest extends OneHandedTestCase {
 
     private UiEventLoggerFake mUiEventLogger;
 

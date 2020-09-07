@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 /**
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for OneHanded transition.

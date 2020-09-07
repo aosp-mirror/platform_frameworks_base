@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
-import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS;
-import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
-import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER;
-import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS;
+import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS;
+import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
+import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER;
+import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -59,24 +59,24 @@ public class OneHandedSettingsUtilTest extends OneHandedTestCase {
     @Test
     public void testRegisterSecureKeyObserver() {
         final Uri result = OneHandedSettingsUtil.registerSettingsKeyObserver(
-                Settings.Secure.ONE_HANDED_MODE_ENABLED, mContentResolver, mContentObserver);
+                Settings.Secure.TAPS_APP_TO_EXIT, mContentResolver, mContentObserver);
 
         assertThat(result).isNotNull();
 
         OneHandedSettingsUtil.registerSettingsKeyObserver(
-                Settings.Secure.ONE_HANDED_MODE_ENABLED, mContentResolver, mContentObserver);
+                Settings.Secure.TAPS_APP_TO_EXIT, mContentResolver, mContentObserver);
     }
 
     @Test
     public void testUnregisterSecureKeyObserver() {
         OneHandedSettingsUtil.registerSettingsKeyObserver(
-                Settings.Secure.ONE_HANDED_MODE_ENABLED, mContentResolver, mContentObserver);
+                Settings.Secure.TAPS_APP_TO_EXIT, mContentResolver, mContentObserver);
         OneHandedSettingsUtil.unregisterSettingsKeyObserver(mContentResolver, mContentObserver);
 
         assertThat(mOnChanged).isFalse();
 
         Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.ONE_HANDED_MODE_ENABLED, 0);
+                Settings.Secure.TAPS_APP_TO_EXIT, 0);
 
         assertThat(mOnChanged).isFalse();
     }

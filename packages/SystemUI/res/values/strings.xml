@@ -2799,9 +2799,4 @@
     <string name="udfps_hbm_enable_command" translatable="false"></string>
     <!-- Device-specific payload for disabling the high-brightness mode -->
     <string name="udfps_hbm_disable_command" translatable="false"></string>
-
-    <!-- One-Handed Tutorial title [CHAR LIMIT=60] -->
-    <string name="one_handed_tutorial_title">Using one-handed mode</string>
-    <!-- One-Handed Tutorial description [CHAR LIMIT=NONE] -->
-    <string name="one_handed_tutorial_description">To exit, swipe up from the bottom of the screen or tap anywhere above the app</string>
 </resources>

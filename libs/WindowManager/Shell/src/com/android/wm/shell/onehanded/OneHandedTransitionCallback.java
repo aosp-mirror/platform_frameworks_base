@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import android.graphics.Rect;
 

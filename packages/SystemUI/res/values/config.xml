@@ -560,9 +560,6 @@
     <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
     <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
 
-    <!-- Allow one handed to enable round corner -->
-    <bool name="config_one_handed_enable_round_corner">true</bool>
-
     <!-- Show a separate icon for low and high volume on the volume dialog -->
     <bool name="config_showLowMediaVolumeIcon">false</bool>
 </resources>

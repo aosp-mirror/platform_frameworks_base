@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
-import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
+import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
 
 import android.os.Handler;
 import android.os.Looper;

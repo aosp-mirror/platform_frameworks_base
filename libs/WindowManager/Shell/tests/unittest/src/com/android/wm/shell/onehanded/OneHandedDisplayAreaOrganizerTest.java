@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;

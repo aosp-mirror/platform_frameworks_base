@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -112,9 +112,20 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testRegisterTransitionCallback() {
-        verify(mMockDisplayAreaOrganizer, atLeastOnce()).registerTransitionCallback(any());
+    public void testRegisterTransitionCallbackAfterInit() {
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mMockTouchHandler);
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mMockGestureHandler);
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mMockTutorialHandler);
     }
+
+    @Test
+    public void testRegisterTransitionCallback() {
+        OneHandedTransitionCallback callback = new OneHandedTransitionCallback() {};
+        mOneHandedController.registerTransitionCallback(callback);
+
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(callback);
+    }
+
 
     @Test
     public void testStopOneHanded_shouldRemoveTimer() {
@@ -139,7 +150,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
     }
 
-    @Ignore("b/161980408, fix it after migration finished")
+    @Ignore("b/167943723, refactor it and fix it")
     @Test
     public void tesSettingsObserver_updateTapAppToExit() {
         Settings.Secure.putInt(mContext.getContentResolver(),
@@ -148,7 +159,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         verify(mOneHandedController).setTaskChangeToExit(true);
     }
 
-    @Ignore("b/161980408, fix it after migration finished")
+    @Ignore("b/167943723, refactor it and fix it")
     @Test
     public void tesSettingsObserver_updateEnabled() {
         Settings.Secure.putInt(mContext.getContentResolver(),
@@ -157,7 +168,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         verify(mOneHandedController).setOneHandedEnabled(true);
     }
 
-    @Ignore("b/161980408, fix it after migration finished")
+    @Ignore("b/167943723, refactor it and fix it")
     @Test
     public void tesSettingsObserver_updateTimeout() {
         Settings.Secure.putInt(mContext.getContentResolver(),
@@ -168,7 +179,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
 
-    @Ignore("b/161980408, fix it after migration finished")
+    @Ignore("b/167943723, refactor it and fix it")
     @Test
     public void tesSettingsObserver_updateSwipeToNotification() {
         Settings.Secure.putInt(mContext.getContentResolver(),

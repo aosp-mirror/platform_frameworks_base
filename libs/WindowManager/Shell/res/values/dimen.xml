@@ -62,4 +62,8 @@
 
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
+
+    <!-- One-Handed Mode -->
+    <!-- Threshold for dragging distance to enable one-handed mode -->
+    <dimen name="gestures_onehanded_drag_threshold">20dp</dimen>
 </resources>

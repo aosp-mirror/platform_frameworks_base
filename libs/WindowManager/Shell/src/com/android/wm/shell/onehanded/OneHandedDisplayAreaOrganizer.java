@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
-import static com.android.systemui.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
+import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
+import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
 import android.content.Context;
 import android.graphics.Point;

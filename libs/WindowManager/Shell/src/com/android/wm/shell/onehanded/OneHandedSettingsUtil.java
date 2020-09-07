@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import android.annotation.IntDef;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
-
-import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -31,7 +29,6 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * APIs for querying or updating one handed settings .
  */
-@SysUISingleton
 public final class OneHandedSettingsUtil {
     private static final String TAG = "OneHandedSettingsUtil";
 
