@@ -129,12 +129,8 @@ java_sdk_library {
     },
     hostdex: true, // for hiddenapi check
 
-    // Allow access to the stubs from anywhere.
-    visibility: ["//visibility:public"],
-
     // Restrict access to implementation library.
     impl_library_visibility: [
-        "//visibility:override", // Ignore the visibility property.
         "//frameworks/opt/net/wifi/service:__subpackages__",
     ] + test_access_hidden_api_whitelist,
 

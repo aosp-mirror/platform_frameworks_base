@@ -72,19 +72,7 @@ java_sdk_library {
 
     hostdex: true, // for hiddenapi check
 
-    visibility: [
-        "//frameworks/base", // Framework
-        "//frameworks/base/apex/statsd:__subpackages__", // statsd apex
-        "//frameworks/base/packages/Tethering", // Tethering
-        "//frameworks/opt/net/wifi/service", // wifi service
-        "//packages/providers/MediaProvider", // MediaProvider apk
-    ],
-
-    // Restrict access to implementation library.
-    impl_library_visibility: [
-        "//visibility:override", // Ignore the visibility property.
-        "//frameworks/base/apex/statsd:__subpackages__", // statsd apex
-    ],
+    impl_library_visibility: ["//frameworks/base/apex/statsd/framework/test:__subpackages__"],
 
     apex_available: [
         "com.android.os.statsd",
