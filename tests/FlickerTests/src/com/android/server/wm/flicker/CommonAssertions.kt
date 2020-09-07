@@ -109,7 +109,7 @@ fun LayersAssertion.navBarLayerRotatesAndScales(
     }
 
     if (startingPos == endingPos) {
-        all("navBarLayerRotatesAndScales", enabled, bugId) {
+        all("navBarLayerRotatesAndScales", enabled, bugId = 167747321) {
             this.hasVisibleRegion(FlickerTestBase.NAVIGATION_BAR_WINDOW_TITLE, startingPos)
         }
     }
