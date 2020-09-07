@@ -87,6 +87,8 @@ public class AudioRecordingDisclosureBar implements
     private boolean mIsEnabled;
 
     private View mIndicatorView;
+    private boolean mViewAndWindowAdded;
+    private ObjectAnimator mAnimator;
 
     @State private int mState = STATE_STOPPED;
 
@@ -181,7 +183,7 @@ public class AudioRecordingDisclosureBar implements
         }
 
         if (active) {
-            showIfNotShown();
+            showIfNeeded();
         } else {
             hideIndicatorIfNeeded();
         }
@@ -189,26 +191,42 @@ public class AudioRecordingDisclosureBar implements
 
     @UiThread
     private void hideIndicatorIfNeeded() {
-        // If not STATE_APPEARING, will check whether the indicator should be hidden when the
-        // indicator comes to the STATE_SHOWN.
-        // If STATE_DISAPPEARING or STATE_SHOWN - nothing else for us to do here.
-        if (mState != STATE_SHOWN) return;
+        // If STOPPED, NOT_SHOWN or DISAPPEARING - nothing else for us to do here.
+        if (mState != STATE_SHOWN && mState != STATE_APPEARING) return;
 
-        // If is in the STATE_SHOWN and there are no active recorders - hide.
-        if (!hasActiveRecorders()) {
-            hide();
+        if (hasActiveRecorders()) {
+            return;
+        }
+
+        if (mViewAndWindowAdded) {
+            mState = STATE_DISAPPEARING;
+            animateDisappearance();
+        } else {
+            // Appearing animation has not started yet, as we were still waiting for the View to be
+            // laid out.
+            mState = STATE_NOT_SHOWN;
+            removeIndicatorView();
         }
     }
 
     @UiThread
-    private void showIfNotShown() {
-        if (mState != STATE_NOT_SHOWN) return;
+    private void showIfNeeded() {
+        // If STOPPED, SHOWN or APPEARING - nothing else for us to do here.
+        if (mState != STATE_NOT_SHOWN && mState != STATE_DISAPPEARING) return;
+
         if (DEBUG) Log.d(TAG, "Showing indicator");
+
+        final int prevState = mState;
+        mState = STATE_APPEARING;
+
+        if (prevState == STATE_DISAPPEARING) {
+            animateAppearance();
+            return;
+        }
 
         // Inflate the indicator view
         mIndicatorView = LayoutInflater.from(mContext).inflate(
-                R.layout.tv_audio_recording_indicator,
-                null);
+                R.layout.tv_audio_recording_indicator, null);
 
         // 1. Set alpha to 0.
         // 2. Wait until the window is shown and the view is laid out.
@@ -220,25 +238,16 @@ public class AudioRecordingDisclosureBar implements
                         new ViewTreeObserver.OnGlobalLayoutListener() {
                             @Override
                             public void onGlobalLayout() {
-                                if (mState == STATE_STOPPED) {
-                                    return;
-                                }
+                                // State could have changed to NOT_SHOWN (if all the recorders are
+                                // already gone) to STOPPED (if the indicator was disabled)
+                                if (mState != STATE_APPEARING) return;
 
+                                mViewAndWindowAdded = true;
                                 // Remove the observer
                                 mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
 
-                                final ObjectAnimator anim =
-                                        ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 1f)
-                                                .setDuration(ANIMATION_DURATION_MS);
-                                anim.addListener(
-                                        new AnimatorListenerAdapter() {
-                                            @Override
-                                            public void onAnimationEnd(Animator animation) {
-                                                onAppeared();
-                                            }
-                                        });
-                                anim.start();
+                                animateAppearance();
                             }
                         });
 
@@ -256,49 +265,58 @@ public class AudioRecordingDisclosureBar implements
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
         windowManager.addView(mIndicatorView, layoutParams);
-
-        mState = STATE_APPEARING;
     }
 
-    @UiThread
-    private void hide() {
-        if (DEBUG) Log.d(TAG, "Hide indicator");
 
-        final ObjectAnimator anim = ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f)
-                .setDuration(ANIMATION_DURATION_MS);
-        anim.addListener(
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        onHidden();
+    private void animateAppearance() {
+        animateAlphaTo(1f);
+    }
+
+    private void animateDisappearance() {
+        animateAlphaTo(0f);
+    }
+
+    private void animateAlphaTo(final float endValue) {
+        if (mAnimator == null) {
+            if (DEBUG) Log.d(TAG, "set up animator");
+
+            mAnimator = new ObjectAnimator();
+            mAnimator.setTarget(mIndicatorView);
+            mAnimator.setProperty(View.ALPHA);
+            mAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation, boolean isReverse) {
+                    if (DEBUG) Log.d(TAG, "onAnimationStart");
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    if (DEBUG) Log.d(TAG, "onAnimationCancel");
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (DEBUG) Log.d(TAG, "onAnimationEnd");
+
+                    if (mState == STATE_APPEARING) {
+                        mState = STATE_SHOWN;
+                    } else if (mState == STATE_DISAPPEARING) {
+                        removeIndicatorView();
+                        mState = STATE_NOT_SHOWN;
                     }
-                });
-        anim.start();
-
-        mState = STATE_DISAPPEARING;
-    }
-
-
-    @UiThread
-    private void onAppeared() {
-        if (mState == STATE_STOPPED) return;
-
-        mState = STATE_SHOWN;
-
-        hideIndicatorIfNeeded();
-    }
-
-    @UiThread
-    private void onHidden() {
-        if (mState == STATE_STOPPED) return;
-
-        removeIndicatorView();
-        mState = STATE_NOT_SHOWN;
-
-        if (hasActiveRecorders()) {
-            // Got new recorders, show again.
-            showIfNotShown();
+                }
+            });
+        } else if (mAnimator.isRunning()) {
+            if (DEBUG) Log.d(TAG, "cancel running animation");
+            mAnimator.cancel();
         }
+
+        final float currentValue = mIndicatorView.getAlpha();
+        if (DEBUG) Log.d(TAG, "animate alpha to " + endValue + " from " + currentValue);
+
+        mAnimator.setDuration((int) (Math.abs(currentValue - endValue) * ANIMATION_DURATION_MS));
+        mAnimator.setFloatValues(endValue);
+        mAnimator.start();
     }
 
     private boolean hasActiveRecorders() {
@@ -317,6 +335,9 @@ public class AudioRecordingDisclosureBar implements
         windowManager.removeView(mIndicatorView);
 
         mIndicatorView = null;
+        mAnimator = null;
+
+        mViewAndWindowAdded = false;
     }
 
     private static List<String> splitByComma(String string) {
