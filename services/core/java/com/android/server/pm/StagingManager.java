@@ -1064,46 +1064,13 @@ public class StagingManager {
                 || apexSessionInfo.isRevertFailed;
     }
 
-    @GuardedBy("mStagedSessions")
-    private boolean isMultiPackageSessionComplete(@NonNull PackageInstallerSession session) {
-        // This method assumes that the argument is either a parent session of a multi-package
-        // i.e. isMultiPackage() returns true, or that it is a child session, i.e.
-        // hasParentSessionId() returns true.
-        if (session.isMultiPackage()) {
-            // Parent session of a multi-package group. Check that we restored all the children.
-            for (int childSession : session.getChildSessionIds()) {
-                if (mStagedSessions.get(childSession) == null) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (session.hasParentSessionId()) {
-            PackageInstallerSession parent = mStagedSessions.get(session.getParentSessionId());
-            if (parent == null) {
-                return false;
-            }
-            return isMultiPackageSessionComplete(parent);
-        }
-        Slog.wtf(TAG, "Attempting to restore an invalid multi-package session.");
-        return false;
-    }
-
     void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
         PackageInstallerSession sessionToResume = session;
         synchronized (mStagedSessions) {
             mStagedSessions.append(session.sessionId, session);
-            // For multi-package sessions, we don't know in which order they will be restored. We
-            // need to wait until we have restored all the session in a group before restoring them.
-            if (session.isMultiPackage() || session.hasParentSessionId()) {
-                if (!isMultiPackageSessionComplete(session)) {
-                    // Still haven't recovered all sessions of the group, return.
-                    return;
-                }
-                // Group recovered, find the parent if necessary and resume the installation.
-                if (session.hasParentSessionId()) {
-                    sessionToResume = mStagedSessions.get(session.getParentSessionId());
-                }
+            if (session.hasParentSessionId()) {
+                // Only parent sessions can be restored
+                return;
             }
         }
         // The preconditions used during pre-reboot verification might have changed when device
