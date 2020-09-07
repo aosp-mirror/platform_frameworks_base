@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकताका सूचना आइकनहरू देखाउनुहोस्"</string>
     <string name="other" msgid="429768510980739978">"अन्य"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"विभाजित-स्क्रिन छुट्याउने"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"बायाँ भाग फुल स्क्रिन"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"बायाँ भाग ७०%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"बायाँ भाग ५०%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"बायाँ भाग ३०%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"दायाँ भाग फुल स्क्रिन"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"माथिल्लो भाग फुल स्क्रिन"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"माथिल्लो भाग ७०%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"माथिल्लो भाग ५०%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"माथिल्लो भाग ३०%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तल्लो भाग फुल स्क्रिन"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। सम्पादन गर्नाका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। थप्नका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई सार्नुहोस्"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई <xliff:g id="POSITION">%2$d</xliff:g> स्थितिमा सार्नुहोस्"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"द्रुत सेटिङ सम्पादक।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> को सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"अनुप्रयोगले विभाजित-स्क्रिनमा काम नगर्न सक्छ।"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"अनुप्रयोगले विभाजित-स्क्रिनलाई समर्थन गर्दैन।"</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"यो अनुप्रयोगले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"द्रुत सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"द्रुत सेटिङहरूलाई बन्द गर्नुहोस्।"</string>

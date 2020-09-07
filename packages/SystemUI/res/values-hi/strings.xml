@@ -881,17 +881,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकता वाली सूचना के आइकॉन दिखाएं"</string>
     <string name="other" msgid="429768510980739978">"अन्य"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"विभाजित स्क्रीन विभाजक"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"बाईं स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"बाईं स्क्रीन को 70% बनाएं"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"बाईं स्क्रीन को 50% बनाएं"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"बाईं स्क्रीन को 30% बनाएं"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"दाईं स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"ऊपर की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"ऊपर की स्क्रीन को 70% बनाएं"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ऊपर की स्क्रीन को 50% बनाएं"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ऊपर की स्क्रीन को 30% बनाएं"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"नीचे की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. में बदलाव करने के लिए दो बार छूएं."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. जोड़ने के लिए दो बार छूएं."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> को ले जाएं"</string>
@@ -900,10 +889,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> काे क्रम संख्या <xliff:g id="POSITION">%2$d</xliff:g> पर ले जाएं"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"त्वरित सेटिंग संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"हो सकता है कि ऐप्लिकेशन विभाजित स्क्रीन के साथ काम ना करे."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"क्विक सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"त्वरित सेटिंग बंद करें."</string>

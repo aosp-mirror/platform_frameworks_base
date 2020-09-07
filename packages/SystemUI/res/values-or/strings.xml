@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"କମ୍‍-ଅଗ୍ରାଧିକାର ବିଜ୍ଞପ୍ତି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ"</string>
     <string name="other" msgid="429768510980739978">"ଅନ୍ୟାନ୍ୟ"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନ ବିଭାଜକ"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"ବାମ ପଟକୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"ବାମ ପଟକୁ 70% କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"ବାମ ପଟକୁ 50% କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"ବାମ ପଟେ 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"ଡାହାଣ ପଟକୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"ଉପର ଆଡ଼କୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"ଉପର ଆଡ଼କୁ 70% କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ଉପର ଆଡ଼କୁ 50% କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ଉପର ଆଡ଼କୁ 30% କରନ୍ତୁ"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"ତଳ ଅଂଶର ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ଅବସ୍ଥାନ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। ଏଡିଟ୍ କରିବାକୁ ଡବଲ୍‍-ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। ଯୋଡ଼ିବା ପାଇଁ ଡବଲ୍‍-ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ନିଅନ୍ତୁ"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="POSITION">%2$d</xliff:g> ଅବସ୍ଥାନକୁ <xliff:g id="TILE_NAME">%1$s</xliff:g> ଘୁଞ୍ଚାନ୍ତୁ"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଏଡିଟର୍।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ବିଜ୍ଞପ୍ତି: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନରେ ଆପ୍‍ କାମ କରିନପାରେ।"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"ଆପ୍‍ ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନକୁ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ କାମ ନକରିପାରେ।"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ ଲଞ୍ଚ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ଦ୍ରୁତ ସେଟିଂସ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>

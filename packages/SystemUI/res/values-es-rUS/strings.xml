@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostrar íconos de notificaciones con prioridad baja"</string>
     <string name="other" msgid="429768510980739978">"Otros"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Divisor de pantalla dividida"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Pantalla izquierda completa"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"Izquierda: 70%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"Izquierda: 50%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"Izquierda: 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Pantalla derecha completa"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Pantalla superior completa"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"Superior: 70%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Superior: 50%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Superior: 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Pantalla inferior completa"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Posición <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Presiona dos veces para editarla."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Presiona dos veces para agregarlo."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor de Configuración rápida"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Es posible que la app no funcione en el modo de pantalla dividida."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"La app no es compatible con la función de pantalla dividida."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Es posible que la app no funcione en una pantalla secundaria."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"La app no puede iniciarse en pantallas secundarias."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Abrir Configuración"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Abrir la configuración rápida"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Cerrar configuración rápida"</string>

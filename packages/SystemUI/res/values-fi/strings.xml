@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Näytä vähemmän tärkeät ilmoituskuvakkeet"</string>
     <string name="other" msgid="429768510980739978">"Muu"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Näytön jakaja"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Vasen koko näytölle"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"Vasen 70 %"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"Vasen 50 %"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"Vasen 30 %"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Oikea koko näytölle"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Yläosa koko näytölle"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"Yläosa 70 %"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Yläosa 50 %"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Yläosa 30 %"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Alaosa koko näytölle"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Paikka <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Muokkaa kaksoisnapauttamalla."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Lisää kaksoisnapauttamalla."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Siirrä <xliff:g id="TILE_NAME">%1$s</xliff:g>."</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Siirrä <xliff:g id="TILE_NAME">%1$s</xliff:g> kohtaan <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Pika-asetusten muokkausnäkymä"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Ilmoitus kohteesta <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Sovellus ei ehkä toimi jaetulla näytöllä."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"Sovellus ei tue jaetun näytön tilaa."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Sovellus ei ehkä toimi toissijaisella näytöllä."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"Sovellus ei tue käynnistämistä toissijaisilla näytöillä."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Avaa asetukset."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Avaa pika-asetukset."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Sulje pika-asetukset."</string>
