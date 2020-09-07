@@ -389,13 +389,29 @@ public class TarBackupReader {
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
             boolean allowApks, FileMetadata info, Signature[] signatures,
             PackageManagerInternal pmi, int userId) {
+        return chooseRestorePolicy(packageManager, allowApks, info, signatures, pmi, userId,
+                BackupEligibilityRules.forBackup(packageManager, pmi, userId));
+    }
+
+    /**
+     * Chooses restore policy.
+     *
+     * @param packageManager - PackageManager instance.
+     * @param allowApks - allow restore set to include apks.
+     * @param info - file metadata.
+     * @param signatures - array of signatures parsed from backup file.
+     * @param userId - ID of the user for which restore is performed.
+     * @param eligibilityRules - {@link BackupEligibilityRules} for this operation.
+     * @return a restore policy constant.
+     */
+    public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
+            boolean allowApks, FileMetadata info, Signature[] signatures,
+            PackageManagerInternal pmi, int userId, BackupEligibilityRules eligibilityRules) {
         if (signatures == null) {
             return RestorePolicy.IGNORE;
         }
 
         RestorePolicy policy = RestorePolicy.IGNORE;
-        BackupEligibilityRules eligibilityRules = BackupEligibilityRules.forBackup(packageManager,
-                pmi, userId);
         // Okay, got the manifest info we need...
         try {
             PackageInfo pkgInfo = packageManager.getPackageInfoAsUser(
