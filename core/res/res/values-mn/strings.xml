@@ -1120,7 +1120,7 @@
     <string name="yes" msgid="9069828999585032361">"ОК"</string>
     <string name="no" msgid="5122037903299899715">"Цуцлах"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Анхаар"</string>
-    <string name="loading" msgid="3138021523725055037">"Ачааллаж байна..."</string>
+    <string name="loading" msgid="3138021523725055037">"Ачаалж байна..."</string>
     <string name="capital_on" msgid="2770685323900821829">"Идэвхтэй"</string>
     <string name="capital_off" msgid="7443704171014626777">"Идэвхгүй"</string>
     <string name="checked" msgid="9179896827054513119">"тэмдэглэсэн"</string>
