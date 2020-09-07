@@ -174,7 +174,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testForceStopPackage() {
-        final Task task = new StackBuilder(mWm.mRoot).build();
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopMostActivity();
         final WindowProcessController wpc = activity.app;
         final ActivityRecord[] activities = {
