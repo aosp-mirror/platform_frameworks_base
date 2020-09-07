@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"優先度の低い通知アイコンを表示"</string>
     <string name="other" msgid="429768510980739978">"その他"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"分割画面の分割線"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"左全画面"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"左 70%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"左 50%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"左 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"右全画面"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"上部全画面"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"上 70%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"上 50%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"上 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"下部全画面"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ポジション <xliff:g id="POSITION">%1$d</xliff:g> の <xliff:g id="TILE_NAME">%2$s</xliff:g> を編集するにはダブルタップします。"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g> を追加するにはダブルタップします。"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> を移動します"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> をポジション <xliff:g id="POSITION">%2$d</xliff:g> に移動"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"クイック設定エディタ"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> の通知: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"アプリは分割画面では動作しないことがあります。"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"アプリで分割画面がサポートされていません。"</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"アプリはセカンダリ ディスプレイでは動作しないことがあります。"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"アプリはセカンダリ ディスプレイでの起動に対応していません。"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"設定を開きます。"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"クイック設定を開きます。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"クイック設定を閉じます。"</string>

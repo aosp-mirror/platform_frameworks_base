@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"အရေးမကြီးသော အကြောင်းကြားချက် သင်္ကေတများ ပြရန်"</string>
     <string name="other" msgid="429768510980739978">"အခြား"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"မျက်နှာပြင်ခွဲခြမ်း ပိုင်းခြားပေးသည့်စနစ်"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"ဘယ်ဘက် မျက်နှာပြင်အပြည့်"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"ဘယ်ဘက်မျက်နှာပြင် ၇၀%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"ဘယ်ဘက် မျက်နှာပြင် ၅၀%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"ဘယ်ဘက် မျက်နှာပြင် ၃၀%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"ညာဘက် မျက်နှာပြင်အပြည့်"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"အပေါ်ဘက် မျက်နှာပြင်အပြည့်"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"အပေါ်ဘက် မျက်နှာပြင် ၇၀%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"အပေါ်ဘက် မျက်နှာပြင် ၅၀%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"အပေါ်ဘက် မျက်နှာပြင် ၃၀%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"အောက်ခြေ မျက်နှာပြင်အပြည့်"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g>၊ <xliff:g id="TILE_NAME">%2$s</xliff:g> နေရာ။ တည်းဖြတ်ရန် နှစ်ချက်တို့ပါ။"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>။ ပေါင်းထည့်ရန် နှစ်ချက်တို့ပါ။"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကိုရွှေ့ပါ"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို အနေအထား <xliff:g id="POSITION">%2$d</xliff:g> သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"မြန်ဆန်သည့် ဆက်တင်တည်းဖြတ်စနစ်"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> အကြောင်းကြားချက် − <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"မျက်နှာပြင် ခွဲခြမ်းပြသမှုဖြင့် အက်ပ်သည် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"အက်ပ်သည် မျက်နှာပြင်ခွဲပြရန် ပံ့ပိုးထားခြင်းမရှိပါ။"</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"ဤအက်ပ်အနေဖြင့် ဒုတိယဖန်သားပြင်ပေါ်တွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"ဤအက်ပ်အနေဖြင့် ဖွင့်ရန်စနစ်ကို ဒုတိယဖန်သားပြင်မှ အသုံးပြုရန် ပံ့ပိုးမထားပါ။"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"အမြန်ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"အမြန်ဆက်တင်များကို ပိတ်ပါ။"</string>

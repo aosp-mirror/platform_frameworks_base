@@ -480,7 +480,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Mirë se erdhe, i ftuar!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Fillo nga e para"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo!"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Përdorues vizitor"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Për të fshirë aplikacionet dhe të dhënat, hiqe përdoruesin vizitor"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"HIQ VIZITORIN"</string>
@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Shfaq ikonat e njoftimeve me përparësi të ulët"</string>
     <string name="other" msgid="429768510980739978">"Të tjera"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Ndarësi i ekranit të ndarë"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Ekrani i plotë majtas"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"Majtas 70%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"Majtas 50%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"Majtas 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Ekrani i plotë djathtas"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Ekrani i plotë lart"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"Lart 70%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Lart 50%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Lart 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Ekrani i plotë poshtë"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Pozicioni <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Trokit dy herë për ta redaktuar."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Trokit dy herë për ta shtuar."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Zhvendose <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Zhvendos <xliff:g id="TILE_NAME">%1$s</xliff:g> te pozicioni <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redaktori i cilësimeve të shpejta."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Njoftim nga <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikacioni mund të mos funksionojë me ekranin e ndarë."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"Aplikacioni nuk mbështet ekranin e ndarë."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Aplikacioni mund të mos funksionojë në një ekran dytësor."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"Aplikacioni nuk mbështet nisjen në ekrane dytësore."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Hap cilësimet."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Hap cilësimet e shpejta."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Mbyll cilësimet e shpejta."</string>

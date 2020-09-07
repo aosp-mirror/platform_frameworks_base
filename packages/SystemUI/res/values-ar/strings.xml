@@ -232,7 +232,7 @@
     <string name="not_default_data_content_description" msgid="6757881730711522517">"لم يتم الضبط على استخدام البيانات"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"غير مفعّلة"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"التوصيل عبر البلوتوث"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطائرة."</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطيران."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"‏ليس هناك شريحة SIM."</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"جارٍ تغيير شبكة مشغِّل شبكة الجوّال."</string>
@@ -267,10 +267,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"‏تم تفعيل Wifi."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"الجوّال <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"البطارية <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطائرة."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"إيقاف وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"تفعيل وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"تم إيقاف وضع الطيران."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"تم تفعيل وضع الطيران."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"كتم الصوت تمامًا"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"المنبِّهات فقط"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"عدم الإزعاج"</string>
@@ -664,7 +664,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطائرة"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="add_tile" msgid="6239678623873086686">"إضافة فئة"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"إرسال فئة"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g> إلا إذا أوقفت هذا قبل الموعد"</string>
@@ -899,17 +899,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"إظهار رموز الإشعارات ذات الأولوية المنخفضة"</string>
     <string name="other" msgid="429768510980739978">"غير ذلك"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"أداة تقسيم الشاشة"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"عرض النافذة اليسرى بملء الشاشة"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"ضبط حجم النافذة اليسرى ليكون ٧٠%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"ضبط حجم النافذة اليسرى ليكون ٥٠%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"ضبط حجم النافذة اليسرى ليكون ٣٠%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"عرض النافذة اليمنى بملء الشاشة"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"عرض النافذة العلوية بملء الشاشة"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"ضبط حجم النافذة العلوية ليكون ٧٠%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ضبط حجم النافذة العلوية ليكون ٥٠%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ضبط حجم النافذة العلوية ليكون ٣٠%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"عرض النافذة السفلية بملء الشاشة"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"الموضع <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. انقر مرّتين للتعديل."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. انقر مرّتين للإضافة."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"نقل <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
@@ -918,10 +907,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"نقل <xliff:g id="TILE_NAME">%1$s</xliff:g> إلى الموضع <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"برنامج تعديل الإعدادات السريعة."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"إشعار <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"يمكن ألا يعمل التطبيق مع وضع تقسيم الشاشة."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"التطبيق لا يتيح تقسيم الشاشة."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"قد لا يعمل التطبيق على شاشة عرض ثانوية."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"لا يمكن تشغيل التطبيق على شاشات عرض ثانوية."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"فتح الإعدادات."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"فتح الإعدادات السريعة."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"إغلاق الإعدادات السريعة."</string>
