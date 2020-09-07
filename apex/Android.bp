@@ -106,7 +106,10 @@ java_defaults {
     stubs_library_visibility: ["//visibility:public"],
 
     // Hide impl library and stub sources
-    impl_library_visibility: [":__package__"],
+    impl_library_visibility: [
+        ":__package__",
+        "//frameworks/base", // For framework-all
+    ],
     stubs_source_visibility: ["//visibility:private"],
 
     // Collates API usages from each module for further analysis.
