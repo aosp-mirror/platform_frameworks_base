@@ -323,6 +323,9 @@
     <!-- Permissions required for CTS test - AdbManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_DEBUGGING" />
 
+    <!-- Permission needed for CTS test - DisplayTest -->
+    <uses-permission android:name="android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

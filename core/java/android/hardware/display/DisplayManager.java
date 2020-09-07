@@ -841,6 +841,30 @@ public final class DisplayManager {
     }
 
     /**
+     * When enabled the app requested mode is always selected regardless of user settings and
+     * policies for low brightness, low battery, etc.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
+    public void setShouldAlwaysRespectAppRequestedMode(boolean enabled) {
+        mGlobal.setShouldAlwaysRespectAppRequestedMode(enabled);
+    }
+
+    /**
+     * Returns whether we are running in a mode which always selects the app requested display mode
+     * and ignores user settings and policies for low brightness, low battery etc.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
+    public boolean shouldAlwaysRespectAppRequestedMode() {
+        return mGlobal.shouldAlwaysRespectAppRequestedMode();
+    }
+
+    /**
      * Listens for changes in available display devices.
      */
     public interface DisplayListener {

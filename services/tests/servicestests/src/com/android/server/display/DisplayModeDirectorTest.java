@@ -302,4 +302,42 @@ public class DisplayModeDirectorTest {
         verifyBrightnessObserverCall(director, 90, 90, 0, 90, 90);
         verifyBrightnessObserverCall(director, 120, 90, 0, 120, 90);
     }
+
+    @Test
+    public void testVotingWithAlwaysRespectAppRequest() {
+        final int displayId = 0;
+        DisplayModeDirector director = createDirectorFromFpsRange(50, 90);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(displayId, votes);
+        votes.put(Vote.PRIORITY_LOW_BRIGHTNESS, Vote.forRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE, Vote.forRefreshRates(60, 90));
+        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, Vote.forRefreshRates(90, 90));
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRefreshRates(0, 60));
+
+
+        director.injectVotesByDisplay(votesByDisplay);
+        Truth.assertThat(director.shouldAlwaysRespectAppRequestedMode()).isFalse();
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+
+        Truth.assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        Truth.assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        Truth.assertThat(desiredSpecs.baseModeId).isEqualTo(60);
+
+        director.setShouldAlwaysRespectAppRequestedMode(true);
+        Truth.assertThat(director.shouldAlwaysRespectAppRequestedMode()).isTrue();
+        desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+        Truth.assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        Truth.assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        Truth.assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+
+        director.setShouldAlwaysRespectAppRequestedMode(false);
+        Truth.assertThat(director.shouldAlwaysRespectAppRequestedMode()).isFalse();
+
+        desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+        Truth.assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        Truth.assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        Truth.assertThat(desiredSpecs.baseModeId).isEqualTo(60);
+    }
 }

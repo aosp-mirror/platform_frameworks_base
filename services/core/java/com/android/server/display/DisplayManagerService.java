@@ -1179,6 +1179,15 @@ public final class DisplayManagerService extends SystemService {
         return mWideColorSpace.getId();
     }
 
+    void setShouldAlwaysRespectAppRequestedModeInternal(boolean enabled) {
+        mDisplayModeDirector.setShouldAlwaysRespectAppRequestedMode(enabled);
+    }
+
+
+    boolean shouldAlwaysRespectAppRequestedModeInternal() {
+        return mDisplayModeDirector.shouldAlwaysRespectAppRequestedMode();
+    }
+
     private void setBrightnessConfigurationForUserInternal(
             @Nullable BrightnessConfiguration c, @UserIdInt int userId,
             @Nullable String packageName) {
@@ -2458,6 +2467,32 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getPreferredWideGamutColorSpaceIdInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setShouldAlwaysRespectAppRequestedMode(boolean enabled) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS,
+                    "Permission required to override display mode requests.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setShouldAlwaysRespectAppRequestedModeInternal(enabled);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public boolean shouldAlwaysRespectAppRequestedMode() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS,
+                    "Permission required to override display mode requests.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return shouldAlwaysRespectAppRequestedModeInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

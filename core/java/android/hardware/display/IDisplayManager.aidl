@@ -128,4 +128,10 @@ interface IDisplayManager {
     // The wide gamut color space is returned from composition pipeline
     // based on hardware capability.
     int getPreferredWideGamutColorSpaceId();
+
+    // When enabled the app requested display resolution and refresh rate is always selected
+    // in DisplayModeDirector regardless of user settings and policies for low brightness, low
+    // battery etc.
+    void setShouldAlwaysRespectAppRequestedMode(boolean enabled);
+    boolean shouldAlwaysRespectAppRequestedMode();
 }
