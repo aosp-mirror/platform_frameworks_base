@@ -217,7 +217,10 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         // Create source token
         final ActivityBuilder builder = new ActivityBuilder(service).setTask(
-                new TaskBuilder(service.mStackSupervisor).setVoiceSession(voiceSession).build());
+                new TaskBuilder(service.mStackSupervisor)
+                        .setVoiceSession(voiceSession)
+                        .setCreateParentTask(true)
+                        .build());
 
         if (aInfo != null) {
             aInfo.applicationInfo = new ApplicationInfo();
@@ -706,7 +709,9 @@ public class ActivityStarterTests extends WindowTestsBase {
     @Test
     public void testBringTaskToFrontWhenFocusedStackIsFinising() {
         // Put 2 tasks in the same stack (simulate the behavior of home stack).
+        final Task rootTask = new TaskBuilder(mSupervisor).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setStack(rootTask)
                 .setCreateTask(true).build();
         new ActivityBuilder(mAtm)
                 .setStack(activity.getRootTask())
@@ -792,7 +797,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task topTask = new TaskBuilder(mSupervisor).setStack(topStack).build();
+        final Task topTask = new TaskBuilder(mSupervisor).setParentTask(topStack).build();
         new ActivityBuilder(mAtm).setTask(topTask).build();
 
         // Start activity with the same intent as {@code singleTaskActivity} on secondary display.
@@ -851,7 +856,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
         final Task task = new TaskBuilder(mSupervisor)
                 .setComponent(componentName)
-                .setStack(stack)
+                .setParentTask(stack)
                 .build();
         return new ActivityBuilder(mAtm)
                 .setComponent(componentName)
@@ -987,7 +992,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mAtm).build();
         final Task task = new TaskBuilder(mAtm.mStackSupervisor)
-                .setStack(mAtm.mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
+                .setParentTask(mAtm.mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .setUserId(10)
                 .build();

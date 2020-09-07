@@ -100,7 +100,7 @@ public class ActivityStackTests extends WindowTestsBase {
         mStack = mDefaultTaskDisplayArea.createStack(WINDOWING_MODE_UNDEFINED,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         spyOn(mStack);
-        mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
+        mTask = new TaskBuilder(mSupervisor).setParentTask(mStack).build();
     }
 
     @Test
@@ -330,7 +330,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 targetActivity);
         final ComponentName alias = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
                 aliasActivity);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).setStack(mStack).build();
+        final Task task = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(mStack).build();
         task.origActivity = alias;
         task.realActivity = target;
         new ActivityBuilder(mAtm).setComponent(target).setTask(task).setTargetActivity(
@@ -995,7 +995,7 @@ public class ActivityStackTests extends WindowTestsBase {
             mDefaultTaskDisplayArea.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, task,
                     false /* includingParents */);
         } else {
-            task = new StackBuilder(mRootWindowContainer)
+            task = new TaskBuilder(mSupervisor)
                     .setTaskDisplayArea(taskDisplayArea)
                     .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
