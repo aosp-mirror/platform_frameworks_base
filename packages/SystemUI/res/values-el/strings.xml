@@ -691,7 +691,7 @@
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Αυτές οι ειδοποιήσεις θα ελαχιστοποιηθούν"</string>
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Αυτές οι ειδοποιήσεις θα εμφανίζονται σιωπηλά"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Αυτές οι ειδοποιήσεις θα σας ενημερώνουν"</string>
-    <string name="inline_blocking_helper" msgid="2891486013649543452">"Συνήθως απορρίπτετε αυτές τις ειδοποιήσεις. \nΝα εξακολουθήσουν να εμφανίζονται;"</string>
+    <string name="inline_blocking_helper" msgid="2891486013649543452">"Συνήθως παραβλέπετε αυτές τις ειδοποιήσεις. \nΝα εξακολουθήσουν να εμφανίζονται;"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Τέλος"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Εφαρμογή"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Να συνεχίσουν να εμφανίζονται αυτές οι ειδοποιήσεις;"</string>
