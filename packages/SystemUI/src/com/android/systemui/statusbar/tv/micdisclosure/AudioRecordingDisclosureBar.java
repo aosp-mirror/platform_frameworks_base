@@ -36,7 +36,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.tv.TvStatusBar;
@@ -89,12 +88,6 @@ public class AudioRecordingDisclosureBar implements
     private boolean mIsEnabled;
 
     private View mIndicatorView;
-    private View mIconTextsContainer;
-    private View mIconContainerBg;
-    private View mIcon;
-    private View mBgEnd;
-    private View mTextsContainers;
-    private TextView mTextView;
     private boolean mIsLtr;
 
     @State private int mState = STATE_STOPPED;
@@ -221,21 +214,6 @@ public class AudioRecordingDisclosureBar implements
         mIndicatorView = LayoutInflater.from(mContext).inflate(
                 R.layout.tv_audio_recording_indicator,
                 null);
-        mIconTextsContainer = mIndicatorView.findViewById(R.id.icon_texts_container);
-        mIconContainerBg = mIconTextsContainer.findViewById(R.id.icon_container_bg);
-        mIcon = mIconTextsContainer.findViewById(R.id.icon_mic);
-        mTextsContainers = mIconTextsContainer.findViewById(R.id.texts_container);
-        mTextView = mTextsContainers.findViewById(R.id.text);
-        mBgEnd = mIndicatorView.findViewById(R.id.bg_end);
-
-        mTextsContainers.setVisibility(View.GONE);
-        mIconContainerBg.setVisibility(View.GONE);
-        mTextView.setVisibility(View.GONE);
-        mBgEnd.setVisibility(View.GONE);
-        mTextsContainers = null;
-        mIconContainerBg = null;
-        mTextView = null;
-        mBgEnd = null;
 
         // Initially change the visibility to INVISIBLE, wait until and receives the size and
         // then animate it moving from "off" the screen correctly
@@ -305,12 +283,11 @@ public class AudioRecordingDisclosureBar implements
     private void hide() {
         if (DEBUG) Log.d(TAG, "Hide indicator");
 
-        final int targetOffset = (mIsLtr ? 1 : -1) * (mIndicatorView.getWidth()
-                - (int) mIconTextsContainer.getTranslationX());
+        final int targetOffset = (mIsLtr ? 1 : -1) * mIndicatorView.getWidth();
         final AnimatorSet set = new AnimatorSet();
         set.playTogether(
                 ObjectAnimator.ofFloat(mIndicatorView, View.TRANSLATION_X, targetOffset),
-                ObjectAnimator.ofFloat(mIcon, View.ALPHA, 0f));
+                ObjectAnimator.ofFloat(mIndicatorView, View.ALPHA, 0f));
         set.setDuration(ANIMATION_DURATION);
         set.addListener(
                 new AnimatorListenerAdapter() {
@@ -363,12 +340,6 @@ public class AudioRecordingDisclosureBar implements
         windowManager.removeView(mIndicatorView);
 
         mIndicatorView = null;
-        mIconTextsContainer = null;
-        mIconContainerBg = null;
-        mIcon = null;
-        mTextsContainers = null;
-        mTextView = null;
-        mBgEnd = null;
     }
 
     private static List<String> splitByComma(String string) {
