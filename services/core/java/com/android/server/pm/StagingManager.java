@@ -1186,8 +1186,8 @@ public class StagingManager {
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
     //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
-    void notifyPreRebootVerification_Apk_Complete(int sessionId) {
-        mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(sessionId);
+    void notifyPreRebootVerification_Apk_Complete(PackageInstallerSession session) {
+        mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(session);
     }
 
     private final class PreRebootVerificationHandler extends Handler {
@@ -1222,7 +1222,7 @@ public class StagingManager {
         public void handleMessage(Message msg) {
             final int sessionId = msg.arg1;
             final int rollbackId = msg.arg2;
-            final PackageInstallerSession session = getStagedSession(sessionId);
+            final PackageInstallerSession session = (PackageInstallerSession) msg.obj;
             if (session == null) {
                 Slog.wtf(TAG, "Session disappeared in the middle of pre-reboot verification: "
                         + sessionId);
@@ -1274,7 +1274,8 @@ public class StagingManager {
 
             if (session != null && session.notifyStagedStartPreRebootVerification()) {
                 Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
-                obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1).sendToTarget();
+                obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
+                        .sendToTarget();
             }
         }
 
@@ -1296,16 +1297,20 @@ public class StagingManager {
             session.notifyStagedEndPreRebootVerification();
         }
 
-        private void notifyPreRebootVerification_Start_Complete(int sessionId, int rollbackId) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APEX, sessionId, rollbackId).sendToTarget();
+        private void notifyPreRebootVerification_Start_Complete(
+                PackageInstallerSession session, int rollbackId) {
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APEX, session.sessionId, rollbackId, session)
+                    .sendToTarget();
         }
 
-        private void notifyPreRebootVerification_Apex_Complete(int sessionId) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APK, sessionId, -1).sendToTarget();
+        private void notifyPreRebootVerification_Apex_Complete(PackageInstallerSession session) {
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APK, session.sessionId, -1, session)
+                    .sendToTarget();
         }
 
-        private void notifyPreRebootVerification_Apk_Complete(int sessionId) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, sessionId, -1).sendToTarget();
+        private void notifyPreRebootVerification_Apk_Complete(PackageInstallerSession session) {
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId, -1, session)
+                    .sendToTarget();
         }
 
         /**
@@ -1338,7 +1343,7 @@ public class StagingManager {
                 }
             }
 
-            notifyPreRebootVerification_Start_Complete(session.sessionId, rollbackId);
+            notifyPreRebootVerification_Start_Complete(session, rollbackId);
         }
 
         /**
@@ -1372,17 +1377,17 @@ public class StagingManager {
                 packageManagerInternal.pruneCachedApksInApex(apexPackages);
             }
 
-            notifyPreRebootVerification_Apex_Complete(session.sessionId);
+            notifyPreRebootVerification_Apex_Complete(session);
         }
 
         /**
          * Pre-reboot verification state for apk files. Session is sent to
          * {@link PackageManagerService} for verification and it notifies back the result via
-         * {@link #notifyPreRebootVerification_Apk_Complete(int)}
+         * {@link #notifyPreRebootVerification_Apk_Complete}
          */
         private void handlePreRebootVerification_Apk(@NonNull PackageInstallerSession session) {
             if (!sessionContainsApk(session)) {
-                notifyPreRebootVerification_Apk_Complete(session.sessionId);
+                notifyPreRebootVerification_Apk_Complete(session);
                 return;
             }
             session.verifyStagedSession();

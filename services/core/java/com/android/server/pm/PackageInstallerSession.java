@@ -1998,7 +1998,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyPreRebootVerification_Apk_Complete(sessionId);
+            mStagingManager.notifyPreRebootVerification_Apk_Complete(this);
             // TODO(b/136257624): We also need to destroy internals for verified staged session,
             //  otherwise file descriptors are never closed for verified staged session until reboot
             return;
