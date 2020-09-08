@@ -136,14 +136,8 @@ class MediaDataFilter @Inject constructor(
 
     /**
      * Are there any media entries we should display?
-     * If resumption is enabled, this will include inactive players
-     * If resumption is disabled, we only want to show active players
      */
-    fun hasAnyMedia() = if (mediaResumeListener.isResumptionEnabled()) {
-        userEntries.isNotEmpty()
-    } else {
-        hasActiveMedia()
-    }
+    fun hasAnyMedia() = userEntries.isNotEmpty()
 
     /**
      * Add a listener for filtered [MediaData] changes
