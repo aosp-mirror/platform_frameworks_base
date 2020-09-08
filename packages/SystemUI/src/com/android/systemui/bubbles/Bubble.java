@@ -646,14 +646,14 @@ class Bubble implements BubbleViewProvider {
     }
 
     private int getDimenForPackageUser(Context context, int resId, String pkg, int userId) {
-        PackageManager pm = context.getPackageManager();
         Resources r;
         if (pkg != null) {
             try {
                 if (userId == UserHandle.USER_ALL) {
                     userId = UserHandle.USER_SYSTEM;
                 }
-                r = pm.getResourcesForApplicationAsUser(pkg, userId);
+                r = context.createContextAsUser(UserHandle.of(userId), /* flags */ 0)
+                        .getPackageManager().getResourcesForApplication(pkg);
                 return r.getDimensionPixelSize(resId);
             } catch (PackageManager.NameNotFoundException ex) {
                 // Uninstalled, don't care
