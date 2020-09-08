@@ -2258,7 +2258,7 @@
 
     <!-- Amount of time in ms the user needs to press the relevant keys to trigger the
          screenshot chord -->
-    <integer name="config_screenshotChordKeyTimeout">500</integer>
+    <integer name="config_screenshotChordKeyTimeout">0</integer>
 
     <!-- Default width of a vertical scrollbar and height of a horizontal scrollbar.
          Takes effect only if the scrollbar drawables have no intrinsic size. -->
