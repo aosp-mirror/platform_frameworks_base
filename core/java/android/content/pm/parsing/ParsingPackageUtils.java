@@ -210,7 +210,7 @@ public class ParsingPackageUtils {
      * package is a monolithic style (single APK file) or cluster style
      * (directory of APKs).
      * <p>
-     * This performs sanity checking on cluster style packages, such as
+     * This performs validity checking on cluster style packages, such as
      * requiring identical package name and version codes, a single base APK,
      * and unique split names.
      * <p>
@@ -236,7 +236,7 @@ public class ParsingPackageUtils {
 
     /**
      * Parse all APKs contained in the given directory, treating them as a
-     * single package. This also performs sanity checking, such as requiring
+     * single package. This also performs validity checking, such as requiring
      * identical package name and version codes, a single base APK, and unique
      * split names.
      * <p>

@@ -228,7 +228,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             PackageManagerInternal.class);
                     RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
                             mBackupManagerService.getPackageManager(), allowApks, info, signatures,
-                            pmi, mUserId);
+                            pmi, mUserId, mBackupEligibilityRules);
                     mManifestSignatures.put(info.packageName, signatures);
                     mPackagePolicies.put(pkg, restorePolicy);
                     mPackageInstallers.put(pkg, info.installerPackageName);

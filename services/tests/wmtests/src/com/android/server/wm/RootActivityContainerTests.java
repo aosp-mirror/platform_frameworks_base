@@ -195,8 +195,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
     public void testApplySleepTokens() {
         final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
-        final Task stack = new StackBuilder(mRootWindowContainer)
-                .setCreateActivity(false)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setDisplay(display)
                 .setOnTop(false)
                 .build();
@@ -384,7 +383,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final Task primaryStack = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
                         true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setStack(primaryStack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(primaryStack).build();
         final ActivityRecord r = new ActivityBuilder(mAtm).setTask(task).build();
 
         // Find a launch stack for the top activity in split-screen primary, while requesting
@@ -404,14 +403,17 @@ public class RootActivityContainerTests extends WindowTestsBase {
     @Test
     public void testFindTaskToMoveToFrontWhenRecentsOnTop() {
         // Create stack/task on default display.
-        final Task targetStack = new StackBuilder(mRootWindowContainer)
+        final Task targetStack = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
                 .setOnTop(false)
                 .build();
         final Task targetTask = targetStack.getBottomMostTask();
 
         // Create Recents on top of the display.
-        final Task stack = new StackBuilder(mRootWindowContainer).setActivityType(
-                ACTIVITY_TYPE_RECENTS).build();
+        final Task stack = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setActivityType(ACTIVITY_TYPE_RECENTS)
+                .build();
 
         final String reason = "findTaskToMoveToFront";
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
@@ -431,14 +433,14 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task targetStack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final Task targetTask = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final Task targetTask = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
 
         // Create Recents on secondary display.
         final TestDisplayContent secondDisplay = addNewDisplayContentAt(
                 DisplayContent.POSITION_TOP);
         final Task stack = secondDisplay.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         new ActivityBuilder(mAtm).setTask(task).build();
 
         final String reason = "findTaskToMoveToFront";
@@ -458,7 +460,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task targetStack = spy(taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
-        final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         taskDisplayArea.positionChildAt(POSITION_BOTTOM, targetStack, false /*includingParents*/);
 
@@ -514,7 +516,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
                 DisplayContent.POSITION_TOP);
         final Task stack = secondDisplay.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         new ActivityBuilder(mAtm).setTask(task).build();
 
         doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
@@ -538,7 +540,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task targetStack = spy(taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
-        final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         activity.setState(ActivityState.RESUMED, "test");
 
@@ -558,7 +560,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task targetStack = spy(taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
-        final Task task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         activity.setState(ActivityState.RESUMED, "test");
         taskDisplayArea.positionChildAt(POSITION_BOTTOM, targetStack, false /*includingParents*/);
@@ -884,7 +886,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         // Create a root task with an activity on secondary display.
         final TestDisplayContent secondaryDisplay = new TestDisplayContent.Builder(mAtm, 300,
                 600).build();
-        final Task task = new StackBuilder(mRootWindowContainer)
+        final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(secondaryDisplay).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
 

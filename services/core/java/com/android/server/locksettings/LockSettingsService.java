@@ -837,7 +837,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (getString("migrated", null, 0) == null) {
             final ContentResolver cr = mContext.getContentResolver();
             for (String validSetting : VALID_SETTINGS) {
-                String value = Settings.Secure.getString(cr, validSetting);
+                String value = Settings.Secure.getStringForUser(cr, validSetting, cr.getUserId());
                 if (value != null) {
                     setString(validSetting, value, 0);
                 }

@@ -341,9 +341,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     public void testConsecutiveLaunchOnDifferentDisplay() {
         onActivityLaunched(mTopActivity);
 
-        final Task stack = new StackBuilder(mRootWindowContainer)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setDisplay(addNewDisplayContentAt(DisplayContent.POSITION_BOTTOM))
-                .setCreateActivity(false)
                 .build();
         final ActivityRecord activityOnNewDisplay = new ActivityBuilder(mAtm)
                 .setStack(stack)

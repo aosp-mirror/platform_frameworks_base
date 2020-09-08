@@ -290,7 +290,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testTaskTransaction() {
         removeGlobalMinSizeRestriction();
-        final Task stack = new StackBuilder(mWm.mRoot)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
         testTransaction(task);
@@ -299,7 +299,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testStackTransaction() {
         removeGlobalMinSizeRestriction();
-        final Task stack = new StackBuilder(mWm.mRoot)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         StackInfo info =
                 mWm.mAtmService.getStackInfo(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
@@ -324,7 +324,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testSetWindowingMode() {
-        final Task stack = new StackBuilder(mWm.mRoot)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         testSetWindowingMode(stack);
 
@@ -358,7 +358,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testContainerFocusableChanges() {
         removeGlobalMinSizeRestriction();
-        final Task stack = new StackBuilder(mWm.mRoot)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
@@ -374,7 +374,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testContainerHiddenChanges() {
         removeGlobalMinSizeRestriction();
-        final Task stack = new StackBuilder(mWm.mRoot)
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         WindowContainerTransaction t = new WindowContainerTransaction();
         assertTrue(stack.shouldBeVisible(null));
@@ -389,7 +389,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testOverrideConfigSize() {
         removeGlobalMinSizeRestriction();
-        final Task stack = new StackBuilder(mWm.mRoot)
+        final Task stack = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();

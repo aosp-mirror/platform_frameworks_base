@@ -90,6 +90,7 @@ import com.android.server.AttributeCache;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.Description;
+import org.mockito.Mockito;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -398,22 +399,20 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     Task createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
-        return new StackBuilder(dc.mWmService.mRoot)
+        return new TaskBuilder(dc.mAtmService.mStackSupervisor)
                 .setDisplay(dc)
                 .setWindowingMode(windowingMode)
                 .setActivityType(activityType)
-                .setCreateActivity(false)
                 .setIntent(new Intent())
                 .build();
     }
 
     Task createTaskStackOnTaskDisplayArea(int windowingMode, int activityType,
             TaskDisplayArea tda) {
-        return new StackBuilder(tda.mWmService.mRoot)
+        return new TaskBuilder(tda.mDisplayContent.mAtmService.mStackSupervisor)
                 .setTaskDisplayArea(tda)
                 .setWindowingMode(windowingMode)
                 .setActivityType(activityType)
-                .setCreateActivity(false)
                 .setIntent(new Intent())
                 .build();
     }
@@ -422,7 +421,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     Task createTaskInStack(Task stack, int userId) {
         final Task task = new TaskBuilder(stack.mStackSupervisor)
                 .setUserId(userId)
-                .setStack(stack)
+                .setParentTask(stack)
                 .build();
         return task;
     }
@@ -733,7 +732,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mCreateTask) {
                 mTask = new TaskBuilder(mService.mStackSupervisor)
                         .setComponent(mComponent)
-                        .setStack(mStack).build();
+                        .setParentTask(mStack).build();
             } else if (mTask == null && mStack != null && DisplayContent.alwaysCreateStack(
                     mStack.getWindowingMode(), mStack.getActivityType())) {
                 // The stack can be the task root.
@@ -813,20 +812,42 @@ class WindowTestsBase extends SystemServiceTestsBase {
     protected static class TaskBuilder {
         private final ActivityStackSupervisor mSupervisor;
 
+        private TaskDisplayArea mTaskDisplayArea;
         private ComponentName mComponent;
         private String mPackage;
         private int mFlags = 0;
-        // Task id 0 is reserved in ARC for the home app.
-        private int mTaskId = SystemServicesTestRule.sNextTaskId++;
+        private int mTaskId = -1;
         private int mUserId = 0;
+        private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+        private int mActivityType = ACTIVITY_TYPE_STANDARD;
+        private ActivityInfo mActivityInfo;
+        private Intent mIntent;
+        private boolean mOnTop = true;
         private IVoiceInteractionSession mVoiceSession;
-        private boolean mCreateStack = true;
 
-        private Task mStack;
-        private TaskDisplayArea mTaskDisplayArea;
+        private boolean mCreateParentTask = false;
+        private Task mParentTask;
+
+        private boolean mCreateActivity = false;
 
         TaskBuilder(ActivityStackSupervisor supervisor) {
             mSupervisor = supervisor;
+            mTaskDisplayArea = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+        }
+
+        /**
+         * Set the parent {@link DisplayContent} and use the default task display area. Overrides
+         * the task display area, if was set before.
+         */
+        TaskBuilder setDisplay(DisplayContent display) {
+            mTaskDisplayArea = display.getDefaultTaskDisplayArea();
+            return this;
+        }
+
+        /** Set the parent {@link TaskDisplayArea}. Overrides the display, if was set before. */
+        TaskBuilder setTaskDisplayArea(TaskDisplayArea taskDisplayArea) {
+            mTaskDisplayArea = taskDisplayArea;
+            return this;
         }
 
         TaskBuilder setComponent(ComponentName component) {
@@ -836,20 +857,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         TaskBuilder setPackage(String packageName) {
             mPackage = packageName;
-            return this;
-        }
-
-        /**
-         * Set to {@code true} by default, set to {@code false} to prevent the task from
-         * automatically creating a parent stack.
-         */
-        TaskBuilder setCreateStack(boolean createStack) {
-            mCreateStack = createStack;
-            return this;
-        }
-
-        TaskBuilder setVoiceSession(IVoiceInteractionSession session) {
-            mVoiceSession = session;
             return this;
         }
 
@@ -868,156 +875,117 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        TaskBuilder setStack(Task stack) {
-            mStack = stack;
+        TaskBuilder setWindowingMode(int windowingMode) {
+            mWindowingMode = windowingMode;
             return this;
         }
 
-        TaskBuilder setDisplay(DisplayContent display) {
-            mTaskDisplayArea = display.getDefaultTaskDisplayArea();
+        TaskBuilder setActivityType(int activityType) {
+            mActivityType = activityType;
+            return this;
+        }
+
+        TaskBuilder setActivityInfo(ActivityInfo info) {
+            mActivityInfo = info;
+            return this;
+        }
+
+        TaskBuilder setIntent(Intent intent) {
+            mIntent = intent;
+            return this;
+        }
+
+        TaskBuilder setOnTop(boolean onTop) {
+            mOnTop = onTop;
+            return this;
+        }
+
+        TaskBuilder setVoiceSession(IVoiceInteractionSession session) {
+            mVoiceSession = session;
+            return this;
+        }
+
+        TaskBuilder setCreateParentTask(boolean createParentTask) {
+            mCreateParentTask = createParentTask;
+            return this;
+        }
+
+        TaskBuilder setParentTask(Task parentTask) {
+            mParentTask = parentTask;
+            return this;
+        }
+
+        TaskBuilder setCreateActivity(boolean createActivity) {
+            mCreateActivity = createActivity;
             return this;
         }
 
         Task build() {
             SystemServicesTestRule.checkHoldsLock(mSupervisor.mService.mGlobalLock);
 
-            if (mStack == null && mCreateStack) {
-                TaskDisplayArea displayArea = mTaskDisplayArea != null ? mTaskDisplayArea
-                        : mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
-                mStack = displayArea.createStack(
+            // Create parent task.
+            if (mParentTask == null && mCreateParentTask) {
+                mParentTask = mTaskDisplayArea.createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-                spyOn(mStack);
+            }
+            if (mParentTask != null && !Mockito.mockingDetails(mParentTask).isSpy()) {
+                spyOn(mParentTask);
             }
 
-            final ActivityInfo aInfo = new ActivityInfo();
-            aInfo.applicationInfo = new ApplicationInfo();
-            aInfo.applicationInfo.packageName = mPackage;
-
-            Intent intent = new Intent();
-            if (mComponent == null) {
-                mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
-                        DEFAULT_COMPONENT_CLASS_NAME);
+            // Create task.
+            if (mActivityInfo == null) {
+                mActivityInfo = new ActivityInfo();
+                mActivityInfo.applicationInfo = new ApplicationInfo();
+                mActivityInfo.applicationInfo.packageName = mPackage;
             }
 
-            intent.setComponent(mComponent);
-            intent.setFlags(mFlags);
+            if (mIntent == null) {
+                mIntent = new Intent();
+                if (mComponent == null) {
+                    mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+                            DEFAULT_COMPONENT_CLASS_NAME);
+                }
+                mIntent.setComponent(mComponent);
+                mIntent.setFlags(mFlags);
+            }
 
-            final Task task = new Task(mSupervisor.mService, mTaskId, aInfo,
-                    intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
-                    null /*taskDescription*/, mStack);
+            Task task;
+            final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextStackId();
+            if (mParentTask == null) {
+                task = mTaskDisplayArea.createStackUnchecked(
+                        mWindowingMode, mActivityType, taskId, mOnTop, mActivityInfo,
+                        mIntent, false /* createdByOrganizer */);
+            } else {
+                task = new Task(mSupervisor.mService, taskId, mActivityInfo,
+                        mIntent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
+                        null /*taskDescription*/, mParentTask);
+                mParentTask.moveToFront("build-task");
+                mParentTask.addChild(task, true, true);
+            }
             spyOn(task);
             task.mUserId = mUserId;
+            Task rootTask = task.getRootTask();
+            doNothing().when(rootTask).startActivityLocked(
+                    any(), any(), anyBoolean(), anyBoolean(), any());
 
-            if (mStack != null) {
-                mStack.moveToFront("test");
-                mStack.addChild(task, true, true);
+            // Create child task with activity.
+            if (mCreateActivity) {
+                new ActivityBuilder(mSupervisor.mService)
+                        .setCreateTask(true)
+                        .setStack(task)
+                        .build();
+                if (mOnTop) {
+                    // We move the task to front again in order to regain focus after activity
+                    // added to the stack. Or {@link TaskDisplayArea#mPreferredTopFocusableStack}
+                    // could be other stacks (e.g. home stack).
+                    task.moveToFront("createActivityTask");
+                } else {
+                    task.moveToBack("createActivityTask", null);
+                }
             }
 
             return task;
         }
-    }
-
-    static class StackBuilder {
-        private final RootWindowContainer mRootWindowContainer;
-        private DisplayContent mDisplay;
-        private TaskDisplayArea mTaskDisplayArea;
-        private int mStackId = -1;
-        private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
-        private int mActivityType = ACTIVITY_TYPE_STANDARD;
-        private boolean mOnTop = true;
-        private boolean mCreateActivity = true;
-        private ActivityInfo mInfo;
-        private Intent mIntent;
-
-        StackBuilder(RootWindowContainer root) {
-            mRootWindowContainer = root;
-            mDisplay = mRootWindowContainer.getDefaultDisplay();
-            mTaskDisplayArea = mDisplay.getDefaultTaskDisplayArea();
-        }
-
-        StackBuilder setWindowingMode(int windowingMode) {
-            mWindowingMode = windowingMode;
-            return this;
-        }
-
-        StackBuilder setActivityType(int activityType) {
-            mActivityType = activityType;
-            return this;
-        }
-
-        StackBuilder setStackId(int stackId) {
-            mStackId = stackId;
-            return this;
-        }
-
-        /**
-         * Set the parent {@link DisplayContent} and use the default task display area. Overrides
-         * the task display area, if was set before.
-         */
-        StackBuilder setDisplay(DisplayContent display) {
-            mDisplay = display;
-            mTaskDisplayArea = mDisplay.getDefaultTaskDisplayArea();
-            return this;
-        }
-
-        /** Set the parent {@link TaskDisplayArea}. Overrides the display, if was set before. */
-        StackBuilder setTaskDisplayArea(TaskDisplayArea taskDisplayArea) {
-            mTaskDisplayArea = taskDisplayArea;
-            mDisplay = mTaskDisplayArea.mDisplayContent;
-            return this;
-        }
-
-        StackBuilder setOnTop(boolean onTop) {
-            mOnTop = onTop;
-            return this;
-        }
-
-        StackBuilder setCreateActivity(boolean createActivity) {
-            mCreateActivity = createActivity;
-            return this;
-        }
-
-        StackBuilder setActivityInfo(ActivityInfo info) {
-            mInfo = info;
-            return this;
-        }
-
-        StackBuilder setIntent(Intent intent) {
-            mIntent = intent;
-            return this;
-        }
-
-        Task build() {
-            SystemServicesTestRule.checkHoldsLock(mRootWindowContainer.mWmService.mGlobalLock);
-
-            final int stackId = mStackId >= 0 ? mStackId : mTaskDisplayArea.getNextStackId();
-            final Task stack = mTaskDisplayArea.createStackUnchecked(
-                    mWindowingMode, mActivityType, stackId, mOnTop, mInfo, mIntent,
-                    false /* createdByOrganizer */);
-            final ActivityStackSupervisor supervisor = mRootWindowContainer.mStackSupervisor;
-
-            if (mCreateActivity) {
-                new ActivityBuilder(supervisor.mService)
-                        .setCreateTask(true)
-                        .setStack(stack)
-                        .build();
-                if (mOnTop) {
-                    // We move the task to front again in order to regain focus after activity
-                    // added to the stack. Or {@link DisplayContent#mPreferredTopFocusableStack}
-                    // could be other stacks (e.g. home stack).
-                    stack.moveToFront("createActivityStack");
-                } else {
-                    stack.moveToBack("createActivityStack", null);
-                }
-            }
-            spyOn(stack);
-
-            doNothing().when(stack).startActivityLocked(
-                    any(), any(), anyBoolean(), anyBoolean(), any());
-
-            return stack;
-        }
-
     }
 
     static class TestSplitOrganizer extends ITaskOrganizer.Stub {
