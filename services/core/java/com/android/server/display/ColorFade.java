@@ -493,6 +493,10 @@ final class ColorFade {
                         == Display.COLOR_MODE_DISPLAY_P3;
                 SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                         mDisplayManagerInternal.systemScreenshot(mDisplayId);
+                if (screenshotBuffer == null) {
+                    Slog.e(TAG, "Failed to take screenshot. Buffer is null");
+                    return false;
+                }
                 s.attachAndQueueBufferWithColorSpace(screenshotBuffer.getHardwareBuffer(),
                         screenshotBuffer.getColorSpace());
 
