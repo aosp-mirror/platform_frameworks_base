@@ -533,7 +533,8 @@ final class InputMonitor {
             }
 
             if (mAddNavInputConsumerHandle) {
-                mNavInputConsumer.show(mInputTransaction, w);
+                // We set the layer to z=MAX-1 so that it's always on top.
+                mNavInputConsumer.show(mInputTransaction, Integer.MAX_VALUE - 1);
                 mAddNavInputConsumerHandle = false;
             }
 
