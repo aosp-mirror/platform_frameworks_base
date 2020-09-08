@@ -595,6 +595,27 @@ public final class ScanResult implements Parcelable {
     public static final int BAND_6_GHZ_END_FREQ_MHZ = 7105;
 
     /**
+     * 60 GHz band first channel number
+     * @hide
+     */
+    public static final int BAND_60_GHZ_FIRST_CH_NUM = 1;
+    /**
+     * 60 GHz band last channel number
+     * @hide
+     */
+    public static final int BAND_60_GHZ_LAST_CH_NUM = 6;
+    /**
+     * 60 GHz band frequency of first channel in MHz
+     * @hide
+     */
+    public static final int BAND_60_GHZ_START_FREQ_MHZ = 58320;
+    /**
+     * 60 GHz band frequency of last channel in MHz
+     * @hide
+     */
+    public static final int BAND_60_GHZ_END_FREQ_MHZ = 70200;
+
+    /**
      * Utility function to check if a frequency within 2.4 GHz band
      * @param freqMhz frequency in MHz
      * @return true if within 2.4GHz, false otherwise
@@ -625,6 +646,17 @@ public final class ScanResult implements Parcelable {
      */
     public static boolean is6GHz(int freqMhz) {
         return freqMhz >= BAND_6_GHZ_START_FREQ_MHZ && freqMhz <= BAND_6_GHZ_END_FREQ_MHZ;
+    }
+
+    /**
+     * Utility function to check if a frequency within 60 GHz band
+     * @param freqMhz
+     * @return true if within 60GHz, false otherwise
+     *
+     * @hide
+     */
+    public static boolean is60GHz(int freqMhz) {
+        return freqMhz >= BAND_60_GHZ_START_FREQ_MHZ && freqMhz <= BAND_60_GHZ_END_FREQ_MHZ;
     }
 
     /**
@@ -704,6 +736,13 @@ public final class ScanResult implements Parcelable {
      */
     public boolean is6GHz() {
         return ScanResult.is6GHz(frequency);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean is60GHz() {
+        return ScanResult.is60GHz(frequency);
     }
 
     /**
