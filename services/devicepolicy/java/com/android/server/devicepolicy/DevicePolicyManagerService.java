@@ -7132,9 +7132,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return (deviceOwner != null) ? deviceOwner.keepUninstalledPackages : null;
     }
 
+    /**
+     * Logs a warning when the device doesn't have {@code PackageManager.FEATURE_DEVICE_ADMIN}.
+     *
+     * @param message action that was not executed; should not end with a period because the missing
+     * feature will be appended to it.
+     */
+    private void logMissingFeatureAction(String message) {
+        Slog.w(LOG_TAG, message + " because device does not have the "
+                + PackageManager.FEATURE_DEVICE_ADMIN + " feature.");
+    }
+
     @Override
     public boolean setDeviceOwner(ComponentName admin, String ownerName, int userId) {
         if (!mHasFeature) {
+            logMissingFeatureAction("Cannot set " + ComponentName.flattenToShortString(admin)
+                    + " as device owner for user " + userId);
             return false;
         }
         if (admin == null
@@ -7456,6 +7469,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setProfileOwner(ComponentName who, String ownerName, int userHandle) {
         if (!mHasFeature) {
+            logMissingFeatureAction("Cannot set " + ComponentName.flattenToShortString(who)
+                    + " as profile owner for user " + userHandle);
             return false;
         }
         if (who == null
@@ -7676,6 +7691,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setUserProvisioningState(int newState, int userHandle) {
         if (!mHasFeature) {
+            logMissingFeatureAction("Cannot set provisioning state " + newState + " for user "
+                    + userHandle);
             return;
         }
 
@@ -7753,6 +7770,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setProfileEnabled(ComponentName who) {
         if (!mHasFeature) {
+            logMissingFeatureAction("Cannot enable profile for "
+                    + ComponentName.flattenToShortString(who));
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
