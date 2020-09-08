@@ -102,7 +102,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
-import com.android.server.pm.Installer.Batch;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -4561,6 +4560,7 @@ public final class Settings {
         pw.println();
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
+            pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isUsesNonSdkApi());
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().signatureSchemeVersion;
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
