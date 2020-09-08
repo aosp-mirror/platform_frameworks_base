@@ -101,6 +101,40 @@ public class AudioSystemAdapter {
     }
 
     /**
+     * Same as (@link AudioSystem#setDevicesRoleForCapturePreset(int, List))
+     * @param capturePreset
+     * @param role
+     * @param devices
+     * @return
+     */
+    public int setDevicesRoleForCapturePreset(int capturePreset, int role,
+                                              @NonNull List<AudioDeviceAttributes> devices) {
+        return AudioSystem.setDevicesRoleForCapturePreset(capturePreset, role, devices);
+    }
+
+    /**
+     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int)}
+     * @param capturePreset
+     * @param role
+     * @param devicesToRemove
+     * @return
+     */
+    public int removeDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devicesToRemove) {
+        return AudioSystem.removeDevicesRoleForCapturePreset(capturePreset, role, devicesToRemove);
+    }
+
+    /**
+     * Same as {@link AudioSystem#}
+     * @param capturePreset
+     * @param role
+     * @return
+     */
+    public int clearDevicesRoleForCapturePreset(int capturePreset, int role) {
+        return AudioSystem.clearDevicesRoleForCapturePreset(capturePreset, role);
+    }
+
+    /**
      * Same as {@link AudioSystem#setParameters(String)}
      * @param keyValuePairs
      * @return
