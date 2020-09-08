@@ -1191,8 +1191,8 @@ public class StagingManager {
     }
 
     private final class PreRebootVerificationHandler extends Handler {
-        // Hold session ids before handler gets ready to do the verification.
-        private IntArray mPendingSessionIds;
+        // Hold sessions before handler gets ready to do the verification.
+        private List<PackageInstallerSession> mPendingSessions;
         private boolean mIsReady;
 
         PreRebootVerificationHandler(Looper looper) {
@@ -1252,27 +1252,27 @@ public class StagingManager {
         // Notify the handler that system is ready, and reschedule the pre-reboot verifications.
         private synchronized void readyToStart() {
             mIsReady = true;
-            if (mPendingSessionIds != null) {
-                for (int i = 0; i < mPendingSessionIds.size(); i++) {
-                    PackageInstallerSession session = getStagedSession(mPendingSessionIds.get(i));
+            if (mPendingSessions != null) {
+                for (int i = 0; i < mPendingSessions.size(); i++) {
+                    PackageInstallerSession session = mPendingSessions.get(i);
                     startPreRebootVerification(session);
                 }
-                mPendingSessionIds = null;
+                mPendingSessions = null;
             }
         }
 
         // Method for starting the pre-reboot verification
         private synchronized void startPreRebootVerification(PackageInstallerSession session) {
-            int sessionId = session.sessionId;
             if (!mIsReady) {
-                if (mPendingSessionIds == null) {
-                    mPendingSessionIds = new IntArray();
+                if (mPendingSessions == null) {
+                    mPendingSessions = new ArrayList<>();
                 }
-                mPendingSessionIds.add(sessionId);
+                mPendingSessions.add(session);
                 return;
             }
 
             if (session != null && session.notifyStagedStartPreRebootVerification()) {
+                int sessionId = session.sessionId;
                 Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
                 obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
                         .sendToTarget();
