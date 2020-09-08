@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 
@@ -50,7 +49,6 @@ public class AmbientState {
     private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
-    private int mSpeedBumpIndex = -1;
     private boolean mDozing;
     private boolean mHideSensitive;
     private float mStackTranslation;
@@ -243,14 +241,6 @@ public class AmbientState {
 
     public float getOverScrollAmount(boolean top) {
         return top ? mOverScrollTopAmount : mOverScrollBottomAmount;
-    }
-
-    public int getSpeedBumpIndex() {
-        return mSpeedBumpIndex;
-    }
-
-    public void setSpeedBumpIndex(int shelfIndex) {
-        mSpeedBumpIndex = shelfIndex;
     }
 
     public SectionProvider getSectionProvider() {
