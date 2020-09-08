@@ -48,6 +48,7 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
@@ -73,7 +74,7 @@ public class WindowMagnificationManagerTest {
     @Mock
     private StatusBarManagerInternal mMockStatusBarManagerInternal;
     @Mock
-    private Runnable mEndCallback;
+    private MagnificationAnimationCallback mAnimationCallback;
     private MockContentResolver mResolver;
     private WindowMagnificationManager mWindowMagnificationManager;
 
@@ -177,9 +178,9 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2f, 200f, 300f,
-                mEndCallback);
+                mAnimationCallback);
 
-        verify(mEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -198,9 +199,10 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
 
-        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY,  false, mEndCallback);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY,  false,
+                mAnimationCallback);
 
-        verify(mEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
