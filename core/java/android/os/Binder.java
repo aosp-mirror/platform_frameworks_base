@@ -984,7 +984,6 @@ public class Binder implements IBinder {
     }
 
     private static native long getNativeBBinderHolder();
-    private static native long getFinalizer();
 
     /**
      * By default, we use the calling uid since we can always trust it.
