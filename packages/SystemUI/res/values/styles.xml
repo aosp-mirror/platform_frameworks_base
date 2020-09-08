@@ -400,6 +400,10 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.MediaOutput">
+        <item name="android:windowBackground">@drawable/media_output_dialog_background</item>
+    </style>
+
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
         <item name="android:background">@drawable/qs_btn_borderless_rect</item>
@@ -789,5 +793,4 @@
           * Title: headline, medium 20sp
           * Message: body, 16 sp -->
     <style name="Theme.ControlsRequestDialog" parent="@*android:style/Theme.DeviceDefault.Dialog.Alert"/>
-
 </resources>
