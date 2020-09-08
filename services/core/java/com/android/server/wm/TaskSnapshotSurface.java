@@ -237,11 +237,7 @@ class TaskSnapshotSurface implements StartingSurface {
             task.getBounds(taskBounds);
             currentOrientation = topFullscreenOpaqueWindow.getConfiguration().orientation;
             activityType = activity.getActivityType();
-
-            final InsetsPolicy insetsPolicy = topFullscreenOpaqueWindow.getDisplayContent()
-                    .getInsetsPolicy();
-            insetsState =
-                    new InsetsState(insetsPolicy.getInsetsForDispatch(topFullscreenOpaqueWindow));
+            insetsState = topFullscreenOpaqueWindow.getInsetsState();
             mergeInsetsSources(insetsState, topFullscreenOpaqueWindow.getRequestedInsetsState());
         }
         try {
