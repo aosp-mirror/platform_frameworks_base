@@ -428,6 +428,17 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SCREENSHOT_KEYCHORD_DELAY = "screenshot_keychord_delay";
 
+    /**
+     * (boolean) Whether to use an ML model for the Back Gesture.
+     */
+    public static final String USE_BACK_GESTURE_ML_MODEL = "use_back_gesture_ml_model";
+
+    /**
+     * (float) Threshold for Back Gesture ML model prediction.
+     */
+    public static final String BACK_GESTURE_ML_MODEL_THRESHOLD = "back_gesture_ml_model_threshold";
+
+
     private SystemUiDeviceConfigFlags() {
     }
 }
