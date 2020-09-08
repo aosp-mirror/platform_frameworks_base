@@ -74,8 +74,6 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         mMockResources = mock(Resources.class);
         mPackageManagerSpy = spy(getContext().getPackageManager());
         doReturn(mMockResources).when(mPackageManagerSpy)
-                .getResourcesForApplicationAsUser(eq("mockPackage"), anyInt());
-        doReturn(mMockResources).when(mPackageManagerSpy)
                 .getResourcesForApplication(eq("mockPackage"));
         doReturn(mMockResources).when(mPackageManagerSpy).getResourcesForApplication(argThat(
                 (ArgumentMatcher<ApplicationInfo>) o -> "mockPackage".equals(o.packageName)));
