@@ -7873,7 +7873,7 @@ package android.net.wifi.nl80211 {
     method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method @Nullable public static android.net.wifi.nl80211.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
-    method public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
+    method @Deprecated public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
     method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SendMgmtFrameCallback);
     method public void setOnServiceDeadCallback(@NonNull Runnable);
     method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
@@ -7924,10 +7924,10 @@ package android.net.wifi.nl80211 {
     field public final int txBitrateMbps;
   }
 
-  public static interface WifiNl80211Manager.SoftApCallback {
-    method public void onConnectedClientsChanged(@NonNull android.net.wifi.nl80211.NativeWifiClient, boolean);
-    method public void onFailure();
-    method public void onSoftApChannelSwitched(int, int);
+  @Deprecated public static interface WifiNl80211Manager.SoftApCallback {
+    method @Deprecated public void onConnectedClientsChanged(@NonNull android.net.wifi.nl80211.NativeWifiClient, boolean);
+    method @Deprecated public void onFailure();
+    method @Deprecated public void onSoftApChannelSwitched(int, int);
   }
 
   public static class WifiNl80211Manager.TxPacketCounters {
