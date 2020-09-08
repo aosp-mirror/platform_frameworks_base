@@ -1186,7 +1186,7 @@ public class StagingManager {
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
     //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
-    void notifyPreRebootVerification_Apk_Complete(PackageInstallerSession session) {
+    void notifyPreRebootVerification_Apk_Complete(@NonNull PackageInstallerSession session) {
         mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(session);
     }
 
@@ -1223,11 +1223,6 @@ public class StagingManager {
             final int sessionId = msg.arg1;
             final int rollbackId = msg.arg2;
             final PackageInstallerSession session = (PackageInstallerSession) msg.obj;
-            if (session == null) {
-                Slog.wtf(TAG, "Session disappeared in the middle of pre-reboot verification: "
-                        + sessionId);
-                return;
-            }
             if (session.isDestroyed() || session.isStagedSessionFailed()) {
                 // No point in running verification on a destroyed/failed session
                 onPreRebootVerificationComplete(session);
@@ -1262,7 +1257,8 @@ public class StagingManager {
         }
 
         // Method for starting the pre-reboot verification
-        private synchronized void startPreRebootVerification(PackageInstallerSession session) {
+        private synchronized void startPreRebootVerification(
+                @NonNull PackageInstallerSession session) {
             if (!mIsReady) {
                 if (mPendingSessions == null) {
                     mPendingSessions = new ArrayList<>();
@@ -1271,7 +1267,7 @@ public class StagingManager {
                 return;
             }
 
-            if (session != null && session.notifyStagedStartPreRebootVerification()) {
+            if (session.notifyStagedStartPreRebootVerification()) {
                 int sessionId = session.sessionId;
                 Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
                 obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
@@ -1298,17 +1294,19 @@ public class StagingManager {
         }
 
         private void notifyPreRebootVerification_Start_Complete(
-                PackageInstallerSession session, int rollbackId) {
+                @NonNull PackageInstallerSession session, int rollbackId) {
             obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APEX, session.sessionId, rollbackId, session)
                     .sendToTarget();
         }
 
-        private void notifyPreRebootVerification_Apex_Complete(PackageInstallerSession session) {
+        private void notifyPreRebootVerification_Apex_Complete(
+                @NonNull PackageInstallerSession session) {
             obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APK, session.sessionId, -1, session)
                     .sendToTarget();
         }
 
-        private void notifyPreRebootVerification_Apk_Complete(PackageInstallerSession session) {
+        private void notifyPreRebootVerification_Apk_Complete(
+                @NonNull PackageInstallerSession session) {
             obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId, -1, session)
                     .sendToTarget();
         }
