@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Looper;
 import android.view.MagnificationSpec;
+import android.view.accessibility.MagnificationAnimationCallback;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -99,12 +100,12 @@ public class FullScreenMagnificationControllerTest {
     ValueAnimator.AnimatorListener mStateListener;
 
     FullScreenMagnificationController mFullScreenMagnificationController;
-    Runnable mEndCallback;
+    MagnificationAnimationCallback mAnimationCallback;
 
     @Before
     public void setUp() {
         Looper looper = InstrumentationRegistry.getContext().getMainLooper();
-        mEndCallback = Mockito.mock(Runnable.class);
+        mAnimationCallback = Mockito.mock(MagnificationAnimationCallback.class);
         // Pretending ID of the Thread associated with looper as main thread ID in controller
         when(mMockContext.getMainLooper()).thenReturn(looper);
         when(mMockControllerCtx.getContext()).thenReturn(mMockContext);
@@ -323,7 +324,6 @@ public class FullScreenMagnificationControllerTest {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             setScaleAndCenter_animated_stateChangesAndAnimationHappens(i);
             resetMockWindowManager();
-            Mockito.reset(mEndCallback);
         }
     }
 
@@ -336,7 +336,7 @@ public class FullScreenMagnificationControllerTest {
         MagnificationSpec endSpec = getMagnificationSpec(scale, offsets);
 
         assertTrue(mFullScreenMagnificationController.setScaleAndCenter(displayId, scale,
-                newCenter.x, newCenter.y, mEndCallback, SERVICE_ID_1));
+                newCenter.x, newCenter.y, mAnimationCallback, SERVICE_ID_1));
         mMessageCapturingHandler.sendAllMessages();
 
         assertEquals(newCenter.x, mFullScreenMagnificationController.getCenterX(displayId), 0.5);
@@ -365,18 +365,17 @@ public class FullScreenMagnificationControllerTest {
         mTargetAnimationListener.onAnimationUpdate(mMockValueAnimator);
         mStateListener.onAnimationEnd(mMockValueAnimator);
         verify(mMockWindowManager).setMagnificationSpec(eq(displayId), argThat(closeTo(endSpec)));
-        verify(mEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
     public void testSetScaleAndCenterWithAnimation_sameSpec_noAnimationButInvokeEndCallback() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
-            setScaleAndCenter_sameSpec_noAnimationButInvokeEndCallback(i);
-            Mockito.reset(mEndCallback);
+            setScaleAndCenter_sameSpec_noAnimationButInvokeCallbacks(i);
         }
     }
 
-    private void setScaleAndCenter_sameSpec_noAnimationButInvokeEndCallback(int displayId) {
+    private void setScaleAndCenter_sameSpec_noAnimationButInvokeCallbacks(int displayId) {
         register(displayId);
         final PointF center = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         final float targetScale = 2.0f;
@@ -385,11 +384,11 @@ public class FullScreenMagnificationControllerTest {
         mMessageCapturingHandler.sendAllMessages();
 
         assertFalse(mFullScreenMagnificationController.setScaleAndCenter(displayId,
-                targetScale, center.x, center.y, mEndCallback, SERVICE_ID_1));
+                targetScale, center.x, center.y, mAnimationCallback, SERVICE_ID_1));
         mMessageCapturingHandler.sendAllMessages();
 
         verify(mMockValueAnimator, never()).start();
-        verify(mEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
@@ -673,38 +672,38 @@ public class FullScreenMagnificationControllerTest {
     public void testReset_notMagnifying_noStateChangeButInvokeCallback() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             reset_notMagnifying_noStateChangeButInvokeCallback(i);
-            Mockito.reset(mEndCallback);
         }
     }
 
     private void reset_notMagnifying_noStateChangeButInvokeCallback(int displayId) {
         register(displayId);
 
-        assertFalse(mFullScreenMagnificationController.reset(displayId, mEndCallback));
+        assertFalse(mFullScreenMagnificationController.reset(displayId, mAnimationCallback));
         mMessageCapturingHandler.sendAllMessages();
 
         verify(mMockAms, never()).notifyMagnificationChanged(eq(displayId),
                 any(Region.class), anyFloat(), anyFloat(), anyFloat());
-        verify(mEndCallback).run();
+        verify(mAnimationCallback).onResult(true);
     }
 
     @Test
-    public void testReset_Magnifying_resetsMagnificationAndInvokeLastEndCallback() {
+    public void testReset_Magnifying_resetsMagnificationAndInvokeCallbacks() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
-            reset_Magnifying_resetsMagnificationAndInvokeLastEndCallback(i);
+            reset_Magnifying_resetsMagnificationAndInvokeCallbacks(i);
         }
     }
 
-    private void reset_Magnifying_resetsMagnificationAndInvokeLastEndCallback(int displayId) {
+    private void reset_Magnifying_resetsMagnificationAndInvokeCallbacks(int displayId) {
         register(displayId);
         float scale = 2.5f;
         PointF firstCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         assertTrue(mFullScreenMagnificationController.setScaleAndCenter(displayId,
-                scale, firstCenter.x, firstCenter.y, mEndCallback, SERVICE_ID_1));
+                scale, firstCenter.x, firstCenter.y, mAnimationCallback, SERVICE_ID_1));
         mMessageCapturingHandler.sendAllMessages();
         Mockito.reset(mMockValueAnimator);
         // Stubs the logic after the animation is started.
         doAnswer(invocation -> {
+            mStateListener.onAnimationCancel(mMockValueAnimator);
             mStateListener.onAnimationEnd(mMockValueAnimator);
             return null;
         }).when(mMockValueAnimator).cancel();
@@ -713,13 +712,14 @@ public class FullScreenMagnificationControllerTest {
         float fraction = 0.33f;
         when(mMockValueAnimator.getAnimatedFraction()).thenReturn(fraction);
         mTargetAnimationListener.onAnimationUpdate(mMockValueAnimator);
-        Runnable lastEndCallback = Mockito.mock(Runnable.class);
+        MagnificationAnimationCallback lastAnimationCallback = Mockito.mock(
+                MagnificationAnimationCallback.class);
 
-        assertTrue(mFullScreenMagnificationController.reset(displayId, lastEndCallback));
+        assertTrue(mFullScreenMagnificationController.reset(displayId, lastAnimationCallback));
         mMessageCapturingHandler.sendAllMessages();
 
         // Verify expected actions.
-        verify(mEndCallback, never()).run();
+        verify(mAnimationCallback).onResult(false);
         verify(mMockValueAnimator).start();
         verify(mMockValueAnimator).cancel();
 
@@ -729,7 +729,7 @@ public class FullScreenMagnificationControllerTest {
         mStateListener.onAnimationEnd(mMockValueAnimator);
 
         assertFalse(mFullScreenMagnificationController.isMagnifying(DISPLAY_0));
-        verify(lastEndCallback).run();
+        verify(lastAnimationCallback).onResult(true);
     }
 
     @Test
@@ -1142,6 +1142,7 @@ public class FullScreenMagnificationControllerTest {
         verify(mMockValueAnimator).addListener(animatorListenerArgumentCaptor.capture());
         mStateListener = animatorListenerArgumentCaptor.getValue();
         Mockito.reset(mMockValueAnimator); // Ignore other initialization
+        Mockito.reset(mAnimationCallback);
     }
 
     private void zoomIn2xToMiddle(int displayId) {
