@@ -104,6 +104,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private var hidden = true
     private lateinit var dismissGlobalActions: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
+    private var retainCache = false
 
     private val collator = Collator.getInstance(context.resources.configuration.locales[0])
     private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
@@ -149,6 +150,7 @@ class ControlsUiControllerImpl @Inject constructor (
         this.parent = parent
         this.dismissGlobalActions = dismissGlobalActions
         hidden = false
+        retainCache = false
 
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
@@ -235,6 +237,8 @@ class ControlsUiControllerImpl @Inject constructor (
         }
         putIntentExtras(i, si)
         startActivity(context, i)
+
+        retainCache = true
     }
 
     private fun putIntentExtras(intent: Intent, si: StructureInfo) {
@@ -497,7 +501,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         controlsListingController.get().removeCallback(listingCallback)
 
-        RenderInfo.clearCache()
+        if (!retainCache) RenderInfo.clearCache()
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
