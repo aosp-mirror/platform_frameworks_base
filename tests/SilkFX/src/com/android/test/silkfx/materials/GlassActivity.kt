@@ -47,6 +47,7 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
     lateinit var scrimOpacityValue: TextView
     lateinit var blurRadiusValue: TextView
     lateinit var zoomValue: TextView
+    lateinit var textOverlay: TextView
 
     var background: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
     set(value) {
@@ -74,6 +75,7 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
         scrimOpacityValue = requireViewById(R.id.scrimOpacityValue)
         blurRadiusValue = requireViewById(R.id.blurRadiusValue)
         zoomValue = requireViewById(R.id.zoomValue)
+        textOverlay = requireViewById(R.id.textOverlay)
 
         background = BitmapFactory.decodeResource(resources, R.drawable.background1)
 
@@ -90,6 +92,7 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
 
         lightMaterialSwitch.setOnCheckedChangeListener { _, isChecked ->
             materialView.color = if (isChecked) Color.WHITE else Color.BLACK
+            textOverlay.setTextColor(if (isChecked) Color.BLACK else Color.WHITE)
         }
     }
 
@@ -118,6 +121,11 @@ class GlassActivity : Activity(), SeekBar.OnSeekBarChangeListener {
             }
             else -> throw IllegalArgumentException("Unknown seek bar")
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        materialView.resetGyroOffsets()
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
