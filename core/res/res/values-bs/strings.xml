@@ -1283,7 +1283,7 @@
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"nepoznata vrsta mreže"</string>
     <string name="accept" msgid="5447154347815825107">"Prihvati"</string>
     <string name="decline" msgid="6490507610282145874">"Odbijte"</string>
-    <string name="select_character" msgid="3352797107930786979">"Umetni karakter"</string>
+    <string name="select_character" msgid="3352797107930786979">"Umetni znak"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"Slanje SMS poruka"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; šalje veliki broj SMS poruka. Da li želite dozvoliti ovoj aplikaciji da nastavi slanje poruka?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Dozvoli"</string>

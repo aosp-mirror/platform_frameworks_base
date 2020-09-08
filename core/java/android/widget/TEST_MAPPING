@@ -36,17 +36,6 @@
       "name": "CtsAutoFillServiceTestCases",
       "options": [
         {
-          "include-filter": "android.autofillservice.cts.AutofillValueTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
-      "name": "CtsAutoFillServiceTestCases",
-      "options": [
-        {
           "include-filter": "android.autofillservice.cts.CheckoutActivityTest"
         },
         {

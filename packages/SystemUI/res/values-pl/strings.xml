@@ -889,17 +889,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Pokazuj ikony powiadomień o niskim priorytecie"</string>
     <string name="other" msgid="429768510980739978">"Inne"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Linia dzielenia ekranu"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Lewa część ekranu na pełnym ekranie"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"70% lewej części ekranu"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"50% lewej części ekranu"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"30% lewej części ekranu"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Prawa część ekranu na pełnym ekranie"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Górna część ekranu na pełnym ekranie"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"70% górnej części ekranu"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"50% górnej części ekranu"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"30% górnej części ekranu"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Dolna część ekranu na pełnym ekranie"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Położenie <xliff:g id="POSITION">%1$d</xliff:g>, kafelek <xliff:g id="TILE_NAME">%2$s</xliff:g>. Kliknij dwukrotnie, by edytować."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"Kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>. Kliknij dwukrotnie, by dodać."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Przenieś kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
@@ -908,10 +897,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Przenieś kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> w położenie <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Edytor szybkich ustawień."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Powiadomienie z aplikacji <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikacja może nie działać przy podzielonym ekranie."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"Aplikacja nie obsługuje dzielonego ekranu."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Aplikacja może nie działać na dodatkowym ekranie."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"Aplikacja nie obsługuje uruchamiania na dodatkowych ekranach."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Otwórz ustawienia."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Otwórz szybkie ustawienia."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Zamknij szybkie ustawienia."</string>
@@ -1016,7 +1001,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Przenieś w lewy dolny róg"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Przenieś w prawy dolny róg"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Zamknij dymek"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj rozmowy jako dymku"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj rozmowy jako dymka"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Czatuj, korzystając z dymków"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe rozmowy będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Zarządzaj dymkami w dowolnym momencie"</string>

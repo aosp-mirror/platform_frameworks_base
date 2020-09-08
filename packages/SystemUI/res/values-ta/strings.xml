@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"குறைந்த முன்னுரிமை உள்ள அறிவிப்பு ஐகான்களைக் காட்டு"</string>
     <string name="other" msgid="429768510980739978">"மற்றவை"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"திரையைப் பிரிக்கும் பிரிப்பான்"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"இடது புறம் முழுத் திரை"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"இடது புறம் 70%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"இடது புறம் 50%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"இடது புறம் 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"வலது புறம் முழுத் திரை"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"மேற்புறம் முழுத் திரை"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"மேலே 70%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"மேலே 50%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"மேலே 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"கீழ்ப்புறம் முழுத் திரை"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"நிலை <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. திருத்த, இருமுறை தட்டவும்."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. சேர்க்க, இருமுறை தட்டவும்."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ஐ நகர்த்தவும்"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"நிலைப்பாடு <xliff:g id="POSITION">%2$d</xliff:g>க்கு <xliff:g id="TILE_NAME">%1$s</xliff:g>ஐ நகர்த்தும்"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"விரைவு அமைப்புகள் திருத்தி."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> அறிவிப்பு: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"திரைப் பிரிப்பில் ஆப்ஸ் வேலைசெய்யாமல் போகக்கூடும்."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"திரையைப் பிரிப்பதைப் ஆப்ஸ் ஆதரிக்கவில்லை."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"இரண்டாம்நிலைத் திரையில் ஆப்ஸ் வேலை செய்யாமல் போகக்கூடும்."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"இரண்டாம்நிலைத் திரைகளில் பயன்பாட்டைத் தொடங்க முடியாது."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"விரைவு அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"விரைவு அமைப்புகளை மூடு."</string>

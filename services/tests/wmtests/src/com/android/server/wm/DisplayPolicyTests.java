@@ -27,11 +27,9 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
@@ -39,7 +37,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
@@ -47,7 +44,6 @@ import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -235,18 +231,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertEquals(mAppWindow, policy.getTopFullscreenOpaqueWindow());
     }
 
-    @Test
-    public void testShouldShowToastWhenScreenLocked() {
-        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
-        final WindowState activity = createApplicationWindow();
-        final WindowState toast = createToastWindow();
-
-        policy.adjustWindowParamsLw(toast, toast.mAttrs, 0 /* callingPid */, 0 /* callingUid */);
-
-        assertTrue(policy.canToastShowWhenLocked(0 /* callingUid */));
-        assertNotEquals(0, toast.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED);
-    }
-
     @Test(expected = RuntimeException.class)
     public void testMainAppWindowDisallowFitSystemWindowTypes() {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
@@ -255,16 +239,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         policy.adjustWindowParamsLw(activity, activity.mAttrs, 0 /* callingPid */,
                 0 /* callingUid */);
-    }
-
-    private WindowState createToastWindow() {
-        final WindowState win = createWindow(null, TYPE_TOAST, "Toast");
-        final WindowManager.LayoutParams attrs = win.mAttrs;
-        attrs.width = WRAP_CONTENT;
-        attrs.height = WRAP_CONTENT;
-        attrs.flags = FLAG_KEEP_SCREEN_ON | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE;
-        attrs.format = PixelFormat.TRANSLUCENT;
-        return win;
     }
 
     private WindowState createApplicationWindow() {

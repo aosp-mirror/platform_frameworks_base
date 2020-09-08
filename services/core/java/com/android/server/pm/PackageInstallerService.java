@@ -656,7 +656,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     throw new IllegalArgumentException("Invalid install mode: " + params.mode);
             }
 
-            // If caller requested explicit location, sanity check it, otherwise
+            // If caller requested explicit location, validity check it, otherwise
             // resolve the best internal or adopted location.
             if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
                 if (!PackageHelper.fitsOnInternal(mContext, params)) {
@@ -688,7 +688,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final int sessionId;
         final PackageInstallerSession session;
         synchronized (mSessions) {
-            // Sanity check that installer isn't going crazy
+            // Check that the installer does not have too many active sessions.
             final int activeCount = getSessionCount(mSessions, callingUid);
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {

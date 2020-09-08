@@ -67,7 +67,6 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
                 }
             }
 
-            // Sanity check.
             if (sShellCommands.size() > TOO_MANY_PENDING_SHELL_COMMANDS) {
                 Slog.e(TAG, "Too many pending shell commands: " + sShellCommands.size());
             }

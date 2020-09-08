@@ -428,7 +428,7 @@
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Az NFC ki van kapcsolva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Az NFC be van kapcsolva"</string>
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Képernyő rögzítése"</string>
-    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Kezdés"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Indítás"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Eszköz"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Váltás az alkalmazások között felfelé csúsztatással"</string>
@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Alacsony prioritású értesítési ikonok mutatása"</string>
     <string name="other" msgid="429768510980739978">"Egyéb"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Elválasztó az osztott nézetben"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Bal oldali teljes képernyőre"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"Bal oldali 70%-ra"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"Bal oldali 50%-ra"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"Bal oldali 30%-ra"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Jobb oldali teljes képernyőre"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Felső teljes képernyőre"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"Felső 70%-ra"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Felső 50%-ra"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Felső 30%-ra"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Alsó teljes képernyőre"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g>. pozíció: <xliff:g id="TILE_NAME">%2$s</xliff:g>. Koppintson duplán a szerkesztéshez."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Koppintson duplán a hozzáadáshoz."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"A(z) <xliff:g id="TILE_NAME">%1$s</xliff:g> áthelyezése"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> áthelyezése a következő pozícióba: <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Gyorsbeállítások szerkesztője"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-értesítések: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"Az alkalmazást nem lehet másodlagos kijelzőn elindítani."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Beállítások megnyitása."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Gyorsbeállítások megnyitása."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Gyorsbeállítások bezárása"</string>

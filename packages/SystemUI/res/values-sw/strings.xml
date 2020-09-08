@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Onyesha aikoni za arifa zisizo muhimu"</string>
     <string name="other" msgid="429768510980739978">"Nyingine"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"Kitenganishi cha skrini inayogawanywa"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"Skrini nzima ya kushoto"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"Kushoto 70%"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"Kushoto 50%"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"Kushoto 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"Skrini nzima ya kulia"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"Skrini nzima ya juu"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"Juu 70%"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Juu 50%"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Juu 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Skrini nzima ya chini"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gusa mara mbili ili ubadilishe."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gusa mara mbili ili uongeze."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Hamisha <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Sogeza <xliff:g id="TILE_NAME">%1$s</xliff:g> kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Kihariri cha Mipangilio ya haraka."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Arifa kutoka <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"Huenda programu isifanye kazi kwenye skrini inayogawanywa."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"Programu haiwezi kutumia skrini iliyogawanywa."</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"Huenda programu isifanye kazi kwenye dirisha lingine."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"Programu hii haiwezi kufunguliwa kwenye madirisha mengine."</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Fungua mipangilio."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Fungua mipangilio ya haraka."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Funga mipangilio ya haraka."</string>

@@ -879,17 +879,6 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"কম গুৰুত্বপূৰ্ণ জাননীৰ আইকনসমূহ দেখুৱাওক"</string>
     <string name="other" msgid="429768510980739978">"অন্যান্য"</string>
-    <string name="accessibility_divider" msgid="2830785970889237307">"স্প্লিট স্ক্ৰীণৰ বিভাজক"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"বাওঁফালৰ স্ক্ৰীণখন সম্পূৰ্ণ স্ক্ৰীণ কৰক"</string>
-    <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"বাওঁফালৰ স্ক্ৰীণখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"বাওঁফালৰ স্ক্ৰীণখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"বাওঁফালৰ স্ক্ৰীণখন ৩০% কৰক"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"সোঁফালৰ স্ক্ৰীণখন সম্পূৰ্ণ স্ক্ৰীণ কৰক"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"শীৰ্ষ স্ক্ৰীণখন সম্পূৰ্ণ স্ক্ৰীণ কৰক"</string>
-    <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"শীর্ষ স্ক্ৰীণখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"শীর্ষ স্ক্ৰীণখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"শীর্ষ স্ক্ৰীণখন ৩০% কৰক"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"তলৰ স্ক্ৰীণখন সম্পূৰ্ণ স্ক্ৰীণ কৰক"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"অৱস্থান <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। সম্পাদনা কৰিবৰ বাবে দুবাৰ টিপক।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। যোগ কৰিবলৈ দুবাৰ টিপক।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> স্থানান্তৰ কৰক"</string>
@@ -898,10 +887,6 @@
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ক এই স্থান <xliff:g id="POSITION">%2$d</xliff:g>লৈ যাওক"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ক্ষিপ্ৰ ছেটিংসমূহৰ সম্পাদক।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> জাননী: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="4689301323912928801">"বিভাজিত স্ক্ৰীণৰ সৈতে এপে হয়তো কাম নকৰিব।"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7284915968096153808">"এপটোৱে বিভাজিত স্ক্ৰীণ সমৰ্থন নকৰে।"</string>
-    <string name="forced_resizable_secondary_display" msgid="522558907654394940">"গৌণ ডিছপ্লেত এপে সঠিকভাৱে কাম নকৰিব পাৰে।"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="8446727617187998208">"গৌণ ডিছপ্লেত এপ্ লঞ্চ কৰিব নোৱাৰি।"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ছেটিংসমূহ খোলক।"</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ক্ষিপ্ৰ ছেটিংসমূহ খোলক।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ক্ষিপ্ৰ ছেটিংসমূহ বন্ধ কৰক।"</string>

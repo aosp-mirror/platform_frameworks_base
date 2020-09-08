@@ -5555,7 +5555,8 @@ public class TelephonyManager {
      * @param events The telephony state(s) of interest to the listener,
      *               as a bitwise-OR combination of {@link PhoneStateListener}
      *               LISTEN_ flags.
-     * @deprecated use {@link #listen(long, PhoneStateListener) instead.
+     * @deprecated use {@link #listen(long, PhoneStateListener) instead due to the event number
+     *             limit increased to 64.
      */
     @Deprecated
     public void listen(PhoneStateListener listener, int events) {
@@ -5563,9 +5564,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Since the limit of {@link PhoneStateListener} LISTEN_ flags is exceeded, use long type to
-     * extend it.
-     *
      * Registers a listener object to receive notification of changes
      * in specified telephony states.
      * <p>

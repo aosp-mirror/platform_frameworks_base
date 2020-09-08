@@ -62,8 +62,7 @@ public class RunningTasksTest extends WindowTestsBase {
 
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
-            final Task stack = new StackBuilder(mRootWindowContainer)
-                    .setCreateActivity(false)
+            final Task stack = new TaskBuilder(mSupervisor)
                     .setDisplay(display)
                     .setOnTop(false)
                     .build();
@@ -104,8 +103,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
         final int numTasks = 10;
         for (int i = 0; i < numTasks; i++) {
-            final Task stack = new StackBuilder(mRootWindowContainer)
-                    .setCreateActivity(false)
+            final Task stack = new TaskBuilder(mSupervisor)
                     .setDisplay(display)
                     .setOnTop(true)
                     .build();
@@ -135,7 +133,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final Task task = new TaskBuilder(mAtm.mStackSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
-                .setStack(stack)
+                .setParentTask(stack)
                 .build();
         task.lastActiveTime = lastActiveTime;
         final ActivityRecord activity = new ActivityBuilder(mAtm)
