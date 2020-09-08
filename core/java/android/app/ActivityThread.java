@@ -5418,12 +5418,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         final int prevState = r.getLifecycleState();
 
-        if (prevState < ON_RESUME || prevState > ON_STOP) {
-            Log.w(TAG, "Activity state must be in [ON_RESUME..ON_STOP] in order to be relaunched,"
+        if (prevState < ON_START || prevState > ON_STOP) {
+            Log.w(TAG, "Activity state must be in [ON_START..ON_STOP] in order to be relaunched,"
                     + "current state is " + prevState);
             return;
         }
-
 
         // Initialize a relaunch request.
         final MergedConfiguration mergedConfiguration = new MergedConfiguration(
