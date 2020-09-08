@@ -18,7 +18,6 @@ package com.android.server.location.gnss;
 
 import android.annotation.Nullable;
 import android.net.TrafficStats;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.util.TrafficStatsConstants;
@@ -42,7 +41,6 @@ class GnssPsdsDownloader {
     private static final String TAG = "GnssPsdsDownloader";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long MAXIMUM_CONTENT_LENGTH_BYTES = 1000000;  // 1MB.
-    private static final String DEFAULT_USER_AGENT = "Android";
     private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(30);
     private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(60);
 
@@ -55,25 +53,16 @@ class GnssPsdsDownloader {
     private final String[] mPsdsServers;
     // to load balance our server requests
     private int mNextServerIndex;
-    private final String mUserAgent;
 
     GnssPsdsDownloader(Properties properties) {
         // read PSDS servers from the Properties object
         int count = 0;
-        String longTermPsdsServer1 = properties.getProperty("XTRA_SERVER_1");
-        String longTermPsdsServer2 = properties.getProperty("XTRA_SERVER_2");
-        String longTermPsdsServer3 = properties.getProperty("XTRA_SERVER_3");
+        String longTermPsdsServer1 = properties.getProperty("LONGTERM_PSDS_SERVER_1");
+        String longTermPsdsServer2 = properties.getProperty("LONGTERM_PSDS_SERVER_2");
+        String longTermPsdsServer3 = properties.getProperty("LONGTERM_PSDS_SERVER_3");
         if (longTermPsdsServer1 != null) count++;
         if (longTermPsdsServer2 != null) count++;
         if (longTermPsdsServer3 != null) count++;
-
-        // Set User Agent from properties, if possible.
-        String agent = properties.getProperty("XTRA_USER_AGENT");
-        if (TextUtils.isEmpty(agent)) {
-            mUserAgent = DEFAULT_USER_AGENT;
-        } else {
-            mUserAgent = agent;
-        }
 
         if (count == 0) {
             Log.e(TAG, "No Long-Term PSDS servers were specified in the GnssConfiguration");
