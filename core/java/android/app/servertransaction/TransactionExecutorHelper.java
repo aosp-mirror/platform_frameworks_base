@@ -185,6 +185,9 @@ public class TransactionExecutorHelper {
         final ActivityLifecycleItem lifecycleItem;
         switch (prevState) {
             // TODO(lifecycler): Extend to support all possible states.
+            case ON_START:
+                lifecycleItem = StartActivityItem.obtain();
+                break;
             case ON_PAUSE:
                 lifecycleItem = PauseActivityItem.obtain();
                 break;
