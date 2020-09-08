@@ -558,7 +558,7 @@ public class StagingManager {
                 // failed when not in checkpoint mode, hence it is being processed separately.
                 Slog.d(TAG, "Found pending staged session " + session.sessionId + " still to "
                         + "be verified, resuming pre-reboot verification");
-                mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
+                mPreRebootVerificationHandler.startPreRebootVerification(session);
                 return;
             }
         }
@@ -873,7 +873,7 @@ public class StagingManager {
 
     void commitSession(@NonNull PackageInstallerSession session) {
         updateStoredSession(session);
-        mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
+        mPreRebootVerificationHandler.startPreRebootVerification(session);
     }
 
     private int getSessionIdForParentOrSelf(PackageInstallerSession session) {
@@ -1106,7 +1106,7 @@ public class StagingManager {
         if (!session.isStagedSessionReady()) {
             // The framework got restarted before the pre-reboot verification could complete,
             // restart the verification.
-            mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
+            mPreRebootVerificationHandler.startPreRebootVerification(session);
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
@@ -1261,14 +1261,16 @@ public class StagingManager {
             mIsReady = true;
             if (mPendingSessionIds != null) {
                 for (int i = 0; i < mPendingSessionIds.size(); i++) {
-                    startPreRebootVerification(mPendingSessionIds.get(i));
+                    PackageInstallerSession session = getStagedSession(mPendingSessionIds.get(i));
+                    startPreRebootVerification(session);
                 }
                 mPendingSessionIds = null;
             }
         }
 
         // Method for starting the pre-reboot verification
-        private synchronized void startPreRebootVerification(int sessionId) {
+        private synchronized void startPreRebootVerification(PackageInstallerSession session) {
+            int sessionId = session.sessionId;
             if (!mIsReady) {
                 if (mPendingSessionIds == null) {
                     mPendingSessionIds = new IntArray();
@@ -1277,7 +1279,6 @@ public class StagingManager {
                 return;
             }
 
-            PackageInstallerSession session = getStagedSession(sessionId);
             if (session != null && session.notifyStagedStartPreRebootVerification()) {
                 Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
                 obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, 0).sendToTarget();
