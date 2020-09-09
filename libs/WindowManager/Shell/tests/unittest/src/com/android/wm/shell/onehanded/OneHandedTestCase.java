@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
-import static com.android.systemui.onehanded.OneHandedController.SUPPORT_ONE_HANDED_MODE;
-import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HANDED_MODE;
+import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
 
 import static org.junit.Assume.assumeTrue;
 
+import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 
-import com.android.systemui.SysuiTestCase;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,14 +36,26 @@ import org.junit.Before;
 /**
  * Base class that does One Handed specific setup.
  */
-public abstract class OneHandedTestCase extends SysuiTestCase {
+public abstract class OneHandedTestCase {
     static boolean sOrigEnabled;
     static boolean sOrigTapsAppToExitEnabled;
     static int sOrigTimeout;
     static boolean sOrigSwipeToNotification;
 
+    protected Context mContext;
+
     @Before
     public void setupSettings() {
+        final Context testContext =
+                InstrumentationRegistry.getInstrumentation().getTargetContext();
+        final DisplayManager dm = testContext.getSystemService(DisplayManager.class);
+        mContext = testContext.createDisplayContext(dm.getDisplay(DEFAULT_DISPLAY));
+
+        InstrumentationRegistry
+                .getInstrumentation()
+                .getUiAutomation()
+                .adoptShellPermissionIdentity();
+
         sOrigEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 getContext().getContentResolver());
         sOrigTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
@@ -74,6 +90,15 @@ public abstract class OneHandedTestCase extends SysuiTestCase {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 sOrigSwipeToNotification ? 1 : 0);
+
+        InstrumentationRegistry
+                .getInstrumentation()
+                .getUiAutomation()
+                .dropShellPermissionIdentity();
+    }
+
+    protected Context getContext() {
+        return mContext;
     }
 }
 

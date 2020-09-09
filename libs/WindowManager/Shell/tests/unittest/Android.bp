@@ -25,6 +25,7 @@ android_test {
         "androidx.test.ext.junit",
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
+        "testables",
     ],
     libs: [
         "android.test.mock",

@@ -88,4 +88,9 @@
     <string name="accessibility_action_divider_top_30">Top 30%</string>
     <!-- Accessibility action for moving docked stack divider to make the bottom screen full screen [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_bottom_full">Bottom full screen</string>
+
+    <!-- One-Handed Tutorial title [CHAR LIMIT=60] -->
+    <string name="one_handed_tutorial_title">Using one-handed mode</string>
+    <!-- One-Handed Tutorial description [CHAR LIMIT=NONE] -->
+    <string name="one_handed_tutorial_description">To exit, swipe up from the bottom of the screen or tap anywhere above the app</string>
 </resources>

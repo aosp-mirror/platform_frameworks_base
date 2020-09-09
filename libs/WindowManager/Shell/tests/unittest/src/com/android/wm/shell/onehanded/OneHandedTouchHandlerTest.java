@@ -14,54 +14,56 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
-import static org.mockito.Mockito.verify;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.common.DisplayController;
-
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
+public class OneHandedTouchHandlerTest extends OneHandedTestCase {
     OneHandedTouchHandler mTouchHandler;
-    OneHandedTutorialHandler mTutorialHandler;
-    OneHandedGestureHandler mGestureHandler;
-    OneHandedController mOneHandedController;
-    @Mock
-    DisplayController mMockDisplayController;
-    @Mock
-    OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new OneHandedTouchHandler();
-        mTutorialHandler = Mockito.spy(new OneHandedTutorialHandler(mContext));
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController);
-        mOneHandedController = new OneHandedController(
-                getContext(),
-                mMockDisplayController,
-                mMockDisplayAreaOrganizer,
-                mTouchHandler,
-                mTutorialHandler,
-                mGestureHandler);
     }
 
     @Test
-    public void testOneHandedManager_registerForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mTutorialHandler);
+    public void testRegisterTouchEventListener() {
+        OneHandedTouchHandler.OneHandedTouchEventCallback callback = () -> {
+        };
+        mTouchHandler.registerTouchEventListener(callback);
+
+        assertThat(mTouchHandler.mTouchEventCallback).isEqualTo(callback);
+    }
+
+    @Test
+    public void testOneHandedDisabled_shouldDisposeInputChannel() {
+        mTouchHandler.onOneHandedEnabled(false);
+
+        assertThat(mTouchHandler.mInputMonitor).isNull();
+        assertThat(mTouchHandler.mInputEventReceiver).isNull();
+    }
+
+    @Ignore("b/167943723, refactor it and fix it")
+    @Test
+    public void testOneHandedEnabled_monitorInputChannel() {
+        mTouchHandler.onOneHandedEnabled(true);
+
+        assertThat(mTouchHandler.mInputMonitor).isNotNull();
+        assertThat(mTouchHandler.mInputEventReceiver).isNotNull();
     }
 }

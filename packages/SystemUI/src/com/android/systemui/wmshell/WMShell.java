@@ -38,10 +38,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.onehanded.OneHanded;
-import com.android.systemui.onehanded.OneHandedEvents;
-import com.android.systemui.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
-import com.android.systemui.onehanded.OneHandedTransitionCallback;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -51,6 +47,10 @@ import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.nano.WmShellTraceProto;
+import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.onehanded.OneHandedEvents;
+import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
+import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -248,10 +248,9 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             @Override
             public void setImeWindowStatus(int displayId, IBinder token, int vis,
                     int backDisposition, boolean showImeSwitcher) {
-                if (displayId != DEFAULT_DISPLAY && (vis & InputMethodService.IME_VISIBLE) == 0) {
-                    return;
+                if (displayId == DEFAULT_DISPLAY && (vis & InputMethodService.IME_VISIBLE) != 0) {
+                    oneHanded.stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
                 }
-                oneHanded.stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
             }
         });
 
