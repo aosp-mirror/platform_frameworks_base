@@ -117,28 +117,6 @@ struct Dvr : public RefBase {
     int mFd;
 };
 
-struct MediaEvent : public RefBase {
-    MediaEvent(sp<IFilter> iFilter, hidl_handle avHandle, uint64_t dataId,
-        uint64_t dataLength, jobject obj);
-    ~MediaEvent();
-    jobject getLinearBlock();
-    uint64_t getAudioHandle();
-    void finalize();
-
-    sp<IFilter> mIFilter;
-    native_handle_t* mAvHandle;
-    uint64_t mDataId;
-    uint64_t mDataLength;
-    uint8_t* mBuffer;
-    android::Mutex mLock;
-    int mDataIdRefCnt;
-    int mAvHandleRefCnt;
-    jweak mMediaEventObj;
-    jweak mLinearBlockObj;
-    C2HandleIon* mIonHandle;
-    std::weak_ptr<C2Buffer> mC2Buffer;
-};
-
 struct Filter : public RefBase {
     Filter(sp<IFilter> sp, jobject obj);
     ~Filter();
@@ -148,6 +126,31 @@ struct Filter : public RefBase {
     std::unique_ptr<MQ> mFilterMQ;
     EventFlag* mFilterMQEventFlag;
     jweak mFilterObj;
+    native_handle_t* mAvSharedHandle;
+    uint64_t mAvSharedMemSize;
+    bool mIsMediaFilter;
+};
+
+struct MediaEvent : public RefBase {
+    MediaEvent(sp<Filter> filter, hidl_handle avHandle, uint64_t dataId,
+        uint64_t dataSize, jobject obj);
+    ~MediaEvent();
+    jobject getLinearBlock();
+    uint64_t getAudioHandle();
+    void finalize();
+
+    sp<Filter> mFilter;
+    native_handle_t* mAvHandle;
+    uint64_t mDataId;
+    uint64_t mDataSize;
+    uint8_t* mBuffer;
+    android::Mutex mLock;
+    int mDataIdRefCnt;
+    int mAvHandleRefCnt;
+    jweak mMediaEventObj;
+    jweak mLinearBlockObj;
+    C2HandleIon* mIonHandle;
+    std::weak_ptr<C2Buffer> mC2Buffer;
 };
 
 struct FilterCallback : public IFilterCallback {
@@ -159,8 +162,7 @@ struct FilterCallback : public IFilterCallback {
 
     void setFilter(const sp<Filter> filter);
 private:
-    jweak mFilter;
-    sp<IFilter> mIFilter;
+    sp<Filter> mFilter;
     jobjectArray getSectionEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getMediaEvent(
