@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.MacAddress;
-import android.os.Build;
+import android.net.wifi.util.SdkLevelUtil;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -138,7 +138,7 @@ public final class SoftApInfo implements Parcelable {
      */
     @Nullable
     public MacAddress getBssid() {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+        if (!SdkLevelUtil.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
         return mBssid;
