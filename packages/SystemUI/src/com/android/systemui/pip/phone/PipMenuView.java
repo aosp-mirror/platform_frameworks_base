@@ -475,12 +475,10 @@ public class PipMenuView extends FrameLayout {
         final Pair<ComponentName, Integer> topPipActivityInfo =
                 PipUtils.getTopPipActivity(mContext, ActivityManager.getService());
         if (topPipActivityInfo.first != null) {
-            final UserHandle user = UserHandle.of(topPipActivityInfo.second);
             final Intent settingsIntent = new Intent(ACTION_PICTURE_IN_PICTURE_SETTINGS,
                     Uri.fromParts("package", topPipActivityInfo.first.getPackageName(), null));
-            settingsIntent.putExtra(Intent.EXTRA_USER_HANDLE, user);
             settingsIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
-            mContext.startActivity(settingsIntent);
+            mContext.startActivityAsUser(settingsIntent, UserHandle.CURRENT);
         }
     }
 
