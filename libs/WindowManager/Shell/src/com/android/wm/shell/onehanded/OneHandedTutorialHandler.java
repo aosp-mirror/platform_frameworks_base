@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,7 +33,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 
 import java.io.PrintWriter;
 
@@ -79,7 +79,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mTargetViewContainer.setClipChildren(false);
         mTutorialAreaHeight = Math.round(mDisplaySize.y
                 * (SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50) / 100.0f));
-        mTutorialView = LayoutInflater.from(context).inflate(R.xml.one_handed_tutorial, null);
+        mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial, null);
         mTargetViewContainer.addView(mTutorialView);
         mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
                 Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)

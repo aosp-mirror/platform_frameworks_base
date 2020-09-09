@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static android.os.UserHandle.USER_CURRENT;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -35,9 +35,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 
 import java.io.PrintWriter;
 
@@ -390,7 +390,7 @@ public class OneHandedController implements OneHanded {
         }
     }
 
-    @androidx.annotation.VisibleForTesting
+    @VisibleForTesting
     private void setEnabledGesturalOverlay(boolean enabled) {
         try {
             mOverlayManager.setEnabled(ONE_HANDED_MODE_GESTURAL_OVERLAY, enabled, USER_CURRENT);

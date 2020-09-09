@@ -75,8 +75,6 @@ import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.onehanded.OneHanded;
-import com.android.systemui.onehanded.OneHandedEvents;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -93,6 +91,8 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;

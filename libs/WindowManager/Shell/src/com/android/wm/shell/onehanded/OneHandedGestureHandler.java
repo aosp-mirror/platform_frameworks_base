@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -38,7 +38,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.R;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 
@@ -210,7 +210,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
                     displaySize.y);
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-gesture-offset", DEFAULT_DISPLAY);
-            mInputEventReceiver = new SysUiInputEventReceiver(
+            mInputEventReceiver = new EventReceiver(
                     mInputMonitor.getInputChannel(), Looper.getMainLooper());
         }
     }
@@ -227,8 +227,8 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         mRotation = toRotation;
     }
 
-    private class SysUiInputEventReceiver extends InputEventReceiver {
-        SysUiInputEventReceiver(InputChannel channel, Looper looper) {
+    private class EventReceiver extends InputEventReceiver {
+        EventReceiver(InputChannel channel, Looper looper) {
             super(channel, looper);
         }
 

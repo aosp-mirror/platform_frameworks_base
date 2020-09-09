@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -127,7 +127,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
         if (mIsEnabled) {
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-touch", DEFAULT_DISPLAY);
-            mInputEventReceiver = new SysUiInputEventReceiver(
+            mInputEventReceiver = new EventReceiver(
                     mInputMonitor.getInputChannel(), Looper.getMainLooper());
         }
     }
@@ -150,8 +150,8 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
         pw.println(mLastUpdatedBounds);
     }
 
-    private class SysUiInputEventReceiver extends InputEventReceiver {
-        SysUiInputEventReceiver(InputChannel channel, Looper looper) {
+    private class EventReceiver extends InputEventReceiver {
+        EventReceiver(InputChannel channel, Looper looper) {
             super(channel, looper);
         }
 

@@ -30,15 +30,15 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.onehanded.OneHanded;
-import com.android.systemui.onehanded.OneHandedGestureHandler;
-import com.android.systemui.onehanded.OneHandedTransitionCallback;
 import com.android.systemui.pip.Pip;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.onehanded.OneHanded;
+import com.android.wm.shell.onehanded.OneHandedGestureHandler;
+import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;

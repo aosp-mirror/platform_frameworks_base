@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.onehanded;
+package com.android.wm.shell.onehanded;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
+import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 
 import java.io.PrintWriter;
 
