@@ -160,8 +160,9 @@ public final class HexDumpTest extends TestCase {
     private static void assertThrows(Class<? extends RuntimeException> clazz, Runnable runnable) {
         try {
             runnable.run();
-        } catch (RuntimeException exception) {
-            assertEquals(toStrackTrace(exception), clazz, exception.getClass());
+            fail();
+        } catch (RuntimeException expected) {
+            assertEquals(toStrackTrace(expected), clazz, expected.getClass());
         }
     }
 
