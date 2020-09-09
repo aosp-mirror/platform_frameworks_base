@@ -78,6 +78,11 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
     }
 
     @Override
+    protected boolean shouldFocusWindow() {
+        return false;
+    }
+
+    @Override
     protected void showInternal() {
         getLayout().setVisibility(View.VISIBLE);
     }

@@ -136,16 +136,18 @@ public class OverlayViewController {
     }
 
     /**
-     * Returns {@code true} if navigation bar should be displayed over this view.
+     * Returns {@code true} if navigation bar insets should be displayed over this view. Has no
+     * effect if {@link #shouldFocusWindow} returns {@code false}.
      */
-    protected boolean shouldShowNavigationBar() {
+    protected boolean shouldShowNavigationBarInsets() {
         return false;
     }
 
     /**
-     * Returns {@code true} if status bar should be displayed over this view.
+     * Returns {@code true} if status bar insets should be displayed over this view. Has no
+     * effect if {@link #shouldFocusWindow} returns {@code false}.
      */
-    protected boolean shouldShowStatusBar() {
+    protected boolean shouldShowStatusBarInsets() {
         return false;
     }
 
@@ -154,6 +156,15 @@ public class OverlayViewController {
      */
     protected boolean shouldShowWhenOccluded() {
         return false;
+    }
+
+    /**
+     * Returns {@code true} if the window should be focued when this view is visible. Note that
+     * returning {@code false} here means that {@link #shouldShowStatusBarInsets} and
+     * {@link #shouldShowNavigationBarInsets} will have no effect.
+     */
+    protected boolean shouldFocusWindow() {
+        return true;
     }
 
     /**
