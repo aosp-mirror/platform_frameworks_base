@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -94,7 +96,8 @@ class InsetsSourceProvider {
                 new Point());
 
         final int type = source.getType();
-        if (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR) {
+        if (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR || type == ITYPE_CLIMATE_BAR
+                || type == ITYPE_EXTRA_NAVIGATION_BAR) {
             mControllable = sNewInsetsMode == NEW_INSETS_MODE_FULL;
         } else if (type == ITYPE_IME) {
             mControllable = sNewInsetsMode >= NEW_INSETS_MODE_IME;
