@@ -71,7 +71,7 @@ public class PackageParser2 implements AutoCloseable {
                     return platformCompat.isChangeEnabled(changeId, appInfo);
                 } catch (Exception e) {
                     // This shouldn't happen, but assume enforcement if it does
-                    Slog.wtf(ParsingUtils.TAG, "IPlatformCompat query failed", e);
+                    Slog.wtf(TAG, "IPlatformCompat query failed", e);
                     return true;
                 }
             }
@@ -87,7 +87,7 @@ public class PackageParser2 implements AutoCloseable {
         });
     }
 
-    static final String TAG = "PackageParser2";
+    private static final String TAG = ParsingUtils.TAG;
 
     private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
     private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;

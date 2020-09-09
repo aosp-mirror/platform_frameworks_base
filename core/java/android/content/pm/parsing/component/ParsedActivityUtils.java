@@ -24,7 +24,6 @@ import android.app.ActivityTaskManager;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
@@ -55,7 +54,7 @@ import java.util.Objects;
 /** @hide */
 public class ParsedActivityUtils {
 
-    private static final String TAG = ParsingPackageUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)

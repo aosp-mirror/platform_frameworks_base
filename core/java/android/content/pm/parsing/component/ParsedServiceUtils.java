@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
@@ -42,8 +41,6 @@ import java.util.Objects;
 
 /** @hide */
 public class ParsedServiceUtils {
-
-    private static final String TAG = ParsingPackageUtils.TAG;
 
     @NonNull
     public static ParseResult<ParsedService> parseService(String[] separateProcesses,

@@ -53,7 +53,7 @@ import java.util.List;
 /** @hide */
 public class ApkLiteParseUtils {
 
-    private static final String TAG = ParsingPackageUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     // TODO(b/135203078): Consolidate constants
     private static final int DEFAULT_MIN_SDK_VERSION = 1;
