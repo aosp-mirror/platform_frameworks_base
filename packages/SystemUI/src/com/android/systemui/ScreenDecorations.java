@@ -105,6 +105,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     public static final String SIZE = "sysui_rounded_size";
     public static final String PADDING = "sysui_rounded_content_padding";
+    // Provide a way for factory to disable ScreenDecorations to run the Display tests.
+    private static final boolean DEBUG_DISABLE_SCREEN_DECORATIONS =
+            SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
     private static final boolean VERBOSE = false;
@@ -204,6 +207,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     @Override
     public void start() {
+        if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
+            Log.i(TAG, "ScreenDecorations is disabled");
+            return;
+        }
         mHandler = startHandlerThread();
         mHandler.post(this::startOnScreenDecorationsThread);
     }
