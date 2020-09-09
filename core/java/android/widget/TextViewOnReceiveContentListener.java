@@ -60,7 +60,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public final class TextViewOnReceiveContentListener implements OnReceiveContentListener {
     private static final String LOG_TAG = "ReceiveContent";
 
@@ -261,10 +261,17 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
         mInputConnectionInfo = null;
     }
 
-    /** @hide */
-    @VisibleForTesting
+    /**
+     * Returns the MIME types accepted by {@link View#performReceiveContent} for the given view,
+     * <strong>for autofill purposes</strong>. This will be non-null only if fallback to the
+     * keyboard image API {@link #isUsageOfImeCommitContentEnabled is enabled} and the view has an
+     * {@link InputConnection} with {@link EditorInfo#contentMimeTypes} populated.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @Nullable
-    public String[] getEditorInfoMimeTypes(@NonNull TextView view) {
+    public String[] getFallbackMimeTypesForAutofill(@NonNull TextView view) {
         if (!isUsageOfImeCommitContentEnabled(view)) {
             return null;
         }

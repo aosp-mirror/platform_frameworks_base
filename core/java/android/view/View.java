@@ -8821,6 +8821,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillValue(getAutofillValue());
             }
             structure.setImportantForAutofill(getImportantForAutofill());
+            structure.setOnReceiveContentMimeTypes(getOnReceiveContentMimeTypes());
         }
 
         int ignoredParentLeft = 0;

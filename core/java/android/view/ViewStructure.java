@@ -372,6 +372,14 @@ public abstract class ViewStructure {
     public void setImportantForAutofill(@AutofillImportance int mode) {}
 
     /**
+     * Sets the MIME types accepted by this view. See {@link View#getOnReceiveContentMimeTypes()}.
+     *
+     * <p>Should only be set when the node is used for Autofill or Content Capture purposes - it
+     * will be ignored when used for Assist.
+     */
+    public void setOnReceiveContentMimeTypes(@Nullable String[] mimeTypes) {}
+
+    /**
      * Sets the {@link android.text.InputType} bits of this node.
      *
      * @param inputType inputType bits as defined by {@link android.text.InputType}.
