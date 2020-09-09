@@ -4334,6 +4334,14 @@ package android.media {
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setVideoTrackFormat(@NonNull android.media.MediaFormat);
   }
 
+  public static class MediaTranscodeManager.TranscodingRequest.MediaFormatResolver {
+    ctor public MediaTranscodeManager.TranscodingRequest.MediaFormatResolver();
+    method @Nullable public android.media.MediaFormat resolveVideoFormat();
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setSourceVideoFormatHint(@NonNull android.media.MediaFormat);
+    method public boolean shouldTranscode();
+    field public static final String CAPS_SUPPORTS_HEVC = "support-hevc";
+  }
+
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);
