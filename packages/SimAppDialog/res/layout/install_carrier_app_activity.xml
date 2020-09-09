@@ -14,17 +14,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<com.google.android.setupdesign.GlifLayout
+<com.android.setupwizardlib.GlifLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/setup_wizard_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:icon="@drawable/ic_signal_cellular_alt_rounded"
-    app:sucHeaderText="@string/install_carrier_app_title">
+    app:suwHeaderText="@string/install_carrier_app_title"
+    app:suwFooter="@layout/install_carrier_app_footer">
 
     <LinearLayout
-        style="@style/SudContentFrame"
+        style="@style/SuwContentFrame"
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,12 +33,12 @@
 
         <TextView
             android:id="@+id/install_carrier_app_description"
-            style="@style/SudDescription.Glif"
+            style="@style/SuwDescription.Glif"
             android:text="@string/install_carrier_app_description_default"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <com.google.android.setupdesign.view.FillContentLayout
+        <com.android.setupwizardlib.view.FillContentLayout
             android:id="@+id/illo_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,12 +47,12 @@
 
             <ImageView
                 android:src="@drawable/illo_sim_app_dialog"
-                style="@style/SudContentIllustration"
+                style="@style/SuwContentIllustration"
                 android:contentDescription="@string/install_carrier_app_image_content_description"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
-        </com.google.android.setupdesign.view.FillContentLayout>
-    </LinearLayout>
+        </com.android.setupwizardlib.view.FillContentLayout>
+</LinearLayout>
 
-</com.google.android.setupdesign.GlifLayout>
+</com.android.setupwizardlib.GlifLayout>
