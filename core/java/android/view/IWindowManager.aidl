@@ -393,11 +393,6 @@ interface IWindowManager
     oneway void setRecentsVisibility(boolean visible);
 
     /**
-     * Called by System UI to notify of changes to the visibility of PIP.
-     */
-    oneway void setPipVisibility(boolean visible);
-
-    /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
      */
     @UnsupportedAppUsage
