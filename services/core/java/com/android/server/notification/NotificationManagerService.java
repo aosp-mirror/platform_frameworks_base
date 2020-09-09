@@ -1684,8 +1684,10 @@ public class NotificationManagerService extends SystemService {
                 final IntArray userIds = mUserProfiles.getCurrentProfileIds();
 
                 for (int i = 0; i < userIds.size(); i++) {
-                    mArchive.updateHistoryEnabled(userIds.get(i), Settings.Secure.getInt(resolver,
-                            Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1);
+                    mArchive.updateHistoryEnabled(userIds.get(i),
+                            Settings.Secure.getIntForUser(resolver,
+                                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,
+                                    userIds.get(i)) == 1);
                 }
             }
             if (uri == null || NOTIFICATION_SHOW_MEDIA_ON_QUICK_SETTINGS_URI.equals(uri)) {
@@ -7148,9 +7150,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void playInCallNotification() {
+        final ContentResolver cr = getContext().getContentResolver();
         if (mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_NORMAL
-                && Settings.Secure.getInt(getContext().getContentResolver(),
-                Settings.Secure.IN_CALL_NOTIFICATION_ENABLED, 1) != 0) {
+                && Settings.Secure.getIntForUser(cr,
+                Settings.Secure.IN_CALL_NOTIFICATION_ENABLED, 1, cr.getUserId()) != 0) {
             new Thread() {
                 @Override
                 public void run() {
