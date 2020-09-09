@@ -28,6 +28,8 @@ import static android.os.Process.SYSTEM_UID;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceSpec;
 import android.app.usage.UsageStatsManagerInternal;
@@ -39,7 +41,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -61,6 +65,7 @@ import com.android.internal.app.AssistUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -72,7 +77,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 public class SliceManagerService extends ISliceManager.Stub {
 
@@ -80,13 +88,16 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final Object mLock = new Object();
 
     private final Context mContext;
+    private final PackageManagerInternal mPackageManagerInternal;
     private final AppOpsManager mAppOps;
     private final AssistUtils mAssistUtils;
 
     @GuardedBy("mLock")
     private final ArrayMap<Uri, PinnedSliceState> mPinnedSlicesByUri = new ArrayMap<>();
     @GuardedBy("mLock")
-    private final SparseArray<String> mLastAssistantPackage = new SparseArray<>();
+    private final SparseArray<PackageMatchingCache> mAssistantLookup = new SparseArray<>();
+    @GuardedBy("mLock")
+    private final SparseArray<PackageMatchingCache> mHomeLookup = new SparseArray<>();
     private final Handler mHandler;
 
     private final SlicePermissionManager mPermissions;
@@ -99,6 +110,8 @@ public class SliceManagerService extends ISliceManager.Stub {
     @VisibleForTesting
     SliceManagerService(Context context, Looper looper) {
         mContext = context;
+        mPackageManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(PackageManagerInternal.class));
         mAppOps = context.getSystemService(AppOpsManager.class);
         mAssistUtils = new AssistUtils(context);
         mHandler = new Handler(looper);
@@ -111,6 +124,7 @@ public class SliceManagerService extends ISliceManager.Stub {
         filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
+        mRoleObserver = new RoleObserver();
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
     }
 
@@ -160,7 +174,8 @@ public class SliceManagerService extends ISliceManager.Stub {
         mHandler.post(() -> {
             if (slicePkg != null && !Objects.equals(pkg, slicePkg)) {
                 mAppUsageStats.reportEvent(slicePkg, user,
-                        isAssistant(pkg, user) ? SLICE_PINNED_PRIV : SLICE_PINNED);
+                        isAssistant(pkg, user) || isDefaultHomeApp(pkg, user)
+                                ? SLICE_PINNED_PRIV : SLICE_PINNED);
             }
         });
     }
@@ -425,19 +440,38 @@ public class SliceManagerService extends ISliceManager.Stub {
     private boolean hasFullSliceAccess(String pkg, int userId) {
         long ident = Binder.clearCallingIdentity();
         try {
-            return isAssistant(pkg, userId) || isGrantedFullAccess(pkg, userId);
+            boolean ret = isDefaultHomeApp(pkg, userId) || isAssistant(pkg, userId)
+                    || isGrantedFullAccess(pkg, userId);
+            return ret;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     private boolean isAssistant(String pkg, int userId) {
-        if (pkg == null) return false;
-        if (!pkg.equals(mLastAssistantPackage.get(userId))) {
-            // Failed on cached value, try updating.
-            mLastAssistantPackage.put(userId, getAssistant(userId));
+        return getAssistantMatcher(userId).matches(pkg);
+    }
+
+    private boolean isDefaultHomeApp(String pkg, int userId) {
+        return getHomeMatcher(userId).matches(pkg);
+    }
+
+    private PackageMatchingCache getAssistantMatcher(int userId) {
+        PackageMatchingCache matcher = mAssistantLookup.get(userId);
+        if (matcher == null) {
+            matcher = new PackageMatchingCache(() -> getAssistant(userId));
+            mAssistantLookup.put(userId, matcher);
         }
-        return pkg.equals(mLastAssistantPackage.get(userId));
+        return matcher;
+    }
+
+    private PackageMatchingCache getHomeMatcher(int userId) {
+        PackageMatchingCache matcher = mHomeLookup.get(userId);
+        if (matcher == null) {
+            matcher = new PackageMatchingCache(() -> getDefaultHome(userId));
+            mHomeLookup.put(userId, matcher);
+        }
+        return matcher;
     }
 
     private String getAssistant(int userId) {
@@ -446,6 +480,111 @@ public class SliceManagerService extends ISliceManager.Stub {
             return null;
         }
         return cn.getPackageName();
+    }
+
+    /**
+     * A cached value of the default home app
+     */
+    private String mCachedDefaultHome = null;
+
+    // Based on getDefaultHome in ShortcutService.
+    // TODO: Unify if possible
+    @VisibleForTesting
+    protected String getDefaultHome(int userId) {
+
+        // Set VERIFY to true to run the cache in "shadow" mode for cache
+        // testing.  Do not commit set to true;
+        final boolean VERIFY = false;
+
+        if (mCachedDefaultHome != null) {
+            if (!VERIFY) {
+                return mCachedDefaultHome;
+            }
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
+
+            // Default launcher from package manager.
+            final ComponentName defaultLauncher = mPackageManagerInternal
+                    .getHomeActivitiesAsUser(allHomeCandidates, userId);
+
+            ComponentName detected = defaultLauncher;
+
+            // Cache the default launcher.  It is not a problem if the
+            // launcher is null - eventually, the default launcher will be
+            // set to something non-null.
+            mCachedDefaultHome = ((detected != null) ? detected.getPackageName() : null);
+
+            if (detected == null) {
+                // If we reach here, that means it's the first check since the user was created,
+                // and there's already multiple launchers and there's no default set.
+                // Find the system one with the highest priority.
+                // (We need to check the priority too because of FallbackHome in Settings.)
+                // If there's no system launcher yet, then no one can access slices, until
+                // the user explicitly sets one.
+                final int size = allHomeCandidates.size();
+
+                int lastPriority = Integer.MIN_VALUE;
+                for (int i = 0; i < size; i++) {
+                    final ResolveInfo ri = allHomeCandidates.get(i);
+                    if (!ri.activityInfo.applicationInfo.isSystemApp()) {
+                        continue;
+                    }
+                    if (ri.priority < lastPriority) {
+                        continue;
+                    }
+                    detected = ri.activityInfo.getComponentName();
+                    lastPriority = ri.priority;
+                }
+            }
+            final String ret = ((detected != null) ? detected.getPackageName() : null);
+            if (VERIFY) {
+                if (mCachedDefaultHome != null && !mCachedDefaultHome.equals(ret)) {
+                    Slog.e(TAG, "getDefaultHome() cache failure, is " +
+                           mCachedDefaultHome + " should be " + ret);
+                }
+            }
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void invalidateCachedDefaultHome() {
+        mCachedDefaultHome = null;
+    }
+
+    /**
+     * Listen for changes in the roles, and invalidate the cached default
+     * home as necessary.
+     */
+    private RoleObserver mRoleObserver;
+
+    class RoleObserver implements OnRoleHoldersChangedListener {
+        private RoleManager mRm;
+        private final Executor mExecutor;
+
+        RoleObserver() {
+            mExecutor = mContext.getMainExecutor();
+            register();
+        }
+
+        public void register() {
+            mRm = mContext.getSystemService(RoleManager.class);
+            if (mRm != null) {
+                mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
+                invalidateCachedDefaultHome();
+            }
+        }
+
+        @Override
+        public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+            if (RoleManager.ROLE_HOME.equals(roleName)) {
+                invalidateCachedDefaultHome();
+            }
+        }
     }
 
     private boolean isGrantedFullAccess(String pkg, int userId) {
@@ -494,6 +633,30 @@ public class SliceManagerService extends ISliceManager.Stub {
                 .authority(authority)
                 .build(), 0);
         return mPermissions.getAllPackagesGranted(pkg);
+    }
+
+    /**
+     * Holder that caches a package that has access to a slice.
+     */
+    static class PackageMatchingCache {
+
+        private final Supplier<String> mPkgSource;
+        private String mCurrentPkg;
+
+        public PackageMatchingCache(Supplier<String> pkgSource) {
+            mPkgSource = pkgSource;
+        }
+
+        public boolean matches(String pkgCandidate) {
+            if (pkgCandidate == null) return false;
+
+            if (Objects.equals(pkgCandidate, mCurrentPkg)) {
+                return true;
+            }
+            // Failed on cached value, try updating.
+            mCurrentPkg = mPkgSource.get();
+            return Objects.equals(pkgCandidate, mCurrentPkg);
+        }
     }
 
     public static class Lifecycle extends SystemService {
