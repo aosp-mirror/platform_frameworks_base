@@ -205,9 +205,11 @@ public interface NotificationsModule {
             Context context,
             NotificationGutsManager notificationGutsManager,
             NotificationEntryManager notificationEntryManager,
-            MetricsLogger metricsLogger) {
+            MetricsLogger metricsLogger,
+            GroupMembershipManager groupMembershipManager) {
         return new NotificationBlockingHelperManager(
-                context, notificationGutsManager, notificationEntryManager, metricsLogger);
+                context, notificationGutsManager, notificationEntryManager, metricsLogger,
+                groupMembershipManager);
     }
 
     /** Provides an instance of {@link GroupMembershipManager} */
@@ -273,7 +275,8 @@ public interface NotificationsModule {
             Lazy<NotifCollection> notifCollection,
             Lazy<VisualStabilityCoordinator> visualStabilityCoordinator,
             NotificationEntryManager entryManager,
-            VisualStabilityManager visualStabilityManager) {
+            VisualStabilityManager visualStabilityManager,
+            Lazy<GroupMembershipManager> groupMembershipManagerLazy) {
         return featureFlags.isNewNotifPipelineRenderingEnabled()
                 ? new OnUserInteractionCallbackImpl(
                         pipeline.get(),
@@ -285,7 +288,8 @@ public interface NotificationsModule {
                         entryManager,
                         headsUpManager,
                         statusBarStateController,
-                        visualStabilityManager);
+                        visualStabilityManager,
+                        groupMembershipManagerLazy.get());
     }
 
     /** */
