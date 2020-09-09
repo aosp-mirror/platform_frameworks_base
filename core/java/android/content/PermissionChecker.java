@@ -343,20 +343,22 @@ public final class PermissionChecker {
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
-     * @param attributionTag attribution tag of caller (if not self)
+     * @param callingPackageName package name tag of caller (if not self)
+     * @param callingAttributionTag attribution tag of caller (if not self)
      * @param message A message describing the reason the permission was checked
      *
      * @see #checkCallingOrSelfPermissionForPreflight(Context, String)
      */
     @PermissionResult
     public static int checkCallingOrSelfPermissionForDataDelivery(@NonNull Context context,
-            @NonNull String permission, @Nullable String attributionTag, @Nullable String message) {
-        String packageName = (Binder.getCallingPid() == Process.myPid())
-                ? context.getPackageName() : null;
-        attributionTag = (Binder.getCallingPid() == Process.myPid())
-                ? context.getAttributionTag() : attributionTag;
+            @NonNull String permission, @Nullable String callingPackageName,
+            @Nullable String callingAttributionTag, @Nullable String message) {
+        callingPackageName = (Binder.getCallingPid() == Process.myPid())
+                ? context.getPackageName() : callingPackageName;
+        callingAttributionTag = (Binder.getCallingPid() == Process.myPid())
+                ? context.getAttributionTag() : callingAttributionTag;
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName, attributionTag, message);
+                Binder.getCallingUid(), callingPackageName, callingAttributionTag, message);
     }
 
     /**
@@ -375,15 +377,15 @@ public final class PermissionChecker {
      * app's fg/gb state) and this check will not leave a trace that permission protected
      * data was delivered. When you are about to deliver the location data to a registered
      * listener you should use {@link #checkCallingOrSelfPermissionForDataDelivery(Context,
-     * String, String, String)} which will evaluate the permission access based on the current
-     * fg/bg state of the app and leave a record that the data was accessed.
+     * String, String, String, String)} which will evaluate the permission access based on the
+     * current fg/bg state of the app and leave a record that the data was accessed.
      *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      *
-     * @see #checkCallingOrSelfPermissionForDataDelivery(Context, String, String, String)
+     * @see #checkCallingOrSelfPermissionForDataDelivery(Context, String, String, String, String)
      */
     @PermissionResult
     public static int checkCallingOrSelfPermissionForPreflight(@NonNull Context context,
