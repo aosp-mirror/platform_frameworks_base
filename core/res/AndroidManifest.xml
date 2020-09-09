@@ -4691,6 +4691,12 @@
     <permission android:name="android.permission.HANDLE_CAR_MODE_CHANGES"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows the holder to send category_car notifications.
+        @hide -->
+    <permission
+        android:name="android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
