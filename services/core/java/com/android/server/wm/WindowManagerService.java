@@ -2386,10 +2386,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.mActivityRecord != null) {
                 win.mActivityRecord.updateReportedVisibilityLocked();
             }
-            if (winAnimator.mReportSurfaceResized) {
-                winAnimator.mReportSurfaceResized = false;
-                result |= WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED;
-            }
             if (displayPolicy.areSystemBarsForcedShownLw(win)) {
                 result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
             }

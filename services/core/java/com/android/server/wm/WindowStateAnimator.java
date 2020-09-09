@@ -126,11 +126,7 @@ class WindowStateAnimator {
      * we must tell them application to resize (and thus redraw itself).
      */
     boolean mSurfaceResized;
-    /**
-     * Whether we should inform the client on next relayoutWindow that
-     * the surface has been resized since last time.
-     */
-    boolean mReportSurfaceResized;
+
     WindowSurfaceController mSurfaceController;
     private WindowSurfaceController mPendingDestroySurface;
 
@@ -872,7 +868,6 @@ class WindowStateAnimator {
         }
 
         if (mSurfaceResized) {
-            mReportSurfaceResized = true;
             mWin.getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
     }
