@@ -138,8 +138,6 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testFixedAspectRatioBoundsWithDecorInSquareDisplay() {
         final int notchHeight = 100;
         setUpApp(new TestDisplayContent.Builder(mAtm, 600, 800).setNotch(notchHeight).build());
-        // Rotation is ignored so because the display size is close to square (700/600<1.333).
-        assertTrue(mActivity.mDisplayContent.ignoreRotationForApps());
 
         final Rect displayBounds = mActivity.mDisplayContent.getWindowConfiguration().getBounds();
         final float aspectRatio = 1.2f;
@@ -163,23 +161,14 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertFitted();
 
-        // After the orientation of activity is changed, even display is not rotated, the aspect
-        // ratio should be the same (bounds=[0, 0 - 600, 600], appBounds=[0, 100 - 600, 600]).
+        // After the orientation of activity is changed, the display is rotated, the aspect
+        // ratio should be the same (bounds=[100, 0 - 800, 583], appBounds=[100, 0 - 800, 583]).
         assertEquals(appBounds.width(), appBounds.height() * aspectRatio, 0.5f /* delta */);
-        // The notch is still on top.
-        assertEquals(mActivity.getBounds().height(), appBounds.height() + notchHeight);
+        // The notch is no longer on top.
+        assertEquals(appBounds, mActivity.getBounds());
 
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertFitted();
-
-        // Close-to-square display can rotate without being restricted by the requested orientation.
-        // The notch becomes on the left side. The activity is horizontal centered in 100 ~ 800.
-        // So the bounds and appBounds will be [200, 0 - 700, 600] (500x600) that is still fitted.
-        // Left = 100 + (800 - 100 - 500) / 2 = 200.
-        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
-        assertFitted();
-        assertEquals(appBounds.left,
-                notchHeight + (displayBounds.width() - notchHeight - appBounds.width()) / 2);
     }
 
     @Test
