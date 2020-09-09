@@ -200,7 +200,6 @@ public class PackageSetting extends PackageSettingBase {
         return installPermissionsFixed;
     }
 
-    // TODO(b/135203078): Remove these in favor of reading from the package directly
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }

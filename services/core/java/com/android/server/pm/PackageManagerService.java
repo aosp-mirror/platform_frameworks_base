@@ -17763,7 +17763,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     oldPackage = mPackages.get(pkgName11);
                     existingPackage = oldPackage;
                     if (DEBUG_INSTALL) {
-                        // TODO(b/135203078): PackageImpl.toString()
                         Slog.d(TAG,
                                 "replacePackageLI: new=" + parsedPackage + ", old=" + oldPackage);
                     }

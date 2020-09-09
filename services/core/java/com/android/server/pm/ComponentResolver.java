@@ -623,7 +623,6 @@ public class ComponentResolver {
             AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
 
             if (pkg != null) {
-                // TODO(b/135203078): Print AppInfo?
                 pw.print("      applicationInfo="); pw.println(pkg.toAppInfoWithoutState());
             }
         }

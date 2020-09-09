@@ -888,6 +888,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public ApplicationInfo toAppInfoWithoutStateWithoutFlags() {
         ApplicationInfo appInfo = new ApplicationInfo();
 
+        // Lines that are commented below are state related and should not be assigned here.
+        // They are left in as placeholders, since there is no good backwards compatible way to
+        // separate these.
         appInfo.appComponentFactory = appComponentFactory;
         appInfo.backupAgentName = backupAgentName;
         appInfo.banner = banner;
@@ -897,13 +900,17 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.compatibleWidthLimitDp = compatibleWidthLimitDp;
         appInfo.compileSdkVersion = compileSdkVersion;
         appInfo.compileSdkVersionCodename = compileSdkVersionCodeName;
-//        appInfo.credentialProtectedDataDir = credentialProtectedDataDir;
-//        appInfo.dataDir = dataDir;
+//        appInfo.credentialProtectedDataDir
+        appInfo.crossProfile = isCrossProfile();
+//        appInfo.dataDir
         appInfo.descriptionRes = descriptionRes;
-//        appInfo.deviceProtectedDataDir = deviceProtectedDataDir;
+//        appInfo.deviceProtectedDataDir
         appInfo.enabled = enabled;
+//        appInfo.enabledSetting
         appInfo.fullBackupContent = fullBackupContent;
-//        appInfo.hiddenUntilInstalled = hiddenUntilInstalled;
+        // TODO(b/135203078): See ParsingPackageImpl#getHiddenApiEnforcementPolicy
+//        appInfo.mHiddenApiPolicy
+//        appInfo.hiddenUntilInstalled
         appInfo.icon = (PackageParser.sUseRoundIcon && roundIconRes != 0) ? roundIconRes : iconRes;
         appInfo.iconRes = iconRes;
         appInfo.roundIconRes = roundIconRes;
@@ -920,9 +927,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         if (appInfo.name != null) {
             appInfo.name = appInfo.name.trim();
         }
-//        appInfo.nativeLibraryDir = nativeLibraryDir;
-//        appInfo.nativeLibraryRootDir = nativeLibraryRootDir;
-//        appInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
+//        appInfo.nativeLibraryDir
+//        appInfo.nativeLibraryRootDir
+//        appInfo.nativeLibraryRootRequiresIsa
         appInfo.networkSecurityConfigRes = networkSecurityConfigRes;
         appInfo.nonLocalizedLabel = nonLocalizedLabel;
         if (appInfo.nonLocalizedLabel != null) {
@@ -930,16 +937,17 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         }
         appInfo.packageName = packageName;
         appInfo.permission = permission;
-//        appInfo.primaryCpuAbi = primaryCpuAbi;
+//        appInfo.primaryCpuAbi
         appInfo.processName = getProcessName();
         appInfo.requiresSmallestWidthDp = requiresSmallestWidthDp;
-//        appInfo.secondaryCpuAbi = secondaryCpuAbi;
-//        appInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
-//        appInfo.seInfo = seInfo;
-//        appInfo.seInfoUser = seInfoUser;
-//        appInfo.sharedLibraryFiles = usesLibraryFiles.isEmpty()
-//                ? null : usesLibraryFiles.toArray(new String[0]);
-//        appInfo.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+//        appInfo.resourceDirs
+//        appInfo.secondaryCpuAbi
+//        appInfo.secondaryNativeLibraryDir
+//        appInfo.seInfo
+//        appInfo.seInfoUser
+//        appInfo.sharedLibraryFiles
+//        appInfo.sharedLibraryInfos
+//        appInfo.showUserIcon
         appInfo.splitClassLoaderNames = splitClassLoaderNames;
         appInfo.splitDependencies = splitDependencies;
         appInfo.splitNames = splitNames;
@@ -948,11 +956,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.targetSdkVersion = targetSdkVersion;
         appInfo.taskAffinity = taskAffinity;
         appInfo.theme = theme;
-//        appInfo.uid = uid;
+//        appInfo.uid
         appInfo.uiOptions = uiOptions;
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
-        appInfo.crossProfile = isCrossProfile();
         appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setBaseCodePath(baseCodePath);
         appInfo.setBaseResourcePath(baseCodePath);
@@ -961,15 +968,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.setSplitCodePaths(splitCodePaths);
         appInfo.setSplitResourcePaths(splitCodePaths);
         appInfo.setVersionCode(PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode));
-
-        // TODO(b/135203078): Can this be removed? Looks only used in ActivityInfo.
-//        appInfo.showUserIcon = pkg.getShowUserIcon();
-        // TODO(b/135203078): Unused?
-//        appInfo.resourceDirs = pkg.getResourceDirs();
-        // TODO(b/135203078): Unused?
-//        appInfo.enabledSetting = pkg.getEnabledSetting();
-        // TODO(b/135203078): See ParsingPackageImpl#getHiddenApiEnforcementPolicy
-//        appInfo.mHiddenApiPolicy = pkg.getHiddenApiPolicy();
 
         return appInfo;
     }

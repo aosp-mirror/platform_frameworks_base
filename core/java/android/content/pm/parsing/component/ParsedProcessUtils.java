@@ -40,8 +40,6 @@ import java.util.Set;
 /** @hide */
 public class ParsedProcessUtils {
 
-    private static final String TAG = ParsingUtils.TAG;
-
     @NonNull
     private static ParseResult<Set<String>> parseDenyPermission(Set<String> perms,
             Resources res, XmlResourceParser parser, ParseInput input)

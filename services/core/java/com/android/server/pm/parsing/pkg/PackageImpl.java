@@ -430,7 +430,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Deprecated
     @Override
     public String toAppInfoToString() {
-        return "ApplicationInfo{"
+        return "PackageImpl{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + getPackageName() + "}";
     }
