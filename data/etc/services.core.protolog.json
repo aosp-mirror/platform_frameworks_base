@@ -1393,6 +1393,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/BlackFrame.java"
     },
+    "155482615": {
+      "message": "Focus requested for window=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/InputMonitor.java"
+    },
     "174572959": {
       "message": "DisplayArea info changed name=%s",
       "level": "VERBOSE",
@@ -2634,6 +2640,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
+    },
+    "2081291430": {
+      "message": "Focus not requested for window=%s because it has no surface",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/InputMonitor.java"
     },
     "2083556954": {
       "message": "Set mOrientationChanging of %s",
