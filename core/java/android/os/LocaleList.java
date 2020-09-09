@@ -26,6 +26,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -171,18 +172,18 @@ public final class LocaleList implements Parcelable {
     /**
      * Creates a new {@link LocaleList}.
      *
+     * If two or more same locales are passed, the repeated locales will be dropped.
      * <p>For empty lists of {@link Locale} items it is better to use {@link #getEmptyLocaleList()},
      * which returns a pre-constructed empty list.</p>
      *
      * @throws NullPointerException if any of the input locales is <code>null</code>.
-     * @throws IllegalArgumentException if any of the input locales repeat.
      */
     public LocaleList(@NonNull Locale... list) {
         if (list.length == 0) {
             mList = sEmptyList;
             mStringRepresentation = "";
         } else {
-            final Locale[] localeList = new Locale[list.length];
+            final ArrayList<Locale> localeList = new ArrayList<>();
             final HashSet<Locale> seenLocales = new HashSet<Locale>();
             final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < list.length; i++) {
@@ -190,10 +191,10 @@ public final class LocaleList implements Parcelable {
                 if (l == null) {
                     throw new NullPointerException("list[" + i + "] is null");
                 } else if (seenLocales.contains(l)) {
-                    throw new IllegalArgumentException("list[" + i + "] is a repetition");
+                    // Dropping duplicated locale entries.
                 } else {
                     final Locale localeClone = (Locale) l.clone();
-                    localeList[i] = localeClone;
+                    localeList.add(localeClone);
                     sb.append(localeClone.toLanguageTag());
                     if (i < list.length - 1) {
                         sb.append(',');
@@ -201,7 +202,7 @@ public final class LocaleList implements Parcelable {
                     seenLocales.add(localeClone);
                 }
             }
-            mList = localeList;
+            mList = localeList.toArray(new Locale[localeList.size()]);
             mStringRepresentation = sb.toString();
         }
     }
