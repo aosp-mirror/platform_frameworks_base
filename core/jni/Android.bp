@@ -1,4 +1,3 @@
-
 cc_library_shared {
     name: "libandroid_runtime",
     host_supported: true,
@@ -286,8 +285,9 @@ cc_library_shared {
             ],
             include_dirs: [
                 "external/vulkan-headers/include",
+                "frameworks/native/libs/math/include",
                 "frameworks/native/libs/nativebase/include",
-                "frameworks/native/libs/nativewindow/include"
+                "frameworks/native/libs/nativewindow/include",
             ],
             shared_libs: [
                 "libicui18n",
@@ -303,9 +303,35 @@ cc_library_shared {
         linux_glibc: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
+                "android_hardware_input_InputApplicationHandle.cpp",
                 "android_os_MessageQueue.cpp",
+                "android_os_Parcel.cpp",
+
+                "android_view_KeyCharacterMap.cpp",
+                "android_view_KeyEvent.cpp",
+                "android_view_InputChannel.cpp",
+                "android_view_InputDevice.cpp",
+                "android_view_InputEventReceiver.cpp",
+                "android_view_InputEventSender.cpp",
+                "android_view_MotionEvent.cpp",
+                "android_view_VelocityTracker.cpp",
+                "android_view_VerifiedKeyEvent.cpp",
+                "android_view_VerifiedMotionEvent.cpp",
+
                 "android_util_AssetManager.cpp",
+                "android_util_Binder.cpp",
+
                 "android_util_FileObserver.cpp",
+            ],
+            static_libs: [
+                "libinput",
+                "libbinderthreadstateutils",
+            ],
+            shared_libs: [
+                // libbinder needs to be shared since it has global state
+		// (e.g. gDefaultServiceManager)
+                "libbinder",
+                "libhidlbase", // libhwbinder is in here
             ],
         },
         windows: {
