@@ -281,17 +281,10 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
         // TODO: Some of this code may be able to move to NotificationEntryManager.
         removeHUN(row);
-        NotificationEntry parentToCancel = null;
-        if (shouldAutoCancel(entry.getSbn()) && mGroupMembershipManager.isOnlyChildInGroup(entry)) {
-            NotificationEntry summarySbn = mGroupMembershipManager.getLogicalGroupSummary(entry);
-            if (shouldAutoCancel(summarySbn.getSbn())) {
-                parentToCancel = summarySbn;
-            }
-        }
-        final NotificationEntry parentToCancelFinal = parentToCancel;
+
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
                 entry, row, controller, intent,
-                isActivityIntent, wasOccluded, parentToCancelFinal);
+                isActivityIntent, wasOccluded);
 
         if (showOverLockscreen) {
             mShadeController.addPostCollapseAction(runnable);
@@ -312,8 +305,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             RemoteInputController controller,
             PendingIntent intent,
             boolean isActivityIntent,
-            boolean wasOccluded,
-            NotificationEntry parentToCancelFinal) {
+            boolean wasOccluded) {
         String notificationKey = entry.getKey();
         mLogger.logHandleClickAfterPanelCollapsed(notificationKey);
 
@@ -373,22 +365,23 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                 rank, count, true, location);
+
+        // NMS will officially remove notification if the notification has FLAG_AUTO_CANCEL:
         mClickNotifier.onNotificationClick(notificationKey, nv);
 
-        if (!canBubble) {
-            if (parentToCancelFinal != null) {
-                // TODO: (b/145659174) remove - this cancels the parent if the notification clicked
-                // on will auto-cancel and is the only child in the group. This won't be
-                // necessary in the new pipeline due to group pruning in ShadeListBuilder.
-                removeNotification(parentToCancelFinal);
-            }
+        // TODO (b/162832756): delete these notification removals when migrating to the new
+        //  pipeline; this is taken care of in {@link NotifCollection#tryRemoveNotification}
+        //  which cancels lifetime extenders if the notification was dismissed by the user (ie:
+        //  clicked or manually dismissed)
+        if (!canBubble && !mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             if (shouldAutoCancel(entry.getSbn())
                     || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
                     notificationKey)) {
-                // Automatically remove all notifications that we may have kept around longer
+                // manually call notification removal in order to cancel any lifetime extenders
                 removeNotification(row.getEntry());
             }
         }
+
         mIsCollapsingToShowActivityOverLockscreen = false;
     }
 

@@ -817,13 +817,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mNotificationParent != null;
     }
 
-    /**
-     * @return whether this notification is the only child in the group summary
-     */
-    public boolean isOnlyChildInGroup() {
-        return mGroupMembershipManager.isOnlyChildInGroup(mEntry);
-    }
-
     public ExpandableNotificationRow getNotificationParent() {
         return mNotificationParent;
     }
@@ -1425,14 +1418,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void performDismiss(boolean fromAccessibility) {
-        if (isOnlyChildInGroup()) {
-            NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(mEntry);
-            if (groupSummary.isClearable()) {
-                // If this is the only child in the group, dismiss the group, but don't try to show
-                // the blocking helper affordance!
-                groupSummary.getRow().performDismiss(fromAccessibility);
-            }
-        }
         dismiss(fromAccessibility);
         if (mEntry.isClearable()) {
             if (mOnUserInteractionCallback != null) {
