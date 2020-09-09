@@ -7,8 +7,7 @@ android_app {
 
     static_libs: [
         "androidx.legacy_legacy-support-v4",
-        "setupcompat",
-        "setupdesign",
+        "setup-wizard-lib",
     ],
 
     resource_dirs: ["res"],
