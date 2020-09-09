@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Адладка па Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Каб праглядаць і выкарыстоўваць даступныя прылады, уключыце адладку па Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Спалучыць прыладу з дапамогай QR-кода"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Спалучаць новыя прылады з дапамогай сканера QR-кода"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Спалучаць новыя прылады з дапамогай сканера QR-кодаў"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Спалучыць прыладу з дапамогай кода спалучэння"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Спалучаць новыя прылады з дапамогай шасцізначнага кода"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Спалучаныя прылады"</string>
