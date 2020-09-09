@@ -1021,6 +1021,18 @@ public class Build {
 
         /**
          * R.
+         *
+         * <p>Applications targeting this or a later release will get these new changes in behavior.
+         * For more information about this release, see the
+         * <a href="/about/versions/11">Android 11 overview</a>.</p>
+         * <ul>
+         * <li><a href="/about/versions/11/behavior-changes-all">Behavior changes: all apps</a></li>
+         * <li><a href="/about/versions/11/behavior-changes-11">Behavior changes: Apps targeting
+         * Android 11</a></li>
+         * <li><a href="/about/versions/11/non-sdk-11">Updates to non-SDK interface restrictions
+         * in Android 11</a></li>
+         * </ul>
+         *
          */
         public static final int R = 30;
     }
