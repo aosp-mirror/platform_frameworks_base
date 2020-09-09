@@ -90,6 +90,8 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testAddPinCreatesPinned() throws RemoteException {
+        doReturn("pkg").when(mService).getDefaultHome(anyInt());
+
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
         verify(mService, times(1)).createPinnedSlice(eq(maybeAddUserId(TEST_URI, 0)), anyString());
@@ -97,6 +99,8 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRemovePinDestroysPinned() throws RemoteException {
+        doReturn("pkg").when(mService).getDefaultHome(anyInt());
+
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
 
         when(mCreatedSliceState.unpin(eq("pkg"), eq(mToken))).thenReturn(false);
