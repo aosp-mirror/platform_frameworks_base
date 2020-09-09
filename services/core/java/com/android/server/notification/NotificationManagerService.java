@@ -8465,7 +8465,10 @@ public class NotificationManagerService extends SystemService {
         if (Notification.CATEGORY_CAR_EMERGENCY.equals(notification.category)
                 || Notification.CATEGORY_CAR_WARNING.equals(notification.category)
                 || Notification.CATEGORY_CAR_INFORMATION.equals(notification.category)) {
-                    checkCallerIsSystem();
+            getContext().enforceCallingPermission(
+                    android.Manifest.permission.SEND_CATEGORY_CAR_NOTIFICATIONS,
+                    String.format("Notification category %s restricted",
+                            notification.category));
         }
     }
 
