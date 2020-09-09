@@ -231,7 +231,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private void assertShowButtonAnimation() {
         verify(mViewPropertyAnimator).cancel();
         verify(mViewPropertyAnimator).setDuration(anyLong());
-        verify(mViewPropertyAnimator).setStartDelay(anyLong());
         verify(mViewPropertyAnimator).alpha(anyFloat());
         verify(mViewPropertyAnimator).start();
     }
@@ -239,11 +238,15 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private void initMockImageViewAndAnimator() {
         when(mViewPropertyAnimator.setDuration(anyLong())).thenReturn(mViewPropertyAnimator);
         when(mViewPropertyAnimator.alpha(anyFloat())).thenReturn(mViewPropertyAnimator);
-        when(mViewPropertyAnimator.setStartDelay(anyLong())).thenReturn(mViewPropertyAnimator);
         when(mViewPropertyAnimator.withEndAction(any(Runnable.class))).thenReturn(
                 mViewPropertyAnimator);
 
         when(mSpyImageView.animate()).thenReturn(mViewPropertyAnimator);
+        doAnswer(invocation -> {
+            Runnable run = invocation.getArgument(0);
+            run.run();
+            return null;
+        }).when(mSpyImageView).postDelayed(any(), anyLong());
     }
 
     private void resetMockImageViewAndAnimator() {
