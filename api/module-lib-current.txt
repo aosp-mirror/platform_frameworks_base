@@ -57,6 +57,10 @@ package android.media.session {
     field public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 65536; // 0x10000
   }
 
+  public static final class MediaSession.Token implements android.os.Parcelable {
+    method public int getUid();
+  }
+
   public final class MediaSessionManager {
     method public void dispatchMediaKeyEventAsSystemService(@NonNull android.view.KeyEvent);
     method public boolean dispatchMediaKeyEventAsSystemService(@NonNull android.media.session.MediaSession.Token, @NonNull android.view.KeyEvent);

@@ -828,9 +828,10 @@ public final class MediaSession {
         }
 
         /**
-         * Gets the UID of this token.
+         * Gets the UID of the application that created the media session.
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public int getUid() {
             return mUid;
         }
