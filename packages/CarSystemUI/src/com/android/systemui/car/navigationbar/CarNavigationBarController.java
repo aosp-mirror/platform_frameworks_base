@@ -83,9 +83,7 @@ public class CarNavigationBarController {
      * Hides all system bars.
      */
     public void hideBars() {
-        if (mTopView != null) {
-            mTopView.setVisibility(View.GONE);
-        }
+        setTopWindowVisibility(View.GONE);
         setBottomWindowVisibility(View.GONE);
         setLeftWindowVisibility(View.GONE);
         setRightWindowVisibility(View.GONE);
@@ -95,9 +93,7 @@ public class CarNavigationBarController {
      * Shows all system bars.
      */
     public void showBars() {
-        if (mTopView != null) {
-            mTopView.setVisibility(View.VISIBLE);
-        }
+        setTopWindowVisibility(View.VISIBLE);
         setBottomWindowVisibility(View.VISIBLE);
         setLeftWindowVisibility(View.VISIBLE);
         setRightWindowVisibility(View.VISIBLE);
@@ -138,6 +134,11 @@ public class CarNavigationBarController {
     @Nullable
     public ViewGroup getRightWindow() {
         return mShowRight ? mNavigationBarViewFactory.getRightWindow() : null;
+    }
+
+    /** Toggles the top nav bar visibility. */
+    public boolean setTopWindowVisibility(@View.Visibility int visibility) {
+        return setWindowVisibility(getTopWindow(), visibility);
     }
 
     /** Toggles the bottom nav bar visibility. */
