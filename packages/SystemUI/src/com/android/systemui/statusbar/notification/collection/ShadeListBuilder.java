@@ -673,7 +673,6 @@ public class ShadeListBuilder implements Dumpable {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
                     child.getAttachState().setSection(section);
-                    child.getAttachState().setSection(section);
                 }
                 parent.sortChildren(sChildComparator);
             }

@@ -65,9 +65,7 @@ class ShadeViewDiffer(
      *
      * For debugging purposes.
      */
-    fun getViewLabel(view: View): String {
-        return views[view]?.label ?: view.toString()
-    }
+    fun getViewLabel(view: View): String = views[view]?.label ?: view.toString()
 
     private fun detachChildren(
         parentNode: ShadeNode,

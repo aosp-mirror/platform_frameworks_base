@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.listbuilder
 
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.render.NodeController
 
 data class NotifSection(
     val sectioner: NotifSectioner,
@@ -24,4 +25,7 @@ data class NotifSection(
 ) {
     val label: String
         get() = "Section($index, \"${sectioner.name}\")"
+
+    val headerController: NodeController?
+        get() = sectioner.headerNodeController
 }

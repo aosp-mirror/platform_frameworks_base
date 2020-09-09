@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
@@ -73,6 +74,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotifLifetimeExtender.OnEndLifetimeExtensionCallback mEndLifetimeExtension;
+    @Mock private NodeController mHeaderController;
 
     private NotificationEntry mEntry;
 
@@ -85,8 +87,8 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mHeadsUpViewBinder,
                 mNotificationInterruptStateProvider,
-                mRemoteInputManager
-        );
+                mRemoteInputManager,
+                mHeaderController);
 
         mCoordinator.attach(mNotifPipeline);
 

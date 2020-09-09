@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.collection.render.NodeController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +55,8 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private NotifPipeline mNotifPipeline;
+    @Mock private NodeController mAlertingHeaderController;
+    @Mock private NodeController mSilentHeaderController;
 
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
 
@@ -67,8 +70,9 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        RankingCoordinator rankingCoordinator =
-                new RankingCoordinator(mStatusBarStateController, mHighPriorityProvider);
+        RankingCoordinator rankingCoordinator = new RankingCoordinator(
+                mStatusBarStateController, mHighPriorityProvider, mAlertingHeaderController,
+                mSilentHeaderController);
         mEntry = new NotificationEntryBuilder().build();
 
         rankingCoordinator.attach(mNotifPipeline);
