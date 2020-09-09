@@ -41,6 +41,10 @@ package android.media {
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
 
+  public static final class MediaMetadata.Builder {
+    ctor public MediaMetadata.Builder(@NonNull android.media.MediaMetadata, @IntRange(from=1) int);
+  }
+
 }
 
 package android.media.session {
