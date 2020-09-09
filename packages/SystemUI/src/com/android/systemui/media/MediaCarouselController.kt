@@ -42,7 +42,7 @@ class MediaCarouselController @Inject constructor(
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val activityStarter: ActivityStarter,
     @Main executor: DelayableExecutor,
-    mediaManager: MediaDataManager,
+    private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager
 ) {
@@ -109,6 +109,7 @@ class MediaCarouselController @Inject constructor(
     private val pageIndicator: PageIndicator
     private val visualStabilityCallback: VisualStabilityManager.Callback
     private var needsReordering: Boolean = false
+    private var keysNeedRemoval = mutableSetOf<String>()
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -161,6 +162,10 @@ class MediaCarouselController @Inject constructor(
                 needsReordering = false
                 reorderAllPlayers()
             }
+
+            keysNeedRemoval.forEach { removePlayer(it) }
+            keysNeedRemoval.clear()
+
             // Let's reset our scroll position
             mediaCarouselScrollHandler.scrollToStart()
         }
@@ -168,13 +173,19 @@ class MediaCarouselController @Inject constructor(
                 true /* persistent */)
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-                if (!data.active && !Utils.useMediaResumption(context)) {
-                    // This view is inactive, let's remove this! This happens e.g when dismissing /
-                    // timing out a view. We still have the data around because resumption could
-                    // be on, but we should save the resources and release this.
-                    onMediaDataRemoved(key)
+                addOrUpdatePlayer(key, oldKey, data)
+                val canRemove = data.isPlaying?.let { !it } ?: data.isClearable
+                if (canRemove && !Utils.useMediaResumption(context)) {
+                    // This view isn't playing, let's remove this! This happens e.g when
+                    // dismissing/timing out a view. We still have the data around because
+                    // resumption could be on, but we should save the resources and release this.
+                    if (visualStabilityManager.isReorderingAllowed) {
+                        onMediaDataRemoved(key)
+                    } else {
+                        keysNeedRemoval.add(key)
+                    }
                 } else {
-                    addOrUpdatePlayer(key, oldKey, data)
+                    keysNeedRemoval.remove(key)
                 }
             }
 
@@ -236,12 +247,12 @@ class MediaCarouselController @Inject constructor(
             var newPlayer = mediaControlPanelFactory.get()
             newPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context), mediaContent))
             newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
-            MediaPlayerData.addMediaPlayer(key, data, newPlayer)
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
             newPlayer.view?.player?.setLayoutParams(lp)
             newPlayer.bind(data)
             newPlayer.setListening(currentlyExpanded)
+            MediaPlayerData.addMediaPlayer(key, data, newPlayer)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers()
         } else {
@@ -271,6 +282,9 @@ class MediaCarouselController @Inject constructor(
             removed.onDestroy()
             mediaCarouselScrollHandler.onPlayersChanged()
             updatePageIndicator()
+
+            // Inform the media manager of a potentially late dismissal
+            mediaManager.dismissMediaData(key, 0L)
         }
     }
 
@@ -478,12 +492,11 @@ class MediaCarouselController @Inject constructor(
 internal object MediaPlayerData {
     private data class MediaSortKey(
         val data: MediaData,
-        val updateTime: Long = 0,
-        val isPlaying: Boolean = false
+        val updateTime: Long = 0
     )
 
     private val comparator =
-        compareByDescending<MediaSortKey> { it.isPlaying }
+        compareByDescending<MediaSortKey> { it.data.isPlaying }
         .thenByDescending { it.data.isLocalSession }
         .thenByDescending { !it.data.resumption }
         .thenByDescending { it.updateTime }
@@ -493,7 +506,7 @@ internal object MediaPlayerData {
 
     fun addMediaPlayer(key: String, data: MediaData, player: MediaControlPanel) {
         removeMediaPlayer(key)
-        val sortKey = MediaSortKey(data, System.currentTimeMillis(), player.isPlaying())
+        val sortKey = MediaSortKey(data, System.currentTimeMillis())
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
     }

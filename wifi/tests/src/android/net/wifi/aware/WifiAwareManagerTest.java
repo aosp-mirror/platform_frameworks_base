@@ -146,6 +146,15 @@ public class WifiAwareManagerTest {
         verify(mockAwareService).getCharacteristics();
     }
 
+    /**
+     * Validate pass-through of isDeviceAttached() API.
+     */
+    @Test
+    public void testIsAttached() throws Exception {
+        mDut.isDeviceAttached();
+        verify(mockAwareService).isDeviceAttached();
+    }
+
     /*
      * WifiAwareEventCallbackProxy Tests
      */

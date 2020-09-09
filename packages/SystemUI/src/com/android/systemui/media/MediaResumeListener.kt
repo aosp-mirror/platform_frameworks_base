@@ -125,8 +125,6 @@ class MediaResumeListener @Inject constructor(
         }, Settings.Secure.MEDIA_CONTROLS_RESUME_BLOCKED)
     }
 
-    fun isResumptionEnabled() = useMediaResumption
-
     private fun loadSavedComponents() {
         // Make sure list is empty (if we switched users)
         resumeComponents.clear()

@@ -451,8 +451,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testAddNotificationUpdatesSpeedBumpIndex() {
-        // initial state == -1
-        assertEquals(-1, mStackScroller.getSpeedBumpIndex());
+        // initial state calculated == 0
+        assertEquals(0, mStackScroller.getSpeedBumpIndex());
 
         // add notification that's before the speed bump
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
@@ -467,8 +467,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testAddAmbientNotificationNoSpeedBumpUpdate() {
-        // initial state == -1
-        assertEquals(-1, mStackScroller.getSpeedBumpIndex());
+        // initial state calculated  == 0
+        assertEquals(0, mStackScroller.getSpeedBumpIndex());
 
         // add notification that's after the speed bump
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
@@ -483,8 +483,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testRemoveNotificationUpdatesSpeedBump() {
-        // initial state == -1
-        assertEquals(-1, mStackScroller.getSpeedBumpIndex());
+        // initial state calculated == 0
+        assertEquals(0, mStackScroller.getSpeedBumpIndex());
 
         // add 3 notification that are after the speed bump
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);

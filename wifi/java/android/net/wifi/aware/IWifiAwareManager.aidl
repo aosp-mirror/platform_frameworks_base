@@ -36,6 +36,7 @@ interface IWifiAwareManager
     // Aware API
     boolean isUsageEnabled();
     Characteristics getCharacteristics();
+    boolean isDeviceAttached();
 
     // client API
     void connect(in IBinder binder, in String callingPackage, in String callingFeatureId,
