@@ -499,53 +499,6 @@ java_library {
     installable: false,
 }
 
-java_defaults {
-    name: "framework-defaults",
-    defaults: ["framework-aidl-export-defaults"],
-    installable: true,
-
-    aidl: {
-        generate_get_transaction_name: true,
-    },
-
-    srcs: ["core/java/**/*.logtags"],
-
-    exclude_srcs: [
-        // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
-    ],
-
-    sdk_version: "core_platform",
-    libs: [
-        "app-compat-annotations",
-        "ext",
-        "unsupportedappusage",
-    ],
-
-    jarjar_rules: ":framework-jarjar-rules",
-
-    static_libs: [
-        "framework-internal-utils",
-    ],
-
-    dxflags: [
-        "--core-library",
-        "--multi-dex",
-    ],
-
-    plugins: [
-        "view-inspector-annotation-processor",
-        "staledataclass-annotation-processor",
-        "error_prone_android_framework",
-    ],
-
-    required: [
-        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
-        "gps_debug.conf",
-        "protolog.conf.json.gz",
-    ],
-}
-
 filegroup {
     name: "framework-jarjar-rules",
     srcs: ["framework-jarjar-rules.txt"],
@@ -585,19 +538,47 @@ filegroup {
 
 java_library {
     name: "framework-minus-apex",
-    defaults: ["framework-defaults"],
-    srcs: [":framework-non-updatable-sources"],
+    defaults: ["framework-aidl-export-defaults"],
+    srcs: [
+        ":framework-non-updatable-sources",
+        "core/java/**/*.logtags",
+    ],
+    // See comment on framework-atb-backward-compatibility module below
+    exclude_srcs: ["core/java/android/content/pm/AndroidTestBaseUpdater.java"],
+    aidl: {
+        generate_get_transaction_name: true,
+    },
+    dxflags: [
+        "--core-library",
+        "--multi-dex",
+    ],
     installable: true,
+    jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
+    plugins: [
+        "view-inspector-annotation-processor",
+        "staledataclass-annotation-processor",
+        "error_prone_android_framework",
+    ],
     required: [
         "framework-platform-compat-config",
+        // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
+        "gps_debug.conf",
         "libcore-platform-compat-config",
+        "protolog.conf.json.gz",
         "services-platform-compat-config",
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
     ],
-    libs: ["framework-updatable-stubs-module_libs_api"],
+    libs: [
+        "app-compat-annotations",
+        "ext",
+        "framework-updatable-stubs-module_libs_api",
+        "unsupportedappusage",
+    ],
+    sdk_version: "core_platform",
     static_libs: [
+        "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",

@@ -41,16 +41,6 @@ public class InputChannelCompat {
     }
 
     /**
-     * Creates a dispatcher from the extras received as part on onInitialize
-     */
-    public static InputEventReceiver fromBundle(Bundle params, String key,
-            Looper looper, Choreographer choreographer, InputEventListener listener) {
-
-        InputChannel channel = params.getParcelable(key);
-        return new InputEventReceiver(channel, looper, choreographer, listener);
-    }
-
-    /**
      * Version of addBatch method which preserves time accuracy in nanoseconds instead of
      * converting the time to milliseconds.
      * @param src old MotionEvent where the target should be appended
@@ -69,11 +59,9 @@ public class InputChannelCompat {
     public static class InputEventReceiver {
 
         private final BatchedInputEventReceiver mReceiver;
-        private final InputChannel mInputChannel;
 
         public InputEventReceiver(InputChannel inputChannel, Looper looper,
                 Choreographer choreographer, final InputEventListener listener) {
-            mInputChannel = inputChannel;
             mReceiver = new BatchedInputEventReceiver(inputChannel, looper, choreographer) {
 
                 @Override
@@ -85,40 +73,17 @@ public class InputChannelCompat {
         }
 
         /**
+         * @see BatchedInputEventReceiver#setBatchingEnabled()
+         */
+        public void setBatchingEnabled(boolean batchingEnabled) {
+            mReceiver.setBatchingEnabled(batchingEnabled);
+        }
+
+        /**
          * @see BatchedInputEventReceiver#dispose()
          */
         public void dispose() {
             mReceiver.dispose();
-            mInputChannel.dispose();
-        }
-    }
-
-    /**
-     * @see InputEventSender
-     */
-    public static class InputEventDispatcher {
-
-        private final InputChannel mInputChannel;
-        private final InputEventSender mSender;
-
-        public InputEventDispatcher(InputChannel inputChannel, Looper looper) {
-            mInputChannel = inputChannel;
-            mSender = new InputEventSender(inputChannel, looper) { };
-        }
-
-        /**
-         * @see InputEventSender#sendInputEvent(int, InputEvent)
-         */
-        public void dispatch(InputEvent ev) {
-            mSender.sendInputEvent(ev.getSequenceNumber(), ev);
-        }
-
-        /**
-         * @see InputEventSender#dispose()
-         */
-        public void dispose() {
-            mSender.dispose();
-            mInputChannel.dispose();
         }
     }
 }
