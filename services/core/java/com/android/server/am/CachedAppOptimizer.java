@@ -479,6 +479,21 @@ public final class CachedAppOptimizer {
     private static native void enableFreezerInternal(boolean enable);
 
     /**
+     * Informs binder that a process is about to be frozen. If freezer is enabled on a process via
+     * this method, this method will synchronously dispatch all pending transactions to the
+     * specified pid. This method will not add significant latencies when unfreezing.
+     * After freezing binder calls, binder will block all transaction to the frozen pid, and return
+     * an error to the sending process.
+     *
+     * @param pid the target pid for which binder transactions are to be frozen
+     * @param freeze specifies whether to flush transactions and then freeze (true) or unfreeze
+     * binder for the specificed pid.
+     *
+     * @throws RuntimeException in case a flush/freeze operation could not complete successfully.
+     */
+    private static native void freezeBinder(int pid, boolean freeze);
+
+    /**
      * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
@@ -727,6 +742,13 @@ public final class CachedAppOptimizer {
         }
 
         if (!app.frozen) {
+            try {
+                freezeBinder(app.pid, false);
+            } catch (RuntimeException e) {
+                // TODO: it might be preferable to kill the target pid in this case
+                Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName);
+            }
+
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "sync unfroze " + app.pid + " " + app.processName);
             }
@@ -1036,6 +1058,14 @@ public final class CachedAppOptimizer {
                                 + " " + name + " curAdj = " + proc.curAdj
                                 + ", shouldNotFreeze = " + proc.shouldNotFreeze);
                     }
+                    return;
+                }
+
+                try {
+                    freezeBinder(pid, true);
+                } catch (RuntimeException e) {
+                    // TODO: it might be preferable to kill the target pid in this case
+                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
                     return;
                 }
 
