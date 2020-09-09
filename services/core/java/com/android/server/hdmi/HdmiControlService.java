@@ -29,6 +29,7 @@ import static com.android.server.hdmi.Constants.OPTION_MHL_SERVICE_CONTROL;
 import static com.android.server.hdmi.Constants.VERSION_1_4;
 import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -90,6 +91,8 @@ import libcore.util.EmptyArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -178,6 +181,19 @@ public class HdmiControlService extends SystemService {
 
     private HdmiCecNetwork mHdmiCecNetwork;
 
+    static final int WAKE_UP_SCREEN_ON = 0;
+    static final int WAKE_UP_BOOT_UP = 1;
+
+    // The reason code for starting the wake-up procedure. This procedure starts either by
+    // Intent.ACTION_SCREEN_ON or after boot-up.
+    @IntDef({
+            WAKE_UP_SCREEN_ON,
+            WAKE_UP_BOOT_UP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WakeReason {
+    }
+
     // Logical address of the active source.
     @GuardedBy("mLock")
     protected final ActiveSource mActiveSource = new ActiveSource();
@@ -237,7 +253,7 @@ public class HdmiControlService extends SystemService {
                     break;
                 case Intent.ACTION_SCREEN_ON:
                     if (isPowerStandbyOrTransient()) {
-                        onWakeUp();
+                        onWakeUp(WAKE_UP_SCREEN_ON);
                     }
                     break;
                 case Intent.ACTION_CONFIGURATION_CHANGED:
@@ -553,7 +569,7 @@ public class HdmiControlService extends SystemService {
     private void bootCompleted() {
         // on boot, if device is interactive, set HDMI CEC state as powered on as well
         if (mPowerManager.isInteractive() && isPowerStandbyOrTransient()) {
-            onWakeUp();
+            onWakeUp(WAKE_UP_BOOT_UP);
         }
     }
 
@@ -639,6 +655,12 @@ public class HdmiControlService extends SystemService {
                 reason = HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING;
                 break;
             case INITIATED_BY_SCREEN_ON:
+                reason = HdmiControlManager.CONTROL_STATE_CHANGED_REASON_WAKEUP;
+                final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
+                for (HdmiCecLocalDevice device : devices) {
+                    device.onInitializeCecComplete(initiatedBy);
+                }
+                break;
             case INITIATED_BY_WAKE_UP_MESSAGE:
                 reason = HdmiControlManager.CONTROL_STATE_CHANGED_REASON_WAKEUP;
                 break;
@@ -2852,14 +2874,26 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void onWakeUp() {
+    private void onWakeUp(@WakeReason final int wakeUpAction) {
         assertRunOnServiceThread();
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
         if (mCecController != null) {
             if (mHdmiControlEnabled) {
-                int startReason = INITIATED_BY_SCREEN_ON;
-                if (mWakeUpMessageReceived) {
-                    startReason = INITIATED_BY_WAKE_UP_MESSAGE;
+                int startReason = -1;
+                switch (wakeUpAction) {
+                    case WAKE_UP_SCREEN_ON:
+                        startReason = INITIATED_BY_SCREEN_ON;
+                        if (mWakeUpMessageReceived) {
+                            startReason = INITIATED_BY_WAKE_UP_MESSAGE;
+                        }
+                        break;
+                    case WAKE_UP_BOOT_UP:
+                        startReason = INITIATED_BY_BOOT_UP;
+                        break;
+                    default:
+                        Slog.e(TAG, "wakeUpAction " + wakeUpAction + " not defined.");
+                        return;
+
                 }
                 initializeCec(startReason);
             }
