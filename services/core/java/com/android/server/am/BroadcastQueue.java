@@ -964,7 +964,7 @@ public final class BroadcastQueue {
                 + mParallelBroadcasts.size() + " parallel broadcasts; "
                 + mDispatcher.describeStateLocked());
 
-        mService.updateCpuStats();
+        mService.updateCpuStatsLocked();
 
         if (fromMsg) {
             mBroadcastsScheduled = false;

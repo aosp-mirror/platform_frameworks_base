@@ -1422,12 +1422,7 @@ class ProcessRecord implements WindowProcessListener {
     @Override
     public void clearProfilerIfNeeded() {
         synchronized (mService) {
-            if (mService.mProfileData.getProfileProc() == null
-                    || mService.mProfileData.getProfilerInfo() == null
-                    || mService.mProfileData.getProfileProc() != this) {
-                return;
-            }
-            mService.clearProfilerLocked();
+            mService.mAppProfiler.clearProfilerLocked();
         }
     }
 
@@ -1483,7 +1478,7 @@ class ProcessRecord implements WindowProcessListener {
      */
     @Override
     public long getCpuTime() {
-        return mService.mProcessCpuTracker.getCpuTimeForPid(pid);
+        return mService.mAppProfiler.getCpuTimeForPid(pid);
     }
 
     @Override
@@ -1492,7 +1487,7 @@ class ProcessRecord implements WindowProcessListener {
         synchronized (mService) {
             waitingToKill = null;
             if (setProfileProc) {
-                mService.mProfileData.setProfileProc(this);
+                mService.mAppProfiler.setProfileProcLocked(this);
             }
             if (packageName != null) {
                 addPackage(packageName, versionCode, mService.mProcessStats);
@@ -1566,7 +1561,7 @@ class ProcessRecord implements WindowProcessListener {
     /** Non-private access is for tests only. */
     @VisibleForTesting
     boolean isMonitorCpuUsage() {
-        return mService.MONITOR_CPU_USAGE;
+        return mService.mAppProfiler.MONITOR_CPU_USAGE;
     }
 
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
@@ -1701,9 +1696,7 @@ class ProcessRecord implements WindowProcessListener {
 
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
-            synchronized (mService.mProcessCpuTracker) {
-                report.append(mService.mProcessCpuTracker.printCurrentState(anrTime));
-            }
+            mService.mAppProfiler.printCurrentCpuState(report, anrTime);
             info.append(processCpuTracker.printCurrentLoad());
             info.append(report);
         }
