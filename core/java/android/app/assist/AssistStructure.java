@@ -36,8 +36,6 @@ import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1676,8 +1674,9 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Returns the maximum length of the text associated with this node node, or {@code -1}
-         * if not supported by the node or not set.
+         * Returns the maximum length of the text associated with this node, or {@code -1} if not
+         * supported by the node or not set. System may set a default value if the text length is
+         * not set.
          *
          * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
          * not for assist purposes.
