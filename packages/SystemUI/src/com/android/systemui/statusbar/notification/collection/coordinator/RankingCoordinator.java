@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import android.annotation.Nullable;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -24,6 +26,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.dagger.AlertingHeader;
+import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 
 import javax.inject.Inject;
 
@@ -40,13 +45,19 @@ public class RankingCoordinator implements Coordinator {
 
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
+    private final NodeController mSilentHeaderController;
+    private final NodeController mAlertingHeaderController;
 
     @Inject
     public RankingCoordinator(
             StatusBarStateController statusBarStateController,
-            HighPriorityProvider highPriorityProvider) {
+            HighPriorityProvider highPriorityProvider,
+            @AlertingHeader NodeController alertingHeaderController,
+            @SilentHeader NodeController silentHeaderController) {
         mStatusBarStateController = statusBarStateController;
         mHighPriorityProvider = highPriorityProvider;
+        mAlertingHeaderController = alertingHeaderController;
+        mSilentHeaderController = silentHeaderController;
     }
 
     @Override
@@ -70,12 +81,24 @@ public class RankingCoordinator implements Coordinator {
         public boolean isInSection(ListEntry entry) {
             return mHighPriorityProvider.isHighPriority(entry);
         }
+
+        @Nullable
+        @Override
+        public NodeController getHeaderNodeController() {
+            return mAlertingHeaderController;
+        }
     };
 
     private final NotifSectioner mSilentNotifSectioner = new NotifSectioner("Silent") {
         @Override
         public boolean isInSection(ListEntry entry) {
             return !mHighPriorityProvider.isHighPriority(entry);
+        }
+
+        @Nullable
+        @Override
+        public NodeController getHeaderNodeController() {
+            return mSilentHeaderController;
         }
     };
 

@@ -22,6 +22,8 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.render.NodeController
+import com.android.systemui.statusbar.notification.dagger.PeopleHeader
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import javax.inject.Inject
@@ -33,7 +35,8 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class ConversationCoordinator @Inject constructor(
-    private val peopleNotificationIdentifier: PeopleNotificationIdentifier
+    private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
+    @PeopleHeader peopleHeaderController: NodeController
 ) : Coordinator {
 
     private val notificationPromoter = object : NotifPromoter(TAG) {
@@ -43,9 +46,9 @@ class ConversationCoordinator @Inject constructor(
     }
 
     val sectioner = object : NotifSectioner("People") {
-        override fun isInSection(entry: ListEntry): Boolean {
-            return isConversation(entry.representativeEntry!!)
-        }
+        override fun isInSection(entry: ListEntry): Boolean =
+                isConversation(entry.representativeEntry!!)
+        override fun getHeaderNodeController() = peopleHeaderController
     }
 
     override fun attach(pipeline: NotifPipeline) {

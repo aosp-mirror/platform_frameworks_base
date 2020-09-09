@@ -39,9 +39,7 @@ interface NodeController {
         throw RuntimeException("Not supported")
     }
 
-    fun getChildCount(): Int {
-        throw RuntimeException("Not supported")
-    }
+    fun getChildCount(): Int = 0
 
     fun addChildAt(child: NodeController, index: Int) {
         throw RuntimeException("Not supported")

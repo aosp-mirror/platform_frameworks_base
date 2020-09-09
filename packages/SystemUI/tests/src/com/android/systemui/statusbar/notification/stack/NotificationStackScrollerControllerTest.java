@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChan
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -76,50 +77,30 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class NotificationStackScrollerControllerTest extends SysuiTestCase {
 
-    @Mock
-    private NotificationGutsManager mNotificationGutsManager;
-    @Mock
-    private HeadsUpManagerPhone mHeadsUpManager;
-    @Mock
-    private NotificationRoundnessManager mNotificationRoundnessManager;
-    @Mock
-    private TunerService mTunerService;
-    @Mock
-    private DynamicPrivacyController mDynamicPrivacyController;
-    @Mock
-    private ConfigurationController mConfigurationController;
-    @Mock
-    private NotificationStackScrollLayout mNotificationStackScrollLayout;
-    @Mock
-    private ZenModeController mZenModeController;
-    @Mock
-    private KeyguardMediaController mKeyguardMediaController;
-    @Mock
-    private SysuiStatusBarStateController mSysuiStatusBarStateController;
-    @Mock
-    private KeyguardBypassController mKeyguardBypassController;
-    @Mock
-    private SysuiColorExtractor mColorExtractor;
-    @Mock
-    private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
-    @Mock
-    private MetricsLogger mMetricsLogger;
-    @Mock
-    private FalsingManager mFalsingManager;
-    @Mock
-    private NotificationSectionsManager mNotificationSectionsManager;
-    @Mock
-    private Resources mResources;
+    @Mock private NotificationGutsManager mNotificationGutsManager;
+    @Mock private HeadsUpManagerPhone mHeadsUpManager;
+    @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
+    @Mock private TunerService mTunerService;
+    @Mock private DynamicPrivacyController mDynamicPrivacyController;
+    @Mock private ConfigurationController mConfigurationController;
+    @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
+    @Mock private ZenModeController mZenModeController;
+    @Mock private KeyguardMediaController mKeyguardMediaController;
+    @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
+    @Mock private KeyguardBypassController mKeyguardBypassController;
+    @Mock private SysuiColorExtractor mColorExtractor;
+    @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
+    @Mock private MetricsLogger mMetricsLogger;
+    @Mock private FalsingManager mFalsingManager;
+    @Mock private NotificationSectionsManager mNotificationSectionsManager;
+    @Mock private Resources mResources;
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
-    @Mock
-    private NotificationSwipeHelper mNotificationSwipeHelper;
-    @Mock
-    private StatusBar mStatusBar;
-    @Mock
-    private ScrimController mScrimController;
-    @Mock
-    private NotificationGroupManagerLegacy mLegacyGroupManager;
+    @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
+    @Mock private StatusBar mStatusBar;
+    @Mock private ScrimController mScrimController;
+    @Mock private NotificationGroupManagerLegacy mLegacyGroupManager;
+    @Mock private SectionHeaderController mSilentHeaderController;
 
     @Captor
     ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -154,7 +135,8 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mStatusBar,
                 mScrimController,
                 mLegacyGroupManager,
-                mLegacyGroupManager
+                mLegacyGroupManager,
+                mSilentHeaderController
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
