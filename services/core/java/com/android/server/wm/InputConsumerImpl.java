@@ -156,7 +156,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     }
 
     void disposeChannelsLw(SurfaceControl.Transaction t) {
-        mService.mInputManager.unregisterInputChannel(mServerChannel);
+        mService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
         mClientChannel.dispose();
         mServerChannel.dispose();
         t.remove(mInputSurface);

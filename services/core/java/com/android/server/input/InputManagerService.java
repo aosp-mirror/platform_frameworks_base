@@ -222,7 +222,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativeRegisterInputMonitor(long ptr, InputChannel inputChannel,
             int displayId, boolean isGestureMonitor);
-    private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
+    private static native void nativeUnregisterInputChannel(long ptr, IBinder connectionToken);
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
     private static native void nativeSetInTouchMode(long ptr, boolean inTouchMode);
@@ -581,17 +581,17 @@ public class InputManagerService extends IInputManager.Stub
 
     /**
      * Unregisters an input channel.
-     * @param inputChannel The input channel to unregister.
+     * @param connectionToken The input channel to unregister.
      */
-    public void unregisterInputChannel(InputChannel inputChannel) {
-        if (inputChannel == null) {
-            throw new IllegalArgumentException("inputChannel must not be null.");
+    public void unregisterInputChannel(IBinder connectionToken) {
+        if (connectionToken == null) {
+            throw new IllegalArgumentException("connectionToken must not be null.");
         }
         synchronized (mGestureMonitorPidsLock) {
-            mGestureMonitorPidsByToken.remove(inputChannel.getToken());
+            mGestureMonitorPidsByToken.remove(connectionToken);
         }
 
-        nativeUnregisterInputChannel(mPtr, inputChannel);
+        nativeUnregisterInputChannel(mPtr, connectionToken);
     }
 
     /**
@@ -2455,7 +2455,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void dispose() {
-            nativeUnregisterInputChannel(mPtr, mInputChannel);
+            nativeUnregisterInputChannel(mPtr, mInputChannel.getToken());
             mInputChannel.dispose();
         }
     }

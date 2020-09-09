@@ -192,7 +192,7 @@ class EmbeddedWindowController {
 
         void onRemoved() {
             if (mInputChannel != null) {
-                mWmService.mInputManager.unregisterInputChannel(mInputChannel);
+                mWmService.mInputManager.unregisterInputChannel(mInputChannel.getToken());
                 mInputChannel.dispose();
                 mInputChannel = null;
             }

@@ -299,7 +299,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         }
 
         mService.mTaskPositioningController.hideInputSurface(mDisplayContent.getDisplayId());
-        mService.mInputManager.unregisterInputChannel(mServerChannel);
+        mService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
 
         mInputEventReceiver.dispose();
         mInputEventReceiver = null;

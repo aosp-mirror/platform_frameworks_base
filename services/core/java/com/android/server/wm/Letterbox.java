@@ -239,7 +239,7 @@ public class Letterbox {
         }
 
         void dispose() {
-            mWmService.mInputManager.unregisterInputChannel(mServerChannel);
+            mWmService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
             mInputEventReceiver.dispose();
             mServerChannel.dispose();
             mClientChannel.dispose();

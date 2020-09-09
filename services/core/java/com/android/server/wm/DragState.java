@@ -308,7 +308,7 @@ class DragState {
         }
 
         void tearDown() {
-            mService.mInputManager.unregisterInputChannel(mServerChannel);
+            mService.mInputManager.unregisterInputChannel(mServerChannel.getToken());
             mInputEventReceiver.dispose();
             mInputEventReceiver = null;
             mClientChannel.dispose();
