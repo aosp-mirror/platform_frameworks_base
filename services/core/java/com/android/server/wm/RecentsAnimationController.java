@@ -814,14 +814,14 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     boolean updateInputConsumerForApp(InputWindowHandle inputWindowHandle,
-            boolean hasFocus) {
+            boolean focusable) {
         // Update the input consumer touchable region to match the target app main window
         final WindowState targetAppMainWindow = mTargetActivityRecord != null
                 ? mTargetActivityRecord.findMainWindow()
                 : null;
         if (targetAppMainWindow != null) {
             targetAppMainWindow.getBounds(mTmpRect);
-            inputWindowHandle.focusable = hasFocus;
+            inputWindowHandle.focusable = focusable;
             inputWindowHandle.touchableRegion.set(mTmpRect);
             return true;
         }

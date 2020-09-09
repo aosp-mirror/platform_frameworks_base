@@ -618,6 +618,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mInEnsureActivitiesVisible = false;
 
+    /**
+     * Last window to be requested focus via {@code SurfaceControl.Transaction#setFocusedWindow} to
+     * prevent duplicate requests to input.
+     */
+    WindowState mLastRequestedFocus = null;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
