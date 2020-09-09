@@ -238,7 +238,6 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         }
 
         onAnimateCollapsePanel();
-        getOverlayViewGlobalStateController().setWindowFocusable(false);
         animatePanel(mClosingVelocity, /* isClosing= */ true);
     }
 
@@ -415,7 +414,6 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
             getOverlayViewGlobalStateController().hideView(/* panelViewController= */ this);
         }
         getLayout().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        getOverlayViewGlobalStateController().setWindowFocusable(visible);
     }
 
     /* ***************************************************************************************** *
