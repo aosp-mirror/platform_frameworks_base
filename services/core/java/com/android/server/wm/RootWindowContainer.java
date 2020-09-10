@@ -2201,7 +2201,22 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         ensureActivitiesVisible(null, 0, false /* preserveWindows */);
         resumeFocusedStacksTopActivities();
 
-        mService.getTaskChangeNotificationController().notifyActivityPinned(r);
+        notifyActivityPipModeChanged(r);
+    }
+
+    /**
+     * Notifies when an activity enters or leaves PIP mode.
+     * @param r indicates the activity currently in PIP, can be null to indicate no activity is
+     *          currently in PIP mode.
+     */
+    void notifyActivityPipModeChanged(@Nullable ActivityRecord r) {
+        final boolean inPip = r != null;
+        if (inPip) {
+            mService.getTaskChangeNotificationController().notifyActivityPinned(r);
+        } else {
+            mService.getTaskChangeNotificationController().notifyActivityUnpinned();
+        }
+        mWindowManager.mPolicy.setPipVisibilityLw(inPip);
     }
 
     void executeAppTransitionForAllDisplay() {

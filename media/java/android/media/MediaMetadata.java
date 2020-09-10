@@ -15,8 +15,10 @@
  */
 package android.media;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
@@ -738,15 +740,16 @@ public final class MediaMetadata implements Parcelable {
 
         /**
          * Create a Builder using a {@link MediaMetadata} instance to set
-         * initial values, but replace bitmaps with a scaled down copy if they
-         * are larger than maxBitmapSize.
+         * initial values, but replace bitmaps with a scaled down copy if their width (or height)
+         * is larger than maxBitmapSize.
          *
          * @param source The original metadata to copy.
          * @param maxBitmapSize The maximum height/width for bitmaps contained
          *            in the metadata.
          * @hide
          */
-        public Builder(MediaMetadata source, int maxBitmapSize) {
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        public Builder(@NonNull MediaMetadata source, @IntRange(from = 1) int maxBitmapSize) {
             this(source);
             for (String key : mBundle.keySet()) {
                 Object value = mBundle.get(key);

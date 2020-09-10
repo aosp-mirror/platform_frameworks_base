@@ -30,6 +30,8 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.dagger.IncomingHeader;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -61,6 +63,7 @@ public class HeadsUpCoordinator implements Coordinator {
     private final HeadsUpViewBinder mHeadsUpViewBinder;
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationRemoteInputManager mRemoteInputManager;
+    private final NodeController mIncomingHeaderController;
 
     // tracks the current HeadUpNotification reported by HeadsUpManager
     private @Nullable NotificationEntry mCurrentHun;
@@ -73,11 +76,13 @@ public class HeadsUpCoordinator implements Coordinator {
             HeadsUpManager headsUpManager,
             HeadsUpViewBinder headsUpViewBinder,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
-            NotificationRemoteInputManager remoteInputManager) {
+            NotificationRemoteInputManager remoteInputManager,
+            @IncomingHeader NodeController incomingHeaderController) {
         mHeadsUpManager = headsUpManager;
         mHeadsUpViewBinder = headsUpViewBinder;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mRemoteInputManager = remoteInputManager;
+        mIncomingHeaderController = incomingHeaderController;
     }
 
     @Override
@@ -195,6 +200,12 @@ public class HeadsUpCoordinator implements Coordinator {
         @Override
         public boolean isInSection(ListEntry entry) {
             return isCurrentlyShowingHun(entry);
+        }
+
+        @Nullable
+        @Override
+        public NodeController getHeaderNodeController() {
+            return mIncomingHeaderController;
         }
     };
 

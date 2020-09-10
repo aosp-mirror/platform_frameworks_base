@@ -1949,6 +1949,349 @@ public class AudioManager {
     }
 
     //====================================================================
+    // Audio Capture Preset routing
+
+    /**
+     * @hide
+     * Set the preferred device for a given capture preset, i.e. the audio routing to be used by
+     * this capture preset. Note that the device may not be available at the time the preferred
+     * device is set, but it will be used once made available.
+     * <p>Use {@link #clearPreferredDevicesForCapturePreset(int)} to cancel setting this preference
+     * for this capture preset.</p>
+     * @param capturePreset the audio capture preset whose routing will be affected
+     * @param device the audio device to route to when available
+     * @return true if the operation was successful, false otherwise
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean setPreferredDeviceForCapturePreset(int capturePreset,
+                                                      @NonNull AudioDeviceAttributes device) {
+        return setPreferredDevicesForCapturePreset(capturePreset, Arrays.asList(device));
+    }
+
+    /**
+     * @hide
+     * Remove all the preferred audio devices previously set
+     * @param capturePreset the audio capture preset whose routing will be affected
+     * @return true if the operation was successful, false otherwise (invalid capture preset, or no
+     *     device set for example)
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean clearPreferredDevicesForCapturePreset(int capturePreset) {
+        if (!MediaRecorder.isValidAudioSource(capturePreset)) {
+            return false;
+        }
+        try {
+            final int status = getService().clearPreferredDevicesForCapturePreset(capturePreset);
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Return the preferred devices for an audio capture preset, previously set with
+     * {@link #setPreferredDeviceForCapturePreset(int, AudioDeviceAttributes)}
+     * @param capturePreset the capture preset to query
+     * @return a list that contains preferred devices for that capture preset.
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int capturePreset) {
+        if (!MediaRecorder.isValidAudioSource(capturePreset)) {
+            return new ArrayList<AudioDeviceAttributes>();
+        }
+        try {
+            return getService().getPreferredDevicesForCapturePreset(capturePreset);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private boolean setPreferredDevicesForCapturePreset(
+            int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
+        Objects.requireNonNull(devices);
+        if (!MediaRecorder.isValidAudioSource(capturePreset)) {
+            return false;
+        }
+        if (devices.size() != 1) {
+            throw new IllegalArgumentException(
+                    "Only support setting one preferred devices for capture preset");
+        }
+        for (AudioDeviceAttributes device : devices) {
+            Objects.requireNonNull(device);
+        }
+        try {
+            final int status =
+                    getService().setPreferredDevicesForCapturePreset(capturePreset, devices);
+            return status == AudioSystem.SUCCESS;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Interface to be notified of changes in the preferred audio devices set for a given capture
+     * preset.
+     * <p>Note that this listener will only be invoked whenever
+     * {@link #setPreferredDeviceForCapturePreset(int, AudioDeviceAttributes)} or
+     * {@link #clearPreferredDevicesForCapturePreset(int)} causes a change in
+     * preferred device. It will not be invoked directly after registration with
+     * {@link #addOnPreferredDevicesForCapturePresetChangedListener(
+     * Executor, OnPreferredDevicesForCapturePresetChangedListener)}
+     * to indicate which strategies had preferred devices at the time of registration.</p>
+     * @see #setPreferredDeviceForCapturePreset(int, AudioDeviceAttributes)
+     * @see #clearPreferredDevicesForCapturePreset(int)
+     * @see #getPreferredDevicesForCapturePreset(int)
+     */
+    @SystemApi
+    public interface OnPreferredDevicesForCapturePresetChangedListener {
+        /**
+         * Called on the listener to indicate that the preferred audio devices for the given
+         * capture preset has changed.
+         * @param capturePreset the capture preset whose preferred device changed
+         * @param devices a list of newly set preferred audio devices
+         */
+        void onPreferredDevicesForCapturePresetChanged(
+                int capturePreset, @NonNull List<AudioDeviceAttributes> devices);
+    }
+
+    /**
+     * @hide
+     * Adds a listener for being notified of changes to the capture-preset-preferred audio device.
+     * @param executor
+     * @param listener
+     * @throws SecurityException if the caller doesn't hold the required permission
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void addOnPreferredDevicesForCapturePresetChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnPreferredDevicesForCapturePresetChangedListener listener)
+            throws SecurityException {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        int status = addOnDevRoleForCapturePresetChangedListener(
+                executor, listener, AudioSystem.DEVICE_ROLE_PREFERRED);
+        if (status == AudioSystem.ERROR) {
+            // This must not happen
+            throw new RuntimeException("Unknown error happened");
+        }
+        if (status == AudioSystem.BAD_VALUE) {
+            throw new IllegalArgumentException(
+                    "attempt to call addOnPreferredDevicesForCapturePresetChangedListener() "
+                            + "on a previously registered listener");
+        }
+    }
+
+    /**
+     * @hide
+     * Removes a previously added listener of changes to the capture-preset-preferred audio device.
+     * @param listener
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void removeOnPreferredDevicesForCapturePresetChangedListener(
+            @NonNull OnPreferredDevicesForCapturePresetChangedListener listener) {
+        Objects.requireNonNull(listener);
+        int status = removeOnDevRoleForCapturePresetChangedListener(
+                listener, AudioSystem.DEVICE_ROLE_PREFERRED);
+        if (status == AudioSystem.ERROR) {
+            // This must not happen
+            throw new RuntimeException("Unknown error happened");
+        }
+        if (status == AudioSystem.BAD_VALUE) {
+            throw new IllegalArgumentException(
+                    "attempt to call removeOnPreferredDevicesForCapturePresetChangedListener() "
+                            + "on an unregistered listener");
+        }
+    }
+
+    private <T> int addOnDevRoleForCapturePresetChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull T listener, int deviceRole) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        DevRoleListeners<T> devRoleListeners =
+                (DevRoleListeners<T>) mDevRoleForCapturePresetListeners.get(deviceRole);
+        if (devRoleListeners == null) {
+            return AudioSystem.ERROR;
+        }
+        synchronized (devRoleListeners.mDevRoleListenersLock) {
+            if (devRoleListeners.hasDevRoleListener(listener)) {
+                return AudioSystem.BAD_VALUE;
+            }
+            // lazy initialization of the list of device role listener
+            if (devRoleListeners.mListenerInfos == null) {
+                devRoleListeners.mListenerInfos = new ArrayList<>();
+            }
+            final int oldCbCount = devRoleListeners.mListenerInfos.size();
+            devRoleListeners.mListenerInfos.add(new DevRoleListenerInfo<T>(executor, listener));
+            if (oldCbCount == 0 && devRoleListeners.mListenerInfos.size() > 0) {
+                // register binder for callbacks
+                synchronized (mDevRoleForCapturePresetListenersLock) {
+                    int deviceRoleListenerStatus = mDeviceRoleListenersStatus;
+                    mDeviceRoleListenersStatus |= (1 << deviceRole);
+                    if (deviceRoleListenerStatus != 0) {
+                        // There are already device role changed listeners active.
+                        return AudioSystem.SUCCESS;
+                    }
+                    if (mDevicesRoleForCapturePresetDispatcherStub == null) {
+                        mDevicesRoleForCapturePresetDispatcherStub =
+                                new CapturePresetDevicesRoleDispatcherStub();
+                    }
+                    try {
+                        getService().registerCapturePresetDevicesRoleDispatcher(
+                                mDevicesRoleForCapturePresetDispatcherStub);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            }
+        }
+        return AudioSystem.SUCCESS;
+    }
+
+    private <T> int removeOnDevRoleForCapturePresetChangedListener(
+            @NonNull T listener, int deviceRole) {
+        Objects.requireNonNull(listener);
+        DevRoleListeners<T> devRoleListeners =
+                (DevRoleListeners<T>) mDevRoleForCapturePresetListeners.get(deviceRole);
+        if (devRoleListeners == null) {
+            return AudioSystem.ERROR;
+        }
+        synchronized (devRoleListeners.mDevRoleListenersLock) {
+            if (!devRoleListeners.removeDevRoleListener(listener)) {
+                return AudioSystem.BAD_VALUE;
+            }
+            if (devRoleListeners.mListenerInfos.size() == 0) {
+                // unregister binder for callbacks
+                synchronized (mDevRoleForCapturePresetListenersLock) {
+                    mDeviceRoleListenersStatus ^= (1 << deviceRole);
+                    if (mDeviceRoleListenersStatus != 0) {
+                        // There are some other device role changed listeners active.
+                        return AudioSystem.SUCCESS;
+                    }
+                    try {
+                        getService().unregisterCapturePresetDevicesRoleDispatcher(
+                                mDevicesRoleForCapturePresetDispatcherStub);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            }
+        }
+        return AudioSystem.SUCCESS;
+    }
+
+    private final Map<Integer, Object> mDevRoleForCapturePresetListeners = new HashMap<>(){{
+            put(AudioSystem.DEVICE_ROLE_PREFERRED,
+                    new DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>());
+        }};
+
+    private class DevRoleListenerInfo<T> {
+        final @NonNull Executor mExecutor;
+        final @NonNull T mListener;
+        DevRoleListenerInfo(Executor executor, T listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+    }
+
+    private class DevRoleListeners<T> {
+        private final Object mDevRoleListenersLock = new Object();
+        @GuardedBy("mDevRoleListenersLock")
+        private @Nullable ArrayList<DevRoleListenerInfo<T>> mListenerInfos;
+
+        @GuardedBy("mDevRoleListenersLock")
+        private @Nullable DevRoleListenerInfo<T> getDevRoleListenerInfo(T listener) {
+            if (mListenerInfos == null) {
+                return null;
+            }
+            for (DevRoleListenerInfo<T> listenerInfo : mListenerInfos) {
+                if (listenerInfo.mListener == listener) {
+                    return listenerInfo;
+                }
+            }
+            return null;
+        }
+
+        @GuardedBy("mDevRoleListenersLock")
+        private boolean hasDevRoleListener(T listener) {
+            return getDevRoleListenerInfo(listener) != null;
+        }
+
+        @GuardedBy("mDevRoleListenersLock")
+        private boolean removeDevRoleListener(T listener) {
+            final DevRoleListenerInfo<T> infoToRemove = getDevRoleListenerInfo(listener);
+            if (infoToRemove != null) {
+                mListenerInfos.remove(infoToRemove);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private final Object mDevRoleForCapturePresetListenersLock = new Object();
+    /**
+     * Record if there is a listener added for device role change. If there is a listener added for
+     * a specified device role change, the bit at position `1 << device_role` is set.
+     */
+    @GuardedBy("mDevRoleForCapturePresetListenersLock")
+    private int mDeviceRoleListenersStatus = 0;
+    @GuardedBy("mDevRoleForCapturePresetListenersLock")
+    private CapturePresetDevicesRoleDispatcherStub mDevicesRoleForCapturePresetDispatcherStub;
+
+    private final class CapturePresetDevicesRoleDispatcherStub
+            extends ICapturePresetDevicesRoleDispatcher.Stub {
+
+        @Override
+        public void dispatchDevicesRoleChanged(
+                int capturePreset, int role, List<AudioDeviceAttributes> devices) {
+            final Object listenersObj = mDevRoleForCapturePresetListeners.get(role);
+            if (listenersObj == null) {
+                return;
+            }
+            switch (role) {
+                case AudioSystem.DEVICE_ROLE_PREFERRED: {
+                    final DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>
+                            listeners =
+                            (DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>)
+                            listenersObj;
+                    final ArrayList<DevRoleListenerInfo<
+                            OnPreferredDevicesForCapturePresetChangedListener>> prefDevListeners;
+                    synchronized (listeners.mDevRoleListenersLock) {
+                        if (listeners.mListenerInfos.isEmpty()) {
+                            return;
+                        }
+                        prefDevListeners = (ArrayList<DevRoleListenerInfo<
+                                OnPreferredDevicesForCapturePresetChangedListener>>)
+                                listeners.mListenerInfos.clone();
+                    }
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        for (DevRoleListenerInfo<
+                                OnPreferredDevicesForCapturePresetChangedListener> info :
+                                prefDevListeners) {
+                            info.mExecutor.execute(() ->
+                                    info.mListener.onPreferredDevicesForCapturePresetChanged(
+                                            capturePreset, devices));
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                } break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    //====================================================================
     // Offload query
     /**
      * Returns whether offloaded playback of an audio format is supported on the device.
@@ -6305,6 +6648,132 @@ public class AudioManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Adjusts the volume of the most relevant stream, or the given fallback
+     * stream.
+     * <p>
+     * This method should only be used by applications that replace the
+     * platform-wide management of audio settings or the main telephony
+     * application.
+     * <p>
+     * This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>This API checks if the caller has the necessary permissions based on the provided
+     * component name, uid, and pid values.
+     * See {@link #adjustSuggestedStreamVolume(int, int, int)}.
+     *
+     * @param suggestedStreamType The stream type that will be used if there
+     *         isn't a relevant stream. {@link #USE_DEFAULT_STREAM_TYPE} is
+     *         valid here.
+     * @param direction The direction to adjust the volume. One of
+     *         {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE},
+     *         {@link #ADJUST_SAME}, {@link #ADJUST_MUTE},
+     *         {@link #ADJUST_UNMUTE}, or {@link #ADJUST_TOGGLE_MUTE}.
+     * @param flags One or more flags.
+     * @param packageName the package name of client application
+     * @param uid the uid of client application
+     * @param pid the pid of client application
+     * @param targetSdkVersion the target sdk version of client application
+     * @see #adjustVolume(int, int)
+     * @see #adjustStreamVolume(int, int, int)
+     * @see #setStreamVolume(int, int, int)
+     * @see #isVolumeFixed()
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void adjustSuggestedStreamVolumeForUid(int suggestedStreamType, int direction, int flags,
+            @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
+        try {
+            getService().adjustSuggestedStreamVolumeForUid(suggestedStreamType, direction, flags,
+                    packageName, uid, pid, UserHandle.getUserHandleForUid(uid), targetSdkVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adjusts the volume of a particular stream by one step in a direction.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
+     * unless the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
+     * <p>This API checks if the caller has the necessary permissions based on the provided
+     * component name, uid, and pid values.
+     * See {@link #adjustStreamVolume(int, int, int)}.
+     *
+     * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
+     *         {@link #STREAM_SYSTEM}, {@link #STREAM_RING}, {@link #STREAM_MUSIC},
+     *         {@link #STREAM_ALARM} or {@link #STREAM_ACCESSIBILITY}.
+     * @param direction The direction to adjust the volume. One of
+     *         {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
+     *         {@link #ADJUST_SAME}.
+     * @param flags One or more flags.
+     * @param packageName the package name of client application
+     * @param uid the uid of client application
+     * @param pid the pid of client application
+     * @param targetSdkVersion the target sdk version of client application
+     * @see #adjustVolume(int, int)
+     * @see #setStreamVolume(int, int, int)
+     * @throws SecurityException if the adjustment triggers a Do Not Disturb change
+     *         and the caller is not granted notification policy access.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void adjustStreamVolumeForUid(int streamType, int direction, int flags,
+            @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
+        try {
+            getService().adjustStreamVolumeForUid(streamType, direction, flags, packageName, uid,
+                    pid, UserHandle.getUserHandleForUid(uid), targetSdkVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the volume index for a particular stream.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
+     * the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
+     * <p>This API checks if the caller has the necessary permissions based on the provided
+     * component name, uid, and pid values.
+     * See {@link #setStreamVolume(int, int, int)}.
+     *
+     * @param streamType The stream whose volume index should be set.
+     * @param index The volume index to set. See
+     *         {@link #getStreamMaxVolume(int)} for the largest valid value.
+     * @param flags One or more flags.
+     * @param packageName the package name of client application
+     * @param uid the uid of client application
+     * @param pid the pid of client application
+     * @param targetSdkVersion the target sdk version of client application
+     * @see #getStreamMaxVolume(int)
+     * @see #getStreamVolume(int)
+     * @see #isVolumeFixed()
+     * @throws SecurityException if the volume change triggers a Do Not Disturb change
+     *         and the caller is not granted notification policy access.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void setStreamVolumeForUid(int streamType, int index, int flags,
+            @NonNull String packageName, int uid, int pid, int targetSdkVersion) {
+        try {
+            getService().setStreamVolumeForUid(streamType, index, flags, packageName, uid, pid,
+                    UserHandle.getUserHandleForUid(uid), targetSdkVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     /** @hide
      * TODO: make this a @SystemApi */

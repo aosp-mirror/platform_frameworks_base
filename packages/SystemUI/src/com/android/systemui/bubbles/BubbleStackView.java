@@ -276,6 +276,10 @@ public class BubbleStackView extends FrameLayout
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
+
+        String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
+                getBubblesOnScreen(), getExpandedBubble());
+        pw.print("  bubbles on screen:       "); pw.println(bubblesOnScreen);
         pw.print("  gestureInProgress:       "); pw.println(mIsGestureInProgress);
         pw.print("  showingDismiss:          "); pw.println(mDismissView.isShowing());
         pw.print("  isExpansionAnimating:    "); pw.println(mIsExpansionAnimating);

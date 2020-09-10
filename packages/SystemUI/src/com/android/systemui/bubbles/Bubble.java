@@ -694,6 +694,7 @@ class Bubble implements BubbleViewProvider {
         pw.print("  showInShade:   "); pw.println(showInShade());
         pw.print("  showDot:       "); pw.println(showDot());
         pw.print("  showFlyout:    "); pw.println(showFlyout());
+        pw.print("  lastActivity:  "); pw.println(getLastActivity());
         pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());

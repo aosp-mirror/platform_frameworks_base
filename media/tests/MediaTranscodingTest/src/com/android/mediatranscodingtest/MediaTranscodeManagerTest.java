@@ -24,6 +24,7 @@ import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
+import android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver;
 import android.media.TranscodingTestConfig;
 import android.net.Uri;
 import android.os.Bundle;
@@ -414,17 +415,27 @@ public class MediaTranscodeManagerTest
         Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
                 + mContext.getCacheDir().getAbsolutePath() + "/HevcTranscode.mp4");
 
+        Bundle clientCaps = new Bundle();
+        clientCaps.putBoolean(MediaFormatResolver.CAPS_SUPPORTS_HEVC, false);
+        MediaFormatResolver resolver = new MediaFormatResolver()
+                .setSourceVideoFormatHint(MediaFormat.createVideoFormat(
+                        MediaFormat.MIMETYPE_VIDEO_HEVC, WIDTH, HEIGHT))
+                .setClientCapabilities(clientCaps);
+        assertTrue(resolver.shouldTranscode());
+        MediaFormat videoTrackFormat = resolver.resolveVideoFormat();
+        assertNotNull(videoTrackFormat);
+
         TranscodingRequest request =
                 new TranscodingRequest.Builder()
                         .setSourceUri(mSourceHEVCVideoUri)
                         .setDestinationUri(destinationUri)
                         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
                         .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
-                        .setVideoTrackFormat(createMediaFormat())
+                        .setVideoTrackFormat(videoTrackFormat)
                         .build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
-        Log.i(TAG, "transcoding to " + createMediaFormat());
+        Log.i(TAG, "transcoding to " + videoTrackFormat);
 
         TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
                 transcodingJob -> {

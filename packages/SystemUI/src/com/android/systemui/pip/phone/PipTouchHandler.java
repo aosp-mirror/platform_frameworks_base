@@ -650,8 +650,7 @@ public class PipTouchHandler {
         }
 
         MotionEvent ev = (MotionEvent) inputEvent;
-        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN
-                && mPipResizeGestureHandler.willStartResizeGesture(ev)) {
+        if (mPipResizeGestureHandler.willStartResizeGesture(ev)) {
             // Initialize the touch state for the gesture, but immediately reset to invalidate the
             // gesture
             mTouchState.onTouchEvent(ev);

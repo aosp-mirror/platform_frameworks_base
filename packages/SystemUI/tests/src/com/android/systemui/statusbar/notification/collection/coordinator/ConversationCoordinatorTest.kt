@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import org.junit.Assert.assertFalse
@@ -47,12 +48,10 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     private lateinit var promoter: NotifPromoter
     private lateinit var peopleSectioner: NotifSectioner
 
-    @Mock
-    private lateinit var pipeline: NotifPipeline
-    @Mock
-    private lateinit var peopleNotificationIdentifier: PeopleNotificationIdentifier
-    @Mock
-    private lateinit var channel: NotificationChannel
+    @Mock private lateinit var pipeline: NotifPipeline
+    @Mock private lateinit var peopleNotificationIdentifier: PeopleNotificationIdentifier
+    @Mock private lateinit var channel: NotificationChannel
+    @Mock private lateinit var headerController: NodeController
     private lateinit var entry: NotificationEntry
 
     private lateinit var coordinator: ConversationCoordinator
@@ -60,7 +59,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        coordinator = ConversationCoordinator(peopleNotificationIdentifier)
+        coordinator = ConversationCoordinator(peopleNotificationIdentifier, headerController)
         whenever(channel.isImportantConversation).thenReturn(true)
 
         coordinator.attach(pipeline)

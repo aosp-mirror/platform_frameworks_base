@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -812,6 +813,141 @@ public final class MediaTranscodeManager {
                 }
 
                 return new TranscodingRequest(this);
+            }
+        }
+
+        /**
+         * Helper class for deciding if transcoding is needed, and if so, the track
+         * formats to use.
+         */
+        public static class MediaFormatResolver {
+            private static final int BIT_RATE = 20000000;            // 20Mbps
+
+            private MediaFormat mSrcVideoFormatHint;
+            private MediaFormat mSrcAudioFormatHint;
+            private Bundle mClientCaps;
+
+            /**
+             * A key describing whether the client supports HEVC-encoded video.
+             *
+             * The value associated with this key is a boolean. If unspecified, it's up to
+             * the MediaFormatResolver to determine the default.
+             *
+             * @see #setClientCapabilities(Bundle)
+             */
+            public static final String CAPS_SUPPORTS_HEVC = "support-hevc";
+
+            /**
+             * Sets the abilities of the client consuming the media. Must be called
+             * before {@link #shouldTranscode()} or {@link #resolveVideoFormat()}.
+             *
+             * @param clientCaps A Bundle object containing the client's capabilities, such as
+             *                   {@link #CAPS_SUPPORTS_HEVC}.
+             * @return the same VideoFormatResolver instance.
+             * @hide
+             */
+            @NonNull
+            public MediaFormatResolver setClientCapabilities(@NonNull Bundle clientCaps) {
+                mClientCaps = clientCaps;
+                return this;
+            }
+
+            /**
+             * Sets the video format hint about the source. Must be called before
+             * {@link #shouldTranscode()} or {@link #resolveVideoFormat()}.
+             *
+             * @param format A MediaFormat object containing information about the source's
+             *               video track format that could affect the transcoding decision.
+             *               Such information could include video codec types, color spaces,
+             *               whether special format info (eg. slow-motion markers) are present,
+             *               etc.. If a particular information is not present, it will not be
+             *               used to make the decision.
+             * @return the same MediaFormatResolver instance.
+             */
+            @NonNull
+            public MediaFormatResolver setSourceVideoFormatHint(@NonNull MediaFormat format) {
+                mSrcVideoFormatHint = format;
+                return this;
+            }
+
+            /**
+             * Sets the audio format hint about the source.
+             *
+             * @param format A MediaFormat object containing information about the source's
+             *               audio track format that could affect the transcoding decision.
+             * @return the same MediaFormatResolver instance.
+             * @hide
+             */
+            @NonNull
+            public MediaFormatResolver setSourceAudioFormatHint(@NonNull MediaFormat format) {
+                mSrcAudioFormatHint = format;
+                return this;
+            }
+
+            /**
+             * Returns whether the source content should be transcoded.
+             *
+             * @return true if the source should be transcoded.
+             * @throws UnsupportedOperationException if {@link #setClientCapabilities(Bundle)}
+             *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
+             */
+            public boolean shouldTranscode() {
+                if (mClientCaps == null) {
+                    throw new UnsupportedOperationException(
+                            "Client caps must be set!");
+                }
+                // Video src hint must be provided, audio src hint is not used right now.
+                if (mSrcVideoFormatHint == null) {
+                    throw new UnsupportedOperationException(
+                            "Source video format hint must be set!");
+                }
+                boolean supportHevc = mClientCaps.getBoolean(CAPS_SUPPORTS_HEVC, false);
+                if (!supportHevc && MediaFormat.MIMETYPE_VIDEO_HEVC.equals(
+                        mSrcVideoFormatHint.getString(MediaFormat.KEY_MIME))) {
+                    return true;
+                }
+                // TODO: add more checks as needed below.
+                return false;
+            }
+
+            /**
+             * Retrieves the video track format to be used on
+             * {@link Builder#setVideoTrackFormat(MediaFormat)} for this configuration.
+             *
+             * @return the video track format to be used if transcoding should be performed,
+             *         and null otherwise.
+             * @throws UnsupportedOperationException if {@link #setClientCapabilities(Bundle)}
+             *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
+             */
+            @Nullable
+            public MediaFormat resolveVideoFormat() {
+                if (!shouldTranscode()) {
+                    return null;
+                }
+                // TODO(hkuang): Only modified the video codec type, and use fixed bitrate for now.
+                // May switch to transcoding profile when it's available.
+                MediaFormat videoTrackFormat = new MediaFormat(mSrcVideoFormatHint);
+                videoTrackFormat.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_AVC);
+                videoTrackFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
+                return videoTrackFormat;
+            }
+
+            /**
+             * Retrieves the audio track format to be used for transcoding.
+             *
+             * @return the audio track format to be used if transcoding should be performed, and
+             *         null otherwise.
+             * @throws UnsupportedOperationException if {@link #setClientCapabilities(Bundle)}
+             *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
+             * @hide
+             */
+            @Nullable
+            public MediaFormat resolveAudioFormat() {
+                if (!shouldTranscode()) {
+                    return null;
+                }
+                // Audio transcoding is not supported yet, always return null.
+                return null;
             }
         }
     }

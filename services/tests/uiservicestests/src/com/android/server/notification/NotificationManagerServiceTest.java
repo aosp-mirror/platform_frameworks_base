@@ -1086,12 +1086,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     /**
-     * Confirm the system user on automotive devices can use car categories
+     * Confirm an application with the SEND_CATEGORY_CAR_NOTIFICATIONS permission on automotive
+     * devices can use car categories.
      */
     @Test
-    public void testEnqueuedRestrictedNotifications_asSystem() throws Exception {
+    public void testEnqueuedRestrictedNotifications_hasPermission() throws Exception {
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
                 .thenReturn(true);
+        // SEND_CATEGORY_CAR_NOTIFICATIONS is a system-level permission that this test cannot
+        // obtain. Mocking out enforce permission call to ensure notifications can be created when
+        // permitted.
+        doNothing().when(mContext).enforceCallingPermission(
+                eq("android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS"), anyString());
         List<String> categories = Arrays.asList(Notification.CATEGORY_CAR_EMERGENCY,
                 Notification.CATEGORY_CAR_WARNING,
                 Notification.CATEGORY_CAR_INFORMATION);
@@ -1114,7 +1120,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
      */
     @Test
     public void testEnqueuedRestrictedNotifications_notAutomotive() throws Exception {
-        mService.isSystemUid = false;
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
                 .thenReturn(false);
         List<String> categories = Arrays.asList(Notification.CATEGORY_CAR_EMERGENCY,
@@ -1134,12 +1139,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     /**
-     * Confirm if a non-system user tries to use the car categories on a automotive device that
-     * they will get a security exception
+     * Confirm if an application tries to use the car categories on a automotive device without the
+     * SEND_CATEGORY_CAR_NOTIFICATIONS permission that a security exception will be thrown.
      */
     @Test
-    public void testEnqueuedRestrictedNotifications_badUser() throws Exception {
-        mService.isSystemUid = false;
+    public void testEnqueuedRestrictedNotifications_noPermission() throws Exception {
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
                 .thenReturn(true);
         List<String> categories = Arrays.asList(Notification.CATEGORY_CAR_EMERGENCY,

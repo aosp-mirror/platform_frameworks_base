@@ -75,6 +75,8 @@ public class BubbleData {
         @Nullable Bubble selectedBubble;
         @Nullable Bubble addedBubble;
         @Nullable Bubble updatedBubble;
+        @Nullable Bubble addedOverflowBubble;
+        @Nullable Bubble removedOverflowBubble;
         // Pair with Bubble and @DismissReason Integer
         final List<Pair<Bubble, Integer>> removedBubbles = new ArrayList<>();
 
@@ -93,10 +95,12 @@ public class BubbleData {
                     || addedBubble != null
                     || updatedBubble != null
                     || !removedBubbles.isEmpty()
+                    || addedOverflowBubble != null
+                    || removedOverflowBubble != null
                     || orderChanged;
         }
 
-        void bubbleRemoved(Bubble bubbleToRemove, @DismissReason  int reason) {
+        void bubbleRemoved(Bubble bubbleToRemove, @DismissReason int reason) {
             removedBubbles.add(new Pair<>(bubbleToRemove, reason));
         }
     }
@@ -486,8 +490,9 @@ public class BubbleData {
                     b.stopInflation();
                 }
                 mLogger.logOverflowRemove(b, reason);
-                mStateChange.bubbleRemoved(b, reason);
                 mOverflowBubbles.remove(b);
+                mStateChange.bubbleRemoved(b, reason);
+                mStateChange.removedOverflowBubble = b;
             }
             return;
         }
@@ -532,6 +537,7 @@ public class BubbleData {
         }
         mLogger.logOverflowAdd(bubble, reason);
         mOverflowBubbles.add(0, bubble);
+        mStateChange.addedOverflowBubble = bubble;
         bubble.stopInflation();
         if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
             // Remove oldest bubble.
@@ -542,6 +548,7 @@ public class BubbleData {
             mStateChange.bubbleRemoved(oldest, BubbleController.DISMISS_OVERFLOW_MAX_REACHED);
             mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
             mOverflowBubbles.remove(oldest);
+            mStateChange.removedOverflowBubble = oldest;
         }
     }
 
@@ -821,11 +828,19 @@ public class BubbleData {
                 : "null");
         pw.print("expanded: ");
         pw.println(mExpanded);
-        pw.print("count:    ");
+
+        pw.print("stack bubble count:    ");
         pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
             bubble.dump(fd, pw, args);
         }
+
+        pw.print("overflow bubble count:    ");
+        pw.println(mOverflowBubbles.size());
+        for (Bubble bubble : mOverflowBubbles) {
+            bubble.dump(fd, pw, args);
+        }
+
         pw.print("summaryKeys: ");
         pw.println(mSuppressedGroupKeys.size());
         for (String key : mSuppressedGroupKeys.keySet()) {

@@ -98,7 +98,11 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
         }
 
         if (finish) {
-            mCallback.onClientFinished(this, false /* success */);
+            if (mCallback == null) {
+                Slog.e(TAG, "Callback is null, perhaps the client hasn't been started yet?");
+            } else {
+                mCallback.onClientFinished(this, false /* success */);
+            }
         }
     }
 

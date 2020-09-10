@@ -510,8 +510,15 @@ class Face10 implements IHwBinder.DeathRecipient {
             if (mCurrentChallengeOwner != null) {
                 Slog.w(TAG, "Current challenge owner: " + mCurrentChallengeOwner
                         + ", interrupted by: " + opPackageName);
+                final ClientMonitorCallbackConverter listener =
+                        mCurrentChallengeOwner.getListener();
+                if (listener == null) {
+                    Slog.w(TAG, "Null listener, skip sending interruption callback");
+                    return;
+                }
+
                 try {
-                    mCurrentChallengeOwner.getListener().onChallengeInterrupted(mSensorId);
+                    listener.onChallengeInterrupted(mSensorId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify challenge interrupted", e);
                 }
@@ -524,7 +531,7 @@ class Face10 implements IHwBinder.DeathRecipient {
                 @Override
                 public void onClientStarted(@NonNull ClientMonitor<?> clientMonitor) {
                     if (client != clientMonitor) {
-                        Slog.e(TAG, "scheduleGenerateChallenge, mismatched client."
+                        Slog.e(TAG, "scheduleGenerateChallenge onClientStarted, mismatched client."
                                 + " Expecting: " + client + ", received: " + clientMonitor);
                         return;
                     }

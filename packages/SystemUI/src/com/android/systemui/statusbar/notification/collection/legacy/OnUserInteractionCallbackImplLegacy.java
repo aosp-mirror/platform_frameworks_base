@@ -26,6 +26,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -38,17 +39,20 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityManager mVisualStabilityManager;
+    private final GroupMembershipManager mGroupMembershipManager;
 
     public OnUserInteractionCallbackImplLegacy(
             NotificationEntryManager notificationEntryManager,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
-            VisualStabilityManager visualStabilityManager
+            VisualStabilityManager visualStabilityManager,
+            GroupMembershipManager groupMembershipManager
     ) {
         mNotificationEntryManager = notificationEntryManager;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
         mVisualStabilityManager = visualStabilityManager;
+        mGroupMembershipManager = groupMembershipManager;
     }
 
     /**
@@ -69,6 +73,13 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
             dismissalSurface = NotificationStats.DISMISSAL_AOD;
         }
 
+        if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
+            NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
+            if (groupSummary.isClearable()) {
+                onDismiss(groupSummary, cancellationReason);
+            }
+        }
+
         mNotificationEntryManager.performRemoveNotification(
                 entry.getSbn(),
                 new DismissedByUserStats(
@@ -82,6 +93,7 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
                                 NotificationLogger.getNotificationLocation(entry))),
                 cancellationReason
         );
+
     }
 
     @Override

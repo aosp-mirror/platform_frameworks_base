@@ -127,7 +127,7 @@ import java.util.StringTokenizer;
  */
 public class ParsingPackageUtils {
 
-    public static final String TAG = ParsingUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     /**
      * @see #parseDefault(ParseInput, File, int, boolean)
@@ -739,7 +739,6 @@ public class ParsingPackageUtils {
             String tagName = parser.getName();
             final ParseResult result;
 
-            // TODO(b/135203078): Convert to instance methods to share variables
             // <application> has special logic, so it's handled outside the general method
             if (PackageParser.TAG_APPLICATION.equals(tagName)) {
                 if (foundApp) {
@@ -1718,10 +1717,6 @@ public class ParsingPackageUtils {
                         .AndroidManifestApplication_persistentWhenFeatureAvailable);
                 pkg.setPersistent(requiredFeature == null || mCallback.hasFeature(requiredFeature));
             }
-
-            // TODO(b/135203078): Should parsing code be responsible for this? Maybe move to a
-            //  util or just have PackageImpl return true if either flag is set
-            pkg.setProfileableByShell(pkg.isProfileableByShell());
 
             if (sa.hasValueOrEmpty(R.styleable.AndroidManifestApplication_resizeableActivity)) {
                 pkg.setResizeableActivity(sa.getBoolean(

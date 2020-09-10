@@ -153,12 +153,9 @@ public class WindowManagerWrapper {
         }
     }
 
+    @Deprecated
     public void setPipVisibility(final boolean visible) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().setPipVisibility(visible);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to reach window manager", e);
-        }
+        // To be removed
     }
 
     /**

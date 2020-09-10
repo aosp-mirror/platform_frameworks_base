@@ -17763,7 +17763,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     oldPackage = mPackages.get(pkgName11);
                     existingPackage = oldPackage;
                     if (DEBUG_INSTALL) {
-                        // TODO(b/135203078): PackageImpl.toString()
                         Slog.d(TAG,
                                 "replacePackageLI: new=" + parsedPackage + ", old=" + oldPackage);
                     }
@@ -19867,7 +19866,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
             final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
             if (removeExisting && existing != null) {
-                removeFiltersLocked(pir, filter, existing);
+                mSettings.removeFiltersLPw(pir, filter, existing);
             }
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
@@ -19968,28 +19967,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 if (existing != null) {
-                    removeFiltersLocked(pir, filter, existing);
+                    mSettings.removeFiltersLPw(pir, filter, existing);
                 }
             }
         }
         addPreferredActivityInternal(filter, match, set, activity, true, userId,
                 "Replacing preferred", false);
-    }
-
-    private void removeFiltersLocked(@NonNull PreferredIntentResolver pir,
-            @NonNull IntentFilter filter, @NonNull List<PreferredActivity> existing) {
-        if (DEBUG_PREFERRED) {
-            Slog.i(TAG, existing.size() + " preferred matches for:");
-            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-        }
-        for (int i = existing.size() - 1; i >= 0; --i) {
-            final PreferredActivity pa = existing.get(i);
-            if (DEBUG_PREFERRED) {
-                Slog.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
-                pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
-            }
-            pir.removeFilter(pa);
-        }
     }
 
     @Override

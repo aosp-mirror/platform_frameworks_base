@@ -19,6 +19,7 @@ package com.android.server.audio;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
@@ -94,8 +95,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         mContext = cntxt;
         mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
         mFocusEnforcer = pfe;
-        mMultiAudioFocusEnabled = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.MULTI_AUDIO_FOCUS_ENABLED, 0) != 0;
+        final ContentResolver cr = mContext.getContentResolver();
+        mMultiAudioFocusEnabled = Settings.System.getIntForUser(cr,
+                Settings.System.MULTI_AUDIO_FOCUS_ENABLED, 0, cr.getUserId()) != 0;
     }
 
     protected void dump(PrintWriter pw) {
@@ -1081,8 +1083,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     public void updateMultiAudioFocus(boolean enabled) {
         Log.d(TAG, "updateMultiAudioFocus( " + enabled + " )");
         mMultiAudioFocusEnabled = enabled;
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.MULTI_AUDIO_FOCUS_ENABLED, enabled ? 1 : 0);
+        final ContentResolver cr = mContext.getContentResolver();
+        Settings.System.putIntForUser(cr,
+                Settings.System.MULTI_AUDIO_FOCUS_ENABLED, enabled ? 1 : 0, cr.getUserId());
         if (!mFocusStack.isEmpty()) {
             final FocusRequester fr = mFocusStack.peek();
             fr.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null, false);

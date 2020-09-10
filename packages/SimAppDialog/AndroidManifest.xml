@@ -23,7 +23,7 @@
             android:name=".InstallCarrierAppActivity"
             android:exported="true"
             android:permission="android.permission.NETWORK_SETTINGS"
-            android:theme="@style/SudThemeGlif.Light">
+            android:theme="@style/SuwThemeGlif.Light">
         </activity>
     </application>
 </manifest>

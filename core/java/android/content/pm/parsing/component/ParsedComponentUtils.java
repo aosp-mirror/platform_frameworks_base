@@ -36,8 +36,6 @@ import com.android.internal.annotations.VisibleForTesting;
 /** @hide */
 class ParsedComponentUtils {
 
-    private static final String TAG = ParsingPackageUtils.TAG;
-
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     static <Component extends ParsedComponent> ParseResult<Component> parseComponent(

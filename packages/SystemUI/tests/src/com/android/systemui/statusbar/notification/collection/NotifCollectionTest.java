@@ -442,7 +442,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDismissingLifetimeExtendedSummaryDoesNotDismissChildren() {
+    public void testRetractingLifetimeExtendedSummaryDoesNotDismissChildren() {
         // GIVEN A notif group with one summary and two children
         mCollection.addNotificationLifetimeExtender(mExtender1);
         CollectionEvent notif1 = postNotif(
@@ -460,15 +460,16 @@ public class NotifCollectionTest extends SysuiTestCase {
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
         NotificationEntry entry3 = mCollectionListener.getEntry(notif3.key);
 
-        // GIVEN that the summary and one child are retracted, but both are lifetime-extended
+        // GIVEN that the summary and one child are retracted by the app, but both are
+        // lifetime-extended
         mExtender1.shouldExtendLifetime = true;
-        mNoMan.retractNotif(notif1.sbn, REASON_CANCEL);
-        mNoMan.retractNotif(notif2.sbn, REASON_CANCEL);
+        mNoMan.retractNotif(notif1.sbn, REASON_APP_CANCEL);
+        mNoMan.retractNotif(notif2.sbn, REASON_APP_CANCEL);
         assertEquals(
                 new ArraySet<>(List.of(entry1, entry2, entry3)),
                 new ArraySet<>(mCollection.getAllNotifs()));
 
-        // WHEN the summary is dismissed by the user
+        // WHEN the summary is retracted by the app
         mCollection.dismissNotification(entry1, defaultStats(entry1));
 
         // THEN the summary is removed, but both children stick around
@@ -477,6 +478,28 @@ public class NotifCollectionTest extends SysuiTestCase {
                 new ArraySet<>(mCollection.getAllNotifs()));
         assertEquals(NOT_DISMISSED, entry2.getDismissState());
         assertEquals(NOT_DISMISSED, entry3.getDismissState());
+    }
+
+    @Test
+    public void testNMSReportsUserDismissalAlwaysRemovesNotif() throws RemoteException {
+        // GIVEN notifications are lifetime extended
+        mExtender1.shouldExtendLifetime = true;
+        CollectionEvent notif = postNotif(buildNotif(TEST_PACKAGE, 1, "myTag"));
+        CollectionEvent notif2 = postNotif(buildNotif(TEST_PACKAGE, 2, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+        assertEquals(
+                new ArraySet<>(List.of(entry, entry2)),
+                new ArraySet<>(mCollection.getAllNotifs()));
+
+        // WHEN the notifications are reported to be dismissed by the user by NMS
+        mNoMan.retractNotif(notif.sbn, REASON_CANCEL);
+        mNoMan.retractNotif(notif2.sbn, REASON_CLICK);
+
+        // THEN the notifications are removed b/c they were dismissed by the user
+        assertEquals(
+                new ArraySet<>(List.of()),
+                new ArraySet<>(mCollection.getAllNotifs()));
     }
 
     @Test
@@ -833,13 +856,13 @@ public class NotifCollectionTest extends SysuiTestCase {
         NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88));
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
 
-        // WHEN a notification is removed
-        mNoMan.retractNotif(notif2.sbn, REASON_CLICK);
+        // WHEN a notification is removed by the app
+        mNoMan.retractNotif(notif2.sbn, REASON_APP_CANCEL);
 
         // THEN each extender is asked whether to extend, even if earlier ones return true
-        verify(mExtender1).shouldExtendLifetime(entry2, REASON_CLICK);
-        verify(mExtender2).shouldExtendLifetime(entry2, REASON_CLICK);
-        verify(mExtender3).shouldExtendLifetime(entry2, REASON_CLICK);
+        verify(mExtender1).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender2).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
+        verify(mExtender3).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
 
         // THEN the entry is not removed
         assertTrue(mCollection.getAllNotifs().contains(entry2));
