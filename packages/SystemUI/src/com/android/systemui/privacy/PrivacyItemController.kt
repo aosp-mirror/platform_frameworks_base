@@ -86,9 +86,9 @@ class PrivacyItemController @Inject constructor(
                 ALL_INDICATORS, DEFAULT_ALL_INDICATORS)
     }
 
+    // TODO(b/168209929) Remove hardcode
     private fun isMicCameraEnabled(): Boolean {
-        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                MIC_CAMERA, DEFAULT_MIC_CAMERA)
+        return true
     }
 
     private var currentUserIds = emptyList<Int>()
@@ -124,11 +124,11 @@ class PrivacyItemController @Inject constructor(
                             DEFAULT_ALL_INDICATORS)
                     callbacks.forEach { it.get()?.onFlagAllChanged(allIndicatorsAvailable) }
                 }
-
-                if (properties.keyset.contains(MIC_CAMERA)) {
-                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
-                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
-                }
+                // TODO(b/168209929) Uncomment
+//                if (properties.keyset.contains(MIC_CAMERA)) {
+//                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
+//                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
+//                }
                 internalUiExecutor.updateListeningState()
             }
         }
