@@ -697,7 +697,7 @@ public class SoundTriggerService extends SystemService {
             synchronized (mLock) {
                 ModuleProperties properties = mSoundTriggerHelper.getModuleProperties();
                 sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "getModuleProperties(): " + properties.toString()));
+                        "getModuleProperties(): " + properties));
                 return properties;
             }
         }
