@@ -209,7 +209,6 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -233,6 +232,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
@@ -388,15 +388,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Configuration mTempConfiguration = new Configuration();
 
     /**
-     * The last content insets returned to the client in relayout. We use
-     * these in the bounds animation to ensure we only observe inset changes
-     * at the same time that a client resizes it's surface so that we may use
-     * the geometryAppliesWithResize synchronization mechanism to keep
-     * the contents in place.
-     */
-    final Rect mLastRelayoutContentInsets = new Rect();
-
-    /**
      * Set to true if we are waiting for this window to receive its
      * given internal insets before laying out other windows based on it.
      */
@@ -436,6 +427,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final float[] mTmpMatrixArray = new float[9];
 
     private final WindowFrames mWindowFrames = new WindowFrames();
+
+    private final ClientWindowFrames mClientWindowFrames = new ClientWindowFrames();
 
     /** The frames used to compute a temporal layout appearance. */
     private WindowFrames mSimulatedWindowFrames;
@@ -1299,7 +1292,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWindowFrames.mRelFrame;
     }
 
-    /** Retrieves the frame of the display that this window was last laid out in. */
+    /**
+     * Gets the frame that excludes the area of side insets according to the layout parameter from
+     * {@link WindowManager.LayoutParams#setFitInsetsSides}.
+     */
     Rect getDisplayFrame() {
         return mWindowFrames.mDisplayFrame;
     }
@@ -3585,6 +3581,39 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return wpc != null && wpc.registeredForDisplayConfigChanges();
     }
 
+    void fillClientWindowFrames(ClientWindowFrames outFrames) {
+        outFrames.frame.set(mWindowFrames.mCompatFrame);
+        outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
+        if (mInvGlobalScale != 1.0f && inSizeCompatMode()) {
+            outFrames.displayFrame.scale(mInvGlobalScale);
+        }
+
+        final Rect backdropFrame = outFrames.backdropFrame;
+        // When the task is docked, we send fullscreen sized backdropFrame as soon as resizing
+        // start even if we haven't received the relayout window, so that the client requests
+        // the relayout sooner. When dragging stops, backdropFrame needs to stay fullscreen
+        // until the window to small size, otherwise the multithread renderer will shift last
+        // one or more frame to wrong offset. So here we send fullscreen backdrop if either
+        // isDragResizing() or isDragResizeChanged() is true.
+        final boolean resizing = isDragResizing() || isDragResizeChanged();
+        if (!resizing || getWindowConfiguration().useWindowFrameForBackdrop()) {
+            // Surface position is now inherited from parent, and BackdropFrameRenderer uses
+            // backdrop frame to position content. Thus we just keep the size of backdrop frame,
+            // and remove the offset to avoid double offset from display origin.
+            backdropFrame.set(outFrames.frame);
+            backdropFrame.offsetTo(0, 0);
+        } else {
+            final DisplayInfo displayInfo = getDisplayInfo();
+            backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        }
+        outFrames.displayCutout.set(mWindowFrames.mDisplayCutout.getDisplayCutout());
+
+        // TODO(b/149813814): Remove legacy insets.
+        outFrames.contentInsets.set(mWindowFrames.mLastContentInsets);
+        outFrames.visibleInsets.set(mWindowFrames.mLastVisibleInsets);
+        outFrames.stableInsets.set(mWindowFrames.mLastStableInsets);
+    }
+
     void reportResized() {
         // If the activity is scheduled to relaunch, skip sending the resized to ViewRootImpl now
         // since it will be destroyed anyway. This also prevents the client from receiving
@@ -3616,23 +3645,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWinAnimator.mSurfaceResized = false;
         mWindowFrames.resetInsetsChanged();
 
-        final Rect frame = mWindowFrames.mCompatFrame;
-        final Rect contentInsets = mWindowFrames.mLastContentInsets;
-        final Rect visibleInsets = mWindowFrames.mLastVisibleInsets;
-        final Rect stableInsets = mWindowFrames.mLastStableInsets;
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
         final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING || useBLASTSync() || !mRedrawForSyncReported;
         final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
         final int displayId = getDisplayId();
-        final DisplayCutout displayCutout = getWmDisplayCutout().getDisplayCutout();
+        fillClientWindowFrames(mClientWindowFrames);
 
         mRedrawForSyncReported = true;
 
         try {
-            mClient.resized(frame, contentInsets, visibleInsets, stableInsets, reportDraw,
-                    mergedConfiguration, getBackdropFrame(frame), forceRelayout,
+            mClient.resized(mClientWindowFrames, reportDraw, mergedConfiguration, forceRelayout,
                     getDisplayContent().getDisplayPolicy().areSystemBarsForcedShownLw(this),
-                    displayId, new DisplayCutout.ParcelableWrapper(displayCutout));
+                    displayId);
 
             if (mWmService.mAccessibilityController != null) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(displayId);
@@ -3736,27 +3760,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean canShowTransient() {
         return (mAttrs.insetsFlags.behavior & BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) != 0;
-    }
-
-    Rect getBackdropFrame(Rect frame) {
-        // When the task is docked, we send fullscreen sized backDropFrame as soon as resizing
-        // start even if we haven't received the relayout window, so that the client requests
-        // the relayout sooner. When dragging stops, backDropFrame needs to stay fullscreen
-        // until the window to small size, otherwise the multithread renderer will shift last
-        // one or more frame to wrong offset. So here we send fullscreen backdrop if either
-        // isDragResizing() or isDragResizeChanged() is true.
-        boolean resizing = isDragResizing() || isDragResizeChanged();
-        if (getWindowConfiguration().useWindowFrameForBackdrop() || !resizing) {
-            // Surface position is now inherited from parent, and BackdropFrameRenderer uses
-            // backdrop frame to position content. Thus we just keep the size of backdrop frame, and
-            // remove the offset to avoid double offset from display origin.
-            mTmpRect.set(frame);
-            mTmpRect.offsetTo(0, 0);
-            return mTmpRect;
-        }
-        final DisplayInfo displayInfo = getDisplayInfo();
-        mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        return mTmpRect;
     }
 
     private int getRootTaskId() {
@@ -5668,18 +5671,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mWindowFrames.mVisibleFrame.bottom > out.bottom) {
             out.bottom = mWindowFrames.mVisibleFrame.bottom;
         }
-    }
-
-    /**
-     * Copy the inset values over so they can be sent back to the client when a relayout occurs.
-     */
-    void getInsetsForRelayout(Rect outContentInsets, Rect outVisibleInsets,
-            Rect outStableInsets) {
-        outContentInsets.set(mWindowFrames.mContentInsets);
-        outVisibleInsets.set(mWindowFrames.mVisibleInsets);
-        outStableInsets.set(mWindowFrames.mStableInsets);
-
-        mLastRelayoutContentInsets.set(mWindowFrames.mContentInsets);
     }
 
     void getContentInsets(Rect outContentInsets) {

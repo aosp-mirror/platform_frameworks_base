@@ -29,6 +29,7 @@ import android.view.InsetsState;
 import android.view.IScrollCaptureController;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -52,11 +53,9 @@ oneway interface IWindow {
      */
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
-    void resized(in Rect frame, in Rect contentInsets,
-            in Rect visibleInsets, in Rect stableInsets, boolean reportDraw,
-            in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
-            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-            in DisplayCutout.ParcelableWrapper displayCutout);
+    void resized(in ClientWindowFrames frames, boolean reportDraw,
+            in MergedConfiguration newMergedConfiguration,
+            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId);
 
     /**
      * Called when the window location in parent display has changed. The offset will only be a
