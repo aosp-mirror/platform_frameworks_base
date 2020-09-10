@@ -30,7 +30,7 @@ open class ImeAppHelper(
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
             .getInstance(instr)
             .launcherStrategy
-) : FlickerAppHelper(instr, launcherName, launcherStrategy) {
+) : StandardAppHelper(instr, launcherName, launcherStrategy) {
     open fun openIME(device: UiDevice) {
         val editText = device.wait(
                 Until.findObject(By.res(getPackage(), "plain_text_input")),
