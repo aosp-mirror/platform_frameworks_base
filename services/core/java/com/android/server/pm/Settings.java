@@ -102,7 +102,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
-import com.android.server.pm.Installer.Batch;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -3192,6 +3191,22 @@ public final class Settings {
         }
     }
 
+    void removeFiltersLPw(@NonNull PreferredIntentResolver pir,
+            @NonNull IntentFilter filter, @NonNull List<PreferredActivity> existing) {
+        if (PackageManagerService.DEBUG_PREFERRED) {
+            Slog.i(TAG, existing.size() + " preferred matches for:");
+            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+        }
+        for (int i = existing.size() - 1; i >= 0; --i) {
+            final PreferredActivity pa = existing.get(i);
+            if (PackageManagerService.DEBUG_PREFERRED) {
+                Slog.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
+                pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
+            }
+            pir.removeFilter(pa);
+        }
+    }
+
     private void applyDefaultPreferredActivityLPw(
             PackageManagerInternal pmInternal, IntentFilter tmpPa, ComponentName cn, int userId) {
         // The initial preferences only specify the target activity
@@ -3395,8 +3410,13 @@ public final class Settings {
                     Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
                 }
             }
+            final PreferredIntentResolver pir = editPreferredActivitiesLPw(userId);
+            final List<PreferredActivity> existing = pir.findFilters(filter);
+            if (existing != null) {
+                removeFiltersLPw(pir, filter, existing);
+            }
             PreferredActivity pa = new PreferredActivity(filter, systemMatch, set, cn, true);
-            editPreferredActivitiesLPw(userId).addFilter(pa);
+            pir.addFilter(pa);
         } else if (haveNonSys == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("No component ");
@@ -4564,7 +4584,6 @@ public final class Settings {
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().signatureSchemeVersion;
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
-            // TODO(b/135203078): Is there anything to print here with AppInfo removed?
             pw.print(prefix); pw.print("  applicationInfo=");
             pw.println(pkg.toAppInfoToString());
             pw.print(prefix); pw.print("  flags=");
@@ -5160,7 +5179,6 @@ public final class Settings {
     }
 
     void dumpComponents(PrintWriter pw, String prefix, PackageSetting ps) {
-        // TODO(b/135203078): ParsedComponent toString methods for dumping
         dumpComponents(pw, prefix, "activities:", ps.pkg.getActivities());
         dumpComponents(pw, prefix, "services:", ps.pkg.getServices());
         dumpComponents(pw, prefix, "receivers:", ps.pkg.getReceivers());

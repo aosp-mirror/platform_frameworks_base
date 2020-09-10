@@ -35,7 +35,14 @@ package android.graphics {
 package android.media {
 
   public class AudioManager {
+    method public void adjustStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
+    method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
+  }
+
+  public static final class MediaMetadata.Builder {
+    ctor public MediaMetadata.Builder(@NonNull android.media.MediaMetadata, @IntRange(from=1) int);
   }
 
 }

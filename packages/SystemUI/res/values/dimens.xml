@@ -1366,8 +1366,4 @@
     <dimen name="config_rounded_mask_size">@*android:dimen/rounded_corner_radius</dimen>
     <dimen name="config_rounded_mask_size_top">@*android:dimen/rounded_corner_radius_top</dimen>
     <dimen name="config_rounded_mask_size_bottom">@*android:dimen/rounded_corner_radius_bottom</dimen>
-
-    <!-- One-Handed Mode -->
-    <!-- Threshold for dragging distance to enable one-handed mode -->
-    <dimen name="gestures_onehanded_drag_threshold">20dp</dimen>
 </resources>

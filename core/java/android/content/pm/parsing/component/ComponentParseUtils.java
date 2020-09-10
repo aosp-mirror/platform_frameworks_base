@@ -24,14 +24,12 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.text.TextUtils;
-
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,8 +38,6 @@ import java.io.IOException;
 
 /** @hide */
 public class ComponentParseUtils {
-
-    private static final String TAG = ParsingPackageUtils.TAG;
 
     public static boolean isImplicitlyExposedIntent(ParsedIntentInfo intentInfo) {
         return intentInfo.hasCategory(Intent.CATEGORY_BROWSABLE)

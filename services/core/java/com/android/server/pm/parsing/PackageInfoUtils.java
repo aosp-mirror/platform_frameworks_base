@@ -35,6 +35,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -73,7 +74,7 @@ import java.util.Set;
  * @hide
  **/
 public class PackageInfoUtils {
-    private static final String TAG = PackageParser2.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     /**
      * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
@@ -207,7 +208,6 @@ public class PackageInfoUtils {
     public static ApplicationInfo generateApplicationInfo(AndroidPackage pkg,
             @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
             @Nullable PackageSetting pkgSetting) {
-        // TODO(b/135203078): Consider cases where we don't have a PkgSetting
         if (pkg == null) {
             return null;
         }
@@ -354,7 +354,6 @@ public class PackageInfoUtils {
             return null;
         }
 
-        // TODO(b/135203078): Add setting related state
         info.primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
         info.secondaryCpuAbi = AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting);
         info.nativeLibraryDir = pkg.getNativeLibraryDir();
@@ -454,7 +453,6 @@ public class PackageInfoUtils {
 
     /** @see ApplicationInfo#flags */
     public static int appInfoFlags(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
-        // TODO(b/135203078): Add setting related state
         // @formatter:off
         int pkgWithoutStateFlags = PackageInfoWithoutStateUtils.appInfoFlags(pkg)
                 | flag(pkg.isSystem(), ApplicationInfo.FLAG_SYSTEM)

@@ -869,10 +869,11 @@ public class DisplayModeDirector {
         }
 
         private void updateRefreshRateSettingLocked() {
-            float minRefreshRate = Settings.System.getFloat(mContext.getContentResolver(),
-                    Settings.System.MIN_REFRESH_RATE, 0f);
-            float peakRefreshRate = Settings.System.getFloat(mContext.getContentResolver(),
-                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate);
+            final ContentResolver cr = mContext.getContentResolver();
+            float minRefreshRate = Settings.System.getFloatForUser(cr,
+                    Settings.System.MIN_REFRESH_RATE, 0f, cr.getUserId());
+            float peakRefreshRate = Settings.System.getFloatForUser(cr,
+                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate, cr.getUserId());
             updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate);
         }
 
@@ -1301,8 +1302,9 @@ public class DisplayModeDirector {
         }
         // TODO: brightnessfloat: make it use float not int
         private void onBrightnessChangedLocked() {
-            int brightness = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, -1);
+            final ContentResolver cr = mContext.getContentResolver();
+            int brightness = Settings.System.getIntForUser(cr,
+                    Settings.System.SCREEN_BRIGHTNESS, -1, cr.getUserId());
 
             Vote vote = null;
             boolean insideZone = isInsideZone(brightness, mAmbientLux);

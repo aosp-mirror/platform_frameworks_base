@@ -43,6 +43,7 @@ class MagnificationModeSwitch {
 
     private static final int DURATION_MS = 5000;
     private static final int START_DELAY_MS = 3000;
+    private final Runnable mAnimationTask;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -70,6 +71,14 @@ class MagnificationModeSwitch {
         applyResourcesValues();
         mImageView.setImageResource(getIconResId(mMagnificationMode));
         mImageView.setOnTouchListener(this::onTouch);
+
+        mAnimationTask = () -> {
+            mImageView.animate()
+                    .alpha(0f)
+                    .setDuration(DURATION_MS)
+                    .withEndAction(() -> removeButton())
+                    .start();
+        };
     }
 
     private void applyResourcesValues() {
@@ -147,13 +156,8 @@ class MagnificationModeSwitch {
         // Dismiss the magnification switch button after the button is displayed for a period of
         // time.
         mImageView.animate().cancel();
-        mImageView.animate()
-                .alpha(0f)
-                .setStartDelay(START_DELAY_MS)
-                .setDuration(DURATION_MS)
-                .withEndAction(
-                        () -> removeButton())
-                .start();
+        mImageView.removeCallbacks(mAnimationTask);
+        mImageView.postDelayed(mAnimationTask, START_DELAY_MS);
     }
 
     void onConfigurationChanged(int configDiff) {

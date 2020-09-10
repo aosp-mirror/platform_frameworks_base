@@ -42,45 +42,35 @@ class ShadeViewManager constructor(
     private val rootController = RootNodeController(listContainer, View(context))
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
 
-    fun attach(listBuilder: ShadeListBuilder) {
-        listBuilder.setOnRenderListListener(::onNewNotifTree)
-    }
+    fun attach(listBuilder: ShadeListBuilder) =
+            listBuilder.setOnRenderListListener(::onNewNotifTree)
 
-    private fun onNewNotifTree(tree: List<ListEntry>) {
-        viewDiffer.applySpec(buildTree(tree))
-    }
+    private fun onNewNotifTree(tree: List<ListEntry>) = viewDiffer.applySpec(buildTree(tree))
 
     private fun buildTree(notifList: List<ListEntry>): NodeSpec {
-        val root = NodeSpecImpl(null, rootController)
-
-        for (entry in notifList) {
-            // TODO: Add section header logic here
-            root.children.add(buildNotifNode(entry, root))
+        val root = NodeSpecImpl(null, rootController).apply {
+            // Insert first section header, if present
+            notifList.firstOrNull()?.section?.headerController?.let {
+                children.add(NodeSpecImpl(this, it))
+            }
+            notifList.asSequence().zipWithNext().forEach { (prev, entry) ->
+                // Insert new header if the section has changed between two entries
+                entry.section.takeIf { it != prev.section }?.headerController?.let {
+                    children.add(NodeSpecImpl(this, it))
+                }
+                children.add(buildNotifNode(entry, this))
+            }
         }
-
         notificationIconAreaController.updateNotificationIcons(notifList)
         return root
     }
 
     private fun buildNotifNode(entry: ListEntry, parent: NodeSpec): NodeSpec {
         return when (entry) {
-            is NotificationEntry -> {
-                NodeSpecImpl(parent, viewBarn.requireView(entry))
-            }
-            is GroupEntry -> {
-                val groupNode = NodeSpecImpl(
-                        parent,
-                        viewBarn.requireView(checkNotNull(entry.summary)))
-
-                for (childEntry in entry.children) {
-                    groupNode.children.add(buildNotifNode(childEntry, groupNode))
-                }
-
-                groupNode
-            }
-            else -> {
-                throw RuntimeException("Unexpected entry: $entry")
-            }
+            is NotificationEntry -> NodeSpecImpl(parent, viewBarn.requireView(entry))
+            is GroupEntry -> NodeSpecImpl(parent, viewBarn.requireView(checkNotNull(entry.summary)))
+                    .apply { entry.children.forEach { children.add(buildNotifNode(it, this)) } }
+            else -> throw RuntimeException("Unexpected entry: $entry")
         }
     }
 }
@@ -91,12 +81,11 @@ class ShadeViewManagerFactory @Inject constructor(
     private val viewBarn: NotifViewBarn,
     private val notificationIconAreaController: NotificationIconAreaController
 ) {
-    fun create(listContainer: NotificationListContainer): ShadeViewManager {
-        return ShadeViewManager(
-                context,
-                listContainer,
-                logger,
-                viewBarn,
-                notificationIconAreaController)
-    }
+    fun create(listContainer: NotificationListContainer) =
+            ShadeViewManager(
+                    context,
+                    listContainer,
+                    logger,
+                    viewBarn,
+                    notificationIconAreaController)
 }

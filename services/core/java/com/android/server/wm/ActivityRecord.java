@@ -6643,8 +6643,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
         final int requestedOrientation = getRequestedConfigurationOrientation();
-        final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED
-                && !mDisplayContent.ignoreRotationForApps();
+        final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED;
         final int orientation = orientationRequested
                 ? requestedOrientation
                 : newParentConfiguration.orientation;

@@ -2386,10 +2386,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.mActivityRecord != null) {
                 win.mActivityRecord.updateReportedVisibilityLocked();
             }
-            if (winAnimator.mReportSurfaceResized) {
-                winAnimator.mReportSurfaceResized = false;
-                result |= WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED;
-            }
             if (displayPolicy.areSystemBarsForcedShownLw(win)) {
                 result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
             }
@@ -5749,19 +5745,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 "setRecentsVisibility()");
         synchronized (mGlobalLock) {
             mPolicy.setRecentsVisibilityLw(visible);
-        }
-    }
-
-    @Override
-    public void setPipVisibility(boolean visible) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
-
-        synchronized (mGlobalLock) {
-            mPolicy.setPipVisibilityLw(visible);
         }
     }
 

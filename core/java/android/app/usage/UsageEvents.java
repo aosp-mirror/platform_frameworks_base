@@ -199,7 +199,7 @@ public final class UsageEvents implements Parcelable {
         public static final int NOTIFICATION_INTERRUPTION = 12;
 
         /**
-         * A Slice was pinned by the default assistant.
+         * A Slice was pinned by the default launcher or the default assistant.
          * @hide
          */
         @SystemApi

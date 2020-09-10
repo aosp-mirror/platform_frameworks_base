@@ -17,6 +17,7 @@
 package android.media;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFocusInfo;
@@ -41,6 +42,7 @@ import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.view.KeyEvent;
 
 /**
@@ -320,4 +322,16 @@ interface IAudioService {
 
     oneway void unregisterCapturePresetDevicesRoleDispatcher(
             ICapturePresetDevicesRoleDispatcher dispatcher);
+
+    oneway void adjustStreamVolumeForUid(int streamType, int direction, int flags,
+            in String packageName, int uid, int pid, in UserHandle userHandle,
+            int targetSdkVersion);
+
+    oneway void adjustSuggestedStreamVolumeForUid(int streamType, int direction, int flags,
+            in String packageName, int uid, int pid, in UserHandle userHandle,
+            int targetSdkVersion);
+
+    oneway void setStreamVolumeForUid(int streamType, int direction, int flags,
+            in String packageName, int uid, int pid, in UserHandle userHandle,
+            int targetSdkVersion);
 }

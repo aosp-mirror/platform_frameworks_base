@@ -88,7 +88,7 @@ import dagger.Provides;
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
-@Module
+@Module(includes = { NotificationSectionHeadersModule.class })
 public interface NotificationsModule {
     /** Provides an instance of {@link NotificationEntryManager} */
     @SysUISingleton

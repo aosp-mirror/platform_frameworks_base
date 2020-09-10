@@ -105,6 +105,7 @@ android_library {
     static_libs: [
         "protolog-lib",
         "WindowManager-Shell-proto",
+        "androidx.appcompat_appcompat",
     ],
     manifest: "AndroidManifest.xml",
 }

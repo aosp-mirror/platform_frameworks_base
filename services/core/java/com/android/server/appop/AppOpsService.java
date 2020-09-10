@@ -3926,7 +3926,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             if (!isAttributionTagValid) {
                 String msg = "attributionTag " + attributionTag + " not declared in"
-                        + "manifest of " + packageName;
+                        + " manifest of " + packageName;
                 try {
                     if (mPlatformCompat.isChangeEnabledByPackageName(
                             SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,

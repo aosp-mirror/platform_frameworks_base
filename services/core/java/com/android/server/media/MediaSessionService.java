@@ -42,7 +42,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
-import android.media.AudioManagerInternal;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IRemoteVolumeController;
@@ -85,7 +84,6 @@ import android.view.ViewConfiguration;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.Watchdog;
@@ -136,7 +134,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             new ArrayList<>();
 
     private KeyguardManager mKeyguardManager;
-    private AudioManagerInternal mAudioManagerInternal;
+    private AudioManager mAudioManager;
     private ContentResolver mContentResolver;
     private boolean mHasFeatureLeanback;
 
@@ -162,6 +160,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         PowerManager pm = mContext.getSystemService(PowerManager.class);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
+        mAudioManager = mContext.getSystemService(AudioManager.class);
     }
 
     @Override
@@ -169,7 +168,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
         Watchdog.getInstance().addMonitor(this);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
@@ -2057,8 +2055,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                             callingPid = pid;
                         }
                         try {
-                            mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(suggestedStream,
-                                    direction, flags, callingOpPackageName, callingUid, callingPid);
+                            mAudioManager.adjustSuggestedStreamVolumeForUid(suggestedStream,
+                                    direction, flags, callingOpPackageName, callingUid, callingPid,
+                                    getContext().getApplicationInfo().targetSdkVersion);
                         } catch (SecurityException | IllegalArgumentException e) {
                             Log.e(TAG, "Cannot adjust volume: direction=" + direction
                                     + ", suggestedStream=" + suggestedStream + ", flags=" + flags
