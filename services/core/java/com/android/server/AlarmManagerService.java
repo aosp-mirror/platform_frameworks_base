@@ -3109,6 +3109,14 @@ class AlarmManagerService extends SystemService {
                 mPendingBackgroundAlarms.removeAt(i);
             }
         }
+        for (int i = mPendingNonWakeupAlarms.size() - 1; i >= 0; i--) {
+            final Alarm a = mPendingNonWakeupAlarms.get(i);
+            if (a.matches(operation, directReceiver)) {
+                // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                mPendingNonWakeupAlarms.remove(i);
+                decrementAlarmCount(a.uid, 1);
+            }
+        }
         if (didRemove) {
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "remove(operation) changed bounds; rebatching");
