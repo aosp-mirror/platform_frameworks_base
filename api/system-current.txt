@@ -7583,6 +7583,7 @@ package android.net.wifi {
     field public static final int WIFI_BAND_5_GHZ = 2; // 0x2
     field public static final int WIFI_BAND_5_GHZ_DFS_ONLY = 4; // 0x4
     field public static final int WIFI_BAND_5_GHZ_WITH_DFS = 6; // 0x6
+    field public static final int WIFI_BAND_60_GHZ = 16; // 0x10
     field public static final int WIFI_BAND_6_GHZ = 8; // 0x8
     field public static final int WIFI_BAND_BOTH = 3; // 0x3
     field public static final int WIFI_BAND_BOTH_WITH_DFS = 7; // 0x7
