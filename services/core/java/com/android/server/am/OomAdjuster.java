@@ -733,10 +733,6 @@ public final class OomAdjuster {
             uidRec.reset();
         }
 
-        if (mService.mAtmInternal != null) {
-            mService.mAtmInternal.rankTaskLayersIfNeeded();
-        }
-
         mAdjSeq++;
         if (fullUpdate) {
             mNewNumServiceProcs = 0;

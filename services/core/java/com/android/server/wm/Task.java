@@ -464,9 +464,10 @@ class Task extends WindowContainer<WindowContainer> {
     int mMinWidth;
     int mMinHeight;
 
+    static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
-    int mLayerRank = -1;
+    int mLayerRank = LAYER_RANK_INVISIBLE;
 
     /** Helper object used for updating override configuration. */
     private Configuration mTmpConfig = new Configuration();
@@ -1539,7 +1540,6 @@ class Task extends WindowContainer<WindowContainer> {
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
         }
-        mRootWindowContainer.invalidateTaskLayers();
     }
 
     // Close up recents linked list.
@@ -7451,6 +7451,10 @@ class Task extends WindowContainer<WindowContainer> {
 
         if (!mChildren.contains(child)) {
             return;
+        }
+        if (child.asTask() != null) {
+            // Non-root task position changed.
+            mRootWindowContainer.invalidateTaskLayers();
         }
 
         final boolean isTop = getTopChild() == child;

@@ -173,6 +173,35 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskLayerRank() {
+        final Task rootTask = new TaskBuilder(mSupervisor).build();
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        new ActivityBuilder(mAtm).setStack(task1).build().mVisibleRequested = true;
+        // RootWindowContainer#invalidateTaskLayers should post to update.
+        waitHandlerIdle(mWm.mH);
+
+        assertEquals(1, task1.mLayerRank);
+        // Only tasks that directly contain activities have a ranking.
+        assertEquals(Task.LAYER_RANK_INVISIBLE, rootTask.mLayerRank);
+
+        final Task task2 = new TaskBuilder(mSupervisor).build();
+        new ActivityBuilder(mAtm).setStack(task2).build().mVisibleRequested = true;
+        waitHandlerIdle(mWm.mH);
+
+        // Note that ensureActivitiesVisible is disabled in SystemServicesTestRule, so both the
+        // activities have the visible rank.
+        assertEquals(2, task1.mLayerRank);
+        // The task2 is the top task, so it has a lower rank as a higher priority oom score.
+        assertEquals(1, task2.mLayerRank);
+
+        task2.moveToBack("test", null /* task */);
+        waitHandlerIdle(mWm.mH);
+
+        assertEquals(1, task1.mLayerRank);
+        assertEquals(2, task2.mLayerRank);
+    }
+
+    @Test
     public void testForceStopPackage() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopMostActivity();

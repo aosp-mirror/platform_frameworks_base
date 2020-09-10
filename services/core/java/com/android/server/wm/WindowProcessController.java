@@ -1097,6 +1097,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (addPendingTopUid) {
             mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
         }
+        if (updateOomAdj) {
+            mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
+        }
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
                 mListener, updateServiceConnectionActivities, activityChange, updateOomAdj);
@@ -1158,6 +1161,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (topProcessState == ActivityManager.PROCESS_STATE_TOP) {
             mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
         }
+        mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
         // Posting the message at the front of queue so WM lock isn't held when we call into AM,
         // and the process state of starting activity can be updated quicker which will give it a
         // higher scheduling group.

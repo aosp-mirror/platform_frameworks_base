@@ -276,6 +276,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
+    private final LockedScheduler mRankTaskLayersScheduler;
 
     private boolean mTmpBoolean;
     private RemoteException mTmpRemoteException;
@@ -450,6 +451,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mStackSupervisor = mService.mStackSupervisor;
         mStackSupervisor.mRootWindowContainer = this;
         mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl("Display-off");
+        mRankTaskLayersScheduler = new LockedScheduler(mService) {
+            @Override
+            public void execute() {
+                rankTaskLayersIfNeeded();
+            }
+        };
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
@@ -2698,27 +2705,25 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     void invalidateTaskLayers() {
         mTaskLayersChanged = true;
+        mRankTaskLayersScheduler.scheduleIfNeeded();
     }
 
+    /** Generate oom-score-adjustment rank for all tasks in the system based on z-order. */
     void rankTaskLayersIfNeeded() {
         if (!mTaskLayersChanged) {
             return;
         }
         mTaskLayersChanged = false;
         mTmpTaskLayerRank = 0;
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                RootWindowContainer::rankTaskLayerForActivity, this,
-                PooledLambda.__(ActivityRecord.class));
-        forAllActivities(c);
-        c.recycle();
-    }
-
-    private void rankTaskLayerForActivity(ActivityRecord r) {
-        if (r.canBeTopRunning() && r.mVisibleRequested) {
-            r.getTask().mLayerRank = ++mTmpTaskLayerRank;
-        } else {
-            r.getTask().mLayerRank = -1;
-        }
+        // Only rank for leaf tasks because the score of activity is based on immediate parent.
+        forAllLeafTasks(task -> {
+            final ActivityRecord r = task.topRunningActivityLocked();
+            if (r != null && r.mVisibleRequested) {
+                task.mLayerRank = ++mTmpTaskLayerRank;
+            } else {
+                task.mLayerRank = Task.LAYER_RANK_INVISIBLE;
+            }
+        }, true /* traverseTopToBottom */);
     }
 
     void clearOtherAppTimeTrackers(AppTimeTracker except) {
@@ -3678,6 +3683,36 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         public String toString() {
             return "{\"" + mTag + "\", display " + mDisplayId
                     + ", acquire at " + TimeUtils.formatUptime(mAcquireTime) + "}";
+        }
+    }
+
+    /**
+     * Helper class to schedule the runnable if it hasn't scheduled on display thread inside window
+     * manager lock.
+     */
+    abstract static class LockedScheduler implements Runnable {
+        private final ActivityTaskManagerService mService;
+        private boolean mScheduled;
+
+        LockedScheduler(ActivityTaskManagerService service) {
+            mService = service;
+        }
+
+        @Override
+        public void run() {
+            synchronized (mService.mGlobalLock) {
+                mScheduled = false;
+                execute();
+            }
+        }
+
+        abstract void execute();
+
+        void scheduleIfNeeded() {
+            if (!mScheduled) {
+                mService.mH.post(this);
+                mScheduled = true;
+            }
         }
     }
 }
