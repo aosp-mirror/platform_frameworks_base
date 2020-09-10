@@ -117,12 +117,13 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
 
     @Override
     public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
+        boolean geoDetectionEnabled = mGeoDetectionFeatureEnabled && isGeoDetectionEnabled(userId);
         return new ConfigurationInternal.Builder(userId)
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setAutoDetectionSupported(isAutoDetectionSupported())
                 .setAutoDetectionEnabled(isAutoDetectionEnabled())
                 .setLocationEnabled(isLocationEnabled(userId))
-                .setGeoDetectionEnabled(isGeoDetectionEnabled(userId))
+                .setGeoDetectionEnabled(geoDetectionEnabled)
                 .build();
     }
 
@@ -167,9 +168,11 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
             final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
             setAutoDetectionEnabled(autoDetectionEnabled);
 
-            final int userId = configuration.getUserId();
-            final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
-            setGeoDetectionEnabled(userId, geoTzDetectionEnabled);
+            if (mGeoDetectionFeatureEnabled) {
+                final int userId = configuration.getUserId();
+                final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
+                setGeoDetectionEnabled(userId, geoTzDetectionEnabled);
+            }
         }
     }
 
