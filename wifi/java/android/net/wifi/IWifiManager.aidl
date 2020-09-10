@@ -118,6 +118,8 @@ interface IWifiManager
 
     boolean is6GHzBandSupported();
 
+    boolean is60GHzBandSupported();
+
     boolean isWifiStandardSupported(int standard);
 
     DhcpInfo getDhcpInfo();
