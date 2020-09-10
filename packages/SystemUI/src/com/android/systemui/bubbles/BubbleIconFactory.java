@@ -156,17 +156,4 @@ public class BubbleIconFactory extends BaseIconFactory {
         canvas.setBitmap(null);
         return bitmap;
     }
-
-    /**
-     * Returns a {@link BitmapInfo} for the entire bubble icon including the badge.
-     */
-    BitmapInfo getBubbleBitmap(Drawable bubble, BitmapInfo badge) {
-        BitmapInfo bubbleIconInfo = createBadgedIconBitmap(bubble,
-                null /* user */,
-                true /* shrinkNonAdaptiveIcons */);
-
-        badgeWithDrawable(bubbleIconInfo.icon,
-                new BitmapDrawable(mContext.getResources(), badge.icon));
-        return bubbleIconInfo;
-    }
 }
