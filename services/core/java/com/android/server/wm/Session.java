@@ -677,7 +677,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.grantInputChannel(mUid, mPid, displayId, surface, window, hostInputToken,
+            mService.grantInputChannel(this, mUid, mPid, displayId, surface, window, hostInputToken,
                     flags, mCanAddInternalSystemWindow ? privateFlags : 0,
                     mCanAddInternalSystemWindow ? type : 0, outInputChannel);
         } finally {
@@ -692,6 +692,27 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         try {
             mService.updateInputChannel(channelToken, displayId, surface, flags,
                     mCanAddInternalSystemWindow ? privateFlags : 0, region);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void grantEmbeddedWindowFocus(IWindow callingWindow, IBinder targetInputToken,
+                                         boolean grantFocus) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (callingWindow == null) {
+                if (!mCanAddInternalSystemWindow) {
+                    // Callers without INTERNAL_SYSTEM_WINDOW permission cannot request focus on
+                    // embedded windows without providing the calling window
+                    throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+                }
+                mService.grantEmbeddedWindowFocus(this, targetInputToken, grantFocus);
+            } else {
+                mService.grantEmbeddedWindowFocus(this, callingWindow, targetInputToken,
+                        grantFocus);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

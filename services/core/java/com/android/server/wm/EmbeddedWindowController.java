@@ -134,10 +134,13 @@ class EmbeddedWindowController {
         final int mOwnerUid;
         final int mOwnerPid;
         final WindowManagerService mWmService;
+        final int mDisplayId;
+        public Session mSession;
         InputChannel mInputChannel;
         final int mWindowType;
 
         /**
+         * @param session  calling session to check ownership of the window
          * @param clientToken client token used to clean up the map if the embedding process dies
          * @param hostWindowState input channel token belonging to the host window. This is needed
          *                        to handle input callbacks to wm. It's used when raising ANR and
@@ -145,9 +148,13 @@ class EmbeddedWindowController {
          *                        can be null if there is no host window.
          * @param ownerUid  calling uid
          * @param ownerPid  calling pid used for anr blaming
+         * @param windowType to forward to input
+         * @param displayId used for focus requests
          */
-        EmbeddedWindow(WindowManagerService service, IWindow clientToken,
-                WindowState hostWindowState, int ownerUid, int ownerPid, int windowType) {
+        EmbeddedWindow(Session session, WindowManagerService service, IWindow clientToken,
+                       WindowState hostWindowState, int ownerUid, int ownerPid, int windowType,
+                       int displayId) {
+            mSession = session;
             mWmService = service;
             mClient = clientToken;
             mHostWindowState = hostWindowState;
@@ -156,6 +163,7 @@ class EmbeddedWindowController {
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
             mWindowType = windowType;
+            mDisplayId = displayId;
         }
 
         String getName() {

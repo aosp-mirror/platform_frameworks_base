@@ -457,4 +457,9 @@ public class WindowlessWindowManager implements IWindowSession {
       return surfaceInsets != null
           ? attrs.height + surfaceInsets.top + surfaceInsets.bottom : attrs.height;
     }
+
+    @Override
+    public void grantEmbeddedWindowFocus(IWindow callingWindow, IBinder targetInputToken,
+                                         boolean grantFocus) {
+    }
 }
