@@ -45,6 +45,7 @@ public class PersistableBundleUtils {
 
     private static final String PARCEL_UUID_KEY = "PARCEL_UUID";
     private static final String BYTE_ARRAY_KEY = "BYTE_ARRAY_KEY";
+    private static final String INTEGER_KEY = "INTEGER_KEY";
 
     /**
      * Functional interface to convert an object of the specified type to a PersistableBundle.
@@ -74,6 +75,21 @@ public class PersistableBundleUtils {
          */
         T fromPersistableBundle(PersistableBundle in);
     }
+
+    /** Serializer to convert an integer to a PersistableBundle. */
+    public static final Serializer<Integer> INTEGER_SERIALIZER =
+            (i) -> {
+                final PersistableBundle result = new PersistableBundle();
+                result.putInt(INTEGER_KEY, i);
+                return result;
+            };
+
+    /** Deserializer to convert a PersistableBundle to an integer. */
+    public static final Deserializer<Integer> INTEGER_DESERIALIZER =
+            (bundle) -> {
+                Objects.requireNonNull(bundle, "PersistableBundle is null");
+                return bundle.getInt(INTEGER_KEY);
+            };
 
     /**
      * Converts a ParcelUuid to a PersistableBundle.

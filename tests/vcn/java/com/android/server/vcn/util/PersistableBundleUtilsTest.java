@@ -200,4 +200,15 @@ public class PersistableBundleUtilsTest {
 
         assertArrayEquals(byteArray, result);
     }
+
+    @Test
+    public void testIntegerConversionLossless() throws Exception {
+        final int testInt = 1;
+        final PersistableBundle integerBundle =
+                PersistableBundleUtils.INTEGER_SERIALIZER.toPersistableBundle(testInt);
+        final int result =
+                PersistableBundleUtils.INTEGER_DESERIALIZER.fromPersistableBundle(integerBundle);
+
+        assertEquals(testInt, result);
+    }
 }
