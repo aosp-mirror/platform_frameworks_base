@@ -184,11 +184,11 @@ class PackageParsingPerfTest {
 
                 override fun startParsingPackage(
                     packageName: String,
-                    baseCodePath: String,
-                    codePath: String,
+                    baseApkPath: String,
+                    path: String,
                     manifestArray: TypedArray,
                     isCoreApp: Boolean
-                ) = ParsingPackageImpl(packageName, baseCodePath, codePath, manifestArray)
+                ) = ParsingPackageImpl(packageName, baseApkPath, path, manifestArray)
             })
 
         override fun parseImpl(file: File) =
