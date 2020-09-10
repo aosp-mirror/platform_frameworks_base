@@ -282,6 +282,12 @@ public class SoftApConfigurationTest {
                 .build();
 
         assertNull(band_6g_config.toWifiConfiguration());
+        SoftApConfiguration sae_transition_config = new SoftApConfiguration.Builder()
+                .setPassphrase("secretsecret",
+                        SoftApConfiguration.SECURITY_TYPE_WPA3_SAE_TRANSITION)
+                .build();
+
+        assertNull(sae_transition_config.toWifiConfiguration());
     }
 
     @Test
@@ -324,16 +330,5 @@ public class SoftApConfigurationTest {
         assertThat(wifiConfig_2g5g.apBand).isEqualTo(WifiConfiguration.AP_BAND_ANY);
         assertThat(wifiConfig_2g5g.apChannel).isEqualTo(0);
         assertThat(wifiConfig_2g5g.hiddenSSID).isEqualTo(true);
-
-        SoftApConfiguration softApConfig_sae_transition = new SoftApConfiguration.Builder()
-                .setPassphrase("secretsecret",
-                SoftApConfiguration.SECURITY_TYPE_WPA3_SAE_TRANSITION)
-                .build();
-
-        WifiConfiguration wifiConfig_sae_transition =
-                softApConfig_sae_transition.toWifiConfiguration();
-        assertThat(wifiConfig_sae_transition.getAuthType())
-                .isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
-        assertThat(wifiConfig_sae_transition.preSharedKey).isEqualTo("secretsecret");
     }
 }
