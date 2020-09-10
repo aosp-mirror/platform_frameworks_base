@@ -538,7 +538,7 @@ public final class Settings {
             return null;
         }
         p.getPkgState().setUpdatedSystemApp(false);
-        PackageSetting ret = addPackageLPw(name, p.realName, p.getCodePath(),
+        PackageSetting ret = addPackageLPw(name, p.realName, p.getPath(),
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
@@ -645,7 +645,7 @@ public final class Settings {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                     + pkgName + " is adopting original package " + originalPkg.name);
             pkgSetting = new PackageSetting(originalPkg, pkgName /*realPkgName*/);
-            pkgSetting.setCodePath(codePath);
+            pkgSetting.setPath(codePath);
             pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             pkgSetting.pkgFlags = pkgFlags;
             pkgSetting.pkgPrivateFlags = pkgPrivateFlags;
@@ -770,12 +770,12 @@ public final class Settings {
                     "Updating application package " + pkgName + " failed");
         }
 
-        if (!pkgSetting.getCodePath().equals(codePath)) {
+        if (!pkgSetting.getPath().equals(codePath)) {
             final boolean isSystem = pkgSetting.isSystem();
             Slog.i(PackageManagerService.TAG,
                     "Update" + (isSystem ? " system" : "")
                     + " package " + pkgName
-                    + " code path from " + pkgSetting.getCodePathString()
+                    + " code path from " + pkgSetting.getPathString()
                     + " to " + codePath.toString()
                     + "; Retain data and using new");
             if (!isSystem) {
@@ -797,7 +797,7 @@ public final class Settings {
                 // internal to external storage or vice versa.
                 pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             }
-            pkgSetting.setCodePath(codePath);
+            pkgSetting.setPath(codePath);
         }
         // If what we are scanning is a system (and possibly privileged) package,
         // then make it so, regardless of whether it was previously installed only
@@ -2710,7 +2710,7 @@ public final class Settings {
         if (pkg.realName != null) {
             serializer.attribute(null, "realName", pkg.realName);
         }
-        serializer.attribute(null, "codePath", pkg.getCodePathString());
+        serializer.attribute(null, "codePath", pkg.getPathString());
         serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
         serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
         serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
@@ -2752,7 +2752,7 @@ public final class Settings {
         if (pkg.realName != null) {
             serializer.attribute(null, "realName", pkg.realName);
         }
-        serializer.attribute(null, "codePath", pkg.getCodePathString());
+        serializer.attribute(null, "codePath", pkg.getPathString());
 
         if (pkg.legacyNativeLibraryPathString != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.legacyNativeLibraryPathString);
@@ -4561,9 +4561,9 @@ public final class Settings {
             pw.print(prefix); pw.print("  sharedUser="); pw.println(ps.sharedUser);
         }
         pw.print(prefix); pw.print("  pkg="); pw.println(pkg);
-        pw.print(prefix); pw.print("  codePath="); pw.println(ps.getCodePathString());
+        pw.print(prefix); pw.print("  codePath="); pw.println(ps.getPathString());
         if (permissionNames == null) {
-            pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getCodePathString());
+            pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getPathString());
             pw.print(prefix); pw.print("  legacyNativeLibraryDir=");
             pw.println(ps.legacyNativeLibraryPathString);
             pw.print(prefix); pw.print("  extractNativeLibs=");

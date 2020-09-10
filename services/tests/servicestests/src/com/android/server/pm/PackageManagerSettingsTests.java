@@ -617,7 +617,7 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
-        assertThat(testPkgSetting01.getCodePath(), is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
@@ -656,7 +656,7 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
         assertThat(testPkgSetting01.appId, is(0));
-        assertThat(testPkgSetting01.getCodePath(), is(INITIAL_CODE_PATH));
+        assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(0));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
@@ -700,7 +700,7 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
         assertThat(testPkgSetting01.appId, is(10064));
-        assertThat(testPkgSetting01.getCodePath(), is(INITIAL_CODE_PATH));
+        assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(0));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
@@ -741,7 +741,7 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/);
         assertThat(testPkgSetting01.appId, is(10064));
-        assertThat(testPkgSetting01.getCodePath(), is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(0));
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
@@ -792,10 +792,10 @@ public class PackageManagerSettingsTests {
     private void verifySettingCopy(PackageSetting origPkgSetting, PackageSetting testPkgSetting) {
         assertThat(origPkgSetting, is(not(testPkgSetting)));
         assertThat(origPkgSetting.appId, is(testPkgSetting.appId));
-        assertSame(origPkgSetting.getCodePath(), testPkgSetting.getCodePath());
-        assertThat(origPkgSetting.getCodePath(), is(testPkgSetting.getCodePath()));
-        assertSame(origPkgSetting.getCodePathString(), testPkgSetting.getCodePathString());
-        assertThat(origPkgSetting.getCodePathString(), is(testPkgSetting.getCodePathString()));
+        assertSame(origPkgSetting.getPath(), testPkgSetting.getPath());
+        assertThat(origPkgSetting.getPath(), is(testPkgSetting.getPath()));
+        assertSame(origPkgSetting.getPathString(), testPkgSetting.getPathString());
+        assertThat(origPkgSetting.getPathString(), is(testPkgSetting.getPathString()));
         assertSame(origPkgSetting.cpuAbiOverrideString, testPkgSetting.cpuAbiOverrideString);
         assertThat(origPkgSetting.cpuAbiOverrideString, is(testPkgSetting.cpuAbiOverrideString));
         assertThat(origPkgSetting.firstInstallTime, is(testPkgSetting.firstInstallTime));

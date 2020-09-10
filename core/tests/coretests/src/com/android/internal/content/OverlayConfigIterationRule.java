@@ -146,7 +146,7 @@ public class OverlayConfigIterationRule implements TestRule {
                         when(a.getTargetSdkVersion()).thenReturn(info.targetSdkVersion);
                         when(a.isOverlayIsStatic()).thenReturn(info.isStatic);
                         when(a.getOverlayPriority()).thenReturn(info.priority);
-                        when(a.getBaseCodePath()).thenReturn(info.path.getPath());
+                        when(a.getBaseApkPath()).thenReturn(info.path.getPath());
                         f.accept(a, !info.path.getPath().contains("data/overlay"));
                     }
                     return null;

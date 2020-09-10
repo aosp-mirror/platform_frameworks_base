@@ -40,6 +40,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.Arrays;
@@ -59,13 +60,9 @@ public abstract class PackageSettingBase extends SettingBase {
     public final String name;
     final String realName;
 
-    /**
-     * Path where this package was found on disk. For monolithic packages
-     * this is path to single base APK file; for cluster packages this is
-     * path to the cluster directory.
-     */
-    private File mCodePath;
-    private String mCodePathString;
+    /** @see AndroidPackage#getPath() */
+    private File mPath;
+    private String mPathString;
 
     String[] usesStaticLibraries;
     long[] usesStaticLibrariesVersions;
@@ -136,7 +133,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     boolean forceQueryableOverride;
 
-    PackageSettingBase(String name, String realName, @NonNull File codePath,
+    PackageSettingBase(String name, String realName, @NonNull File path,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             long pVersionCode, int pkgFlags, int pkgPrivateFlags,
@@ -146,7 +143,7 @@ public abstract class PackageSettingBase extends SettingBase {
         this.realName = realName;
         this.usesStaticLibraries = usesStaticLibraries;
         this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
-        setCodePath(codePath);
+        setPath(path);
         this.legacyNativeLibraryPathString = legacyNativeLibraryPathString;
         this.primaryCpuAbiString = primaryCpuAbiString;
         this.secondaryCpuAbiString = secondaryCpuAbiString;
@@ -230,7 +227,7 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     private void doCopy(PackageSettingBase orig) {
-        setCodePath(orig.getCodePath());
+        setPath(orig.getPath());
         cpuAbiOverrideString = orig.cpuAbiOverrideString;
         firstInstallTime = orig.firstInstallTime;
         installPermissionsFixed = orig.installPermissionsFixed;
@@ -697,18 +694,23 @@ public abstract class PackageSettingBase extends SettingBase {
         return userState.harmfulAppWarning;
     }
 
-    PackageSettingBase setCodePath(@NonNull File codePath) {
-        this.mCodePath = codePath;
-        this.mCodePathString = codePath.toString();
+    /**
+     * @see #mPath
+     */
+    PackageSettingBase setPath(@NonNull File path) {
+        this.mPath = path;
+        this.mPathString = path.toString();
         return this;
     }
 
-    File getCodePath() {
-        return mCodePath;
+    /** @see #mPath */
+    File getPath() {
+        return mPath;
     }
 
-    String getCodePathString() {
-        return mCodePathString;
+    /** @see #mPath */
+    String getPathString() {
+        return mPathString;
     }
 
     /**
@@ -733,7 +735,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     protected PackageSettingBase updateFrom(PackageSettingBase other) {
         super.copyFrom(other);
-        setCodePath(other.getCodePath());
+        setPath(other.getPath());
         this.usesStaticLibraries = other.usesStaticLibraries;
         this.usesStaticLibrariesVersions = other.usesStaticLibrariesVersions;
         this.legacyNativeLibraryPathString = other.legacyNativeLibraryPathString;
