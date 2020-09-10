@@ -23,8 +23,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.net.wifi.EAPConstants;
-import android.net.wifi.FakeKeys;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Parcel;
@@ -34,11 +32,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -390,39 +383,19 @@ public class PasspointConfigurationTest {
     }
 
     /**
-     * Verify that the unique identifier generated is the same for two instances with different
-     * HomeSp node but same FQDN
+     * Verify that the unique identifier generated is different for two instances with different
+     * HomeSp node
      *
      * @throws Exception
      */
     @Test
-    public void validateUniqueIdDifferentHomeSpSameFqdn() throws Exception {
+    public void validateUniqueIdDifferentHomeSp() throws Exception {
         PasspointConfiguration config1 = PasspointTestUtils.createConfig();
 
-        // Modify config2's RCOIs and friendly name to a different set of values
+        // Modify config2's RCOIs to a different set of values
         PasspointConfiguration config2 = PasspointTestUtils.createConfig();
         HomeSp homeSp = config2.getHomeSp();
         homeSp.setRoamingConsortiumOis(new long[] {0xaa, 0xbb});
-        homeSp.setFriendlyName("Some other name");
-        config2.setHomeSp(homeSp);
-
-        assertEquals(config1.getUniqueId(), config2.getUniqueId());
-    }
-
-    /**
-     * Verify that the unique identifier generated is different for two instances with the same
-     * HomeSp node but different FQDN
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateUniqueIdSameHomeSpDifferentFqdn() throws Exception {
-        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
-
-        // Modify config2's FQDN to a different value
-        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
-        HomeSp homeSp = config2.getHomeSp();
-        homeSp.setFqdn("fqdn2.com");
         config2.setHomeSp(homeSp);
 
         assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
@@ -430,15 +403,15 @@ public class PasspointConfigurationTest {
 
     /**
      * Verify that the unique identifier generated is different for two instances with different
-     * SIM Credential node
+     * Credential node
      *
      * @throws Exception
      */
     @Test
-    public void validateUniqueIdDifferentSimCredential() throws Exception {
+    public void validateUniqueIdDifferentCredential() throws Exception {
         PasspointConfiguration config1 = PasspointTestUtils.createConfig();
 
-        // Modify config2's realm and SIM credential to a different set of values
+        // Modify config2's RCOIs to a different set of values
         PasspointConfiguration config2 = PasspointTestUtils.createConfig();
         Credential credential = config2.getCredential();
         credential.setRealm("realm2.example.com");
@@ -446,157 +419,6 @@ public class PasspointConfigurationTest {
         config2.setCredential(credential);
 
         assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
-    }
-
-    /**
-     * Verify that the unique identifier generated is different for two instances with different
-     * Realm in the Credential node
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateUniqueIdDifferentRealm() throws Exception {
-        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
-
-        // Modify config2's realm to a different set of values
-        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
-        Credential credential = config2.getCredential();
-        credential.setRealm("realm2.example.com");
-        config2.setCredential(credential);
-
-        assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
-    }
-
-    /**
-     * Verify that the unique identifier generated is the same for two instances with different
-     * password and same username in the User Credential node
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateUniqueIdSameUserInUserCredential() throws Exception {
-        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
-        Credential credential = createCredentialWithUserCredential("user", "passwd");
-        config1.setCredential(credential);
-
-        // Modify config2's Passpowrd to a different set of values
-        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
-        credential = createCredentialWithUserCredential("user", "newpasswd");
-        config2.setCredential(credential);
-
-        assertEquals(config1.getUniqueId(), config2.getUniqueId());
-    }
-
-    /**
-     * Verify that the unique identifier generated is different for two instances with different
-     * username in the User Credential node
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateUniqueIdDifferentUserCredential() throws Exception {
-        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
-        Credential credential = createCredentialWithUserCredential("user", "passwd");
-        config1.setCredential(credential);
-
-        // Modify config2's username to a different value
-        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
-        credential = createCredentialWithUserCredential("user2", "passwd");
-        config2.setCredential(credential);
-
-        assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
-    }
-
-    /**
-     * Verify that the unique identifier generated is different for two instances with different
-     * Cert Credential node
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateUniqueIdDifferentCertCredential() throws Exception {
-        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
-        Credential credential = createCredentialWithCertificateCredential(true, true);
-        config1.setCredential(credential);
-
-        // Modify config2's cert credential to a different set of values
-        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
-        credential = createCredentialWithCertificateCredential(false, false);
-        config2.setCredential(credential);
-
-        assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
-    }
-
-    /**
-     * Helper function for generating certificate credential for testing.
-     *
-     * @return {@link Credential}
-     */
-    private static Credential createCredentialWithCertificateCredential(Boolean useCaCert0,
-            Boolean useCert0)
-            throws NoSuchAlgorithmException, CertificateEncodingException {
-        Credential.CertificateCredential certCred = new Credential.CertificateCredential();
-        certCred.setCertType("x509v3");
-        if (useCert0) {
-            certCred.setCertSha256Fingerprint(
-                    MessageDigest.getInstance("SHA-256").digest(FakeKeys.CLIENT_CERT.getEncoded()));
-        } else {
-            certCred.setCertSha256Fingerprint(MessageDigest.getInstance("SHA-256")
-                    .digest(FakeKeys.CLIENT_SUITE_B_RSA3072_CERT.getEncoded()));
-        }
-        return createCredential(null, certCred, null, new X509Certificate[] {FakeKeys.CLIENT_CERT},
-                FakeKeys.RSA_KEY1, useCaCert0 ? FakeKeys.CA_CERT0 : FakeKeys.CA_CERT1);
-    }
-
-    /**
-     * Helper function for generating user credential for testing.
-     *
-     * @return {@link Credential}
-     */
-    private static Credential createCredentialWithUserCredential(String username, String password) {
-        Credential.UserCredential userCred = new Credential.UserCredential();
-        userCred.setUsername(username);
-        userCred.setPassword(password);
-        userCred.setMachineManaged(true);
-        userCred.setAbleToShare(true);
-        userCred.setSoftTokenApp("TestApp");
-        userCred.setEapType(EAPConstants.EAP_TTLS);
-        userCred.setNonEapInnerMethod("MS-CHAP");
-        return createCredential(userCred, null, null, null, null, FakeKeys.CA_CERT0);
-    }
-
-    /**
-     * Helper function for generating Credential for testing.
-     *
-     * @param userCred Instance of UserCredential
-     * @param certCred Instance of CertificateCredential
-     * @param simCred Instance of SimCredential
-     * @param clientCertificateChain Chain of client certificates
-     * @param clientPrivateKey Client private key
-     * @param caCerts CA certificates
-     * @return {@link Credential}
-     */
-    private static Credential createCredential(Credential.UserCredential userCred,
-            Credential.CertificateCredential certCred,
-            Credential.SimCredential simCred,
-            X509Certificate[] clientCertificateChain, PrivateKey clientPrivateKey,
-            X509Certificate... caCerts) {
-        Credential cred = new Credential();
-        cred.setCreationTimeInMillis(123455L);
-        cred.setExpirationTimeInMillis(2310093L);
-        cred.setRealm("realm");
-        cred.setCheckAaaServerCertStatus(true);
-        cred.setUserCredential(userCred);
-        cred.setCertCredential(certCred);
-        cred.setSimCredential(simCred);
-        if (caCerts != null && caCerts.length == 1) {
-            cred.setCaCertificate(caCerts[0]);
-        } else {
-            cred.setCaCertificates(caCerts);
-        }
-        cred.setClientCertificateChain(clientCertificateChain);
-        cred.setClientPrivateKey(clientPrivateKey);
-        return cred;
     }
 
     /**

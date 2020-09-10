@@ -214,35 +214,6 @@ public class FakeKeys {
     };
     public static final PrivateKey RSA_KEY1 = loadPrivateRSAKey(FAKE_RSA_KEY_1);
 
-    private static final String CLIENT_SUITE_B_RSA3072_CERT_STRING =
-            "-----BEGIN CERTIFICATE-----\n"
-                    + "MIIERzCCAq8CFDopjyNgaj+c2TN2k06h7okEWpHJMA0GCSqGSIb3DQEBDAUAMF4x\n"
-                    + "CzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTEMMAoGA1UEBwwDTVRWMRAwDgYDVQQK\n"
-                    + "DAdBbmRyb2lkMQ4wDAYDVQQLDAVXaS1GaTESMBAGA1UEAwwJdW5pdGVzdENBMB4X\n"
-                    + "DTIwMDcyMTAyMjkxMVoXDTMwMDUzMDAyMjkxMVowYjELMAkGA1UEBhMCVVMxCzAJ\n"
-                    + "BgNVBAgMAkNBMQwwCgYDVQQHDANNVFYxEDAOBgNVBAoMB0FuZHJvaWQxDjAMBgNV\n"
-                    + "BAsMBVdpLUZpMRYwFAYDVQQDDA11bml0ZXN0Q2xpZW50MIIBojANBgkqhkiG9w0B\n"
-                    + "AQEFAAOCAY8AMIIBigKCAYEAwSK3C5K5udtCKTnE14e8z2cZvwmB4Xe+a8+7QLud\n"
-                    + "Hooc/lQzClgK4MbVUC0D3FE+U32C78SxKoTaRWtvPmNm+UaFT8KkwyUno/dv+2XD\n"
-                    + "pd/zARQ+3FwAfWopAhEyCVSxwsCa+slQ4juRIMIuUC1Mm0NaptZyM3Tj/ICQEfpk\n"
-                    + "o9qVIbiK6eoJMTkY8EWfAn7RTFdfR1OLuO0mVOjgLW9/+upYv6hZ19nAMAxw4QTJ\n"
-                    + "x7lLwALX7B+tDYNEZHDqYL2zyvQWAj2HClere8QYILxkvktgBg2crEJJe4XbDH7L\n"
-                    + "A3rrXmsiqf1ZbfFFEzK9NFqovL+qGh+zIP+588ShJFO9H/RDnDpiTnAFTWXQdTwg\n"
-                    + "szSS0Vw2PB+JqEABAa9DeMvXT1Oy+NY3ItPHyy63nQZVI2rXANw4NhwS0Z6DF+Qs\n"
-                    + "TNrj+GU7e4SG/EGR8SvldjYfQTWFLg1l/UT1hOOkQZwdsaW1zgKyeuiFB2KdMmbA\n"
-                    + "Sq+Ux1L1KICo0IglwWcB/8nnAgMBAAEwDQYJKoZIhvcNAQEMBQADggGBAMYwJkNw\n"
-                    + "BaCviKFmReDTMwWPRy4AMNViEeqAXgERwDEKwM7efjsaj5gctWfKsxX6UdLzkhgg\n"
-                    + "6S/T6PxVWKzJ6l7SoOuTa6tMQOZp+h3R1mdfEQbw8B5cXBxZ+batzAai6Fiy1FKS\n"
-                    + "/ka3INbcGfYuIYghfTrb4/NJKN06ZaQ1bpPwq0e4gN7800T2nbawvSf7r+8ZLcG3\n"
-                    + "6bGCjRMwDSIipNvOwoj3TG315XC7TccX5difQ4sKOY+d2MkVJ3RiO0Ciw2ZbEW8d\n"
-                    + "1FH5vUQJWnBUfSFznosGzLwH3iWfqlP+27jNE+qB2igEwCRFgVAouURx5ou43xuX\n"
-                    + "qf6JkdI3HTJGLIWxkp7gOeln4dEaYzKjYw+P0VqJvKVqQ0IXiLjHgE0J9p0vgyD6\n"
-                    + "HVVcP7U8RgqrbIjL1QgHU4KBhGi+WSUh/mRplUCNvHgcYdcHi/gHpj/j6ubwqIGV\n"
-                    + "z4iSolAHYTmBWcLyE0NgpzE6ntp+53r2KaUJA99l2iGVzbWTwqPSm0XAVw==\n"
-                    + "-----END CERTIFICATE-----\n";
-    public static final X509Certificate CLIENT_SUITE_B_RSA3072_CERT =
-            loadCertificate(CLIENT_SUITE_B_RSA3072_CERT_STRING);
-
     private static X509Certificate loadCertificate(String blob) {
         try {
             final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
