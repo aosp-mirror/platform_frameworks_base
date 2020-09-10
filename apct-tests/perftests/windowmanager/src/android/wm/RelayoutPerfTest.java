@@ -21,14 +21,12 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.RemoteException;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.PerfTestActivity;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
-import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
@@ -38,6 +36,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.LinearLayout;
+import android.window.ClientWindowFrames;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -125,13 +124,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
     }
 
     private static class RelayoutRunner {
-        final Rect mOutFrame = new Rect();
-        final Rect mOutContentInsets = new Rect();
-        final Rect mOutVisibleInsets = new Rect();
-        final Rect mOutStableInsets = new Rect();
-        final Rect mOutBackDropFrame = new Rect();
-        final DisplayCutout.ParcelableWrapper mOutDisplayCutout =
-                new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
+        final ClientWindowFrames mOutFrames = new ClientWindowFrames();
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
@@ -164,11 +157,9 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
                 session.relayout(mWindow, mSeq, mParams, mWidth, mHeight,
-                        mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrame,
-                        mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
-                        mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,
-                        mOutSurfaceControl, mOutInsetsState, mOutControls, mOutSurfaceSize,
-                        mOutBlastSurfaceControl);
+                        mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrames,
+                        mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls,
+                        mOutSurfaceSize, mOutBlastSurfaceControl);
             }
         }
     }
