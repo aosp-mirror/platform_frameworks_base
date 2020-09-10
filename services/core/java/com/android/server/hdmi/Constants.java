@@ -329,6 +329,30 @@ final class Constants {
     static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
     static final int PATH_INTERNAL = HdmiDeviceInfo.PATH_INTERNAL;
 
+    // The relationship from one path (physical address) to another.
+    @IntDef({
+            PATH_RELATIONSHIP_UNKNOWN,
+            PATH_RELATIONSHIP_DIFFERENT_BRANCH,
+            PATH_RELATIONSHIP_ANCESTOR,
+            PATH_RELATIONSHIP_DESCENDANT,
+            PATH_RELATIONSHIP_SIBLING,
+            PATH_RELATIONSHIP_SAME
+    })
+    @interface PathRelationship {}
+
+    // One or both of the paths is invalid
+    static final int PATH_RELATIONSHIP_UNKNOWN = 0;
+    // None of the relationships below holds
+    static final int PATH_RELATIONSHIP_DIFFERENT_BRANCH = 1;
+    // A path is either the TV, or between the TV and another path
+    static final int PATH_RELATIONSHIP_ANCESTOR = 2;
+    // A path is located somewhere below another path
+    static final int PATH_RELATIONSHIP_DESCENDANT = 3;
+    // A path has the same parent as another path
+    static final int PATH_RELATIONSHIP_SIBLING = 4;
+    // A path is equal to another path
+    static final int PATH_RELATIONSHIP_SAME = 5;
+
     // Strategy for device polling.
     // Should use "OR(|) operation of POLL_STRATEGY_XXX and POLL_ITERATION_XXX.
     static final int POLL_STRATEGY_MASK = 0x3; // first and second bit.
