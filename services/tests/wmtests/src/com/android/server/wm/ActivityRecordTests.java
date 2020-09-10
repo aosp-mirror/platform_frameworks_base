@@ -73,7 +73,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
@@ -1671,8 +1670,6 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testCanTurnScreenOn() {
         mStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        doReturn(true).when(mStack).checkKeyguardVisibility(
-                same(mActivity), eq(true) /* shouldBeVisible */, anyBoolean());
         doReturn(true).when(mActivity).getTurnScreenOnFlag();
 
         assertTrue(mActivity.canTurnScreenOn());
@@ -1681,8 +1678,6 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testFreeformWindowCantTurnScreenOn() {
         mStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        doReturn(true).when(mStack).checkKeyguardVisibility(
-                same(mActivity), eq(true) /* shouldBeVisible */, anyBoolean());
         doReturn(true).when(mActivity).getTurnScreenOnFlag();
 
         assertFalse(mActivity.canTurnScreenOn());
