@@ -3738,6 +3738,39 @@ public abstract class PackageManager {
      */
     public static final int SYSTEM_APP_STATE_UNINSTALLED = 3;
 
+    /**
+     * Reasons for why a package is unstartable.
+     * @hide
+     */
+    @IntDef({UNSTARTABLE_REASON_UNKNOWN,
+            UNSTARTABLE_REASON_DATALOADER_TRANSPORT,
+            UNSTARTABLE_REASON_DATALOADER_STORAGE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UnstartableReason {}
+
+    /**
+     * Unstartable state with no root cause specified. E.g., data loader seeing missing pages but
+     * unclear about the cause. This corresponds to a generic alert window shown to the user when
+     * the user attempts to launch the app.
+     * @hide
+     */
+    public static final int UNSTARTABLE_REASON_UNKNOWN = 0;
+
+    /**
+     * Unstartable state after hint from dataloader of issues with the transport layer.
+     * This corresponds to an alert window shown to the user indicating network errors.
+     * @hide
+     */
+    public static final int UNSTARTABLE_REASON_DATALOADER_TRANSPORT = 1;
+
+    /**
+     * Unstartable state after encountering storage limitations.
+     * This corresponds to an alert window indicating limited storage.
+     * @hide
+     */
+    public static final int UNSTARTABLE_REASON_DATALOADER_STORAGE = 2;
+
     /** {@hide} */
     public int getUserId() {
         return UserHandle.myUserId();
