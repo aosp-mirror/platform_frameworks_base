@@ -87,6 +87,8 @@ class FaceAuthScreenBrightnessControllerTest : SysuiTestCase() {
             override fun createAnimator(start: Float, end: Float) = animator
         }
         `when`(systemSettings.getFloat(eq(SCREEN_BRIGHTNESS_FLOAT))).thenReturn(INITIAL_BRIGHTNESS)
+        `when`(systemSettings.getFloat(eq(SCREEN_BRIGHTNESS_FLOAT), eq(1f)))
+                .thenReturn(INITIAL_BRIGHTNESS)
         faceAuthScreenBrightnessController.attach(whiteOverlay)
         verify(keyguardUpdateMonitor).registerCallback(capture(keyguardUpdateCallback))
     }

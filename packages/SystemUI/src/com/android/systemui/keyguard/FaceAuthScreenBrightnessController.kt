@@ -177,7 +177,7 @@ open class FaceAuthScreenBrightnessController(
                     userDefinedBrightness = systemSettings.getFloat(SCREEN_BRIGHTNESS_FLOAT)
                 }
             })
-        userDefinedBrightness = systemSettings.getFloat(SCREEN_BRIGHTNESS_FLOAT)
+        userDefinedBrightness = systemSettings.getFloat(SCREEN_BRIGHTNESS_FLOAT, 1f)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
