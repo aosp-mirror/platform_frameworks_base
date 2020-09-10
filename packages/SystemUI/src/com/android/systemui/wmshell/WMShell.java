@@ -78,6 +78,9 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
     private final Optional<OneHanded> mOneHandedOptional;
     private final ProtoTracer mProtoTracer;
 
+    private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
+    private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
+
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -128,7 +131,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
 
     @VisibleForTesting
     void initSplitScreen(SplitScreen splitScreen) {
-        mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
+        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
                 // Hide the divider when keyguard is showing. Even though keyguard/statusbar is
@@ -137,7 +140,8 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
                 // TODO(b/148906453): Figure out keyguard dismiss animation for divider view.
                 splitScreen.onKeyguardVisibilityChanged(showing);
             }
-        });
+        };
+        mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
 
         mActivityManagerWrapper.registerTaskStackListener(
                 new TaskStackChangeListener() {
@@ -217,7 +221,7 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             }
         });
 
-        mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
+        mOneHandedKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardBouncerChanged(boolean bouncer) {
                 if (bouncer) {
@@ -229,7 +233,8 @@ public final class WMShell extends SystemUI implements ProtoTraceable<SystemUiTr
             public void onKeyguardVisibilityChanged(boolean showing) {
                 oneHanded.stopOneHanded();
             }
-        });
+        };
+        mKeyguardUpdateMonitor.registerCallback(mOneHandedKeyguardCallback);
 
         mScreenLifecycle.addObserver(new ScreenLifecycle.Observer() {
             @Override
