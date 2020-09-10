@@ -1328,6 +1328,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             // Lazy load overflow bubbles from disk
             loadOverflowBubblesFromDisk();
 
+            mStackView.updateOverflowButtonDot();
+
             // Update bubbles in overflow.
             if (mOverflowListener != null) {
                 mOverflowListener.applyUpdate(update);
