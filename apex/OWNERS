@@ -1,0 +1,7 @@
+# Shared module build rule owners
+per-file *.bp=hansson@google.com
+per-file *.bp=jiyong@google.com
+
+# This file, and all other OWNERS files
+per-file OWNERS=dariofreni@google.com
+per-file OWNERS=hansson@google.com
