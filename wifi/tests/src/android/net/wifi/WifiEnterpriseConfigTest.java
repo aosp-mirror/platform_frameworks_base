@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.net.wifi.WifiEnterpriseConfig.Eap;
 import android.net.wifi.WifiEnterpriseConfig.Phase2;
@@ -46,6 +47,7 @@ public class WifiEnterpriseConfigTest {
     public static final String KEYSTORE_URI = "keystore://";
     public static final String CA_CERT_PREFIX = KEYSTORE_URI + Credentials.CA_CERTIFICATE;
     public static final String KEYSTORES_URI = "keystores://";
+    private static final String TEST_DOMAIN_SUFFIX_MATCH = "domainSuffixMatch";
 
     private WifiEnterpriseConfig mEnterpriseConfig;
 
@@ -343,11 +345,13 @@ public class WifiEnterpriseConfigTest {
         enterpriseConfig.setPassword("*");
         enterpriseConfig.setEapMethod(Eap.TTLS);
         enterpriseConfig.setPhase2Method(Phase2.GTC);
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUIRE_CERT_STATUS);
         mEnterpriseConfig = new WifiEnterpriseConfig();
         mEnterpriseConfig.copyFromExternal(enterpriseConfig, "*");
         assertEquals("TTLS", getSupplicantEapMethod());
         assertEquals("\"autheap=GTC\"", getSupplicantPhase2Method());
         assertNotEquals("*", mEnterpriseConfig.getPassword());
+        assertEquals(enterpriseConfig.getOcsp(), mEnterpriseConfig.getOcsp());
     }
 
     /** Verfies that parceling a WifiEnterpriseConfig preseves method information. */
@@ -487,4 +491,87 @@ public class WifiEnterpriseConfigTest {
         assertFalse(mEnterpriseConfig.isAppInstalledDeviceKeyAndCert());
         assertTrue(mEnterpriseConfig.isAppInstalledCaCert());
     }
+
+    /** Verifies that OCSP value is set correctly. */
+    @Test
+    public void testOcspSetGet() throws Exception {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_NONE);
+        assertEquals(WifiEnterpriseConfig.OCSP_NONE, enterpriseConfig.getOcsp());
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUIRE_CERT_STATUS);
+        assertEquals(WifiEnterpriseConfig.OCSP_REQUIRE_CERT_STATUS, enterpriseConfig.getOcsp());
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUEST_CERT_STATUS);
+        assertEquals(WifiEnterpriseConfig.OCSP_REQUEST_CERT_STATUS, enterpriseConfig.getOcsp());
+
+        enterpriseConfig.setOcsp(WifiEnterpriseConfig.OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS);
+        assertEquals(WifiEnterpriseConfig.OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS,
+                enterpriseConfig.getOcsp());
+    }
+
+    /** Verifies that an exception is thrown when invalid OCSP is set. */
+    @Test
+    public void testInvalidOcspValue() {
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        try {
+            enterpriseConfig.setOcsp(-1);
+            fail("Should raise an IllegalArgumentException here.");
+        } catch (IllegalArgumentException e) {
+            // expected exception.
+        }
+    }
+
+    /** Verifies that the EAP inner method is reset when we switch to Unauth-TLS */
+    @Test
+    public void eapPhase2MethodForUnauthTls() {
+        // Initially select an EAP method that supports an phase2.
+        mEnterpriseConfig.setEapMethod(Eap.PEAP);
+        mEnterpriseConfig.setPhase2Method(Phase2.MSCHAPV2);
+        assertEquals("PEAP", getSupplicantEapMethod());
+        assertEquals("\"auth=MSCHAPV2\"", getSupplicantPhase2Method());
+
+        // Change the EAP method to another type which supports a phase2.
+        mEnterpriseConfig.setEapMethod(Eap.TTLS);
+        assertEquals("TTLS", getSupplicantEapMethod());
+        assertEquals("\"auth=MSCHAPV2\"", getSupplicantPhase2Method());
+
+        // Change the EAP method to Unauth-TLS which does not support a phase2.
+        mEnterpriseConfig.setEapMethod(Eap.UNAUTH_TLS);
+        assertEquals(null, getSupplicantPhase2Method());
+    }
+
+    @Test
+    public void testIsEnterpriseConfigSecure() {
+        WifiEnterpriseConfig baseConfig = new WifiEnterpriseConfig();
+        baseConfig.setEapMethod(Eap.PEAP);
+        baseConfig.setPhase2Method(Phase2.MSCHAPV2);
+        assertTrue(baseConfig.isInsecure());
+
+        WifiEnterpriseConfig noMatchConfig = new WifiEnterpriseConfig(baseConfig);
+        noMatchConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        // Missing match is insecure.
+        assertTrue(noMatchConfig.isInsecure());
+
+        WifiEnterpriseConfig noCaConfig = new WifiEnterpriseConfig(baseConfig);
+        noCaConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        // Missing CA certificate is insecure.
+        assertTrue(noCaConfig.isInsecure());
+
+        WifiEnterpriseConfig secureConfig = new WifiEnterpriseConfig();
+        secureConfig.setEapMethod(Eap.PEAP);
+        secureConfig.setPhase2Method(Phase2.MSCHAPV2);
+        secureConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        secureConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        assertFalse(secureConfig.isInsecure());
+
+        WifiEnterpriseConfig secureConfigWithCaAlias = new WifiEnterpriseConfig();
+        secureConfigWithCaAlias.setEapMethod(Eap.PEAP);
+        secureConfigWithCaAlias.setPhase2Method(Phase2.MSCHAPV2);
+        secureConfigWithCaAlias.setCaCertificateAliases(new String[]{"alias1", "alisa2"});
+        secureConfigWithCaAlias.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        assertFalse(secureConfigWithCaAlias.isInsecure());
+    }
+
 }

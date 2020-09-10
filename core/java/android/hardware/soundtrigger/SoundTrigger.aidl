@@ -24,5 +24,6 @@ parcelable SoundTrigger.GenericRecognitionEvent;
 parcelable SoundTrigger.KeyphraseRecognitionExtra;
 parcelable SoundTrigger.KeyphraseSoundModel;
 parcelable SoundTrigger.GenericSoundModel;
+parcelable SoundTrigger.ModelParamRange;
 parcelable SoundTrigger.ModuleProperties;
 parcelable SoundTrigger.RecognitionConfig;

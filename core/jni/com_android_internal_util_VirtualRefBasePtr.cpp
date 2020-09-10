@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include <utils/LightRefBase.h>
 #include "core_jni_helpers.h"
 
 namespace android {

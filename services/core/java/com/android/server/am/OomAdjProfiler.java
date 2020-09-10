@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.os.Message;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.SystemClock;
@@ -29,16 +30,22 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.io.PrintWriter;
 
 public class OomAdjProfiler {
-    // Disable profiling for Q. Re-enable once b/130635979 is fixed.
-    private static final boolean PROFILING_DISABLED = true;
+    private static final int MSG_UPDATE_CPU_TIME = 42;
 
     @GuardedBy("this")
     private boolean mOnBattery;
     @GuardedBy("this")
     private boolean mScreenOff;
 
+    /** The value of {@link #mOnBattery} when the CPU time update was last scheduled. */
     @GuardedBy("this")
-    private long mOomAdjStartTimeMs;
+    private boolean mLastScheduledOnBattery;
+    /** The value of {@link #mScreenOff} when the CPU time update was last scheduled. */
+    @GuardedBy("this")
+    private boolean mLastScheduledScreenOff;
+
+    @GuardedBy("this")
+    private long mOomAdjStartTimeUs;
     @GuardedBy("this")
     private boolean mOomAdjStarted;
 
@@ -58,10 +65,12 @@ public class OomAdjProfiler {
     @GuardedBy("this")
     final RingBuffer<CpuTimes> mSystemServerCpuTimesHist = new RingBuffer<>(CpuTimes.class, 10);
 
+    @GuardedBy("this")
+    private long mTotalOomAdjRunTimeUs;
+    @GuardedBy("this")
+    private int mTotalOomAdjCalls;
+
     void batteryPowerChanged(boolean onBattery) {
-        if (PROFILING_DISABLED) {
-            return;
-        }
         synchronized (this) {
             scheduleSystemServerCpuTimeUpdate();
             mOnBattery = onBattery;
@@ -69,9 +78,6 @@ public class OomAdjProfiler {
     }
 
     void onWakefulnessChanged(int wakefulness) {
-        if (PROFILING_DISABLED) {
-            return;
-        }
         synchronized (this) {
             scheduleSystemServerCpuTimeUpdate();
             mScreenOff = wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -79,53 +85,52 @@ public class OomAdjProfiler {
     }
 
     void oomAdjStarted() {
-        if (PROFILING_DISABLED) {
-            return;
-        }
         synchronized (this) {
-            mOomAdjStartTimeMs = SystemClock.currentThreadTimeMillis();
+            mOomAdjStartTimeUs = SystemClock.currentThreadTimeMicro();
             mOomAdjStarted = true;
         }
     }
 
     void oomAdjEnded() {
-        if (PROFILING_DISABLED) {
-            return;
-        }
         synchronized (this) {
             if (!mOomAdjStarted) {
                 return;
             }
-            mOomAdjRunTime.addCpuTimeMs(SystemClock.currentThreadTimeMillis() - mOomAdjStartTimeMs);
+            long elapsedUs = SystemClock.currentThreadTimeMicro() - mOomAdjStartTimeUs;
+            mOomAdjRunTime.addCpuTimeUs(elapsedUs);
+            mTotalOomAdjRunTimeUs += elapsedUs;
+            mTotalOomAdjCalls++;
         }
     }
 
     private void scheduleSystemServerCpuTimeUpdate() {
-        if (PROFILING_DISABLED) {
-            return;
-        }
         synchronized (this) {
             if (mSystemServerCpuTimeUpdateScheduled) {
                 return;
             }
+            mLastScheduledOnBattery = mOnBattery;
+            mLastScheduledScreenOff = mScreenOff;
             mSystemServerCpuTimeUpdateScheduled = true;
-            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+            Message scheduledMessage = PooledLambda.obtainMessage(
                     OomAdjProfiler::updateSystemServerCpuTime,
-                    this, mOnBattery, mScreenOff));
+                    this, mLastScheduledOnBattery, mLastScheduledScreenOff, true);
+            scheduledMessage.setWhat(MSG_UPDATE_CPU_TIME);
+
+            BackgroundThread.getHandler().sendMessage(scheduledMessage);
         }
     }
 
-    private void updateSystemServerCpuTime(boolean onBattery, boolean screenOff) {
-        if (PROFILING_DISABLED) {
-            return;
-        }
+    private void updateSystemServerCpuTime(boolean onBattery, boolean screenOff,
+            boolean onlyIfScheduled) {
         final long cpuTimeMs = mProcessCpuTracker.getCpuTimeForPid(Process.myPid());
         synchronized (this) {
+            if (onlyIfScheduled && !mSystemServerCpuTimeUpdateScheduled) {
+                return;
+            }
             mSystemServerCpuTime.addCpuTimeMs(
                     cpuTimeMs - mLastSystemServerCpuTimeMs, onBattery, screenOff);
             mLastSystemServerCpuTimeMs = cpuTimeMs;
             mSystemServerCpuTimeUpdateScheduled = false;
-            notifyAll();
         }
     }
 
@@ -142,20 +147,14 @@ public class OomAdjProfiler {
     }
 
     void dump(PrintWriter pw) {
-        if (PROFILING_DISABLED) {
-            return;
-        }
         synchronized (this) {
             if (mSystemServerCpuTimeUpdateScheduled) {
-                while (mSystemServerCpuTimeUpdateScheduled) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
+                // Cancel the scheduled update since we're going to update it here instead.
+                BackgroundThread.getHandler().removeMessages(MSG_UPDATE_CPU_TIME);
+                // Make sure the values are attributed to the right states.
+                updateSystemServerCpuTime(mLastScheduledOnBattery, mLastScheduledScreenOff, false);
             } else {
-                updateSystemServerCpuTime(mOnBattery, mScreenOff);
+                updateSystemServerCpuTime(mOnBattery, mScreenOff, false);
             }
 
             pw.println("System server and oomAdj runtimes (ms) in recent battery sessions "
@@ -178,32 +177,50 @@ public class OomAdjProfiler {
                 pw.print("oom_adj=");
                 pw.println(oomAdjRunTimes[i]);
             }
+            if (mTotalOomAdjCalls != 0) {
+                pw.println("System server total oomAdj runtimes (us) since boot:");
+                pw.print("  cpu time spent=");
+                pw.print(mTotalOomAdjRunTimeUs);
+                pw.print("  number of calls=");
+                pw.print(mTotalOomAdjCalls);
+                pw.print("  average=");
+                pw.println(mTotalOomAdjRunTimeUs / mTotalOomAdjCalls);
+            }
         }
     }
 
     private class CpuTimes {
-        private long mOnBatteryTimeMs;
-        private long mOnBatteryScreenOffTimeMs;
+        private long mOnBatteryTimeUs;
+        private long mOnBatteryScreenOffTimeUs;
 
         public void addCpuTimeMs(long cpuTimeMs) {
-            addCpuTimeMs(cpuTimeMs, mOnBattery, mScreenOff);
+            addCpuTimeUs(cpuTimeMs * 1000, mOnBattery, mScreenOff);
         }
 
         public void addCpuTimeMs(long cpuTimeMs, boolean onBattery, boolean screenOff) {
+            addCpuTimeUs(cpuTimeMs * 1000, onBattery, screenOff);
+        }
+
+        public void addCpuTimeUs(long cpuTimeUs) {
+            addCpuTimeUs(cpuTimeUs, mOnBattery, mScreenOff);
+        }
+
+        public void addCpuTimeUs(long cpuTimeUs, boolean onBattery, boolean screenOff) {
             if (onBattery) {
-                mOnBatteryTimeMs += cpuTimeMs;
+                mOnBatteryTimeUs += cpuTimeUs;
                 if (screenOff) {
-                    mOnBatteryScreenOffTimeMs += cpuTimeMs;
+                    mOnBatteryScreenOffTimeUs += cpuTimeUs;
                 }
             }
         }
 
         public boolean isEmpty() {
-            return mOnBatteryTimeMs == 0 && mOnBatteryScreenOffTimeMs == 0;
+            return mOnBatteryTimeUs == 0 && mOnBatteryScreenOffTimeUs == 0;
         }
 
         public String toString() {
-            return "[" + mOnBatteryTimeMs + "," + mOnBatteryScreenOffTimeMs + "]";
+            return "[" + (mOnBatteryTimeUs / 1000) + ","
+                    + (mOnBatteryScreenOffTimeUs / 1000) + "]";
         }
     }
 }

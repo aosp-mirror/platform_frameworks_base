@@ -101,11 +101,12 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
      * either complete or cancelled.
      */
     public void injectEvents(List<GestureStep> gestureSteps,
-            IAccessibilityServiceClient serviceInterface, int sequence) {
+            IAccessibilityServiceClient serviceInterface, int sequence, int displayId) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = gestureSteps;
         args.arg2 = serviceInterface;
         args.argi1 = sequence;
+        args.argi2 = displayId;
         mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_INJECT_EVENTS, args));
     }
 
@@ -146,7 +147,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
         if (message.what == MESSAGE_INJECT_EVENTS) {
             SomeArgs args = (SomeArgs) message.obj;
             injectEventsMainThread((List<GestureStep>) args.arg1,
-                    (IAccessibilityServiceClient) args.arg2, args.argi1);
+                    (IAccessibilityServiceClient) args.arg2, args.argi1, args.argi2);
             args.recycle();
             return true;
         }
@@ -165,7 +166,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     }
 
     private void injectEventsMainThread(List<GestureStep> gestureSteps,
-            IAccessibilityServiceClient serviceInterface, int sequence) {
+            IAccessibilityServiceClient serviceInterface, int sequence, int displayId) {
         if (mIsDestroyed) {
             try {
                 serviceInterface.onPerformGestureResult(sequence, false);
@@ -209,6 +210,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
 
         for (int i = 0; i < events.size(); i++) {
             MotionEvent event = events.get(i);
+            event.setDisplayId(displayId);
             int isEndOfSequence = (i == events.size() - 1) ? 1 : 0;
             Message message = mHandler.obtainMessage(
                     MESSAGE_SEND_MOTION_EVENT, isEndOfSequence, 0, event);

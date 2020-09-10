@@ -42,6 +42,8 @@ import android.hardware.usb.V1_0.Constants;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
  * Represents a physical USB port and describes its characteristics.
  *
@@ -67,7 +69,7 @@ public final class UsbPort {
             int supportedContaminantProtectionModes,
             boolean supportsEnableContaminantPresenceProtection,
             boolean supportsEnableContaminantPresenceDetection) {
-        Preconditions.checkNotNull(id);
+        Objects.requireNonNull(id);
         Preconditions.checkFlagsArgument(supportedModes,
                 MODE_DFP | MODE_UFP | MODE_AUDIO_ACCESSORY | MODE_DEBUG_ACCESSORY);
 

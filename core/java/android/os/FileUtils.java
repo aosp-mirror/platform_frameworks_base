@@ -743,6 +743,8 @@ public final class FileUtils {
      *            {@link MessageDigest#getInstance(String)}.
      * @hide
      */
+    @TestApi
+    @NonNull
     public static byte[] digest(@NonNull File file, @NonNull String algorithm)
             throws IOException, NoSuchAlgorithmException {
         try (FileInputStream in = new FileInputStream(file)) {
@@ -757,6 +759,8 @@ public final class FileUtils {
      *            {@link MessageDigest#getInstance(String)}.
      * @hide
      */
+    @TestApi
+    @NonNull
     public static byte[] digest(@NonNull InputStream in, @NonNull String algorithm)
             throws IOException, NoSuchAlgorithmException {
         // TODO: implement kernel optimizations

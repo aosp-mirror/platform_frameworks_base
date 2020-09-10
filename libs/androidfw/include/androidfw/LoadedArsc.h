@@ -51,10 +51,6 @@ struct TypeSpec {
   // and under which configurations it varies.
   const ResTable_typeSpec* type_spec;
 
-  // Pointer to the mmapped data where the IDMAP mappings for this type
-  // exist. May be nullptr if no IDMAP exists.
-  const IdmapEntry_header* idmap_entries;
-
   // The number of types that follow this struct.
   // There is a type for each configuration that entries are defined for.
   size_t type_count;
@@ -71,6 +67,26 @@ struct TypeSpec {
     const uint32_t* flags = reinterpret_cast<const uint32_t*>(type_spec + 1);
     return flags[entry_index];
   }
+};
+
+// Flags that change the behavior of loaded packages.
+// Keep in sync with f/b/android/content/res/ApkAssets.java
+using package_property_t = uint32_t;
+enum : package_property_t {
+  // The package contains framework resource values specified by the system.
+  // This allows some functions to filter out this package when computing
+  // what configurations/resources are available.
+  PROPERTY_SYSTEM = 1U << 0U,
+
+  // The package is a shared library or has a package id of 7f and is loaded as a shared library by
+  // force.
+  PROPERTY_DYNAMIC = 1U << 1U,
+
+  // The package has been loaded dynamically using a ResourcesProvider.
+  PROPERTY_LOADER = 1U << 2U,
+
+  // The package is a RRO.
+  PROPERTY_OVERLAY = 1U << 3U,
 };
 
 // TypeSpecPtr points to a block of memory that holds a TypeSpec struct, followed by an array of
@@ -136,8 +152,7 @@ class LoadedPackage {
   }
 
   static std::unique_ptr<const LoadedPackage> Load(const Chunk& chunk,
-                                                   const LoadedIdmap* loaded_idmap, bool system,
-                                                   bool load_as_shared_library);
+                                                   package_property_t property_flags);
 
   ~LoadedPackage();
 
@@ -174,17 +189,26 @@ class LoadedPackage {
 
   // Returns true if this package is dynamic (shared library) and needs to have an ID assigned.
   inline bool IsDynamic() const {
-    return dynamic_;
+    return (property_flags_ & PROPERTY_DYNAMIC) != 0;
+  }
+
+  // Returns true if this package is a Runtime Resource Overlay.
+  inline bool IsOverlay() const {
+    return (property_flags_ & PROPERTY_OVERLAY) != 0;
   }
 
   // Returns true if this package originates from a system provided resource.
   inline bool IsSystem() const {
-    return system_;
+    return (property_flags_ & PROPERTY_SYSTEM) != 0;
   }
 
-  // Returns true if this package is from an overlay ApkAssets.
-  inline bool IsOverlay() const {
-    return overlay_;
+  // Returns true if this package is a custom loader and should behave like an overlay.
+  inline bool IsCustomLoader() const {
+    return (property_flags_ & PROPERTY_LOADER) != 0;
+  }
+
+  inline package_property_t GetPropertyFlags() const {
+    return property_flags_;
   }
 
   // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
@@ -216,9 +240,6 @@ class LoadedPackage {
       const TypeSpecPtr& ptr = type_specs_[i];
       if (ptr != nullptr) {
         uint8_t type_id = ptr->type_spec->id;
-        if (ptr->idmap_entries != nullptr) {
-          type_id = ptr->idmap_entries->target_type_id;
-        }
         f(ptr.get(), type_id - 1);
       }
     }
@@ -255,17 +276,17 @@ class LoadedPackage {
   ResStringPool type_string_pool_;
   ResStringPool key_string_pool_;
   std::string package_name_;
+  bool defines_overlayable_ = false;
   int package_id_ = -1;
   int type_id_offset_ = 0;
-  bool dynamic_ = false;
-  bool system_ = false;
-  bool overlay_ = false;
-  bool defines_overlayable_ = false;
+  package_property_t property_flags_ = 0U;
 
   ByteBucketArray<TypeSpecPtr> type_specs_;
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
   std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
+
+  // A map of overlayable name to actor
   std::unordered_map<std::string, std::string> overlayable_map_;
 };
 
@@ -281,8 +302,7 @@ class LoadedArsc {
   // ID.
   static std::unique_ptr<const LoadedArsc> Load(const StringPiece& data,
                                                 const LoadedIdmap* loaded_idmap = nullptr,
-                                                bool system = false,
-                                                bool load_as_shared_library = false);
+                                                package_property_t property_flags = 0U);
 
   // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
   static std::unique_ptr<const LoadedArsc> CreateEmpty();
@@ -290,7 +310,7 @@ class LoadedArsc {
   // Returns the string pool where all string resource values
   // (Res_value::dataType == Res_value::TYPE_STRING) are indexed.
   inline const ResStringPool* GetStringPool() const {
-    return &global_string_pool_;
+    return global_string_pool_.get();
   }
 
   // Gets a pointer to the package with the specified package ID, or nullptr if no such package
@@ -302,20 +322,15 @@ class LoadedArsc {
     return packages_;
   }
 
-  // Returns true if this is a system provided resource.
-  inline bool IsSystem() const {
-    return system_;
-  }
-
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedArsc);
 
   LoadedArsc() = default;
-  bool LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap, bool load_as_shared_library);
+  bool LoadTable(
+      const Chunk& chunk, const LoadedIdmap* loaded_idmap, package_property_t property_flags);
 
-  ResStringPool global_string_pool_;
+  std::unique_ptr<ResStringPool> global_string_pool_ = util::make_unique<ResStringPool>();
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;
-  bool system_ = false;
 };
 
 }  // namespace android

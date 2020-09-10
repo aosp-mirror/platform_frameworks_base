@@ -3,6 +3,7 @@ package com.android.settingslib;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -13,6 +14,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -29,14 +31,14 @@ import android.telephony.ServiceState;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
+import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.drawable.UserIconDrawable;
+import com.android.settingslib.fuelgauge.BatteryStatus;
 
 import java.text.NumberFormat;
 
 public class Utils {
 
-    private static final String CURRENT_MODE_KEY = "CURRENT_MODE";
-    private static final String NEW_MODE_KEY = "NEW_MODE";
     @VisibleForTesting
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
@@ -56,24 +58,11 @@ public class Utils {
 
     public static void updateLocationEnabled(Context context, boolean enabled, int userId,
             int source) {
-        LocationManager locationManager = context.getSystemService(LocationManager.class);
-
         Settings.Secure.putIntForUser(
                 context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
                 userId);
 
-        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
-        final int oldMode = locationManager.isLocationEnabled()
-                ? Settings.Secure.LOCATION_MODE_ON
-                : Settings.Secure.LOCATION_MODE_OFF;
-        final int newMode = enabled
-                ? Settings.Secure.LOCATION_MODE_ON
-                : Settings.Secure.LOCATION_MODE_OFF;
-        intent.putExtra(CURRENT_MODE_KEY, oldMode);
-        intent.putExtra(NEW_MODE_KEY, newMode);
-        context.sendBroadcastAsUser(
-                intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
-
+        LocationManager locationManager = context.getSystemService(LocationManager.class);
         locationManager.setLocationEnabledForUser(enabled, UserHandle.of(userId));
     }
 
@@ -132,7 +121,7 @@ public class Utils {
     public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
-            Drawable drawable =  UserIconDrawable.getManagedUserDrawable(context);
+            Drawable drawable = UserIconDrawable.getManagedUserDrawable(context);
             drawable.setBounds(0, 0, iconSize, iconSize);
             return drawable;
         }
@@ -174,20 +163,43 @@ public class Utils {
         return (level * 100) / scale;
     }
 
-    public static String getBatteryStatus(Resources res, Intent batteryChangedIntent) {
-        int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
+    /**
+     * Get battery status string
+     *
+     * @param context the context
+     * @param batteryChangedIntent battery broadcast intent received from {@link
+     *                             Intent.ACTION_BATTERY_CHANGED}.
+     * @return battery status string
+     */
+    public static String getBatteryStatus(Context context, Intent batteryChangedIntent) {
+        final int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
                 BatteryManager.BATTERY_STATUS_UNKNOWN);
-        String statusString;
-        if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-            statusString = res.getString(R.string.battery_info_status_charging);
-        } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
-            statusString = res.getString(R.string.battery_info_status_discharging);
-        } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
-            statusString = res.getString(R.string.battery_info_status_not_charging);
-        } else if (status == BatteryManager.BATTERY_STATUS_FULL) {
+        final Resources res = context.getResources();
+
+        String statusString = res.getString(R.string.battery_info_status_unknown);
+        final BatteryStatus batteryStatus = new BatteryStatus(batteryChangedIntent);
+
+        if (batteryStatus.isCharged()) {
             statusString = res.getString(R.string.battery_info_status_full);
         } else {
-            statusString = res.getString(R.string.battery_info_status_unknown);
+            if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                switch (batteryStatus.getChargingSpeed(context)) {
+                    case BatteryStatus.CHARGING_FAST:
+                        statusString = res.getString(R.string.battery_info_status_charging_fast);
+                        break;
+                    case BatteryStatus.CHARGING_SLOWLY:
+                        statusString = res.getString(R.string.battery_info_status_charging_slow);
+                        break;
+                    default:
+                        statusString = res.getString(R.string.battery_info_status_charging);
+                        break;
+                }
+
+            } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
+                statusString = res.getString(R.string.battery_info_status_discharging);
+            } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
+                statusString = res.getString(R.string.battery_info_status_not_charging);
+            }
         }
 
         return statusString;
@@ -218,6 +230,13 @@ public class Utils {
         return list.getDefaultColor();
     }
 
+    /**
+     * This method computes disabled color from normal color
+     *
+     * @param context the context
+     * @param inputColor normal color.
+     * @return disabled color.
+     */
     @ColorInt
     public static int getDisabled(Context context, int inputColor) {
         return applyAlphaAttr(context, android.R.attr.disabledAlpha, inputColor);
@@ -258,8 +277,12 @@ public class Utils {
     }
 
     public static int getThemeAttr(Context context, int attr) {
+        return getThemeAttr(context, attr, 0);
+    }
+
+    public static int getThemeAttr(Context context, int attr, int defaultValue) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
-        int theme = ta.getResourceId(0, 0);
+        int theme = ta.getResourceId(0, defaultValue);
         ta.recycle();
         return theme;
     }
@@ -430,6 +453,21 @@ public class Utils {
             }
         }
         return state;
+    }
+
+    /** Get the corresponding adaptive icon drawable. */
+    public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
+        try (IconFactory iconFactory = IconFactory.obtain(context)) {
+            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(icon, user,
+                    true /* shrinkNonAdaptiveIcons */).icon;
+            return new BitmapDrawable(context.getResources(), iconBmp);
+        }
+    }
+
+    /** Get the {@link Drawable} that represents the app icon */
+    public static Drawable getBadgedIcon(Context context, ApplicationInfo appInfo) {
+        return getBadgedIcon(context, appInfo.loadUnbadgedIcon(context.getPackageManager()),
+                UserHandle.getUserHandleForUid(appInfo.uid));
     }
 
     private static boolean isNotInIwlan(ServiceState serviceState) {

@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
@@ -91,6 +91,7 @@ public class StatusBarController extends BarController {
                 View.STATUS_BAR_UNHIDE,
                 View.STATUS_BAR_TRANSLUCENT,
                 StatusBarManager.WINDOW_STATUS_BAR,
+                TYPE_STATUS_BAR,
                 FLAG_TRANSLUCENT_STATUS,
                 View.STATUS_BAR_TRANSPARENT);
     }
@@ -100,11 +101,6 @@ public class StatusBarController extends BarController {
         if (statusBar != null) {
             statusBar.setTopAppHidesStatusBar(hidesStatusBar);
         }
-    }
-
-    @Override
-    protected boolean skipAnimation() {
-        return mWin.getAttrs().height == MATCH_PARENT;
     }
 
     AppTransitionListener getAppTransitionListener() {

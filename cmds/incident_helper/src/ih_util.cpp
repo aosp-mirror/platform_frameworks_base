@@ -237,33 +237,38 @@ double toDouble(const std::string& s) {
 Reader::Reader(const int fd)
 {
     mFile = fdopen(fd, "r");
+    mBuffer = new char[1024];
     mStatus = mFile == nullptr ? "Invalid fd " + std::to_string(fd) : "";
 }
 
 Reader::~Reader()
 {
     if (mFile != nullptr) fclose(mFile);
+    delete[] mBuffer;
 }
 
 bool Reader::readLine(std::string* line) {
     if (mFile == nullptr) return false;
 
-    char* buf = nullptr;
     size_t len = 0;
-    ssize_t read = getline(&buf, &len, mFile);
+    ssize_t read = getline(&mBuffer, &len, mFile);
     if (read != -1) {
-        std::string s(buf);
+        std::string s(mBuffer);
         line->assign(trim(s, DEFAULT_NEWLINE));
-    } else if (errno == EINVAL) {
-        mStatus = "Bad Argument";
+        return true;
     }
-    free(buf);
-    return read != -1;
+    if (!feof(mFile)) {
+        mStatus = "Error reading file. Ferror: " + std::to_string(ferror(mFile));
+    }
+    return false;
 }
 
 bool Reader::ok(std::string* error) {
+    if (mStatus.empty()) {
+        return true;
+    }
     error->assign(mStatus);
-    return mStatus.empty();
+    return false;
 }
 
 // ==============================================================================

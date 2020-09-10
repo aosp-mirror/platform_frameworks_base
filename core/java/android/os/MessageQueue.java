@@ -550,11 +550,12 @@ public final class MessageQueue {
         if (msg.target == null) {
             throw new IllegalArgumentException("Message must have a target.");
         }
-        if (msg.isInUse()) {
-            throw new IllegalStateException(msg + " This message is already in use.");
-        }
 
         synchronized (this) {
+            if (msg.isInUse()) {
+                throw new IllegalStateException(msg + " This message is already in use.");
+            }
+
             if (mQuitting) {
                 IllegalStateException e = new IllegalStateException(
                         msg.target + " sending message to a Handler on a dead thread");
@@ -925,11 +926,11 @@ public final class MessageQueue {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
         synchronized (this) {
             for (Message msg = mMessages; msg != null; msg = msg.next) {
-                msg.writeToProto(proto, MessageQueueProto.MESSAGES);
+                msg.dumpDebug(proto, MessageQueueProto.MESSAGES);
             }
             proto.write(MessageQueueProto.IS_POLLING_LOCKED, isPollingLocked());
             proto.write(MessageQueueProto.IS_QUITTING, mQuitting);

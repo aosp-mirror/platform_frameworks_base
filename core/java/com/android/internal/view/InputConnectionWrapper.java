@@ -17,14 +17,12 @@
 package com.android.internal.view;
 
 import android.annotation.AnyThread;
-import android.annotation.BinderThread;
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.Nullable;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -36,10 +34,15 @@ import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 
+import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.ResultCallbacks;
+
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 
 public class InputConnectionWrapper implements InputConnection {
+    private static final String TAG = "InputConnectionWrapper";
+
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
     private final IInputContext mIInputContext;
     @NonNull
@@ -49,257 +52,94 @@ public class InputConnectionWrapper implements InputConnection {
     private final int mMissingMethods;
 
     /**
-     * {@code true} if the system already decided to take away IME focus from the target app. This
-     * can be signaled even when the corresponding signal is in the task queue and
-     * {@link InputMethodService#onUnbindInput()} is not yet called back on the UI thread.
+     * Signaled when the system decided to take away IME focus from the target app.
+     *
+     * <p>This is expected to be signaled immediately when the IME process receives
+     * {@link IInputMethod#unbindInput()}.</p>
      */
     @NonNull
-    private final AtomicBoolean mIsUnbindIssued;
-
-    static class InputContextCallback extends IInputContextCallback.Stub {
-        private static final String TAG = "InputConnectionWrapper.ICC";
-        public int mSeq;
-        public boolean mHaveValue;
-        public CharSequence mTextBeforeCursor;
-        public CharSequence mTextAfterCursor;
-        public CharSequence mSelectedText;
-        public ExtractedText mExtractedText;
-        public int mCursorCapsMode;
-        public boolean mRequestUpdateCursorAnchorInfoResult;
-        public boolean mCommitContentResult;
-
-        // A 'pool' of one InputContextCallback.  Each ICW request will attempt to gain
-        // exclusive access to this object.
-        private static InputContextCallback sInstance = new InputContextCallback();
-        private static int sSequenceNumber = 1;
-        
-        /**
-         * Returns an InputContextCallback object that is guaranteed not to be in use by
-         * any other thread.  The returned object's 'have value' flag is cleared and its expected
-         * sequence number is set to a new integer.  We use a sequence number so that replies that
-         * occur after a timeout has expired are not interpreted as replies to a later request.
-         */
-        @UnsupportedAppUsage
-        @AnyThread
-        private static InputContextCallback getInstance() {
-            synchronized (InputContextCallback.class) {
-                // Return sInstance if it's non-null, otherwise construct a new callback
-                InputContextCallback callback;
-                if (sInstance != null) {
-                    callback = sInstance;
-                    sInstance = null;
-                    
-                    // Reset the callback
-                    callback.mHaveValue = false;
-                } else {
-                    callback = new InputContextCallback();
-                }
-                
-                // Set the sequence number
-                callback.mSeq = sSequenceNumber++;
-                return callback;
-            }
-        }
-        
-        /**
-         * Makes the given InputContextCallback available for use in the future.
-         */
-        @UnsupportedAppUsage
-        @AnyThread
-        private void dispose() {
-            synchronized (InputContextCallback.class) {
-                // If sInstance is non-null, just let this object be garbage-collected
-                if (sInstance == null) {
-                    // Allow any objects being held to be gc'ed
-                    mTextAfterCursor = null;
-                    mTextBeforeCursor = null;
-                    mExtractedText = null;
-                    sInstance = this;
-                }
-            }
-        }
-
-        @BinderThread
-        public void setTextBeforeCursor(CharSequence textBeforeCursor, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mTextBeforeCursor = textBeforeCursor;
-                    mHaveValue = true;
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setTextBeforeCursor, ignoring.");
-                }
-            }
-        }
-
-        @BinderThread
-        public void setTextAfterCursor(CharSequence textAfterCursor, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mTextAfterCursor = textAfterCursor;
-                    mHaveValue = true;
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setTextAfterCursor, ignoring.");
-                }
-            }
-        }
-
-        @BinderThread
-        public void setSelectedText(CharSequence selectedText, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mSelectedText = selectedText;
-                    mHaveValue = true;
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setSelectedText, ignoring.");
-                }
-            }
-        }
-
-        @BinderThread
-        public void setCursorCapsMode(int capsMode, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mCursorCapsMode = capsMode; 
-                    mHaveValue = true;  
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setCursorCapsMode, ignoring.");
-                }
-            }
-        }
-
-        @BinderThread
-        public void setExtractedText(ExtractedText extractedText, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mExtractedText = extractedText;
-                    mHaveValue = true;
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setExtractedText, ignoring.");
-                }
-            }
-        }
-
-        @BinderThread
-        public void setRequestUpdateCursorAnchorInfoResult(boolean result, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mRequestUpdateCursorAnchorInfoResult = result;
-                    mHaveValue = true;
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setCursorAnchorInfoRequestResult, ignoring.");
-                }
-            }
-        }
-
-        @BinderThread
-        public void setCommitContentResult(boolean result, int seq) {
-            synchronized (this) {
-                if (seq == mSeq) {
-                    mCommitContentResult = result;
-                    mHaveValue = true;
-                    notifyAll();
-                } else {
-                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setCommitContentResult, ignoring.");
-                }
-            }
-        }
-
-        /**
-         * Waits for a result for up to {@link #MAX_WAIT_TIME_MILLIS} milliseconds.
-         * 
-         * <p>The caller must be synchronized on this callback object.
-         */
-        @AnyThread
-        void waitForResultLocked() {
-            long startTime = SystemClock.uptimeMillis();
-            long endTime = startTime + MAX_WAIT_TIME_MILLIS;
-
-            while (!mHaveValue) {
-                long remainingTime = endTime - SystemClock.uptimeMillis();
-                if (remainingTime <= 0) {
-                    Log.w(TAG, "Timed out waiting on IInputContextCallback");
-                    return;
-                }
-                try {
-                    wait(remainingTime);
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-    }
+    private final CancellationGroup mCancellationGroup;
 
     public InputConnectionWrapper(
             @NonNull WeakReference<AbstractInputMethodService> inputMethodService,
-            IInputContext inputContext, @MissingMethodFlags final int missingMethods,
-            @NonNull AtomicBoolean isUnbindIssued) {
+            IInputContext inputContext, @MissingMethodFlags int missingMethods,
+            @NonNull CancellationGroup cancellationGroup) {
         mInputMethodService = inputMethodService;
         mIInputContext = inputContext;
         mMissingMethods = missingMethods;
-        mIsUnbindIssued = isUnbindIssued;
+        mCancellationGroup = cancellationGroup;
+    }
+
+    @AnyThread
+    private static void logInternal(@Nullable String methodName, boolean timedOut,
+            @Nullable Object defaultValue) {
+        if (timedOut) {
+            Log.w(TAG, methodName + " didn't respond in " + MAX_WAIT_TIME_MILLIS + " msec."
+                    + " Returning default: " + defaultValue);
+        } else {
+            Log.w(TAG, methodName + " was canceled before complete. Returning default: "
+                    + defaultValue);
+        }
+    }
+
+    @AnyThread
+    private static int getResultOrZero(@NonNull CancellationGroup.Completable.Int value,
+             @NonNull String methodName) {
+        final boolean timedOut = value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS);
+        if (value.hasValue()) {
+            return value.getValue();
+        }
+        logInternal(methodName, timedOut, 0);
+        return 0;
+    }
+
+    @AnyThread
+    @Nullable
+    private static <T> T getResultOrNull(@NonNull CancellationGroup.Completable.Values<T> value,
+            @NonNull String methodName) {
+        final boolean timedOut = value.await(MAX_WAIT_TIME_MILLIS,  TimeUnit.MILLISECONDS);
+        if (value.hasValue()) {
+            return value.getValue();
+        }
+        logInternal(methodName, timedOut, null);
+        return null;
     }
 
     @AnyThread
     public CharSequence getTextAfterCursor(int length, int flags) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 
-        CharSequence value = null;
+        final CancellationGroup.Completable.CharSequence value =
+                mCancellationGroup.createCompletableCharSequence();
         try {
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getTextAfterCursor(length, flags, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    value = callback.mTextAfterCursor;
-                }
-            }
-            callback.dispose();
+            mIInputContext.getTextAfterCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return value;
+        return getResultOrNull(value, "getTextAfterCursor()");
     }
 
     @AnyThread
     public CharSequence getTextBeforeCursor(int length, int flags) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 
-        CharSequence value = null;
+        final CancellationGroup.Completable.CharSequence value =
+                mCancellationGroup.createCompletableCharSequence();
         try {
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getTextBeforeCursor(length, flags, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    value = callback.mTextBeforeCursor;
-                }
-            }
-            callback.dispose();
+            mIInputContext.getTextBeforeCursor(length, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return value;
+        return getResultOrNull(value, "getTextBeforeCursor()");
     }
 
     @AnyThread
     public CharSequence getSelectedText(int flags) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 
@@ -307,67 +147,46 @@ public class InputConnectionWrapper implements InputConnection {
             // This method is not implemented.
             return null;
         }
-        CharSequence value = null;
+        final CancellationGroup.Completable.CharSequence value =
+                mCancellationGroup.createCompletableCharSequence();
         try {
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getSelectedText(flags, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    value = callback.mSelectedText;
-                }
-            }
-            callback.dispose();
+            mIInputContext.getSelectedText(flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return value;
+        return getResultOrNull(value, "getSelectedText()");
     }
 
     @AnyThread
     public int getCursorCapsMode(int reqModes) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return 0;
         }
 
-        int value = 0;
+        final CancellationGroup.Completable.Int value =
+                mCancellationGroup.createCompletableInt();
         try {
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getCursorCapsMode(reqModes, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    value = callback.mCursorCapsMode;
-                }
-            }
-            callback.dispose();
+            mIInputContext.getCursorCapsMode(reqModes, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return 0;
         }
-        return value;
+        return getResultOrZero(value, "getCursorCapsMode()");
     }
 
     @AnyThread
     public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 
-        ExtractedText value = null;
+        final CancellationGroup.Completable.ExtractedText value =
+                mCancellationGroup.createCompletableExtractedText();
         try {
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.getExtractedText(request, flags, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    value = callback.mExtractedText;
-                }
-            }
-            callback.dispose();
+            mIInputContext.getExtractedText(request, flags, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return null;
         }
-        return value;
+        return getResultOrNull(value, "getExtractedText()");
     }
 
     @AnyThread
@@ -563,29 +382,22 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public boolean requestCursorUpdates(int cursorUpdateMode) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return false;
         }
 
-        boolean result = false;
         if (isMethodMissing(MissingMethodFlags.REQUEST_CURSOR_UPDATES)) {
             // This method is not implemented.
             return false;
         }
+        final CancellationGroup.Completable.Int value = mCancellationGroup.createCompletableInt();
         try {
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    result = callback.mRequestUpdateCursorAnchorInfoResult;
-                }
-            }
-            callback.dispose();
+            mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode,
+                    ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return false;
         }
-        return result;
+        return getResultOrZero(value, "requestUpdateCursorAnchorInfo()") != 0;
     }
 
     @AnyThread
@@ -601,38 +413,31 @@ public class InputConnectionWrapper implements InputConnection {
 
     @AnyThread
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
-        if (mIsUnbindIssued.get()) {
+        if (mCancellationGroup.isCanceled()) {
             return false;
         }
 
-        boolean result = false;
         if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
             // This method is not implemented.
             return false;
         }
-        try {
-            if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
-                final AbstractInputMethodService inputMethodService = mInputMethodService.get();
-                if (inputMethodService == null) {
-                    // This basically should not happen, because it's the the caller of this method.
-                    return false;
-                }
-                inputMethodService.exposeContent(inputContentInfo, this);
-            }
 
-            InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.commitContent(inputContentInfo, flags, opts, callback.mSeq, callback);
-            synchronized (callback) {
-                callback.waitForResultLocked();
-                if (callback.mHaveValue) {
-                    result = callback.mCommitContentResult;
-                }
+        if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+            final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+            if (inputMethodService == null) {
+                // This basically should not happen, because it's the caller of this method.
+                return false;
             }
-            callback.dispose();
+            inputMethodService.exposeContent(inputContentInfo, this);
+        }
+
+        final CancellationGroup.Completable.Int value = mCancellationGroup.createCompletableInt();
+        try {
+            mIInputContext.commitContent(inputContentInfo, flags, opts, ResultCallbacks.of(value));
         } catch (RemoteException e) {
             return false;
         }
-        return result;
+        return getResultOrZero(value, "commitContent()") != 0;
     }
 
     @AnyThread

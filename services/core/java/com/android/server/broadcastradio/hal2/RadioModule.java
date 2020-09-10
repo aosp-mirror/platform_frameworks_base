@@ -42,6 +42,7 @@ import android.util.MutableInt;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,7 +69,13 @@ class RadioModule {
     private Boolean mAntennaConnected = null;
 
     @GuardedBy("mLock")
-    private RadioManager.ProgramInfo mProgramInfo = null;
+    private RadioManager.ProgramInfo mCurrentProgramInfo = null;
+
+    @GuardedBy("mLock")
+    private final ProgramInfoCache mProgramInfoCache = new ProgramInfoCache(null);
+
+    @GuardedBy("mLock")
+    private android.hardware.radio.ProgramList.Filter mUnionOfAidlProgramFilters = null;
 
     // Callback registered with the HAL to relay callbacks to AIDL clients.
     private final ITunerCallback mHalTunerCallback = new ITunerCallback.Stub() {
@@ -84,19 +91,21 @@ class RadioModule {
         @Override
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
             lockAndFireLater(() -> {
-                mProgramInfo = Convert.programInfoFromHal(halProgramInfo);
-                fanoutAidlCallbackLocked(cb -> cb.onCurrentProgramInfoChanged(mProgramInfo));
+                mCurrentProgramInfo = Convert.programInfoFromHal(halProgramInfo);
+                fanoutAidlCallbackLocked(cb -> cb.onCurrentProgramInfoChanged(mCurrentProgramInfo));
             });
         }
 
         @Override
         public void onProgramListUpdated(ProgramListChunk programListChunk) {
-            // TODO: Cache per-AIDL client filters, send union of filters to HAL, use filters to fan
-            // back out to clients.
             lockAndFireLater(() -> {
                 android.hardware.radio.ProgramList.Chunk chunk =
                         Convert.programListChunkFromHal(programListChunk);
-                fanoutAidlCallbackLocked(cb -> cb.onProgramListUpdated(chunk));
+                mProgramInfoCache.filterAndApplyChunk(chunk);
+
+                for (TunerSession tunerSession : mAidlTunerSessions) {
+                    tunerSession.onMergedProgramListUpdateFromHal(chunk);
+                }
             });
         }
 
@@ -121,8 +130,9 @@ class RadioModule {
     @GuardedBy("mLock")
     private final Set<TunerSession> mAidlTunerSessions = new HashSet<>();
 
-    private RadioModule(@NonNull IBroadcastRadio service,
-            @NonNull RadioManager.ModuleProperties properties) throws RemoteException {
+    @VisibleForTesting
+    RadioModule(@NonNull IBroadcastRadio service,
+            @NonNull RadioManager.ModuleProperties properties) {
         mProperties = Objects.requireNonNull(properties);
         mService = Objects.requireNonNull(service);
         mHandler = new Handler(Looper.getMainLooper());
@@ -176,8 +186,8 @@ class RadioModule {
             if (mAntennaConnected != null) {
                 userCb.onAntennaState(mAntennaConnected);
             }
-            if (mProgramInfo != null) {
-                userCb.onCurrentProgramInfoChanged(mProgramInfo);
+            if (mCurrentProgramInfo != null) {
+                userCb.onCurrentProgramInfoChanged(mCurrentProgramInfo);
             }
 
             return tunerSession;
@@ -199,18 +209,114 @@ class RadioModule {
         }
     }
 
+    private @Nullable android.hardware.radio.ProgramList.Filter
+            buildUnionOfTunerSessionFiltersLocked() {
+        Set<Integer> idTypes = null;
+        Set<android.hardware.radio.ProgramSelector.Identifier> ids = null;
+        boolean includeCategories = false;
+        boolean excludeModifications = true;
+
+        for (TunerSession tunerSession : mAidlTunerSessions) {
+            android.hardware.radio.ProgramList.Filter filter =
+                    tunerSession.getProgramListFilter();
+            if (filter == null) {
+                continue;
+            }
+
+            if (idTypes == null) {
+                idTypes = new HashSet<>(filter.getIdentifierTypes());
+                ids = new HashSet<>(filter.getIdentifiers());
+                includeCategories = filter.areCategoriesIncluded();
+                excludeModifications = filter.areModificationsExcluded();
+                continue;
+            }
+            if (!idTypes.isEmpty()) {
+                if (filter.getIdentifierTypes().isEmpty()) {
+                    idTypes.clear();
+                } else {
+                    idTypes.addAll(filter.getIdentifierTypes());
+                }
+            }
+
+            if (!ids.isEmpty()) {
+                if (filter.getIdentifiers().isEmpty()) {
+                    ids.clear();
+                } else {
+                    ids.addAll(filter.getIdentifiers());
+                }
+            }
+
+            includeCategories |= filter.areCategoriesIncluded();
+            excludeModifications &= filter.areModificationsExcluded();
+        }
+
+        return idTypes == null ? null : new android.hardware.radio.ProgramList.Filter(idTypes, ids,
+                includeCategories, excludeModifications);
+    }
+
+    void onTunerSessionProgramListFilterChanged(@Nullable TunerSession session) {
+        synchronized (mLock) {
+            onTunerSessionProgramListFilterChangedLocked(session);
+        }
+    }
+
+    private void onTunerSessionProgramListFilterChangedLocked(@Nullable TunerSession session) {
+        android.hardware.radio.ProgramList.Filter newFilter =
+                buildUnionOfTunerSessionFiltersLocked();
+        if (newFilter == null) {
+            // If there are no AIDL clients remaining, we can stop updates from the HAL as well.
+            if (mUnionOfAidlProgramFilters == null) {
+                return;
+            }
+            mUnionOfAidlProgramFilters = null;
+            try {
+                mHalTunerSession.stopProgramListUpdates();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "mHalTunerSession.stopProgramListUpdates() failed: ", ex);
+            }
+            return;
+        }
+
+        // If the HAL filter doesn't change, we can immediately send an update to the AIDL
+        // client.
+        if (newFilter.equals(mUnionOfAidlProgramFilters)) {
+            if (session != null) {
+                session.updateProgramInfoFromHalCache(mProgramInfoCache);
+            }
+            return;
+        }
+
+        // Otherwise, update the HAL's filter, and AIDL clients will be updated when
+        // mHalTunerCallback.onProgramListUpdated() is called.
+        mUnionOfAidlProgramFilters = newFilter;
+        try {
+            int halResult = mHalTunerSession.startProgramListUpdates(Convert.programFilterToHal(
+                    newFilter));
+            Convert.throwOnError("startProgramListUpdates", halResult);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "mHalTunerSession.startProgramListUpdates() failed: ", ex);
+        }
+    }
+
     void onTunerSessionClosed(TunerSession tunerSession) {
         synchronized (mLock) {
+            onTunerSessionsClosedLocked(tunerSession);
+        }
+    }
+
+    private void onTunerSessionsClosedLocked(TunerSession... tunerSessions) {
+        for (TunerSession tunerSession : tunerSessions) {
             mAidlTunerSessions.remove(tunerSession);
-            if (mAidlTunerSessions.isEmpty() && mHalTunerSession != null) {
-                Slog.v(TAG, "closing HAL tuner session");
-                try {
-                    mHalTunerSession.close();
-                } catch (RemoteException ex) {
-                    Slog.e(TAG, "mHalTunerSession.close() failed: ", ex);
-                }
-                mHalTunerSession = null;
+        }
+        onTunerSessionProgramListFilterChanged(null);
+        if (mAidlTunerSessions.isEmpty() && mHalTunerSession != null) {
+            Slog.v(TAG, "closing HAL tuner session");
+            try {
+                mHalTunerSession.close();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "mHalTunerSession.close() failed: ", ex);
             }
+            mHalTunerSession = null;
         }
     }
 
@@ -249,7 +355,8 @@ class RadioModule {
             }
         }
         if (deadSessions != null) {
-            mAidlTunerSessions.removeAll(deadSessions);
+            onTunerSessionsClosedLocked(deadSessions.toArray(
+                    new TunerSession[deadSessions.size()]));
         }
     }
 

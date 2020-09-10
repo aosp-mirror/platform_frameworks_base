@@ -30,14 +30,15 @@ import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
+import com.android.internal.os.SomeArgs;
+
 import java.util.ArrayList;
 
 class TaskChangeNotificationController {
     private static final int LOG_STACK_STATE_MSG = 1;
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
     private static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
-    private static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
-    private static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 5;
+    private static final int NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
     private static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
     private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
     private static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
@@ -48,15 +49,19 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_REMOVAL_STARTED_LISTENERS = 13;
     private static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
     private static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
-    private static final int NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG = 16;
     private static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED_MSG = 19;
     private static final int NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG = 20;
     private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
     private static final int NOTIFY_SINGLE_TASK_DISPLAY_DRAWN = 22;
-    private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 23;
-    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 24;
+    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 23;
+    private static final int NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG = 24;
+    private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 25;
+    private static final int NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG = 26;
+    private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 27;
+    private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 28;
+    private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 29;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -117,16 +122,10 @@ class TaskChangeNotificationController {
         l.onActivityUnpinned();
     };
 
-    private final TaskStackConsumer mNotifyPinnedActivityRestartAttempt = (l, m) -> {
-        l.onPinnedActivityRestartAttempt(m.arg1 != 0);
-    };
-
-    private final TaskStackConsumer mNotifyPinnedStackAnimationStarted = (l, m) -> {
-        l.onPinnedStackAnimationStarted();
-    };
-
-    private final TaskStackConsumer mNotifyPinnedStackAnimationEnded = (l, m) -> {
-        l.onPinnedStackAnimationEnded();
+    private final TaskStackConsumer mNotifyActivityRestartAttempt = (l, m) -> {
+        SomeArgs args = (SomeArgs) m.obj;
+        l.onActivityRestartAttempt((RunningTaskInfo) args.arg1, args.argi1 != 0,
+                args.argi2 != 0, args.argi3 != 0);
     };
 
     private final TaskStackConsumer mNotifyActivityForcedResizable = (l, m) -> {
@@ -167,6 +166,26 @@ class TaskChangeNotificationController {
 
     private final TaskStackConsumer mNotifyTaskDisplayChanged = (l, m) -> {
         l.onTaskDisplayChanged(m.arg1, m.arg2);
+    };
+
+    private final TaskStackConsumer mNotifyTaskListUpdated = (l, m) -> {
+        l.onRecentTaskListUpdated();
+    };
+
+    private final TaskStackConsumer mNotifyTaskListFrozen = (l, m) -> {
+        l.onRecentTaskListFrozenChanged(m.arg1 != 0);
+    };
+
+    private final TaskStackConsumer mNotifyTaskFocusChanged = (l, m) -> {
+        l.onTaskFocusChanged(m.arg1, m.arg2 != 0);
+    };
+
+    private final TaskStackConsumer mNotifyTaskRequestedOrientationChanged = (l, m) -> {
+        l.onTaskRequestedOrientationChanged(m.arg1, m.arg2);
+    };
+
+    private final TaskStackConsumer mNotifyOnActivityRotation = (l, m) -> {
+        l.onActivityRotation(m.arg1);
     };
 
     @FunctionalInterface
@@ -215,14 +234,8 @@ class TaskChangeNotificationController {
                 case NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyActivityUnpinned, msg);
                     break;
-                case NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyPinnedActivityRestartAttempt, msg);
-                    break;
-                case NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyPinnedStackAnimationStarted, msg);
-                    break;
-                case NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyPinnedStackAnimationEnded, msg);
+                case NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyActivityRestartAttempt, msg);
                     break;
                 case NOTIFY_FORCED_RESIZABLE_MSG:
                     forAllRemoteListeners(mNotifyActivityForcedResizable, msg);
@@ -257,6 +270,24 @@ class TaskChangeNotificationController {
                 case NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskDisplayChanged, msg);
                     break;
+                case NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyTaskListUpdated, msg);
+                    break;
+                case NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG:
+                    forAllRemoteListeners(mNotifyTaskListFrozen, msg);
+                    break;
+                case NOTIFY_TASK_FOCUS_CHANGED_MSG:
+                    forAllRemoteListeners(mNotifyTaskFocusChanged, msg);
+                    break;
+                case NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG:
+                    forAllRemoteListeners(mNotifyTaskRequestedOrientationChanged, msg);
+                    break;
+                case NOTIFY_ACTIVITY_ROTATED_MSG:
+                    forAllRemoteListeners(mNotifyOnActivityRotation, msg);
+                    break;
+            }
+            if (msg.obj instanceof SomeArgs) {
+                ((SomeArgs) msg.obj).recycle();
             }
         }
     }
@@ -334,7 +365,7 @@ class TaskChangeNotificationController {
     void notifyActivityPinned(ActivityRecord r) {
         mHandler.removeMessages(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
         final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG,
-                r.getTaskRecord().taskId, r.getStackId(), r.packageName);
+                r.getTask().mTaskId, r.getRootTaskId(), r.packageName);
         msg.sendingUid = r.mUserId;
         forAllLocalListeners(mNotifyActivityPinned, msg);
         msg.sendToTarget();
@@ -350,33 +381,19 @@ class TaskChangeNotificationController {
 
     /**
      * Notifies all listeners when an attempt was made to start an an activity that is already
-     * running in the pinned stack and the activity was not actually started, but the task is
-     * either brought to the front or a new Intent is delivered to it.
+     * running, but the task is either brought to the front or a new Intent is delivered to it.
      */
-    void notifyPinnedActivityRestartAttempt(boolean clearedTask) {
-        mHandler.removeMessages(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
-        final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
-                        clearedTask ? 1 : 0, 0);
-        forAllLocalListeners(mNotifyPinnedActivityRestartAttempt, msg);
-        msg.sendToTarget();
-    }
-
-    /** Notifies all listeners when the pinned stack animation starts. */
-    void notifyPinnedStackAnimationStarted() {
-        mHandler.removeMessages(NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG);
-        final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG);
-        forAllLocalListeners(mNotifyPinnedStackAnimationStarted, msg);
-        msg.sendToTarget();
-    }
-
-    /** Notifies all listeners when the pinned stack animation ends. */
-    void notifyPinnedStackAnimationEnded() {
-        mHandler.removeMessages(NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG);
-        final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG);
-        forAllLocalListeners(mNotifyPinnedStackAnimationEnded, msg);
+    void notifyActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask, boolean wasVisible) {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = task;
+        args.argi1 = homeTaskVisible ? 1 : 0;
+        args.argi2 = clearedTask ? 1 : 0;
+        args.argi3 = wasVisible ? 1 : 0;
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
+                        args);
+        forAllLocalListeners(mNotifyActivityRestartAttempt, msg);
         msg.sendToTarget();
     }
 
@@ -530,6 +547,47 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG,
                 taskId, newDisplayId);
         forAllLocalListeners(mNotifyTaskStackChanged, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Called when any additions or deletions to the recent tasks list have been made.
+     */
+    void notifyTaskListUpdated() {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_LIST_UPDATED_LISTENERS_MSG);
+        forAllLocalListeners(mNotifyTaskListUpdated, msg);
+        msg.sendToTarget();
+    }
+
+    /** @see ITaskStackListener#onRecentTaskListFrozenChanged(boolean) */
+    void notifyTaskListFrozen(boolean frozen) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG,
+                frozen ? 1 : 0, 0 /* unused */);
+        forAllLocalListeners(mNotifyTaskListFrozen, msg);
+        msg.sendToTarget();
+    }
+
+    /** @see ITaskStackListener#onTaskFocusChanged(int, boolean) */
+    void notifyTaskFocusChanged(int taskId, boolean focused) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_FOCUS_CHANGED_MSG,
+                taskId, focused ? 1 : 0);
+        forAllLocalListeners(mNotifyTaskFocusChanged, msg);
+        msg.sendToTarget();
+    }
+
+    /** @see android.app.ITaskStackListener#onTaskRequestedOrientationChanged(int, int) */
+    void notifyTaskRequestedOrientationChanged(int taskId, int requestedOrientation) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG,
+                taskId, requestedOrientation);
+        forAllLocalListeners(mNotifyTaskRequestedOrientationChanged, msg);
+        msg.sendToTarget();
+    }
+
+    /** @see android.app.ITaskStackListener#onActivityRotation(int) */
+    void notifyOnActivityRotation(int displayId) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_ROTATED_MSG,
+                displayId, 0 /* unused */);
+        forAllLocalListeners(mNotifyOnActivityRotation, msg);
         msg.sendToTarget();
     }
 }

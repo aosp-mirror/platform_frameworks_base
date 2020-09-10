@@ -22,25 +22,13 @@ namespace statsd {
 using std::vector;
 
 ConditionState ConditionWizard::query(const int index, const ConditionKey& parameters,
-                                      const vector<Matcher>& dimensionFields,
-                                      const bool isSubOutputDimensionFields,
-                                      const bool isPartialLink,
-                                      std::unordered_set<HashableDimensionKey>* dimensionKeySet) {
+                                      const bool isPartialLink) {
     vector<ConditionState> cache(mAllConditions.size(), ConditionState::kNotEvaluated);
 
     mAllConditions[index]->isConditionMet(
-        parameters, mAllConditions, dimensionFields, isSubOutputDimensionFields, isPartialLink,
-        cache, *dimensionKeySet);
+        parameters, mAllConditions, isPartialLink,
+        cache);
     return cache[index];
-}
-
-ConditionState ConditionWizard::getMetConditionDimension(
-        const int index, const vector<Matcher>& dimensionFields,
-        const bool isSubOutputDimensionFields,
-        std::unordered_set<HashableDimensionKey>* dimensionsKeySet) const {
-    return mAllConditions[index]->getMetConditionDimension(mAllConditions, dimensionFields,
-                                                           isSubOutputDimensionFields,
-                                                           *dimensionsKeySet);
 }
 
 const set<HashableDimensionKey>* ConditionWizard::getChangedToTrueDimensions(

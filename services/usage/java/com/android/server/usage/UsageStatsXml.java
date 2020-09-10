@@ -16,14 +16,11 @@
 
 package com.android.server.usage;
 
-import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
-import android.util.proto.ProtoInputStream;
-import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -31,7 +28,6 @@ import java.io.*;
 
 public class UsageStatsXml {
     private static final String TAG = "UsageStatsXml";
-    private static final int CURRENT_VERSION = 1;
     private static final String USAGESTATS_TAG = "usagestats";
     private static final String VERSION_ATTR = "version";
     static final String CHECKED_IN_SUFFIX = "-c";
@@ -60,19 +56,5 @@ public class UsageStatsXml {
             Slog.e(TAG, "Failed to parse Xml", e);
             throw new IOException(e);
         }
-    }
-
-    public static void write(OutputStream out, IntervalStats stats) throws IOException {
-        FastXmlSerializer xml = new FastXmlSerializer();
-        xml.setOutput(out, "utf-8");
-        xml.startDocument("utf-8", true);
-        xml.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-        xml.startTag(null, USAGESTATS_TAG);
-        xml.attribute(null, VERSION_ATTR, Integer.toString(CURRENT_VERSION));
-
-        UsageStatsXmlV1.write(xml, stats);
-
-        xml.endTag(null, USAGESTATS_TAG);
-        xml.endDocument();
     }
 }

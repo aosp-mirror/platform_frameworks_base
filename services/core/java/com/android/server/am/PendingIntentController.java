@@ -23,6 +23,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -40,8 +41,12 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
@@ -51,6 +56,7 @@ import com.android.server.wm.SafeActivityOptions;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -65,6 +71,9 @@ public class PendingIntentController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "PendingIntentController" : TAG_AM;
     private static final String TAG_MU = TAG + POSTFIX_MU;
 
+    /** @see {@link #mRecentIntentsPerUid}.  */
+    private static final int RECENT_N = 10;
+
     /** Lock for internal state. */
     final Object mLock = new Object();
     final Handler mH;
@@ -76,10 +85,22 @@ public class PendingIntentController {
     final HashMap<PendingIntentRecord.Key, WeakReference<PendingIntentRecord>> mIntentSenderRecords
             = new HashMap<>();
 
-    PendingIntentController(Looper looper, UserController userController) {
+    /** The number of PendingIntentRecord per uid */
+    @GuardedBy("mLock")
+    private final SparseIntArray mIntentsPerUid = new SparseIntArray();
+
+    /** The recent PendingIntentRecord, up to {@link #RECENT_N} per uid */
+    @GuardedBy("mLock")
+    private final SparseArray<RingBuffer<String>> mRecentIntentsPerUid = new SparseArray<>();
+
+    private final ActivityManagerConstants mConstants;
+
+    PendingIntentController(Looper looper, UserController userController,
+            ActivityManagerConstants constants) {
         mH = new Handler(looper);
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mUserController = userController;
+        mConstants = constants;
     }
 
     void onActivityManagerInternalAdded() {
@@ -88,9 +109,9 @@ public class PendingIntentController {
         }
     }
 
-    public PendingIntentRecord getIntentSender(int type, String packageName, int callingUid,
-            int userId, IBinder token, String resultWho, int requestCode, Intent[] intents,
-            String[] resolvedTypes, int flags, Bundle bOptions) {
+    public PendingIntentRecord getIntentSender(int type, String packageName,
+            @Nullable String featureId, int callingUid, int userId, IBinder token, String resultWho,
+            int requestCode, Intent[] intents, String[] resolvedTypes, int flags, Bundle bOptions) {
         synchronized (mLock) {
             if (DEBUG_MU) Slog.v(TAG_MU, "getIntentSender(): uid=" + callingUid);
 
@@ -109,8 +130,8 @@ public class PendingIntentController {
             flags &= ~(PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_CANCEL_CURRENT
                     | PendingIntent.FLAG_UPDATE_CURRENT);
 
-            PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, token,
-                    resultWho, requestCode, intents, resolvedTypes, flags,
+            PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, featureId,
+                    token, resultWho, requestCode, intents, resolvedTypes, flags,
                     SafeActivityOptions.fromBundle(bOptions), userId);
             WeakReference<PendingIntentRecord> ref;
             ref = mIntentSenderRecords.get(key);
@@ -135,12 +156,14 @@ public class PendingIntentController {
                 }
                 makeIntentSenderCanceled(rec);
                 mIntentSenderRecords.remove(key);
+                decrementUidStatLocked(rec);
             }
             if (noCreate) {
                 return rec;
             }
             rec = new PendingIntentRecord(this, key, callingUid);
             mIntentSenderRecords.put(key, rec.ref);
+            incrementUidStatLocked(rec);
             return rec;
         }
     }
@@ -197,6 +220,7 @@ public class PendingIntentController {
                 didSomething = true;
                 it.remove();
                 makeIntentSenderCanceled(pir);
+                decrementUidStatLocked(pir);
                 if (pir.key.activity != null) {
                     final Message m = PooledLambda.obtainMessage(
                             PendingIntentController::clearPendingResultForActivity, this,
@@ -236,6 +260,7 @@ public class PendingIntentController {
         synchronized (mLock) {
             makeIntentSenderCanceled(rec);
             mIntentSenderRecords.remove(rec.key);
+            decrementUidStatLocked(rec);
             if (cleanActivity && rec.key.activity != null) {
                 final Message m = PooledLambda.obtainMessage(
                         PendingIntentController::clearPendingResultForActivity, this,
@@ -368,8 +393,80 @@ public class PendingIntentController {
                 }
             }
 
+            final int sizeOfIntentsPerUid = mIntentsPerUid.size();
+            if (sizeOfIntentsPerUid > 0) {
+                for (int i = 0; i < sizeOfIntentsPerUid; i++) {
+                    pw.print("  * UID: ");
+                    pw.print(mIntentsPerUid.keyAt(i));
+                    pw.print(" total: ");
+                    pw.println(mIntentsPerUid.valueAt(i));
+                }
+            }
+
             if (!printed) {
                 pw.println("  (nothing)");
+            }
+        }
+    }
+
+    /**
+     * Increment the number of the PendingIntentRecord for the given uid, log a warning
+     * if there are too many for this uid already.
+     */
+    @GuardedBy("mLock")
+    void incrementUidStatLocked(final PendingIntentRecord pir) {
+        final int uid = pir.uid;
+        final int idx = mIntentsPerUid.indexOfKey(uid);
+        int newCount = 1;
+        if (idx >= 0) {
+            newCount = mIntentsPerUid.valueAt(idx) + 1;
+            mIntentsPerUid.setValueAt(idx, newCount);
+        } else {
+            mIntentsPerUid.put(uid, newCount);
+        }
+
+        // If the number is within the range [threshold - N + 1, threshold], log it into buffer
+        final int lowBound = mConstants.PENDINGINTENT_WARNING_THRESHOLD - RECENT_N + 1;
+        RingBuffer<String> recentHistory = null;
+        if (newCount == lowBound) {
+            recentHistory = new RingBuffer(String.class, RECENT_N);
+            mRecentIntentsPerUid.put(uid, recentHistory);
+        } else if (newCount > lowBound && newCount <= mConstants.PENDINGINTENT_WARNING_THRESHOLD) {
+            recentHistory = mRecentIntentsPerUid.get(uid);
+        }
+        if (recentHistory == null) {
+            return;
+        }
+
+        recentHistory.append(pir.key.toString());
+
+        // Output the log if we are hitting the threshold
+        if (newCount == mConstants.PENDINGINTENT_WARNING_THRESHOLD) {
+            Slog.wtf(TAG, "Too many PendingIntent created for uid " + uid
+                    + ", recent " + RECENT_N + ": " + Arrays.toString(recentHistory.toArray()));
+            // Clear the buffer, as we don't want to spam the log when the numbers
+            // are jumping up and down around the threshold.
+            mRecentIntentsPerUid.remove(uid);
+        }
+    }
+
+    /**
+     * Decrement the number of the PendingIntentRecord for the given uid.
+     */
+    @GuardedBy("mLock")
+    void decrementUidStatLocked(final PendingIntentRecord pir) {
+        final int uid = pir.uid;
+        final int idx = mIntentsPerUid.indexOfKey(uid);
+        if (idx >= 0) {
+            final int newCount = mIntentsPerUid.valueAt(idx) - 1;
+            // If we are going below the low threshold, no need to keep logs.
+            if (newCount == mConstants.PENDINGINTENT_WARNING_THRESHOLD - RECENT_N) {
+                mRecentIntentsPerUid.delete(uid);
+            }
+            if (newCount == 0) {
+                mIntentsPerUid.removeAt(idx);
+            } else {
+                mIntentsPerUid.setValueAt(idx, newCount);
             }
         }
     }

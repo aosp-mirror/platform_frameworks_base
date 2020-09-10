@@ -56,16 +56,14 @@ message WindowLayoutParamsProto {
     optional uint32 input_feature_flags = 19;
     optional int64 user_activity_timeout = 20;
 
-    enum NeedsMenuState {
-        NEEDS_MENU_UNSET = 0;
-        NEEDS_MENU_SET_TRUE = 1;
-        NEEDS_MENU_SET_FALSE = 2;
-    }
-    optional NeedsMenuState needs_menu_key = 22;
-
     optional DisplayProto.ColorMode color_mode = 23;
     optional uint32 flags = 24;
     optional uint32 private_flags = 26;
     optional uint32 system_ui_visibility_flags = 27;
     optional uint32 subtree_system_ui_visibility_flags = 28;
+    optional uint32 appearance = 29;
+    optional uint32 behavior = 30;
+    optional uint32 fit_insets_types = 31;
+    optional uint32 fit_insets_sides = 32;
+    optional bool fit_ignore_visibility = 33;
 }

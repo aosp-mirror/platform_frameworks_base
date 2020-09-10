@@ -62,7 +62,9 @@ public class LockPatternUtilsTest {
         Settings.Global.putInt(cr, Settings.Global.DEVICE_DEMO_MODE, deviceDemoMode);
 
         final ILockSettings ils = Mockito.mock(ILockSettings.class);
-        when(ils.havePassword(DEMO_USER_ID)).thenReturn(isSecure);
+        when(ils.getCredentialType(DEMO_USER_ID)).thenReturn(
+                isSecure ? LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+                         : LockPatternUtils.CREDENTIAL_TYPE_NONE);
         when(ils.getLong("lockscreen.password_type", PASSWORD_QUALITY_UNSPECIFIED, DEMO_USER_ID))
                 .thenReturn((long) PASSWORD_QUALITY_MANAGED);
         // TODO(b/63758238): stop spying the class under test

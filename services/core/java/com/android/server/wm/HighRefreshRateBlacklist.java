@@ -27,9 +27,9 @@ import android.util.ArraySet;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.wm.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
 
 /**
  * A Blacklist for packages that should force the display out of high refresh rate.
@@ -41,26 +41,20 @@ class HighRefreshRateBlacklist {
     private final String[] mDefaultBlacklist;
     private final Object mLock = new Object();
 
+    private DeviceConfigInterface mDeviceConfig;
+    private OnPropertiesChangedListener mListener = new OnPropertiesChangedListener();
+
     static HighRefreshRateBlacklist create(@NonNull Resources r) {
-        return new HighRefreshRateBlacklist(r, new DeviceConfigInterface() {
-            @Override
-            public @Nullable String getProperty(@NonNull String namespace, @NonNull String name) {
-                return DeviceConfig.getProperty(namespace, name);
-            }
-            public void addOnPropertyChangedListener(@NonNull String namespace,
-                    @NonNull Executor executor,
-                    @NonNull DeviceConfig.OnPropertyChangedListener listener) {
-                DeviceConfig.addOnPropertyChangedListener(namespace, executor, listener);
-            }
-        });
+        return new HighRefreshRateBlacklist(r, DeviceConfigInterface.REAL);
     }
 
     @VisibleForTesting
     HighRefreshRateBlacklist(Resources r, DeviceConfigInterface deviceConfig) {
         mDefaultBlacklist = r.getStringArray(R.array.config_highRefreshRateBlacklist);
-        deviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                BackgroundThread.getExecutor(), new OnPropertyChangedListener());
-        final String property = deviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+        mDeviceConfig = deviceConfig;
+        mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                BackgroundThread.getExecutor(), mListener);
+        final String property = mDeviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 KEY_HIGH_REFRESH_RATE_BLACKLIST);
         updateBlacklist(property);
     }
@@ -101,17 +95,19 @@ class HighRefreshRateBlacklist {
         }
     }
 
-    interface DeviceConfigInterface {
-        @Nullable String getProperty(@NonNull String namespace, @NonNull String name);
-        void addOnPropertyChangedListener(@NonNull String namespace, @NonNull Executor executor,
-                @NonNull DeviceConfig.OnPropertyChangedListener listener);
+    /** Used to prevent WmTests leaking issues. */
+    @VisibleForTesting
+    void dispose() {
+        mDeviceConfig.removeOnPropertiesChangedListener(mListener);
+        mDeviceConfig = null;
+        mBlacklistedPackages.clear();
     }
 
-    private class OnPropertyChangedListener implements DeviceConfig.OnPropertyChangedListener {
-        public void onPropertyChanged(@NonNull String namespace, @NonNull String name,
-                @Nullable String value) {
-            if (KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(name)) {
-                updateBlacklist(value);
+    private class OnPropertiesChangedListener implements DeviceConfig.OnPropertiesChangedListener {
+        public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
+            if (properties.getKeyset().contains(KEY_HIGH_REFRESH_RATE_BLACKLIST)) {
+                updateBlacklist(
+                        properties.getString(KEY_HIGH_REFRESH_RATE_BLACKLIST, null /*default*/));
             }
         }
     }

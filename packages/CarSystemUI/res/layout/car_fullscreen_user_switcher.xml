@@ -16,14 +16,16 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fullscreen_user_switcher"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:background="@color/car_user_switcher_background_color">
 
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
         android:orientation="vertical">
 
         <include
@@ -31,10 +33,11 @@
             android:layout_alignParentTop="true"
             android:theme="@android:style/Theme"/>
 
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <com.android.systemui.statusbar.car.UserGridRecyclerView
+            <com.android.systemui.car.userswitcher.UserGridRecyclerView
                 android:id="@+id/user_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

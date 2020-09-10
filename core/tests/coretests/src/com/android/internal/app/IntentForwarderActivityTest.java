@@ -48,6 +48,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -56,6 +57,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,6 +68,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class IntentForwarderActivityTest {
@@ -87,6 +91,7 @@ public class IntentForwarderActivityTest {
     static {
         MANAGED_PROFILE_INFO.id = 10;
         MANAGED_PROFILE_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE;
+        MANAGED_PROFILE_INFO.userType = UserManager.USER_TYPE_PROFILE_MANAGED;
     }
 
     private static UserInfo CURRENT_USER_INFO = new UserInfo();
@@ -116,12 +121,21 @@ public class IntentForwarderActivityTest {
 
     private Context mContext;
     public static final String PHONE_NUMBER = "123-456-789";
+    private int mDeviceProvisionedInitialValue;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
         sInjector = spy(new TestInjector());
+        mDeviceProvisionedInitialValue = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, /* def= */ 0);
+    }
+
+    @After
+    public void tearDown() {
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                mDeviceProvisionedInitialValue);
     }
 
     @Test
@@ -201,12 +215,8 @@ public class IntentForwarderActivityTest {
     }
 
     @Test
-    public void forwardToManagedProfile_canForward_chooserIntent() throws Exception {
+    public void launchInSameProfile_chooserIntent() {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
-
-        // Intent can be forwarded.
-        when(mIPm.canForwardTo(
-                any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
 
         // Manage profile exists.
         List<UserInfo> profiles = new ArrayList<>();
@@ -223,10 +233,6 @@ public class IntentForwarderActivityTest {
         intent.putExtra(Intent.EXTRA_INTENT, sendIntent);
         IntentForwarderWrapperActivity activity = mActivityRule.launchActivity(intent);
 
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mIPm).canForwardTo(intentCaptor.capture(), eq(TYPE_PLAIN_TEXT), anyInt(), anyInt());
-        assertEquals(Intent.ACTION_SEND, intentCaptor.getValue().getAction());
-
         assertNotNull(activity.mStartActivityIntent);
         assertEquals(Intent.ACTION_CHOOSER, activity.mStartActivityIntent.getAction());
         assertNull(activity.mStartActivityIntent.getPackage());
@@ -237,9 +243,9 @@ public class IntentForwarderActivityTest {
         assertEquals(Intent.ACTION_SEND, innerIntent.getAction());
         assertNull(innerIntent.getComponent());
         assertNull(innerIntent.getPackage());
-        assertEquals(CURRENT_USER_INFO.id, innerIntent.getContentUserHint());
+        assertEquals(UserHandle.USER_CURRENT, innerIntent.getContentUserHint());
 
-        assertEquals(MANAGED_PROFILE_INFO.id, activity.mUserIdActivityLaunchedIn);
+        assertEquals(CURRENT_USER_INFO.id, activity.mUserIdActivityLaunchedIn);
     }
 
     @Test
@@ -533,6 +539,22 @@ public class IntentForwarderActivityTest {
     }
 
     @Test
+    public void shouldSkipDisclosure_duringDeviceSetup() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                /* value= */ 0);
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("http", "apache.org", null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
     public void forwardToManagedProfile_LoggingTest() throws Exception {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
 
@@ -590,6 +612,8 @@ public class IntentForwarderActivityTest {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
         sActivityName = "MyTestActivity";
         sPackageName = "test.package.name";
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                /* value= */ 1);
         when(mApplicationInfo.isSystemApp()).thenReturn(true);
         // Managed profile exists.
         List<UserInfo> profiles = new ArrayList<>();
@@ -611,6 +635,11 @@ public class IntentForwarderActivityTest {
         public void onCreate(@Nullable Bundle savedInstanceState) {
             getIntent().setComponent(sComponentName);
             super.onCreate(savedInstanceState);
+            try {
+                mExecutorService.awaitTermination(/* timeout= */ 30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -649,7 +678,8 @@ public class IntentForwarderActivityTest {
         }
 
         @Override
-        public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
+        public CompletableFuture<ResolveInfo> resolveActivityAsUser(
+                Intent intent, int flags, int userId) {
             ActivityInfo activityInfo = new ActivityInfo();
             activityInfo.packageName = sPackageName;
             activityInfo.name = sActivityName;
@@ -658,7 +688,7 @@ public class IntentForwarderActivityTest {
             ResolveInfo resolveInfo = new ResolveInfo();
             resolveInfo.activityInfo = activityInfo;
 
-            return resolveInfo;
+            return CompletableFuture.completedFuture(resolveInfo);
         }
 
         @Override

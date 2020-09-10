@@ -18,4 +18,8 @@
 <resources>
     <!-- The height of the divider between the individual notifications. -->
     <dimen name="notification_divider_height">1dp</dimen>
+
+    <!-- Height of the background gradient behind the screenshot UI (taller in dark mode) -->
+    <dimen name="screenshot_bg_protection_height">375dp</dimen>
+
 </resources>

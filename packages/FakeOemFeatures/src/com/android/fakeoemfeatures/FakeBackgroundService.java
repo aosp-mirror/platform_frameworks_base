@@ -16,19 +16,24 @@
 
 package com.android.fakeoemfeatures;
 
-import java.util.ArrayList;
-import java.util.Random;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import android.app.Dialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class FakeBackgroundService extends Service {
     final ArrayList<int[]> mAllocs = new ArrayList<int[]>();
@@ -68,13 +73,15 @@ public class FakeBackgroundService extends Service {
         super.onCreate();
         mHandler.sendEmptyMessageDelayed(MSG_TICK, TICK_DELAY);
 
-        final WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
-        final Display display = wm.getDefaultDisplay();
+        final DisplayManager dm = getSystemService(DisplayManager.class);
+        final Display display = dm.getDisplay(DEFAULT_DISPLAY);
+        final Context windowContext = createDisplayContext(display)
+                .createWindowContext(TYPE_APPLICATION_OVERLAY, null /* options */);
 
         // Make a fake window that is always around eating graphics resources.
-        FakeView view = new FakeView(this);
-        Dialog dialog = new Dialog(this, android.R.style.Theme_Holo_Dialog);
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+        FakeView view = new FakeView(windowContext);
+        Dialog dialog = new Dialog(windowContext, android.R.style.Theme_Holo_Dialog);
+        dialog.getWindow().setType(TYPE_APPLICATION_OVERLAY);
         dialog.getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -89,7 +96,11 @@ public class FakeBackgroundService extends Service {
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);
         WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-        int maxSize = display.getMaximumSizeDimension();
+        // Create an instance of WindowManager that is adjusted to the area of the display dedicated
+        // for windows with type TYPE_APPLICATION_OVERLAY.
+        final WindowManager wm = windowContext.getSystemService(WindowManager.class);
+        Rect maxWindowBounds = wm.getMaximumWindowMetrics().getBounds();
+        int maxSize = Math.max(maxWindowBounds.width(), maxWindowBounds.height());
         maxSize *= 2;
         lp.x = maxSize;
         lp.y = maxSize;

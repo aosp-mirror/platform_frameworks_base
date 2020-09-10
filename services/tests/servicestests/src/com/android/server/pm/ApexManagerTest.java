@@ -32,10 +32,10 @@ import static org.testng.Assert.assertThrows;
 
 import android.apex.ApexInfo;
 import android.apex.ApexSessionInfo;
+import android.apex.ApexSessionParams;
 import android.apex.IApexService;
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.os.FileUtils;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
@@ -43,41 +43,49 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.frameworks.servicestests.R;
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.TestPackageParser2;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
+
 public class ApexManagerTest {
     private static final String TEST_APEX_PKG = "com.android.apex.test";
+    private static final String TEST_APEX_FILE_NAME = "apex.test.apex";
     private static final int TEST_SESSION_ID = 99999999;
     private static final int[] TEST_CHILD_SESSION_ID = {8888, 7777};
     private ApexManager mApexManager;
     private Context mContext;
+    private PackageParser2 mPackageParser2;
 
     private IApexService mApexService = mock(IApexService.class);
 
     @Before
     public void setUp() throws RemoteException {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        ApexManager.ApexManagerImpl managerImpl = spy(new ApexManager.ApexManagerImpl(mContext));
+        ApexManager.ApexManagerImpl managerImpl = spy(new ApexManager.ApexManagerImpl());
         doReturn(mApexService).when(managerImpl).waitForApexService();
         mApexManager = managerImpl;
+        mPackageParser2 = new TestPackageParser2();
     }
 
     @Test
     public void testGetPackageInfo_setFlagsMatchActivePackage() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, false));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
         final PackageInfo activePkgPi = mApexManager.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
 
@@ -93,6 +101,8 @@ public class ApexManagerTest {
     @Test
     public void testGetPackageInfo_setFlagsMatchFactoryPackage() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(false, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
         PackageInfo factoryPkgPi = mApexManager.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_FACTORY_PACKAGE);
 
@@ -108,6 +118,8 @@ public class ApexManagerTest {
     @Test
     public void testGetPackageInfo_setFlagsNone() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(false, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getPackageInfo(TEST_APEX_PKG, 0)).isNull();
     }
@@ -115,6 +127,8 @@ public class ApexManagerTest {
     @Test
     public void testGetActivePackages() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getActivePackages()).isNotEmpty();
     }
@@ -122,6 +136,8 @@ public class ApexManagerTest {
     @Test
     public void testGetActivePackages_noneActivePackages() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(false, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getActivePackages()).isEmpty();
     }
@@ -129,6 +145,8 @@ public class ApexManagerTest {
     @Test
     public void testGetFactoryPackages() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(false, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getFactoryPackages()).isNotEmpty();
     }
@@ -136,6 +154,8 @@ public class ApexManagerTest {
     @Test
     public void testGetFactoryPackages_noneFactoryPackages() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, false));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getFactoryPackages()).isEmpty();
     }
@@ -143,6 +163,8 @@ public class ApexManagerTest {
     @Test
     public void testGetInactivePackages() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(false, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getInactivePackages()).isNotEmpty();
     }
@@ -150,6 +172,8 @@ public class ApexManagerTest {
     @Test
     public void testGetInactivePackages_noneInactivePackages() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, false));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getInactivePackages()).isEmpty();
     }
@@ -157,6 +181,8 @@ public class ApexManagerTest {
     @Test
     public void testIsApexPackage() throws RemoteException {
         when(mApexService.getAllPackages()).thenReturn(createApexInfo(false, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.isApexPackage(TEST_APEX_PKG)).isTrue();
     }
@@ -190,7 +216,7 @@ public class ApexManagerTest {
         }).when(mApexService).submitStagedSession(any(), any());
 
         assertThrows(PackageManagerException.class,
-                () -> mApexManager.submitStagedSession(TEST_SESSION_ID, TEST_CHILD_SESSION_ID));
+                () -> mApexManager.submitStagedSession(testParamsWithChildren()));
     }
 
     @Test
@@ -198,7 +224,7 @@ public class ApexManagerTest {
         doThrow(RemoteException.class).when(mApexService).submitStagedSession(any(), any());
 
         assertThrows(RuntimeException.class,
-                () -> mApexManager.submitStagedSession(TEST_SESSION_ID, TEST_CHILD_SESSION_ID));
+                () -> mApexManager.submitStagedSession(testParamsWithChildren()));
     }
 
     @Test
@@ -247,14 +273,30 @@ public class ApexManagerTest {
         assertThat(mApexManager.uninstallApex(TEST_APEX_PKG)).isFalse();
     }
 
+    @Test
+    public void testReportErrorWithApkInApex() throws RemoteException {
+        when(mApexService.getActivePackages()).thenReturn(createApexInfo(true, true));
+        final ApexManager.ActiveApexInfo activeApex = mApexManager.getActiveApexInfos().get(0);
+        assertThat(activeApex.apexModuleName).isEqualTo(TEST_APEX_PKG);
+
+        when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isTrue();
+        mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath());
+        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isFalse();
+    }
+
     private ApexInfo[] createApexInfo(boolean isActive, boolean isFactory) {
-        File apexFile = copyRawResourceToFile(TEST_APEX_PKG, R.raw.apex_test);
+        File apexFile = extractResource(TEST_APEX_PKG,  TEST_APEX_FILE_NAME);
         ApexInfo apexInfo = new ApexInfo();
         apexInfo.isActive = isActive;
         apexInfo.isFactory = isFactory;
         apexInfo.moduleName = TEST_APEX_PKG;
         apexInfo.modulePath = apexFile.getPath();
         apexInfo.versionCode = 191000070;
+        apexInfo.preinstalledModulePath = apexFile.getPath();
 
         return new ApexInfo[]{apexInfo};
     }
@@ -275,27 +317,36 @@ public class ApexManagerTest {
         return stagedSessionInfo;
     }
 
-    /**
-     * Copies a specified {@code resourceId} to a temp file. Returns a non-null file if the copy
-     * succeeded
-     */
-    File copyRawResourceToFile(String baseName, int resourceId) {
-        File outFile;
+    private static ApexSessionParams testParamsWithChildren() {
+        ApexSessionParams params = new ApexSessionParams();
+        params.sessionId = TEST_SESSION_ID;
+        params.childSessionIds = TEST_CHILD_SESSION_ID;
+        return params;
+    }
+
+    // Extracts the binary data from a resource and writes it to a temp file
+    private static File extractResource(String baseName, String fullResourceName) {
+        File file;
         try {
-            outFile = File.createTempFile(baseName, ".apex");
+            file = File.createTempFile(baseName, ".apex");
         } catch (IOException e) {
             throw new AssertionError("CreateTempFile IOException" + e);
         }
-
-        try (InputStream is = mContext.getResources().openRawResource(resourceId);
-             FileOutputStream os = new FileOutputStream(outFile)) {
-            assertThat(FileUtils.copy(is, os)).isGreaterThan(0L);
-        } catch (FileNotFoundException e) {
-            throw new AssertionError("File not found exception " + e);
+        try (
+                InputStream in = ApexManager.class.getClassLoader()
+                        .getResourceAsStream(fullResourceName);
+                OutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+            if (in == null) {
+                throw new IllegalArgumentException("Resource not found: " + fullResourceName);
+            }
+            byte[] buf = new byte[65536];
+            int chunkSize;
+            while ((chunkSize = in.read(buf)) != -1) {
+                out.write(buf, 0, chunkSize);
+            }
+            return file;
         } catch (IOException e) {
-            throw new AssertionError("IOException" + e);
+            throw new AssertionError("Exception while converting stream to file" + e);
         }
-
-        return outFile;
     }
 }

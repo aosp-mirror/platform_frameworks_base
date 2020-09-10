@@ -1,0 +1,6 @@
+// Baseline format: 1.0
+MissingGetterMatchingBuilder: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
+    android.net.wifi.rtt.RangingRequest does not declare a `getResponders()` method matching method android.net.wifi.rtt.RangingRequest.Builder.addResponder(android.net.wifi.rtt.ResponderConfig)
+
+MissingNullability: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
+

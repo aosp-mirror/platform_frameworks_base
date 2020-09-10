@@ -228,6 +228,18 @@ public abstract class ViewStructure {
     public abstract void setHint(CharSequence hint);
 
     /**
+     * Sets the identifier used to set the hint associated with this view.
+     *
+     * <p>Used as metadata for fingerprinting view nodes/structures.
+     *
+     * <p>Should only be set when the node is used for autofill purposes - it will be ignored
+     * when used for Assist.
+     */
+    public void setHintIdEntry(@NonNull String entryName) {
+        Preconditions.checkNotNull(entryName);
+    }
+
+    /**
      * Retrieve the last {@link #setText(CharSequence)}.
      */
     public abstract CharSequence getText();

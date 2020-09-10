@@ -16,10 +16,12 @@
 
 package com.android.server.hdmi;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
+
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
-import android.sysprop.HdmiProperties;
+import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -42,7 +44,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     // Device has cec switch functionality or not.
     // Default is false.
-    protected boolean mIsSwitchDevice = HdmiProperties.is_switch().orElse(false);
+    protected boolean mIsSwitchDevice = SystemProperties.getBoolean(
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
 
     // Routing port number used for Routing Control.
     // This records the default routing port or the previous valid routing port.
@@ -196,7 +199,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
-    // Source device with Switch functionality should implement this method.
+    // Only source devices that react to routing control messages should implement
+    // this method (e.g. a TV with built in switch).
     // TODO(): decide which type will handle the routing when multi device type is supported
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
         // do nothing
@@ -234,10 +238,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     protected void maySendActiveSource(int dest) {
-        if (mIsActiveSource) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
-                    mAddress, mService.getPhysicalAddress()));
+        if (!mIsActiveSource) {
+            return;
         }
+        addAndStartAction(new ActiveSourceAction(this, dest));
     }
 
     /**

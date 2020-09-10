@@ -13,32 +13,14 @@ option java_package com.android.server.am
 # Do not change these names without updating the checkin_events setting in
 # google3/googledata/wireless/android/provisioning/gservices.config !!
 #
-# An activity is being finished:
-30001 am_finish_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
-# A task is being brought to the front of the screen:
-30002 am_task_to_front (User|1|5),(Task|1|5)
-# An existing activity is being given a new intent:
-30003 am_new_intent (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
-# A new task is being created:
-30004 am_create_task (User|1|5),(Task ID|1|5)
-# A new activity is being created in an existing task:
-30005 am_create_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
-# An activity has been resumed into the foreground but was not already running:
-30006 am_restart_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
-# An activity has been resumed and is now in the foreground:
-30007 am_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # Application Not Responding
 30008 am_anr (User|1|5),(pid|1|5),(Package Name|3),(Flags|1|5),(reason|3)
-# Activity launch time
-30009 am_activity_launch_time (User|1|5),(Token|1|5),(Component Name|3),(time|2|3)
+
 # Application process bound to work
 30010 am_proc_bound (User|1|5),(PID|1|5),(Process Name|3)
 # Application process died
 30011 am_proc_died (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(ProcState|1|5)
-# The Activity Manager failed to pause the given activity.
-30012 am_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
-# Attempting to pause the current activity
-30013 am_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3)
+
 # Application process has been started
 30014 am_proc_start (User|1|5),(PID|1|5),(UID|1|5),(Process Name|3),(Type|3),(Component|3)
 # An application process has been marked as bad
@@ -47,16 +29,7 @@ option java_package com.android.server.am
 30016 am_proc_good (User|1|5),(UID|1|5),(Process Name|3)
 # Reporting to applications that memory is low
 30017 am_low_memory (Num Processes|1|1)
-# An activity is being destroyed:
-30018 am_destroy_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
-# An activity has been relaunched, resumed, and is now in the foreground:
-30019 am_relaunch_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
-# An activity has been relaunched:
-30020 am_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
-# The activity's onPause has been called.
-30021 am_on_paused_called (User|1|5),(Component Name|3),(Reason|3)
-# The activity's onResume has been called.
-30022 am_on_resume_called (User|1|5),(Component Name|3),(Reason|3)
+
 # Kill a process to reclaim memory.
 30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
 # Discard an undelivered serialized broadcast (timeout/ANR/crash)
@@ -87,12 +60,6 @@ option java_package com.android.server.am
 # User switched
 30041 am_switch_user (id|1|5)
 
-# Activity set to resumed
-30043 am_set_resumed_activity (User|1|5),(Component Name|3),(Reason|3)
-
-# Stack focus
-30044 am_focused_stack (User|1|5),(Display Id|1|5),(Focused Stack Id|1|5),(Last Focused Stack Id|1|5),(Reason|3)
-
 # Running pre boot receiver
 30045 am_pre_boot (User|1|5),(Package|3)
 
@@ -100,11 +67,6 @@ option java_package com.android.server.am
 30046 am_meminfo (Cached|2|2),(Free|2|2),(Zram|2|2),(Kernel|2|2),(Native|2|2)
 # Report collection of memory used by a process
 30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2),(Rss|2|2),(StatType|1|5),(ProcState|1|5),(TimeToCollect|2|2)
-
-# Attempting to stop an activity
-30048 am_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
-# The activity's onStop has been called.
-30049 am_on_stop_called (User|1|5),(Component Name|3),(Reason|3)
 
 # Report changing memory conditions (Values are ProcessStats.ADJ_MEM_FACTOR* constants)
 30050 am_mem_factor (Current|1|5),(Previous|1|5)
@@ -123,27 +85,25 @@ option java_package com.android.server.am
 # Note when a service is being forcibly stopped because its app went idle.
 30056 am_stop_idle_service (UID|1|5),(Component Name|3)
 
-# The activity's onCreate has been called.
-30057 am_on_create_called (User|1|5),(Component Name|3),(Reason|3)
-# The activity's onRestart has been called.
-30058 am_on_restart_called (User|1|5),(Component Name|3),(Reason|3)
-# The activity's onStart has been called.
-30059 am_on_start_called (User|1|5),(Component Name|3),(Reason|3)
-# The activity's onDestroy has been called.
-30060 am_on_destroy_called (User|1|5),(Component Name|3),(Reason|3)
-# The activity's onActivityResult has been called.
-30062 am_on_activity_result_called (User|1|5),(Component Name|3),(Reason|3)
-
-# The task is being removed from its parent stack
-30061 am_remove_task (Task ID|1|5), (Stack ID|1|5)
-
 # The task is being compacted
 30063 am_compact (Pid|1|5),(Process Name|3),(Action|3),(BeforeRssTotal|2|2),(BeforeRssFile|2|2),(BeforeRssAnon|2|2),(BeforeRssSwap|2|2),(DeltaRssTotal|2|2),(DeltaRssFile|2|2),(DeltaRssAnon|2|2),(DeltaRssSwap|2|2),(Time|2|3),(LastAction|1|2),(LastActionTimestamp|2|3),(setAdj|1|2),(procState|1|2),(BeforeZRAMFree|2|2),(DeltaZRAMFree|2|2)
 
-# The activity's onTopResumedActivityChanged(true) has been called.
-30064 am_on_top_resumed_gained_called (User|1|5),(Component Name|3),(Reason|3)
-# The activity's onTopResumedActivityChanged(false) has been called.
-30065 am_on_top_resumed_lost_called (User|1|5),(Component Name|3),(Reason|3)
+# The task is being frozen
+30068 am_freeze (Pid|1|5),(Process Name|3)
 
-# An activity been add into stopping list
-30066 am_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
+# The task is being unfrozen
+30069 am_unfreeze (Pid|1|5),(Process Name|3)
+
+# User switch events
+30070 uc_finish_user_unlocking (userId|1|5)
+30071 uc_finish_user_unlocked (userId|1|5)
+30072 uc_finish_user_unlocked_completed (userId|1|5)
+30073 uc_finish_user_stopping (userId|1|5)
+30074 uc_finish_user_stopped (userId|1|5)
+30075 uc_switch_user (userId|1|5)
+30076 uc_start_user_internal (userId|1|5)
+30077 uc_unlock_user (userId|1|5)
+30078 uc_finish_user_boot (userId|1|5)
+30079 uc_dispatch_user_switch (oldUserId|1|5) (newUserId|1|5)
+30080 uc_continue_user_switch (oldUserId|1|5) (newUserId|1|5)
+30081 uc_send_user_broadcast (userId|1|5),(IntentAction|3)

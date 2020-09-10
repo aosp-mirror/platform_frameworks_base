@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.platform.test.annotations.FlakyTest;
 import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
@@ -328,6 +329,7 @@ public class FileUpdaterTest {
         veriryWtf(0);
     }
 
+    @FlakyTest
     @Test
     public void testAll() throws Exception {
         // Run multiple tests on the single target instance.

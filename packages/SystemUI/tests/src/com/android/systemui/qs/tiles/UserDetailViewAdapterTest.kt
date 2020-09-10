@@ -24,8 +24,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.internal.util.UserIcons
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,18 +52,21 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
     @Mock private lateinit var mOtherView: View
     @Mock private lateinit var mInflatedUserDetailItemView: UserDetailItemView
     @Mock private lateinit var mUserInfo: UserInfo
-    @Mock private lateinit var mPicture: Bitmap
     @Mock private lateinit var mLayoutInflater: LayoutInflater
     private lateinit var adapter: UserDetailView.Adapter
+    private lateinit var uiEventLogger: UiEventLoggerFake
+    private lateinit var mPicture: Bitmap
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        uiEventLogger = UiEventLoggerFake()
 
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater)
         `when`(mLayoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
                 .thenReturn(mInflatedUserDetailItemView)
-        adapter = UserDetailView.Adapter(mContext, mUserSwitcherController)
+        adapter = UserDetailView.Adapter(mContext, mUserSwitcherController, uiEventLogger)
+        mPicture = UserIcons.convertToBitmap(mContext.getDrawable(R.drawable.ic_avatar_user))
     }
 
     private fun clickableTest(
@@ -74,6 +82,17 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
         } else {
             verify(v).setOnClickListener(null)
         }
+    }
+
+    @Test
+    fun testUserSwitchLog() {
+        val user = createUserRecord(false /* current */, false /* guest */)
+        val v = adapter.createUserDetailItemView(View(mContext), mParent, user)
+        `when`(v.tag).thenReturn(user)
+        adapter.onClick(v)
+
+        assertEquals(1, uiEventLogger.numLogs())
+        assertEquals(QSUserSwitcherEvent.QS_USER_SWITCH.id, uiEventLogger.eventId(0))
     }
 
     @Test

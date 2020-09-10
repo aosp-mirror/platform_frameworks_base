@@ -19,6 +19,7 @@ package android.service.notification;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -37,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -86,8 +88,8 @@ import java.util.Objects;
  * or after {@link #onListenerDisconnected()}.
  * </p>
  * <p> Notification listeners cannot get notification access or be bound by the system on
- * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices. The system also ignores
- * notification listeners running in a work profile. A
+ * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices running Android Q (and below).
+ * The system also ignores notification listeners running in a work profile. A
  * {@link android.app.admin.DevicePolicyManager} might block notifications originating from a work
  * profile.</p>
  * <p>
@@ -212,6 +214,32 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_SNOOZED = 18;
     /** Notification was canceled due to timeout */
     public static final int REASON_TIMEOUT = 19;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = "REASON_", value = {
+            REASON_CLICK,
+            REASON_CANCEL,
+            REASON_CANCEL_ALL,
+            REASON_ERROR,
+            REASON_PACKAGE_CHANGED,
+            REASON_USER_STOPPED,
+            REASON_PACKAGE_BANNED,
+            REASON_APP_CANCEL,
+            REASON_APP_CANCEL_ALL,
+            REASON_LISTENER_CANCEL,
+            REASON_LISTENER_CANCEL_ALL,
+            REASON_GROUP_SUMMARY_CANCELED,
+            REASON_GROUP_OPTIMIZATION,
+            REASON_PACKAGE_SUSPENDED,
+            REASON_PROFILE_TURNED_OFF,
+            REASON_UNAUTOBUNDLED,
+            REASON_CHANNEL_BANNED,
+            REASON_SNOOZED,
+            REASON_TIMEOUT
+    })
+    public @interface NotificationCancelReason{};
 
     /**
      * The full trim of the StatusBarNotification including all its features.
@@ -1272,6 +1300,10 @@ public abstract class NotificationListenerService extends Service {
                 Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification", e);
                 return;
             }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification");
+                return;
+            }
 
             try {
                 // convert icon metadata to legacy format for older clients
@@ -1311,6 +1343,10 @@ public abstract class NotificationListenerService extends Service {
                 sbn = sbnHolder.get();
             } catch (RemoteException e) {
                 Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification", e);
+                return;
+            }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification");
                 return;
             }
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
@@ -1371,6 +1407,22 @@ public abstract class NotificationListenerService extends Service {
         @Override
         public void onNotificationsSeen(List<String> keys)
                 throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onPanelRevealed(int items) throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onPanelHidden() throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationVisibilityChanged(
+                String key, boolean isVisible) {
             // no-op in the listener
         }
 
@@ -1515,6 +1567,9 @@ public abstract class NotificationListenerService extends Service {
         private ArrayList<CharSequence> mSmartReplies;
         private boolean mCanBubble;
         private boolean mVisuallyInterruptive;
+        private boolean mIsConversation;
+        private ShortcutInfo mShortcutInfo;
+        private boolean mIsBubble;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1547,6 +1602,9 @@ public abstract class NotificationListenerService extends Service {
             out.writeCharSequenceList(mSmartReplies);
             out.writeBoolean(mCanBubble);
             out.writeBoolean(mVisuallyInterruptive);
+            out.writeBoolean(mIsConversation);
+            out.writeParcelable(mShortcutInfo, flags);
+            out.writeBoolean(mIsBubble);
         }
 
         /** @hide */
@@ -1568,7 +1626,7 @@ public abstract class NotificationListenerService extends Service {
             mImportance = in.readInt();
             mImportanceExplanation = in.readCharSequence(); // may be null
             mOverrideGroupKey = in.readString(); // may be null
-            mChannel = (NotificationChannel) in.readParcelable(cl); // may be null
+            mChannel = in.readParcelable(cl); // may be null
             mOverridePeople = in.createStringArrayList();
             mSnoozeCriteria = in.createTypedArrayList(SnoozeCriterion.CREATOR);
             mShowBadge = in.readBoolean();
@@ -1580,6 +1638,9 @@ public abstract class NotificationListenerService extends Service {
             mSmartReplies = in.readCharSequenceList();
             mCanBubble = in.readBoolean();
             mVisuallyInterruptive = in.readBoolean();
+            mIsConversation = in.readBoolean();
+            mShortcutInfo = in.readParcelable(cl);
+            mIsBubble = in.readBoolean();
         }
 
 
@@ -1777,6 +1838,29 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns whether this notification is a conversation notification.
+         * @hide
+         */
+        public boolean isConversation() {
+            return mIsConversation;
+        }
+
+        /**
+         * Returns whether this notification is actively a bubble.
+         * @hide
+         */
+        public boolean isBubble() {
+            return mIsBubble;
+        }
+
+        /**
+         * @hide
+         */
+        public @Nullable ShortcutInfo getShortcutInfo() {
+            return mShortcutInfo;
+        }
+
+        /**
          * @hide
          */
         @VisibleForTesting
@@ -1788,7 +1872,8 @@ public abstract class NotificationListenerService extends Service {
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
-                boolean visuallyInterruptive) {
+                boolean visuallyInterruptive, boolean isConversation, ShortcutInfo shortcutInfo,
+                boolean isBubble) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1810,6 +1895,9 @@ public abstract class NotificationListenerService extends Service {
             mSmartReplies = smartReplies;
             mCanBubble = canBubble;
             mVisuallyInterruptive = visuallyInterruptive;
+            mIsConversation = isConversation;
+            mShortcutInfo = shortcutInfo;
+            mIsBubble = isBubble;
         }
 
         /**
@@ -1835,7 +1923,10 @@ public abstract class NotificationListenerService extends Service {
                     other.mSmartActions,
                     other.mSmartReplies,
                     other.mCanBubble,
-                    other.mVisuallyInterruptive);
+                    other.mVisuallyInterruptive,
+                    other.mIsConversation,
+                    other.mShortcutInfo,
+                    other.mIsBubble);
         }
 
         /**
@@ -1888,7 +1979,12 @@ public abstract class NotificationListenerService extends Service {
                         == (other.mSmartActions == null ? 0 : other.mSmartActions.size()))
                     && Objects.equals(mSmartReplies, other.mSmartReplies)
                     && Objects.equals(mCanBubble, other.mCanBubble)
-                    && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive);
+                    && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive)
+                    && Objects.equals(mIsConversation, other.mIsConversation)
+                    // Shortcutinfo doesn't have equals either; use id
+                    &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),
+                    (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()))
+                    && Objects.equals(mIsBubble, other.mIsBubble);
         }
     }
 

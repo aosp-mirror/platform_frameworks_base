@@ -17,6 +17,7 @@
 package com.android.systemui.shared.system;
 
 public interface RemoteAnimationRunnerCompat {
-    void onAnimationStart(RemoteAnimationTargetCompat[] apps, Runnable finishedCallback);
+    void onAnimationStart(RemoteAnimationTargetCompat[] apps,
+            RemoteAnimationTargetCompat[] wallpapers, Runnable finishedCallback);
     void onAnimationCancelled();
 }

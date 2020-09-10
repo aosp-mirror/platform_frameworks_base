@@ -80,6 +80,8 @@ public final class AutofillServiceInfo {
     @Nullable
     private final ArrayMap<String, Long> mCompatibilityPackages;
 
+    private final boolean mInlineSuggestionsEnabled;
+
     public AutofillServiceInfo(Context context, ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         this(context, getServiceInfoOrThrow(comp, userHandle));
@@ -112,11 +114,13 @@ public final class AutofillServiceInfo {
         if (parser == null) {
             mSettingsActivity = null;
             mCompatibilityPackages = null;
+            mInlineSuggestionsEnabled = false;
             return;
         }
 
         String settingsActivity = null;
         ArrayMap<String, Long> compatibilityPackages = null;
+        boolean inlineSuggestionsEnabled = false; // false by default.
 
         try {
             final Resources resources = context.getPackageManager().getResourcesForApplication(
@@ -135,6 +139,8 @@ public final class AutofillServiceInfo {
                             com.android.internal.R.styleable.AutofillService);
                     settingsActivity = afsAttributes.getString(
                             R.styleable.AutofillService_settingsActivity);
+                    inlineSuggestionsEnabled = afsAttributes.getBoolean(
+                            R.styleable.AutofillService_supportsInlineSuggestions, false);
                 } finally {
                     if (afsAttributes != null) {
                         afsAttributes.recycle();
@@ -150,6 +156,7 @@ public final class AutofillServiceInfo {
 
         mSettingsActivity = settingsActivity;
         mCompatibilityPackages = compatibilityPackages;
+        mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
     }
 
     private ArrayMap<String, Long> parseCompatibilityPackages(XmlPullParser parser,
@@ -227,6 +234,10 @@ public final class AutofillServiceInfo {
         return mCompatibilityPackages;
     }
 
+    public boolean isInlineSuggestionsEnabled() {
+        return mInlineSuggestionsEnabled;
+    }
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -235,6 +246,7 @@ public final class AutofillServiceInfo {
         builder.append(", settings:").append(mSettingsActivity);
         builder.append(", hasCompatPckgs:").append(mCompatibilityPackages != null
                 && !mCompatibilityPackages.isEmpty()).append("]");
+        builder.append(", inline suggestions enabled:").append(mInlineSuggestionsEnabled);
         return builder.toString();
     }
 
@@ -245,5 +257,7 @@ public final class AutofillServiceInfo {
         pw.print(prefix); pw.print("Component: "); pw.println(getServiceInfo().getComponentName());
         pw.print(prefix); pw.print("Settings: "); pw.println(mSettingsActivity);
         pw.print(prefix); pw.print("Compat packages: "); pw.println(mCompatibilityPackages);
+        pw.print(prefix); pw.print("Inline Suggestions Enabled: ");
+        pw.println(mInlineSuggestionsEnabled);
     }
 }

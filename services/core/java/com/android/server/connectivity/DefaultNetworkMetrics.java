@@ -81,10 +81,15 @@ public class DefaultNetworkMetrics {
         printEvent(localTimeMs, pw, mCurrentDefaultNetwork);
     }
 
-    public synchronized void listEventsAsProto(PrintWriter pw) {
+    /**
+     * Convert events in the ring buffer to a list of IpConnectivityEvent protos
+     */
+    public synchronized List<IpConnectivityEvent> listEventsAsProto() {
+        List<IpConnectivityEvent> list = new ArrayList<>();
         for (DefaultNetworkEvent ev : mEventsLog.toArray()) {
-            pw.print(IpConnectivityEventBuilder.toProto(ev));
+            list.add(IpConnectivityEventBuilder.toProto(ev));
         }
+        return list;
     }
 
     public synchronized void flushEvents(List<IpConnectivityEvent> out) {

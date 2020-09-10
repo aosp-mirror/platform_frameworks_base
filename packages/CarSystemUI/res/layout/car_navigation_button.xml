@@ -18,12 +18,51 @@
 -->
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.android.keyguard.AlphaOptimizedImageButton
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/car_nav_button_icon"
-        android:layout_height="wrap_content"
-        android:layout_width="@dimen/car_navigation_button_width"
-        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
         android:animateLayoutChanges="true"
-        android:scaleType="fitCenter">
-    </com.android.keyguard.AlphaOptimizedImageButton>
+        android:orientation="vertical">
+
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:id="@+id/car_nav_button_icon_image"
+            android:layout_height="@dimen/car_navigation_button_icon_height"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:animateLayoutChanges="true"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:tintMode="src_in"
+            android:tint="@color/car_nav_icon_fill_color"
+            android:clickable="false"
+        />
+
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:id="@+id/car_nav_button_more_icon"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:animateLayoutChanges="true"
+            android:src="@drawable/car_ic_arrow"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:clickable="false"
+            android:visibility="gone"
+        />
+
+        <ImageView
+            android:id="@+id/car_nav_button_unseen_icon"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/car_ic_unseen_indicator"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:clickable="false"
+        />
+
+    </FrameLayout>
 </merge>

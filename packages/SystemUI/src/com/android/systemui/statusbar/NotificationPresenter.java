@@ -52,7 +52,7 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     /**
      * Updates the visual representation of the notifications.
      */
-    void updateNotificationViews();
+    void updateNotificationViews(String reason);
 
     /**
      * Returns the maximum number of notifications to show while locked.

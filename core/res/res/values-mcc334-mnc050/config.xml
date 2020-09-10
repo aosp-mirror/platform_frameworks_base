@@ -31,8 +31,4 @@
       <item>9</item>
     </integer-array>
 
-    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
-    <string-array translatable="false" name="config_twoDigitNumberPattern">
-        <item>"#9"</item>
-    </string-array>
 </resources>

@@ -11,9 +11,8 @@ java_binary_host {
     ],
 }
 
-java_binary_host {
-    name: "statsd_testdrive",
-    manifest: "testdrive_manifest.txt",
+java_library_host {
+    name: "statsd_testdrive_lib",
     srcs: [
         "src/com/android/statsd/shelltools/testdrive/*.java",
         "src/com/android/statsd/shelltools/Utils.java",
@@ -23,3 +22,25 @@ java_binary_host {
         "guava",
     ],
 }
+
+
+java_binary_host {
+    name: "statsd_testdrive",
+    manifest: "testdrive_manifest.txt",
+    static_libs: [
+        "statsd_testdrive_lib",
+    ],
+}
+
+java_test_host {
+    name: "statsd_testdrive_test",
+    test_suites: ["general-tests"],
+    srcs: ["test/com/android/statsd/shelltools/testdrive/*.java"],
+    static_libs: [
+        "statsd_testdrive_lib",
+        "junit",
+        "platformprotos",
+        "guava",
+    ],
+}
+

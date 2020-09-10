@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
@@ -1118,24 +1119,6 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Get the Bluetooth alias of the remote device.
-     * If Alias is null, get the Bluetooth name instead.
-     *
-     * @return the Bluetooth alias, or null if no alias or there was a problem
-     * @hide
-     * @see #getAlias()
-     * @see #getName()
-     */
-    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getName()} instead.")
-    public String getAliasName() {
-        String name = getAlias();
-        if (name == null) {
-            name = getName();
-        }
-        return name;
-    }
-
-    /**
      * Get the most recent identified battery level of this Bluetooth device
      *
      * @return Battery level in percents from 0 to 100, {@link #BATTERY_LEVEL_BLUETOOTH_OFF} if
@@ -1324,6 +1307,31 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
+    private static final String BLUETOOTH_BONDING_CACHE_PROPERTY =
+            "cache_key.bluetooth.get_bond_state";
+    private final PropertyInvalidatedCache<BluetoothDevice, Integer> mBluetoothBondCache =
+            new PropertyInvalidatedCache<BluetoothDevice, Integer>(
+                8, BLUETOOTH_BONDING_CACHE_PROPERTY) {
+                @Override
+                protected Integer recompute(BluetoothDevice query) {
+                    try {
+                        return sService.getBondState(query);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                }
+            };
+
+    /** @hide */
+    public void disableBluetoothGetBondStateCache() {
+        mBluetoothBondCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateBluetoothGetBondStateCache() {
+        PropertyInvalidatedCache.invalidateCache(BLUETOOTH_BONDING_CACHE_PROPERTY);
+    }
+
     /**
      * Get the bond state of the remote device.
      * <p>Possible values for the bond state are:
@@ -1341,9 +1349,13 @@ public final class BluetoothDevice implements Parcelable {
             return BOND_NONE;
         }
         try {
-            return service.getBondState(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
+            return mBluetoothBondCache.query(this);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof RemoteException) {
+                Log.e(TAG, "", e);
+            } else {
+                throw e;
+            }
         }
         return BOND_NONE;
     }

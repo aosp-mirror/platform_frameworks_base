@@ -78,9 +78,18 @@ public class PackageParserCacheHelper {
         /**
          * Read an string index from a parcel, and returns the corresponding string from the pool.
          */
-        @Override
         public String readString(Parcel p) {
             return mStrings.get(p.readInt());
+        }
+
+        @Override
+        public String readString8(Parcel p) {
+            return readString(p);
+        }
+
+        @Override
+        public String readString16(Parcel p) {
+            return readString(p);
         }
     }
 
@@ -110,7 +119,6 @@ public class PackageParserCacheHelper {
          * Instead of writing a string directly to a parcel, this method adds it to the pool,
          * and write the index in the pool to the parcel.
          */
-        @Override
         public void writeString(Parcel p, String s) {
             final Integer cur = mIndexes.get(s);
             if (cur != null) {
@@ -131,6 +139,16 @@ public class PackageParserCacheHelper {
 
                 p.writeInt(index);
             }
+        }
+
+        @Override
+        public void writeString8(Parcel p, String s) {
+            writeString(p, s);
+        }
+
+        @Override
+        public void writeString16(Parcel p, String s) {
+            writeString(p, s);
         }
 
         /**

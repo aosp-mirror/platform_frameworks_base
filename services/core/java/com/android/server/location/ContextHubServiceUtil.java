@@ -16,6 +16,8 @@
 
 package com.android.server.location;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.Manifest;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -30,11 +32,10 @@ import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * A class encapsulating helper functions used by the ContextHubService class
@@ -42,8 +43,7 @@ import java.util.ArrayList;
 /* package */ class ContextHubServiceUtil {
     private static final String TAG = "ContextHubServiceUtil";
     private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
-    private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
-            + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
+    private static final String CONTEXT_HUB_PERMISSION = Manifest.permission.ACCESS_CONTEXT_HUB;
 
     /**
      * Creates a ConcurrentHashMap of the Context Hub ID to the ContextHubInfo object given an
@@ -200,7 +200,11 @@ import java.util.ArrayList;
      */
     /* package */
     static void checkPermissions(Context context) {
-        context.enforceCallingPermission(HARDWARE_PERMISSION, ENFORCE_HW_PERMISSION_MESSAGE);
+        if (context.checkCallingPermission(HARDWARE_PERMISSION) != PERMISSION_GRANTED
+                && context.checkCallingPermission(CONTEXT_HUB_PERMISSION) != PERMISSION_GRANTED) {
+            throw new SecurityException(
+                "LOCATION_HARDWARE or ACCESS_CONTEXT_HUB permission required to use Context Hub");
+        }
     }
 
     /**

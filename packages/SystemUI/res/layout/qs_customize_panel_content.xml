@@ -52,7 +52,7 @@
             android:scrollIndicators="top"
             android:scrollbars="vertical"
             android:scrollbarStyle="outsideOverlay"
-            android:importantForAccessibility="no" />
+            android:importantForAccessibility="auto" />
     </com.android.keyguard.AlphaOptimizedLinearLayout>
 
     <View

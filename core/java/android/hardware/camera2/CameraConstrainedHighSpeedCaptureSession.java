@@ -25,9 +25,12 @@ import java.util.List;
  * A constrained high speed capture session for a {@link CameraDevice}, used for capturing high
  * speed images from the {@link CameraDevice} for high speed video recording use case.
  * <p>
- * A CameraHighSpeedCaptureSession is created by providing a set of target output surfaces to
- * {@link CameraDevice#createConstrainedHighSpeedCaptureSession}, Once created, the session is
- * active until a new session is created by the camera device, or the camera device is closed.
+ * A CameraConstrainedHighSpeedCaptureSession is created by providing a session configuration to
+ * {@link CameraDevice#createCaptureSession(SessionConfiguration)} with a type of
+ * {@link android.hardware.camera2.params.SessionConfiguration#SESSION_HIGH_SPEED}. The
+ * CameraCaptureSession returned from {@link CameraCaptureSession.StateCallback} can then be cast to
+ * a CameraConstrainedHighSpeedCaptureSession. Once created, the session is active until a new
+ * session is created by the camera device, or the camera device is closed.
  * </p>
  * <p>
  * An active high speed capture session is a specialized capture session that is only targeted at
@@ -37,8 +40,8 @@ import java.util.List;
  * accepts request lists created via {@link #createHighSpeedRequestList}, and the request list can
  * only be submitted to this session via {@link CameraCaptureSession#captureBurst captureBurst}, or
  * {@link CameraCaptureSession#setRepeatingBurst setRepeatingBurst}. See
- * {@link CameraDevice#createConstrainedHighSpeedCaptureSession} for more details of the
- * limitations.
+ * {@link CameraDevice#createCaptureSession(android.hardware.camera2.params.SessionConfiguration)}
+ * for more details of the limitations.
  * </p>
  * <p>
  * Creating a session is an expensive operation and can take several hundred milliseconds, since it
@@ -50,13 +53,6 @@ import java.util.List;
  * completed, then the {@link CameraCaptureSession.StateCallback#onConfigureFailed} is called, and
  * the session will not become active.
  * </p>
- * <!--
- * <p>
- * Any capture requests (repeating or non-repeating) submitted before the session is ready will be
- * queued up and will begin capture once the session becomes ready. In case the session cannot be
- * configured and {@link CameraCaptureSession.StateCallback#onConfigureFailed onConfigureFailed} is
- * called, all queued capture requests are discarded.  </p>
- * -->
  * <p>
  * If a new session is created by the camera device, then the previous session is closed, and its
  * associated {@link CameraCaptureSession.StateCallback#onClosed onClosed} callback will be

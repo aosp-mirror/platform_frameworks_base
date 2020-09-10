@@ -16,9 +16,8 @@
 
 package android.hardware.camera2.params;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Immutable class to store a 4-element vector of integers corresponding to a 2x2 pattern
@@ -88,7 +87,7 @@ public final class BlackLevelPattern {
      * @throws NullPointerException if the destination is null.
      */
     public void copyTo(int[] destination, int offset) {
-        checkNotNull(destination, "destination must not be null");
+        Objects.requireNonNull(destination, "destination must not be null");
         if (offset < 0) {
             throw new IllegalArgumentException("Null offset passed to copyTo");
         }

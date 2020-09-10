@@ -82,7 +82,7 @@ final class HdmiCecController {
 
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
-    private static final int MAX_CEC_MESSAGE_HISTORY = 200;
+    private static final int MAX_HDMI_MESSAGE_HISTORY = 250;
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
@@ -117,9 +117,9 @@ final class HdmiCecController {
     // Stores the local CEC devices in the system. Device type is used for key.
     private final SparseArray<HdmiCecLocalDevice> mLocalDevices = new SparseArray<>();
 
-    // Stores recent CEC messages history for debugging purpose.
-    private final ArrayBlockingQueue<MessageHistoryRecord> mMessageHistory =
-            new ArrayBlockingQueue<>(MAX_CEC_MESSAGE_HISTORY);
+    // Stores recent CEC messages and HDMI Hotplug event history for debugging purpose.
+    private final ArrayBlockingQueue<Dumpable> mMessageHistory =
+            new ArrayBlockingQueue<>(MAX_HDMI_MESSAGE_HISTORY);
 
     private final NativeWrapper mNativeWrapperImpl;
 
@@ -575,7 +575,9 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (isAcceptableAddress(message.getDestination()) && mService.handleCecCommand(message)) {
+        if ((isAcceptableAddress(message.getDestination())
+            || !mService.isAddressAllocated())
+            && mService.handleCecCommand(message)) {
             return;
         }
         // Not handled message, so we will reply it with <Feature Abort>.
@@ -611,7 +613,7 @@ final class HdmiCecController {
     void sendCommand(final HdmiCecMessage cecMessage,
             final HdmiControlService.SendMessageCallback callback) {
         assertRunOnServiceThread();
-        addMessageToHistory(false /* isReceived */, cecMessage);
+        addCecMessageToHistory(false /* isReceived */, cecMessage);
         runOnIoThread(new Runnable() {
             @Override
             public void run() {
@@ -651,7 +653,7 @@ final class HdmiCecController {
         assertRunOnServiceThread();
         HdmiCecMessage command = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
         HdmiLogger.debug("[R]:" + command);
-        addMessageToHistory(true /* isReceived */, command);
+        addCecMessageToHistory(true /* isReceived */, command);
         onReceiveCommand(command);
     }
 
@@ -662,16 +664,26 @@ final class HdmiCecController {
     private void handleHotplug(int port, boolean connected) {
         assertRunOnServiceThread();
         HdmiLogger.debug("Hotplug event:[port:%d, connected:%b]", port, connected);
+        addHotplugEventToHistory(port, connected);
         mService.onHotplug(port, connected);
     }
 
     @ServiceThreadOnly
-    private void addMessageToHistory(boolean isReceived, HdmiCecMessage message) {
+    private void addHotplugEventToHistory(int port, boolean connected) {
         assertRunOnServiceThread();
-        MessageHistoryRecord record = new MessageHistoryRecord(isReceived, message);
-        if (!mMessageHistory.offer(record)) {
+        addEventToHistory(new HotplugHistoryRecord(port, connected));
+    }
+
+    @ServiceThreadOnly
+    private void addCecMessageToHistory(boolean isReceived, HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        addEventToHistory(new MessageHistoryRecord(isReceived, message));
+    }
+
+    private void addEventToHistory(Dumpable event) {
+        if (!mMessageHistory.offer(event)) {
             mMessageHistory.poll();
-            mMessageHistory.offer(record);
+            mMessageHistory.offer(event);
         }
     }
 
@@ -682,10 +694,11 @@ final class HdmiCecController {
             mLocalDevices.valueAt(i).dump(pw);
             pw.decreaseIndent();
         }
+
         pw.println("CEC message history:");
         pw.increaseIndent();
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (MessageHistoryRecord record : mMessageHistory) {
+        for (Dumpable record : mMessageHistory) {
             record.dump(pw, sdf);
         }
         pw.decreaseIndent();
@@ -904,23 +917,55 @@ final class HdmiCecController {
         }
     }
 
-    private final class MessageHistoryRecord {
-        private final long mTime;
+    private abstract static class Dumpable {
+        protected final long mTime;
+
+        Dumpable() {
+            mTime = System.currentTimeMillis();
+        }
+
+        abstract void dump(IndentingPrintWriter pw, SimpleDateFormat sdf);
+    }
+
+    private static final class MessageHistoryRecord extends Dumpable {
         private final boolean mIsReceived; // true if received message and false if sent message
         private final HdmiCecMessage mMessage;
 
-        public MessageHistoryRecord(boolean isReceived, HdmiCecMessage message) {
-            mTime = System.currentTimeMillis();
+        MessageHistoryRecord(boolean isReceived, HdmiCecMessage message) {
+            super();
             mIsReceived = isReceived;
             mMessage = message;
         }
 
+        @Override
         void dump(final IndentingPrintWriter pw, SimpleDateFormat sdf) {
             pw.print(mIsReceived ? "[R]" : "[S]");
             pw.print(" time=");
             pw.print(sdf.format(new Date(mTime)));
             pw.print(" message=");
             pw.println(mMessage);
+        }
+    }
+
+    private static final class HotplugHistoryRecord extends Dumpable {
+        private final int mPort;
+        private final boolean mConnected;
+
+        HotplugHistoryRecord(int port, boolean connected) {
+            super();
+            mPort = port;
+            mConnected = connected;
+        }
+
+        @Override
+        void dump(final IndentingPrintWriter pw, SimpleDateFormat sdf) {
+            pw.print("[H]");
+            pw.print(" time=");
+            pw.print(sdf.format(new Date(mTime)));
+            pw.print(" hotplug port=");
+            pw.print(mPort);
+            pw.print(" connected=");
+            pw.println(mConnected);
         }
     }
 }

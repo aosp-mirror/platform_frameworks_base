@@ -28,7 +28,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
 import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
@@ -343,7 +343,7 @@ public class RcsUceAdapter {
 
         try {
             imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
-                    null /*featureId*/, contactNumbers, internalCallback);
+                    mContext.getAttributionTag(), contactNumbers, internalCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#requestCapabilities", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -491,7 +491,7 @@ public class RcsUceAdapter {
         try {
             // Telephony.SimInfo#IMS_RCS_UCE_ENABLED can also be used to listen to changes to this.
             return imsRcsController.isUceSettingEnabled(mSubId, mContext.getOpPackageName(),
-                    null /*featureId*/);
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#isUceSettingEnabled", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -539,7 +539,10 @@ public class RcsUceAdapter {
     }
 
     private IImsRcsController getIImsRcsController() {
-        IBinder binder = ServiceManager.getService(Context.TELEPHONY_IMS_SERVICE);
+        IBinder binder = TelephonyFrameworkInitializer
+                .getTelephonyServiceManager()
+                .getTelephonyImsServiceRegisterer()
+                .get();
         return IImsRcsController.Stub.asInterface(binder);
     }
 }

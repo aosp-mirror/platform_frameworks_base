@@ -40,7 +40,6 @@ public class GsmSmsAddress extends SmsAddress {
      *        (addressLength + 1) / 2"
      * @throws ParseException
      */
-
     @UnsupportedAppUsage
     public GsmSmsAddress(byte[] data, int offset, int length) throws ParseException {
         origBytes = new byte[length];

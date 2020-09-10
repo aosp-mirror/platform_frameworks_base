@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Ievadiet paroli"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"PIN kods nav pareizs."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nederīga karte."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Pilnībā uzlādēts"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Akumulators uzlādēts"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek bezvadu uzlāde"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek uzlāde"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek ātrā uzlāde"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Lai atbloķētu, nospiediet izvēlnes ikonu."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tīkls ir bloķēts."</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nav SIM kartes."</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Planšetdatorā nav SIM kartes."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Tālrunī nav SIM kartes."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Ievietojiet SIM karti."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Nav SIM kartes, vai arī to nevar nolasīt. Ievietojiet SIM karti."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Nelietojama SIM karte."</string>
@@ -84,25 +82,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Ievadiet PIN kodu, kas sastāv no 4 līdz 8 cipariem."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kodam ir jābūt vismaz 8 ciparus garam."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Atkārtoti ievadiet pareizo PUK kodu. Ja vairākas reizes ievadīsiet to nepareizi, SIM karte tiks neatgriezeniski atspējota."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"PIN kodi neatbilst."</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Pārāk daudz kombinācijas mēģinājumu"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat ievadījis nepareizu PIN kodu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat ievadījis nepareizu paroli.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat nepareizi uzzīmējis atbloķēšanas kombināciju.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt planšetdatoru. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) šis planšetdators tiks atiestatīts, kā arī visi planšetdatora dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt tālruni. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) šis tālrunis tiks atiestatīts, kā arī visi tālruņa dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt planšetdatoru. Šis planšetdators tiks atiestatīts, kā arī visi planšetdatora dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt tālruni. Šis tālrunis tiks atiestatīts, kā arī visi tālruņa dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt planšetdatoru. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) šis lietotājs tiks noņemts, kā arī visi lietotāja dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt tālruni. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) šis lietotājs tiks noņemts, kā arī visi lietotāja dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt planšetdatoru. Šis lietotājs tiks noņemts, kā arī visi lietotāja dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt tālruni. Šis lietotājs tiks noņemts, kā arī visi lietotāja dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt planšetdatoru. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) darba profils tiks noņemts, kā arī visi profila dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt tālruni. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) darba profils tiks noņemts, kā arī visi profila dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt planšetdatoru. Darba profils tiks noņemts, kā arī visi profila dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizi(-es) nesekmīgi mēģinājāt atbloķēt tālruni. Darba profils tiks noņemts, kā arī visi profila dati tiks dzēsti."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nepareizi norādījāt atbloķēšanas kombināciju. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) planšetdators būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundes(-ēm)."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) nepareizi norādījāt atbloķēšanas kombināciju. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> nesekmīga(-iem) mēģinājuma(-iem) tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nepareizs SIM kartes PIN kods. Lai atbloķētu ierīci, sazinieties ar mobilo sakaru operatoru."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="zero">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>

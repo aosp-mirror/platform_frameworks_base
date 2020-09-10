@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Fut fjalëkalimin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Kodi PIN është i pasaktë."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Karta e pavlefshme."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"I ngarkuar plotësisht"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"I ngarkuar"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me valë"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me shpejtësi"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Shtyp \"Meny\" për të shkyçur."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rrjeti është i kyçur"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nuk ka kartë SIM"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Nuk ka kartë SIM në tablet."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Në telefon nuk ka kartë SIM."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Fut një kartë SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Karta SIM mungon ose është e palexueshme. Fut një kartë të re SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Kartë SIM është e papërdorshme."</string>
@@ -83,25 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Shkruaj një PIN me 4 deri në 8 numra."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Kodi PUK duhet të jetë me 8 numra ose më shumë."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Fut kodin e saktë PUK. Provat e përsëritura do ta çaktivizojnë përgjithmonë kartën SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Kodet PIN nuk përputhen"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Shumë tentativa për motivin"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"E ke shkruar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht kodin PIN.\n\nProvo sërish për <xliff:g id="NUMBER_1">%2$d</xliff:g> sekonda."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"E ke shkruar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht fjalëkalimin.\n\nProvo sërish për <xliff:g id="NUMBER_1">%2$d</xliff:g> sekonda."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses për të vizatuar motivin tënd. \n\nProvo sërish për <xliff:g id="NUMBER_1">%2$d</xliff:g> sekonda."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht për ta shkyçur tabletin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> përpjekjeve të tjera të pasuksesshme, tableti do të rivendoset, gjë që do të rivendosë të gjitha të dhënat e tij."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht për ta shkyçur telefonin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> përpjekjeve të tjera të pasuksesshme, telefoni do të rivendoset, gjë që do të fshijë të gjitha të dhënat e tij."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur tabletin. Ky tablet do të rivendoset, gjë që do të fshijë të gjitha të dhënat e tij."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur telefonin. Ky telefon do të rivendoset, gjë që do të fshijë të gjitha të dhënat e tij."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses për ta shkyçur telefonin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, përdoruesi do të hiqet dhe të gjitha të dhënat e përdoruesit në të, do të fshihen."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses për ta shkyçur telefonin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, përdoruesi do të hiqet dhe të gjitha të dhënat e përdoruesit në të, do të fshihen."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur tabletin. Përdoruesi do të hiqet, gjë që do të fshijë të gjitha të dhënat e përdoruesit."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur telefonin. Përdoruesi do të hiqet, gjë që do të fshijë të gjitha të dhënat e përdoruesit."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses për ta shkyçur tabletin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, profili i punës do të hiqet dhe të gjitha të dhënat në të do të fshihen."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses për ta shkyçur telefonin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, profili i punës do të hiqet dhe të gjitha të dhënat në të do të fshihen."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur tabletin. Profili i punës do të hiqet, gjë që do të fshijë të gjitha të dhënat e profilit."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur telefonin. Profili i punës do të hiqet, gjë që do të fshijë të gjitha të dhënat e profilit."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Ke vizatuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses motivin tënd të shkyçjes. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, do të të duhet ta shkyçësh tabletin duke përdorur një llogari mail-i.\n\n Provo sërish për <xliff:g id="NUMBER_2">%3$d</xliff:g> sekonda."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Ke vizatuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses motivin tënd të shkyçjes. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, do të të duhet ta shkyçësh telefonin duke përdorur një llogari mail-i.\n\n Provo sërish për <xliff:g id="NUMBER_2">%3$d</xliff:g> sekonda."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Kodi PIN i kartës SIM është i pasaktë. Tani duhet të kontaktosh me operatorin për ta shkyçur pajisjen tënde."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">Kodi PIN i kartës SIM është i pasaktë. Të kanë mbetur edhe <xliff:g id="NUMBER_1">%d</xliff:g> tentativa.</item>

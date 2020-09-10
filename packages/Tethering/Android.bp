@@ -35,7 +35,9 @@ java_defaults {
         "net-utils-device-common",
     ],
     libs: [
+        "framework-statsd.stubs.module_lib",
         "framework-tethering.impl",
+        "framework-wifi",
         "unsupportedappusage",
     ],
     plugins: ["java_api_finder"],
@@ -98,7 +100,7 @@ java_defaults {
         "res",
     ],
     libs: [
-        "framework-tethering.impl",
+        "framework-tethering",
     ],
     jarjar_rules: "jarjar-rules.txt",
     optimize: {

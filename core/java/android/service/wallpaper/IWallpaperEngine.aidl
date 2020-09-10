@@ -37,4 +37,5 @@ oneway interface IWallpaperEngine {
     void requestWallpaperColors();
     @UnsupportedAppUsage
     void destroy();
+    void setZoomOut(float scale);
 }

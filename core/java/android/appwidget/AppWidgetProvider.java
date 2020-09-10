@@ -200,6 +200,9 @@ public class AppWidgetProvider extends BroadcastReceiver {
      * provider can immediately generate new RemoteViews suitable for its newly-restored set
      * of instances.
      *
+     * <p>In addition, you should set {@link AppWidgetManager#OPTION_APPWIDGET_RESTORE_COMPLETED}
+     * to true indicate if a widget has been restored successfully from the provider's side.
+     *
      * {@more}
      *
      * @param context

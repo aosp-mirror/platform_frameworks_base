@@ -16,14 +16,20 @@
 
 package com.android.systemui.statusbar;
 
+import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,12 +39,17 @@ import static org.mockito.Mockito.when;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.BatteryManager;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,20 +58,20 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.app.IBatteryStats;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
+import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
-import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
@@ -71,11 +82,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Collections;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
-    private final String ORGANIZATION_NAME = "organization";
+    private static final String ORGANIZATION_NAME = "organization";
 
     private String mDisclosureWithOrganization;
 
@@ -84,17 +97,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private ViewGroup mIndicationArea;
     @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
     private KeyguardIndicationTextView mDisclosure;
     @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
     private LockIcon mLockIcon;
-    @Mock
-    private LockPatternUtils mLockPatternUtils;
-    @Mock
-    private ShadeController mShadeController;
-    @Mock
-    private AccessibilityController mAccessibilityController;
-    @Mock
-    private UnlockMethodCache mUnlockMethodCache;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -104,12 +113,15 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private UserManager mUserManager;
     @Mock
+    private IBatteryStats mIBatteryStats;
+    @Mock
     private DockManager mDockManager;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
+    private WakeLockFake.Builder mWakeLockBuilder;
     private WakeLockFake mWakeLock;
     private Instrumentation mInstrumentation;
 
@@ -126,91 +138,33 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
 
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
+
         when(mIndicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure))
                 .thenReturn(mDisclosure);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
-        when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
+        when(mDisclosure.getAlpha()).thenReturn(1f);
 
         mWakeLock = new WakeLockFake();
+        mWakeLockBuilder = new WakeLockFake.Builder(mContext);
+        mWakeLockBuilder.setWakeLock(mWakeLock);
     }
 
     private void createController() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
-                mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
-                mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor,
-                mDockManager);
+
+        mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
+                mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
+                mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
+                mUserManager);
+        mController.setIndicationArea(mIndicationArea);
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
-    }
-
-    @Test
-    public void unmanaged() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
-        createController();
-
-        verify(mDisclosure).setVisibility(View.GONE);
-        verifyNoMoreInteractions(mDisclosure);
-    }
-
-    @Test
-    public void managedNoOwnerName() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
-        createController();
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
-        verifyNoMoreInteractions(mDisclosure);
-    }
-
-    @Test
-    public void managedOwnerName() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
-        createController();
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
-        verifyNoMoreInteractions(mDisclosure);
-    }
-
-    @Test
-    public void updateOnTheFly() {
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
-        createController();
-
-        final KeyguardUpdateMonitorCallback monitor = mController.getKeyguardCallback();
-        reset(mDisclosure);
-
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
-        monitor.onKeyguardVisibilityChanged(true);
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
-        verifyNoMoreInteractions(mDisclosure);
-        reset(mDisclosure);
-
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
-        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
-        monitor.onKeyguardVisibilityChanged(false);
-        monitor.onKeyguardVisibilityChanged(true);
-
-        verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
-        verifyNoMoreInteractions(mDisclosure);
-        reset(mDisclosure);
-
-        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
-        monitor.onKeyguardVisibilityChanged(false);
-        monitor.onKeyguardVisibilityChanged(true);
-
-        verify(mDisclosure).setVisibility(View.GONE);
-        verifyNoMoreInteractions(mDisclosure);
+        clearInvocations(mIBatteryStats);
+        verify(mDisclosure).getAlpha();
     }
 
     @Test
@@ -270,7 +224,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
         assertThat(mTextView.getCurrentTextColor()).isEqualTo(
-                Utils.getColorError(mContext).getDefaultColor());
+                mContext.getColor(R.color.misalignment_text_color));
     }
 
     @Test
@@ -288,7 +242,134 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
         assertThat(mTextView.getCurrentTextColor()).isEqualTo(
-                Utils.getColorError(mContext).getDefaultColor());
+                mContext.getColor(R.color.misalignment_text_color));
+    }
+
+    @Test
+    public void disclosure_unmanaged() {
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
+        when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(false);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.GONE);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_deviceOwner_noOwnerName() {
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_orgOwnedDeviceWithManagedProfile_noOwnerName() {
+        when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
+                new UserInfo(10, /* name */ null, /* flags */ FLAG_MANAGED_PROFILE)));
+        when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(null);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_hiddenWhenDozing() {
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
+        createController();
+
+        mController.setVisible(true);
+        mController.onDozeAmountChanged(1, 1);
+        mController.setDozing(true);
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).setAlpha(0f);
+        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_visibleWhenDozing() {
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
+        createController();
+
+        mController.setVisible(true);
+        mController.onDozeAmountChanged(0, 0);
+        mController.setDozing(false);
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).setAlpha(1f);
+        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_deviceOwner_withOwnerName() {
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_orgOwnedDeviceWithManagedProfile_withOwnerName() {
+        when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
+                new UserInfo(10, /* name */ null, FLAG_MANAGED_PROFILE)));
+        when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(ORGANIZATION_NAME);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_updateOnTheFly() {
+        ArgumentCaptor<BroadcastReceiver> receiver = ArgumentCaptor.forClass(
+                BroadcastReceiver.class);
+        doNothing().when(mBroadcastDispatcher).registerReceiver(receiver.capture(), any());
+
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
+        createController();
+
+        final KeyguardUpdateMonitorCallback monitor = mController.getKeyguardCallback();
+        reset(mDisclosure);
+
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
+        receiver.getValue().onReceive(mContext, new Intent());
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
+        verifyNoMoreInteractions(mDisclosure);
+        reset(mDisclosure);
+
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
+        receiver.getValue().onReceive(mContext, new Intent());
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
+        verifyNoMoreInteractions(mDisclosure);
+        reset(mDisclosure);
+
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
+        receiver.getValue().onReceive(mContext, new Intent());
+
+        verify(mDisclosure).setVisibility(View.GONE);
+        verifyNoMoreInteractions(mDisclosure);
     }
 
     @Test
@@ -387,45 +468,82 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void lockIcon_click() {
-        createController();
-
-        ArgumentCaptor<View.OnLongClickListener> longClickCaptor = ArgumentCaptor.forClass(
-                View.OnLongClickListener.class);
-        ArgumentCaptor<View.OnClickListener> clickCaptor = ArgumentCaptor.forClass(
-                View.OnClickListener.class);
-        verify(mLockIcon).setOnLongClickListener(longClickCaptor.capture());
-        verify(mLockIcon).setOnClickListener(clickCaptor.capture());
-
-        when(mAccessibilityController.isAccessibilityEnabled()).thenReturn(true);
-        clickCaptor.getValue().onClick(mLockIcon);
-        verify(mShadeController).animateCollapsePanels(anyInt(), eq(true));
-
-        longClickCaptor.getValue().onLongClick(mLockIcon);
-        verify(mLockPatternUtils).requireCredentialEntry(anyInt());
-        verify(mKeyguardUpdateMonitor).onLockIconPressed();
-    }
-
-    @Test
-    public void unlockMethodCache_listenerUpdatesIndication() {
+    public void updateMonitor_listenerUpdatesIndication() {
         createController();
         String restingIndication = "Resting indication";
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
-        mController.setRestingIndication(restingIndication);
+        reset(mKeyguardUpdateMonitor);
+
         mController.setVisible(true);
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getString(com.android.internal.R.string.lockscreen_storage_locked));
+
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
+        mController.setRestingIndication(restingIndication);
         assertThat(mTextView.getText()).isEqualTo(mController.getTrustGrantedIndication());
 
         reset(mKeyguardUpdateMonitor);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        mController.onUnlockMethodStateChanged();
+        mController.onUnlockedChanged();
         assertThat(mTextView.getText()).isEqualTo(restingIndication);
     }
 
     @Test
-    public void unlockMethodCache_listener() {
+    public void onRefreshBatteryInfo_computesChargingTime() throws RemoteException {
         createController();
-        verify(mUnlockMethodCache).addListener(eq(mController));
+        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
+                80 /* level */, BatteryManager.BATTERY_PLUGGED_WIRELESS, 100 /* health */,
+                0 /* maxChargingWattage */);
+
+        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
+        verify(mIBatteryStats).computeChargeTimeRemaining();
+    }
+
+    @Test
+    public void onRefreshBatteryInfo_computesChargingTime_onlyWhenCharging()
+            throws RemoteException {
+        createController();
+        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
+                80 /* level */, 0 /* plugged */, 100 /* health */,
+                0 /* maxChargingWattage */);
+
+        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
+        verify(mIBatteryStats, never()).computeChargeTimeRemaining();
+    }
+
+    /**
+     * Regression test.
+     * We should not make calls to the system_process when updating the doze state.
+     */
+    @Test
+    public void setDozing_noIBatteryCalls() throws RemoteException {
+        createController();
+        mController.setVisible(true);
+        mController.setDozing(true);
+        mController.setDozing(false);
+        verify(mIBatteryStats, never()).computeChargeTimeRemaining();
+    }
+
+    @Test
+    public void updateMonitor_listener() {
+        createController();
+        verify(mKeyguardStateController).addCallback(eq(mController));
         verify(mStatusBarStateController).addCallback(eq(mController));
         verify(mKeyguardUpdateMonitor, times(2)).registerCallback(any());
+    }
+
+    @Test
+    public void unlockMethodCache_listenerUpdatesPluggedIndication() {
+        createController();
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mController.setPowerPluggedIn(true);
+        mController.setVisible(true);
+        String powerIndication = mController.computePowerIndication();
+        String pluggedIndication = mContext.getString(R.string.keyguard_indication_trust_unlocked);
+        pluggedIndication = mContext.getString(
+                R.string.keyguard_indication_trust_unlocked_plugged_in,
+                pluggedIndication, powerIndication);
+        assertThat(mTextView.getText()).isEqualTo(pluggedIndication);
     }
 }

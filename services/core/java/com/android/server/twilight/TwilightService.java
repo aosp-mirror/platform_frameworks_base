@@ -17,6 +17,7 @@
 package com.android.server.twilight;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,6 +51,7 @@ public final class TwilightService extends SystemService
         implements AlarmManager.OnAlarmListener, Handler.Callback, LocationListener {
 
     private static final String TAG = "TwilightService";
+    private static final String ATTRIBUTION_TAG = "TwilightService";
     private static final boolean DEBUG = false;
 
     private static final int MSG_START_LISTENING = 1;
@@ -73,7 +75,7 @@ public final class TwilightService extends SystemService
     protected TwilightState mLastTwilightState;
 
     public TwilightService(Context context) {
-        super(context);
+        super(context.createAttributionContext(ATTRIBUTION_TAG));
         mHandler = new Handler(Looper.getMainLooper(), this);
     }
 
@@ -161,8 +163,13 @@ public final class TwilightService extends SystemService
         // Request the device's location immediately if a previous location isn't available.
         if (mLocationManager.getLastLocation() == null) {
             if (mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                mLocationManager.requestSingleUpdate(
-                        LocationManager.NETWORK_PROVIDER, this, Looper.getMainLooper());
+                mLocationManager.getCurrentLocation(
+                        LocationManager.NETWORK_PROVIDER, null, getContext().getMainExecutor(),
+                        this::onLocationChanged);
+            } else if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                mLocationManager.getCurrentLocation(
+                        LocationManager.GPS_PROVIDER, null, getContext().getMainExecutor(),
+                        this::onLocationChanged);
             }
         }
 
@@ -219,12 +226,7 @@ public final class TwilightService extends SystemService
                 for (int i = mListeners.size() - 1; i >= 0; --i) {
                     final TwilightListener listener = mListeners.keyAt(i);
                     final Handler handler = mListeners.valueAt(i);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onTwilightStateChanged(state);
-                        }
-                    });
+                    handler.post(() -> listener.onTwilightStateChanged(state));
                 }
             }
         }
@@ -244,12 +246,8 @@ public final class TwilightService extends SystemService
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        // Location providers may erroneously return (0.0, 0.0) when they fail to determine the
-        // device's location. These location updates can be safely ignored since the chance of a
-        // user actually being at these coordinates is quite low.
-        if (location != null
-                && !(location.getLongitude() == 0.0 && location.getLatitude() == 0.0)) {
+    public void onLocationChanged(@Nullable Location location) {
+        if (location != null) {
             Slog.d(TAG, "onLocationChanged:"
                     + " provider=" + location.getProvider()
                     + " accuracy=" + location.getAccuracy()

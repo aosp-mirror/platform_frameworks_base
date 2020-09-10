@@ -17,15 +17,16 @@
 #ifndef COUNT_METRIC_PRODUCER_H
 #define COUNT_METRIC_PRODUCER_H
 
-#include <unordered_map>
-
 #include <android/util/ProtoOutputStream.h>
 #include <gtest/gtest_prod.h>
-#include "../anomaly/AnomalyTracker.h"
-#include "../condition/ConditionTracker.h"
-#include "../matchers/matcher_util.h"
+
+#include <unordered_map>
+
 #include "MetricProducer.h"
+#include "anomaly/AnomalyTracker.h"
+#include "condition/ConditionTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "matchers/matcher_util.h"
 #include "stats_util.h"
 
 namespace android {
@@ -40,17 +41,27 @@ struct CountBucket {
 
 class CountMetricProducer : public MetricProducer {
 public:
-    CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int64_t timeBaseNs, const int64_t startTimeNs);
+    CountMetricProducer(
+            const ConfigKey& key, const CountMetric& countMetric, const int conditionIndex,
+            const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
+            const int64_t timeBaseNs, const int64_t startTimeNs,
+            const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
+            const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                    eventDeactivationMap = {},
+            const vector<int>& slicedStateAtoms = {},
+            const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
 
     virtual ~CountMetricProducer();
+
+    void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
+                        const HashableDimensionKey& primaryKey, const FieldValue& oldState,
+                        const FieldValue& newState) override;
 
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
-            const ConditionKey& conditionKey, bool condition,
-            const LogEvent& event) override;
+            const ConditionKey& conditionKey, bool condition, const LogEvent& event,
+            const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
 private:
 
@@ -99,9 +110,11 @@ private:
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithSlicedCondition);
     FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
-    FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgrade);
-    FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket);
     FRIEND_TEST(CountMetricProducerTest, TestFirstBucket);
+    FRIEND_TEST(CountMetricProducerTest, TestOneWeekTimeUnit);
+
+    FRIEND_TEST(CountMetricProducerTest_PartialBucket, TestSplitInCurrentBucket);
+    FRIEND_TEST(CountMetricProducerTest_PartialBucket, TestSplitInNextBucket);
 };
 
 }  // namespace statsd

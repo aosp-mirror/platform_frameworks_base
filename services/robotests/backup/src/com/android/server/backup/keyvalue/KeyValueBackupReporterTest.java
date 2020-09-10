@@ -77,4 +77,16 @@ public class KeyValueBackupReporterTest {
 
         assertThat(observer).isEqualTo(mObserver);
     }
+
+    /**
+     * Ensure that EventLog is called when logging the transport uninitialised issue.
+     */
+    @Test
+    public void testOnTransportNotInitialized_callsEventLog() {
+        ShadowEventLog.setUp();
+
+        mReporter.onTransportNotInitialized("transport");
+
+        assertThat(ShadowEventLog.getEntries().size()).isEqualTo(1);
+    }
 }

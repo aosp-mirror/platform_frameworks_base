@@ -532,55 +532,55 @@ public class ProtoInputStreamFixed64Test extends TestCase {
         };
 
         ProtoInputStream pi = new ProtoInputStream(protobuf);
-        pi.isNextField(fieldId1);
+        pi.nextField();
         try {
             pi.readFloat(fieldId1);
-            fail("Should have throw IllegalArgumentException");
+            fail("Should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException iae) {
             // good
         }
 
         pi = new ProtoInputStream(protobuf);
-        pi.isNextField(fieldId1);
+        pi.nextField();
         try {
             pi.readDouble(fieldId1);
-            fail("Should have throw IllegalArgumentException");
+            fail("Should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException iae) {
             // good
         }
 
         pi = new ProtoInputStream(protobuf);
-        pi.isNextField(fieldId1);
+        pi.nextField();
         try {
             pi.readInt(fieldId1);
-            fail("Should have throw IllegalArgumentException");
+            fail("Should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException iae) {
             // good
         }
 
         pi = new ProtoInputStream(protobuf);
-        pi.isNextField(fieldId1);
+        pi.nextField();
         try {
             pi.readBoolean(fieldId1);
-            fail("Should have throw IllegalArgumentException");
+            fail("Should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException iae) {
             // good
         }
 
         pi = new ProtoInputStream(protobuf);
-        pi.isNextField(fieldId1);
+        pi.nextField();
         try {
             pi.readBytes(fieldId1);
-            fail("Should have throw IllegalArgumentException");
+            fail("Should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException iae) {
             // good
         }
 
         pi = new ProtoInputStream(protobuf);
-        pi.isNextField(fieldId1);
+        pi.nextField();
         try {
             pi.readString(fieldId1);
-            fail("Should have throw IllegalArgumentException");
+            fail("Should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException iae) {
             // good
         }

@@ -25,7 +25,9 @@ package android.drm;
  * This class contains the {@link ProcessedData} object, which can be used
  * to instantiate a {@link DrmRights} object during license acquisition.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmInfoStatus {
     // The following status code constants must be in sync with DrmInfoStatus.cpp
     // Please update isValidStatusCode() if more status codes are added.

@@ -232,7 +232,7 @@ final class ConnectionRecord {
         return stringName = sb.toString();
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         if (binding == null) return; // if binding is null, don't write data, something is wrong.
         long token = proto.start(fieldId);
         proto.write(ConnectionRecordProto.HEX_HASH,

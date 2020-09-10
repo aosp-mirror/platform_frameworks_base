@@ -44,7 +44,7 @@ public class PipAppOpsListener {
             try {
                 // Dismiss the PiP once the user disables the app ops setting for that package
                 final Pair<ComponentName, Integer> topPipActivityInfo =
-                        PipUtils.getTopPinnedActivity(mContext, mActivityManager);
+                        PipUtils.getTopPipActivity(mContext, mActivityManager);
                 if (topPipActivityInfo.first != null) {
                     final ApplicationInfo appInfo = mContext.getPackageManager()
                             .getApplicationInfoAsUser(packageName, 0, topPipActivityInfo.second);

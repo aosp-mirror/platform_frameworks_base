@@ -71,7 +71,7 @@ interface IFingerprintService {
     List<Fingerprint> getEnrolledFingerprints(int groupId, String opPackageName);
 
     // Determine if HAL is loaded and ready
-    boolean isHardwareDetected(long deviceId, String opPackageName);
+    boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
     long preEnroll(IBinder token);
@@ -89,7 +89,7 @@ interface IFingerprintService {
     // long getHardwareDevice(int i);
 
     // Gets the authenticator ID for fingerprint
-    long getAuthenticatorId(String opPackageName);
+    long getAuthenticatorId(int callingUserId);
 
     // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetTimeout(in byte [] cryptoToken);
@@ -111,4 +111,7 @@ interface IFingerprintService {
 
     // Removes a callback set by addClientActiveCallback
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
+
+    // Initialize the OEM configured biometric strength
+    void initConfiguredStrength(int strength);
 }

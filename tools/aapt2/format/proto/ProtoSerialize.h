@@ -35,6 +35,11 @@ struct SerializeXmlOptions {
   bool remove_empty_text_nodes = false;
 };
 
+struct SerializeTableOptions {
+    /** Prevent serializing the source pool and source protos.  */
+    bool exclude_sources = false;
+};
+
 // Serializes a Value to its protobuf representation. An optional StringPool will hold the
 // source path string.
 void SerializeValueToPb(const Value& value, pb::Value* out_value, StringPool* src_pool = nullptr);
@@ -59,7 +64,8 @@ void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool
 void SerializeConfig(const android::ConfigDescription& config, pb::Configuration* out_pb_config);
 
 // Serializes a ResourceTable into its protobuf representation.
-void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table, IDiagnostics* diag);
+void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
+                        IDiagnostics* diag, SerializeTableOptions options = {});
 
 // Serializes a ResourceFile into its protobuf representation.
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file);

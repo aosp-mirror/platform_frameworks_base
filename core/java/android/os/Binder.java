@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ExceptionUtils;
 import android.util.Log;
@@ -36,7 +37,9 @@ import libcore.io.IoUtils;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
 
@@ -243,6 +246,27 @@ public class Binder implements IBinder {
         if (fromBinder instanceof BinderProxy && toBinder instanceof BinderProxy) {
             ((BinderProxy) toBinder).mWarnOnBlocking = ((BinderProxy) fromBinder).mWarnOnBlocking;
         }
+    }
+
+    static ThreadLocal<Boolean> sWarnOnBlockingOnCurrentThread =
+            ThreadLocal.withInitial(() -> sWarnOnBlocking);
+
+    /**
+     * Allow blocking calls for the current thread.  See {@link #allowBlocking}.
+     *
+     * @hide
+     */
+    public static void allowBlockingForCurrentThread() {
+        sWarnOnBlockingOnCurrentThread.set(false);
+    }
+
+    /**
+     * Reset the current thread to the default blocking behavior.  See {@link #defaultBlocking}.
+     *
+     * @hide
+     */
+    public static void defaultBlockingForCurrentThread() {
+        sWarnOnBlockingOnCurrentThread.set(sWarnOnBlocking);
     }
 
     /**
@@ -662,6 +686,17 @@ public class Binder implements IBinder {
          * Called before onTransact.
          *
          * @return an object that will be passed back to #onTransactEnded (or null).
+         * @hide
+         */
+        @Nullable
+        default Object onTransactStarted(@NonNull IBinder binder, int transactionCode, int flags) {
+            return onTransactStarted(binder, transactionCode);
+        }
+
+        /**
+         * Called before onTransact.
+         *
+         * @return an object that will be passed back to #onTransactEnded (or null).
          */
         @Nullable
         Object onTransactStarted(@NonNull IBinder binder, int transactionCode);
@@ -899,8 +934,11 @@ public class Binder implements IBinder {
     }
 
     /**
-     * Handle a call to {@link #shellCommand}.  The default implementation simply prints
-     * an error message.  Override and replace with your own.
+     * Handle a call to {@link #shellCommand}.
+     *
+     * <p>The default implementation performs a caller check to make sure the caller UID is of
+     * SHELL or ROOT, and then call {@link #handleShellCommand}.
+     *
      * <p class="caution">Note: no permission checking is done before calling this method; you must
      * apply any security checks as appropriate for the command being executed.
      * Consider using {@link ShellCommand} to help in the implementation.</p>
@@ -910,11 +948,77 @@ public class Binder implements IBinder {
             @Nullable FileDescriptor err,
             @NonNull String[] args, @Nullable ShellCallback callback,
             @NonNull ResultReceiver resultReceiver) throws RemoteException {
-        FileOutputStream fout = new FileOutputStream(err != null ? err : out);
-        PrintWriter pw = new FastPrintWriter(fout);
+
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SHELL_UID) {
+            resultReceiver.send(-1, null);
+            throw new SecurityException("Shell commands are only callable by ADB");
+        }
+
+        // First, convert in, out and err to @NonNull, by redirecting any that's null to /dev/null.
+        try {
+            if (in == null) {
+                in = new FileInputStream("/dev/null").getFD();
+            }
+            if (out == null) {
+                out = new FileOutputStream("/dev/null").getFD();
+            }
+            if (err == null) {
+                err = out;
+            }
+        } catch (IOException e) {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(err != null ? err : out));
+            pw.println("Failed to open /dev/null: " + e.getMessage());
+            pw.flush();
+            resultReceiver.send(-1, null);
+            return;
+        }
+        // Also make args @NonNull.
+        if (args == null) {
+            args = new String[0];
+        }
+
+        int result = -1;
+        try (ParcelFileDescriptor inPfd = ParcelFileDescriptor.dup(in);
+                ParcelFileDescriptor outPfd = ParcelFileDescriptor.dup(out);
+                ParcelFileDescriptor errPfd = ParcelFileDescriptor.dup(err)) {
+            result = handleShellCommand(inPfd, outPfd, errPfd, args);
+        } catch (IOException e) {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(err));
+            pw.println("dup() failed: " + e.getMessage());
+            pw.flush();
+        } finally {
+            resultReceiver.send(result, null);
+        }
+    }
+
+    /**
+     * System services can implement this method to implement ADB shell commands.
+     *
+     * <p>A system binder service can implement it to handle shell commands on ADB. For example,
+     * the Job Scheduler service implements it to handle <code>adb shell cmd jobscheduler</code>.
+     *
+     * <p>Commands are only executable by ADB shell; i.e. only {@link Process#SHELL_UID} and
+     * {@link Process#ROOT_UID} can call them.
+     *
+     * @param in standard input
+     * @param out standard output
+     * @param err standard error
+     * @param args arguments passed to the command. Can be empty. The first argument is typically
+     *             a subcommand, such as {@code run} for {@code adb shell cmd jobscheduler run}.
+     * @return the status code returned from the <code>cmd</code> command.
+     *
+     * @hide
+     */
+    @SystemApi
+    public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+            @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+            @NonNull String[] args) {
+        FileOutputStream ferr = new FileOutputStream(err.getFileDescriptor());
+        PrintWriter pw = new FastPrintWriter(ferr);
         pw.println("No shell command implementation.");
         pw.flush();
-        resultReceiver.send(0, null);
+        return 0;
     }
 
     /** @hide */
@@ -1046,7 +1150,17 @@ public class Binder implements IBinder {
                 Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
                         + (transactionName != null ? transactionName : code));
             }
-            res = onTransact(code, data, reply, flags);
+
+            if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0) {
+                AppOpsManager.startNotedAppOpsCollection(callingUid);
+                try {
+                    res = onTransact(code, data, reply, flags);
+                } finally {
+                    AppOpsManager.finishNotedAppOpsCollection();
+                }
+            } else {
+                res = onTransact(code, data, reply, flags);
+            }
         } catch (RemoteException|RuntimeException e) {
             if (observer != null) {
                 observer.callThrewException(callSession, e);
@@ -1091,13 +1205,4 @@ public class Binder implements IBinder {
         StrictMode.clearGatheredViolations();
         return res;
     }
-
-    /**
-     * Returns the specified service from servicemanager. If the service is not running,
-     * servicemanager will attempt to start it, and this function will wait for it to be ready.
-     * Returns nullptr only if there are permission problems or fatal errors.
-     * @hide
-     */
-    public static final native @Nullable IBinder waitForService(@NonNull String serviceName)
-            throws RemoteException;
 }

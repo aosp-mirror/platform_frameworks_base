@@ -22,7 +22,7 @@
 #include "TrainInfoPuller.h"
 #include "logd/LogEvent.h"
 #include "stats_log_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 #include "storage/StorageManager.h"
 
 using std::make_shared;
@@ -33,18 +33,20 @@ namespace os {
 namespace statsd {
 
 TrainInfoPuller::TrainInfoPuller() :
-    StatsPuller(android::util::TRAIN_INFO) {
+    StatsPuller(util::TRAIN_INFO) {
 }
 
 bool TrainInfoPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
-    InstallTrainInfo trainInfo;
-    bool ret = StorageManager::readTrainInfo(trainInfo);
-    if (!ret) {
-        ALOGW("Failed to read train info.");
-        return false;
+    vector<InstallTrainInfo> trainInfoList =
+        StorageManager::readAllTrainInfo();
+    if (trainInfoList.empty()) {
+        ALOGW("Train info was empty.");
+        return true;
     }
-    auto event = make_shared<LogEvent>(getWallClockNs(), getElapsedRealtimeNs(), trainInfo);
-    data->push_back(event);
+    for (InstallTrainInfo& trainInfo : trainInfoList) {
+        auto event = make_shared<LogEvent>(getWallClockNs(), getElapsedRealtimeNs(), trainInfo);
+        data->push_back(event);
+    }
     return true;
 }
 

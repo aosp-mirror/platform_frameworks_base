@@ -90,6 +90,7 @@ class ProtoOutputStream
 {
 public:
     ProtoOutputStream();
+    ProtoOutputStream(sp<EncodedBuffer> buffer);
     ~ProtoOutputStream();
 
     /**

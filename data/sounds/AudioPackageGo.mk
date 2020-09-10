@@ -47,3 +47,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/effects/ogg/KeypressDelete.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/KeypressDelete.ogg \
     $(LOCAL_PATH)/effects/ogg/KeypressInvalid.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/KeypressInvalid.ogg \
     $(LOCAL_PATH)/effects/ogg/KeypressReturn.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/KeypressReturn.ogg \
+    $(LOCAL_PATH)/effects/ogg/Lock.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/Lock.ogg \
+    $(LOCAL_PATH)/effects/ogg/Unlock.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/Unlock.ogg \
+    $(LOCAL_PATH)/effects/ogg/Trusted_48k.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/ui/Trusted.ogg \
+

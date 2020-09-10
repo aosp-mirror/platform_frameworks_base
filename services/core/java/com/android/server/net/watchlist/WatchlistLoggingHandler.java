@@ -16,6 +16,8 @@
 
 package com.android.server.net.watchlist;
 
+import static android.os.incremental.IncrementalManager.isIncrementalPath;
+
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -220,7 +222,7 @@ class WatchlistLoggingHandler extends Handler {
         }
     }
 
-    private boolean insertRecord(int uid, String cncHost, long timestamp) {
+    private void insertRecord(int uid, String cncHost, long timestamp) {
         if (DEBUG) {
             Slog.i(TAG, "trying to insert record with host: " + cncHost + ", uid: " + uid);
         }
@@ -229,15 +231,15 @@ class WatchlistLoggingHandler extends Handler {
             if (DEBUG) {
                 Slog.i(TAG, "uid: " + uid + " is not test only package");
             }
-            return true;
+            return;
         }
         final byte[] digest = getDigestFromUid(uid);
         if (digest == null) {
-            Slog.e(TAG, "Cannot get digest from uid: " + uid);
-            return false;
+            return;
         }
-        final boolean result = mDbHelper.insertNewRecord(digest, cncHost, timestamp);
-        return result;
+        if (mDbHelper.insertNewRecord(digest, cncHost, timestamp)) {
+            Slog.w(TAG, "Unable to insert record for uid: " + uid);
+        }
     }
 
     private boolean shouldReportNetworkWatchlist(long lastRecordTime) {
@@ -307,9 +309,6 @@ class WatchlistLoggingHandler extends Handler {
             byte[] digest = getDigestFromUid(apps.get(i).uid);
             if (digest != null) {
                 result.add(HexDump.toHexString(digest));
-            } else {
-                Slog.e(TAG, "Cannot get digest from uid: " + apps.get(i).uid
-                        + ",pkg: " + apps.get(i).packageName);
             }
         }
         // Step 2: Add all digests from records
@@ -341,9 +340,16 @@ class WatchlistLoggingHandler extends Handler {
                             Slog.w(TAG, "Cannot find apkPath for " + packageName);
                             continue;
                         }
+                        if (isIncrementalPath(apkPath)) {
+                            // Do not scan incremental fs apk, as the whole APK may not yet
+                            // be available, so we can't compute the hash of it.
+                            Slog.i(TAG, "Skipping incremental path: " + packageName);
+                            continue;
+                        }
                         return DigestUtils.getSha256Hash(new File(apkPath));
                     } catch (NameNotFoundException | NoSuchAlgorithmException | IOException e) {
-                        Slog.e(TAG, "Should not happen", e);
+                        Slog.e(TAG, "Cannot get digest from uid: " + key
+                                + ",pkg: " + packageName, e);
                         return null;
                     }
                 }

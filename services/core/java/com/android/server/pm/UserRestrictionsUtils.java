@@ -20,13 +20,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -43,6 +43,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 
 import com.google.android.collect.Sets;
 
@@ -52,6 +53,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -194,14 +196,47 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
-            UserManager.DISALLOW_UNMUTE_DEVICE
+            UserManager.DISALLOW_UNMUTE_DEVICE,
+            UserManager.DISALLOW_CAMERA
     );
 
     /**
-     * User restrictions that default to {@code true} for device owners.
+     * Special user restrictions that profile owner of an organization-owned managed profile can
+     * set on the parent profile instance to apply them globally.
      */
-    private static final Set<String> DEFAULT_ENABLED_FOR_DEVICE_OWNERS = Sets.newArraySet(
-            UserManager.DISALLOW_ADD_MANAGED_PROFILE
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
+            Sets.newArraySet(
+                    UserManager.DISALLOW_AIRPLANE_MODE,
+                    UserManager.DISALLOW_CONFIG_DATE_TIME,
+                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS
+    );
+
+    /**
+     * Special user restrictions that profile owner of an organization-owned managed profile can
+     * set on the parent profile instance to apply them on the personal profile.
+     */
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
+            Sets.newArraySet(
+                    UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                    UserManager.DISALLOW_CONFIG_LOCATION,
+                    UserManager.DISALLOW_CONFIG_WIFI,
+                    UserManager.DISALLOW_CONTENT_CAPTURE,
+                    UserManager.DISALLOW_CONTENT_SUGGESTIONS,
+                    UserManager.DISALLOW_DEBUGGING_FEATURES,
+                    UserManager.DISALLOW_SHARE_LOCATION,
+                    UserManager.DISALLOW_OUTGOING_CALLS,
+                    UserManager.DISALLOW_CAMERA,
+                    UserManager.DISALLOW_BLUETOOTH,
+                    UserManager.DISALLOW_BLUETOOTH_SHARING,
+                    UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
+                    UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+                    UserManager.DISALLOW_CONFIG_TETHERING,
+                    UserManager.DISALLOW_DATA_ROAMING,
+                    UserManager.DISALLOW_SAFE_BOOT,
+                    UserManager.DISALLOW_SMS,
+                    UserManager.DISALLOW_USB_FILE_TRANSFER,
+                    UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+                    UserManager.DISALLOW_UNMUTE_MICROPHONE
     );
 
     /**
@@ -354,7 +389,7 @@ public class UserRestrictionsUtils {
     }
 
     public static void merge(@NonNull Bundle dest, @Nullable Bundle in) {
-        Preconditions.checkNotNull(dest);
+        Objects.requireNonNull(dest);
         Preconditions.checkArgument(dest != in);
         if (in == null) {
             return;
@@ -363,22 +398,6 @@ public class UserRestrictionsUtils {
             if (in.getBoolean(key, false)) {
                 dest.putBoolean(key, true);
             }
-        }
-    }
-
-    /**
-     * Merges a sparse array of restrictions bundles into one.
-     */
-    @Nullable
-    public static Bundle mergeAll(SparseArray<Bundle> restrictions) {
-        if (restrictions.size() == 0) {
-            return null;
-        } else {
-            final Bundle result = new Bundle();
-            for (int i = 0; i < restrictions.size(); i++) {
-                merge(result, restrictions.valueAt(i));
-            }
-            return result;
         }
     }
 
@@ -401,11 +420,11 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * Returns the user restrictions that default to {@code true} for device owners.
-     * These user restrictions are local, though. ie only for the device owner's user id.
+     * @return true if a restriction is settable by profile owner of an organization owned device.
      */
-    public static @NonNull Set<String> getDefaultEnabledForDeviceOwner() {
-        return DEFAULT_ENABLED_FOR_DEVICE_OWNERS;
+    public static boolean canProfileOwnerOfOrganizationOwnedDeviceChange(String restriction) {
+        return PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(restriction)
+                || PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS.contains(restriction);
     }
 
     /**
@@ -416,41 +435,25 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * Takes restrictions that can be set by device owner, and sort them into what should be applied
-     * globally and what should be applied only on the current user.
+     * Whether given user restriction should be enforced globally.
      */
-    public static void sortToGlobalAndLocal(@Nullable Bundle in, boolean isDeviceOwner,
-            int cameraRestrictionScope,
-            @NonNull Bundle global, @NonNull Bundle local) {
-        // Camera restriction (as well as all others) goes to at most one bundle.
-        if (cameraRestrictionScope == UserManagerInternal.CAMERA_DISABLED_GLOBALLY) {
-            global.putBoolean(UserManager.DISALLOW_CAMERA, true);
-        } else if (cameraRestrictionScope == UserManagerInternal.CAMERA_DISABLED_LOCALLY) {
-            local.putBoolean(UserManager.DISALLOW_CAMERA, true);
-        }
-        if (in == null || in.size() == 0) {
-            return;
-        }
-        for (String key : in.keySet()) {
-            if (!in.getBoolean(key)) {
-                continue;
-            }
-            if (isGlobal(isDeviceOwner, key)) {
-                global.putBoolean(key, true);
-            } else {
-                local.putBoolean(key, true);
-            }
-        }
+    public static boolean isGlobal(@UserManagerInternal.OwnerType int restrictionOwnerType,
+            String key) {
+        return ((restrictionOwnerType == UserManagerInternal.OWNER_TYPE_DEVICE_OWNER) && (
+                PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
+                || ((restrictionOwnerType
+                == UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE)
+                && PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(key))
+                || PROFILE_GLOBAL_RESTRICTIONS.contains(key)
+                || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key);
     }
 
     /**
-     * Whether given user restriction should be enforced globally.
+     * Whether given user restriction should be enforced locally.
      */
-    private static boolean isGlobal(boolean isDeviceOwner, String key) {
-        return (isDeviceOwner &&
-                (PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
-                || PROFILE_GLOBAL_RESTRICTIONS.contains(key)
-                || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key);
+    public static boolean isLocal(@UserManagerInternal.OwnerType int restrictionOwnerType,
+            String key) {
+        return !isGlobal(restrictionOwnerType, key);
     }
 
     /**
@@ -572,10 +575,6 @@ public class UserRestrictionsUtils {
                     if (newValue) {
                         android.provider.Settings.Global.putStringForUser(
                                 context.getContentResolver(),
-                                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
-                                userId);
-                        android.provider.Settings.Global.putStringForUser(
-                                context.getContentResolver(),
                                 android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
                                 userId);
                     }
@@ -660,6 +659,15 @@ public class UserRestrictionsUtils {
                                 Global.LOCATION_GLOBAL_KILL_SWITCH, "0");
                     }
                     break;
+                case UserManager.DISALLOW_APPS_CONTROL:
+                    // Intentional fall-through
+                case UserManager.DISALLOW_UNINSTALL_APPS:
+                    final PackageManagerInternal pmi = LocalServices.getService(
+                            PackageManagerInternal.class);
+                    pmi.removeAllNonSystemPackageSuspensions(userId);
+                    pmi.removeAllDistractingPackageRestrictions(userId);
+                    pmi.flushPackageRestrictions(userId);
+                    break;
             }
         } finally {
             Binder.restoreCallingIdentity(id);
@@ -668,7 +676,7 @@ public class UserRestrictionsUtils {
 
     public static boolean isSettingRestrictedForUser(Context context, @NonNull String setting,
             int userId, String value, int callingUid) {
-        Preconditions.checkNotNull(setting);
+        Objects.requireNonNull(setting);
         final UserManager mUserManager = context.getSystemService(UserManager.class);
         String restriction;
         boolean checkAllUser = false;
@@ -712,7 +720,6 @@ public class UserRestrictionsUtils {
                 restriction = UserManager.DISALLOW_DEBUGGING_FEATURES;
                 break;
 
-            case android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE:
             case android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB:
                 if ("1".equals(value)) {
                     return false;
@@ -769,6 +776,7 @@ public class UserRestrictionsUtils {
                 break;
 
             case android.provider.Settings.System.SCREEN_BRIGHTNESS:
+            case android.provider.Settings.System.SCREEN_BRIGHTNESS_FLOAT:
             case android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE:
                 if (callingUid == Process.SYSTEM_UID) {
                     return false;
@@ -777,16 +785,6 @@ public class UserRestrictionsUtils {
                 break;
 
             case android.provider.Settings.Global.AUTO_TIME:
-                DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-                if (dpm != null && dpm.getAutoTimeRequired()
-                        && "0".equals(value)) {
-                    return true;
-                } else if (callingUid == Process.SYSTEM_UID) {
-                    return false;
-                }
-                restriction = UserManager.DISALLOW_CONFIG_DATE_TIME;
-                break;
-
             case android.provider.Settings.Global.AUTO_TIME_ZONE:
                 if (callingUid == Process.SYSTEM_UID) {
                     return false;
@@ -844,27 +842,15 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * Moves a particular restriction from one array of bundles to another, e.g. for all users.
+     * Moves a particular restriction from one array of restrictions sets to a restriction set,
+     * e.g. for all users.
      */
-    public static void moveRestriction(String restrictionKey, SparseArray<Bundle> srcRestrictions,
-            SparseArray<Bundle> destRestrictions) {
-        for (int i = 0; i < srcRestrictions.size(); i++) {
-            final int key = srcRestrictions.keyAt(i);
-            final Bundle from = srcRestrictions.valueAt(i);
-            if (contains(from, restrictionKey)) {
-                from.remove(restrictionKey);
-                Bundle to = destRestrictions.get(key);
-                if (to == null) {
-                    to = new Bundle();
-                    destRestrictions.append(key, to);
-                }
-                to.putBoolean(restrictionKey, true);
-                // Don't keep empty bundles.
-                if (from.isEmpty()) {
-                    srcRestrictions.removeAt(i);
-                    i--;
-                }
-            }
+    public static void moveRestriction(String restrictionKey,
+            SparseArray<RestrictionsSet> sourceRestrictionsSets,
+            RestrictionsSet destRestrictionSet) {
+        for (int i = 0; i < sourceRestrictionsSets.size(); i++) {
+            final RestrictionsSet sourceRestrictionsSet = sourceRestrictionsSets.valueAt(i);
+            sourceRestrictionsSet.moveRestriction(destRestrictionSet, restrictionKey);
         }
     }
 

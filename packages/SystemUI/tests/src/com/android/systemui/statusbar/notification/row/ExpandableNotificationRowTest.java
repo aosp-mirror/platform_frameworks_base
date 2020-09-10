@@ -18,9 +18,8 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_ALL;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,7 +41,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
-import android.view.NotificationHeaderView;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -50,7 +48,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
@@ -80,8 +77,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        allowTestableLooperAsMainThread();
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
         mGroupRow = mNotificationTestHelper.createGroup();
         mGroupRow.setHeadsUpAnimatingAwayListener(
                 animatingAway -> mHeadsUpAnimatingAway = animatingAway);
@@ -137,31 +137,13 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFreeContentViewWhenSafe() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
-
-        row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
-
-        assertNull(row.getPrivateLayout().getHeadsUpChild());
-    }
-
-    @Test
-    public void setNeedsRedactionSetsInflationFlag() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
-
-        row.setNeedsRedaction(true);
-
-        assertTrue(row.getNotificationInflater().isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
-    }
-
-    @Test
     public void setNeedsRedactionFreesViewWhenFalse() throws Exception {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
         row.setNeedsRedaction(true);
         row.getPublicLayout().setVisibility(View.GONE);
 
         row.setNeedsRedaction(false);
-
+        TestableLooper.get(this).processAllMessages();
         assertNull(row.getPublicLayout().getContractedChild());
     }
 
@@ -204,9 +186,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testClickSound() throws Exception {
         assertTrue("Should play sounds by default.", mGroupRow.isSoundEffectsEnabled());
-        StatusBarStateController mock = mock(StatusBarStateController.class);
+        StatusBarStateController mock = mNotificationTestHelper.getStatusBarStateController();
         when(mock.isDozing()).thenReturn(true);
-        mGroupRow.setStatusBarStateController(mock);
         mGroupRow.setSecureStateProvider(()-> false);
         assertFalse("Shouldn't play sounds when dark and trusted.",
                 mGroupRow.isSoundEffectsEnabled());
@@ -225,7 +206,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 any(NotificationMenuRowPlugin.MenuItem.class));
         reset(listener);
 
-        mGroupRow.setDismissed(true);
+        mGroupRow.dismiss(true);
         mGroupRow.doLongClickCallback(0,0);
         verify(listener, times(0)).onLongPress(eq(mGroupRow), eq(0), eq(0),
                 any(NotificationMenuRowPlugin.MenuItem.class));
@@ -241,22 +222,19 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testShowAppOpsIcons_header() {
-        NotificationHeaderView mockHeader = mock(NotificationHeaderView.class);
-
         NotificationContentView publicLayout = mock(NotificationContentView.class);
         mGroupRow.setPublicLayout(publicLayout);
         NotificationContentView privateLayout = mock(NotificationContentView.class);
         mGroupRow.setPrivateLayout(privateLayout);
         NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
         when(mockContainer.getNotificationChildCount()).thenReturn(1);
-        when(mockContainer.getHeaderView()).thenReturn(mockHeader);
         mGroupRow.setChildrenContainer(mockContainer);
 
         ArraySet<Integer> ops = new ArraySet<>();
         ops.add(AppOpsManager.OP_ANSWER_PHONE_CALLS);
         mGroupRow.showAppOpsIcons(ops);
 
-        verify(mockHeader, times(1)).showAppOpsIcons(ops);
+        verify(mockContainer, times(1)).showAppOpsIcons(ops);
         verify(privateLayout, times(1)).showAppOpsIcons(ops);
         verify(publicLayout, times(1)).showAppOpsIcons(ops);
 
@@ -323,12 +301,15 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testGetNumUniqueChildren_multiChannel() {
         List<ExpandableNotificationRow> childRows =
-                mGroupRow.getChildrenContainer().getNotificationChildren();
+                mGroupRow.getChildrenContainer().getAttachedChildren();
         // Give each child a unique channel id/name.
         int i = 0;
         for (ExpandableNotificationRow childRow : childRows) {
-            childRow.getEntry().channel =
-                    new NotificationChannel("id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT);
+            modifyRanking(childRow.getEntry())
+                    .setChannel(
+                            new NotificationChannel(
+                                    "id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT))
+                    .build();
             i++;
         }
 
@@ -338,10 +319,10 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testIconScrollXAfterTranslationAndReset() throws Exception {
         mGroupRow.setTranslation(50);
-        assertEquals(50, -mGroupRow.getEntry().expandedIcon.getScrollX());
+        assertEquals(50, -mGroupRow.getEntry().getIcons().getShelfIcon().getScrollX());
 
         mGroupRow.resetTranslation();
-        assertEquals(0, mGroupRow.getEntry().expandedIcon.getScrollX());
+        assertEquals(0, mGroupRow.getEntry().getIcons().getShelfIcon().getScrollX());
     }
 
     @Test
@@ -364,7 +345,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testGetIsNonblockable_oemLocked() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().channel.setImportanceLockedByOEM(true);
+        row.getEntry().getChannel().setImportanceLockedByOEM(true);
 
         assertTrue(row.getIsNonblockable());
     }
@@ -373,7 +354,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().channel.setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
 
         assertTrue(row.getIsNonblockable());
     }

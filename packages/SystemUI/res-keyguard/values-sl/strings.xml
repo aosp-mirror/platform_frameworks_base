@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Vnesite geslo"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Napačna koda PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Neveljavna kartica"</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Popolnoma napolnjen"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Akumulator napolnjen"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • brezžično polnjenje"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • polnjenje"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • hitro polnjenje"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Če želite odkleniti, pritisnite meni."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Omrežje je zaklenjeno"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Ni kartice SIM"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"V tabličnem računalniku ni kartice SIM."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"V telefonu ni kartice SIM."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Vstavite kartico SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Ni kartice SIM ali je ni mogoče prebrati. Vstavite kartico SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Neuporabna kartica SIM."</string>
@@ -85,25 +83,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Vnesite kodo PIN, ki vsebuje od štiri do osem številk."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Koda PUK mora biti 8- ali večmestno število."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Znova vnesite pravilno kodo PUK. Večkratni poskusi bodo trajno onemogočili kartico SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Kodi PIN se ne ujemata"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Preveč poskusov vnosa vzorca"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Kodo PIN ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat vnesli napačno. \n\nPoskusite znova čez <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Geslo ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat vnesli napačno. \n\nPoskusite znova čez <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat nepravilno narisali. \n\nPoskusite znova čez <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo ponastavljen in vsi podatki v njem bodo izbrisani."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo ponastavljen in vsi podatki v njem bodo izbrisani."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat, zato bo ponastavljen, vsi podatki v njem pa bodo izbrisani."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat, zato bo ponastavljen, vsi podatki v njem pa bodo izbrisani."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo ta uporabnik odstranjen in vsi podatki uporabnika bodo izbrisani."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo ta uporabnik odstranjen in vsi podatki uporabnika bodo izbrisani."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat. Ta uporabnik bo odstranjen in vsi podatki uporabnika bodo izbrisani."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat. Ta uporabnik bo odstranjen in vsi podatki uporabnika bodo izbrisani."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo delovni profil odstranjen in vsi podatki profila bodo izbrisani."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat. Če ga neuspešno poskusite odkleniti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, bo delovni profil odstranjen in vsi podatki profila bodo izbrisani."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Tablični računalnik ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat. Delovni profil bo odstranjen in vsi podatki profila bodo izbrisani."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Telefon ste neuspešno poskusili odkleniti <xliff:g id="NUMBER">%d</xliff:g>-krat. Delovni profil bo odstranjen in vsi podatki profila bodo izbrisani."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat napačno vnesli. Če ga neuspešno poskusite vnesti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, boste pozvani, da tablični računalnik odklenete z e-poštnim računom.\n\n Poskusite znova čez <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat napačno vnesli. Če ga neuspešno poskusite vnesti še <xliff:g id="NUMBER_1">%2$d</xliff:g>-krat, boste pozvani, da telefon odklenete z Googlovimi podatki za prijavo.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Napačna koda PIN kartice SIM. Zdaj se boste morali za odklenitev naprave obrniti na operaterja."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus.</item>

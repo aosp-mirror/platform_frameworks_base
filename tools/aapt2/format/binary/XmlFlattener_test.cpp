@@ -226,10 +226,10 @@ TEST_F(XmlFlattenerTest, FlattenNonStandardPackageId) {
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   // The tree needs a custom DynamicRefTable since it is not using a standard app ID (0x7f).
-  android::DynamicRefTable dynamic_ref_table;
-  dynamic_ref_table.addMapping(0x80, 0x80);
+  auto dynamic_ref_table = std::make_shared<android::DynamicRefTable>();
+  dynamic_ref_table->addMapping(0x80, 0x80);
 
-  android::ResXMLTree tree(&dynamic_ref_table);
+  auto tree = android::ResXMLTree(std::move(dynamic_ref_table));
   ASSERT_TRUE(Flatten(doc.get(), &tree));
 
   while (tree.next() != android::ResXMLTree::START_TAG) {

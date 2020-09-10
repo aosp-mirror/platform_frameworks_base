@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.DozeHost;
+import com.android.systemui.doze.DozeLog;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,12 +42,14 @@ public class DozeScrimControllerTest extends SysuiTestCase {
 
     @Mock
     private DozeParameters mDozeParameters;
+    @Mock
+    private DozeLog mDozeLog;
     private DozeScrimController mDozeScrimController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mDozeScrimController = new DozeScrimController(mDozeParameters);
+        mDozeScrimController = new DozeScrimController(mDozeParameters, mDozeLog);
         mDozeScrimController.setDozing(true);
     }
 

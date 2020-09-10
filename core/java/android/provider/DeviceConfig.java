@@ -40,6 +40,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +111,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
+     * Namespace for blobstore feature that allows apps to share data blobs.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_BLOBSTORE = "blobstore";
+
+    /**
      * Namespace for all Bluetooth related features.
      *
      * @hide
@@ -138,8 +147,10 @@ public final class DeviceConfig {
     /**
      * Namespace for how dex runs. The feature requires a reboot to reach a clean state.
      *
+     * @deprecated No longer used
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final String NAMESPACE_DEX_BOOT = "dex_boot";
 
@@ -149,6 +160,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
+    @SystemApi
     public static final String NAMESPACE_DISPLAY_MANAGER = "display_manager";
 
     /**
@@ -199,6 +211,14 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+
+    /**
+     * Namespace for features related to the Package Manager Service.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
 
     /**
      * Namespace for Rollback flags that are applied immediately.
@@ -254,12 +274,29 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SCHEDULER = "scheduler";
 
     /**
+     * Namespace for settings statistics features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_SETTINGS_STATS = "settings_stats";
+
+    /**
      * Namespace for storage-related features.
+     *
+     * @deprecated Replace storage namespace with storage_native_boot.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String NAMESPACE_STORAGE = "storage";
+
+    /**
+     * Namespace for storage-related features, including native and boot.
      *
      * @hide
      */
     @SystemApi
-    public static final String NAMESPACE_STORAGE = "storage";
+    public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
 
     /**
      * Namespace for System UI related features.
@@ -301,13 +338,31 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SETTINGS_UI = "settings_ui";
 
     /**
-     * Namespace for window manager related features. The names to access the properties in this
-     * namespace should be defined in {@link WindowManager}.
+     * Namespace for android related features, i.e. for flags that affect not just a single
+     * component, but the entire system.
+     *
+     * The keys for this namespace are defined in {@link AndroidDeviceConfig}.
      *
      * @hide
      */
     @TestApi
-    public static final String NAMESPACE_WINDOW_MANAGER = "android:window_manager";
+    public static final String NAMESPACE_ANDROID = "android";
+
+    /**
+     * Namespace for window manager related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_WINDOW_MANAGER = "window_manager";
+
+    /**
+     * Namespace for window manager features accessible by native code and
+     * loaded once per boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
 
     /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
@@ -327,51 +382,46 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PRIVACY = "privacy";
 
     /**
-     * Interface for accessing keys belonging to {@link #NAMESPACE_WINDOW_MANAGER}.
+     * Namespace for biometrics related features
+     *
      * @hide
      */
+    @SystemApi
     @TestApi
-    public interface WindowManager {
+    public static final String NAMESPACE_BIOMETRICS = "biometrics";
 
-        /**
-         * Key for accessing the system gesture exclusion limit (an integer in dp).
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        @TestApi
-        String KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP = "system_gesture_exclusion_limit_dp";
+    /**
+     * Permission related properties definitions.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String NAMESPACE_PERMISSIONS = "permissions";
 
-        /**
-         * Key for controlling whether system gestures are implicitly excluded by windows requesting
-         * sticky immersive mode from apps that are targeting an SDK prior to Q.
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        @TestApi
-        String KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE =
-                "system_gestures_excluded_by_pre_q_sticky_immersive";
+    /**
+     * Namespace for all widget related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_WIDGET = "widget";
 
-        /**
-         * The minimum duration between gesture exclusion logging for a given window in
-         * milliseconds.
-         *
-         * Events that happen in-between will be silently dropped.
-         *
-         * A non-positive value disables logging.
-         *
-         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
-         * @hide
-         */
-        String KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS =
-                "system_gesture_exclusion_log_debounce_millis";
-    }
+    /**
+     * Namespace for connectivity thermal power manager features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_CONNECTIVITY_THERMAL_POWER_MANAGER =
+            "connectivity_thermal_power_manager";
+
+    /**
+     * Namespace for configuration related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_CONFIGURATION = "configuration";
 
     private static final Object sLock = new Object();
-    @GuardedBy("sLock")
-    private static ArrayMap<OnPropertyChangedListener, Pair<String, Executor>> sSingleListeners =
-            new ArrayMap<>();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
             new ArrayMap<>();
@@ -395,9 +445,39 @@ public final class DeviceConfig {
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static String getProperty(@NonNull String namespace, @NonNull String name) {
+        // Fetch all properties for the namespace at once and cache them in the local process, so we
+        // incur the cost of the IPC less often. Lookups happen much more frequently than updates,
+        // and we want to optimize the former.
+        return getProperties(namespace, name).getString(name, null);
+    }
+
+    /**
+     * Look up the values of multiple properties for a particular namespace. The lookup is atomic,
+     * such that the values of these properties cannot change between the time when the first is
+     * fetched and the time when the last is fetched.
+     * <p>
+     * Each call to {@link #setProperties(Properties)} is also atomic and ensures that either none
+     * or all of the change is picked up here, but never only part of it.
+     *
+     * @param namespace The namespace containing the properties to look up.
+     * @param names     The names of properties to look up, or empty to fetch all properties for the
+     *                  given namespace.
+     * @return {@link Properties} object containing the requested properties. This reflects the
+     *     state of these properties at the time of the lookup, and is not updated to reflect any
+     *     future changes. The keyset of this Properties object will contain only the intersection
+     *     of properties already set and properties requested via the names parameter. Properties
+     *     that are already set but were not requested will not be contained here. Properties that
+     *     are not set, but were requested will not be contained here either.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @NonNull
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static Properties getProperties(@NonNull String namespace, @NonNull String ... names) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        String compositeName = createCompositeName(namespace, name);
-        return Settings.Config.getString(contentResolver, compositeName);
+        return new Properties(namespace,
+                Settings.Config.getStrings(contentResolver, namespace, Arrays.asList(names)));
     }
 
     /**
@@ -541,9 +621,32 @@ public final class DeviceConfig {
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperty(@NonNull String namespace, @NonNull String name,
             @Nullable String value, boolean makeDefault) {
-        String compositeName = createCompositeName(namespace, name);
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.putString(contentResolver, compositeName, value, makeDefault);
+        return Settings.Config.putString(contentResolver, namespace, name, value, makeDefault);
+    }
+
+    /**
+     * Set all of the properties for a specific namespace. Pre-existing properties will be updated
+     * and new properties will be added if necessary. Any pre-existing properties for the specific
+     * namespace which are not part of the provided {@link Properties} object will be deleted from
+     * the namespace. These changes are all applied atomically, such that no calls to read or reset
+     * these properties can happen in the middle of this update.
+     * <p>
+     * Each call to {@link #getProperties(String, String...)} is also atomic and ensures that either
+     * none or all of this update is picked up, but never only part of it.
+     *
+     * @param properties the complete set of properties to set for a specific namespace.
+     * @throws BadConfigException if the provided properties are banned by RescueParty.
+     * @return True if the values were set, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static boolean setProperties(@NonNull Properties properties) throws BadConfigException {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        return Settings.Config.setStrings(contentResolver, properties.getNamespace(),
+                properties.mMap);
     }
 
     /**
@@ -563,48 +666,6 @@ public final class DeviceConfig {
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         Settings.Config.resetToDefaults(contentResolver, resetMode, namespace);
-    }
-
-    /**
-     * Add a listener for property changes.
-     * <p>
-     * This listener will be called whenever properties in the specified namespace change. Callbacks
-     * will be made on the specified executor. Future calls to this method with the same listener
-     * will replace the old namespace and executor. Remove the listener entirely by calling
-     * {@link #removeOnPropertyChangedListener(OnPropertyChangedListener)}.
-     *
-     * @param namespace                 The namespace containing properties to monitor.
-     * @param executor                  The executor which will be used to run callbacks.
-     * @param onPropertyChangedListener The listener to add.
-     * @hide
-     * @see #removeOnPropertyChangedListener(OnPropertyChangedListener)
-     * @removed
-     */
-    @SystemApi
-    @TestApi
-    @RequiresPermission(READ_DEVICE_CONFIG)
-    public static void addOnPropertyChangedListener(
-            @NonNull String namespace,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnPropertyChangedListener onPropertyChangedListener) {
-        enforceReadPermission(ActivityThread.currentApplication().getApplicationContext(),
-                namespace);
-        synchronized (sLock) {
-            Pair<String, Executor> oldNamespace = sSingleListeners.get(onPropertyChangedListener);
-            if (oldNamespace == null) {
-                // Brand new listener, add it to the list.
-                sSingleListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
-                incrementNamespace(namespace);
-            } else if (namespace.equals(oldNamespace.first)) {
-                // Listener is already registered for this namespace, update executor just in case.
-                sSingleListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
-            } else {
-                // Update this listener from an old namespace to the new one.
-                decrementNamespace(sSingleListeners.get(onPropertyChangedListener).first);
-                sSingleListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
-                incrementNamespace(namespace);
-            }
-        }
     }
 
     /**
@@ -652,28 +713,6 @@ public final class DeviceConfig {
      * Remove a listener for property changes. The listener will receive no further notification of
      * property changes.
      *
-     * @param onPropertyChangedListener The listener to remove.
-     * @hide
-     * @see #addOnPropertyChangedListener(String, Executor, OnPropertyChangedListener)
-     * @removed
-     */
-    @SystemApi
-    @TestApi
-    public static void removeOnPropertyChangedListener(
-            @NonNull OnPropertyChangedListener onPropertyChangedListener) {
-        Preconditions.checkNotNull(onPropertyChangedListener);
-        synchronized (sLock) {
-            if (sSingleListeners.containsKey(onPropertyChangedListener)) {
-                decrementNamespace(sSingleListeners.get(onPropertyChangedListener).first);
-                sSingleListeners.remove(onPropertyChangedListener);
-            }
-        }
-    }
-
-    /**
-     * Remove a listener for property changes. The listener will receive no further notification of
-     * property changes.
-     *
      * @param onPropertiesChangedListener The listener to remove.
      * @hide
      * @see #addOnPropertiesChangedListener(String, Executor, OnPropertiesChangedListener)
@@ -689,12 +728,6 @@ public final class DeviceConfig {
                 sListeners.remove(onPropertiesChangedListener);
             }
         }
-    }
-
-    private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
-        Preconditions.checkNotNull(namespace);
-        Preconditions.checkNotNull(name);
-        return namespace + "/" + name;
     }
 
     private static Uri createNamespaceUri(@NonNull String namespace) {
@@ -760,48 +793,31 @@ public final class DeviceConfig {
         List<String> pathSegments = uri.getPathSegments();
         // pathSegments(0) is "config"
         final String namespace = pathSegments.get(1);
-        final String name = pathSegments.get(2);
-        final String value;
+        Properties.Builder propBuilder = new Properties.Builder(namespace);
         try {
-            value = getProperty(namespace, name);
+            Properties allProperties = getProperties(namespace);
+            for (int i = 2; i < pathSegments.size(); ++i) {
+                String key = pathSegments.get(i);
+                propBuilder.setString(key, allProperties.getString(key, null));
+            }
         } catch (SecurityException e) {
             // Silently failing to not crash binder or listener threads.
             Log.e(TAG, "OnPropertyChangedListener update failed: permission violation.");
             return;
         }
+        Properties properties = propBuilder.build();
+
         synchronized (sLock) {
-            // OnPropertiesChangedListeners
             for (int i = 0; i < sListeners.size(); i++) {
                 if (namespace.equals(sListeners.valueAt(i).first)) {
-                    final int j = i;
-                    sListeners.valueAt(i).second.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            Map<String, String> propertyMap = new HashMap(1);
-                            propertyMap.put(name, value);
-                            sListeners.keyAt(j)
-                                    .onPropertiesChanged(new Properties(namespace, propertyMap));
-                        }
-
-                    });
-                }
-            }
-            // OnPropertyChangedListeners
-            for (int i = 0; i < sSingleListeners.size(); i++) {
-                if (namespace.equals(sSingleListeners.valueAt(i).first)) {
-                    final int j = i;
-                    sSingleListeners.valueAt(i).second.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            sSingleListeners.keyAt(j).onPropertyChanged(namespace, name, value);
-                        }
-
+                    final OnPropertiesChangedListener listener = sListeners.keyAt(i);
+                    sListeners.valueAt(i).second.execute(() -> {
+                        listener.onPropertiesChanged(properties);
                     });
                 }
             }
         }
     }
-
 
     /**
      * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
@@ -817,31 +833,20 @@ public final class DeviceConfig {
         }
     }
 
-
     /**
-     * Interface for monitoring single property changes.
-     * <p>
-     * Override {@link #onPropertyChanged(String, String, String)} to handle callbacks for changes.
-     *
+     * Returns list of namespaces that can be read without READ_DEVICE_CONFIG_PERMISSION;
      * @hide
-     * @removed
      */
-    @SystemApi
-    @TestApi
-    public interface OnPropertyChangedListener {
-        /**
-         * Called when a property has changed.
-         *
-         * @param namespace The namespace containing the property which has changed.
-         * @param name      The name of the property which has changed.
-         * @param value     The new value of the property which has changed.
-         */
-        void onPropertyChanged(@NonNull String namespace, @NonNull String name,
-                @Nullable String value);
+    public static @NonNull List<String> getPublicNamespaces() {
+        return PUBLIC_NAMESPACES;
     }
 
     /**
-     * Interface for monitoring changes to properties.
+     * Interface for monitoring changes to properties. Implementations will receive callbacks when
+     * properties change, including a {@link Properties} object which contains a single namespace
+     * and all of the properties which changed for that namespace. This includes properties which
+     * were added, updated, or deleted. This is not necessarily a complete list of all properties
+     * belonging to the namespace, as properties which don't change are omitted.
      * <p>
      * Override {@link #onPropertiesChanged(Properties)} to handle callbacks for changes.
      *
@@ -851,13 +856,26 @@ public final class DeviceConfig {
     @TestApi
     public interface OnPropertiesChangedListener {
         /**
-         * Called when one or more properties have changed.
+         * Called when one or more properties have changed, providing a Properties object with all
+         * of the changed properties. This object will contain only properties which have changed,
+         * not the complete set of all properties belonging to the namespace.
          *
          * @param properties Contains the complete collection of properties which have changed for a
-         *                   single namespace.
+         *                   single namespace. This includes only those which were added, updated,
+         *                   or deleted.
          */
         void onPropertiesChanged(@NonNull Properties properties);
     }
+
+    /**
+     * Thrown by {@link #setProperties(Properties)} when a configuration is rejected. This
+     * happens if RescueParty has identified a bad configuration and reset the namespace.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static class BadConfigException extends Exception {}
 
     /**
      * A mapping of properties to values, as well as a single namespace which they all belong to.
@@ -869,14 +887,16 @@ public final class DeviceConfig {
     public static class Properties {
         private final String mNamespace;
         private final HashMap<String, String> mMap;
+        private Set<String> mKeyset;
 
         /**
          * Create a mapping of properties to values and the namespace they belong to.
          *
          * @param namespace The namespace these properties belong to.
          * @param keyValueMap A map between property names and property values.
+         * @hide
          */
-        Properties(@NonNull String namespace, @Nullable Map<String, String> keyValueMap) {
+        public Properties(@NonNull String namespace, @Nullable Map<String, String> keyValueMap) {
             Preconditions.checkNotNull(namespace);
             mNamespace = namespace;
             mMap = new HashMap();
@@ -898,7 +918,10 @@ public final class DeviceConfig {
          */
         @NonNull
         public Set<String> getKeyset() {
-            return mMap.keySet();
+            if (mKeyset == null) {
+                mKeyset = Collections.unmodifiableSet(mMap.keySet());
+            }
+            return mKeyset;
         }
 
         /**
@@ -993,5 +1016,93 @@ public final class DeviceConfig {
                 return defaultValue;
             }
         }
+
+        /**
+         * Builder class for the construction of {@link Properties} objects.
+         */
+        public static final class Builder {
+            @NonNull
+            private final String mNamespace;
+            @NonNull
+            private final Map<String, String> mKeyValues = new HashMap<>();
+
+            /**
+             * Create a new Builders for the specified namespace.
+             * @param namespace non null namespace.
+             */
+            public Builder(@NonNull String namespace) {
+                mNamespace = namespace;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value nullable string value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setString(@NonNull String name, @Nullable String value) {
+                mKeyValues.put(name, value);
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value nullable string value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setBoolean(@NonNull String name, boolean value) {
+                mKeyValues.put(name, Boolean.toString(value));
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value int value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setInt(@NonNull String name, int value) {
+                mKeyValues.put(name, Integer.toString(value));
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value long value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setLong(@NonNull String name, long value) {
+                mKeyValues.put(name, Long.toString(value));
+                return this;
+            }
+
+            /**
+             * Add a new property with the specified key and value.
+             * @param name non null name of the property.
+             * @param value float value of the property.
+             * @return this Builder object
+             */
+            @NonNull
+            public Builder setFloat(@NonNull String name, float value) {
+                mKeyValues.put(name, Float.toString(value));
+                return this;
+            }
+
+            /**
+             * Create a new {@link Properties} object.
+             * @return non null Properties.
+             */
+            @NonNull
+            public Properties build() {
+                return new Properties(mNamespace, mKeyValues);
+            }
+        }
     }
+
 }

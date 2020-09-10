@@ -22,6 +22,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * MediaManager provide interface to get MediaDevice list.
@@ -30,7 +31,7 @@ public abstract class MediaManager {
 
     private static final String TAG = "MediaManager";
 
-    protected final Collection<MediaDeviceCallback> mCallbacks = new ArrayList<>();
+    protected final Collection<MediaDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
     protected final List<MediaDevice> mMediaDevices = new ArrayList<>();
 
     protected Context mContext;
@@ -42,18 +43,14 @@ public abstract class MediaManager {
     }
 
     protected void registerCallback(MediaDeviceCallback callback) {
-        synchronized (mCallbacks) {
-            if (!mCallbacks.contains(callback)) {
-                mCallbacks.add(callback);
-            }
+        if (!mCallbacks.contains(callback)) {
+            mCallbacks.add(callback);
         }
     }
 
     protected void unregisterCallback(MediaDeviceCallback callback) {
-        synchronized (mCallbacks) {
-            if (mCallbacks.contains(callback)) {
-                mCallbacks.remove(callback);
-            }
+        if (mCallbacks.contains(callback)) {
+            mCallbacks.remove(callback);
         }
     }
 
@@ -78,51 +75,49 @@ public abstract class MediaManager {
     }
 
     protected void dispatchDeviceAdded(MediaDevice mediaDevice) {
-        synchronized (mCallbacks) {
-            for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceAdded(mediaDevice);
-            }
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onDeviceAdded(mediaDevice);
         }
     }
 
     protected void dispatchDeviceRemoved(MediaDevice mediaDevice) {
-        synchronized (mCallbacks) {
-            for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceRemoved(mediaDevice);
-            }
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onDeviceRemoved(mediaDevice);
         }
     }
 
     protected void dispatchDeviceListAdded() {
-        synchronized (mCallbacks) {
-            for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceListAdded(new ArrayList<>(mMediaDevices));
-            }
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onDeviceListAdded(new ArrayList<>(mMediaDevices));
         }
     }
 
     protected void dispatchDeviceListRemoved(List<MediaDevice> devices) {
-        synchronized (mCallbacks) {
-            for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceListRemoved(devices);
-            }
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onDeviceListRemoved(devices);
         }
     }
 
     protected void dispatchConnectedDeviceChanged(String id) {
-        synchronized (mCallbacks) {
-            for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onConnectedDeviceChanged(id);
-            }
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onConnectedDeviceChanged(id);
         }
     }
 
     protected void dispatchDataChanged() {
-        synchronized (mCallbacks) {
-            for (MediaDeviceCallback callback : mCallbacks) {
-                callback.onDeviceAttributesChanged();
-            }
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onDeviceAttributesChanged();
         }
+    }
+
+    protected void dispatchOnRequestFailed(int reason) {
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onRequestFailed(reason);
+        }
+    }
+
+    private Collection<MediaDeviceCallback> getCallbacks() {
+        return new CopyOnWriteArrayList<>(mCallbacks);
     }
 
     /**
@@ -169,5 +164,17 @@ public abstract class MediaManager {
          * (e.g: device name, connection state, subtitle) is changed.
          */
         void onDeviceAttributesChanged();
+
+        /**
+         * Callback for notifying that transferring is failed.
+         *
+         * @param reason the reason that the request has failed. Can be one of followings:
+         * {@link android.media.MediaRoute2ProviderService#REASON_UNKNOWN_ERROR},
+         * {@link android.media.MediaRoute2ProviderService#REASON_REJECTED},
+         * {@link android.media.MediaRoute2ProviderService#REASON_NETWORK_ERROR},
+         * {@link android.media.MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE},
+         * {@link android.media.MediaRoute2ProviderService#REASON_INVALID_COMMAND},
+         */
+        void onRequestFailed(int reason);
     }
 }

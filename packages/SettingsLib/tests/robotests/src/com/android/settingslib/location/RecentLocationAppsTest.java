@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
+import android.app.AppOpsManager.AttributedOpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -16,7 +17,7 @@ import android.content.res.Resources;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.LongSparseLongArray;
+import android.util.LongSparseArray;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -156,13 +157,11 @@ public class RecentLocationAppsTest {
     }
 
     private OpEntry createOpEntryWithTime(int op, long time, int duration) {
-        final LongSparseLongArray accessTimes = new LongSparseLongArray();
-        accessTimes.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
-                AppOpsManager.OP_FLAG_SELF), time);
-        final LongSparseLongArray durations = new LongSparseLongArray();
-        durations.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
-                AppOpsManager.OP_FLAG_SELF), duration);
-        return new OpEntry(op, false, AppOpsManager.MODE_ALLOWED, accessTimes,
-                null /*rejectTimes*/, durations, null /* proxyUids */, null /* proxyPackages */);
+        final LongSparseArray<AppOpsManager.NoteOpEvent> accessEvents = new LongSparseArray<>();
+        accessEvents.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
+                AppOpsManager.OP_FLAG_SELF), new AppOpsManager.NoteOpEvent(time, duration, null));
+
+        return new OpEntry(op, AppOpsManager.MODE_ALLOWED, Collections.singletonMap(null,
+                new AttributedOpEntry(op, false, accessEvents, null)));
     }
 }

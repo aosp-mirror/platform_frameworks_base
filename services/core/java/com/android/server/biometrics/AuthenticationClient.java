@@ -66,6 +66,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     public abstract boolean wasUserDetected();
 
+    public abstract boolean isStrongBiometric();
+
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
@@ -82,11 +84,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     @Override
     public void binderDied() {
-        super.binderDied();
-        // When the binder dies, we should stop the client. This probably belongs in
-        // ClientMonitor's binderDied(), but testing all the cases would be tricky.
-        // AuthenticationClient is the most user-visible case.
-        stop(false /* initiatedByClient */);
+        final boolean clearListener = !isBiometricPrompt();
+        binderDiedInternal(clearListener);
     }
 
     @Override
@@ -167,9 +166,15 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
                 if (isBiometricPrompt() && listener != null) {
                     // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceededInternal(mRequireConfirmation, byteToken);
+                    listener.onAuthenticationSucceededInternal(mRequireConfirmation, byteToken,
+                            isStrongBiometric());
                 } else if (!isBiometricPrompt() && listener != null) {
-                    KeyStore.getInstance().addAuthToken(byteToken);
+                    if (isStrongBiometric()) {
+                        KeyStore.getInstance().addAuthToken(byteToken);
+                    } else {
+                        Slog.d(getLogTag(), "Skipping addAuthToken");
+                    }
+
                     try {
                         // Explicitly have if/else here to make it super obvious in case the code is
                         // touched in the future.
@@ -209,8 +214,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     // will show briefly and be replaced by "device locked out" message.
                     if (listener != null) {
                         if (isBiometricPrompt()) {
-                            listener.onAuthenticationFailedInternal(getCookie(),
-                                    getRequireConfirmation());
+                            listener.onAuthenticationFailedInternal();
                         } else {
                             listener.onAuthenticationFailed(getHalDeviceId());
                         }

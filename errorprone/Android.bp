@@ -1,0 +1,26 @@
+
+java_plugin {
+    name: "error_prone_android_framework",
+
+    static_libs: [
+        "error_prone_android_framework_lib",
+    ],
+}
+
+java_library_host {
+    name: "error_prone_android_framework_lib",
+
+    srcs: ["java/**/*.java"],
+
+    static_libs: [
+        "//external/error_prone:error_prone_core",
+    ],
+
+    libs: [
+        "//external/auto:auto_service_annotations",
+    ],
+
+    plugins: [
+        "//external/auto:auto_service_plugin",
+    ],
+}

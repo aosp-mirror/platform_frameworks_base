@@ -115,6 +115,7 @@ public:
      * wasted)
      */
     size_t usedSize() const { return mTotalAllocated - mWastedSpace; }
+    size_t allocatedSize() const { return mTotalAllocated; }
 
 private:
     LinearAllocator(const LinearAllocator& other);

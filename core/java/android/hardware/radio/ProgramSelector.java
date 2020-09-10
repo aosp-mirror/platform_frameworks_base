@@ -582,6 +582,19 @@ public final class ProgramSelector implements Parcelable {
         }
 
         /**
+         * Returns whether this Identifier's type is considered a category when filtering
+         * ProgramLists for category entries.
+         *
+         * @see {@link ProgramList.Filter#areCategoriesIncluded()}
+         * @return False if this identifier's type is not tuneable (e.g. DAB ensemble or
+         *         vendor-specified type). True otherwise.
+         */
+        public boolean isCategoryType() {
+            return (mType >= IDENTIFIER_TYPE_VENDOR_START && mType <= IDENTIFIER_TYPE_VENDOR_END)
+                    || mType == IDENTIFIER_TYPE_DAB_ENSEMBLE;
+        }
+
+        /**
          * Value of an identifier.
          *
          * Its meaning depends on identifier type, ie. for IDENTIFIER_TYPE_AMFM_FREQUENCY type,

@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Geef je wachtwoord op"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Onjuiste pincode."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Volledig opgeladen"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Opgeladen"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Draadloos opladen"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Snel opladen"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Druk op Menu om te ontgrendelen."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netwerk vergrendeld"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Geen simkaart"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"Geen simkaart in tablet."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"Geen simkaart in telefoon."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Plaats een simkaart."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"De simkaart ontbreekt of kan niet worden gelezen. Plaats een simkaart."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Onbruikbare simkaart."</string>
@@ -83,25 +81,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Geef een pincode van vier tot acht cijfers op."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"De pukcode is minimaal acht cijfers lang."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Geef de juiste pukcode opnieuw op. Bij herhaalde pogingen wordt de simkaart definitief uitgeschakeld."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Pincodes komen niet overeen"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Te veel patroonpogingen"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Je hebt je pincode <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Je hebt je wachtwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. \n\nProbeer het over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt deze tablet gereset, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt deze telefoon gereset, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Deze tablet wordt gereset, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Deze telefoon wordt gereset, waardoor alle gegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt deze gebruiker verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt deze gebruiker verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Deze gebruiker wordt verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Deze gebruiker wordt verwijderd, waardoor alle gebruikersgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt het werkprofiel verwijderd, waardoor alle profielgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt het werkprofiel verwijderd, waardoor alle profielgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Het werkprofiel wordt verwijderd, waardoor alle profielgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Je hebt <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Het werkprofiel wordt verwijderd, waardoor alle profielgegevens worden verwijderd."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt je gevraagd je tablet te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt je gevraagd je telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Onjuiste pincode voor simkaart. Je moet nu contact opnemen met je provider om je apparaat te ontgrendelen."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">Onjuiste pincode voor simkaart. Je hebt nog <xliff:g id="NUMBER_1">%d</xliff:g> pogingen over.</item>

@@ -19,9 +19,13 @@ package com.android.systemui.keyguard;
 import android.os.Handler;
 import android.os.Message;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Dispatches the lifecycles keyguard gets from WindowManager on the main thread.
  */
+@Singleton
 public class KeyguardLifecyclesDispatcher {
 
     static final int SCREEN_TURNING_ON = 0;
@@ -37,6 +41,7 @@ public class KeyguardLifecyclesDispatcher {
     private final ScreenLifecycle mScreenLifecycle;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
 
+    @Inject
     public KeyguardLifecyclesDispatcher(ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle) {
         mScreenLifecycle = screenLifecycle;

@@ -1318,7 +1318,7 @@ public class LockPatternView extends View {
         super.onRestoreInstanceState(ss.getSuperState());
         setPattern(
                 DisplayMode.Correct,
-                LockPatternUtils.stringToPattern(ss.getSerializedPattern()));
+                LockPatternUtils.byteArrayToPattern(ss.getSerializedPattern().getBytes()));
         mPatternDisplayMode = DisplayMode.values()[ss.getDisplayMode()];
         mInputEnabled = ss.isInputEnabled();
         mInStealthMode = ss.isInStealthMode();

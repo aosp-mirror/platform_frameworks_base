@@ -18,7 +18,7 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:layout_width="@dimen/chooser_target_width"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:minHeight="100dp"
               android:gravity="center"
@@ -30,8 +30,8 @@
               android:background="?attr/selectableItemBackgroundBorderless">
 
     <ImageView android:id="@+id/icon"
-               android:layout_width="@dimen/resolver_grid_icon_size"
-               android:layout_height="@dimen/resolver_grid_icon_size"
+               android:layout_width="@dimen/chooser_icon_size"
+               android:layout_height="@dimen/chooser_icon_size"
                android:scaleType="fitCenter" />
 
     <!-- Size manually tuned to match specs -->
@@ -44,7 +44,7 @@
               android:layout_height="wrap_content"
               android:textAppearance="?attr/textAppearanceSmall"
               android:textColor="?attr/textColorPrimary"
-              android:textSize="14sp"
+              android:textSize="12sp"
               android:gravity="top|center_horizontal"
               android:lines="1"
               android:ellipsize="end" />

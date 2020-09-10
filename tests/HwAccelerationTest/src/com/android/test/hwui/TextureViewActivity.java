@@ -122,7 +122,7 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
             if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) break;
         }
         
-        int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        int rotation = getDisplay().getRotation();
         int degrees = 0;
 
         switch (rotation) {

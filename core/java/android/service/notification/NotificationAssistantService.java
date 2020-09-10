@@ -182,6 +182,32 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
+     * Implement this to know when the notification panel is revealed
+     *
+     * @param items Number of notifications on the panel at time of opening
+     */
+    public void onPanelRevealed(int items) {
+
+    }
+
+    /**
+     * Implement this to know when the notification panel is hidden
+     */
+    public void onPanelHidden() {
+
+    }
+
+    /**
+     * Implement this to know when a notification becomes visible or hidden from the user.
+     *
+     * @param key the notification key
+     * @param isVisible whether the notification is visible.
+     */
+    public void onNotificationVisibilityChanged(@NonNull String key, boolean isVisible) {
+
+    }
+
+    /**
      * Implement this to know when a notification change (expanded / collapsed) is visible to user.
      *
      * @param key the notification key
@@ -293,6 +319,11 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 Log.w(TAG, "onNotificationEnqueued: Error receiving StatusBarNotification", e);
                 return;
             }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationEnqueuedWithChannel: "
+                        + "Error receiving StatusBarNotification");
+                return;
+            }
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
@@ -311,6 +342,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 Log.w(TAG, "onNotificationSnoozed: Error receiving StatusBarNotification", e);
                 return;
             }
+            if (sbn == null) {
+                Log.w(TAG, "onNotificationSnoozed: Error receiving StatusBarNotification");
+                return;
+            }
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
@@ -324,6 +359,30 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = keys;
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATIONS_SEEN,
+                    args).sendToTarget();
+        }
+
+        @Override
+        public void onPanelRevealed(int items) {
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = items;
+            mHandler.obtainMessage(MyHandler.MSG_ON_PANEL_REVEALED,
+                    args).sendToTarget();
+        }
+
+        @Override
+        public void onPanelHidden() {
+            SomeArgs args = SomeArgs.obtain();
+            mHandler.obtainMessage(MyHandler.MSG_ON_PANEL_HIDDEN,
+                    args).sendToTarget();
+        }
+
+        @Override
+        public void onNotificationVisibilityChanged(String key, boolean isVisible) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.argi1 = isVisible ? 1 : 0;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_VISIBILITY_CHANGED,
                     args).sendToTarget();
         }
 
@@ -385,6 +444,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public static final int MSG_ON_SUGGESTED_REPLY_SENT = 6;
         public static final int MSG_ON_ACTION_INVOKED = 7;
         public static final int MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED = 8;
+        public static final int MSG_ON_PANEL_REVEALED = 9;
+        public static final int MSG_ON_PANEL_HIDDEN = 10;
+        public static final int MSG_ON_NOTIFICATION_VISIBILITY_CHANGED = 11;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -469,6 +531,25 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 }
                 case MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED: {
                     onAllowedAdjustmentsChanged();
+                    break;
+                }
+                case MSG_ON_PANEL_REVEALED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    int items = args.argi1;
+                    args.recycle();
+                    onPanelRevealed(items);
+                    break;
+                }
+                case MSG_ON_PANEL_HIDDEN: {
+                    onPanelHidden();
+                    break;
+                }
+                case MSG_ON_NOTIFICATION_VISIBILITY_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    boolean isVisible = args.argi1 == 1;
+                    args.recycle();
+                    onNotificationVisibilityChanged(key, isVisible);
                     break;
                 }
             }

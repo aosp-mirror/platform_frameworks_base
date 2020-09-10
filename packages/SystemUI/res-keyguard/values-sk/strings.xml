@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Zadajte heslo"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Nesprávny kód PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Neplatná karta."</string>
-    <string name="keyguard_charged" msgid="6572033099675649299">"Úplne nabité"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Nabité"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa bezdrôtovo"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa rýchlo"</string>
@@ -42,8 +42,6 @@
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Odomknete stlačením tlačidla ponuky."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieť je zablokovaná"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Žiadna SIM karta"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="3088787847082615459">"V tablete nie je žiadna SIM karta."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="5124049236681993063">"V telefóne nie je žiadna SIM karta."</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Vložte SIM kartu."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM karta chýba alebo sa z nej nedá čítať. Vložte SIM kartu."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM karta je nepoužiteľná."</string>
@@ -85,25 +83,10 @@
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Zadajte kód PIN s dĺžkou 4 až 8 číslic."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Kód PUK musí obsahovať 8 alebo viac číslic."</string>
     <string name="kg_invalid_puk" msgid="1774337070084931186">"Znova zadajte správny kód PUK. Opakované pokusy zakážu SIM kartu natrvalo."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="1500814146841660886">"Kódy PIN sa nezhodujú"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Príliš veľa pokusov o nakreslenie vzoru"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávny kód PIN. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="2445671146665131857">"Tablet ste sa pokúsili <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne odomknúť. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%2$d</xliff:g>) bude tento tablet obnovený a všetky údaje, ktoré sú v ňom uložené, budú odstránené."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4738318327984389472">"Telefón ste sa pokúsili <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne odomknúť. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%2$d</xliff:g>) bude tento telefón obnovený a všetky údaje, ktoré sú v ňom uložené, budú odstránené."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="6974065787881197466">"Tablet ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>-krát nesprávne odomknúť. Tablet bude obnovený a všetky údaje, ktoré sú v ňom uložené, budú odstránené."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4645797157486540692">"Telefón ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>-krát nesprávne odomknúť. Telefón bude obnovený a všetky údaje, ktoré sú v ňom uložené, budú odstránené."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="2444432908572039632">"Tablet ste sa pokúsili <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne odomknúť. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%2$d</xliff:g>) bude tento používateľ odstránený a spolu s ním všetky jeho údaje."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="3230300995829296824">"Telefón ste sa pokúsili <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne odomknúť. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%2$d</xliff:g>) bude tento používateľ odstránený a spolu s ním všetky jeho údaje."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="9046628517316763961">"Tablet ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>-krát nesprávne odomknúť. Používateľ bude odstránený a spolu s ním všetky jeho údaje."</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3588779327358321092">"Telefón ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>-krát nesprávne odomknúť. Používateľ bude odstránený a spolu s ním všetky jeho údaje."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="6114158710353725041">"Tablet ste sa pokúsili <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne odomknúť. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%2$d</xliff:g>) bude pracovný profil odstránený a spolu s ním všetky údaje profilu."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="8345451368768804892">"Telefón ste sa pokúsili <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne odomknúť. Po ďalších neúspešných pokusoch (počet: <xliff:g id="NUMBER_1">%2$d</xliff:g>) bude pracovný profil odstránený a spolu s ním všetky údaje profilu."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="9063715142119087685">"Tablet ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>-krát nesprávne odomknúť. Pracovný profil bude odstránený spolu so všetkými údajmi."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="105463960684230996">"Telefón ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>-krát nesprávne odomknúť. Pracovný profil bude odstránený spolu so všetkými údajmi."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="5123792377735688284">"Už ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne nakreslili svoj bezpečnostný vzor. Po ďalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="3307854957632348753">"Už ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%3$d</xliff:g>} s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nesprávny kód PIN SIM karty. Teraz musíte kontaktovať svojho operátora, aby vám odomkol zariadenie."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="few">Nesprávny kód PIN SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>

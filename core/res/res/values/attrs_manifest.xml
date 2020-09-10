@@ -296,8 +296,11 @@
             granted to the system app predictor -->
         <flag name="appPredictor" value="0x200000" />
         <!-- Additional flag from base permission type: this permission can be automatically
-            granted to the system telephony apps -->
-        <flag name="telephony" value="0x400000" />
+            granted to the system companion device manager service -->
+        <flag name="companion" value="0x800000" />
+        <!-- Additional flag from base permission type: this permission will be granted to the
+             retail demo app, as defined by the OEM. -->
+        <flag name="retailDemo" value="0x1000000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -1318,7 +1321,11 @@
          it will yield the baseIntent to any activity that it launches in the same task. This
          continues until an activity is encountered which has this attribute set to false. False
          is the default. This attribute set to true also permits activity's use of the
-         TaskDescription to change labels, colors and icons in the recent task list. -->
+         TaskDescription to change labels, colors and icons in the recent task list.
+
+         <p>NOTE: Setting this flag to <code>true</code> will not change the affinity of the task,
+         which is used for intent resolution during activity launch. The task's root activity will
+         always define its affinity. -->
     <attr name="relinquishTaskIdentity" format="boolean" />
 
     <!-- Indicate that it is okay for this activity be resumed while the previous
@@ -1513,8 +1520,45 @@
         <!-- Managing a media projection session, e.g, for screen recording or taking
              screenshots.-->
         <flag name="mediaProjection" value="0x20" />
+        <!-- Use the camera device or record video.
+
+            <p>For apps with <code>targetSdkVersion</code> {@link android.os.Build.VERSION_CODES#R}
+            and above, a foreground service will not be able to access the camera if this type is
+            not specified in the manifest and in
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+            -->
+        <flag name="camera" value="0x40" />
+        <!--Use the microphone device or record audio.
+
+            <p>For apps with <code>targetSdkVersion</code> {@link android.os.Build.VERSION_CODES#R}
+            and above, a foreground service will not be able to access the microphone if this type
+            is not specified in the manifest and in
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+            -->
+        <flag name="microphone" value="0x80" />
     </attr>
 
+    <!-- Enable sampled memory bug detection in this process.
+         When enabled, a very small, random subset of native
+         memory allocations are protected with guard pages, providing an
+         ASan-like error report in case of a memory corruption bug.
+
+         GWP-ASan is a recursive acronym. It stands for “GWP-ASan Will Provide Allocation SANity”.
+         See the <a href="http://llvm.org/docs/GwpAsan.html">LLVM documentation</a>
+         for more information about this feature.
+
+         <p>This attribute can be applied to a
+         {@link android.R.styleable#AndroidManifestProcess process} tag, or to an
+         {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
+         a default setting for all application components). -->
+    <attr name="gwpAsanMode">
+        <!-- Default behavior: GwpAsan is disabled in user apps, randomly enabled in system apps. -->
+        <enum name="default" value="-1" />
+        <!-- Never enable GwpAsan. -->
+        <enum name="never" value="0" />
+        <!-- Always enable GwpAsan. -->
+       <enum name="always" value="1" />
+    </attr>
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1526,7 +1570,8 @@
          <code>com.google.app.<em>appname</em></code>
 
          <p>Inside of the manifest tag, may appear the following tags
-         in any order: {@link #AndroidManifestPermission permission},
+         in any order: {@link #AndroidManifestAttribution attribution},
+         {@link #AndroidManifestPermission permission},
          {@link #AndroidManifestPermissionGroup permission-group},
          {@link #AndroidManifestPermissionTree permission-tree},
          {@link #AndroidManifestUsesSdk uses-sdk},
@@ -1742,7 +1787,89 @@
                  - {@code true} for apps with targetSdkVersion < 29.
              -->
         <attr name="requestLegacyExternalStorage" format="boolean" />
+
+        <!-- If {@code true} this app would like to preserve the legacy storage
+             model from a previously installed version. Note that this may not always be
+             respected due to policy or backwards compatibility reasons.
+
+             <p>This has no effect on the first install of an app on a device.
+             For an updating app, setting this to {@code true} will preserve the legacy behaviour
+             configured by the {@code requestLegacyExternalStorage} flag. If on an update, this
+             flag is set to {@code false} then the legacy access is not preserved, such an app can
+             only have legacy access with the {@code requestLegacyExternalStorage} flag.
+             <p>
+
+             The default value is {@code false}.
+             -->
+        <attr name="preserveLegacyExternalStorage" format="boolean" />
+
+        <!-- If {@code true} this app declares that it should be visible to all other apps on
+             device, regardless of what they declare via the {@code queries} tags in their
+             manifest.
+
+             The default value is {@code false}. -->
+        <attr name="forceQueryable" format="boolean" />
+
+        <!-- If {@code true} indicates that this application is capable of presenting a unified
+             interface representing multiple profiles.
+
+             The default value is {@code false}. -->
+        <attr name="crossProfile" format="boolean" />
+
+        <!-- If {@code true} this app will receive tagged pointers to native heap allocations
+             from functions like malloc() on compatible devices. Note that this may not always
+             be respected due to policy or backwards compatibility reasons. See the
+             <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged Pointers</a>
+             document for more information on this feature.
+
+             The default value is {@code true}. -->
+        <attr name="allowNativeHeapPointerTagging" format="boolean" />
+
+        <attr name="gwpAsanMode" />
+
+        <!-- @hide no longer used, kept to preserve padding -->
+        <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
+
+        <!-- No longer used. Declaring this does nothing -->
+        <attr name="autoRevokePermissions">
+            <!-- No longer used -->
+            <enum name="allowed" value="0" />
+            <!-- No longer used -->
+            <enum name="discouraged" value="1" />
+            <!-- No longer used -->
+            <enum name="disallowed" value="2" />
+        </attr>
     </declare-styleable>
+
+    <!-- An attribution is a logical part of an app and is identified by a tag.
+    E.g. a photo sharing app might include a direct messaging component. To tag certain code as
+    belonging to an attribution, use a context created via
+    {@link android.content.Context#createAttributionContext(String)} for any interaction with the
+    system.
+
+    <p>This appears as a child tag of the root {@link #AndroidManifest manifest} tag.
+
+    <p>In case this attribution inherits from another attribution, this tag can contain one or
+    multiple {@link #AndroidManifestAttributionInheritFrom inherit-from} tags. -->
+    <declare-styleable name="AndroidManifestAttribution" parent="AndroidManifest">
+        <!-- TODO moltmann: Remove -->
+        <attr name="featureId" format="string" />
+        <!-- Required identifier for a attribution. Can be passed to
+        {@link android.content.Context#createAttributionContext} to create a context tagged with
+        this attribution
+        -->
+        <attr name="tag" format="string" />
+        <!-- Required user visible label for a attribution. -->
+        <attr name="label" format="string" />
+    </declare-styleable>
+
+    <!-- Declares previously declared features this feature inherits from. -->
+    <declare-styleable name="AndroidManifestAttributionInheritFrom"
+                       parent="AndroidManifestAttribution">
+        <!-- Identifier of the attribution this attribution inherits from -->
+        <attr name="tag" format="string" />
+    </declare-styleable>
+
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
          features in your package (or other packages).  See the
@@ -1961,6 +2088,15 @@
         <attr name="maxSdkVersion" />
     </declare-styleable>
 
+    <!-- The <code>extension-sdk</code> tag is a child of the <uses-sdk> tag,
+         and specifies required extension sdk features. -->
+    <declare-styleable name="AndroidManifestExtensionSdk">
+        <!-- The extension SDK version that this tag refers to. -->
+        <attr name="sdkVersion" format="integer" />
+        <!-- The minimum version of the extension SDK this application requires.-->
+        <attr name="minExtensionVersion" format="integer" />
+    </declare-styleable>
+
     <!-- The <code>library</code> tag declares that this apk is providing itself
          as a shared library for other applications to use.  It can only be used
          with apks that are built in to the system image.  Other apks can link to
@@ -1974,6 +2110,15 @@
         Java-style scoping to ensure it is unique.  The name should typically
         be the same as the apk's package name. -->
         <attr name="name" />
+    </declare-styleable>
+
+    <declare-styleable name="AndroidManifestQueries" parent="AndroidManifest" />
+    <declare-styleable name="AndroidManifestQueriesPackage" parent="AndroidManifestQueries">
+        <attr name="name" />
+    </declare-styleable>
+    <declare-styleable name="AndroidManifestQueriesIntent" parent="AndroidManifestQueries" />
+    <declare-styleable name="AndroidManifestQueriesProvider" parent="AndroidManifestQueries" >
+        <attr name="authorities" />
     </declare-styleable>
 
 
@@ -2158,9 +2303,9 @@
              a newer platform that supports more screens. -->
         <attr name="resizeable" format="boolean" />
         <!-- Indicates whether the application can accommodate any screen
-             density.  Older applications are assumed to not be able to,
-             new ones able to.  You can explicitly supply your abilities
-             here. -->
+             density. This is assumed true if targetSdkVersion is 4 or higher.
+             @deprecated Should always be true by default and not overridden.
+              -->
         <attr name="anyDensity" format="boolean" />
     </declare-styleable>
 
@@ -2182,6 +2327,56 @@
          <p>This appears as a child tag of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestOriginalPackage" parent="AndroidManifest">
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- The <code>processes</code> tag specifies the processes the application will run code in
+         and optionally characteristics of those processes.  This tag is optional; if not
+         specified, components will simply run in the processes they specify.  If supplied,
+         they can only specify processes that are enumerated here, and if they don't this
+         will be treated as a corrupt apk and result in an install failure.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestProcesses" parent="AndroidManifestApplication">
+    </declare-styleable>
+
+    <!-- The <code>process</code> tag enumerates one of the available processes under its
+         containing <code>processes</code> tag.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestProcesses processes} tag. -->
+    <declare-styleable name="AndroidManifestProcess" parent="AndroidManifestProcesses">
+        <!-- Required name of the process that is allowed -->
+        <attr name="process" />
+        <attr name="gwpAsanMode" />
+    </declare-styleable>
+
+    <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied
+         for a particular process (if specified under the
+         {@link #AndroidManifestProcess process} tag) or by default for all
+         processes {if specified under the
+         @link #AndroidManifestProcesses processes} tag).
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestProcesses processes} and
+         {@link #AndroidManifestProcess process} tags. -->
+    <declare-styleable name="AndroidManifestDenyPermission"
+            parent="AndroidManifestProcesses">
+        <!-- Required name of the permission that is to be denied -->
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- The <code>allow-permission</code> tag specifies that a permission is to be allowed
+         for a particular process, when it was previously denied for all processes through
+         {@link #AndroidManifestDenyPermission deny-permission}
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestProcesses processes} and
+         {@link #AndroidManifestProcess process} tags. -->
+    <declare-styleable name="AndroidManifestAllowPermission"
+            parent="AndroidManifestProcesses">
+        <!-- Required name of the permission that is to be allowed. -->
         <attr name="name" />
     </declare-styleable>
 
@@ -2476,6 +2671,31 @@
             <!-- High dynamic range color mode. -->
             <enum name="hdr" value="2" />
         </attr>
+        <attr name="forceQueryable" format="boolean" />
+        <!-- Indicates whether the activity wants the connected display to do minimal
+             post processing on the produced image or video frames. This will only be
+             requested if this activity's main window is visible on the screen.
+
+             <p> This setting should be used when low latency has a higher priority than
+             image enhancement processing (e.g. for games or video conferencing).
+
+             <p> If the Display sink is connected via HDMI, the device will begin to
+             send infoframes with Auto Low Latency Mode enabled and Game Content Type.
+             This will switch the connected display to a minimal image processing  mode
+             (if available), which reduces latency, improving the user experience for
+             gaming or video conferencing applications. For more information,
+             see HDMI 2.1 specification.
+
+             <p> If the Display sink has an internal connection or uses some other
+             protocol than HDMI, effects may be similar but implementation-defined.
+
+             <p> The ability to switch to a mode with minimal post proessing may be
+             disabled by a user setting in the system settings menu. In that case,
+             this field is ignored and the display will remain in its current
+             mode.
+
+             <p> See {@link android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING} -->
+        <attr name="preferMinimalPostProcessing" format="boolean"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -2627,6 +2847,9 @@
              case-sensitive, unlike formal RFC MIME types.  As a result,
              MIME types here should always use lower case letters.</em></p> -->
         <attr name="mimeType" format="string" />
+        <!-- Specify a group of MIME types that are handled. MIME types can be added and
+             removed to a package's MIME group via the PackageManager. -->
+        <attr name="mimeGroup" format="string" />
         <!-- Specify a URI scheme that is handled, as per
              {@link android.content.IntentFilter#addDataScheme
              IntentFilter.addDataScheme()}.
@@ -2825,6 +3048,9 @@
 
         <!-- The name of the overlayable whose resources will be overlaid. -->
         <attr name="targetName" />
+
+        <!-- The xml file that defines the target id to overlay value mappings. -->
+        <attr name="resourcesMap" format="reference" />
     </declare-styleable>
 
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May

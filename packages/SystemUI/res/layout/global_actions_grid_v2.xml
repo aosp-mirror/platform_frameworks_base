@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/global_actions_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+>
+  <com.android.systemui.globalactions.GlobalActionsFlatLayout
+      android:id="@id/global_actions_view"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:theme="@style/qs_theme"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:layout_marginStart="@dimen/global_actions_side_margin"
+  >
+    <LinearLayout
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/global_actions_grid_vertical_padding"
+        android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
+        android:orientation="horizontal"
+        android:gravity="left | center_vertical"
+        android:translationZ="@dimen/global_actions_translate"
+    >
+      <RelativeLayout
+          android:id="@+id/global_actions_overflow_button"
+          android:contentDescription="@string/accessibility_menu"
+          android:layout_width="48dp"
+          android:layout_height="48dp"
+      >
+        <ImageView
+            android:src="@drawable/ic_more_vert"
+            android:layout_centerInParent="true"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/control_more_vert"
+        />
+      </RelativeLayout>
+    </LinearLayout>
+  </com.android.systemui.globalactions.GlobalActionsFlatLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/global_actions_lock_message_container"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone">
+    <TextView
+        android:id="@+id/global_actions_lock_message"
+        style="@style/TextAppearance.Control.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/global_actions_side_margin"
+        android:drawablePadding="12dp"
+        android:gravity="center"
+        android:text="@string/global_action_lock_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35"/>
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <com.android.systemui.globalactions.MinHeightScrollView
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:scrollbars="none">
+
+    <LinearLayout
+        android:id="@+id/global_actions_grid_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:orientation="vertical"
+        android:clipToPadding="false">
+
+      <FrameLayout
+          android:id="@+id/global_actions_wallet"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"/>
+
+      <LinearLayout
+          android:id="@+id/global_actions_controls"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical"/>
+
+    </LinearLayout>
+  </com.android.systemui.globalactions.MinHeightScrollView>
+</LinearLayout>

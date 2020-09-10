@@ -22,6 +22,7 @@
     android:background="@drawable/qs_detail_background"
     android:clickable="true"
     android:orientation="vertical"
+    android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
     android:paddingBottom="8dp"
     android:visibility="invisible"
     android:elevation="4dp"
@@ -44,7 +45,7 @@
         android:scaleType="fitXY"
         />
 
-    <com.android.systemui.qs.NonInterceptingScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -54,7 +55,7 @@
             android:id="@android:id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-    </com.android.systemui.qs.NonInterceptingScrollView>
+    </ScrollView>
 
     <include layout="@layout/qs_detail_buttons" />
 

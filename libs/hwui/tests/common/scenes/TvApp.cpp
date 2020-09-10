@@ -217,9 +217,9 @@ private:
             std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
                     image->stagingProperties().getWidth(), image->stagingProperties().getHeight(),
                     image.get()));
-            SkPaint paint;
+            Paint paint;
             sk_sp<SkColorFilter> filter(
-                    SkColorFilter::MakeModeFilter((curFrame % 150) << 24, SkBlendMode::kSrcATop));
+                    SkColorFilters::Blend((curFrame % 150) << 24, SkBlendMode::kSrcATop));
             paint.setColorFilter(filter);
             sk_sp<Bitmap> bitmap = mCachedBitmaps[ci];
             canvas->drawBitmap(*bitmap, 0, 0, &paint);

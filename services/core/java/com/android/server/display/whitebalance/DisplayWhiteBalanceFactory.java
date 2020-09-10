@@ -23,6 +23,8 @@ import android.os.Handler;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.utils.AmbientFilter;
+import com.android.server.display.utils.AmbientFilterFactory;
 
 /**
  * The DisplayWhiteBalanceFactory creates and configures an DisplayWhiteBalanceController.
@@ -58,10 +60,12 @@ public class DisplayWhiteBalanceFactory {
             SensorManager sensorManager, Resources resources) {
         final AmbientSensor.AmbientBrightnessSensor brightnessSensor =
                 createBrightnessSensor(handler, sensorManager, resources);
-        final AmbientFilter brightnessFilter = createBrightnessFilter(resources);
+        final AmbientFilter brightnessFilter =
+                AmbientFilterFactory.createBrightnessFilter(BRIGHTNESS_FILTER_TAG, resources);
         final AmbientSensor.AmbientColorTemperatureSensor colorTemperatureSensor =
                 createColorTemperatureSensor(handler, sensorManager, resources);
-        final AmbientFilter colorTemperatureFilter = createColorTemperatureFilter(resources);
+        final AmbientFilter colorTemperatureFilter = AmbientFilterFactory
+                .createColorTemperatureFilter(COLOR_TEMPERATURE_FILTER_TAG, resources);
         final DisplayWhiteBalanceThrottler throttler = createThrottler(resources);
         final float[] displayWhiteBalanceLowLightAmbientBrightnesses = getFloatArray(resources,
                 com.android.internal.R.array
@@ -112,23 +116,6 @@ public class DisplayWhiteBalanceFactory {
     }
 
     /**
-     * Creates a BrightnessFilter which functions as a weighted moving average buffer for recent
-     * brightness values.
-     */
-    public static AmbientFilter createBrightnessFilter(Resources resources) {
-        final int horizon = resources.getInteger(
-                com.android.internal.R.integer.config_displayWhiteBalanceBrightnessFilterHorizon);
-        final float intercept = getFloat(resources,
-                com.android.internal.R.dimen.config_displayWhiteBalanceBrightnessFilterIntercept);
-        if (!Float.isNaN(intercept)) {
-            return new AmbientFilter.WeightedMovingAverageAmbientFilter(
-                    BRIGHTNESS_FILTER_TAG, horizon, intercept);
-        }
-        throw new IllegalArgumentException("missing configurations: "
-                + "expected config_displayWhiteBalanceBrightnessFilterIntercept");
-    }
-
-    /**
      * Creates an ambient color sensor instance to redirect sensor data to callbacks.
      */
     @VisibleForTesting
@@ -141,21 +128,6 @@ public class DisplayWhiteBalanceFactory {
                 com.android.internal.R.integer
                 .config_displayWhiteBalanceColorTemperatureSensorRate);
         return new AmbientSensor.AmbientColorTemperatureSensor(handler, sensorManager, name, rate);
-    }
-
-    private static AmbientFilter createColorTemperatureFilter(Resources resources) {
-        final int horizon = resources.getInteger(
-                com.android.internal.R.integer
-                .config_displayWhiteBalanceColorTemperatureFilterHorizon);
-        final float intercept = getFloat(resources,
-                com.android.internal.R.dimen
-                .config_displayWhiteBalanceColorTemperatureFilterIntercept);
-        if (!Float.isNaN(intercept)) {
-            return new AmbientFilter.WeightedMovingAverageAmbientFilter(
-                    COLOR_TEMPERATURE_FILTER_TAG, horizon, intercept);
-        }
-        throw new IllegalArgumentException("missing configurations: "
-                + "expected config_displayWhiteBalanceColorTemperatureFilterIntercept");
     }
 
     private static DisplayWhiteBalanceThrottler createThrottler(Resources resources) {

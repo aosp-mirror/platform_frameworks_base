@@ -17,28 +17,33 @@
 #pragma once
 
 #include <android/util/ProtoOutputStream.h>
+
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
-#include "atoms_info.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
+#include "logd/LogEvent.h"
+
+using android::util::ProtoOutputStream;
 
 namespace android {
 namespace os {
 namespace statsd {
 
 void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& values,
-                                 util::ProtoOutputStream* protoOutput);
+                                 ProtoOutputStream* protoOutput);
 void writeDimensionToProto(const HashableDimensionKey& dimension, std::set<string> *str_set,
-                           util::ProtoOutputStream* protoOutput);
+                           ProtoOutputStream* protoOutput);
 
 void writeDimensionLeafNodesToProto(const HashableDimensionKey& dimension,
                                     const int dimensionLeafFieldId,
                                     std::set<string> *str_set,
-                                    util::ProtoOutputStream* protoOutput);
+                                    ProtoOutputStream* protoOutput);
 
 void writeDimensionPathToProto(const std::vector<Matcher>& fieldMatchers,
-                               util::ProtoOutputStream* protoOutput);
+                               ProtoOutputStream* protoOutput);
+
+void writeStateToProto(const FieldValue& state, ProtoOutputStream* protoOutput);
 
 // Convert the TimeUnit enum to the bucket size in millis with a guardrail on
 // bucket size.
@@ -56,6 +61,9 @@ int64_t getElapsedRealtimeMillis();
 // Gets the elapsed timestamp in seconds.
 int64_t getElapsedRealtimeSec();
 
+// Gets the system uptime in millis.
+int64_t getSystemUptimeMillis();
+
 // Gets the wall clock timestamp in ns.
 int64_t getWallClockNs();
 
@@ -71,14 +79,14 @@ int64_t MillisToNano(const int64_t millis);
 
 // Helper function to write PulledAtomStats to ProtoOutputStream
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
-                              util::ProtoOutputStream* protoOutput);
+                              ProtoOutputStream* protoOutput);
 
 // Helper function to write AtomMetricStats to ProtoOutputStream
 void writeAtomMetricStatsToStream(const std::pair<int64_t, StatsdStats::AtomMetricStats> &pair,
-                                  util::ProtoOutputStream *protoOutput);
+                                  ProtoOutputStream *protoOutput);
 
 template<class T>
-bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
+bool parseProtoOutputStream(ProtoOutputStream& protoOutput, T* message) {
     std::string pbBytes;
     sp<android::util::ProtoReader> reader = protoOutput.data();
     while (reader->readBuffer() != NULL) {
@@ -89,12 +97,19 @@ bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }
 
-// Checks the blacklist of atoms as well as the blacklisted range of 300,000 - 304,999.
+// Checks the truncate timestamp annotation as well as the blacklisted range of 300,000 - 304,999.
 // Returns the truncated timestamp to the nearest 5 minutes if needed.
-int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs);
+int64_t truncateTimestampIfNecessary(const LogEvent& event);
+
+// Checks permission for given pid and uid.
+bool checkPermissionForIds(const char* permission, pid_t pid, uid_t uid);
 
 inline bool isVendorPulledAtom(int atomId) {
     return atomId >= StatsdStats::kVendorPulledAtomStartTag && atomId < StatsdStats::kMaxAtomTag;
+}
+
+inline bool isPulledAtom(int atomId) {
+    return atomId >= StatsdStats::kPullAtomStartTag && atomId < StatsdStats::kVendorAtomStartTag;
 }
 
 }  // namespace statsd

@@ -16,8 +16,8 @@
 
 package android.net.wifi.hotspot2.pps;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -299,9 +299,25 @@ public final class HomeSp implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFqdn, mFriendlyName, mIconUrl, mHomeNetworkIds, mMatchAllOis,
-                mMatchAnyOis, mOtherHomePartners, mRoamingConsortiumOis);
+        return Objects.hash(mFqdn, mFriendlyName, mIconUrl,
+                mHomeNetworkIds, Arrays.hashCode(mMatchAllOis),
+                Arrays.hashCode(mMatchAnyOis), Arrays.hashCode(mOtherHomePartners),
+                Arrays.hashCode(mRoamingConsortiumOis));
     }
+
+    /**
+     * Get a unique identifier for HomeSp. This identifier depends only on items that remain
+     * constant throughout the lifetime of a subscription.
+     *
+     * @hide
+     * @return a Unique identifier for a HomeSp object
+     */
+    public int getUniqueId() {
+        return Objects.hash(mFqdn, mFriendlyName, mHomeNetworkIds, Arrays.hashCode(mMatchAllOis),
+                Arrays.hashCode(mMatchAnyOis), Arrays.hashCode(mOtherHomePartners),
+                Arrays.hashCode(mRoamingConsortiumOis));
+    }
+
 
     @Override
     public String toString() {

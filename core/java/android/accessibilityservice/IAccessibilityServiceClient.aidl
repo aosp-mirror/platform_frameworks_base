@@ -20,6 +20,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Region;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.accessibilityservice.AccessibilityGestureEvent;
 import android.view.KeyEvent;
 
 /**
@@ -35,7 +36,7 @@ import android.view.KeyEvent;
 
     void onInterrupt();
 
-    void onGesture(int gesture);
+    void onGesture(in AccessibilityGestureEvent gestureEvent);
 
     void clearAccessibilityCache();
 
@@ -51,7 +52,9 @@ import android.view.KeyEvent;
 
     void onFingerprintGesture(int gesture);
 
-    void onAccessibilityButtonClicked();
+    void onAccessibilityButtonClicked(int displayId);
 
     void onAccessibilityButtonAvailabilityChanged(boolean available);
+
+    void onSystemActionsChanged();
 }

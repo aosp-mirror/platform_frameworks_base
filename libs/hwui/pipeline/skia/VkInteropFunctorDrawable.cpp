@@ -121,7 +121,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         DrawGlInfo info;
-        SkMatrix44 mat4(canvas->getTotalMatrix());
+        SkM44 mat4(canvas->experimental_getLocalToDevice());
         SkIRect clipBounds = canvas->getDeviceClipBounds();
 
         info.clipLeft = clipBounds.fLeft;
@@ -131,7 +131,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         info.isLayer = true;
         info.width = mFBInfo.width();
         info.height = mFBInfo.height();
-        mat4.asColMajorf(&info.transform[0]);
+        mat4.getColMajor(&info.transform[0]);
         info.color_space_ptr = canvas->imageInfo().colorSpace();
 
         glViewport(0, 0, info.width, info.height);

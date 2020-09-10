@@ -19,7 +19,9 @@ package android.drm;
 /**
  * Defines constants that are used by the DRM framework.
  *
+ * @deprecated Please use {@link android.media.MediaDrm}
  */
+@Deprecated
 public class DrmStore {
     /**
      * Interface definition for the columns that represent DRM constraints.

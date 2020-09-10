@@ -22,8 +22,6 @@ import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Objects;
 
 /** @hide */
@@ -46,7 +44,7 @@ public final class WifiClient implements Parcelable {
 
     /** @hide */
     public WifiClient(@NonNull MacAddress macAddress) {
-        Preconditions.checkNotNull(macAddress, "mMacAddress must not be null.");
+        Objects.requireNonNull(macAddress, "mMacAddress must not be null.");
 
         this.mMacAddress = macAddress;
     }

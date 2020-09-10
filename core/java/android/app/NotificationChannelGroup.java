@@ -332,7 +332,7 @@ public final class NotificationChannelGroup implements Parcelable {
     }
 
     /** @hide */
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
 
         proto.write(NotificationChannelGroupProto.ID, mId);
@@ -340,7 +340,7 @@ public final class NotificationChannelGroup implements Parcelable {
         proto.write(NotificationChannelGroupProto.DESCRIPTION, mDescription);
         proto.write(NotificationChannelGroupProto.IS_BLOCKED, mBlocked);
         for (NotificationChannel channel : mChannels) {
-            channel.writeToProto(proto, NotificationChannelGroupProto.CHANNELS);
+            channel.dumpDebug(proto, NotificationChannelGroupProto.CHANNELS);
         }
         proto.end(token);
     }

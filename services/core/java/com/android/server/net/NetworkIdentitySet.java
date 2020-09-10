@@ -170,11 +170,11 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         return ident.compareTo(anotherIdent);
     }
 
-    public void writeToProto(ProtoOutputStream proto, long tag) {
+    public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         for (NetworkIdentity ident : this) {
-            ident.writeToProto(proto, NetworkIdentitySetProto.IDENTITIES);
+            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES);
         }
 
         proto.end(start);

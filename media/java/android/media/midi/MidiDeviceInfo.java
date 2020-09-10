@@ -19,7 +19,6 @@ package android.media.midi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import android.util.Log;
 
 /**
@@ -205,6 +204,20 @@ public final class MidiDeviceInfo implements Parcelable {
     public MidiDeviceInfo(int type, int id, int numInputPorts, int numOutputPorts,
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
             boolean isPrivate) {
+        // Check num ports for out-of-range values. Typical values will be
+        // between zero and three. More than 16 would be very unlikely
+        // because the port index field in the USB packet is only 4 bits.
+        // This check is mainly just to prevent OutOfMemoryErrors when
+        // fuzz testing.
+        final int maxPorts = 256; // arbitrary and very high
+        if (numInputPorts < 0 || numInputPorts > maxPorts) {
+            throw new IllegalArgumentException("numInputPorts out of range = "
+                    + numInputPorts);
+        }
+        if (numOutputPorts < 0 || numOutputPorts > maxPorts) {
+            throw new IllegalArgumentException("numOutputPorts out of range = "
+                    + numOutputPorts);
+        }
         mType = type;
         mId = id;
         mInputPortCount = numInputPorts;

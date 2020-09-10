@@ -41,11 +41,11 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
@@ -413,6 +413,7 @@ public class DeviceStorageMonitorService extends SystemService {
     void dumpImpl(FileDescriptor fd, PrintWriter _pw, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(_pw, "  ");
         if (args == null || args.length == 0 || "-a".equals(args[0])) {
+            final StorageManager storage = getContext().getSystemService(StorageManager.class);
             pw.println("Known volumes:");
             pw.increaseIndent();
             for (int i = 0; i < mStates.size(); i++) {
@@ -427,6 +428,19 @@ public class DeviceStorageMonitorService extends SystemService {
                 pw.printPair("level", State.levelToString(state.level));
                 pw.printPair("lastUsableBytes", state.lastUsableBytes);
                 pw.println();
+                for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                    final File file = vol.getPath();
+                    final UUID innerUuid = StorageManager.convert(vol.getFsUuid());
+                    if (Objects.equals(uuid, innerUuid)) {
+                        pw.print("lowBytes=");
+                        pw.print(storage.getStorageLowBytes(file));
+                        pw.print(" fullBytes=");
+                        pw.println(storage.getStorageFullBytes(file));
+                        pw.print("path=");
+                        pw.println(file);
+                        break;
+                    }
+                }
                 pw.decreaseIndent();
             }
             pw.decreaseIndent();
@@ -479,15 +493,15 @@ public class DeviceStorageMonitorService extends SystemService {
             notification.flags |= Notification.FLAG_NO_CLEAR;
             mNotifManager.notifyAsUser(uuid.toString(), SystemMessage.NOTE_LOW_STORAGE,
                     notification, UserHandle.ALL);
-            StatsLog.write(StatsLog.LOW_STORAGE_STATE_CHANGED,
+            FrameworkStatsLog.write(FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED,
                     Objects.toString(vol.getDescription()),
-                    StatsLog.LOW_STORAGE_STATE_CHANGED__STATE__ON);
+                    FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED__STATE__ON);
         } else if (State.isLeaving(State.LEVEL_LOW, oldLevel, newLevel)) {
             mNotifManager.cancelAsUser(uuid.toString(), SystemMessage.NOTE_LOW_STORAGE,
                     UserHandle.ALL);
-            StatsLog.write(StatsLog.LOW_STORAGE_STATE_CHANGED,
+            FrameworkStatsLog.write(FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED,
                     Objects.toString(vol.getDescription()),
-                    StatsLog.LOW_STORAGE_STATE_CHANGED__STATE__OFF);
+                    FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED__STATE__OFF);
         }
     }
 

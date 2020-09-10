@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
 
@@ -36,23 +37,30 @@ public interface BiometricAuthenticator {
      * @hide
      */
     int TYPE_NONE = 0;
+
+    /**
+     * Constant representing credential (PIN, pattern, or password).
+     * @hide
+     */
+    int TYPE_CREDENTIAL = 1 << 0;
+
     /**
      * Constant representing fingerprint.
      * @hide
      */
-    int TYPE_FINGERPRINT = 1 << 0;
+    int TYPE_FINGERPRINT = 1 << 1;
 
     /**
      * Constant representing iris.
      * @hide
      */
-    int TYPE_IRIS = 1 << 1;
+    int TYPE_IRIS = 1 << 2;
 
     /**
      * Constant representing face.
      * @hide
      */
-    int TYPE_FACE = 1 << 2;
+    int TYPE_FACE = 1 << 3;
 
     /**
      * Container for biometric data
@@ -112,6 +120,7 @@ public interface BiometricAuthenticator {
     class AuthenticationResult {
         private Identifier mIdentifier;
         private CryptoObject mCryptoObject;
+        private @AuthenticationResultType int mAuthenticationType;
         private int mUserId;
 
         /**
@@ -122,24 +131,38 @@ public interface BiometricAuthenticator {
         /**
          * Authentication result
          * @param crypto
+         * @param authenticationType
          * @param identifier
          * @param userId
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, Identifier identifier,
+        public AuthenticationResult(CryptoObject crypto,
+                @AuthenticationResultType int authenticationType, Identifier identifier,
                 int userId) {
             mCryptoObject = crypto;
+            mAuthenticationType = authenticationType;
             mIdentifier = identifier;
             mUserId = userId;
         }
 
         /**
-         * Obtain the crypto object associated with this transaction
-         * @return crypto object provided to {@link BiometricAuthenticator#authenticate(
-         * CryptoObject, CancellationSignal, Executor, AuthenticationCallback)}
+         * Provides the crypto object associated with this transaction.
+         * @return The crypto object provided to {@link BiometricPrompt#authenticate(
+         * BiometricPrompt.CryptoObject, CancellationSignal, Executor,
+         * BiometricPrompt.AuthenticationCallback)}
          */
         public CryptoObject getCryptoObject() {
             return mCryptoObject;
+        }
+
+        /**
+         * Provides the type of authentication (e.g. device credential or biometric) that was
+         * requested from and successfully provided by the user.
+         *
+         * @return An integer value representing the authentication method used.
+         */
+        public @AuthenticationResultType int getAuthenticationType() {
+            return mAuthenticationType;
         }
 
         /**

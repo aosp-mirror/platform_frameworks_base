@@ -5,10 +5,76 @@ filegroup {
     visibility: ["//frameworks/base/services"],
 }
 
+java_library {
+    name: "protolog-common",
+    srcs: [
+        "java/com/android/server/protolog/common/**/*.java",
+    ],
+    host_supported: true,
+}
+
+java_library {
+    name: "services.core.wm.protologgroups",
+    srcs: [
+        "java/com/android/server/wm/ProtoLogGroup.java",
+    ],
+    static_libs: ["protolog-common"],
+}
+
+genrule {
+    name: "services.core.protologsrc",
+    srcs: [
+        ":services.core.wm.protologgroups",
+        ":services.core-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) transform-protolog-calls " +
+      "--protolog-class com.android.server.protolog.common.ProtoLog " +
+      "--protolog-impl-class com.android.server.protolog.ProtoLogImpl " +
+      "--protolog-cache-class 'com.android.server.protolog.ProtoLog$$Cache' " +
+      "--loggroups-class com.android.server.wm.ProtoLogGroup " +
+      "--loggroups-jar $(location :services.core.wm.protologgroups) " +
+      "--output-srcjar $(out) " +
+      "$(locations :services.core-sources)",
+    out: ["services.core.protolog.srcjar"],
+}
+
+genrule {
+    name: "generate-protolog.json",
+    srcs: [
+        ":services.core.wm.protologgroups",
+        ":services.core-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+      "--protolog-class com.android.server.protolog.common.ProtoLog " +
+      "--loggroups-class com.android.server.wm.ProtoLogGroup " +
+      "--loggroups-jar $(location :services.core.wm.protologgroups) " +
+      "--viewer-conf $(out) " +
+      "$(locations :services.core-sources)",
+    out: ["services.core.protolog.json"],
+}
+
+genrule {
+    name: "checked-protolog.json",
+    srcs: [
+        ":generate-protolog.json",
+        ":services.core.protolog.json",
+    ],
+    cmd: "cp $(location :generate-protolog.json) $(out) && " +
+      "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
+      "{ echo -e '\\n\\n################################################################\\n#\\n" +
+      "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
+      "#  cp $(location :generate-protolog.json) " +
+      "$(location :services.core.protolog.json)\\n#\\n" +
+      "################################################################\\n\\n' >&2 && false; } }",
+    out: ["services.core.protolog.json"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
     srcs: [
-        "java/**/*.java",
+        ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gsiservice_aidl",
@@ -17,23 +83,28 @@ java_library_static {
         ":storaged_aidl",
         ":vold_aidl",
         ":platform-compat-config",
+        ":display-device-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
+        "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
     ],
 
     libs: [
         "services.net",
         "android.hardware.light-V2.0-java",
+        "android.hardware.power-java",
         "android.hardware.power-V1.0-java",
         "android.hardware.vibrator-java",
         "android.net.ipsec.ike.stubs.module_lib",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
+        "service-permission.stubs.system_server",
     ],
 
     required: [
         "gps_debug.conf",
+        "protolog.conf.json.gz",
     ],
 
     static_libs: [
@@ -48,14 +119,19 @@ java_library_static {
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
-        "android.hardware.biometrics.fingerprint-V2.1-java",
+        "android.hardware.biometrics.fingerprint-V2.2-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
+        "android.hardware.rebootescrow-java",
+        "android.hardware.soundtrigger-V2.3-java",
         "android.hidl.manager-V1.2-java",
+        "capture_state_listener-aidl-java",
         "dnsresolver_aidl_interface-java",
         "icu4j_calendar_astronomer",
         "netd_aidl_interfaces-platform-java",
+        "overlayable_policy_aidl-java",
+        "SurfaceFlingerProperties",
     ],
 }
 
@@ -74,11 +150,29 @@ java_genrule {
 
 java_library {
     name: "services.core",
+    defaults: ["services_defaults"],
     static_libs: ["services.core.priorityboosted"],
 }
 
+java_library_host {
+    name: "core_cts_test_resources",
+    srcs: ["java/com/android/server/notification/SmallHash.java"]
+}
 
 prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gps_debug.conf",
+}
+
+genrule {
+    name: "services.core.json.gz",
+    srcs: [":checked-protolog.json"],
+    out: ["services.core.protolog.json.gz"],
+    cmd: "$(location minigzip) -c < $(in) > $(out)",
+    tools: ["minigzip"],
+}
+
+prebuilt_etc {
+    name: "protolog.conf.json.gz",
+    src: ":services.core.json.gz",
 }

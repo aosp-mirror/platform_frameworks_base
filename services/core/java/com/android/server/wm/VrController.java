@@ -441,7 +441,7 @@ final class VrController {
       return String.format("[VrState=0x%x,VrRenderThreadTid=%d]", mVrState, mVrRenderThreadTid);
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         ProtoUtils.writeBitWiseFlagsToProtoEnum(proto, VrControllerProto.VR_MODE,
                 mVrState, ORIG_ENUMS, PROTO_ENUMS);

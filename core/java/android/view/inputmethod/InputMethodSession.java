@@ -191,4 +191,10 @@ public interface InputMethodSession {
      * @hide
      */
     public void notifyImeHidden();
+
+    /**
+     * Notify IME directly to remove surface as it is no longer visible.
+     * @hide
+     */
+    public void removeImeSurface();
 }

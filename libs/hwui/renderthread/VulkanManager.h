@@ -20,17 +20,17 @@
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
-#include <vulkan/vulkan.h>
-
 #include <GrContextOptions.h>
 #include <SkSurface.h>
-#include <ui/Fence.h>
 #include <utils/StrongPointer.h>
 #include <vk/GrVkBackendContext.h>
 #include <vk/GrVkExtensions.h>
+#include <vulkan/vulkan.h>
+
 #include "Frame.h"
 #include "IRenderPipeline.h"
 #include "VulkanSurface.h"
+#include "private/hwui/DrawVkInfo.h"
 
 class GrVkExtensions;
 
@@ -70,11 +70,11 @@ public:
     void destroy();
 
     // Inserts a wait on fence command into the Vulkan command buffer.
-    status_t fenceWait(sp<Fence>& fence, GrContext* grContext);
+    status_t fenceWait(int fence, GrContext* grContext);
 
     // Creates a fence that is signaled when all the pending Vulkan commands are finished on the
     // GPU.
-    status_t createReleaseFence(sp<Fence>& nativeFence, GrContext* grContext);
+    status_t createReleaseFence(int* nativeFence, GrContext* grContext);
 
     // Returned pointers are owned by VulkanManager.
     // An instance of VkFunctorInitParams returned from getVkFunctorInitParams refers to
@@ -106,14 +106,6 @@ private:
     private:
         FNPTR_TYPE fPtr;
     };
-
-    // WSI interface functions
-    VkPtr<PFN_vkCreateAndroidSurfaceKHR> mCreateAndroidSurfaceKHR;
-    VkPtr<PFN_vkDestroySurfaceKHR> mDestroySurfaceKHR;
-    VkPtr<PFN_vkGetPhysicalDeviceSurfaceSupportKHR> mGetPhysicalDeviceSurfaceSupportKHR;
-    VkPtr<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR> mGetPhysicalDeviceSurfaceCapabilitiesKHR;
-    VkPtr<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR> mGetPhysicalDeviceSurfaceFormatsKHR;
-    VkPtr<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR> mGetPhysicalDeviceSurfacePresentModesKHR;
 
     // Instance Functions
     VkPtr<PFN_vkEnumerateInstanceVersion> mEnumerateInstanceVersion;

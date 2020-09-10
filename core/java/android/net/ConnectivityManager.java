@@ -1725,7 +1725,6 @@ public class ConnectivityManager {
         @UnsupportedAppUsage
         public PacketKeepaliveCallback() {
         }
-
         /** The requested keepalive was successfully started. */
         @UnsupportedAppUsage
         public void onStarted() {}
@@ -3177,6 +3176,7 @@ public class ConnectivityManager {
      * @hide
      */
     @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_AIRPLANE_MODE,
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK})
@@ -3303,7 +3303,6 @@ public class ConnectivityManager {
             android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
-
         try {
             return mService.registerNetworkAgent(messenger, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {

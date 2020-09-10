@@ -44,7 +44,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
@@ -73,6 +72,7 @@ import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.devicepolicy.MockUtils;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import com.google.android.collect.Lists;
 
@@ -133,9 +133,10 @@ public class NetworkScoreServiceTest {
     @Mock private UnaryOperator<List<ScoredNetwork>> mScanResultsFilter;
     @Mock private WifiInfo mWifiInfo;
     @Mock private NetworkScoreService.ScoringServiceConnection mServiceConnection;
-    @Mock private PackageManagerInternal mPackageManagerInternal;
+    @Mock private PermissionManagerServiceInternal mPermissionManagerInternal;
     @Captor private ArgumentCaptor<List<ScoredNetwork>> mScoredNetworkCaptor;
-    @Captor private ArgumentCaptor<PackageManagerInternal.PackagesProvider> mPackagesProviderCaptor;
+    @Captor private
+    ArgumentCaptor<PermissionManagerServiceInternal.PackagesProvider> mPackagesProviderCaptor;
 
     private ContentResolver mContentResolver;
     private NetworkScoreService mNetworkScoreService;
@@ -163,7 +164,8 @@ public class NetworkScoreServiceTest {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
         mHandlerThread = new HandlerThread("NetworkScoreServiceTest");
         mHandlerThread.start();
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
+        LocalServices.addService(
+                PermissionManagerServiceInternal.class, mPermissionManagerInternal);
         mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager,
                 networkScorerAppData -> mServiceConnection, mHandlerThread.getLooper());
         WifiConfiguration configuration = new WifiConfiguration();
@@ -189,7 +191,7 @@ public class NetworkScoreServiceTest {
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quitSafely();
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(PermissionManagerServiceInternal.class);
     }
 
     @Test
@@ -197,7 +199,7 @@ public class NetworkScoreServiceTest {
         Settings.Global.putString(mContentResolver,
                 Settings.Global.USE_OPEN_WIFI_PACKAGE, "com.some.app");
 
-        verify(mPackageManagerInternal)
+        verify(mPermissionManagerInternal)
                 .setUseOpenWifiAppPackagesProvider(mPackagesProviderCaptor.capture());
 
         String[] packages = mPackagesProviderCaptor.getValue().getPackages(0);
@@ -210,7 +212,7 @@ public class NetworkScoreServiceTest {
         Settings.Global.putString(mContentResolver,
                 Settings.Global.USE_OPEN_WIFI_PACKAGE, "com.some.other.app");
 
-        verify(mPackageManagerInternal, timeout(500))
+        verify(mPermissionManagerInternal, timeout(500))
                 .grantDefaultPermissionsToDefaultUseOpenWifiApp("com.some.other.app", 0);
     }
 

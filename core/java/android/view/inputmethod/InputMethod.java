@@ -23,9 +23,14 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.util.Log;
+import android.view.View;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 /**
  * The InputMethod interface represents an input method which can generate key
@@ -58,6 +63,8 @@ import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
  * which is what clients use to communicate with the input method.
  */
 public interface InputMethod {
+    /** @hide **/
+    public static final String TAG = "InputMethod";
     /**
      * This is the interface name that a service implementing an input
      * method should say that it supports -- that is, this is the action it
@@ -101,6 +108,23 @@ public interface InputMethod {
             IInputMethodPrivilegedOperations privilegedOperations) {
         updateInputMethodDisplay(displayId);
         attachToken(token);
+    }
+
+    /**
+     * Called to notify the IME that Autofill Frameworks requested an inline suggestions request.
+     *
+     * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
+     * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
+     *
+     * @hide
+     */
+    default void onCreateInlineSuggestionsRequest(InlineSuggestionsRequestInfo requestInfo,
+            IInlineSuggestionsRequestCallback cb) {
+        try {
+            cb.onInlineSuggestionsUnsupported();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call onInlineSuggestionsUnsupported.", e);
+        }
     }
 
     /**
@@ -273,7 +297,30 @@ public interface InputMethod {
      * until deliberated dismissed by the user in its UI.
      */
     public static final int SHOW_FORCED = 0x00002;
-    
+
+    /**
+     * Request that any soft input part of the input method be shown to the user.
+     *
+     * @param flags Provides additional information about the show request.
+     * Currently may be 0 or have the bit {@link #SHOW_EXPLICIT} set.
+     * @param resultReceiver The client requesting the show may wish to
+     * be told the impact of their request, which should be supplied here.
+     * The result code should be
+     * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
+     * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN InputMethodManager.RESULT_UNCHANGED_HIDDEN},
+     * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
+     * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
+     * @param showInputToken an opaque {@link android.os.Binder} token to identify which API call
+     *        of {@link InputMethodManager#showSoftInput(View, int)} is associated with
+     *        this callback.
+     * @hide
+     */
+    @MainThread
+    default public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+            IBinder showInputToken) {
+        showSoftInput(flags, resultReceiver);
+    }
+
     /**
      * Request that any soft input part of the input method be shown to the user.
      * 
@@ -289,7 +336,7 @@ public interface InputMethod {
      */
     @MainThread
     public void showSoftInput(int flags, ResultReceiver resultReceiver);
-    
+
     /**
      * Request that any soft input part of the input method be hidden from the user.
      * @param flags Provides additional information about the show request.
@@ -299,6 +346,27 @@ public interface InputMethod {
      * The result code should be
      * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
      * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN InputMethodManager.RESULT_UNCHANGED_HIDDEN},
+     * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
+     * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
+     * @param hideInputToken an opaque {@link android.os.Binder} token to identify which API call
+     *         of {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}} is associated
+     *         with this callback.
+     * @hide
+     */
+    @MainThread
+    public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+            IBinder hideInputToken);
+
+    /**
+     * Request that any soft input part of the input method be hidden from the user.
+     * @param flags Provides additional information about the show request.
+     * Currently always 0.
+     * @param resultReceiver The client requesting the show may wish to
+     * be told the impact of their request, which should be supplied here.
+     * The result code should be
+     * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
+     * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN
+     *        InputMethodManager.RESULT_UNCHANGED_HIDDEN},
      * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
      * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
      */
@@ -311,4 +379,21 @@ public interface InputMethod {
      */
     @MainThread
     public void changeInputMethodSubtype(InputMethodSubtype subtype);
+
+    /**
+     * Update token of the client window requesting {@link #showSoftInput(int, ResultReceiver)}
+     * @param showInputToken dummy app window token for window requesting
+     *        {@link InputMethodManager#showSoftInput(View, int)}
+     * @hide
+     */
+    public void setCurrentShowInputToken(IBinder showInputToken);
+
+    /**
+     * Update token of the client window requesting {@link #hideSoftInput(int, ResultReceiver)}
+     * @param hideInputToken dummy app window token for window requesting
+     *        {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}
+     * @hide
+     */
+    public void setCurrentHideInputToken(IBinder hideInputToken);
+
 }

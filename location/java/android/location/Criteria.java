@@ -16,8 +16,15 @@
 
 package android.location;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class indicating the application criteria for selecting a
@@ -26,6 +33,25 @@ import android.os.Parcelable;
  * cost.
  */
 public class Criteria implements Parcelable {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({NO_REQUIREMENT, POWER_LOW, POWER_MEDIUM, POWER_HIGH})
+    public @interface PowerRequirement {
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({NO_REQUIREMENT, ACCURACY_LOW, ACCURACY_MEDIUM, ACCURACY_HIGH})
+    public @interface AccuracyRequirement {
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({NO_REQUIREMENT, ACCURACY_FINE, ACCURACY_COARSE})
+    public @interface LocationAccuracyRequirement {
+    }
+
     /**
      * A constant indicating that the application does not choose to
      * place requirement on a particular feature.
@@ -81,15 +107,15 @@ public class Criteria implements Parcelable {
      */
     public static final int ACCURACY_HIGH = 3;
 
-    private int mHorizontalAccuracy    = NO_REQUIREMENT;
-    private int mVerticalAccuracy      = NO_REQUIREMENT;
-    private int mSpeedAccuracy         = NO_REQUIREMENT;
-    private int mBearingAccuracy       = NO_REQUIREMENT;
-    private int mPowerRequirement      = NO_REQUIREMENT;
-    private boolean mAltitudeRequired  = false;
-    private boolean mBearingRequired   = false;
-    private boolean mSpeedRequired     = false;
-    private boolean mCostAllowed       = false;
+    private int mHorizontalAccuracy = NO_REQUIREMENT;
+    private int mVerticalAccuracy = NO_REQUIREMENT;
+    private int mSpeedAccuracy = NO_REQUIREMENT;
+    private int mBearingAccuracy = NO_REQUIREMENT;
+    private int mPowerRequirement = NO_REQUIREMENT;
+    private boolean mAltitudeRequired = false;
+    private boolean mBearingRequired = false;
+    private boolean mSpeedRequired = false;
+    private boolean mCostAllowed = false;
 
     /**
      * Constructs a new Criteria object.  The new object will have no
@@ -97,7 +123,8 @@ public class Criteria implements Parcelable {
      * require altitude, speed, or bearing; and will not allow monetary
      * cost.
      */
-    public Criteria() {}
+    public Criteria() {
+    }
 
     /**
      * Constructs a new Criteria object that is a copy of the given criteria.
@@ -115,125 +142,121 @@ public class Criteria implements Parcelable {
     }
 
     /**
-     * Indicates the desired horizontal accuracy (latitude and longitude).
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
-     * {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}.
-     * More accurate location may consume more power and may take longer.
+     * Indicates the desired horizontal accuracy (latitude and longitude). Accuracy may be
+     * {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM}, {@link #ACCURACY_HIGH} or
+     * {@link #NO_REQUIREMENT}. More accurate location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
      */
-    public void setHorizontalAccuracy(int accuracy) {
-        if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_HIGH) {
-            throw new IllegalArgumentException("accuracy=" + accuracy);
-        }
-        mHorizontalAccuracy = accuracy;
+    public void setHorizontalAccuracy(@AccuracyRequirement int accuracy) {
+        mHorizontalAccuracy = Preconditions.checkArgumentInRange(accuracy, NO_REQUIREMENT,
+                ACCURACY_HIGH, "accuracy");
     }
 
     /**
      * Returns a constant indicating the desired horizontal accuracy (latitude and longitude).
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
-     * {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}.
+     *
+     * @see #setHorizontalAccuracy(int)
      */
+    @AccuracyRequirement
     public int getHorizontalAccuracy() {
         return mHorizontalAccuracy;
     }
 
     /**
-     * Indicates the desired vertical accuracy (altitude).
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_MEDIUM},
-     * {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}.
-     * More accurate location may consume more power and may take longer.
+     * Indicates the desired vertical accuracy (altitude). Accuracy may be {@link #ACCURACY_LOW},
+     * {@link #ACCURACY_MEDIUM}, {@link #ACCURACY_HIGH} or {@link #NO_REQUIREMENT}. More accurate
+     * location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
      */
-    public void setVerticalAccuracy(int accuracy) {
-        if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_HIGH) {
-            throw new IllegalArgumentException("accuracy=" + accuracy);
-        }
-        mVerticalAccuracy = accuracy;
+    public void setVerticalAccuracy(@AccuracyRequirement int accuracy) {
+        mVerticalAccuracy = Preconditions.checkArgumentInRange(accuracy, NO_REQUIREMENT,
+                ACCURACY_HIGH, "accuracy");
     }
 
     /**
      * Returns a constant indicating the desired vertical accuracy (altitude).
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
-     * or {@link #NO_REQUIREMENT}.
+     *
+     * @see #setVerticalAccuracy(int)
      */
+    @AccuracyRequirement
     public int getVerticalAccuracy() {
         return mVerticalAccuracy;
     }
 
     /**
-     * Indicates the desired speed accuracy.
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
-     * or {@link #NO_REQUIREMENT}.
-     * More accurate location may consume more power and may take longer.
+     * Indicates the desired speed accuracy. Accuracy may be {@link #ACCURACY_LOW},
+     * {@link #ACCURACY_MEDIUM}, {@link #ACCURACY_HIGH}, or {@link #NO_REQUIREMENT}. More accurate
+     * location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
      */
-    public void setSpeedAccuracy(int accuracy) {
-        if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_HIGH) {
-            throw new IllegalArgumentException("accuracy=" + accuracy);
-        }
-        mSpeedAccuracy = accuracy;
+    public void setSpeedAccuracy(@AccuracyRequirement int accuracy) {
+        mSpeedAccuracy = Preconditions.checkArgumentInRange(accuracy, NO_REQUIREMENT, ACCURACY_HIGH,
+                "accuracy");
     }
 
     /**
-     * Returns a constant indicating the desired speed accuracy
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
-     * or {@link #NO_REQUIREMENT}.
+     * Returns a constant indicating the desired speed accuracy.
+     *
+     * @see #setSpeedAccuracy(int)
      */
+    @AccuracyRequirement
     public int getSpeedAccuracy() {
         return mSpeedAccuracy;
     }
 
     /**
-     * Indicates the desired bearing accuracy.
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
-     * or {@link #NO_REQUIREMENT}.
-     * More accurate location may consume more power and may take longer.
+     * Indicates the desired bearing accuracy. Accuracy may be {@link #ACCURACY_LOW},
+     * {@link #ACCURACY_MEDIUM}, {@link #ACCURACY_HIGH}, or {@link #NO_REQUIREMENT}. More accurate
+     * location may consume more power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
      */
-    public void setBearingAccuracy(int accuracy) {
-        if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_HIGH) {
-            throw new IllegalArgumentException("accuracy=" + accuracy);
-        }
-        mBearingAccuracy = accuracy;
+    public void setBearingAccuracy(@AccuracyRequirement int accuracy) {
+        mBearingAccuracy = Preconditions.checkArgumentInRange(accuracy, NO_REQUIREMENT,
+                ACCURACY_HIGH, "accuracy");
     }
 
     /**
      * Returns a constant indicating the desired bearing accuracy.
-     * Accuracy may be {@link #ACCURACY_LOW}, {@link #ACCURACY_HIGH},
-     * or {@link #NO_REQUIREMENT}.
+     *
+     * @see #setBearingAccuracy(int)
      */
+    @AccuracyRequirement
     public int getBearingAccuracy() {
         return mBearingAccuracy;
     }
 
     /**
-     * Indicates the desired accuracy for latitude and longitude. Accuracy
-     * may be {@link #ACCURACY_FINE} if desired location
-     * is fine, else it can be {@link #ACCURACY_COARSE}.
-     * More accurate location may consume more power and may take longer.
+     * Indicates the desired accuracy for latitude and longitude. Accuracy may be
+     * {@link #ACCURACY_FINE} or {@link #ACCURACY_COARSE}. More accurate location may consume more
+     * power and may take longer.
      *
      * @throws IllegalArgumentException if accuracy is not one of the supported constants
      */
-    public void setAccuracy(int accuracy) {
-        if (accuracy < NO_REQUIREMENT || accuracy > ACCURACY_COARSE) {
-            throw new IllegalArgumentException("accuracy=" + accuracy);
-        }
-        if (accuracy == ACCURACY_FINE) {
-            mHorizontalAccuracy = ACCURACY_HIGH;
-        } else {
-            mHorizontalAccuracy = ACCURACY_LOW;
+    public void setAccuracy(@LocationAccuracyRequirement int accuracy) {
+        Preconditions.checkArgumentInRange(accuracy, NO_REQUIREMENT, ACCURACY_COARSE, "accuracy");
+        switch (accuracy) {
+            case NO_REQUIREMENT:
+                setHorizontalAccuracy(NO_REQUIREMENT);
+                break;
+            case ACCURACY_FINE:
+                setHorizontalAccuracy(ACCURACY_HIGH);
+                break;
+            case ACCURACY_COARSE:
+                setHorizontalAccuracy(ACCURACY_LOW);
+                break;
         }
     }
 
     /**
-     * Returns a constant indicating desired accuracy of location
-     * Accuracy may be {@link #ACCURACY_FINE} if desired location
-     * is fine, else it can be {@link #ACCURACY_COARSE}.
+     * Returns a constant indicating desired accuracy of location.
+     *
+     * @see #setAccuracy(int)
      */
+    @LocationAccuracyRequirement
     public int getAccuracy() {
         if (mHorizontalAccuracy >= ACCURACY_HIGH) {
             return ACCURACY_FINE;
@@ -243,21 +266,20 @@ public class Criteria implements Parcelable {
     }
 
     /**
-     * Indicates the desired maximum power level.  The level parameter
-     * must be one of NO_REQUIREMENT, POWER_LOW, POWER_MEDIUM, or
-     * POWER_HIGH.
+     * Indicates the desired maximum power requirement. The power requirement parameter may be
+     * {@link #NO_REQUIREMENT}, {@link #POWER_LOW}, {@link #POWER_MEDIUM}, or {@link #POWER_HIGH}.
      */
-    public void setPowerRequirement(int level) {
-        if (level < NO_REQUIREMENT || level > POWER_HIGH) {
-            throw new IllegalArgumentException("level=" + level);
-        }
-        mPowerRequirement = level;
+    public void setPowerRequirement(@PowerRequirement int powerRequirement) {
+        mPowerRequirement = Preconditions.checkArgumentInRange(powerRequirement, NO_REQUIREMENT,
+                POWER_HIGH, "powerRequirement");
     }
 
     /**
-     * Returns a constant indicating the desired power requirement.  The
-     * returned
+     * Returns a constant indicating the desired maximum power requirement.
+     *
+     * @see #setPowerRequirement(int)
      */
+    @PowerRequirement
     public int getPowerRequirement() {
         return mPowerRequirement;
     }
@@ -277,8 +299,8 @@ public class Criteria implements Parcelable {
     }
 
     /**
-     * Indicates whether the provider must provide altitude information.
-     * Not all fixes are guaranteed to contain such information.
+     * Indicates whether the provider must provide altitude information. Not all fixes are
+     * guaranteed to contain such information.
      */
     public void setAltitudeRequired(boolean altitudeRequired) {
         mAltitudeRequired = altitudeRequired;
@@ -286,15 +308,16 @@ public class Criteria implements Parcelable {
 
     /**
      * Returns whether the provider must provide altitude information.
-     * Not all fixes are guaranteed to contain such information.
+     *
+     * @see #setAltitudeRequired(boolean)
      */
     public boolean isAltitudeRequired() {
         return mAltitudeRequired;
     }
 
     /**
-     * Indicates whether the provider must provide speed information.
-     * Not all fixes are guaranteed to contain such information.
+     * Indicates whether the provider must provide speed information. Not all fixes are guaranteed
+     * to contain such information.
      */
     public void setSpeedRequired(boolean speedRequired) {
         mSpeedRequired = speedRequired;
@@ -302,15 +325,16 @@ public class Criteria implements Parcelable {
 
     /**
      * Returns whether the provider must provide speed information.
-     * Not all fixes are guaranteed to contain such information.
+     *
+     * @see #setSpeedRequired(boolean)
      */
     public boolean isSpeedRequired() {
         return mSpeedRequired;
     }
 
     /**
-     * Indicates whether the provider must provide bearing information.
-     * Not all fixes are guaranteed to contain such information.
+     * Indicates whether the provider must provide bearing information. Not all fixes are guaranteed
+     * to contain such information.
      */
     public void setBearingRequired(boolean bearingRequired) {
         mBearingRequired = bearingRequired;
@@ -318,34 +342,36 @@ public class Criteria implements Parcelable {
 
     /**
      * Returns whether the provider must provide bearing information.
-     * Not all fixes are guaranteed to contain such information.
+     *
+     * @see #setBearingRequired(boolean)
      */
     public boolean isBearingRequired() {
         return mBearingRequired;
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<Criteria> CREATOR =
-        new Parcelable.Creator<Criteria>() {
-        @Override
-        public Criteria createFromParcel(Parcel in) {
-            Criteria c = new Criteria();
-            c.mHorizontalAccuracy = in.readInt();
-            c.mVerticalAccuracy = in.readInt();
-            c.mSpeedAccuracy = in.readInt();
-            c.mBearingAccuracy = in.readInt();
-            c.mPowerRequirement = in.readInt();
-            c.mAltitudeRequired = in.readInt() != 0;
-            c.mBearingRequired = in.readInt() != 0;
-            c.mSpeedRequired = in.readInt() != 0;
-            c.mCostAllowed = in.readInt() != 0;
-            return c;
-        }
+    @NonNull
+    public static final Parcelable.Creator<Criteria> CREATOR =
+            new Parcelable.Creator<Criteria>() {
+                @Override
+                public Criteria createFromParcel(Parcel in) {
+                    Criteria c = new Criteria();
+                    c.mHorizontalAccuracy = in.readInt();
+                    c.mVerticalAccuracy = in.readInt();
+                    c.mSpeedAccuracy = in.readInt();
+                    c.mBearingAccuracy = in.readInt();
+                    c.mPowerRequirement = in.readInt();
+                    c.mAltitudeRequired = in.readInt() != 0;
+                    c.mBearingRequired = in.readInt() != 0;
+                    c.mSpeedRequired = in.readInt() != 0;
+                    c.mCostAllowed = in.readInt() != 0;
+                    return c;
+                }
 
-        @Override
-        public Criteria[] newArray(int size) {
-            return new Criteria[size];
-        }
-    };
+                @Override
+                public Criteria[] newArray(int size) {
+                    return new Criteria[size];
+                }
+            };
 
     @Override
     public int describeContents() {
@@ -365,42 +391,57 @@ public class Criteria implements Parcelable {
         parcel.writeInt(mCostAllowed ? 1 : 0);
     }
 
-    private static String powerToString(int power) {
-        switch (power) {
-            case NO_REQUIREMENT:
-                return "NO_REQ";
-            case POWER_LOW:
-                return "LOW";
-            case POWER_MEDIUM:
-                return "MEDIUM";
-            case POWER_HIGH:
-                return "HIGH";
-            default:
-                return "???";
-        }
-    }
-
-    private static String accuracyToString(int accuracy) {
-        switch (accuracy) {
-            case NO_REQUIREMENT:
-                return "---";
-            case ACCURACY_HIGH:
-                return "HIGH";
-            case ACCURACY_MEDIUM:
-                return "MEDIUM";
-            case ACCURACY_LOW:
-                return "LOW";
-            default:
-                return "???";
-        }
-    }
-
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("Criteria[power=").append(powerToString(mPowerRequirement));
-        s.append(" acc=").append(accuracyToString(mHorizontalAccuracy));
+        s.append("Criteria[");
+        s.append("power=").append(requirementToString(mPowerRequirement)).append(", ");
+        s.append("accuracy=").append(requirementToString(mHorizontalAccuracy));
+        if (mVerticalAccuracy != NO_REQUIREMENT) {
+            s.append(", verticalAccuracy=").append(requirementToString(mVerticalAccuracy));
+        }
+        if (mSpeedAccuracy != NO_REQUIREMENT) {
+            s.append(", speedAccuracy=").append(requirementToString(mSpeedAccuracy));
+        }
+        if (mBearingAccuracy != NO_REQUIREMENT) {
+            s.append(", bearingAccuracy=").append(requirementToString(mBearingAccuracy));
+        }
+        if (mAltitudeRequired || mBearingRequired || mSpeedRequired) {
+            s.append(", required=[");
+            if (mAltitudeRequired) {
+                s.append("altitude, ");
+            }
+            if (mBearingRequired) {
+                s.append("bearing, ");
+            }
+            if (mSpeedRequired) {
+                s.append("speed, ");
+            }
+            s.setLength(s.length() - 2);
+            s.append("]");
+        }
+        if (mCostAllowed) {
+            s.append(", costAllowed");
+        }
         s.append(']');
         return s.toString();
+    }
+
+    private static String requirementToString(int power) {
+        switch (power) {
+            case NO_REQUIREMENT:
+                return "None";
+            //case ACCURACY_LOW:
+            case POWER_LOW:
+                return "Low";
+            //case ACCURACY_MEDIUM:
+            case POWER_MEDIUM:
+                return "Medium";
+            //case ACCURACY_HIGH:
+            case POWER_HIGH:
+                return "High";
+            default:
+                return "???";
+        }
     }
 }

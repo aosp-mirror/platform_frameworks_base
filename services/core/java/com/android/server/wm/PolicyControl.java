@@ -26,6 +26,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -51,7 +53,8 @@ class PolicyControl {
     private static final String TAG = "PolicyControl";
     private static final boolean DEBUG = false;
 
-    private static final String NAME_IMMERSIVE_FULL = "immersive.full";
+    @VisibleForTesting
+    static final String NAME_IMMERSIVE_FULL = "immersive.full";
     private static final String NAME_IMMERSIVE_STATUS = "immersive.status";
     private static final String NAME_IMMERSIVE_NAVIGATION = "immersive.navigation";
     private static final String NAME_IMMERSIVE_PRECONFIRMATIONS = "immersive.preconfirms";
@@ -148,7 +151,8 @@ class PolicyControl {
         }
     }
 
-    private static void setFilters(String value) {
+    @VisibleForTesting
+    static void setFilters(String value) {
         if (DEBUG) Slog.d(TAG, "setFilters: " + value);
         sImmersiveStatusFilter = null;
         sImmersiveNavigationFilter = null;

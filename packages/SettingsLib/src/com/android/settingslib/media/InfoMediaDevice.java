@@ -15,14 +15,23 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK;
+import static android.media.MediaRoute2Info.FEATURE_REMOTE_VIDEO_PLAYBACK;
+import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.widget.Toast;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 
-import androidx.mediarouter.media.MediaRouter;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
+
+import java.util.List;
 
 /**
  * InfoMediaDevice extends MediaDevice to represents wifi device.
@@ -31,29 +40,66 @@ public class InfoMediaDevice extends MediaDevice {
 
     private static final String TAG = "InfoMediaDevice";
 
-    private MediaRouter.RouteInfo mRouteInfo;
-
-    InfoMediaDevice(Context context, MediaRouter.RouteInfo info) {
-        super(context, MediaDeviceType.TYPE_CAST_DEVICE);
-        mRouteInfo = info;
+    InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
+            String packageName) {
+        super(context, routerManager, info, packageName);
         initDeviceRecord();
     }
 
     @Override
     public String getName() {
-        return mRouteInfo.getName();
+        return mRouteInfo.getName().toString();
     }
 
     @Override
     public String getSummary() {
-        return null;
+        return mRouteInfo.getClientPackageName() != null
+                ? mContext.getString(R.string.bluetooth_active_no_battery_level) : null;
     }
 
     @Override
     public Drawable getIcon() {
-        //TODO(b/120669861): Return remote device icon uri once api is ready.
-        return BluetoothUtils.buildBtRainbowDrawable(mContext,
-                mContext.getDrawable(R.drawable.ic_media_device), getId().hashCode());
+        final Drawable drawable = getIconWithoutBackground();
+        setColorFilter(drawable);
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+    }
+
+    @Override
+    public Drawable getIconWithoutBackground() {
+        return mContext.getDrawable(getDrawableResIdByFeature());
+    }
+
+    @VisibleForTesting
+    int getDrawableResId() {
+        int resId;
+        switch (mRouteInfo.getType()) {
+            case TYPE_GROUP:
+                resId = R.drawable.ic_media_group_device;
+                break;
+            case TYPE_REMOTE_TV:
+                resId = R.drawable.ic_media_display_device;
+                break;
+            case TYPE_REMOTE_SPEAKER:
+            default:
+                resId = R.drawable.ic_media_speaker_device;
+                break;
+        }
+        return resId;
+    }
+
+    @VisibleForTesting
+    int getDrawableResIdByFeature() {
+        int resId;
+        final List<String> features = mRouteInfo.getFeatures();
+        if (features.contains(FEATURE_REMOTE_GROUP_PLAYBACK)) {
+            resId = R.drawable.ic_media_group_device;
+        } else if (features.contains(FEATURE_REMOTE_VIDEO_PLAYBACK)) {
+            resId = R.drawable.ic_media_display_device;
+        } else {
+            resId = R.drawable.ic_media_speaker_device;
+        }
+
+        return resId;
     }
 
     @Override
@@ -61,20 +107,6 @@ public class InfoMediaDevice extends MediaDevice {
         return MediaDeviceUtils.getId(mRouteInfo);
     }
 
-    @Override
-    public boolean connect() {
-        //TODO(b/121083246): use SystemApi to transfer media
-        setConnectedRecord();
-        Toast.makeText(mContext, "This is cast device !", Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
-    @Override
-    public void disconnect() {
-        //TODO(b/121083246): disconnected last select device
-    }
-
-    @Override
     public boolean isConnected() {
         return true;
     }

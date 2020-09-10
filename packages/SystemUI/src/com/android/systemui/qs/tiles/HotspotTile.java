@@ -17,10 +17,11 @@
 package com.android.systemui.qs.tiles;
 
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.util.Log;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -35,9 +36,6 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<BooleanState> {
-    private static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
-            "com.android.settings", "com.android.settings.TetherSettings"));
-
     private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot);
 
     private final HotspotController mHotspotController;
@@ -68,6 +66,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         if (mListening == listening) return;
         mListening = listening;
         if (listening) {
@@ -77,7 +76,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(TETHER_SETTINGS);
+        return new Intent(Settings.ACTION_TETHER_SETTINGS);
     }
 
     @Override
@@ -147,6 +146,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
 
         state.secondaryLabel = getSecondaryLabel(
                 isTileActive, isTransient, isDataSaverEnabled, numConnectedDevices);
+        state.stateDescription = state.secondaryLabel;
     }
 
     @Nullable
@@ -199,6 +199,14 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             mCallbackInfo.isHotspotEnabled = enabled;
             mCallbackInfo.numConnectedDevices = numDevices;
             refreshState(mCallbackInfo);
+        }
+
+        @Override
+        public void onHotspotAvailabilityChanged(boolean available) {
+            if (!available) {
+                Log.d(TAG, "Tile removed. Hotspot no longer available");
+                mHost.removeTile(getTileSpec());
+            }
         }
     }
 

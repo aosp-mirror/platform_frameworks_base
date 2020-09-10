@@ -27,6 +27,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
+import android.content.res.loader.ResourcesLoader;
 import android.os.ParcelFileDescriptor;
 import android.util.ArraySet;
 import android.util.Log;
@@ -34,21 +35,21 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.om.OverlayConfig;
 
-import libcore.io.IoUtils;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
@@ -60,7 +61,6 @@ import java.util.Map;
 public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
-    private static final boolean FEATURE_FLAG_IDMAP2 = true;
 
     private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
 
@@ -111,6 +111,8 @@ public final class AssetManager implements AutoCloseable {
     @GuardedBy("this") private int mNumRefs = 1;
     @GuardedBy("this") private HashMap<Long, RuntimeException> mRefStacks;
 
+    private ResourcesLoader[] mLoaders;
+
     /**
      * A Builder class that helps create an AssetManager with only a single invocation of
      * {@link AssetManager#setApkAssets(ApkAssets[], boolean)}. Without using this builder,
@@ -121,9 +123,15 @@ public final class AssetManager implements AutoCloseable {
      */
     public static class Builder {
         private ArrayList<ApkAssets> mUserApkAssets = new ArrayList<>();
+        private ArrayList<ResourcesLoader> mLoaders = new ArrayList<>();
 
         public Builder addApkAssets(ApkAssets apkAssets) {
             mUserApkAssets.add(apkAssets);
+            return this;
+        }
+
+        public Builder addLoader(ResourcesLoader loader) {
+            mLoaders.add(loader);
             return this;
         }
 
@@ -131,14 +139,36 @@ public final class AssetManager implements AutoCloseable {
             // Retrieving the system ApkAssets forces their creation as well.
             final ApkAssets[] systemApkAssets = getSystem().getApkAssets();
 
-            final int totalApkAssetCount = systemApkAssets.length + mUserApkAssets.size();
+            // Filter ApkAssets so that assets provided by multiple loaders are only included once
+            // in the AssetManager assets. The last appearance of the ApkAssets dictates its load
+            // order.
+            final ArrayList<ApkAssets> loaderApkAssets = new ArrayList<>();
+            final ArraySet<ApkAssets> uniqueLoaderApkAssets = new ArraySet<>();
+            for (int i = mLoaders.size() - 1; i >= 0; i--) {
+                final List<ApkAssets> currentLoaderApkAssets = mLoaders.get(i).getApkAssets();
+                for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
+                    final ApkAssets apkAssets = currentLoaderApkAssets.get(j);
+                    if (uniqueLoaderApkAssets.add(apkAssets)) {
+                        loaderApkAssets.add(0, apkAssets);
+                    }
+                }
+            }
+
+            final int totalApkAssetCount = systemApkAssets.length + mUserApkAssets.size()
+                    + loaderApkAssets.size();
             final ApkAssets[] apkAssets = new ApkAssets[totalApkAssetCount];
 
             System.arraycopy(systemApkAssets, 0, apkAssets, 0, systemApkAssets.length);
 
-            final int userApkAssetCount = mUserApkAssets.size();
-            for (int i = 0; i < userApkAssetCount; i++) {
+            // Append user ApkAssets after system ApkAssets.
+            for (int i = 0, n = mUserApkAssets.size(); i < n; i++) {
                 apkAssets[i + systemApkAssets.length] = mUserApkAssets.get(i);
+            }
+
+            // Append ApkAssets provided by loaders to the end.
+            for (int i = 0, n = loaderApkAssets.size(); i < n; i++) {
+                apkAssets[i + systemApkAssets.length  + mUserApkAssets.size()] =
+                        loaderApkAssets.get(i);
             }
 
             // Calling this constructor prevents creation of system ApkAssets, which we took care
@@ -147,6 +177,9 @@ public final class AssetManager implements AutoCloseable {
             assetManager.mApkAssets = apkAssets;
             AssetManager.nativeSetApkAssets(assetManager.mObject, apkAssets,
                     false /*invalidateCaches*/);
+            assetManager.mLoaders = mLoaders.isEmpty() ? null
+                    : mLoaders.toArray(new ResourcesLoader[0]);
+
             return assetManager;
         }
     }
@@ -162,7 +195,7 @@ public final class AssetManager implements AutoCloseable {
     public AssetManager() {
         final ApkAssets[] assets;
         synchronized (sSync) {
-            createSystemAssetsInZygoteLocked();
+            createSystemAssetsInZygoteLocked(false, FRAMEWORK_APK_PATH);
             assets = sSystemApkAssets;
         }
 
@@ -191,75 +224,34 @@ public final class AssetManager implements AutoCloseable {
 
     /**
      * This must be called from Zygote so that system assets are shared by all applications.
+     * @hide
      */
     @GuardedBy("sSync")
-    private static void createSystemAssetsInZygoteLocked() {
-        if (sSystem != null) {
+    @VisibleForTesting
+    public static void createSystemAssetsInZygoteLocked(boolean reinitialize,
+            String frameworkPath) {
+        if (sSystem != null && !reinitialize) {
             return;
         }
 
-
         try {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
-            apkAssets.add(ApkAssets.loadFromPath(FRAMEWORK_APK_PATH, true /*system*/));
-            if (FEATURE_FLAG_IDMAP2) {
-                final String[] systemIdmapPaths =
-                    nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
-                if (systemIdmapPaths != null) {
-                    for (String idmapPath : systemIdmapPaths) {
-                        apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
-                    }
-                } else {
-                    Log.w(TAG, "'idmap2 --scan' failed: no static=\"true\" overlays targeting "
-                            + "\"android\" will be loaded");
-                }
-            } else {
-                nativeVerifySystemIdmaps();
-                loadStaticRuntimeOverlays(apkAssets);
+            apkAssets.add(ApkAssets.loadFromPath(frameworkPath, ApkAssets.PROPERTY_SYSTEM));
+
+            final String[] systemIdmapPaths =
+                    OverlayConfig.getZygoteInstance().createImmutableFrameworkIdmapsInZygote();
+            for (String idmapPath : systemIdmapPaths) {
+                apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, ApkAssets.PROPERTY_SYSTEM));
             }
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
             sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
-            sSystem = new AssetManager(true /*sentinel*/);
+            if (sSystem == null) {
+                sSystem = new AssetManager(true /*sentinel*/);
+            }
             sSystem.setApkAssets(sSystemApkAssets, false /*invalidateCaches*/);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create system AssetManager", e);
-        }
-    }
-
-    /**
-     * Loads the static runtime overlays declared in /data/resource-cache/overlays.list.
-     * Throws an exception if the file is corrupt or if loading the APKs referenced by the file
-     * fails. Returns quietly if the overlays.list file doesn't exist.
-     * @param outApkAssets The list to fill with the loaded ApkAssets.
-     */
-    private static void loadStaticRuntimeOverlays(ArrayList<ApkAssets> outApkAssets)
-            throws IOException {
-        final FileInputStream fis;
-        try {
-            fis = new FileInputStream("/data/resource-cache/overlays.list");
-        } catch (FileNotFoundException e) {
-            // We might not have any overlays, this is fine. We catch here since ApkAssets
-            // loading can also fail with the same exception, which we would want to propagate.
-            Log.i(TAG, "no overlays.list file found");
-            return;
-        }
-
-        try {
-            // Acquire a lock so that any idmap scanning doesn't impact the current set.
-            // The order of this try-with-resources block matters. We must release the lock, and
-            // then close the file streams when exiting the block.
-            try (final BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-                 final FileLock flock = fis.getChannel().lock(0, Long.MAX_VALUE, true /*shared*/)) {
-                for (String line; (line = br.readLine()) != null; ) {
-                    final String idmapPath = line.split(" ")[1];
-                    outApkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
-                }
-            }
-        } finally {
-            // When BufferedReader is closed above, FileInputStream is closed as well. But let's be
-            // paranoid.
-            IoUtils.closeQuietly(fis);
         }
     }
 
@@ -271,7 +263,7 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     public static AssetManager getSystem() {
         synchronized (sSync) {
-            createSystemAssetsInZygoteLocked();
+            createSystemAssetsInZygoteLocked(false, FRAMEWORK_APK_PATH);
             return sSystem;
         }
     }
@@ -302,7 +294,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     public void setApkAssets(@NonNull ApkAssets[] apkAssets, boolean invalidateCaches) {
-        Preconditions.checkNotNull(apkAssets, "apkAssets");
+        Objects.requireNonNull(apkAssets, "apkAssets");
 
         ApkAssets[] newApkAssets = new ApkAssets[sSystemApkAssets.length + apkAssets.length];
 
@@ -331,6 +323,42 @@ public final class AssetManager implements AutoCloseable {
                 invalidateCachesLocked(-1);
             }
         }
+    }
+
+    /**
+     * Changes the {@link ResourcesLoader ResourcesLoaders} used in this AssetManager.
+     * @hide
+     */
+    void setLoaders(@NonNull List<ResourcesLoader> newLoaders) {
+        Objects.requireNonNull(newLoaders, "newLoaders");
+
+        final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
+        for (int i = 0; i < mApkAssets.length; i++) {
+            // Filter out the previous loader apk assets.
+            if (!mApkAssets[i].isForLoader()) {
+                apkAssets.add(mApkAssets[i]);
+            }
+        }
+
+        if (!newLoaders.isEmpty()) {
+            // Filter so that assets provided by multiple loaders are only included once
+            // in the final assets list. The last appearance of the ApkAssets dictates its load
+            // order.
+            final int loaderStartIndex = apkAssets.size();
+            final ArraySet<ApkAssets> uniqueLoaderApkAssets = new ArraySet<>();
+            for (int i = newLoaders.size() - 1; i >= 0; i--) {
+                final List<ApkAssets> currentLoaderApkAssets = newLoaders.get(i).getApkAssets();
+                for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
+                    final ApkAssets loaderApkAssets = currentLoaderApkAssets.get(j);
+                    if (uniqueLoaderApkAssets.add(loaderApkAssets)) {
+                        apkAssets.add(loaderStartIndex, loaderApkAssets);
+                    }
+                }
+            }
+        }
+
+        mLoaders = newLoaders.toArray(new ResourcesLoader[0]);
+        setApkAssets(apkAssets.toArray(new ApkAssets[0]), true /* invalidate_caches */);
     }
 
     /**
@@ -381,7 +409,7 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     public int findCookieForPath(@NonNull String path) {
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureValidLocked();
             final int count = mApkAssets.length;
@@ -425,7 +453,7 @@ public final class AssetManager implements AutoCloseable {
     }
 
     private int addAssetPathInternal(String path, boolean overlay, boolean appAsLib) {
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureOpenLocked();
             final int count = mApkAssets.length;
@@ -445,9 +473,10 @@ public final class AssetManager implements AutoCloseable {
                     final String idmapPath = "/data/resource-cache/"
                             + path.substring(1).replace('/', '@')
                             + "@idmap";
-                    assets = ApkAssets.loadOverlayFromPath(idmapPath, false /*system*/);
+                    assets = ApkAssets.loadOverlayFromPath(idmapPath, 0 /* flags */);
                 } else {
-                    assets = ApkAssets.loadFromPath(path, false /*system*/, appAsLib);
+                    assets = ApkAssets.loadFromPath(path,
+                            appAsLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
                 }
             } catch (IOException e) {
                 return 0;
@@ -459,6 +488,12 @@ public final class AssetManager implements AutoCloseable {
             invalidateCachesLocked(-1);
             return count + 1;
         }
+    }
+
+    /** @hide */
+    @NonNull
+    public List<ResourcesLoader> getLoaders() {
+        return mLoaders == null ? Collections.emptyList() : Arrays.asList(mLoaders);
     }
 
     /**
@@ -500,7 +535,7 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        Preconditions.checkNotNull(outValue, "outValue");
+        Objects.requireNonNull(outValue, "outValue");
         synchronized (this) {
             ensureValidLocked();
             final int cookie = nativeGetResourceValue(
@@ -514,7 +549,7 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = mApkAssets[cookie - 1].getStringFromPool(outValue.data);
+                outValue.string = getPooledStringForCookie(cookie, outValue.data);
             }
             return true;
         }
@@ -561,7 +596,7 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                return mApkAssets[cookie - 1].getStringFromPool(outValue.data);
+                return getPooledStringForCookie(cookie, outValue.data);
             }
             return outValue.coerceToString();
         }
@@ -597,7 +632,7 @@ public final class AssetManager implements AutoCloseable {
      * @see TypedArray#STYLE_DENSITY
      */
     int getResourceArray(@ArrayRes int resId, @NonNull int[] outData) {
-        Preconditions.checkNotNull(outData, "outData");
+        Objects.requireNonNull(outData, "outData");
         synchronized (this) {
             ensureValidLocked();
             return nativeGetResourceArray(mObject, resId, outData);
@@ -639,7 +674,7 @@ public final class AssetManager implements AutoCloseable {
                 int cookie = rawInfoArray[i];
                 int index = rawInfoArray[i + 1];
                 retArray[j] = (index >= 0 && cookie > 0)
-                        ? mApkAssets[cookie - 1].getStringFromPool(index) : null;
+                        ? getPooledStringForCookie(cookie, index) : null;
             }
             return retArray;
         }
@@ -681,7 +716,7 @@ public final class AssetManager implements AutoCloseable {
      */
     boolean getThemeValue(long theme, @AnyRes int resId, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        Preconditions.checkNotNull(outValue, "outValue");
+        Objects.requireNonNull(outValue, "outValue");
         synchronized (this) {
             ensureValidLocked();
             final int cookie = nativeThemeGetAttributeValue(mObject, theme, resId, outValue,
@@ -695,7 +730,7 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = mApkAssets[cookie - 1].getStringFromPool(outValue.data);
+                outValue.string = getPooledStringForCookie(cookie, outValue.data);
             }
             return true;
         }
@@ -760,6 +795,7 @@ public final class AssetManager implements AutoCloseable {
      *
      * @hide
      */
+    @TestApi
     public void setResourceResolutionLoggingEnabled(boolean enabled) {
         synchronized (this) {
             ensureValidLocked();
@@ -775,10 +811,24 @@ public final class AssetManager implements AutoCloseable {
      *
      * @hide
      */
+    @TestApi
     public @Nullable String getLastResourceResolution() {
         synchronized (this) {
             ensureValidLocked();
             return nativeGetLastResourceResolution(mObject);
+        }
+    }
+
+    /**
+     * Returns whether the {@code resources.arsc} of any loaded apk assets is allocated in RAM
+     * (not mmapped).
+     *
+     * @hide
+     */
+    public boolean containsAllocatedTable() {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeContainsAllocatedTable(mObject);
         }
     }
 
@@ -818,7 +868,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #list
      */
     public @NonNull InputStream open(@NonNull String fileName, int accessMode) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
             final long asset = nativeOpenAsset(mObject, fileName, accessMode);
@@ -842,7 +892,7 @@ public final class AssetManager implements AutoCloseable {
      * @return An open AssetFileDescriptor.
      */
     public @NonNull AssetFileDescriptor openFd(@NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
             final ParcelFileDescriptor pfd = nativeOpenAssetFd(mObject, fileName, mOffsets);
@@ -866,7 +916,7 @@ public final class AssetManager implements AutoCloseable {
      * @see #open
      */
     public @Nullable String[] list(@NonNull String path) throws IOException {
-        Preconditions.checkNotNull(path, "path");
+        Objects.requireNonNull(path, "path");
         synchronized (this) {
             ensureValidLocked();
             return nativeList(mObject, path);
@@ -935,7 +985,7 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     public @NonNull InputStream openNonAsset(int cookie, @NonNull String fileName, int accessMode)
             throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
             final long asset = nativeOpenNonAsset(mObject, cookie, fileName, accessMode);
@@ -974,7 +1024,7 @@ public final class AssetManager implements AutoCloseable {
      */
     public @NonNull AssetFileDescriptor openNonAssetFd(int cookie, @NonNull String fileName)
             throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
             final ParcelFileDescriptor pfd =
@@ -1035,9 +1085,10 @@ public final class AssetManager implements AutoCloseable {
      * @hide
      */
     @NonNull XmlBlock openXmlBlockAsset(int cookie, @NonNull String fileName) throws IOException {
-        Preconditions.checkNotNull(fileName, "fileName");
+        Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
+
             final long xmlBlock = nativeOpenXmlAsset(mObject, cookie, fileName);
             if (xmlBlock == 0) {
                 throw new FileNotFoundException("Asset XML file: " + fileName);
@@ -1058,7 +1109,7 @@ public final class AssetManager implements AutoCloseable {
     void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
             long outIndicesAddress) {
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
+        Objects.requireNonNull(inAttrs, "inAttrs");
         synchronized (this) {
             // Need to synchronize on AssetManager because we will be accessing
             // the native implementation of AssetManager.
@@ -1081,9 +1132,9 @@ public final class AssetManager implements AutoCloseable {
     boolean resolveAttrs(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable int[] inValues, @NonNull int[] inAttrs, @NonNull int[] outValues,
             @NonNull int[] outIndices) {
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
-        Preconditions.checkNotNull(outValues, "outValues");
-        Preconditions.checkNotNull(outIndices, "outIndices");
+        Objects.requireNonNull(inAttrs, "inAttrs");
+        Objects.requireNonNull(outValues, "outValues");
+        Objects.requireNonNull(outIndices, "outIndices");
         synchronized (this) {
             // Need to synchronize on AssetManager because we will be accessing
             // the native implementation of AssetManager.
@@ -1096,10 +1147,10 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     boolean retrieveAttributes(@NonNull XmlBlock.Parser parser, @NonNull int[] inAttrs,
             @NonNull int[] outValues, @NonNull int[] outIndices) {
-        Preconditions.checkNotNull(parser, "parser");
-        Preconditions.checkNotNull(inAttrs, "inAttrs");
-        Preconditions.checkNotNull(outValues, "outValues");
-        Preconditions.checkNotNull(outIndices, "outIndices");
+        Objects.requireNonNull(parser, "parser");
+        Objects.requireNonNull(inAttrs, "inAttrs");
+        Objects.requireNonNull(outValues, "outValues");
+        Objects.requireNonNull(outIndices, "outIndices");
         synchronized (this) {
             // Need to synchronize on AssetManager because we will be accessing
             // the native implementation of AssetManager.
@@ -1203,14 +1254,14 @@ public final class AssetManager implements AutoCloseable {
         @Override
         public final int read(@NonNull byte[] b) throws IOException {
             ensureOpen();
-            Preconditions.checkNotNull(b, "b");
+            Objects.requireNonNull(b, "b");
             return nativeAssetRead(mAssetNativePtr, b, 0, b.length);
         }
 
         @Override
         public final int read(@NonNull byte[] b, int off, int len) throws IOException {
             ensureOpen();
-            Preconditions.checkNotNull(b, "b");
+            Objects.requireNonNull(b, "b");
             return nativeAssetRead(mAssetNativePtr, b, off, len);
         }
 
@@ -1303,7 +1354,7 @@ public final class AssetManager implements AutoCloseable {
      *
      * <p>On SDK 21 (Android 5.0: Lollipop) and above, Locale strings are valid
      * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a> language tags and can be
-     * parsed using {@link java.util.Locale#forLanguageTag(String)}.
+     * parsed using {@link Locale#forLanguageTag(String)}.
      *
      * <p>On SDK 20 (Android 4.4W: Kitkat for watches) and below, locale strings
      * are of the form {@code ll_CC} where {@code ll} is a two letter language code,
@@ -1367,9 +1418,28 @@ public final class AssetManager implements AutoCloseable {
      */
     @UnsupportedAppUsage
     public SparseArray<String> getAssignedPackageIdentifiers() {
+        return getAssignedPackageIdentifiers(true, true);
+    }
+
+    /**
+     * @hide
+     */
+    public SparseArray<String> getAssignedPackageIdentifiers(boolean includeOverlays,
+            boolean includeLoaders) {
         synchronized (this) {
             ensureValidLocked();
-            return nativeGetAssignedPackageIdentifiers(mObject);
+            return nativeGetAssignedPackageIdentifiers(mObject, includeOverlays, includeLoaders);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @GuardedBy("this")
+    public @Nullable Map<String, String> getOverlayableMap(String packageName) {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetOverlayableMap(mObject, packageName);
         }
     }
 
@@ -1378,10 +1448,10 @@ public final class AssetManager implements AutoCloseable {
      */
     @TestApi
     @GuardedBy("this")
-    public @Nullable Map<String, String> getOverlayableMap(String packageName) {
+    public @Nullable String getOverlayablesToString(String packageName) {
         synchronized (this) {
             ensureValidLocked();
-            return nativeGetOverlayableMap(mObject, packageName);
+            return nativeGetOverlayablesToString(mObject, packageName);
         }
     }
 
@@ -1422,9 +1492,10 @@ public final class AssetManager implements AutoCloseable {
             int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp, int screenLayout,
             int uiMode, int colorMode, int majorVersion);
     private static native @NonNull SparseArray<String> nativeGetAssignedPackageIdentifiers(
-            long ptr);
+            long ptr, boolean includeOverlays, boolean includeLoaders);
 
     // File native methods.
+    private static native boolean nativeContainsAllocatedTable(long ptr);
     private static native @Nullable String[] nativeList(long ptr, @NonNull String path)
             throws IOException;
     private static native long nativeOpenAsset(long ptr, @NonNull String fileName, int accessMode);
@@ -1435,6 +1506,8 @@ public final class AssetManager implements AutoCloseable {
     private static native @Nullable ParcelFileDescriptor nativeOpenNonAssetFd(long ptr, int cookie,
             @NonNull String fileName, @NonNull long[] outOffsets) throws IOException;
     private static native long nativeOpenXmlAsset(long ptr, int cookie, @NonNull String fileName);
+    private static native long nativeOpenXmlAssetFd(long ptr, int cookie,
+            @NonNull FileDescriptor fileDescriptor);
 
     // Primitive resource native methods.
     private static native int nativeGetResourceValue(long ptr, @AnyRes int resId, short density,
@@ -1500,9 +1573,10 @@ public final class AssetManager implements AutoCloseable {
     private static native long nativeAssetGetLength(long assetPtr);
     private static native long nativeAssetGetRemainingLength(long assetPtr);
 
-    private static native void nativeVerifySystemIdmaps();
     private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
     private static native @Nullable Map nativeGetOverlayableMap(long ptr,
+            @NonNull String packageName);
+    private static native @Nullable String nativeGetOverlayablesToString(long ptr,
             @NonNull String packageName);
 
     // Global debug native methods.

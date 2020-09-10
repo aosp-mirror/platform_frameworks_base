@@ -16,15 +16,17 @@
 
 #pragma once
 
-#include "binder/IBinder.h"
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
 
-#include <map>
+#include <aidl/android/os/IPendingIntentRef.h>
 #include <mutex>
 #include <string>
 
 #include <stdio.h>
+
+using aidl::android::os::IPendingIntentRef;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -63,12 +65,12 @@ public:
     /**
      * Sets the broadcast receiver for a configuration key.
      */
-    void SetConfigReceiver(const ConfigKey& key, const sp<IBinder>& intentSender);
+    void SetConfigReceiver(const ConfigKey& key, const shared_ptr<IPendingIntentRef>& pir);
 
     /**
      * Returns the package name and class name representing the broadcast receiver for this config.
      */
-    const sp<android::IBinder> GetConfigReceiver(const ConfigKey& key) const;
+    const shared_ptr<IPendingIntentRef> GetConfigReceiver(const ConfigKey& key) const;
 
     /**
      * Returns all config keys registered.
@@ -84,13 +86,13 @@ public:
      * Sets the broadcast receiver that is notified whenever the list of active configs
      * changes for this uid.
      */
-    void SetActiveConfigsChangedReceiver(const int uid, const sp<IBinder>& intentSender);
+    void SetActiveConfigsChangedReceiver(const int uid, const shared_ptr<IPendingIntentRef>& pir);
 
     /**
      * Returns the broadcast receiver for active configs changed for this uid.
      */
 
-    const sp<IBinder> GetActiveConfigsChangedReceiver(const int uid) const;
+    const shared_ptr<IPendingIntentRef> GetActiveConfigsChangedReceiver(const int uid) const;
 
     /**
      * Erase any active configs changed broadcast receiver associated with this uid.
@@ -140,21 +142,38 @@ private:
     std::map<int, std::set<ConfigKey>> mConfigs;
 
     /**
-     * Each config key can be subscribed by up to one receiver, specified as IBinder from
-     * PendingIntent.
+     * Each config key can be subscribed by up to one receiver, specified as IPendingIntentRef.
      */
-    std::map<ConfigKey, sp<android::IBinder>> mConfigReceivers;
+    std::map<ConfigKey, shared_ptr<IPendingIntentRef>> mConfigReceivers;
 
     /**
      * Each uid can be subscribed by up to one receiver to notify that the list of active configs
-     * for this uid has changed. The receiver is specified as IBinder from PendingIntent.
+     * for this uid has changed. The receiver is specified as IPendingIntentRef.
      */
-     std::map<int, sp<android::IBinder>> mActiveConfigsChangedReceivers;
+     std::map<int, shared_ptr<IPendingIntentRef>> mActiveConfigsChangedReceivers;
 
     /**
      * The ConfigListeners that will be told about changes.
      */
     std::vector<sp<ConfigListener>> mListeners;
+
+    // Death recipients that are triggered when the host process holding an
+    // IPendingIntentRef dies.
+    ::ndk::ScopedAIBinder_DeathRecipient mConfigReceiverDeathRecipient;
+    ::ndk::ScopedAIBinder_DeathRecipient mActiveConfigChangedReceiverDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a config receiver dies.
+     * The cookie is a pointer to a ConfigReceiverDeathCookie.
+     */
+    static void configReceiverDied(void* cookie);
+
+    /**
+     * Death recipient callback that is called when an active config changed
+     * receiver dies. The cookie is a pointer to an
+     * ActiveConfigChangedReceiverDeathCookie.
+     */
+    static void activeConfigChangedReceiverDied(void* cookie);
 };
 
 }  // namespace statsd

@@ -46,8 +46,12 @@
 # <extension1> and <extension2> are mapped (or remapped) to <mimeType>.
 
 ?application/epub+zip epub
+?application/lrc lrc
 ?application/pkix-cert cer
 ?application/rss+xml rss
+?application/sdp sdp
+?application/smil+xml smil
+?application/ttml+xml ttml dfxp
 ?application/vnd.android.ota ota
 ?application/vnd.apple.mpegurl m3u8
 ?application/vnd.ms-pki.stl stl
@@ -62,21 +66,25 @@
 ?application/x-mpegurl m3u m3u8
 ?application/x-pem-file pem
 ?application/x-pkcs12 p12 pfx
+?application/x-subrip srt
 ?application/x-webarchive webarchive
 ?application/x-webarchive-xml webarchivexml
 ?application/x-x509-server-cert crt
 ?application/x-x509-user-cert crt
 
-?audio/3gpp 3gpp
+?audio/3gpp 3ga 3gpp
 ?audio/aac-adts aac
+?audio/ac3 ac3 a52
+?audio/amr amr
 ?audio/imelody imy
 ?audio/midi rtttl xmf
 ?audio/mobile-xmf mxmf
-?audio/mp4 m4a
+?audio/mp4 m4a m4b m4p f4a f4b f4p
 ?audio/mpegurl m3u
 ?audio/sp-midi smf
 ?audio/x-matroska mka
 ?audio/x-pn-realaudio ra
+?audio/x-mpeg mp3
 
 ?image/bmp bmp
 ?image/heic heic
@@ -101,10 +109,11 @@
 ?text/xml xml
 ?text/x-vcard vcf
 
-?video/3gpp2 3gpp2 3g2
+?video/3gpp2 3gpp2 3gp2 3g2
 ?video/3gpp 3gpp
 ?video/avi avi
 ?video/m4v m4v
+?video/mp4 m4v f4v mp4v mpeg4
 ?video/mp2p mpeg
 ?video/mp2t m2ts mts
 ?video/mp2ts ts
@@ -129,11 +138,11 @@
 
 application/pgp-signature pgp
 application/x-x509-ca-cert crt
-audio/aac aac
+audio/aac aac adts adt
 audio/basic snd
 audio/flac flac
 audio/midi rtx
-audio/mpeg mp3 m4a m4r
+audio/mpeg mp3 mp2 mp1 mpa m4a m4r
 audio/x-mpegurl m3u m3u8
 image/jpeg jpg
 image/x-ms-bmp bmp
@@ -141,6 +150,6 @@ text/plain txt
 text/x-c++hdr hpp
 text/x-c++src cpp
 video/3gpp 3gpp
-video/mpeg mpeg
+video/mpeg mpeg mpeg2 mpv2 mp2v m2v m2t mpeg1 mpv1 mp1v m1v
 video/quicktime mov
 video/x-matroska mkv

@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 #include "androidfw/StringPiece.h"
 
@@ -70,7 +71,7 @@ class AnnotationProcessor {
   std::stringstream comment_;
   std::stringstream mAnnotations;
   bool has_comments_ = false;
-  uint32_t annotation_bit_mask_ = 0;
+  std::unordered_map<uint32_t, std::string> annotation_parameter_map_;
 
   void AppendCommentLine(std::string line);
 };

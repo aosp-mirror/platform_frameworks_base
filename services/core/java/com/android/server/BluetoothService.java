@@ -18,8 +18,7 @@ package com.android.server;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-
-import com.android.internal.os.RoSystemProperties;
+import android.os.UserManager;
 
 class BluetoothService extends SystemService {
     private BluetoothManagerService mBluetoothManagerService;
@@ -47,7 +46,7 @@ class BluetoothService extends SystemService {
             publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE,
                     mBluetoothManagerService);
         } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY &&
-                !RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER) {
+                !UserManager.isHeadlessSystemUserMode()) {
             initialize();
         }
     }

@@ -38,16 +38,20 @@ legal JSON format, as this would imply multiple root elements).
 Register a new uhid device
 
 | Field         | Type          | Description                |
-|:-------------:|:-------------:|:--------------------------|
+|:-------------:|:-------------:|:-------------------------- |
 | id            | integer       | Device id                  |
 | command       | string        | Must be set to "register"  |
 | name          | string        | Device name                |
 | vid           | 16-bit integer| Vendor id                  |
 | pid           | 16-bit integer| Product id                 |
+| bus           | string        | Bus that device should use |
 | descriptor    | byte array    | USB HID report descriptor  |
 
 Device ID is used for matching the subsequent commands to a specific device
 to avoid ambiguity when multiple devices are registered.
+
+Device bus is used to determine how the uhid device is connected to the host.
+The options are "usb" and "bluetooth".
 
 USB HID report descriptor should be generated according the the USB HID spec
 and can be checked by reverse parsing using a variety of tools, for example
@@ -61,6 +65,7 @@ Example:
   "name": "Odie (Test)",
   "vid": 0x18d1,
   "pid": 0x2c40,
+  "bus": "usb",
   "descriptor": [0x05, 0x01, 0x09, 0x05, 0xa1, 0x01, 0x85, 0x01, 0x05, 0x09, 0x0a, 0x01, 0x00,
     0x0a, 0x02, 0x00, 0x0a, 0x04, 0x00, 0x0a, 0x05, 0x00, 0x0a, 0x07, 0x00, 0x0a, 0x08, 0x00,
     0x0a, 0x0e, 0x00, 0x0a, 0x0f, 0x00, 0x0a, 0x0d, 0x00, 0x05, 0x0c, 0x0a, 0x24, 0x02, 0x0a,

@@ -62,6 +62,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
     static final int STATUS_BAR_HEIGHT = 10;
     static final int NAV_BAR_HEIGHT = 15;
     static final int DISPLAY_CUTOUT_HEIGHT = 8;
+    static final int INPUT_METHOD_WINDOW_TOP = 585;
 
     DisplayPolicy mDisplayPolicy;
 
@@ -77,6 +78,8 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         resources.addOverride(R.dimen.navigation_bar_height, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_height_landscape, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_width, NAV_BAR_HEIGHT);
+        resources.addOverride(R.dimen.navigation_bar_frame_height_landscape, NAV_BAR_HEIGHT);
+        resources.addOverride(R.dimen.navigation_bar_frame_height, NAV_BAR_HEIGHT);
         doReturn(resources.getResources()).when(mDisplayPolicy).getCurrentUserResources();
         doReturn(true).when(mDisplayPolicy).hasNavigationBar();
         doReturn(true).when(mDisplayPolicy).hasStatusBar();
@@ -99,15 +102,17 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
     }
 
     void addWindow(WindowState win) {
-        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs, Binder.getCallingPid(),
-                Binder.getCallingUid());
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs, callingPid, callingUid);
         assertEquals(WindowManagerGlobal.ADD_OKAY,
-                mDisplayPolicy.prepareAddWindowLw(win, win.mAttrs));
+                mDisplayPolicy.validateAddingWindowLw(win.mAttrs, callingPid, callingUid));
+        mDisplayPolicy.addWindowLw(win, win.mAttrs);
         win.mHasSurface = true;
     }
 
     static Pair<DisplayInfo, WmDisplayCutout> displayInfoAndCutoutForRotation(int rotation,
-            boolean withDisplayCutout) {
+            boolean withDisplayCutout, boolean isLongEdgeCutout) {
         final DisplayInfo info = new DisplayInfo();
         WmDisplayCutout cutout = null;
 
@@ -117,7 +122,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         info.rotation = rotation;
         if (withDisplayCutout) {
             cutout = WmDisplayCutout.computeSafeInsets(
-                    displayCutoutForRotation(rotation), info.logicalWidth,
+                    displayCutoutForRotation(rotation, isLongEdgeCutout), info.logicalWidth,
                     info.logicalHeight);
             info.displayCutout = cutout.getDisplayCutout();
         } else {
@@ -126,9 +131,13 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         return Pair.create(info, cutout);
     }
 
-    private static DisplayCutout displayCutoutForRotation(int rotation) {
-        final RectF rectF =
-                new RectF(DISPLAY_WIDTH / 4, 0, DISPLAY_WIDTH * 3 / 4, DISPLAY_CUTOUT_HEIGHT);
+    private static DisplayCutout displayCutoutForRotation(int rotation, boolean isLongEdgeCutout) {
+        RectF rectF = new RectF();
+        if (isLongEdgeCutout) {
+            rectF.set(0, DISPLAY_HEIGHT / 4, DISPLAY_CUTOUT_HEIGHT, DISPLAY_HEIGHT * 3 / 4);
+        } else {
+            rectF.set(DISPLAY_WIDTH / 4, 0, DISPLAY_WIDTH * 3 / 4, DISPLAY_CUTOUT_HEIGHT);
+        }
 
         final Matrix m = new Matrix();
         transformPhysicalToLogicalCoordinates(rotation, DISPLAY_WIDTH, DISPLAY_HEIGHT, m);
@@ -137,16 +146,16 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         int pos = -1;
         switch (rotation) {
             case ROTATION_0:
-                pos = BOUNDS_POSITION_TOP;
+                pos = isLongEdgeCutout ? BOUNDS_POSITION_LEFT : BOUNDS_POSITION_TOP;
                 break;
             case ROTATION_90:
-                pos = BOUNDS_POSITION_LEFT;
+                pos = isLongEdgeCutout ? BOUNDS_POSITION_BOTTOM : BOUNDS_POSITION_LEFT;
                 break;
             case ROTATION_180:
-                pos = BOUNDS_POSITION_BOTTOM;
+                pos = isLongEdgeCutout ? BOUNDS_POSITION_RIGHT : BOUNDS_POSITION_BOTTOM;
                 break;
             case ROTATION_270:
-                pos = BOUNDS_POSITION_RIGHT;
+                pos = isLongEdgeCutout ? BOUNDS_POSITION_TOP : BOUNDS_POSITION_RIGHT;
                 break;
         }
 

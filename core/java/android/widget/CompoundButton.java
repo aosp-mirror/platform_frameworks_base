@@ -80,6 +80,8 @@ public abstract class CompoundButton extends Button implements Checkable {
     // to sanitize autofill requests.
     private boolean mCheckedFromResource = false;
 
+    private CharSequence mCustomStateDescription = null;
+
     private static final int[] CHECKED_STATE_SET = {
         R.attr.state_checked
     };
@@ -156,6 +158,44 @@ public abstract class CompoundButton extends Button implements Checkable {
         return mChecked;
     }
 
+    /** @hide */
+    @NonNull
+    protected CharSequence getButtonStateDescription() {
+        if (isChecked()) {
+            return getResources().getString(R.string.checked);
+        } else {
+            return getResources().getString(R.string.not_checked);
+        }
+    }
+
+    /**
+     * This function is called when an instance or subclass sets the state description. Once this
+     * is called and the argument is not null, the app developer will be responsible for updating
+     * state description when checked state changes and we will not set state description
+     * in {@link #setChecked}. App developers can restore the default behavior by setting the
+     * argument to null. If {@link #setChecked} is called first and then setStateDescription is
+     * called, two state change events will be merged by event throttling and we can still get
+     * the correct state description.
+     *
+     * @param stateDescription The state description.
+     */
+    @Override
+    public void setStateDescription(@Nullable CharSequence stateDescription) {
+        mCustomStateDescription = stateDescription;
+        if (stateDescription == null) {
+            setDefaultStateDescritption();
+        } else {
+            super.setStateDescription(stateDescription);
+        }
+    }
+
+    /** @hide **/
+    protected void setDefaultStateDescritption() {
+        if (mCustomStateDescription == null) {
+            super.setStateDescription(getButtonStateDescription());
+        }
+    }
+
     /**
      * <p>Changes the checked state of this button.</p>
      *
@@ -167,8 +207,6 @@ public abstract class CompoundButton extends Button implements Checkable {
             mCheckedFromResource = false;
             mChecked = checked;
             refreshDrawableState();
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
 
             // Avoid infinite recursions if setChecked() is called from a listener
             if (mBroadcasting) {
@@ -189,6 +227,8 @@ public abstract class CompoundButton extends Button implements Checkable {
 
             mBroadcasting = false;
         }
+        // setStateDescription will not send out event if the description is unchanged.
+        setDefaultStateDescritption();
     }
 
     /**

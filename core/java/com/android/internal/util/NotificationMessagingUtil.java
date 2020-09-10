@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -77,8 +78,8 @@ public class NotificationMessagingUtil {
     private final ContentObserver mSmsContentObserver = new ContentObserver(
             new Handler(Looper.getMainLooper())) {
         @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            if (Settings.Secure.getUriFor(DEFAULT_SMS_APP_SETTING).equals(uri)) {
+        public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
+            if (uris.contains(Settings.Secure.getUriFor(DEFAULT_SMS_APP_SETTING))) {
                 cacheDefaultSmsApp(userId);
             }
         }

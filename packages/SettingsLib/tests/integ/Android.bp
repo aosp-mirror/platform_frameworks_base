@@ -14,7 +14,10 @@
 
 android_test {
     name: "SettingsLibTests",
-    defaults: ["SettingsLibDefaults"],
+    defaults: [
+        "SettingsLibDefaults",
+        "framework-wifi-test-defaults"
+    ],
 
     certificate: "platform",
 

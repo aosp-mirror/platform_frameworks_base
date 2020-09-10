@@ -21,6 +21,7 @@ import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_UNMETERED;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.ColorInt;
 import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -32,8 +33,8 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.app.BroadcastOptions;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +43,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.net.INetworkPolicyManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
@@ -53,7 +53,6 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -64,6 +63,7 @@ import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.util.HandlerExecutor;
+import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
 import com.android.telephony.Rlog;
 
@@ -78,7 +78,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -131,6 +130,127 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage
     public static final Uri CONTENT_URI = SimInfo.CONTENT_URI;
+
+    /** @hide */
+    public static final String CACHE_KEY_DEFAULT_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_sub_id";
+
+    /** @hide */
+    public static final String CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_data_sub_id";
+
+    /** @hide */
+    public static final String CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_sms_sub_id";
+
+    /** @hide */
+    public static final String CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_active_data_sub_id";
+
+    /** @hide */
+    public static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
+            "cache_key.telephony.get_slot_index";
+
+    private static final int MAX_CACHE_SIZE = 4;
+
+    private static class VoidPropertyInvalidatedCache<T>
+            extends PropertyInvalidatedCache<Void, T> {
+        private final FunctionalUtils.ThrowingFunction<ISub, T> mInterfaceMethod;
+        private final String mCacheKeyProperty;
+        private final T mDefaultValue;
+
+        VoidPropertyInvalidatedCache(
+                FunctionalUtils.ThrowingFunction<ISub, T> subscriptionInterfaceMethod,
+                String cacheKeyProperty,
+                T defaultValue) {
+            super(MAX_CACHE_SIZE, cacheKeyProperty);
+            mInterfaceMethod = subscriptionInterfaceMethod;
+            mCacheKeyProperty = cacheKeyProperty;
+            mDefaultValue = defaultValue;
+        }
+
+        @Override
+        protected T recompute(Void aVoid) {
+            T result = mDefaultValue;
+
+            try {
+                ISub iSub = TelephonyManager.getSubscriptionService();
+                if (iSub != null) {
+                    result = mInterfaceMethod.applyOrThrow(iSub);
+                }
+            } catch (Exception ex) {
+                Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
+            }
+
+            if (VDBG) logd("recomputing " + mCacheKeyProperty + ", result = " + result);
+            return result;
+        }
+    }
+
+    private static class IntegerPropertyInvalidatedCache<T>
+            extends PropertyInvalidatedCache<Integer, T> {
+        private final FunctionalUtils.ThrowingBiFunction<ISub, Integer, T> mInterfaceMethod;
+        private final String mCacheKeyProperty;
+        private final T mDefaultValue;
+
+        IntegerPropertyInvalidatedCache(
+                FunctionalUtils.ThrowingBiFunction<ISub, Integer, T> subscriptionInterfaceMethod,
+                String cacheKeyProperty,
+                T defaultValue) {
+            super(MAX_CACHE_SIZE, cacheKeyProperty);
+            mInterfaceMethod = subscriptionInterfaceMethod;
+            mCacheKeyProperty = cacheKeyProperty;
+            mDefaultValue = defaultValue;
+        }
+
+        @Override
+        protected T recompute(Integer query) {
+            T result = mDefaultValue;
+
+            try {
+                ISub iSub = TelephonyManager.getSubscriptionService();
+                if (iSub != null) {
+                    result = mInterfaceMethod.applyOrThrow(iSub, query);
+                }
+            } catch (Exception ex) {
+                Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
+            }
+
+            if (VDBG) logd("recomputing " + mCacheKeyProperty + ", result = " + result);
+            return result;
+        }
+    }
+
+    private static VoidPropertyInvalidatedCache<Integer> sDefaultSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSubId,
+                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sDefaultDataSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
+                    CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sDefaultSmsSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
+                    CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sActiveDataSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
+                    CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sSlotIndexCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSlotIndex,
+                    CACHE_KEY_SLOT_INDEX_PROPERTY,
+                    INVALID_SIM_SLOT_INDEX);
+
+    /** Cache depends on getDefaultSubId, so we use the defaultSubId cache key */
+    private static IntegerPropertyInvalidatedCache<Integer> sPhoneIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
+                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
+                    INVALID_PHONE_INDEX);
 
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
@@ -882,7 +1002,6 @@ public class SubscriptionManager {
     public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     private final Context mContext;
-    private volatile INetworkPolicyManager mNetworkPolicy;
 
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
     // the Context and subId.
@@ -984,14 +1103,6 @@ public class SubscriptionManager {
     public static SubscriptionManager from(Context context) {
         return (SubscriptionManager) context
                 .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-    }
-
-    private INetworkPolicyManager getINetworkPolicyManager() {
-        if (mNetworkPolicy == null) {
-            mNetworkPolicy = INetworkPolicyManager.Stub
-                    .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-        }
-        return mNetworkPolicy;
     }
 
     /**
@@ -1177,17 +1288,16 @@ public class SubscriptionManager {
         SubscriptionInfo subInfo = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subInfo = iSub.getActiveSubscriptionInfo(subId, mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
         }
 
         return subInfo;
-
     }
 
     /**
@@ -1211,10 +1321,10 @@ public class SubscriptionManager {
         SubscriptionInfo result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForIccId(iccId, mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1245,10 +1355,10 @@ public class SubscriptionManager {
         SubscriptionInfo result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIndex,
-                        mContext.getOpPackageName(), null);
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1269,10 +1379,10 @@ public class SubscriptionManager {
         List<SubscriptionInfo> result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAllSubInfoList(mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1336,8 +1446,13 @@ public class SubscriptionManager {
      * both active and hidden SubscriptionInfos.
      *
      */
-    public @Nullable List<SubscriptionInfo> getActiveAndHiddenSubscriptionInfoList() {
-        return getActiveSubscriptionInfoList(/* userVisibleonly */false);
+    public @NonNull List<SubscriptionInfo> getCompleteActiveSubscriptionInfoList() {
+        List<SubscriptionInfo> completeList = getActiveSubscriptionInfoList(
+                /* userVisibleonly */false);
+        if (completeList == null) {
+            completeList = new ArrayList<>();
+        }
+        return completeList;
     }
 
     /**
@@ -1350,10 +1465,10 @@ public class SubscriptionManager {
         List<SubscriptionInfo> activeList = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1401,10 +1516,10 @@ public class SubscriptionManager {
         List<SubscriptionInfo> result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAvailableSubscriptionInfoList(mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1440,7 +1555,7 @@ public class SubscriptionManager {
         List<SubscriptionInfo> result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAccessibleSubscriptionInfoList(mContext.getOpPackageName());
             }
@@ -1469,7 +1584,7 @@ public class SubscriptionManager {
     public void requestEmbeddedSubscriptionInfoListRefresh() {
         int cardId = TelephonyManager.from(mContext).getCardIdForDefaultEuicc();
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.requestEmbeddedSubscriptionInfoListRefresh(cardId);
             }
@@ -1498,7 +1613,7 @@ public class SubscriptionManager {
     @SystemApi
     public void requestEmbeddedSubscriptionInfoListRefresh(int cardId) {
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.requestEmbeddedSubscriptionInfoListRefresh(cardId);
             }
@@ -1519,10 +1634,10 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1548,10 +1663,10 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubInfoCount(mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1569,7 +1684,7 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubInfoCountMax();
             }
@@ -1626,7 +1741,7 @@ public class SubscriptionManager {
         }
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub == null) {
                 Log.e(LOG_TAG, "[addSubscriptionInfoRecord]- ISub service is null");
                 return;
@@ -1660,7 +1775,7 @@ public class SubscriptionManager {
         }
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub == null) {
                 Log.e(LOG_TAG, "[removeSubscriptionInfoRecord]- ISub service is null");
                 return;
@@ -1677,14 +1792,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set SIM icon tint color by simInfo index
+     * Set SIM icon tint color for subscription ID
      * @param tint the RGB value of icon tint color of the SIM
-     * @param subId the unique SubInfoRecord index in database
+     * @param subId the unique Subscritpion ID in database
      * @return the number of records updated
      * @hide
      */
-    @UnsupportedAppUsage
-    public int setIconTint(int tint, int subId) {
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public int setIconTint(@ColorInt int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
         return setSubscriptionPropertyHelper(subId, "setIconTint",
                 (iSub)-> iSub.setIconTint(tint, subId)
@@ -1692,15 +1807,16 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set display name by simInfo index with name source
+     * Set the display name for a subscription ID
      * @param displayName the display name of SIM card
-     * @param subId the unique SubscriptionInfo index in database
+     * @param subId the unique Subscritpion ID in database
      * @param nameSource SIM display name source
      * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
-    @UnsupportedAppUsage
-    public int setDisplayName(String displayName, int subId, @SimDisplayNameSource int nameSource) {
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public int setDisplayName(@Nullable String displayName, int subId,
+            @SimDisplayNameSource int nameSource) {
         if (VDBG) {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
                     + " nameSource:" + nameSource);
@@ -1751,25 +1867,7 @@ public class SubscriptionManager {
      * subscriptionId doesn't have an associated slot index.
      */
     public static int getSlotIndex(int subscriptionId) {
-        if (!isValidSubscriptionId(subscriptionId)) {
-            if (DBG) {
-                logd("[getSlotIndex]- supplied subscriptionId is invalid.");
-            }
-        }
-
-        int result = INVALID_SIM_SLOT_INDEX;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.getSlotIndex(subscriptionId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-
+        return sSlotIndexCache.query(subscriptionId);
     }
 
     /**
@@ -1794,7 +1892,7 @@ public class SubscriptionManager {
         int[] subId = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getSubId(slotIndex);
             }
@@ -1808,27 +1906,7 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static int getPhoneId(int subId) {
-        if (!isValidSubscriptionId(subId)) {
-            if (DBG) {
-                logd("[getPhoneId]- fail");
-            }
-            return INVALID_PHONE_INDEX;
-        }
-
-        int result = INVALID_PHONE_INDEX;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.getPhoneId(subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("[getPhoneId]- phoneId=" + result);
-        return result;
-
+        return sPhoneIdCache.query(subId);
     }
 
     private static void logd(String msg) {
@@ -1849,19 +1927,7 @@ public class SubscriptionManager {
      * @return the "system" default subscription id.
      */
     public static int getDefaultSubscriptionId() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                subId = iSub.getDefaultSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultSubId=" + subId);
-        return subId;
+        return sDefaultSubIdCache.query(null);
     }
 
     /**
@@ -1875,7 +1941,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getDefaultVoiceSubId();
             }
@@ -1905,7 +1971,7 @@ public class SubscriptionManager {
     public void setDefaultVoiceSubscriptionId(int subscriptionId) {
         if (VDBG) logd("setDefaultVoiceSubId sub id = " + subscriptionId);
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setDefaultVoiceSubId(subscriptionId);
             }
@@ -1950,19 +2016,7 @@ public class SubscriptionManager {
      * @return the default SMS subscription Id.
      */
     public static int getDefaultSmsSubscriptionId() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                subId = iSub.getDefaultSmsSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultSmsSubscriptionId, sub id = " + subId);
-        return subId;
+        return sDefaultSmsSubIdCache.query(null);
     }
 
     /**
@@ -1979,7 +2033,7 @@ public class SubscriptionManager {
     public void setDefaultSmsSubId(int subscriptionId) {
         if (VDBG) logd("setDefaultSmsSubId sub id = " + subscriptionId);
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setDefaultSmsSubId(subscriptionId);
             }
@@ -2014,19 +2068,7 @@ public class SubscriptionManager {
      * @return the default data subscription Id.
      */
     public static int getDefaultDataSubscriptionId() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                subId = iSub.getDefaultDataSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultDataSubscriptionId, sub id = " + subId);
-        return subId;
+        return sDefaultDataSubIdCache.query(null);
     }
 
     /**
@@ -2043,7 +2085,7 @@ public class SubscriptionManager {
     public void setDefaultDataSubId(int subscriptionId) {
         if (VDBG) logd("setDataSubscription sub id = " + subscriptionId);
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setDefaultDataSubId(subscriptionId);
             }
@@ -2074,7 +2116,7 @@ public class SubscriptionManager {
     /** @hide */
     public void clearSubscriptionInfo() {
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.clearSubInfo();
             }
@@ -2212,7 +2254,7 @@ public class SubscriptionManager {
      */
     public @NonNull int[] getActiveSubscriptionIdList(boolean visibleOnly) {
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 int[] subId = iSub.getActiveSubIdList(visibleOnly);
                 if (subId != null) return subId;
@@ -2263,7 +2305,7 @@ public class SubscriptionManager {
         int simState = TelephonyManager.SIM_STATE_UNKNOWN;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 simState = iSub.getSimStateForSlotIndex(slotIndex);
             }
@@ -2282,7 +2324,7 @@ public class SubscriptionManager {
      */
     public static void setSubscriptionProperty(int subId, String propKey, String propValue) {
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setSubscriptionProperty(subId, propKey, propValue);
             }
@@ -2302,10 +2344,10 @@ public class SubscriptionManager {
             Context context) {
         String resultValue = null;
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 resultValue = iSub.getSubscriptionProperty(subId, propKey,
-                        context.getOpPackageName(), null);
+                        context.getOpPackageName(), context.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2466,10 +2508,10 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public boolean isActiveSubId(int subId) {
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.isActiveSubId(subId, mContext.getOpPackageName(),
-                        null);
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
         }
@@ -2524,15 +2566,6 @@ public class SubscriptionManager {
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         getNetworkPolicyManager().setSubscriptionPlans(subId,
                 plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
-    }
-
-    /** @hide */
-    private String getSubscriptionPlansOwner(int subId) {
-        try {
-            return getINetworkPolicyManager().getSubscriptionPlansOwner(subId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /**
@@ -2595,89 +2628,6 @@ public class SubscriptionManager {
         final int overrideValue = overrideCongested ? SUBSCRIPTION_OVERRIDE_CONGESTED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_CONGESTED,
                 overrideValue, timeoutMillis, mContext.getOpPackageName());
-    }
-
-    /**
-     * Create an {@link Intent} that can be launched towards the carrier app
-     * that is currently defining the billing relationship plan through
-     * {@link #setSubscriptionPlans(int, List)}.
-     *
-     * @return ready to launch Intent targeted towards the carrier app, or
-     *         {@code null} if no carrier app is defined, or if the defined
-     *         carrier app provides no management activity.
-     * @hide
-     */
-    public @Nullable Intent createManageSubscriptionIntent(int subId) {
-        // Bail if no owner
-        final String owner = getSubscriptionPlansOwner(subId);
-        if (owner == null) return null;
-
-        // Bail if no plans
-        final List<SubscriptionPlan> plans = getSubscriptionPlans(subId);
-        if (plans.isEmpty()) return null;
-
-        final Intent intent = new Intent(ACTION_MANAGE_SUBSCRIPTION_PLANS);
-        intent.setPackage(owner);
-        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
-
-        // Bail if not implemented
-        if (mContext.getPackageManager().queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
-            return null;
-        }
-
-        return intent;
-    }
-
-    /** @hide */
-    private @Nullable Intent createRefreshSubscriptionIntent(int subId) {
-        // Bail if no owner
-        final String owner = getSubscriptionPlansOwner(subId);
-        if (owner == null) return null;
-
-        // Bail if no plans
-        final List<SubscriptionPlan> plans = getSubscriptionPlans(subId);
-        if (plans.isEmpty()) return null;
-
-        final Intent intent = new Intent(ACTION_REFRESH_SUBSCRIPTION_PLANS);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.setPackage(owner);
-        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
-
-        // Bail if not implemented
-        if (mContext.getPackageManager().queryBroadcastReceivers(intent, 0).isEmpty()) {
-            return null;
-        }
-
-        return intent;
-    }
-
-    /**
-     * Check if there is a carrier app that is currently defining the billing
-     * relationship plan through {@link #setSubscriptionPlans(int, List)} that
-     * supports refreshing of subscription plans.
-     *
-     * @hide
-     */
-    public boolean isSubscriptionPlansRefreshSupported(int subId) {
-        return createRefreshSubscriptionIntent(subId) != null;
-    }
-
-    /**
-     * Request that the carrier app that is currently defining the billing
-     * relationship plan through {@link #setSubscriptionPlans(int, List)}
-     * refresh its subscription plans.
-     * <p>
-     * If the app is able to successfully update the plans, you'll expect to
-     * receive the {@link #ACTION_SUBSCRIPTION_PLANS_CHANGED} broadcast.
-     *
-     * @hide
-     */
-    public void requestSubscriptionPlansRefresh(int subId) {
-        final Intent intent = createRefreshSubscriptionIntent(subId);
-        final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setTemporaryAppWhitelistDuration(TimeUnit.MINUTES.toMillis(1));
-        mContext.sendBroadcast(intent, null, options.toBundle());
     }
 
     /**
@@ -2754,7 +2704,7 @@ public class SubscriptionManager {
             @TelephonyManager.SetOpportunisticSubscriptionResult Consumer<Integer> callback) {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub == null) return;
 
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
@@ -2797,7 +2747,7 @@ public class SubscriptionManager {
     public int getPreferredDataSubscriptionId() {
         int preferredSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 preferredSubId = iSub.getPreferredDataSubscriptionId();
             }
@@ -2824,13 +2774,14 @@ public class SubscriptionManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions() {
         String contextPkg = mContext != null ? mContext.getOpPackageName() : "<unknown>";
-        String contextFeature = null;
+        String contextAttributionTag = mContext != null ? mContext.getAttributionTag() : null;
         List<SubscriptionInfo> subInfoList = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                subInfoList = iSub.getOpportunisticSubscriptions(contextPkg, contextFeature);
+                subInfoList = iSub.getOpportunisticSubscriptions(contextPkg,
+                        contextAttributionTag);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2929,7 +2880,7 @@ public class SubscriptionManager {
         ParcelUuid groupUuid = null;
         int[] subIdArray = subIdList.stream().mapToInt(i->i).toArray();
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 groupUuid = iSub.createSubscriptionGroup(subIdArray, pkgForDebug);
             } else {
@@ -2979,7 +2930,7 @@ public class SubscriptionManager {
         int[] subIdArray = subIdList.stream().mapToInt(i->i).toArray();
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.addSubscriptionsIntoGroup(subIdArray, groupUuid, pkgForDebug);
             } else {
@@ -3031,7 +2982,7 @@ public class SubscriptionManager {
         int[] subIdArray = subIdList.stream().mapToInt(i->i).toArray();
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.removeSubscriptionsFromGroup(subIdArray, groupUuid, pkgForDebug);
             } else {
@@ -3069,16 +3020,17 @@ public class SubscriptionManager {
     public @NonNull List<SubscriptionInfo> getSubscriptionsInGroup(@NonNull ParcelUuid groupUuid) {
         Preconditions.checkNotNull(groupUuid, "groupUuid can't be null");
         String contextPkg = mContext != null ? mContext.getOpPackageName() : "<unknown>";
-        String contextFeature = null;
+        String contextAttributionTag = mContext != null ? mContext.getAttributionTag() : null;
         if (VDBG) {
             logd("[getSubscriptionsInGroup]+ groupUuid:" + groupUuid);
         }
 
         List<SubscriptionInfo> result = null;
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                result = iSub.getSubscriptionsInGroup(groupUuid, contextPkg, contextFeature);
+                result = iSub.getSubscriptionsInGroup(groupUuid, contextPkg,
+                        contextAttributionTag);
             } else {
                 if (!isSystemProcess()) {
                     throw new IllegalStateException("telephony service is null.");
@@ -3189,7 +3141,7 @@ public class SubscriptionManager {
             logd("setSubscriptionActivated subId= " + subscriptionId + " enable " + enable);
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.setSubscriptionEnabled(enable, subscriptionId);
             }
@@ -3219,7 +3171,11 @@ public class SubscriptionManager {
             logd("setUiccApplicationsEnabled subId= " + subscriptionId + " enable " + enabled);
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = ISub.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSubscriptionServiceRegisterer()
+                            .get());
             if (iSub != null) {
                 iSub.setUiccApplicationsEnabled(enabled, subscriptionId);
             }
@@ -3249,7 +3205,11 @@ public class SubscriptionManager {
             logd("canDisablePhysicalSubscription");
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = ISub.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSubscriptionServiceRegisterer()
+                            .get());
             if (iSub != null) {
                 return iSub.canDisablePhysicalSubscription();
             }
@@ -3270,7 +3230,7 @@ public class SubscriptionManager {
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isSubscriptionEnabled(int subscriptionId) {
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.isSubscriptionEnabled(subscriptionId);
             }
@@ -3293,7 +3253,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getEnabledSubscriptionId(slotIndex);
             }
@@ -3319,7 +3279,7 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = helper.callMethod(iSub);
             }
@@ -3341,14 +3301,7 @@ public class SubscriptionManager {
      * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                return iSub.getActiveDataSubscriptionId();
-            }
-        } catch (RemoteException ex) {
-        }
-        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        return sActiveDataSubIdCache.query(null);
     }
 
     /**
@@ -3364,5 +3317,57 @@ public class SubscriptionManager {
     public static void putSubscriptionIdExtra(Intent intent, int subId) {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+    }
+
+    /** @hide */
+    public static void invalidateDefaultSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_SUB_ID_PROPERTY);
+    }
+
+    /** @hide */
+    public static void invalidateDefaultDataSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY);
+    }
+
+    /** @hide */
+    public static void invalidateDefaultSmsSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY);
+    }
+
+    /** @hide */
+    public static void invalidateActiveDataSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY);
+    }
+
+    /** @hide */
+    public static void invalidateSlotIndexCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SLOT_INDEX_PROPERTY);
+    }
+
+    /**
+     * Allows a test process to disable client-side caching operations.
+     *
+     * @hide
+     */
+    public static void disableCaching() {
+        sDefaultSubIdCache.disableLocal();
+        sDefaultDataSubIdCache.disableLocal();
+        sActiveDataSubIdCache.disableLocal();
+        sDefaultSmsSubIdCache.disableLocal();
+        sSlotIndexCache.disableLocal();
+        sPhoneIdCache.disableLocal();
+    }
+
+    /**
+     * Clears all process-local binder caches.
+     *
+     * @hide */
+    public static void clearCaches() {
+        sDefaultSubIdCache.clear();
+        sDefaultDataSubIdCache.clear();
+        sActiveDataSubIdCache.clear();
+        sDefaultSmsSubIdCache.clear();
+        sSlotIndexCache.clear();
+        sPhoneIdCache.clear();
     }
 }

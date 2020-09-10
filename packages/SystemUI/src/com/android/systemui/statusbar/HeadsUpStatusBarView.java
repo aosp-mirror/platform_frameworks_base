@@ -33,6 +33,7 @@ import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry.OnSensitivityChangedListener;
 
 import java.util.List;
 
@@ -159,19 +160,29 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     }
 
     public void setEntry(NotificationEntry entry) {
-        if (entry != null) {
-            mShowingEntry = entry;
+        if (mShowingEntry != null) {
+            mShowingEntry.removeOnSensitivityChangedListener(mOnSensitivityChangedListener);
+        }
+        mShowingEntry = entry;
+
+        if (mShowingEntry != null) {
             CharSequence text = entry.headsUpStatusBarText;
             if (entry.isSensitive()) {
                 text = entry.headsUpStatusBarTextPublic;
             }
             mTextView.setText(text);
-            mShowingEntry.setOnSensitiveChangedListener(() -> setEntry(entry));
-        } else if (mShowingEntry != null){
-            mShowingEntry.setOnSensitiveChangedListener(null);
-            mShowingEntry = null;
+            mShowingEntry.addOnSensitivityChangedListener(mOnSensitivityChangedListener);
         }
     }
+
+    private final OnSensitivityChangedListener mOnSensitivityChangedListener = entry -> {
+        if (entry != mShowingEntry) {
+            throw new IllegalStateException("Got a sensitivity change for " + entry
+                    + " but mShowingEntry is " + mShowingEntry);
+        }
+        // Update the text
+        setEntry(entry);
+    };
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {

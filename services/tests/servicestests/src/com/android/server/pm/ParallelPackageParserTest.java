@@ -16,10 +16,14 @@
 
 package com.android.server.pm;
 
-import android.content.pm.PackageParser;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.TestPackageParser2;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import junit.framework.Assert;
 
@@ -30,10 +34,12 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Tests for {@link ParallelPackageParser}
  */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ParallelPackageParserTest {
     private static final String TAG = ParallelPackageParserTest.class.getSimpleName();
@@ -42,7 +48,8 @@ public class ParallelPackageParserTest {
 
     @Before
     public void setUp() {
-        mParser = new TestParallelPackageParser();
+        mParser = new TestParallelPackageParser(new TestPackageParser2(),
+                ParallelPackageParser.makeExecutorService());
     }
 
     @Test(timeout = 1000)
@@ -67,15 +74,14 @@ public class ParallelPackageParserTest {
         }
     }
 
-    class TestParallelPackageParser extends ParallelPackageParser {
+    private class TestParallelPackageParser extends ParallelPackageParser {
 
-        TestParallelPackageParser() {
-            super(null, false, null, null, null);
+        TestParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService) {
+            super(packageParser, executorService);
         }
 
         @Override
-        protected PackageParser.Package parsePackage(PackageParser packageParser, File scanFile,
-                int parseFlags) throws PackageParser.PackageParserException {
+        protected ParsedPackage parsePackage(File scanFile, int parseFlags) {
             // Do not actually parse the package for testing
             return null;
         }

@@ -21,18 +21,16 @@
 #include <private/android_filesystem_config.h>
 
 #include "CountMetricProducer.h"
-#include "atoms_info.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
 #include "guardrail/StatsdStats.h"
 #include "matchers/CombinationLogMatchingTracker.h"
 #include "matchers/SimpleLogMatchingTracker.h"
 #include "metrics_manager_util.h"
-#include "stats_util.h"
+#include "state/StateManager.h"
 #include "stats_log_util.h"
-#include "statslog.h"
-
-#include <private/android_filesystem_config.h>
+#include "stats_util.h"
+#include "statslog_statsd.h"
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_INT32;
@@ -71,6 +69,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
       mTtlEndNs(-1),
       mLastReportTimeNs(currentTimeNs),
       mLastReportWallClockNs(getWallClockNs()),
+      mPullerManager(pullerManager),
+      mWhitelistedAtomIds(config.whitelisted_atom_ids().begin(),
+                          config.whitelisted_atom_ids().end()),
       mShouldPersistHistory(config.persist_locally()) {
     // Init the ttl end timestamp.
     refreshTtl(timeBaseNs);
@@ -81,12 +82,13 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
             mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
             mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
             mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
-            mMetricIndexesWithActivation, mNoReportMetricIds);
+            mAlertTrackerMap, mMetricIndexesWithActivation, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
     mVersionStringsInReport = config.version_strings_in_metric_report();
     mInstallerInReport = config.installer_in_metric_report();
 
+    // Init allowed pushed atom uids.
     if (config.allowed_log_source_size() == 0) {
         mConfigValid = false;
         ALOGE("Log source whitelist is empty! This config won't get any data. Suggest adding at "
@@ -108,6 +110,40 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
             initLogSourceWhiteList();
         }
     }
+
+    // Init default allowed pull atom uids.
+    int numPullPackages = 0;
+    for (const string& pullSource : config.default_pull_packages()) {
+        auto it = UidMap::sAidToUidMapping.find(pullSource);
+        if (it != UidMap::sAidToUidMapping.end()) {
+            numPullPackages++;
+            mDefaultPullUids.insert(it->second);
+        } else {
+            ALOGE("Default pull atom packages must be in sAidToUidMapping");
+            mConfigValid = false;
+        }
+    }
+    // Init per-atom pull atom packages.
+    for (const PullAtomPackages& pullAtomPackages : config.pull_atom_packages()) {
+        int32_t atomId = pullAtomPackages.atom_id();
+        for (const string& pullPackage : pullAtomPackages.packages()) {
+            numPullPackages++;
+            auto it = UidMap::sAidToUidMapping.find(pullPackage);
+            if (it != UidMap::sAidToUidMapping.end()) {
+                mPullAtomUids[atomId].insert(it->second);
+            } else {
+                mPullAtomPackages[atomId].insert(pullPackage);
+            }
+        }
+    }
+    if (numPullPackages > StatsdStats::kMaxPullAtomPackages) {
+        ALOGE("Too many sources in default_pull_packages and pull_atom_packages. This is likely to "
+              "be an error in the config");
+        mConfigValid = false;
+    } else {
+        initPullAtomSources();
+    }
+    mPullerManager->RegisterPullUidProvider(mConfigKey, this);
 
     // Store the sub-configs used.
     for (const auto& annotation : config.annotation()) {
@@ -149,6 +185,13 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
 }
 
 MetricsManager::~MetricsManager() {
+    for (auto it : mAllMetricProducers) {
+        for (int atomId : it->getSlicedStateAtoms()) {
+            StateManager::getInstance().unregisterListener(atomId, it);
+        }
+    }
+    mPullerManager->UnregisterPullUidProvider(mConfigKey, this);
+
     VLOG("~MetricsManager()");
 }
 
@@ -168,6 +211,20 @@ void MetricsManager::initLogSourceWhiteList() {
     }
 }
 
+void MetricsManager::initPullAtomSources() {
+    std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+    mCombinedPullAtomUids.clear();
+    for (const auto& [atomId, uids] : mPullAtomUids) {
+        mCombinedPullAtomUids[atomId].insert(uids.begin(), uids.end());
+    }
+    for (const auto& [atomId, packages] : mPullAtomPackages) {
+        for (const string& pkg : packages) {
+            set<int32_t> uids = mUidMap->getAppUid(pkg);
+            mCombinedPullAtomUids[atomId].insert(uids.begin(), uids.end());
+        }
+    }
+}
+
 bool MetricsManager::isConfigValid() const {
     return mConfigValid;
 }
@@ -175,41 +232,79 @@ bool MetricsManager::isConfigValid() const {
 void MetricsManager::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                                       const int64_t version) {
     // Inform all metric producers.
-    for (auto it : mAllMetricProducers) {
-        it->notifyAppUpgrade(eventTimeNs, apk, uid, version);
+    for (const auto& it : mAllMetricProducers) {
+        it->notifyAppUpgrade(eventTimeNs);
     }
     // check if we care this package
-    if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
-        return;
+    if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) != mAllowedPkg.end()) {
+        // We will re-initialize the whole list because we don't want to keep the multi mapping of
+        // UID<->pkg inside MetricsManager to reduce the memory usage.
+        initLogSourceWhiteList();
     }
-    // We will re-initialize the whole list because we don't want to keep the multi mapping of
-    // UID<->pkg inside MetricsManager to reduce the memory usage.
-    initLogSourceWhiteList();
+
+    for (const auto& it : mPullAtomPackages) {
+        if (it.second.find(apk) != it.second.end()) {
+            initPullAtomSources();
+            return;
+        }
+    }
 }
 
 void MetricsManager::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
                                       const int uid) {
     // Inform all metric producers.
-    for (auto it : mAllMetricProducers) {
-        it->notifyAppRemoved(eventTimeNs, apk, uid);
+    for (const auto& it : mAllMetricProducers) {
+        it->notifyAppRemoved(eventTimeNs);
     }
     // check if we care this package
-    if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
-        return;
+    if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) != mAllowedPkg.end()) {
+        // We will re-initialize the whole list because we don't want to keep the multi mapping of
+        // UID<->pkg inside MetricsManager to reduce the memory usage.
+        initLogSourceWhiteList();
     }
-    // We will re-initialize the whole list because we don't want to keep the multi mapping of
-    // UID<->pkg inside MetricsManager to reduce the memory usage.
-    initLogSourceWhiteList();
+
+    for (const auto& it : mPullAtomPackages) {
+        if (it.second.find(apk) != it.second.end()) {
+            initPullAtomSources();
+            return;
+        }
+    }
 }
 
 void MetricsManager::onUidMapReceived(const int64_t& eventTimeNs) {
     // Purposefully don't inform metric producers on a new snapshot
     // because we don't need to flush partial buckets.
     // This occurs if a new user is added/removed or statsd crashes.
+    initPullAtomSources();
+
     if (mAllowedPkg.size() == 0) {
         return;
     }
     initLogSourceWhiteList();
+}
+
+void MetricsManager::onStatsdInitCompleted(const int64_t& eventTimeNs) {
+    // Inform all metric producers.
+    for (const auto& it : mAllMetricProducers) {
+        it->onStatsdInitCompleted(eventTimeNs);
+    }
+}
+
+void MetricsManager::init() {
+    for (const auto& producer : mAllMetricProducers) {
+        producer->prepareFirstBucket();
+    }
+}
+
+vector<int32_t> MetricsManager::getPullAtomUids(int32_t atomId) {
+    std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+    vector<int32_t> uids;
+    const auto& it = mCombinedPullAtomUids.find(atomId);
+    if (it != mCombinedPullAtomUids.end()) {
+        uids.insert(uids.end(), it->second.begin(), it->second.end());
+    }
+    uids.insert(uids.end(), mDefaultPullUids.begin(), mDefaultPullUids.end());
+    return uids;
 }
 
 void MetricsManager::dumpStates(FILE* out, bool verbose) {
@@ -265,16 +360,18 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
         protoOutput->end(token);
     }
 
-    mLastReportTimeNs = dumpTimeStampNs;
-    mLastReportWallClockNs = getWallClockNs();
+    // Do not update the timestamps when data is not cleared to avoid timestamps from being
+    // misaligned.
+    if (erase_data) {
+        mLastReportTimeNs = dumpTimeStampNs;
+        mLastReportWallClockNs = getWallClockNs();
+    }
     VLOG("=========================Metric Reports End==========================");
 }
 
 
 bool MetricsManager::checkLogCredentials(const LogEvent& event) {
-    if (android::util::AtomsInfo::kWhitelistedAtoms.find(event.GetTagId()) !=
-      android::util::AtomsInfo::kWhitelistedAtoms.end())
-    {
+    if (mWhitelistedAtomIds.find(event.GetTagId()) != mWhitelistedAtomIds.end()) {
         return true;
     }
     std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
@@ -286,18 +383,21 @@ bool MetricsManager::checkLogCredentials(const LogEvent& event) {
 }
 
 bool MetricsManager::eventSanityCheck(const LogEvent& event) {
-    if (event.GetTagId() == android::util::APP_BREADCRUMB_REPORTED) {
+    if (event.GetTagId() == util::APP_BREADCRUMB_REPORTED) {
         // Check that app breadcrumb reported fields are valid.
         status_t err = NO_ERROR;
 
         // Uid is 3rd from last field and must match the caller's uid,
         // unless that caller is statsd itself (statsd is allowed to spoof uids).
         long appHookUid = event.GetLong(event.size()-2, &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("APP_BREADCRUMB_REPORTED had error when parsing the uid");
             return false;
         }
-        int32_t loggerUid = event.GetUid();
+
+        // Because the uid within the LogEvent may have been mapped from
+        // isolated to host, map the loggerUid similarly before comparing.
+        int32_t loggerUid = mUidMap->getHostUidOrSelf(event.GetUid());
         if (loggerUid != appHookUid && loggerUid != AID_STATSD) {
             VLOG("APP_BREADCRUMB_REPORTED has invalid uid: claimed %ld but caller is %d",
                  appHookUid, loggerUid);
@@ -306,21 +406,21 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
 
         // The state must be from 0,3. This part of code must be manually updated.
         long appHookState = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("APP_BREADCRUMB_REPORTED had error when parsing the state field");
             return false;
         } else if (appHookState < 0 || appHookState > 3) {
             VLOG("APP_BREADCRUMB_REPORTED does not have valid state %ld", appHookState);
             return false;
         }
-    } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
+    } else if (event.GetTagId() == util::DAVEY_OCCURRED) {
         // Daveys can be logged from any app since they are logged in libs/hwui/JankTracker.cpp.
         // Check that the davey duration is reasonable. Max length check is for privacy.
         status_t err = NO_ERROR;
 
         // Uid is the first field provided.
         long jankUid = event.GetLong(1, &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("Davey occurred had error when parsing the uid");
             return false;
         }
@@ -332,7 +432,7 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
         }
 
         long duration = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("Davey occurred had error when parsing the duration");
             return false;
         } else if (duration > 100000) {
@@ -555,8 +655,40 @@ void MetricsManager::writeActiveConfigToProtoOutputStream(
     }
 }
 
+bool MetricsManager::writeMetadataToProto(int64_t currentWallClockTimeNs,
+                                          int64_t systemElapsedTimeNs,
+                                          metadata::StatsMetadata* statsMetadata) {
+    bool metadataWritten = false;
+    metadata::ConfigKey* configKey = statsMetadata->mutable_config_key();
+    configKey->set_config_id(mConfigKey.GetId());
+    configKey->set_uid(mConfigKey.GetUid());
+    for (const auto& anomalyTracker : mAllAnomalyTrackers) {
+        metadata::AlertMetadata* alertMetadata = statsMetadata->add_alert_metadata();
+        bool alertWritten = anomalyTracker->writeAlertMetadataToProto(currentWallClockTimeNs,
+                systemElapsedTimeNs, alertMetadata);
+        if (!alertWritten) {
+            statsMetadata->mutable_alert_metadata()->RemoveLast();
+        }
+        metadataWritten |= alertWritten;
+    }
+    return metadataWritten;
+}
 
-
+void MetricsManager::loadMetadata(const metadata::StatsMetadata& metadata,
+                                  int64_t currentWallClockTimeNs,
+                                  int64_t systemElapsedTimeNs) {
+    for (const metadata::AlertMetadata& alertMetadata : metadata.alert_metadata()) {
+        int64_t alertId = alertMetadata.alert_id();
+        auto it = mAlertTrackerMap.find(alertId);
+        if (it == mAlertTrackerMap.end()) {
+            ALOGE("No anomalyTracker found for alertId %lld", (long long) alertId);
+            continue;
+        }
+        mAllAnomalyTrackers[it->second]->loadAlertMetadata(alertMetadata,
+                                                           currentWallClockTimeNs,
+                                                           systemElapsedTimeNs);
+    }
+}
 
 }  // namespace statsd
 }  // namespace os

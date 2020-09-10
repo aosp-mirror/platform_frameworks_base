@@ -37,6 +37,7 @@ import android.view.View;
 import com.android.internal.util.Preconditions;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -74,7 +75,7 @@ class DragDropController {
     }
 
     void registerCallback(IDragDropCallback callback) {
-        Preconditions.checkNotNull(callback);
+        Objects.requireNonNull(callback);
         mCallback.set(callback);
     }
 

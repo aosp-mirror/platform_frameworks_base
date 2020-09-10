@@ -32,13 +32,12 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
@@ -57,7 +56,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public static final int FADE_IN_DELAY = 50;
     private PhoneStatusBarView mStatusBar;
     private StatusBarStateController mStatusBarStateController;
-    private KeyguardMonitor mKeyguardMonitor;
+    private KeyguardStateController mKeyguardStateController;
     private NetworkController mNetworkController;
     private LinearLayout mSystemIconArea;
     private View mClockView;
@@ -79,11 +78,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
-        mStatusBarComponent = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
-        mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
+        mStatusBarComponent = Dependency.get(StatusBar.class);
+        mCommandQueue = Dependency.get(CommandQueue.class);
     }
 
     @Override
@@ -100,7 +99,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
+        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons),
+                Dependency.get(CommandQueue.class));
         mDarkIconManager.setShouldLog(true);
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
@@ -207,8 +207,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_CLOCK;
         }
 
-        if (!mKeyguardMonitor.isLaunchTransitionFadingAway()
-                && !mKeyguardMonitor.isKeyguardFadingAway()
+        if (!mKeyguardStateController.isLaunchTransitionFadingAway()
+                && !mKeyguardStateController.isKeyguardFadingAway()
                 && shouldHideNotificationIcons()
                 && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                         && headsUpVisible)) {
@@ -230,7 +230,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         // The shelf will be hidden when dozing with a custom clock, we must show notification
         // icons in this occasion.
         if (mStatusBarStateController.isDozing()
-                && mStatusBarComponent.getPanel().hasCustomClock()) {
+                && mStatusBarComponent.getPanelController().hasCustomClock()) {
             state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
         }
 
@@ -268,7 +268,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * don't set the clock GONE otherwise it'll mess up the animation.
      */
     private int clockHiddenMode() {
-        if (!mStatusBar.isClosed() && !mKeyguardMonitor.isShowing()
+        if (!mStatusBar.isClosed() && !mKeyguardStateController.isShowing()
                 && !mStatusBarStateController.isDozing()) {
             return View.INVISIBLE;
         }
@@ -345,11 +345,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 .withEndAction(null);
 
         // Synchronize the motion with the Keyguard fading if necessary.
-        if (mKeyguardMonitor.isKeyguardFadingAway()) {
+        if (mKeyguardStateController.isKeyguardFadingAway()) {
             v.animate()
-                    .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration())
+                    .setDuration(mKeyguardStateController.getKeyguardFadingAwayDuration())
                     .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                    .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
+                    .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
                     .start();
         }
     }

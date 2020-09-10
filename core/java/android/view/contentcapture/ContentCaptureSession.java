@@ -17,11 +17,13 @@ package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.view.View;
@@ -37,20 +39,20 @@ import com.android.internal.util.Preconditions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
- * Session used when notifying the Android system about events associated with views.
+ * Session used when the Android a system-provided content capture service
+ * about events associated with views.
  */
 public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final String TAG = ContentCaptureSession.class.getSimpleName();
 
-    private static final Random sIdGenerator = new Random();
-
-    /** @hide */
-    public static final int NO_SESSION_ID = 0;
+    // TODO(b/158778794): to make the session ids truly globally unique across
+    //  processes, we may need to explore other options.
+    private static final SecureRandom ID_GENERATOR = new SecureRandom();
 
     /**
      * Initial state, when there is no session.
@@ -166,6 +168,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int FLUSH_REASON_IDLE_TIMEOUT = 5;
     /** @hide */
     public static final int FLUSH_REASON_TEXT_CHANGE_TIMEOUT = 6;
+    /** @hide */
+    public static final int FLUSH_REASON_SESSION_CONNECTED = 7;
 
     /** @hide */
     @IntDef(prefix = { "FLUSH_REASON_" }, value = {
@@ -174,7 +178,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             FLUSH_REASON_SESSION_STARTED,
             FLUSH_REASON_SESSION_FINISHED,
             FLUSH_REASON_IDLE_TIMEOUT,
-            FLUSH_REASON_TEXT_CHANGE_TIMEOUT
+            FLUSH_REASON_TEXT_CHANGE_TIMEOUT,
+            FLUSH_REASON_SESSION_CONNECTED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason{}
@@ -305,7 +310,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     /**
-     * Destroys this session, flushing out all pending notifications.
+     * Destroys this session, flushing out all pending notifications to the service.
      *
      * <p>Once destroyed, any new notification will be dropped.
      */
@@ -353,7 +358,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     /**
-     * Notifies the Android system that a node has been added to the view structure.
+     * Notifies the Content Capture Service that a node has been added to the view structure.
+     *
+     * <p>Typically called "manually" by views that handle their own virtual view hierarchy, or
+     * automatically by the Android System for views that return {@code true} on
+     * {@link View#onProvideContentCaptureStructure(ViewStructure, int)}.
      *
      * @param node node that has been added.
      */
@@ -371,7 +380,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     abstract void internalNotifyViewAppeared(@NonNull ViewNode.ViewStructureImpl node);
 
     /**
-     * Notifies the Android system that a node has been removed from the view structure.
+     * Notifies the Content Capture Service that a node has been removed from the view structure.
+     *
+     * <p>Typically called "manually" by views that handle their own virtual view hierarchy, or
+     * automatically by the Android System for standard views.
      *
      * @param id id of the node that has been removed.
      */
@@ -385,7 +397,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     abstract void internalNotifyViewDisappeared(@NonNull AutofillId id);
 
     /**
-     * Notifies the Android system that many nodes has been removed from a virtual view
+     * Notifies the Content Capture Service that many nodes has been removed from a virtual view
      * structure.
      *
      * <p>Should only be called by views that handle their own virtual view hierarchy.
@@ -411,7 +423,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     /**
-     * Notifies the Android system that the value of a text node has been changed.
+     * Notifies the Intelligence Service that the value of a text node has been changed.
      *
      * @param id of the node.
      * @param text new text.
@@ -427,8 +439,43 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     abstract void internalNotifyViewTextChanged(@NonNull AutofillId id,
             @Nullable CharSequence text);
 
+    /**
+     * Notifies the Intelligence Service that the insets of a view have changed.
+     */
+    public final void notifyViewInsetsChanged(@NonNull Insets viewInsets) {
+        Preconditions.checkNotNull(viewInsets);
+
+        if (!isContentCaptureEnabled()) return;
+
+        internalNotifyViewInsetsChanged(viewInsets);
+    }
+
+    abstract void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets);
+
     /** @hide */
     public abstract void internalNotifyViewTreeEvent(boolean started);
+
+    /**
+     * Notifies the Content Capture Service that a session has resumed.
+     */
+    public final void notifySessionResumed() {
+        if (!isContentCaptureEnabled()) return;
+
+        internalNotifySessionResumed();
+    }
+
+    abstract void internalNotifySessionResumed();
+
+    /**
+     * Notifies the Content Capture Service that a session has paused.
+     */
+    public final void notifySessionPaused() {
+        if (!isContentCaptureEnabled()) return;
+
+        internalNotifySessionPaused();
+    }
+
+    abstract void internalNotifySessionPaused();
 
     /**
      * Creates a {@link ViewStructure} for a "standard" view.
@@ -567,6 +614,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "IDLE";
             case FLUSH_REASON_TEXT_CHANGE_TIMEOUT:
                 return "TEXT_CHANGE";
+            case FLUSH_REASON_SESSION_CONNECTED:
+                return "CONNECTED";
             default:
                 return "UNKOWN-" + reason;
         }
@@ -575,7 +624,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     private static int getRandomSessionId() {
         int id;
         do {
-            id = sIdGenerator.nextInt();
+            id = ID_GENERATOR.nextInt();
         } while (id == NO_SESSION_ID);
         return id;
     }

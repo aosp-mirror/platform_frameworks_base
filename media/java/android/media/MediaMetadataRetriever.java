@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -27,6 +28,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.text.TextUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -34,6 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +45,162 @@ import java.util.Map;
  * frame and meta data from an input media file.
  */
 public class MediaMetadataRetriever implements AutoCloseable {
+
+    // borrowed from ExoPlayer
+    private static final String[] STANDARD_GENRES = new String[] {
+            // These are the official ID3v1 genres.
+            "Blues",
+            "Classic Rock",
+            "Country",
+            "Dance",
+            "Disco",
+            "Funk",
+            "Grunge",
+            "Hip-Hop",
+            "Jazz",
+            "Metal",
+            "New Age",
+            "Oldies",
+            "Other",
+            "Pop",
+            "R&B",
+            "Rap",
+            "Reggae",
+            "Rock",
+            "Techno",
+            "Industrial",
+            "Alternative",
+            "Ska",
+            "Death Metal",
+            "Pranks",
+            "Soundtrack",
+            "Euro-Techno",
+            "Ambient",
+            "Trip-Hop",
+            "Vocal",
+            "Jazz+Funk",
+            "Fusion",
+            "Trance",
+            "Classical",
+            "Instrumental",
+            "Acid",
+            "House",
+            "Game",
+            "Sound Clip",
+            "Gospel",
+            "Noise",
+            "AlternRock",
+            "Bass",
+            "Soul",
+            "Punk",
+            "Space",
+            "Meditative",
+            "Instrumental Pop",
+            "Instrumental Rock",
+            "Ethnic",
+            "Gothic",
+            "Darkwave",
+            "Techno-Industrial",
+            "Electronic",
+            "Pop-Folk",
+            "Eurodance",
+            "Dream",
+            "Southern Rock",
+            "Comedy",
+            "Cult",
+            "Gangsta",
+            "Top 40",
+            "Christian Rap",
+            "Pop/Funk",
+            "Jungle",
+            "Native American",
+            "Cabaret",
+            "New Wave",
+            "Psychadelic",
+            "Rave",
+            "Showtunes",
+            "Trailer",
+            "Lo-Fi",
+            "Tribal",
+            "Acid Punk",
+            "Acid Jazz",
+            "Polka",
+            "Retro",
+            "Musical",
+            "Rock & Roll",
+            "Hard Rock",
+            // These were made up by the authors of Winamp and later added to the ID3 spec.
+            "Folk",
+            "Folk-Rock",
+            "National Folk",
+            "Swing",
+            "Fast Fusion",
+            "Bebob",
+            "Latin",
+            "Revival",
+            "Celtic",
+            "Bluegrass",
+            "Avantgarde",
+            "Gothic Rock",
+            "Progressive Rock",
+            "Psychedelic Rock",
+            "Symphonic Rock",
+            "Slow Rock",
+            "Big Band",
+            "Chorus",
+            "Easy Listening",
+            "Acoustic",
+            "Humour",
+            "Speech",
+            "Chanson",
+            "Opera",
+            "Chamber Music",
+            "Sonata",
+            "Symphony",
+            "Booty Bass",
+            "Primus",
+            "Porn Groove",
+            "Satire",
+            "Slow Jam",
+            "Club",
+            "Tango",
+            "Samba",
+            "Folklore",
+            "Ballad",
+            "Power Ballad",
+            "Rhythmic Soul",
+            "Freestyle",
+            "Duet",
+            "Punk Rock",
+            "Drum Solo",
+            "A capella",
+            "Euro-House",
+            "Dance Hall",
+            // These were made up by the authors of Winamp but have not been added to the ID3 spec.
+            "Goa",
+            "Drum & Bass",
+            "Club-House",
+            "Hardcore",
+            "Terror",
+            "Indie",
+            "BritPop",
+            "Afro-Punk",
+            "Polsk Punk",
+            "Beat",
+            "Christian Gangsta Rap",
+            "Heavy Metal",
+            "Black Metal",
+            "Crossover",
+            "Contemporary Christian",
+            "Christian Rock",
+            "Merengue",
+            "Salsa",
+            "Thrash Metal",
+            "Anime",
+            "Jpop",
+            "Synthpop"
+    };
+
     static {
         System.loadLibrary("media_jni");
         native_init();
@@ -62,21 +221,31 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * method before the rest of the methods in this class. This method may be
      * time-consuming.
      *
-     * @param path The path of the input media file.
+     * @param path The path, or the URI (doesn't support streaming source currently)
+     * of the input media file.
      * @throws IllegalArgumentException If the path is invalid.
      */
     public void setDataSource(String path) throws IllegalArgumentException {
         if (path == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("null path");
+        }
+
+        final Uri uri = Uri.parse(path);
+        final String scheme = uri.getScheme();
+        if ("file".equals(scheme)) {
+            path = uri.getPath();
+        } else if (scheme != null) {
+            setDataSource(path, new HashMap<String, String>());
+            return;
         }
 
         try (FileInputStream is = new FileInputStream(path)) {
             FileDescriptor fd = is.getFD();
             setDataSource(fd, 0, 0x7ffffffffffffffL);
         } catch (FileNotFoundException fileEx) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(path + " does not exist");
         } catch (IOException ioEx) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("couldn't open " + path);
         }
     }
 
@@ -155,7 +324,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
     public void setDataSource(Context context, Uri uri)
         throws IllegalArgumentException, SecurityException {
         if (uri == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("null uri");
         }
 
         String scheme = uri.getScheme();
@@ -170,14 +339,14 @@ public class MediaMetadataRetriever implements AutoCloseable {
             try {
                 fd = resolver.openAssetFileDescriptor(uri, "r");
             } catch(FileNotFoundException e) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("could not access " + uri);
             }
             if (fd == null) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("got null FileDescriptor for " + uri);
             }
             FileDescriptor descriptor = fd.getFileDescriptor();
             if (!descriptor.valid()) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("got invalid FileDescriptor for " + uri);
             }
             // Note: using getDeclaredLength so that our behavior is the same
             // as previous versions when the content provider is returning
@@ -213,6 +382,8 @@ public class MediaMetadataRetriever implements AutoCloseable {
     private native void _setDataSource(MediaDataSource dataSource)
           throws IllegalArgumentException;
 
+    private native @Nullable String nativeExtractMetadata(int keyCode);
+
     /**
      * Call this method after setDataSource(). This method retrieves the
      * meta data value associated with the keyCode.
@@ -224,7 +395,156 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @return The meta data value associate with the given keyCode on success;
      * null on failure.
      */
-    public native String extractMetadata(int keyCode);
+    public @Nullable String extractMetadata(int keyCode) {
+        String meta = nativeExtractMetadata(keyCode);
+        if (keyCode == METADATA_KEY_GENRE) {
+            // translate numeric genre code(s) to human readable
+            meta = convertGenreTag(meta);
+        }
+        return meta;
+    }
+
+    /*
+     * The id3v2 spec doesn't specify the syntax of the genre tag very precisely, so
+     * some assumptions are made. Using one possible interpretation of the id3v2
+     * spec, this method converts an id3 genre tag string to a human readable string,
+     * as follows:
+     * - if the first character of the tag is a digit, the entire tag is assumed to
+     *   be an id3v1 numeric genre code. If the tag does not parse to a number, or
+     *   the number is outside the range of defined standard genres, it is ignored.
+     * - if the tag does not start with a digit, it is assumed to be an id3v2 style
+     *   tag consisting of one or more genres, with each genre being either a parenthesized
+     *   integer referring to an id3v1 numeric genre code, the special indicators "(CR)" or
+     *   "(RX)" (for "Cover" or "Remix", respectively), or a custom genre string. When
+     *   a custom genre string is encountered, it is assumed to continue until the end
+     *   of the tag, unless it starts with "((" in which case it is assumed to continue
+     *   until the next close-parenthesis or the end of the tag. Any parse error in the tag
+     *   causes it to be ignored.
+     * The human-readable genre string is not localized, and uses the English genre names
+     * from the spec.
+     */
+    private String convertGenreTag(String meta) {
+        if (TextUtils.isEmpty(meta)) {
+            return null;
+        }
+
+        if (Character.isDigit(meta.charAt(0))) {
+            // assume a single id3v1-style bare number without any extra characters
+            try {
+                int genreIndex = Integer.parseInt(meta);
+                if (genreIndex >= 0 && genreIndex < STANDARD_GENRES.length) {
+                    return STANDARD_GENRES[genreIndex];
+                }
+            } catch (NumberFormatException e) {
+                // ignore and fall through
+            }
+            return null;
+        } else {
+            // assume id3v2-style genre tag, with parenthesized numeric genres
+            // and/or literal genre strings, possibly more than one per tag.
+            StringBuilder genres = null;
+            String nextGenre = null;
+            while (true) {
+                if (!TextUtils.isEmpty(nextGenre)) {
+                    if (genres == null) {
+                        genres = new StringBuilder();
+                    }
+                    if (genres.length() != 0) {
+                        genres.append(", ");
+                    }
+                    genres.append(nextGenre);
+                    nextGenre = null;
+                }
+                if (TextUtils.isEmpty(meta)) {
+                    // entire tag has been processed.
+                    break;
+                }
+                if (meta.startsWith("(RX)")) {
+                    nextGenre = "Remix";
+                    meta = meta.substring(4);
+                } else if (meta.startsWith("(CR)")) {
+                    nextGenre = "Cover";
+                    meta = meta.substring(4);
+                } else if (meta.startsWith("((")) {
+                    // the id3v2 spec says that custom genres that start with a parenthesis
+                    // should be "escaped" with another parenthesis, however the spec doesn't
+                    // specify escaping parentheses inside the custom string. We'll parse any
+                    // such strings until a closing parenthesis is found, or the end of
+                    // the tag is reached.
+                    int closeParenOffset = meta.indexOf(')');
+                    if (closeParenOffset == -1) {
+                        // string continues to end of tag
+                        nextGenre = meta.substring(1);
+                        meta = "";
+                    } else {
+                        nextGenre = meta.substring(1, closeParenOffset + 1);
+                        meta = meta.substring(closeParenOffset + 1);
+                    }
+                } else if (meta.startsWith("(")) {
+                    // should be a parenthesized numeric genre
+                    int closeParenOffset = meta.indexOf(')');
+                    if (closeParenOffset == -1) {
+                        return null;
+                    }
+                    String genreNumString = meta.substring(1, closeParenOffset);
+                    try {
+                        int genreIndex = Integer.parseInt(genreNumString.toString());
+                        if (genreIndex >= 0 && genreIndex < STANDARD_GENRES.length) {
+                            nextGenre = STANDARD_GENRES[genreIndex];
+                        } else {
+                            return null;
+                        }
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                    meta = meta.substring(closeParenOffset + 1);
+                } else {
+                    // custom genre
+                    nextGenre = meta;
+                    meta = "";
+                }
+            }
+            return genres == null || genres.length() == 0 ? null : genres.toString();
+        }
+    }
+
+    /**
+     * This method is similar to {@link #getFrameAtTime(long, int, BitmapParams)}
+     * except that the device will choose the actual {@link Bitmap.Config} to use.
+     *
+     * @param timeUs The time position where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarantee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @param option a hint on how the frame is found. Use
+     * {@link #OPTION_PREVIOUS_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp earlier than or the same as timeUs. Use
+     * {@link #OPTION_NEXT_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp later than or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp closest to or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST} if one wants to retrieve a frame that may
+     * or may not be a sync frame but is closest to or the same as timeUs.
+     * {@link #OPTION_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at timeUs.
+     *
+     * @return A Bitmap containing a representative video frame, which can be null,
+     *         if such a frame cannot be retrieved. {@link Bitmap#getConfig()} can
+     *         be used to query the actual {@link Bitmap.Config}.
+     *
+     * @see #getFrameAtTime(long, int, BitmapParams)
+     */
+    public @Nullable Bitmap getFrameAtTime(long timeUs, @Option int option) {
+        if (option < OPTION_PREVIOUS_SYNC ||
+            option > OPTION_CLOSEST) {
+            throw new IllegalArgumentException("Unsupported option: " + option);
+        }
+
+        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/, null);
+    }
 
     /**
      * Call this method after setDataSource(). This method finds a
@@ -255,16 +575,60 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * {@link #OPTION_CLOSEST} often has larger performance overhead compared
      * to the other options if there is no sync frame located at timeUs.
      *
+     * @param params BitmapParams that controls the returned bitmap config
+     *        (such as pixel formats).
+     *
      * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.
+     *
+     * @see #getFrameAtTime(long, int)
      */
-    public Bitmap getFrameAtTime(long timeUs, @Option int option) {
+    public @Nullable Bitmap getFrameAtTime(
+            long timeUs, @Option int option, @NonNull BitmapParams params) {
         if (option < OPTION_PREVIOUS_SYNC ||
             option > OPTION_CLOSEST) {
             throw new IllegalArgumentException("Unsupported option: " + option);
         }
 
-        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/);
+        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/, params);
+    }
+
+    /**
+     * This method is similar to {@link #getScaledFrameAtTime(long, int, int, int, BitmapParams)}
+     * except that the device will choose the actual {@link Bitmap.Config} to use.
+     *
+     * @param timeUs The time position in microseconds where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarantee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @param option a hint on how the frame is found. Use
+     * {@link #OPTION_PREVIOUS_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp earlier than or the same as timeUs. Use
+     * {@link #OPTION_NEXT_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp later than or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp closest to or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST} if one wants to retrieve a frame that may
+     * or may not be a sync frame but is closest to or the same as timeUs.
+     * {@link #OPTION_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at timeUs.
+     *
+     * @param dstWidth expected output bitmap width
+     * @param dstHeight expected output bitmap height
+     * @return A Bitmap containing a representative video frame, which can be null,
+     *         if such a frame cannot be retrieved. {@link Bitmap#getConfig()} can
+     *         be used to query the actual {@link Bitmap.Config}.
+     * @throws IllegalArgumentException if passed in invalid option or width by height
+     *         is less than or equal to 0.
+     * @see #getScaledFrameAtTime(long, int, int, int, BitmapParams)
+     */
+    public @Nullable Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
+            @IntRange(from=1) int dstWidth, @IntRange(from=1) int dstHeight) {
+        validate(option, dstWidth, dstHeight);
+        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight, null);
     }
 
     /**
@@ -297,15 +661,24 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *
      * @param dstWidth expected output bitmap width
      * @param dstHeight expected output bitmap height
+     * @param params BitmapParams that controls the returned bitmap config
+     *        (such as pixel formats).
+     *
      * @return A Bitmap of size not larger than dstWidth by dstHeight containing a
      *         scaled video frame, which can be null, if such a frame cannot be retrieved.
      * @throws IllegalArgumentException if passed in invalid option or width by height
      *         is less than or equal to 0.
+     * @see #getScaledFrameAtTime(long, int, int, int)
      */
-    public Bitmap getScaledFrameAtTime(
-            long timeUs, @Option int option, int dstWidth, int dstHeight) {
-        if (option < OPTION_PREVIOUS_SYNC ||
-            option > OPTION_CLOSEST) {
+    public @Nullable Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
+            @IntRange(from=1) int dstWidth, @IntRange(from=1) int dstHeight,
+            @NonNull BitmapParams params) {
+        validate(option, dstWidth, dstHeight);
+        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight, params);
+    }
+
+    private void validate(@Option int option, int dstWidth, int dstHeight) {
+        if (option < OPTION_PREVIOUS_SYNC || option > OPTION_CLOSEST) {
             throw new IllegalArgumentException("Unsupported option: " + option);
         }
         if (dstWidth <= 0) {
@@ -314,8 +687,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
         if (dstHeight <= 0) {
             throw new IllegalArgumentException("Invalid height: " + dstHeight);
         }
-
-        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight);
     }
 
     /**
@@ -342,7 +713,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *
      * @see #getFrameAtTime(long, int)
      */
-    public Bitmap getFrameAtTime(long timeUs) {
+    public @Nullable Bitmap getFrameAtTime(long timeUs) {
         return getFrameAtTime(timeUs, OPTION_CLOSEST_SYNC);
     }
 
@@ -364,11 +735,13 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getFrameAtTime(long)
      * @see #getFrameAtTime(long, int)
      */
-    public Bitmap getFrameAtTime() {
-        return _getFrameAtTime(-1, OPTION_CLOSEST_SYNC, -1 /*dst_width*/, -1 /*dst_height*/);
+    public @Nullable Bitmap getFrameAtTime() {
+        return _getFrameAtTime(
+                -1, OPTION_CLOSEST_SYNC, -1 /*dst_width*/, -1 /*dst_height*/, null);
     }
 
-    private native Bitmap _getFrameAtTime(long timeUs, int option, int width, int height);
+    private native Bitmap _getFrameAtTime(
+            long timeUs, int option, int width, int height, @Nullable BitmapParams params);
 
     public static final class BitmapParams {
         private Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -438,7 +811,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getFramesAtIndex(int, int, BitmapParams)
      * @see #getFramesAtIndex(int, int)
      */
-    public Bitmap getFrameAtIndex(int frameIndex, @NonNull BitmapParams params) {
+    public @Nullable Bitmap getFrameAtIndex(int frameIndex, @NonNull BitmapParams params) {
         List<Bitmap> bitmaps = getFramesAtIndex(frameIndex, 1, params);
         return bitmaps.get(0);
     }
@@ -460,7 +833,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getFramesAtIndex(int, int, BitmapParams)
      * @see #getFramesAtIndex(int, int)
      */
-    public Bitmap getFrameAtIndex(int frameIndex) {
+    public @Nullable Bitmap getFrameAtIndex(int frameIndex) {
         List<Bitmap> bitmaps = getFramesAtIndex(frameIndex, 1);
         return bitmaps.get(0);
     }
@@ -563,7 +936,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getPrimaryImage(BitmapParams)
      * @see #getPrimaryImage()
      */
-    public Bitmap getImageAtIndex(int imageIndex, @NonNull BitmapParams params) {
+    public @Nullable Bitmap getImageAtIndex(int imageIndex, @NonNull BitmapParams params) {
         return getImageAtIndexInternal(imageIndex, params);
     }
 
@@ -601,7 +974,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getPrimaryImage(BitmapParams)
      * @see #getPrimaryImage()
      */
-    public Bitmap getImageAtIndex(int imageIndex) {
+    public @Nullable Bitmap getImageAtIndex(int imageIndex) {
         return getImageAtIndexInternal(imageIndex, null);
     }
 
@@ -623,7 +996,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getImageAtIndex(int)
      * @see #getPrimaryImage()
      */
-    public Bitmap getPrimaryImage(@NonNull BitmapParams params) {
+    public @Nullable Bitmap getPrimaryImage(@NonNull BitmapParams params) {
         return getImageAtIndexInternal(-1, params);
     }
 
@@ -639,7 +1012,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getImageAtIndex(int)
      * @see #getPrimaryImage(BitmapParams)
      */
-    public Bitmap getPrimaryImage() {
+    public @Nullable Bitmap getPrimaryImage() {
         return getImageAtIndexInternal(-1, null);
     }
 
@@ -665,7 +1038,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *
      * @return null if no such graphic is found.
      */
-    public byte[] getEmbeddedPicture() {
+    public @Nullable byte[] getEmbeddedPicture() {
         return getEmbeddedPicture(EMBEDDED_PICTURE_TYPE_ANY);
     }
 
@@ -800,7 +1173,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     public static final int METADATA_KEY_YEAR            = 8;
     /**
-     * The metadata key to retrieve the playback duration of the data source.
+     * The metadata key to retrieve the playback duration (in ms) of the data source.
      */
     public static final int METADATA_KEY_DURATION        = 9;
     /**
@@ -938,8 +1311,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see MediaFormat#COLOR_STANDARD_BT601_PAL
      * @see MediaFormat#COLOR_STANDARD_BT601_NTSC
      * @see MediaFormat#COLOR_STANDARD_BT2020
-     *
-     * @hide
      */
     public static final int METADATA_KEY_COLOR_STANDARD = 35;
 
@@ -950,8 +1321,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see MediaFormat#COLOR_TRANSFER_SDR_VIDEO
      * @see MediaFormat#COLOR_TRANSFER_ST2084
      * @see MediaFormat#COLOR_TRANSFER_HLG
-     *
-     * @hide
      */
     public static final int METADATA_KEY_COLOR_TRANSFER = 36;
 
@@ -960,8 +1329,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *
      * @see MediaFormat#COLOR_RANGE_LIMITED
      * @see MediaFormat#COLOR_RANGE_FULL
-     *
-     * @hide
      */
     public static final int METADATA_KEY_COLOR_RANGE    = 37;
     // Add more here...

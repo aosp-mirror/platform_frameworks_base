@@ -20,6 +20,7 @@ import android.app.contentsuggestions.IClassificationsCallback;
 import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.ClassificationsRequest;
 import android.app.contentsuggestions.SelectionsRequest;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.UserHandle;
 import com.android.internal.os.IResultReceiver;
@@ -29,6 +30,10 @@ oneway interface IContentSuggestionsManager {
     void provideContextImage(
             int userId,
             int taskId,
+            in Bundle imageContextRequestExtras);
+    void provideContextBitmap(
+            int userId,
+            in Bitmap bitmap,
             in Bundle imageContextRequestExtras);
     void suggestContentSelections(
             int userId,

@@ -28,7 +28,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
@@ -40,16 +40,16 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_location);
 
     private final LocationController mController;
-    private final KeyguardMonitor mKeyguard;
+    private final KeyguardStateController mKeyguard;
     private final ActivityStarter mActivityStarter;
     private final Callback mCallback = new Callback();
 
     @Inject
     public LocationTile(QSHost host, LocationController locationController,
-            KeyguardMonitor keyguardMonitor, ActivityStarter activityStarter) {
+            KeyguardStateController keyguardStateController, ActivityStarter activityStarter) {
         super(host);
         mController = locationController;
-        mKeyguard = keyguardMonitor;
+        mKeyguard = keyguardStateController;
         mActivityStarter = activityStarter;
         mController.observe(this, mCallback);
         mKeyguard.observe(this, mCallback);
@@ -61,17 +61,13 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     }
 
     @Override
     protected void handleClick() {
-        if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
+        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 final boolean wasEnabled = mState.value;
                 mHost.openPanels();
@@ -97,7 +93,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
         // Work around for bug 15916487: don't show location tile on top of lock screen. After the
         // bug is fixed, this should be reverted to only hiding it on secure lock screens:
-        // state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
+        // state.visible = !(mKeyguard.isMethodSecure() && mKeyguard.isShowing());
         state.value = locationEnabled;
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
         if (state.disabledByPolicy == false) {
@@ -105,15 +101,8 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         }
         state.icon = mIcon;
         state.slash.isSlashed = !state.value;
-        if (locationEnabled) {
-            state.label = mContext.getString(R.string.quick_settings_location_label);
-            state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_location_on);
-        } else {
-            state.label = mContext.getString(R.string.quick_settings_location_label);
-            state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_location_off);
-        }
+        state.label = mContext.getString(R.string.quick_settings_location_label);
+        state.contentDescription = state.label;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
@@ -133,7 +122,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     }
 
     private final class Callback implements LocationChangeCallback,
-            KeyguardMonitor.Callback {
+            KeyguardStateController.Callback {
         @Override
         public void onLocationSettingsChanged(boolean enabled) {
             refreshState();

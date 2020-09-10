@@ -19,16 +19,19 @@ package android.test.mock;
 import android.annotation.Nullable;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.EntityIterator;
 import android.content.IContentProvider;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import java.io.FileNotFoundException;
@@ -43,14 +46,15 @@ import java.util.ArrayList;
  */
 public class MockIContentProvider implements IContentProvider {
     @Override
-    public int bulkInsert(String callingPackage, Uri url, ContentValues[] initialValues) {
+    public int bulkInsert(String callingPackage, @Nullable String featureId, Uri url,
+            ContentValues[] initialValues) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
     @SuppressWarnings("unused")
-    public int delete(String callingPackage, Uri url, String selection, String[] selectionArgs)
-            throws RemoteException {
+    public int delete(String callingPackage, @Nullable String featureId, Uri url,
+            Bundle extras) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -60,34 +64,44 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
+    public void getTypeAsync(Uri uri, RemoteCallback remoteCallback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            remoteCallback.sendResult(bundle);
+        });
+    }
+
+    @Override
     @SuppressWarnings("unused")
-    public Uri insert(String callingPackage, Uri url, ContentValues initialValues)
-            throws RemoteException {
+    public Uri insert(String callingPackage, @Nullable String featureId, Uri url,
+            ContentValues initialValues, Bundle extras) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public ParcelFileDescriptor openFile(
-            String callingPackage, Uri url, String mode, ICancellationSignal signal,
-            IBinder callerToken) {
+    public ParcelFileDescriptor openFile(String callingPackage, @Nullable String featureId,
+            Uri url, String mode, ICancellationSignal signal, IBinder callerToken) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public AssetFileDescriptor openAssetFile(
-            String callingPackage, Uri uri, String mode, ICancellationSignal signal) {
+    public AssetFileDescriptor openAssetFile(String callingPackage, @Nullable String featureId,
+            Uri uri, String mode, ICancellationSignal signal) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public ContentProviderResult[] applyBatch(String callingPackage, String authority,
-            ArrayList<ContentProviderOperation> operations) {
+    public ContentProviderResult[] applyBatch(String callingPackage, @Nullable String featureId,
+            String authority, ArrayList<ContentProviderOperation> operations) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public Cursor query(String callingPackage, Uri url, @Nullable String[] projection,
-            @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal) {
+    public Cursor query(String callingPackage, @Nullable String featureId, Uri url,
+            @Nullable String[] projection, @Nullable Bundle queryArgs,
+            @Nullable ICancellationSignal cancellationSignal) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -97,14 +111,14 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public int update(String callingPackage, Uri url, ContentValues values, String selection,
-            String[] selectionArgs) throws RemoteException {
+    public int update(String callingPackage, @Nullable String featureId, Uri url,
+            ContentValues values, Bundle extras) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public Bundle call(String callingPackage, String authority, String method, String request,
-            Bundle args) throws RemoteException {
+    public Bundle call(String callingPackage, @Nullable String featureId, String authority,
+            String method, String request, Bundle args) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -119,8 +133,9 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public AssetFileDescriptor openTypedAssetFile(String callingPackage, Uri url, String mimeType,
-            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException {
+    public AssetFileDescriptor openTypedAssetFile(String callingPackage,
+            @Nullable String featureId, Uri url, String mimeType, Bundle opts,
+            ICancellationSignal signal) throws RemoteException, FileNotFoundException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -130,18 +145,38 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
+    public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri uri) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
+    @SuppressWarnings("deprecation")
+    public void canonicalizeAsync(String callingPkg, String featureId, Uri uri,
+            RemoteCallback remoteCallback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                    canonicalize(callingPkg, featureId, uri));
+            remoteCallback.sendResult(bundle);
+        });
+    }
+
+    @Override
+    public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+            throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
-    public boolean refresh(String callingPkg, Uri url, Bundle args,
+    public boolean refresh(String callingPkg, @Nullable String featureId, Uri url, Bundle args,
             ICancellationSignal cancellationSignal) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(String callingPkg, @Nullable String featureId, Uri uri, int uid,
+            int modeFlags) {
+        throw new UnsupportedOperationException("unimplemented mock method call");
     }
 }

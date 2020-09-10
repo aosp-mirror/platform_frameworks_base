@@ -19,6 +19,7 @@ package android.net.wifi.aware;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -26,17 +27,15 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
+import android.net.wifi.util.HexEncoding;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-
-import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -158,7 +157,7 @@ public class WifiAwareManager {
     private final Object mLock = new Object(); // lock access to the following vars
 
     /** @hide */
-    public WifiAwareManager(Context context, IWifiAwareManager service) {
+    public WifiAwareManager(@NonNull Context context, @NonNull IWifiAwareManager service) {
         mContext = context;
         mService = service;
     }
@@ -268,7 +267,7 @@ public class WifiAwareManager {
 
             try {
                 Binder binder = new Binder();
-                mService.connect(binder, mContext.getOpPackageName(),
+                mService.connect(binder, mContext.getOpPackageName(), mContext.getAttributionTag(),
                         new WifiAwareEventCallbackProxy(this, looper, binder, attachCallback,
                                 identityChangedListener), configRequest,
                         identityChangedListener != null);
@@ -299,7 +298,8 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.publish(mContext.getOpPackageName(), clientId, publishConfig,
+            mService.publish(mContext.getOpPackageName(), mContext.getAttributionTag(), clientId,
+                    publishConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, true, callback,
                             clientId));
         } catch (RemoteException e) {
@@ -336,7 +336,8 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.subscribe(mContext.getOpPackageName(), clientId, subscribeConfig,
+            mService.subscribe(mContext.getOpPackageName(), mContext.getAttributionTag(), clientId,
+                    subscribeConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, false, callback,
                             clientId));
         } catch (RemoteException e) {
@@ -395,6 +396,17 @@ public class WifiAwareManager {
     }
 
     /** @hide */
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    public void requestMacAddresses(int uid, List<Integer> peerIds,
+            IWifiAwareMacAddressProvider callback) {
+        try {
+            mService.requestMacAddresses(uid, peerIds, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
     public NetworkSpecifier createNetworkSpecifier(int clientId, int role, int sessionId,
             @NonNull PeerHandle peerHandle, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
@@ -434,8 +446,7 @@ public class WifiAwareManager {
                 pmk,
                 passphrase,
                 0, // no port info for deprecated IB APIs
-                -1, // no transport info for deprecated IB APIs
-                Process.myUid());
+                -1); // no transport info for deprecated IB APIs
     }
 
     /** @hide */
@@ -475,8 +486,7 @@ public class WifiAwareManager {
                 pmk,
                 passphrase,
                 0, // no port info for OOB APIs
-                -1, // no transport protocol info for OOB APIs
-                Process.myUid());
+                -1); // no transport protocol info for OOB APIs
     }
 
     private static class WifiAwareEventCallbackProxy extends IWifiAwareEventCallback.Stub {

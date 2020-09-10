@@ -35,6 +35,9 @@ import android.content.IntentSender;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.net.Uri;
@@ -300,7 +303,8 @@ public class PackageManagerTests extends AndroidTestCase {
             final Intent result = localReceiver.getResult();
             final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_SUCCESS);
-            assertEquals(expectedResult, status);
+            String statusMessage = result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
+            assertEquals(statusMessage, expectedResult, status);
         } catch (IllegalArgumentException | IOException | RemoteException e) {
             Log.w(TAG, "Failed to install package; path=" + inPath, e);
             fail("Failed to install package; path=" + inPath + ", e=" + e);
@@ -327,13 +331,14 @@ public class PackageManagerTests extends AndroidTestCase {
         return Uri.fromFile(outFile);
     }
 
-    private PackageParser.Package parsePackage(Uri packageURI) throws PackageParserException {
+    private ParsingPackage parsePackage(Uri packageURI) {
         final String archiveFilePath = packageURI.getPath();
-        PackageParser packageParser = new PackageParser();
-        File sourceFile = new File(archiveFilePath);
-        PackageParser.Package pkg = packageParser.parseMonolithicPackage(sourceFile, 0);
-        packageParser = null;
-        return pkg;
+        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(
+                new File(archiveFilePath), 0 /*flags*/, false /*collectCertificates*/);
+        if (result.isError()) {
+            throw new IllegalStateException(result.getErrorMessage(), result.getException());
+        }
+        return result.getResult();
     }
 
     private boolean checkSd(long pkgLen) {
@@ -417,27 +422,26 @@ public class PackageManagerTests extends AndroidTestCase {
         return INSTALL_LOC_ERR;
     }
 
-    private void assertInstall(PackageParser.Package pkg, int flags, int expInstallLocation) {
+    private void assertInstall(ParsingPackage pkg, int flags, int expInstallLocation) {
         try {
-            String pkgName = pkg.packageName;
+            String pkgName = pkg.getPackageName();
             ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
             assertNotNull(info);
             assertEquals(pkgName, info.packageName);
             File dataDir = Environment.getDataDirectory();
-            String appInstallPath = new File(dataDir, "app").getPath();
-            String drmInstallPath = new File(dataDir, "app-private").getPath();
+            String appInstallParent = new File(dataDir, "app").getPath();
             File srcDir = new File(info.sourceDir);
-            String srcPath = srcDir.getParentFile().getParent();
+            String srcPathParent = srcDir.getParentFile().getParentFile().getParent();
             File publicSrcDir = new File(info.publicSourceDir);
-            String publicSrcPath = publicSrcDir.getParentFile().getParent();
+            String publicSrcPath = publicSrcDir.getParentFile().getParentFile().getParent();
             long pkgLen = new File(info.sourceDir).length();
             String expectedLibPath = new File(new File(info.sourceDir).getParentFile(), "lib")
                     .getPath();
 
             int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
             if (rLoc == INSTALL_LOC_INT) {
-                assertEquals(appInstallPath, srcPath);
-                assertEquals(appInstallPath, publicSrcPath);
+                assertEquals(appInstallParent, srcPathParent);
+                assertEquals(appInstallParent, publicSrcPath);
                 assertStartsWith("Native library should point to shared lib directory",
                         expectedLibPath, info.nativeLibraryDir);
                 assertDirOwnerGroupPermsIfExists(
@@ -464,7 +468,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 // Might need to check:
                 // ((info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0)
                 assertStartsWith("The APK path should point to the ASEC",
-                        SECURE_CONTAINERS_PREFIX, srcPath);
+                        SECURE_CONTAINERS_PREFIX, srcPathParent);
                 assertStartsWith("The public APK path should point to the ASEC",
                         SECURE_CONTAINERS_PREFIX, publicSrcPath);
                 assertStartsWith("The native library path should point to the ASEC",
@@ -566,20 +570,20 @@ public class PackageManagerTests extends AndroidTestCase {
     class InstallParams {
         Uri packageURI;
 
-        PackageParser.Package pkg;
+        ParsingPackage pkg;
 
         InstallParams(String outFileName, int rawResId) throws PackageParserException {
             this.pkg = getParsedPackage(outFileName, rawResId);
-            this.packageURI = Uri.fromFile(new File(pkg.codePath));
+            this.packageURI = Uri.fromFile(new File(pkg.getCodePath()));
         }
 
-        InstallParams(PackageParser.Package pkg) {
-            this.packageURI = Uri.fromFile(new File(pkg.codePath));
+        InstallParams(ParsingPackage pkg) {
+            this.packageURI = Uri.fromFile(new File(pkg.getCodePath()));
             this.pkg = pkg;
         }
 
         long getApkSize() {
-            File file = new File(pkg.codePath);
+            File file = new File(pkg.getCodePath());
             return file.length();
         }
     }
@@ -681,14 +685,12 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private PackageParser.Package getParsedPackage(String outFileName, int rawResId)
-            throws PackageParserException {
+    private ParsingPackage getParsedPackage(String outFileName, int rawResId) {
         PackageManager pm = mContext.getPackageManager();
         File filesDir = mContext.getFilesDir();
         File outFile = new File(filesDir, outFileName);
         Uri packageURI = getInstallablePackage(rawResId, outFile);
-        PackageParser.Package pkg = parsePackage(packageURI);
-        return pkg;
+        return parsePackage(packageURI);
     }
 
     /*
@@ -699,15 +701,15 @@ public class PackageManagerTests extends AndroidTestCase {
     private void installFromRawResource(InstallParams ip, int flags, boolean cleanUp, boolean fail,
             int result, int expInstallLocation) throws Exception {
         PackageManager pm = mContext.getPackageManager();
-        PackageParser.Package pkg = ip.pkg;
+        ParsingPackage pkg = ip.pkg;
         Uri packageURI = ip.packageURI;
         if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
             // Make sure the package doesn't exist
             try {
-                ApplicationInfo appInfo = pm.getApplicationInfo(pkg.packageName,
+                ApplicationInfo appInfo = pm.getApplicationInfo(pkg.getPackageName(),
                         PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                GenericReceiver receiver = new DeleteReceiver(pkg.packageName);
-                invokeDeletePackage(pkg.packageName, 0, receiver);
+                GenericReceiver receiver = new DeleteReceiver(pkg.getPackageName());
+                invokeDeletePackage(pkg.getPackageName(), 0, receiver);
             } catch (IllegalArgumentException | NameNotFoundException e) {
             }
         }
@@ -715,10 +717,10 @@ public class PackageManagerTests extends AndroidTestCase {
             if (fail) {
                 invokeInstallPackageFail(packageURI, flags, result);
                 if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
-                    assertNotInstalled(pkg.packageName);
+                    assertNotInstalled(pkg.getPackageName());
                 }
             } else {
-                InstallReceiver receiver = new InstallReceiver(pkg.packageName);
+                InstallReceiver receiver = new InstallReceiver(pkg.getPackageName());
                 invokeInstallPackage(packageURI, flags, receiver, true);
                 // Verify installed information
                 assertInstall(pkg, flags, expInstallLocation);
@@ -819,15 +821,15 @@ public class PackageManagerTests extends AndroidTestCase {
         Log.i(TAG, "replace=" + replace);
         GenericReceiver receiver;
         if (replace) {
-            receiver = new ReplaceReceiver(ip.pkg.packageName);
+            receiver = new ReplaceReceiver(ip.pkg.getPackageName());
             Log.i(TAG, "Creating replaceReceiver");
         } else {
-            receiver = new InstallReceiver(ip.pkg.packageName);
+            receiver = new InstallReceiver(ip.pkg.getPackageName());
         }
         try {
             invokeInstallPackage(ip.packageURI, flags, receiver, true);
             if (replace) {
-                assertInstall(ip.pkg, flags, ip.pkg.installLocation);
+                assertInstall(ip.pkg, flags, ip.pkg.getInstallLocation());
             }
         } finally {
             cleanUpInstall(ip);
@@ -958,22 +960,20 @@ public class PackageManagerTests extends AndroidTestCase {
     public void deleteFromRawResource(int iFlags, int dFlags) throws Exception {
         InstallParams ip = sampleInstallFromRawResource(iFlags, false);
         boolean retainData = ((dFlags & PackageManager.DELETE_KEEP_DATA) != 0);
-        GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+        GenericReceiver receiver = new DeleteReceiver(ip.pkg.getPackageName());
         try {
-            assertTrue(invokeDeletePackage(ip.pkg.packageName, dFlags, receiver));
+            assertTrue(invokeDeletePackage(ip.pkg.getPackageName(), dFlags, receiver));
             ApplicationInfo info = null;
             Log.i(TAG, "okay4");
             try {
-                info = getPm().getApplicationInfo(ip.pkg.packageName,
+                info = getPm().getApplicationInfo(ip.pkg.getPackageName(),
                         PackageManager.MATCH_UNINSTALLED_PACKAGES);
             } catch (NameNotFoundException e) {
                 info = null;
             }
             if (retainData) {
                 assertNotNull(info);
-                assertEquals(info.packageName, ip.pkg.packageName);
-                File file = new File(info.dataDir);
-                assertTrue(file.exists());
+                assertEquals(info.packageName, ip.pkg.getPackageName());
             } else {
                 assertNull(info);
             }
@@ -1001,9 +1001,9 @@ public class PackageManagerTests extends AndroidTestCase {
         }
         Runtime.getRuntime().gc();
         try {
-            cleanUpInstall(ip.pkg.packageName);
+            cleanUpInstall(ip.pkg.getPackageName());
         } finally {
-            File outFile = new File(ip.pkg.codePath);
+            File outFile = new File(ip.pkg.getCodePath());
             if (outFile != null && outFile.exists()) {
                 outFile.delete();
             }
@@ -1073,13 +1073,13 @@ public class PackageManagerTests extends AndroidTestCase {
         InstallParams ip = installFromRawResource("install.apk", iApk,
                 iFlags, false,
                 false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
+        GenericReceiver receiver = new ReplaceReceiver(ip.pkg.getPackageName());
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
             InstallParams rp = installFromRawResource("install.apk", rApk,
                     replaceFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-            assertInstall(rp.pkg, replaceFlags, rp.pkg.installLocation);
+            assertInstall(rp.pkg, replaceFlags, rp.pkg.getInstallLocation());
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
         } finally {
@@ -1106,7 +1106,7 @@ public class PackageManagerTests extends AndroidTestCase {
             InstallParams rp = installFromRawResource("install.apk", rApk,
                     replaceFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL);
-            assertInstall(rp.pkg, replaceFlags, ip.pkg.installLocation);
+            assertInstall(rp.pkg, replaceFlags, ip.pkg.getInstallLocation());
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
         } finally {
@@ -1207,18 +1207,18 @@ public class PackageManagerTests extends AndroidTestCase {
             // Install first
             ip = installFromRawResource("install.apk", rawResId, installFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-            ApplicationInfo oldAppInfo = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+            ApplicationInfo oldAppInfo = getPm().getApplicationInfo(ip.pkg.getPackageName(), 0);
             if (fail) {
-                assertTrue(invokeMovePackageFail(ip.pkg.packageName, moveFlags, result));
-                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+                assertTrue(invokeMovePackageFail(ip.pkg.getPackageName(), moveFlags, result));
+                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.getPackageName(), 0);
                 assertNotNull(info);
                 assertEquals(oldAppInfo.flags, info.flags);
             } else {
                 // Create receiver based on expRetCode
-                MoveReceiver receiver = new MoveReceiver(ip.pkg.packageName);
-                boolean retCode = invokeMovePackage(ip.pkg.packageName, moveFlags, receiver);
+                MoveReceiver receiver = new MoveReceiver(ip.pkg.getPackageName());
+                boolean retCode = invokeMovePackage(ip.pkg.getPackageName(), moveFlags, receiver);
                 assertTrue(retCode);
-                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
+                ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.getPackageName(), 0);
                 assertNotNull("ApplicationInfo for recently installed application should exist",
                         info);
                 if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
@@ -1297,9 +1297,9 @@ public class PackageManagerTests extends AndroidTestCase {
             ip = installFromRawResource("install.apk", R.raw.install, installFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             // Delete the package now retaining data.
-            GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
-            invokeDeletePackage(ip.pkg.packageName, PackageManager.DELETE_KEEP_DATA, receiver);
-            assertTrue(invokeMovePackageFail(ip.pkg.packageName, moveFlags, result));
+            GenericReceiver receiver = new DeleteReceiver(ip.pkg.getPackageName());
+            invokeDeletePackage(ip.pkg.getPackageName(), PackageManager.DELETE_KEEP_DATA, receiver);
+            assertTrue(invokeMovePackageFail(ip.pkg.getPackageName(), moveFlags, result));
         } catch (Exception e) {
             failStr(e);
         } finally {
@@ -1715,7 +1715,7 @@ public class PackageManagerTests extends AndroidTestCase {
             ip = installFromRawResource("install.apk", iApk,
                     iFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertInstall(ip.pkg, iFlags, ip.pkg.getInstallLocation());
             assertPermissions(BASE_PERMISSIONS_DEFINED);
 
             // **: Upon installing package, are its permissions granted?
@@ -1725,15 +1725,15 @@ public class PackageManagerTests extends AndroidTestCase {
             ip2 = installFromRawResource("install2.apk", i2Apk,
                     i2Flags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.getInstallLocation());
             assertPermissions(BASE_PERMISSIONS_USED);
 
             // **: Upon removing but not deleting, are permissions retained?
 
-            GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+            GenericReceiver receiver = new DeleteReceiver(ip.pkg.getPackageName());
 
             try {
-                invokeDeletePackage(ip.pkg.packageName, PackageManager.DELETE_KEEP_DATA, receiver);
+                invokeDeletePackage(ip.pkg.getPackageName(), PackageManager.DELETE_KEEP_DATA, receiver);
             } catch (Exception e) {
                 failStr(e);
             }
@@ -1745,14 +1745,14 @@ public class PackageManagerTests extends AndroidTestCase {
             ip = installFromRawResource("install.apk", iApk,
                     iFlags | PackageManager.INSTALL_REPLACE_EXISTING, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertInstall(ip.pkg, iFlags, ip.pkg.getInstallLocation());
             assertPermissions(BASE_PERMISSIONS_DEFINED);
             assertPermissions(BASE_PERMISSIONS_USED);
 
             // **: Upon deleting package, are all permissions removed?
 
             try {
-                invokeDeletePackage(ip.pkg.packageName, 0, receiver);
+                invokeDeletePackage(ip.pkg.getPackageName(), 0, receiver);
                 ip = null;
             } catch (Exception e) {
                 failStr(e);
@@ -1762,9 +1762,9 @@ public class PackageManagerTests extends AndroidTestCase {
 
             // **: Delete package using permissions; nothing to check here.
 
-            GenericReceiver receiver2 = new DeleteReceiver(ip2.pkg.packageName);
+            GenericReceiver receiver2 = new DeleteReceiver(ip2.pkg.getPackageName());
             try {
-                invokeDeletePackage(ip2.pkg.packageName, 0, receiver);
+                invokeDeletePackage(ip2.pkg.getPackageName(), 0, receiver);
                 ip2 = null;
             } catch (Exception e) {
                 failStr(e);
@@ -1775,7 +1775,7 @@ public class PackageManagerTests extends AndroidTestCase {
             ip2 = installFromRawResource("install2.apk", i2Apk,
                     i2Flags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.getInstallLocation());
             assertPermissions(BASE_PERMISSIONS_NOTUSED);
 
             // **: Upon installing declaring package, are sig permissions granted
@@ -1784,7 +1784,7 @@ public class PackageManagerTests extends AndroidTestCase {
             ip = installFromRawResource("install.apk", iApk,
                     iFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
+            assertInstall(ip.pkg, iFlags, ip.pkg.getInstallLocation());
             assertPermissions(BASE_PERMISSIONS_DEFINED);
             assertPermissions(BASE_PERMISSIONS_SIGUSED);
 
@@ -1793,13 +1793,13 @@ public class PackageManagerTests extends AndroidTestCase {
             ip2 = installFromRawResource("install2.apk", i2Apk,
                     i2Flags | PackageManager.INSTALL_REPLACE_EXISTING, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
-            assertInstall(ip2.pkg, i2Flags, ip2.pkg.installLocation);
+            assertInstall(ip2.pkg, i2Flags, ip2.pkg.getInstallLocation());
             assertPermissions(BASE_PERMISSIONS_NOTUSED);
 
             // **: Upon deleting package, are all permissions removed?
 
             try {
-                invokeDeletePackage(ip.pkg.packageName, 0, receiver);
+                invokeDeletePackage(ip.pkg.getPackageName(), 0, receiver);
                 ip = null;
             } catch (Exception e) {
                 failStr(e);
@@ -1810,7 +1810,7 @@ public class PackageManagerTests extends AndroidTestCase {
             // **: Delete package using permissions; nothing to check here.
 
             try {
-                invokeDeletePackage(ip2.pkg.packageName, 0, receiver);
+                invokeDeletePackage(ip2.pkg.getPackageName(), 0, receiver);
                 ip2 = null;
             } catch (Exception e) {
                 failStr(e);
@@ -1830,34 +1830,42 @@ public class PackageManagerTests extends AndroidTestCase {
      * The following series of tests are related to upgrading apps with
      * different certificates.
      */
-    private int APP1_UNSIGNED = R.raw.install_app1_unsigned;
+    private static final int APP1_UNSIGNED = R.raw.install_app1_unsigned;
 
-    private int APP1_CERT1 = R.raw.install_app1_cert1;
+    private static final int APP1_CERT1 = R.raw.install_app1_cert1;
 
-    private int APP1_CERT2 = R.raw.install_app1_cert2;
+    private static final int APP1_CERT2 = R.raw.install_app1_cert2;
 
-    private int APP1_CERT1_CERT2 = R.raw.install_app1_cert1_cert2;
+    private static final int APP1_CERT1_CERT2 = R.raw.install_app1_cert1_cert2;
 
-    private int APP1_CERT3_CERT4 = R.raw.install_app1_cert3_cert4;
+    private static final int APP1_CERT3_CERT4 = R.raw.install_app1_cert3_cert4;
 
-    private int APP1_CERT3 = R.raw.install_app1_cert3;
+    private static final int APP1_CERT3 = R.raw.install_app1_cert3;
 
-    private int APP2_UNSIGNED = R.raw.install_app2_unsigned;
+    private static final int APP1_CERT5 = R.raw.install_app1_cert5;
 
-    private int APP2_CERT1 = R.raw.install_app2_cert1;
+    private static final int APP1_CERT5_ROTATED_CERT6 = R.raw.install_app1_cert5_rotated_cert6;
 
-    private int APP2_CERT2 = R.raw.install_app2_cert2;
+    private static final int APP1_CERT6 = R.raw.install_app1_cert6;
 
-    private int APP2_CERT1_CERT2 = R.raw.install_app2_cert1_cert2;
+    private static final int APP2_UNSIGNED = R.raw.install_app2_unsigned;
 
-    private int APP2_CERT3 = R.raw.install_app2_cert3;
+    private static final int APP2_CERT1 = R.raw.install_app2_cert1;
+
+    private static final int APP2_CERT2 = R.raw.install_app2_cert2;
+
+    private static final int APP2_CERT1_CERT2 = R.raw.install_app2_cert1_cert2;
+
+    private static final int APP2_CERT3 = R.raw.install_app2_cert3;
+
+    private static final int APP2_CERT5_ROTATED_CERT6 = R.raw.install_app2_cert5_rotated_cert6;
 
     private InstallParams replaceCerts(int apk1, int apk2, boolean cleanUp, boolean fail,
             int retCode) throws Exception {
         int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
-        PackageParser.Package pkg1 = getParsedPackage(apk1Name, apk1);
+        ParsingPackage pkg1 = getParsedPackage(apk1Name, apk1);
         try {
             InstallParams ip = installFromRawResource(apk1Name, apk1, 0, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -1868,7 +1876,7 @@ public class PackageManagerTests extends AndroidTestCase {
             failStr(e.getMessage());
         } finally {
             if (cleanUp) {
-                cleanUpInstall(pkg1.packageName);
+                cleanUpInstall(pkg1.getPackageName());
             }
         }
         return null;
@@ -2455,20 +2463,40 @@ public class PackageManagerTests extends AndroidTestCase {
             File outFile = new File(filesDir, apk2Name);
             int rawResId = apk2;
             Uri packageURI = getInstallablePackage(rawResId, outFile);
-            PackageParser.Package pkg = parsePackage(packageURI);
+            ParsingPackage pkg = parsePackage(packageURI);
             try {
-                getPi().uninstall(pkg.packageName,
+                getPi().uninstall(pkg.getPackageName(),
                         PackageManager.DELETE_ALL_USERS,
                         null /*statusReceiver*/);
             } catch (IllegalArgumentException ignore) {
             }
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
-                    ip.pkg.packageName, pkg.packageName);
+                    ip.pkg.getPackageName(), pkg.getPackageName());
             assertEquals(PackageManager.SIGNATURE_UNKNOWN_PACKAGE, match);
         } finally {
             cleanUpInstall(ip);
         }
+    }
+
+    @LargeTest
+    public void testCheckSignaturesRotatedAgainstOriginal() throws Exception {
+        // checkSignatures should be backwards compatible with pre-rotation behavior; this test
+        // verifies that an app signed with a rotated key results in a signature match with an app
+        // signed with the original key in the lineage.
+        int apk1 = APP1_CERT5;
+        int apk2 = APP2_CERT5_ROTATED_CERT6;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
+    }
+
+    @LargeTest
+    public void testCheckSignaturesRotatedAgainstRotated() throws Exception {
+        // checkSignatures should be successful when both apps have been signed with the same
+        // rotated key since the initial signature comparison between the two apps should
+        // return a match.
+        int apk1 = APP1_CERT5_ROTATED_CERT6;
+        int apk2 = APP2_CERT5_ROTATED_CERT6;
+        checkSignatures(apk1, apk2, PackageManager.SIGNATURE_MATCH);
     }
 
     @LargeTest
@@ -2505,13 +2533,13 @@ public class PackageManagerTests extends AndroidTestCase {
             int retCode, int expMatchResult) throws Exception {
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
-        PackageParser.Package pkg1 = getParsedPackage(apk1Name, apk1);
-        PackageParser.Package pkg2 = getParsedPackage(apk2Name, apk2);
+        ParsingPackage pkg1 = getParsedPackage(apk1Name, apk1);
+        ParsingPackage pkg2 = getParsedPackage(apk2Name, apk2);
 
         try {
             // Clean up before testing first.
-            cleanUpInstall(pkg1.packageName);
-            cleanUpInstall(pkg2.packageName);
+            cleanUpInstall(pkg1.getPackageName());
+            cleanUpInstall(pkg2.getPackageName());
             installFromRawResource(apk1Name, apk1, 0, false, false, -1,
                     PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             if (fail) {
@@ -2520,14 +2548,23 @@ public class PackageManagerTests extends AndroidTestCase {
             } else {
                 installFromRawResource(apk2Name, apk2, 0, false, false, -1,
                         PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-                int match = mContext.getPackageManager().checkSignatures(pkg1.packageName,
-                        pkg2.packageName);
-                assertEquals(expMatchResult, match);
+                // TODO: All checkSignatures tests should return the same result regardless of
+                // querying by package name or uid; however if there are any edge cases where
+                // individual packages within a shareduid are compared with signatures that do not
+                // match the full lineage of the shareduid this method should be overloaded to
+                // accept the expected response for the uid query.
+                PackageManager pm = getPm();
+                int matchByName = pm.checkSignatures(pkg1.getPackageName(), pkg2.getPackageName());
+                int pkg1Uid = pm.getApplicationInfo(pkg1.getPackageName(), 0).uid;
+                int pkg2Uid = pm.getApplicationInfo(pkg2.getPackageName(), 0).uid;
+                int matchByUid = pm.checkSignatures(pkg1Uid, pkg2Uid);
+                assertEquals(expMatchResult, matchByName);
+                assertEquals(expMatchResult, matchByUid);
             }
         } finally {
             if (cleanUp) {
-                cleanUpInstall(pkg1.packageName);
-                cleanUpInstall(pkg2.packageName);
+                cleanUpInstall(pkg1.getPackageName());
+                cleanUpInstall(pkg2.getPackageName());
             }
         }
     }
@@ -2593,15 +2630,15 @@ public class PackageManagerTests extends AndroidTestCase {
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             PackageManager pm = mContext.getPackageManager();
             // Delete app2
-            PackageParser.Package pkg = getParsedPackage(apk2Name, apk2);
+            ParsingPackage pkg = getParsedPackage(apk2Name, apk2);
             try {
-                getPi().uninstall(
-                        pkg.packageName, PackageManager.DELETE_ALL_USERS, null /*statusReceiver*/);
+                getPi().uninstall(pkg.getPackageName(), PackageManager.DELETE_ALL_USERS,
+                        null /*statusReceiver*/);
             } catch (IllegalArgumentException ignore) {
             }
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
-                    ip1.pkg.packageName, pkg.packageName);
+                    ip1.pkg.getPackageName(), pkg.getPackageName());
             assertEquals(PackageManager.SIGNATURE_UNKNOWN_PACKAGE, match);
         } finally {
             if (ip1 != null) {
@@ -2806,8 +2843,8 @@ public class PackageManagerTests extends AndroidTestCase {
                         PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
         try {
             // then, remove it, keeping it's data around
-            final GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
-            invokeDeletePackage(ip.pkg.packageName, PackageManager.DELETE_KEEP_DATA, receiver);
+            final GenericReceiver receiver = new DeleteReceiver(ip.pkg.getPackageName());
+            invokeDeletePackage(ip.pkg.getPackageName(), PackageManager.DELETE_KEEP_DATA, receiver);
 
             final List<PackageInfo> packages = getPm().getInstalledPackages(flags);
             assertNotNull("installed packages cannot be null", packages);

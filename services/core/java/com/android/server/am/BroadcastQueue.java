@@ -33,7 +33,6 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
@@ -47,12 +46,14 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.IPermissionManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -197,21 +198,6 @@ public final class BroadcastQueue {
         }
     }
 
-    private final class AppNotResponding implements Runnable {
-        private final ProcessRecord mApp;
-        private final String mAnnotation;
-
-        public AppNotResponding(ProcessRecord app, String annotation) {
-            mApp = app;
-            mAnnotation = annotation;
-        }
-
-        @Override
-        public void run() {
-            mApp.appNotResponding(null, null, null, null, false, mAnnotation);
-        }
-    }
-
     BroadcastQueue(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, boolean allowDelayBehindServices) {
         mService = service;
@@ -312,7 +298,7 @@ public final class BroadcastQueue {
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
         mService.mProcessList.updateLruProcessLocked(app, false, null);
         if (!skipOomAdj) {
-            mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+            mService.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
         }
 
         // Tell the application to launch this receiver.
@@ -484,22 +470,23 @@ public final class BroadcastQueue {
         // if this receiver was slow, impose deferral policy on the app.  This will kick in
         // when processNextBroadcastLocked() next finds this uid as a receiver identity.
         if (!r.timeoutExempt) {
-            if (mConstants.SLOW_TIME > 0 && elapsed > mConstants.SLOW_TIME) {
+            // r.curApp can be null if finish has raced with process death - benign
+            // edge case, and we just ignore it because we're already cleaning up
+            // as expected.
+            if (r.curApp != null
+                    && mConstants.SLOW_TIME > 0 && elapsed > mConstants.SLOW_TIME) {
                 // Core system packages are exempt from deferral policy
                 if (!UserHandle.isCore(r.curApp.uid)) {
                     if (DEBUG_BROADCAST_DEFERRAL) {
                         Slog.i(TAG_BROADCAST, "Broadcast receiver " + (r.nextReceiver - 1)
                                 + " was slow: " + receiver + " br=" + r);
                     }
-                    if (r.curApp != null) {
-                        mDispatcher.startDeferring(r.curApp.uid);
-                    } else {
-                        Slog.d(TAG_BROADCAST, "finish receiver curApp is null? " + r);
-                    }
+                    mDispatcher.startDeferring(r.curApp.uid);
                 } else {
                     if (DEBUG_BROADCAST_DEFERRAL) {
                         Slog.i(TAG_BROADCAST, "Core uid " + r.curApp.uid
-                                + " receiver was slow but not deferring: " + receiver + " br=" + r);
+                                + " receiver was slow but not deferring: "
+                                + receiver + " br=" + r);
                     }
                 }
             }
@@ -651,8 +638,9 @@ public final class BroadcastQueue {
             } else {
                 final int opCode = AppOpsManager.permissionToOpCode(filter.requiredPermission);
                 if (opCode != AppOpsManager.OP_NONE
-                        && mService.mAppOpsService.noteOperation(opCode, r.callingUid,
-                                r.callerPackage) != AppOpsManager.MODE_ALLOWED) {
+                        && mService.getAppOpsManager().noteOpNoThrow(opCode, r.callingUid,
+                        r.callerPackage, r.callerFeatureId, "")
+                        != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: broadcasting "
                             + r.intent.toString()
                             + " from " + r.callerPackage + " (pid="
@@ -683,8 +671,8 @@ public final class BroadcastQueue {
                 }
                 int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
                 if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
-                        && mService.mAppOpsService.noteOperation(appOp,
-                        filter.receiverList.uid, filter.packageName)
+                        && mService.getAppOpsManager().noteOpNoThrow(appOp,
+                        filter.receiverList.uid, filter.packageName, filter.featureId, "")
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: receiving "
                             + r.intent.toString()
@@ -715,8 +703,8 @@ public final class BroadcastQueue {
             }
         }
         if (!skip && r.appOp != AppOpsManager.OP_NONE
-                && mService.mAppOpsService.noteOperation(r.appOp,
-                filter.receiverList.uid, filter.packageName)
+                && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
+                filter.receiverList.uid, filter.packageName, filter.featureId, "")
                 != AppOpsManager.MODE_ALLOWED) {
             Slog.w(TAG, "Appop Denial: receiving "
                     + r.intent.toString()
@@ -862,7 +850,8 @@ public final class BroadcastQueue {
         if (callerForeground && receiverRecord.intent.getComponent() != null) {
             IIntentSender target = mService.mPendingIntentController.getIntentSender(
                     ActivityManager.INTENT_SENDER_BROADCAST, receiverRecord.callerPackage,
-                    receiverRecord.callingUid, receiverRecord.userId, null, null, 0,
+                    receiverRecord.callerFeatureId, receiverRecord.callingUid,
+                    receiverRecord.userId, null, null, 0,
                     new Intent[]{receiverRecord.intent},
                     new String[]{receiverRecord.intent.resolveType(mService.mContext
                             .getContentResolver())},
@@ -916,6 +905,10 @@ public final class BroadcastQueue {
         } else if (r.intent.getData() != null) {
             b.append(r.intent.getData());
         }
+        if (DEBUG_BROADCAST) {
+            Slog.v(TAG, "Broadcast temp whitelist uid=" + uid + " duration=" + duration
+                    + " : " + b.toString());
+        }
         mService.tempWhitelistUidLocked(uid, duration, b.toString());
     }
 
@@ -926,7 +919,7 @@ public final class BroadcastQueue {
         if (perms == null) {
             return false;
         }
-        IPackageManager pm = AppGlobals.getPackageManager();
+        IPermissionManager pm = AppGlobals.getPermissionManager();
         for (int i = perms.length-1; i >= 0; i--) {
             try {
                 PermissionInfo pi = pm.getPermissionInfo(perms[i], "android", 0);
@@ -1255,8 +1248,8 @@ public final class BroadcastQueue {
             r.dispatchClockTime = System.currentTimeMillis();
 
             if (mLogLatencyMetrics) {
-                StatsLog.write(
-                        StatsLog.BROADCAST_DISPATCH_LATENCY_REPORTED,
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.BROADCAST_DISPATCH_LATENCY_REPORTED,
                         r.dispatchClockTime - r.enqueueClockTime);
             }
 
@@ -1371,8 +1364,8 @@ public final class BroadcastQueue {
         } else if (!skip && info.activityInfo.permission != null) {
             final int opCode = AppOpsManager.permissionToOpCode(info.activityInfo.permission);
             if (opCode != AppOpsManager.OP_NONE
-                    && mService.mAppOpsService.noteOperation(opCode, r.callingUid,
-                            r.callerPackage) != AppOpsManager.MODE_ALLOWED) {
+                    && mService.getAppOpsManager().noteOpNoThrow(opCode, r.callingUid, r.callerPackage,
+                    r.callerFeatureId, "") != AppOpsManager.MODE_ALLOWED) {
                 Slog.w(TAG, "Appop Denial: broadcasting "
                         + r.intent.toString()
                         + " from " + r.callerPackage + " (pid="
@@ -1409,8 +1402,9 @@ public final class BroadcastQueue {
                 }
                 int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
                 if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
-                        && mService.mAppOpsService.noteOperation(appOp,
-                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName)
+                        && mService.getAppOpsManager().noteOpNoThrow(appOp,
+                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
+                        null /* default featureId */, "")
                         != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: receiving "
                             + r.intent + " to "
@@ -1425,8 +1419,9 @@ public final class BroadcastQueue {
             }
         }
         if (!skip && r.appOp != AppOpsManager.OP_NONE
-                && mService.mAppOpsService.noteOperation(r.appOp,
-                info.activityInfo.applicationInfo.uid, info.activityInfo.packageName)
+                && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
+                info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
+                null  /* default featureId */, "")
                 != AppOpsManager.MODE_ALLOWED) {
             Slog.w(TAG, "Appop Denial: receiving "
                     + r.intent + " to "
@@ -1803,9 +1798,7 @@ public final class BroadcastQueue {
         scheduleBroadcastsLocked();
 
         if (!debugging && anrMessage != null) {
-            // Post the ANR to the handler since we do not want to process ANRs while
-            // potentially holding our lock.
-            mHandler.post(new AppNotResponding(app, anrMessage));
+            mService.mAnrHelper.appNotResponding(app, anrMessage);
         }
     }
 
@@ -1915,17 +1908,17 @@ public final class BroadcastQueue {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
         int N;
         N = mParallelBroadcasts.size();
         for (int i = N - 1; i >= 0; i--) {
-            mParallelBroadcasts.get(i).writeToProto(proto, BroadcastQueueProto.PARALLEL_BROADCASTS);
+            mParallelBroadcasts.get(i).dumpDebug(proto, BroadcastQueueProto.PARALLEL_BROADCASTS);
         }
-        mDispatcher.writeToProto(proto, BroadcastQueueProto.ORDERED_BROADCASTS);
+        mDispatcher.dumpDebug(proto, BroadcastQueueProto.ORDERED_BROADCASTS);
         if (mPendingBroadcast != null) {
-            mPendingBroadcast.writeToProto(proto, BroadcastQueueProto.PENDING_BROADCAST);
+            mPendingBroadcast.dumpDebug(proto, BroadcastQueueProto.PENDING_BROADCAST);
         }
 
         int lastIndex = mHistoryNext;
@@ -1936,7 +1929,7 @@ public final class BroadcastQueue {
             ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_HISTORY);
             BroadcastRecord r = mBroadcastHistory[ringIndex];
             if (r != null) {
-                r.writeToProto(proto, BroadcastQueueProto.HISTORICAL_BROADCASTS);
+                r.dumpDebug(proto, BroadcastQueueProto.HISTORICAL_BROADCASTS);
             }
         } while (ringIndex != lastIndex);
 
@@ -1948,7 +1941,7 @@ public final class BroadcastQueue {
                 continue;
             }
             long summaryToken = proto.start(BroadcastQueueProto.HISTORICAL_BROADCASTS_SUMMARY);
-            intent.writeToProto(proto, BroadcastQueueProto.BroadcastSummary.INTENT,
+            intent.dumpDebug(proto, BroadcastQueueProto.BroadcastSummary.INTENT,
                     false, true, true, false);
             proto.write(BroadcastQueueProto.BroadcastSummary.ENQUEUE_CLOCK_TIME_MS,
                     mSummaryHistoryEnqueueTime[ringIndex]);

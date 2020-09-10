@@ -16,25 +16,28 @@
 
 package com.android.server.updates;
 
-import com.android.server.EventLogTags;
-import com.android.internal.util.HexDump;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Binder;
 import android.util.EventLog;
 import android.util.Slog;
 
+import com.android.internal.util.HexDump;
+import com.android.server.EventLogTags;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
 
@@ -61,8 +64,6 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             @Override
             public void run() {
                 try {
-                    // get the content path from the extras
-                    byte[] altContent = getAltContent(context, intent);
                     // get the version from the extras
                     int altVersion = getVersionFromIntent(intent);
                     // get the previous value from the extras
@@ -75,11 +76,13 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
                         Slog.i(TAG, "Not installing, new version is <= current version");
                     } else if (!verifyPreviousHash(currentHash, altRequiredHash)) {
                         EventLog.writeEvent(EventLogTags.CONFIG_INSTALL_FAILED,
-                                            "Current hash did not match required value");
+                                "Current hash did not match required value");
                     } else {
                         // install the new content
                         Slog.i(TAG, "Found new update, installing...");
-                        install(altContent, altVersion);
+                        try (BufferedInputStream altContent = getAltContent(context, intent)) {
+                            install(altContent, altVersion);
+                        }
                         Slog.i(TAG, "Installation successful");
                         postInstall(context, intent);
                     }
@@ -130,13 +133,13 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    private byte[] getAltContent(Context c, Intent i) throws IOException {
+    private BufferedInputStream getAltContent(Context c, Intent i) throws IOException {
         Uri content = getContentFromIntent(i);
-        InputStream is = c.getContentResolver().openInputStream(content);
+        Binder.allowBlockingForCurrentThread();
         try {
-            return Streams.readFullyNoClose(is);
+            return new BufferedInputStream(c.getContentResolver().openInputStream(content));
         } finally {
-            is.close();
+            Binder.defaultBlockingForCurrentThread();
         }
     }
 
@@ -175,7 +178,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         return current.equals(required);
     }
 
-    protected void writeUpdate(File dir, File file, byte[] content) throws IOException {
+    protected void writeUpdate(File dir, File file, InputStream inputStream) throws IOException {
         FileOutputStream out = null;
         File tmp = null;
         try {
@@ -192,7 +195,7 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
             tmp.setReadable(true, false);
             // write to it
             out = new FileOutputStream(tmp);
-            out.write(content);
+            Streams.copy(inputStream, out);
             // sync to disk
             out.getFD().sync();
             // atomic rename
@@ -207,9 +210,10 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
         }
     }
 
-    protected void install(byte[] content, int version) throws IOException {
-        writeUpdate(updateDir, updateContent, content);
-        writeUpdate(updateDir, updateVersion, Long.toString(version).getBytes());
+    protected void install(InputStream inputStream, int version) throws IOException {
+        writeUpdate(updateDir, updateContent, inputStream);
+        writeUpdate(updateDir, updateVersion,
+                new ByteArrayInputStream(Long.toString(version).getBytes()));
     }
 
     protected void postInstall(Context context, Intent intent) {
