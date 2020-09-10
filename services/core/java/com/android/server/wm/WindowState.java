@@ -5872,6 +5872,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
+        // If the window is goneForLayout, relayout won't be called so we'd just wait forever.
+        if (isGoneForLayout()) {
+            return false;
+        }
         boolean willSync = setPendingListener(waitingListener, waitingId);
         if (!willSync) {
             return false;
