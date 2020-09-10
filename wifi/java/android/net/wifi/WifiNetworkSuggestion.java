@@ -176,7 +176,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mWapiEnterpriseConfig = null;
             mIsNetworkUntrusted = false;
             mPriorityGroup = 0;
-            mIsEnhancedMacRandomizationEnabled = true;
+            mIsEnhancedMacRandomizationEnabled = false;
         }
 
         /**
@@ -409,11 +409,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * Suggested networks will never use the device (factory) MAC address to associate to the
          * network - instead they use a locally generated random MAC address. This method controls
          * the strategy for generating the random MAC address:
-         * <li> Persisted MAC randomization (false): generates the MAC address from a secret seed
-         * and information from the Wi-Fi configuration (SSID or Passpoint profile). That means that
-         * the same generated MAC address will be used for each subsequent association. </li>
-         * <li> Enhanced MAC randomization (true - the default): periodically generates a new MAC
-         * address new connections. Under this option, the randomized MAC address should change
+         * <li> Persisted MAC randomization (false - the default): generates the MAC address from a
+         * secret seed and information from the Wi-Fi configuration (SSID or Passpoint profile).
+         * This means that the same generated MAC address will be used for each subsequent
+         * association. </li>
+         * <li> Enhanced MAC randomization (true): periodically generates a new MAC
+         * address for new connections. Under this option, the randomized MAC address should change
          * if the suggestion is removed and then added back. </li>
          *
          * @param enabled {@code true} to periodically change the randomized MAC address.
