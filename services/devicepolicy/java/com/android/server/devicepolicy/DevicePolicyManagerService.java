@@ -2159,6 +2159,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return getDeviceOwnerOfCallerLocked(caller);
     }
 
+    @NonNull ActiveAdmin getParentOfAdminIfRequired(ActiveAdmin admin, boolean parent) {
+        Objects.requireNonNull(admin);
+        return parent ? admin.getParentActiveAdmin() : admin;
+    }
+
     /**
      * Finds an active admin for the caller then checks {@code permission} if admin check failed.
      *
@@ -4527,6 +4532,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkArgument(timeoutMs >= 0, "Timeout must not be a negative number.");
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
         // timeoutMs with value 0 means that the admin doesn't participate
         // timeoutMs is clamped to the interval in case the internal constants change in the future
         final long minimumStrongAuthTimeout = getMinimumStrongAuthTimeoutMs();
@@ -4537,11 +4544,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             timeoutMs = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
         }
 
-        final int userHandle = mInjector.userHandleGetCallingUserId();
+        final int userHandle = caller.getUserId();
         boolean changed = false;
         synchronized (getLockObject()) {
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
+            ActiveAdmin ap = getParentOfAdminIfRequired(getProfileOwnerOrDeviceOwnerLocked(caller),
+                    parent);
             if (ap.strongAuthUnlockTimeout != timeoutMs) {
                 ap.strongAuthUnlockTimeout = timeoutMs;
                 saveSettingsLocked(userHandle);
@@ -5646,8 +5653,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             List<String> lockdownWhitelist)
             throws SecurityException {
         enforceProfileOrDeviceOwner(who);
+        final CallerIdentity caller = getCallerIdentity(who);
 
-        final int userId = mInjector.userHandleGetCallingUserId();
+        final int userId = caller.getUserId();
         mInjector.binderWithCleanCallingIdentity(() -> {
             if (vpnPackage != null && !isPackageInstalledForUser(vpnPackage, userId)) {
                 Slog.w(LOG_TAG, "Non-existent VPN package specified: " + vpnPackage);
@@ -5678,8 +5686,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .write();
         });
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
             if (!TextUtils.equals(vpnPackage, admin.mAlwaysOnVpnPackage)
                     || lockdown != admin.mAlwaysOnVpnLockdown) {
                 admin.mAlwaysOnVpnPackage = vpnPackage;
@@ -9675,10 +9682,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
+        final CallerIdentity caller = getCallerIdentity(who);
 
         synchronized (getLockObject()) {
-            final ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
+            final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
+                    getProfileOwnerOrDeviceOwnerLocked(caller), parent);
             if (parent) {
                 enforceProfileOwnerOfOrganizationOwnedDevice(activeAdmin);
             }
@@ -9929,6 +9937,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
+        final CallerIdentity caller = getCallerIdentity(who);
         synchronized (getLockObject()) {
             /*
              * When called on the parent DPM instance (parent == true), affects active admin
@@ -9936,9 +9945,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
              * * The ActiveAdmin must be of an org-owned profile owner.
              * * The parent ActiveAdmin instance should be used for managing the restriction.
              */
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    parent ? DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER
-                            : DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
+            final ActiveAdmin ap;
+            if (parent) {
+                ap = getParentOfAdminIfRequired(getOrganizationOwnedProfileOwnerLocked(caller),
+                        parent);
+            } else {
+                ap = getParentOfAdminIfRequired(getProfileOwnerOrDeviceOwnerLocked(caller), parent);
+            }
+
             if (disabled) {
                 ap.accountTypesWithManagementDisabled.add(accountType);
             } else {
