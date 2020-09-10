@@ -768,9 +768,7 @@ public final class ActiveServices {
         FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
                 r.name.getPackageName(), r.name.getClassName(),
                 FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
-        synchronized (r.stats.getBatteryStats()) {
-            r.stats.startRunningLocked();
-        }
+        mAm.mBatteryStatsService.noteServiceStartRunning(r.stats);
         String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false);
         if (error != null) {
             return new ComponentName("!!", error);
@@ -809,9 +807,7 @@ public final class ActiveServices {
         FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, service.appInfo.uid,
                 service.name.getPackageName(), service.name.getClassName(),
                 FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-        synchronized (service.stats.getBatteryStats()) {
-            service.stats.stopRunningLocked();
-        }
+        mAm.mBatteryStatsService.noteServiceStopRunning(service.stats);
         service.startRequested = false;
         if (service.tracker != null) {
             service.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -970,9 +966,7 @@ public final class ActiveServices {
             FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
                     r.name.getPackageName(), r.name.getClassName(),
                     FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-            synchronized (r.stats.getBatteryStats()) {
-                r.stats.stopRunningLocked();
-            }
+            mAm.mBatteryStatsService.noteServiceStopRunning(r.stats);
             r.startRequested = false;
             if (r.tracker != null) {
                 r.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -2518,7 +2512,8 @@ public final class ActiveServices {
                     synchronized (stats) {
                         ss = stats.getServiceStatsLocked(
                                 sInfo.applicationInfo.uid, name.getPackageName(),
-                                name.getClassName());
+                                name.getClassName(), SystemClock.elapsedRealtime(),
+                                SystemClock.uptimeMillis());
                     }
                     r = new ServiceRecord(mAm, ss, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res);
@@ -3056,9 +3051,7 @@ public final class ActiveServices {
             }
             FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_LAUNCH_REPORTED, r.appInfo.uid,
                     r.name.getPackageName(), r.name.getClassName());
-            synchronized (r.stats.getBatteryStats()) {
-                r.stats.startLaunchedLocked();
-            }
+            mAm.mBatteryStatsService.noteServiceStartLaunch(r.stats);
             mAm.notifyPackageUse(r.serviceInfo.packageName,
                                  PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
@@ -3402,9 +3395,7 @@ public final class ActiveServices {
         smap.mDelayedStartList.remove(r);
 
         if (r.app != null) {
-            synchronized (r.stats.getBatteryStats()) {
-                r.stats.stopLaunchedLocked();
-            }
+            mAm.mBatteryStatsService.noteServiceStopLaunch(r.stats);
             r.app.stopService(r);
             r.app.updateBoundClientUids();
             if (r.whitelistManager) {
@@ -3940,9 +3931,7 @@ public final class ActiveServices {
         // Clear app state from services.
         for (int i = app.numberOfRunningServices() - 1; i >= 0; i--) {
             ServiceRecord sr = app.getRunningServiceAt(i);
-            synchronized (sr.stats.getBatteryStats()) {
-                sr.stats.stopLaunchedLocked();
-            }
+            mAm.mBatteryStatsService.noteServiceStopLaunch(sr.stats);
             if (sr.app != app && sr.app != null && !sr.app.isPersistent()) {
                 sr.app.stopService(sr);
                 sr.app.updateBoundClientUids();

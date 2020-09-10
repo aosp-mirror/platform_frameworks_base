@@ -376,7 +376,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     for (int uid : uidsToRemove) {
                         FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, -1, uid,
                                 FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
-                        mStats.removeIsolatedUidLocked(uid);
+                        mStats.removeIsolatedUidLocked(uid, SystemClock.elapsedRealtime(),
+                                SystemClock.uptimeMillis());
                     }
                     mStats.clearPendingRemovedUids();
                 }
@@ -473,11 +474,15 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
         final BluetoothActivityEnergyInfo bluetoothInfo = awaitControllerInfo(bluetoothReceiver);
         final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        final long elapsedRealtimeUs = elapsedRealtime * 1000;
+        final long uptimeUs = uptime * 1000;
 
         synchronized (mStats) {
             mStats.addHistoryEventLocked(
-                    SystemClock.elapsedRealtime(),
-                    SystemClock.uptimeMillis(),
+                    elapsedRealtime,
+                    uptime,
                     BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS,
                     reason, 0);
 
@@ -490,17 +495,17 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             }
 
             if ((updateFlags & UPDATE_ALL) != 0) {
-                mStats.updateKernelWakelocksLocked();
-                mStats.updateKernelMemoryBandwidthLocked();
+                mStats.updateKernelWakelocksLocked(elapsedRealtimeUs);
+                mStats.updateKernelMemoryBandwidthLocked(elapsedRealtimeUs);
             }
 
             if ((updateFlags & UPDATE_RPM) != 0) {
-                mStats.updateRpmStatsLocked();
+                mStats.updateRpmStatsLocked(elapsedRealtimeUs);
             }
 
             if (bluetoothInfo != null) {
                 if (bluetoothInfo.isValid()) {
-                    mStats.updateBluetoothStateLocked(bluetoothInfo);
+                    mStats.updateBluetoothStateLocked(bluetoothInfo, elapsedRealtime, uptime);
                 } else {
                     Slog.w(TAG, "bluetooth info is invalid: " + bluetoothInfo);
                 }
@@ -512,7 +517,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
         if (wifiInfo != null) {
             if (wifiInfo.isValid()) {
-                mStats.updateWifiState(extractDeltaLocked(wifiInfo));
+                mStats.updateWifiState(extractDeltaLocked(wifiInfo), elapsedRealtime, uptime);
             } else {
                 Slog.w(TAG, "wifi info is invalid: " + wifiInfo);
             }
@@ -520,7 +525,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
         if (modemInfo != null) {
             if (modemInfo.isValid()) {
-                mStats.updateMobileRadioState(modemInfo);
+                mStats.updateMobileRadioState(modemInfo, elapsedRealtime, uptime);
             } else {
                 Slog.w(TAG, "modem info is invalid: " + modemInfo);
             }
