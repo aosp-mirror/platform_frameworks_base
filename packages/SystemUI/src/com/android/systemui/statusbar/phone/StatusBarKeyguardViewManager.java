@@ -44,7 +44,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
@@ -104,7 +103,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final NavigationModeController mNavigationModeController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final Optional<FaceAuthScreenBrightnessController> mFaceAuthScreenBrightnessController;
-    private final KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -216,7 +215,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             KeyguardStateController keyguardStateController,
             Optional<FaceAuthScreenBrightnessController> faceAuthScreenBrightnessController,
             NotificationMediaManager notificationMediaManager,
-            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
+            KeyguardBouncer.Factory keyguardBouncerFactory) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -229,7 +228,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBarStateController = sysuiStatusBarStateController;
         mDockManager = dockManager;
         mFaceAuthScreenBrightnessController = faceAuthScreenBrightnessController;
-        mKeyguardBouncerComponentFactory = keyguardBouncerComponentFactory;
+        mKeyguardBouncerFactory = keyguardBouncerFactory;
     }
 
     @Override
@@ -246,9 +245,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mLastLockVisible = mLockIconContainer.getVisibility() == View.VISIBLE;
         }
         mBiometricUnlockController = biometricUnlockController;
-        mBouncer = mKeyguardBouncerComponentFactory
-                .build(container, mExpansionCallback)
-                .createKeyguardBouncer();
+        mBouncer = mKeyguardBouncerFactory.create(container, mExpansionCallback);
         mNotificationPanelViewController = notificationPanelViewController;
         notificationPanelViewController.addExpansionListener(this);
         mBypassController = bypassController;
