@@ -2734,32 +2734,27 @@ public class CarrierConfigManager {
     /**
      * Indicates if the carrier supports auto-upgrading a call to RTT when receiving a call from a
      * RTT-supported device.
-     * @hide
      */
     public static final String KEY_RTT_AUTO_UPGRADE_BOOL = "rtt_auto_upgrade_bool";
 
     /**
      * Indicates if the carrier supports RTT during a video call.
-     * @hide
      */
     public static final String KEY_RTT_SUPPORTED_FOR_VT_BOOL = "rtt_supported_for_vt_bool";
 
     /**
      * Indicates if the carrier supports upgrading a voice call to an RTT call during the call.
-     * @hide
      */
     public static final String KEY_RTT_UPGRADE_SUPPORTED_BOOL = "rtt_upgrade_supported_bool";
 
     /**
      * Indicates if the carrier supports downgrading a RTT call to a voice call during the call.
-     * @hide
      */
     public static final String KEY_RTT_DOWNGRADE_SUPPORTED_BOOL = "rtt_downgrade_supported_bool";
 
     /**
      * Indicates if the TTY HCO and VCO options should be hidden in the accessibility menu
      * if the device is capable of RTT.
-     * @hide
      */
     public static final String KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL = "hide_tty_hco_vco_with_rtt";
 
