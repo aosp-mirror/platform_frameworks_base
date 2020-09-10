@@ -72,6 +72,7 @@ import android.util.Range;
 import android.util.Size;
 
 import dalvik.annotation.optimization.FastNative;
+import dalvik.system.VMRuntime;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -351,6 +352,7 @@ public class CameraMetadataNative implements Parcelable {
         if (mMetadataPtr == 0) {
             throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         }
+        updateNativeAllocation();
     }
 
     /**
@@ -362,6 +364,7 @@ public class CameraMetadataNative implements Parcelable {
         if (mMetadataPtr == 0) {
             throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         }
+        updateNativeAllocation();
     }
 
     /**
@@ -443,6 +446,7 @@ public class CameraMetadataNative implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         nativeReadFromParcel(in, mMetadataPtr);
+        updateNativeAllocation();
     }
 
     /**
@@ -533,6 +537,11 @@ public class CameraMetadataNative implements Parcelable {
         // Delete native pointer, but does not clear it
         nativeClose(mMetadataPtr);
         mMetadataPtr = 0;
+
+        if (mBufferSize > 0) {
+            VMRuntime.getRuntime().registerNativeFree(mBufferSize);
+        }
+        mBufferSize = 0;
     }
 
     private <T> T getBase(CameraCharacteristics.Key<T> key) {
@@ -1645,9 +1654,26 @@ public class CameraMetadataNative implements Parcelable {
         return true;
     }
 
+    private void updateNativeAllocation() {
+        long currentBufferSize = nativeGetBufferSize(mMetadataPtr);
+
+        if (currentBufferSize != mBufferSize) {
+            if (mBufferSize > 0) {
+                VMRuntime.getRuntime().registerNativeFree(mBufferSize);
+            }
+
+            mBufferSize = currentBufferSize;
+
+            if (mBufferSize > 0) {
+                VMRuntime.getRuntime().registerNativeAllocation(mBufferSize);
+            }
+        }
+    }
+
     private int mCameraId = -1;
     private boolean mHasMandatoryConcurrentStreams = false;
     private Size mDisplaySize = new Size(0, 0);
+    private long mBufferSize = 0;
 
     /**
      * Set the current camera Id.
@@ -1705,6 +1731,8 @@ public class CameraMetadataNative implements Parcelable {
     private static synchronized native boolean nativeIsEmpty(long ptr);
     @FastNative
     private static synchronized native int nativeGetEntryCount(long ptr);
+    @FastNative
+    private static synchronized native long nativeGetBufferSize(long ptr);
 
     @UnsupportedAppUsage
     @FastNative
@@ -1744,6 +1772,8 @@ public class CameraMetadataNative implements Parcelable {
         mCameraId = other.mCameraId;
         mHasMandatoryConcurrentStreams = other.mHasMandatoryConcurrentStreams;
         mDisplaySize = other.mDisplaySize;
+        updateNativeAllocation();
+        other.updateNativeAllocation();
     }
 
     /**
