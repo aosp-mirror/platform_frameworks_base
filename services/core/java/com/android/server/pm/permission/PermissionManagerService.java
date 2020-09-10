@@ -83,7 +83,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.UserInfo;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
@@ -121,7 +120,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.TimingsTraceLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -3078,17 +3076,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @return user ids for created users and pre-created users
      */
     private int[] getAllUserIds() {
-        final TimingsTraceLog t = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
-        t.traceBegin("getAllUserIds");
-        List<UserInfo> users = UserManagerService.getInstance().getUsers(
-                /*excludePartial=*/ true, /*excludeDying=*/ true, /*excludePreCreated=*/ false);
-        int size = users.size();
-        final int[] userIds = new int[size];
-        for (int i = 0; i < size; i++) {
-            userIds[i] = users.get(i).id;
-        }
-        t.traceEnd();
-        return userIds;
+        return UserManagerService.getInstance().getUserIdsIncludingPreCreated();
     }
 
     /**

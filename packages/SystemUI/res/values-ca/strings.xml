@@ -707,7 +707,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desactiva les notificacions"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Silenci"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminada"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminat"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bombolla"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sense so ni vibració"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sense so ni vibració i es mostra més avall a la secció de converses"</string>

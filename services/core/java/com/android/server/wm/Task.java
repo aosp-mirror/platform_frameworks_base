@@ -3627,6 +3627,9 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.requestedOrientation = mReuseActivitiesReport.base != null
+                ? mReuseActivitiesReport.base.getRequestedOrientation()
+                : SCREEN_ORIENTATION_UNSET;
     }
 
     /**

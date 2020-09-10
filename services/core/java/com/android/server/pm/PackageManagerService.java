@@ -2376,9 +2376,12 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUserId = UserHandle.getUserId(callingUid);
 
         for (String packageName : packages) {
-            PackageSetting setting = mSettings.mPackages.get(packageName);
-            if (setting != null
-                    && !shouldFilterApplicationLocked(setting, callingUid, callingUserId)) {
+            final boolean filterApp;
+            synchronized (mLock) {
+                final PackageSetting ps = mSettings.getPackageLPr(packageName);
+                filterApp = shouldFilterApplicationLocked(ps, callingUid, callingUserId);
+            }
+            if (!filterApp) {
                 notifyInstallObserver(packageName);
             }
         }
@@ -4198,13 +4201,9 @@ public class PackageManagerService extends IPackageManager.Stub
         Iterator<ResolveInfo> iter = matches.iterator();
         while (iter.hasNext()) {
             final ResolveInfo rInfo = iter.next();
-            final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
-            if (ps != null) {
-                final PermissionsState permissionsState = ps.getPermissionsState();
-                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)
-                        || Build.IS_ENG) {
-                    continue;
-                }
+            if (checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                    rInfo.activityInfo.packageName, 0) == PERMISSION_GRANTED || Build.IS_ENG) {
+                continue;
             }
             iter.remove();
         }
@@ -4380,8 +4379,24 @@ public class PackageManagerService extends IPackageManager.Stub
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0
                     ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
             // Compute granted permissions only if package has requested permissions
-            final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
+            Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
                     ? Collections.emptySet() : permissionsState.getPermissions(userId);
+            if (state.instantApp) {
+                permissions = new ArraySet<>(permissions);
+                permissions.removeIf(permissionName -> {
+                    BasePermission permission = mPermissionManager.getPermissionTEMP(
+                            permissionName);
+                    if (permission == null) {
+                        return true;
+                    }
+                    if (!permission.isInstant()) {
+                        EventLog.writeEvent(0x534e4554, "140256621", UserHandle.getUid(userId,
+                                ps.appId), permissionName);
+                        return true;
+                    }
+                    return false;
+                });
+            }
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
                     ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
@@ -8579,10 +8594,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageSetting ps,
             String[] permissions, boolean[] tmp, int flags, int userId) {
         int numMatch = 0;
-        final PermissionsState permissionsState = ps.getPermissionsState();
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
-            if (permissionsState.hasPermission(permission, userId)) {
+            if (checkPermission(permission, ps.name, userId) == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {
@@ -8914,10 +8928,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (providerInfo == null) {
             return null;
         }
-        if (!mSettings.isEnabledAndMatchLPr(providerInfo, flags, userId)) {
-            return null;
-        }
         synchronized (mLock) {
+            if (!mSettings.isEnabledAndMatchLPr(providerInfo, flags, userId)) {
+                return null;
+            }
             final PackageSetting ps = mSettings.mPackages.get(providerInfo.packageName);
             final ComponentName component =
                     new ComponentName(providerInfo.packageName, providerInfo.name);
@@ -9004,9 +9018,11 @@ public class PackageManagerService extends IPackageManager.Stub
             String targetPackage, int flags) {
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
-        final PackageSetting ps = mSettings.mPackages.get(targetPackage);
-        if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
-            return ParceledListSlice.emptyList();
+        synchronized (mLock) {
+            final PackageSetting ps = mSettings.getPackageLPr(targetPackage);
+            if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
+                return ParceledListSlice.emptyList();
+            }
         }
         return new ParceledListSlice<>(queryInstrumentationInternal(targetPackage, flags,
                 callingUserId));
@@ -14501,7 +14517,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageSetting ps;
         int appId = -1;
         long ceDataInode = -1;
-        synchronized (mSettings) {
+        synchronized (mLock) {
             ps = mSettings.getPackageLPr(packageName);
             if (ps != null) {
                 appId = ps.appId;
@@ -19185,6 +19201,14 @@ public class PackageManagerService extends IPackageManager.Stub
         final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
 
+        // We need to get the permission state before package state is (potentially) destroyed.
+        final SparseBooleanArray hadSuspendAppsPermission = new SparseBooleanArray();
+        // allUserHandles could be null, so call mUserManager.getUserIds() directly which is cached anyway.
+        for (int userId : mUserManager.getUserIds()) {
+            hadSuspendAppsPermission.put(userId, checkPermission(Manifest.permission.SUSPEND_APPS,
+                    packageName, userId) == PERMISSION_GRANTED);
+        }
+
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
 
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
@@ -19251,8 +19275,7 @@ public class PackageManagerService extends IPackageManager.Stub
             affectedUserIds = resolveUserIds(userId);
         }
         for (final int affectedUserId : affectedUserIds) {
-            if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS,
-                    affectedUserId)) {
+            if (hadSuspendAppsPermission.get(affectedUserId)) {
                 unsuspendForSuspendingPackage(packageName, affectedUserId);
                 removeAllDistractingPackageRestrictions(affectedUserId);
             }
@@ -19356,9 +19379,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
 
-        final PackageSetting ps = mSettings.getPackageLPr(packageName);
-        final boolean filterApp =
-                (ps != null && shouldFilterApplicationLocked(ps, callingUid, userId));
+        final boolean filterApp;
+        synchronized (mLock) {
+            final PackageSetting ps = mSettings.getPackageLPr(packageName);
+            filterApp = shouldFilterApplicationLocked(ps, callingUid, userId);
+        }
         if (!filterApp && mProtectedPackages.isPackageDataProtected(userId, packageName)) {
             throw new SecurityException("Cannot clear data for a protected package: "
                     + packageName);
@@ -19638,11 +19663,13 @@ public class PackageManagerService extends IPackageManager.Stub
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-            if (getUidTargetSdkVersionLockedLPr(callingUid)
-                    < Build.VERSION_CODES.FROYO) {
-                Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
-                        + callingUid);
-                return;
+            synchronized (mLock) {
+                if (getUidTargetSdkVersionLockedLPr(callingUid)
+                        < Build.VERSION_CODES.FROYO) {
+                    Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
+                            + callingUid);
+                    return;
+                }
             }
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
@@ -19814,8 +19841,9 @@ public class PackageManagerService extends IPackageManager.Stub
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     private void clearPackagePreferredActivities(String packageName, int userId) {
         final SparseBooleanArray changedUsers = new SparseBooleanArray();
-
-        clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
+        synchronized (mLock) {
+            clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
+        }
         if (changedUsers.size() > 0) {
             updateDefaultHomeNotLocked(changedUsers);
             postPreferredActivityChangedBroadcast(userId);
@@ -19937,7 +19965,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         try {
             final SparseBooleanArray changedUsers = new SparseBooleanArray();
-            clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
+            synchronized (mLock) {
+                clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
+            }
             if (changedUsers.size() > 0) {
                 postPreferredActivityChangedBroadcast(userId);
             }
@@ -20942,15 +20972,19 @@ public class PackageManagerService extends IPackageManager.Stub
         // Limit who can change which apps
         if (!UserHandle.isSameApp(callingUid, pkgSetting.appId)) {
             // Don't allow apps that don't have permission to modify other apps
-            if (!allowedByPermission
-                    || shouldFilterApplicationLocked(pkgSetting, callingUid, userId)) {
+            final boolean filterApp;
+            synchronized (mLock) {
+                filterApp = (!allowedByPermission
+                        || shouldFilterApplicationLocked(pkgSetting, callingUid, userId));
+            }
+            if (filterApp) {
                 throw new SecurityException(
                         "Attempt to change component state; "
-                        + "pid=" + Binder.getCallingPid()
-                        + ", uid=" + callingUid
-                        + (className == null
+                                + "pid=" + Binder.getCallingPid()
+                                + ", uid=" + callingUid
+                                + (className == null
                                 ? ", package=" + packageName
-                                : ", component=" + packageName + "/" + className));
+                                        : ", component=" + packageName + "/" + className));
             }
             // Don't allow changing protected packages.
             if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
@@ -21017,8 +21051,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgSetting.setEnabled(newState, userId, callingPackage);
                 if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                         || newState == COMPONENT_ENABLED_STATE_DISABLED)
-                        && pkgSetting.getPermissionsState().hasPermission(
-                                Manifest.permission.SUSPEND_APPS, userId)) {
+                        && checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                        == PERMISSION_GRANTED) {
                     // This app should not generally be allowed to get disabled by the UI, but if it
                     // ever does, we don't want to end up with some of the user's apps permanently
                     // suspended.

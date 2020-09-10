@@ -78,12 +78,12 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         private @Nullable String mWpa3SaePassphrase;
         /**
          * The enterprise configuration details specifying the EAP method,
-         * certificates and other settings associated with the WPA-EAP networks.
+         * certificates and other settings associated with the WPA/WPA2-Enterprise networks.
          */
         private @Nullable WifiEnterpriseConfig mWpa2EnterpriseConfig;
         /**
          * The enterprise configuration details specifying the EAP method,
-         * certificates and other settings associated with the SuiteB networks.
+         * certificates and other settings associated with the WPA3-Enterprise networks.
          */
         private @Nullable WifiEnterpriseConfig mWpa3EnterpriseConfig;
         /**
@@ -243,7 +243,11 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
 
         /**
          * Set the associated enterprise configuration for this network. Needed for authenticating
-         * to WPA3-SuiteB networks. See {@link WifiEnterpriseConfig} for description.
+         * to WPA3-Enterprise networks (standard and 192-bit security). See
+         * {@link WifiEnterpriseConfig} for description. For 192-bit security networks, both the
+         * client and CA certificates must be provided, and must be of type of either
+         * sha384WithRSAEncryption (OID 1.2.840.113549.1.1.12) or ecdsa-with-SHA384
+         * (OID 1.2.840.10045.4.3.3).
          *
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
@@ -284,8 +288,25 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
             } else if (mWpa2EnterpriseConfig != null) { // WPA-EAP network
                 configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
                 configuration.enterpriseConfig = mWpa2EnterpriseConfig;
-            } else if (mWpa3EnterpriseConfig != null) { // WPA3-SuiteB network
-                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
+            } else if (mWpa3EnterpriseConfig != null) { // WPA3-Enterprise
+                if (mWpa3EnterpriseConfig.getEapMethod() == WifiEnterpriseConfig.Eap.TLS
+                        && WifiEnterpriseConfig.isSuiteBCipherCert(
+                        mWpa3EnterpriseConfig.getClientCertificate())
+                        && WifiEnterpriseConfig.isSuiteBCipherCert(
+                        mWpa3EnterpriseConfig.getCaCertificate())) {
+                    // WPA3-Enterprise in 192-bit security mode (Suite-B)
+                    configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
+                } else {
+                    // WPA3-Enterprise
+                    configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
+                    configuration.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                    configuration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                    configuration.allowedPairwiseCiphers.set(
+                            WifiConfiguration.PairwiseCipher.GCMP_256);
+                    configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                    configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
+                    configuration.requirePmf = true;
+                }
                 configuration.enterpriseConfig = mWpa3EnterpriseConfig;
             } else if (mIsEnhancedOpen) { // OWE network
                 configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OWE);

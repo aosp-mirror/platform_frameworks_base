@@ -5112,6 +5112,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
             r.setState(ON_DESTROY);
+            mLastReportedWindowingMode.remove(r.activity.getActivityToken());
         }
         schedulePurgeIdler();
         // updatePendingActivityConfiguration() reads from mActivities to update

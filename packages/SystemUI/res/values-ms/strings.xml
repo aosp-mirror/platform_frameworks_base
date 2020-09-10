@@ -403,7 +403,7 @@
       <item quantity="one">%d peranti</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Pemberitahuan"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu suluh"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu Suluh"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera sedang digunakan"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Data mudah alih"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan data"</string>

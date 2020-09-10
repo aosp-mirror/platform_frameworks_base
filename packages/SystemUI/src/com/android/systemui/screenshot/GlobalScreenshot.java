@@ -566,7 +566,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, boolean showFlash) {
         if (mScreenshotLayout.isAttachedToWindow()) {
-            if (!mDismissAnimation.isRunning()) { // if we didn't already dismiss for another reason
+            // if we didn't already dismiss for another reason
+            if (mDismissAnimation == null || !mDismissAnimation.isRunning()) {
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_REENTERED);
             }
             dismissScreenshot("new screenshot requested", true);

@@ -16,6 +16,7 @@
 
 package com.android.systemui.car.window;
 
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.content.Context;
@@ -104,6 +105,7 @@ public class SystemUIOverlayWindowController implements
         mLp.setTitle("SystemUIOverlayWindow");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
         mWindowManager.addView(mBaseLayout, mLp);
         mLpChanged.copyFrom(mLp);
@@ -160,6 +162,7 @@ public class SystemUIOverlayWindowController implements
     private void updateWindow() {
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             if (isAttached()) {
+                mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
                 mWindowManager.updateViewLayout(mBaseLayout, mLp);
             }
         }

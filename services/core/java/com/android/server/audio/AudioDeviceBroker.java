@@ -476,8 +476,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
         sendIIMsgNoDelay(MSG_II_SET_HEARING_AID_VOLUME, SENDMSG_REPLACE, index, streamType);
     }
 
-    /*package*/ void postSetModeOwnerPid(int pid) {
-        sendIMsgNoDelay(MSG_I_SET_MODE_OWNER_PID, SENDMSG_REPLACE, pid);
+    /*package*/ void postSetModeOwnerPid(int pid, int mode) {
+        sendIIMsgNoDelay(MSG_I_SET_MODE_OWNER_PID, SENDMSG_REPLACE, pid, mode);
     }
 
     /*package*/ void postBluetoothA2dpDeviceConfigChange(@NonNull BluetoothDevice device) {
@@ -949,7 +949,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         synchronized (mDeviceStateLock) {
                             if (mModeOwnerPid != msg.arg1) {
                                 mModeOwnerPid = msg.arg1;
-                                updateSpeakerphoneOn("setNewModeOwner");
+                                if (msg.arg2 != AudioSystem.MODE_RINGTONE) {
+                                    updateSpeakerphoneOn("setNewModeOwner");
+                                }
                                 if (mModeOwnerPid != 0) {
                                     mBtHelper.disconnectBluetoothSco(mModeOwnerPid);
                                 }
