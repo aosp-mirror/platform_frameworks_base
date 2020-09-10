@@ -45,6 +45,7 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.util.ArrayMap;
@@ -59,7 +60,11 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.PermissionSettings;
+
+import com.google.common.truth.Truth;
 
 import org.junit.After;
 import org.junit.Before;
@@ -377,6 +382,74 @@ public class PackageManagerSettingsTests {
         final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
                 .readUserState(0);
         assertThat(readPus3.distractionFlags, is(distractionFlags3));
+    }
+
+    @Test
+    public void testWriteReadUsesStaticLibraries() {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final Object lock = new Object();
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), mPermissionSettings,
+                mRuntimePermissionsPersistence, lock);
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.appId = Process.FIRST_APPLICATION_UID;
+        ps1.pkg = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
+                .setUid(ps1.appId)
+                .setSystem(true)
+                .hideAsFinal();
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        ps2.appId = Process.FIRST_APPLICATION_UID + 1;
+        ps2.pkg = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_2).hideAsParsed())
+                .setUid(ps2.appId)
+                .hideAsFinal();
+
+        ps1.usesStaticLibraries = new String[] { "com.example.shared.one" };
+        ps1.usesStaticLibrariesVersions = new long[] { 12 };
+        ps1.setFlags(ps1.pkgFlags | ApplicationInfo.FLAG_SYSTEM);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+        assertThat(settingsUnderTest.disableSystemPackageLPw(PACKAGE_NAME_1, false), is(true));
+
+        ps2.usesStaticLibraries = new String[] { "com.example.shared.two" };
+        ps2.usesStaticLibrariesVersions = new long[] { 34 };
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+
+        settingsUnderTest.writeLPr();
+
+        settingsUnderTest.mPackages.clear();
+        settingsUnderTest.mDisabledSysPackages.clear();
+
+        assertThat(settingsUnderTest.readLPw(createFakeUsers()), is(true));
+
+        PackageSetting readPs1 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_1);
+        PackageSetting readPs2 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_2);
+
+        Truth.assertThat(readPs1).isNotNull();
+        Truth.assertThat(readPs1.usesStaticLibraries).isNotNull();
+        Truth.assertThat(readPs1.usesStaticLibrariesVersions).isNotNull();
+        Truth.assertThat(readPs2).isNotNull();
+        Truth.assertThat(readPs2.usesStaticLibraries).isNotNull();
+        Truth.assertThat(readPs2.usesStaticLibrariesVersions).isNotNull();
+
+        List<Long> ps1VersionsAsList = new ArrayList<>();
+        for (long version : ps1.usesStaticLibrariesVersions) {
+            ps1VersionsAsList.add(version);
+        }
+
+        List<Long> ps2VersionsAsList = new ArrayList<>();
+        for (long version : ps2.usesStaticLibrariesVersions) {
+            ps2VersionsAsList.add(version);
+        }
+
+        Truth.assertThat(readPs1.usesStaticLibraries).asList()
+                .containsExactlyElementsIn(ps1.usesStaticLibraries).inOrder();
+
+        Truth.assertThat(readPs1.usesStaticLibrariesVersions).asList()
+                .containsExactlyElementsIn(ps1VersionsAsList).inOrder();
+
+        Truth.assertThat(readPs2.usesStaticLibraries).asList()
+                .containsExactlyElementsIn(ps2.usesStaticLibraries).inOrder();
+
+        Truth.assertThat(readPs2.usesStaticLibrariesVersions).asList()
+                .containsExactlyElementsIn(ps2VersionsAsList).inOrder();
     }
 
     @Test

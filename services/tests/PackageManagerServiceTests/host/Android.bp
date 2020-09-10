@@ -21,12 +21,15 @@ java_test_host {
         "truth-prebuilt",
     ],
     static_libs: [
+        "cts-host-utils",
         "frameworks-base-hostutils",
         "PackageManagerServiceHostTestsIntentVerifyUtils",
     ],
     test_suites: ["general-tests"],
     java_resources: [
+        ":PackageManagerTestAppDeclaresStaticLibrary",
         ":PackageManagerTestAppStub",
+        ":PackageManagerTestAppUsesStaticLibrary",
         ":PackageManagerTestAppVersion1",
         ":PackageManagerTestAppVersion2",
         ":PackageManagerTestAppVersion3",
