@@ -149,7 +149,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
-    boolean mAllowStartForeground;
+    @ActiveServices.FgsFeatureRetCode int mAllowStartForeground;
     String mInfoAllowStartForeground;
     boolean mLoggedInfoAllowStartForeground;
 
