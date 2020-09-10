@@ -43,6 +43,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -271,6 +272,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore // TODO(b/168209929)
     fun testNotListeningWhenIndicatorsDisabled() {
         changeAll(false)
         changeMicCamera(false)
