@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
@@ -448,12 +449,11 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void hang(in IBinder who, boolean allowRestart);
 
-    @UnsupportedAppUsage
-    List<ActivityManager.StackInfo> getAllStackInfos();
+    List<ActivityTaskManager.RootTaskInfo> getAllRootTaskInfos();
     @UnsupportedAppUsage
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     void setFocusedStack(int stackId);
-    ActivityManager.StackInfo getFocusedStackInfo();
+    ActivityTaskManager.RootTaskInfo getFocusedRootTaskInfo();
     @UnsupportedAppUsage
     void restart();
     void performIdleMaintenance();
