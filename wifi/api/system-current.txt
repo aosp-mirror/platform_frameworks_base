@@ -449,6 +449,7 @@ package android.net.wifi {
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public int getWifiApState();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.WifiConfiguration> getWifiConfigForMatchedNetworkSuggestionsSharedWithUser(@NonNull java.util.List<android.net.wifi.ScanResult>);
+    method public boolean is60GHzBandSupported();
     method public boolean isApMacRandomizationSupported();
     method public boolean isConnectedMacRandomizationSupported();
     method @Deprecated public boolean isDeviceToDeviceRttSupported();

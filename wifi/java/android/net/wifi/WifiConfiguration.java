@@ -301,9 +301,16 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int SMS4 = 4;
 
+        /**
+         * AES in Galois/Counter Mode with a 128-bit integrity key
+         */
+        public static final int GCMP_128 = 5;
+
+
         public static final String varName = "pairwise";
 
-        public static final String[] strings = { "NONE", "TKIP", "CCMP", "GCMP_256", "SMS4" };
+        public static final String[] strings = { "NONE", "TKIP", "CCMP", "GCMP_256", "SMS4",
+                "GCMP_128" };
     }
 
     /**
@@ -345,13 +352,17 @@ public class WifiConfiguration implements Parcelable {
          * SMS4 cipher for WAPI
          */
         public static final int SMS4 = 6;
+        /**
+         * AES in Galois/Counter Mode with a 128-bit integrity key
+         */
+        public static final int GCMP_128 = 7;
 
         public static final String varName = "group";
 
         public static final String[] strings =
                 { /* deprecated */ "WEP40", /* deprecated */ "WEP104",
                         "TKIP", "CCMP", "GTK_NOT_USED", "GCMP_256",
-                        "SMS4" };
+                        "SMS4", "GCMP_128" };
     }
 
     /**
@@ -498,8 +509,10 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_128);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_128);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;
@@ -508,7 +521,9 @@ public class WifiConfiguration implements Parcelable {
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_128);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_128);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
                 // Note: allowedSuiteBCiphers bitset will be set by the service once the
@@ -519,8 +534,10 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_128);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_128);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;

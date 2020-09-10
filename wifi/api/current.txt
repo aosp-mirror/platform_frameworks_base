@@ -144,6 +144,7 @@ package android.net.wifi {
 
   @Deprecated public static class WifiConfiguration.GroupCipher {
     field @Deprecated public static final int CCMP = 3; // 0x3
+    field @Deprecated public static final int GCMP_128 = 7; // 0x7
     field @Deprecated public static final int GCMP_256 = 5; // 0x5
     field @Deprecated public static final int SMS4 = 6; // 0x6
     field @Deprecated public static final int TKIP = 2; // 0x2
@@ -173,6 +174,7 @@ package android.net.wifi {
 
   @Deprecated public static class WifiConfiguration.PairwiseCipher {
     field @Deprecated public static final int CCMP = 2; // 0x2
+    field @Deprecated public static final int GCMP_128 = 5; // 0x5
     field @Deprecated public static final int GCMP_256 = 3; // 0x3
     field @Deprecated public static final int NONE = 0; // 0x0
     field @Deprecated public static final int SMS4 = 4; // 0x4
