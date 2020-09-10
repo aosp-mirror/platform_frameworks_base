@@ -43,14 +43,14 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -4983,7 +4983,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
 
             // Apply restriction if necessary.
-            if (needsGestureExclusionRestrictions(w, mLastDispatchedSystemUiVisibility)) {
+            if (needsGestureExclusionRestrictions(w, false /* ignoreRequest */)) {
 
                 // Processes the region along the left edge.
                 remainingLeftRight[0] = addToGlobalAndConsumeLimit(local, outExclusion, leftEdge,
@@ -5000,7 +5000,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 outExclusion.op(middle, Op.UNION);
                 middle.recycle();
             } else {
-                boolean loggable = needsGestureExclusionRestrictions(w, 0 /* lastSysUiVis */);
+                boolean loggable = needsGestureExclusionRestrictions(w, true /* ignoreRequest */);
                 if (loggable) {
                     addToGlobalAndConsumeLimit(local, outExclusion, leftEdge,
                             Integer.MAX_VALUE, w, EXCLUSION_LEFT);
@@ -5022,17 +5022,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * @return Whether gesture exclusion area should be restricted from the window depending on the
-     *         current SystemUI visibility flags.
+     * Returns whether gesture exclusion area should be restricted from the window depending on the
+     * window/activity types and the requested navigation bar visibility and the behavior.
+     *
+     * @param win The target window.
+     * @param ignoreRequest If this is {@code true}, only the window/activity types are considered.
+     * @return {@code true} if the gesture exclusion restrictions are needed.
      */
-    private static boolean needsGestureExclusionRestrictions(WindowState win, int sysUiVisibility) {
+    private static boolean needsGestureExclusionRestrictions(WindowState win,
+            boolean ignoreRequest) {
         final int type = win.mAttrs.type;
-        final int stickyHideNavFlags =
-                SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         final boolean stickyHideNav =
-                (sysUiVisibility & stickyHideNavFlags) == stickyHideNavFlags;
-        return !stickyHideNav && type != TYPE_INPUT_METHOD && type != TYPE_NOTIFICATION_SHADE
-                && win.getActivityType() != ACTIVITY_TYPE_HOME;
+                !win.getRequestedInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                        && win.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+        return (!stickyHideNav || ignoreRequest) && type != TYPE_INPUT_METHOD
+                && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME;
     }
 
     /**
@@ -5048,7 +5052,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 && type != TYPE_APPLICATION_STARTING
                 && type != TYPE_NAVIGATION_BAR
                 && (attrs.flags & FLAG_NOT_TOUCHABLE) == 0
-                && needsGestureExclusionRestrictions(win, 0 /* sysUiVisibility */)
+                && needsGestureExclusionRestrictions(win, true /* ignoreRequest */)
                 && win.getDisplayContent().mDisplayPolicy.hasSideGestures();
     }
 

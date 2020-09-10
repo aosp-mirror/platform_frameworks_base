@@ -32,6 +32,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.TransactionPool;
 import com.android.systemui.dagger.qualifiers.Main;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -90,7 +92,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
     }
 
     @VisibleForTesting
-    class PerDisplay extends IDisplayWindowInsetsController.Stub {
+    class PerDisplay extends DisplayImeController.PerDisplay {
 
         int mDisplayId;
         InsetsController mInsetsController;
@@ -98,6 +100,8 @@ public class DisplaySystemBarsController extends DisplayImeController {
         String mPackageName;
 
         PerDisplay(int displayId) {
+            super(displayId,
+                    mSystemWindows.mDisplayController.getDisplayLayout(displayId).rotation());
             mDisplayId = displayId;
             mInsetsController = new InsetsController(
                     new DisplaySystemBarsInsetsControllerHost(mHandler, this));
@@ -105,6 +109,7 @@ public class DisplaySystemBarsController extends DisplayImeController {
 
         @Override
         public void insetsChanged(InsetsState insetsState) {
+            super.insetsChanged(insetsState);
             if (mInsetsState.equals(insetsState)) {
                 return;
             }
@@ -118,24 +123,33 @@ public class DisplaySystemBarsController extends DisplayImeController {
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
+            super.insetsControlChanged(insetsState, activeControls);
             mInsetsController.onControlsChanged(activeControls);
         }
 
         @Override
         public void hideInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
-            mInsetsController.hide(types);
+            if ((types & WindowInsets.Type.ime()) == 0) {
+                mInsetsController.hide(types);
+            } else {
+                super.hideInsets(types, fromIme);
+            }
+
         }
 
         @Override
         public void showInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme) {
-            mInsetsController.show(types);
+            if ((types & WindowInsets.Type.ime()) == 0) {
+                mInsetsController.show(types);
+            } else {
+                super.showInsets(types, fromIme);
+            }
+
         }
 
         @Override
         public void topFocusedWindowChanged(String packageName) {
-            // If both package names are null or both package names are equal, return.
-            if (mPackageName == packageName
-                    || (mPackageName != null && mPackageName.equals(packageName))) {
+            if (Objects.equals(mPackageName, packageName)) {
                 return;
             }
             mPackageName = packageName;

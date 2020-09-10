@@ -697,7 +697,7 @@ public class SoundTriggerService extends SystemService {
             synchronized (mLock) {
                 ModuleProperties properties = mSoundTriggerHelper.getModuleProperties();
                 sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "getModuleProperties(): " + properties.toString()));
+                        "getModuleProperties(): " + properties));
                 return properties;
             }
         }
@@ -1284,32 +1284,25 @@ public class SoundTriggerService extends SystemService {
          * @return The initialized AudioRecord
          */
         private @NonNull AudioRecord createAudioRecordForEvent(
-                @NonNull SoundTrigger.GenericRecognitionEvent event) {
+                @NonNull SoundTrigger.GenericRecognitionEvent event)
+                throws IllegalArgumentException, UnsupportedOperationException {
             AudioAttributes.Builder attributesBuilder = new AudioAttributes.Builder();
             attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
             AudioAttributes attributes = attributesBuilder.build();
 
-            // Use same AudioFormat processing as in RecognitionEvent.fromParcel
             AudioFormat originalFormat = event.getCaptureFormat();
-            AudioFormat captureFormat = (new AudioFormat.Builder())
-                    .setChannelMask(originalFormat.getChannelMask())
-                    .setEncoding(originalFormat.getEncoding())
-                    .setSampleRate(originalFormat.getSampleRate())
-                    .build();
-
-            int bufferSize = AudioRecord.getMinBufferSize(
-                    captureFormat.getSampleRate() == AudioFormat.SAMPLE_RATE_UNSPECIFIED
-                            ? AudioFormat.SAMPLE_RATE_HZ_MAX
-                            : captureFormat.getSampleRate(),
-                    captureFormat.getChannelCount() == 2
-                            ? AudioFormat.CHANNEL_IN_STEREO
-                            : AudioFormat.CHANNEL_IN_MONO,
-                    captureFormat.getEncoding());
 
             sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
 
-            return new AudioRecord(attributes, captureFormat, bufferSize,
-                    event.getCaptureSession());
+            return (new AudioRecord.Builder())
+                        .setAudioAttributes(attributes)
+                        .setAudioFormat((new AudioFormat.Builder())
+                            .setChannelMask(originalFormat.getChannelMask())
+                            .setEncoding(originalFormat.getEncoding())
+                            .setSampleRate(originalFormat.getSampleRate())
+                            .build())
+                        .setSessionId(event.getCaptureSession())
+                        .build();
         }
 
         @Override
@@ -1335,12 +1328,16 @@ public class SoundTriggerService extends SystemService {
                     // execute if throttled:
                     () -> {
                         if (event.isCaptureAvailable()) {
-                            AudioRecord capturedData = createAudioRecordForEvent(event);
-
-                            // Currently we need to start and release the audio record to reset
-                            // the DSP even if we don't want to process the event
-                            capturedData.startRecording();
-                            capturedData.release();
+                            try {
+                                // Currently we need to start and release the audio record to reset
+                                // the DSP even if we don't want to process the eve
+                                AudioRecord capturedData = createAudioRecordForEvent(event);
+                                capturedData.startRecording();
+                                capturedData.release();
+                            } catch (IllegalArgumentException | UnsupportedOperationException e) {
+                                Slog.w(TAG, mPuuid + ": createAudioRecordForEvent(" + event
+                                        + "), failed to create AudioRecord");
+                            }
                         }
                     }));
         }

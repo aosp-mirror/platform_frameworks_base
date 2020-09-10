@@ -280,6 +280,7 @@ class InsetsStateController {
         }
         if (changed) {
             notifyInsetsChanged();
+            mDisplayContent.updateSystemGestureExclusion();
             mDisplayContent.getDisplayPolicy().updateSystemUiVisibilityLw();
         }
     }
