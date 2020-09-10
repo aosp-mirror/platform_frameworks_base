@@ -23,6 +23,7 @@ import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.util.PathParser
 import android.util.TypedValue
@@ -36,8 +37,9 @@ class BubbleOverflow(
     private val stack: BubbleStackView
 ) : BubbleViewProvider {
 
-    private var bitmap: Bitmap? = null
-    private var dotPath: Path? = null
+    private lateinit var bitmap : Bitmap
+    private lateinit var dotPath : Path
+
     private var bitmapSize = 0
     private var iconBitmapSize = 0
     private var dotColor = 0
@@ -80,40 +82,41 @@ class BubbleOverflow(
         expandedView.updateDimensions()
     }
 
-    fun updateBtnTheme() {
+    private fun updateBtnTheme() {
         val res = context.resources
 
         // Set overflow button accent color, dot color
         val typedValue = TypedValue()
         context.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
-
         val colorAccent = res.getColor(typedValue.resourceId)
-        overflowBtn.getDrawable()?.setTint(colorAccent)
+        overflowBtn.drawable?.setTint(colorAccent)
         dotColor = colorAccent
 
-        // Set button and activity background color
-        val nightMode = (res.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-                == Configuration.UI_MODE_NIGHT_YES)
-        val bg = ColorDrawable(res.getColor(
-                if (nightMode) R.color.bubbles_dark else R.color.bubbles_light))
-
-        // Set button icon
         val iconFactory = BubbleIconFactory(context)
-        val fg = InsetDrawable(overflowBtn.getDrawable(),
-                bitmapSize - iconBitmapSize /* inset */)
-        bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(bg, fg),
-                null /* user */, true /* shrinkNonAdaptiveIcons */).icon
 
-        // Set dot path
+        // Update bitmap
+        val nightMode = (res.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            == Configuration.UI_MODE_NIGHT_YES)
+        val bg = ColorDrawable(res.getColor(
+            if (nightMode) R.color.bubbles_dark else R.color.bubbles_light))
+
+        val fg = InsetDrawable(overflowBtn.drawable,
+            bitmapSize - iconBitmapSize /* inset */)
+        bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(bg, fg),
+            null /* user */, true /* shrinkNonAdaptiveIcons */).icon
+
+        // Update dot path
         dotPath = PathParser.createPathFromPathData(
-                res.getString(com.android.internal.R.string.config_icon_mask))
+            res.getString(com.android.internal.R.string.config_icon_mask))
         val scale = iconFactory.normalizer.getScale(overflowBtn.getDrawable(),
-                null /* outBounds */, null /* path */, null /* outMaskShape */)
+            null /* outBounds */, null /* path */, null /* outMaskShape */)
         val radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f
         val matrix = Matrix()
         matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
-                radius /* pivot y */)
-        dotPath?.transform(matrix)
+            radius /* pivot y */)
+        dotPath.transform(matrix)
+
+        // Attach BubbleOverflow to BadgedImageView
         overflowBtn.setRenderedBubble(this)
     }
 
@@ -129,7 +132,11 @@ class BubbleOverflow(
         return dotColor
     }
 
-    override fun getBadgedImage(): Bitmap? {
+    override fun getAppBadge(): Drawable? {
+        return null
+    }
+
+    override fun getBubbleIcon(): Bitmap {
         return bitmap
     }
 
