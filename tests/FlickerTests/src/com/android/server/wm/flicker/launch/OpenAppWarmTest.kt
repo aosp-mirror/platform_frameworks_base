@@ -18,7 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.dsl.flicker
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
