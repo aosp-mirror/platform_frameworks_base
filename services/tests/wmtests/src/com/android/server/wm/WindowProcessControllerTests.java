@@ -277,6 +277,69 @@ public class WindowProcessControllerTests extends WindowTestsBase {
                 mWpc.getConfiguration().seq, globalSeq);
     }
 
+    @Test
+    public void testComputeOomAdjFromActivities() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setUseProcess(mWpc)
+                .build();
+        activity.mVisibleRequested = true;
+        final int[] callbackResult = { 0 };
+        final int visible = 1;
+        final int paused = 2;
+        final int stopping = 4;
+        final int other = 8;
+        final WindowProcessController.ComputeOomAdjCallback callback =
+                new WindowProcessController.ComputeOomAdjCallback() {
+            @Override
+            public void onVisibleActivity() {
+                callbackResult[0] |= visible;
+            }
+
+            @Override
+            public void onPausedActivity() {
+                callbackResult[0] |= paused;
+            }
+
+            @Override
+            public void onStoppingActivity(boolean finishing) {
+                callbackResult[0] |= stopping;
+            }
+
+            @Override
+            public void onOtherActivity() {
+                callbackResult[0] |= other;
+            }
+        };
+
+        // onStartActivity should refresh the state immediately.
+        mWpc.onStartActivity(0 /* topProcessState */, activity.info);
+        assertEquals(1 /* minTaskLayer */, mWpc.computeOomAdjFromActivities(callback));
+        assertEquals(visible, callbackResult[0]);
+
+        // The oom state will be updated in handler from activity state change.
+        callbackResult[0] = 0;
+        activity.mVisibleRequested = false;
+        activity.setState(Task.ActivityState.PAUSED, "test");
+        waitHandlerIdle(mAtm.mH);
+        mWpc.computeOomAdjFromActivities(callback);
+        assertEquals(paused, callbackResult[0]);
+
+        // updateProcessInfo with updateOomAdj=true should refresh the state immediately.
+        callbackResult[0] = 0;
+        activity.setState(Task.ActivityState.STOPPING, "test");
+        mWpc.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                true /* activityChange */, true /* updateOomAdj */, false /* addPendingTopUid */);
+        mWpc.computeOomAdjFromActivities(callback);
+        assertEquals(stopping, callbackResult[0]);
+
+        callbackResult[0] = 0;
+        activity.setState(Task.ActivityState.STOPPED, "test");
+        waitHandlerIdle(mAtm.mH);
+        mWpc.computeOomAdjFromActivities(callback);
+        assertEquals(other, callbackResult[0]);
+    }
+
     private TestDisplayContent createTestDisplayContentInContainer() {
         return new TestDisplayContent.Builder(mAtm, 1000, 1500).build();
     }

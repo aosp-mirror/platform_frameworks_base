@@ -351,7 +351,7 @@ public class MockingOomAdjusterTests {
         doReturn(mock(WindowProcessController.class)).when(app).getWindowProcessController();
         WindowProcessController wpc = app.getWindowProcessController();
         doReturn(true).when(wpc).hasActivities();
-        doAnswer(answer((minTaskLayer, callback) -> {
+        doAnswer(answer(callback -> {
             Field field = callback.getClass().getDeclaredField("adj");
             field.set(callback, VISIBLE_APP_ADJ);
             field = callback.getClass().getDeclaredField("foregroundActivities");
@@ -361,7 +361,7 @@ public class MockingOomAdjusterTests {
             field = callback.getClass().getDeclaredField("schedGroup");
             field.set(callback, SCHED_GROUP_TOP_APP);
             return 0;
-        })).when(wpc).computeOomAdjFromActivities(anyInt(),
+        })).when(wpc).computeOomAdjFromActivities(
                 any(WindowProcessController.ComputeOomAdjCallback.class));
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
         sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);

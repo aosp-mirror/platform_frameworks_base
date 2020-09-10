@@ -276,6 +276,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
+    private final ArraySet<WindowProcessController> mTmpTaskLayerChangedProcs = new ArraySet<>();
     private final LockedScheduler mRankTaskLayersScheduler;
 
     private boolean mTmpBoolean;
@@ -2717,13 +2718,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTmpTaskLayerRank = 0;
         // Only rank for leaf tasks because the score of activity is based on immediate parent.
         forAllLeafTasks(task -> {
+            final int oldRank = task.mLayerRank;
             final ActivityRecord r = task.topRunningActivityLocked();
             if (r != null && r.mVisibleRequested) {
                 task.mLayerRank = ++mTmpTaskLayerRank;
             } else {
                 task.mLayerRank = Task.LAYER_RANK_INVISIBLE;
             }
+            if (task.mLayerRank != oldRank) {
+                task.forAllActivities(activity -> {
+                    if (activity.hasProcess()) {
+                        mTmpTaskLayerChangedProcs.add(activity.app);
+                    }
+                });
+            }
         }, true /* traverseTopToBottom */);
+
+        for (int i = mTmpTaskLayerChangedProcs.size() - 1; i >= 0; i--) {
+            mTmpTaskLayerChangedProcs.valueAt(i).invalidateOomScoreReferenceState(
+                    true /* computeNow */);
+        }
+        mTmpTaskLayerChangedProcs.clear();
     }
 
     void clearOtherAppTimeTrackers(AppTimeTracker except) {

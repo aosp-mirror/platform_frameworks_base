@@ -1909,8 +1909,8 @@ class ProcessRecord implements WindowProcessListener {
         }
         callback.initialize(this, adj, foregroundActivities, procState, schedGroup, appUid, logUid,
                 processCurTop);
-        final int minLayer = getWindowProcessController().computeOomAdjFromActivities(
-                ProcessList.VISIBLE_APP_LAYER_MAX, callback);
+        final int minLayer = Math.min(ProcessList.VISIBLE_APP_LAYER_MAX,
+                getWindowProcessController().computeOomAdjFromActivities(callback));
 
         mCachedAdj = callback.adj;
         mCachedForegroundActivities = callback.foregroundActivities;

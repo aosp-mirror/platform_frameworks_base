@@ -221,6 +221,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @Nullable
     private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
 
+    /** The state for oom-adjustment calculation. */
+    private final OomScoreReferenceState mOomRefState;
+
     public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
@@ -232,6 +235,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm = atm;
         mDisplayId = INVALID_DISPLAY;
         mBackgroundActivityStartCallback = mAtm.getBackgroundActivityStartCallback();
+        mOomRefState = new OomScoreReferenceState(this);
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
@@ -688,15 +692,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasVisibleActivities() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            for (int i = mActivities.size() - 1; i >= 0; --i) {
-                final ActivityRecord r = mActivities.get(i);
-                if (r.mVisibleRequested) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return (mOomRefState.mActivityStateFlags & OomScoreReferenceState.FLAG_IS_VISIBLE) != 0;
     }
 
     @HotPath(caller = HotPath.LRU_UPDATE)
@@ -991,6 +987,34 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mHostActivities.remove(r);
     }
 
+    private static class OomScoreReferenceState extends RootWindowContainer.LockedScheduler {
+        private static final int FLAG_IS_VISIBLE = 0x10000000;
+        private static final int FLAG_IS_PAUSING = 0x20000000;
+        private static final int FLAG_IS_STOPPING = 0x40000000;
+        private static final int FLAG_IS_STOPPING_FINISHING = 0x80000000;
+        /** @see Task#mLayerRank */
+        private static final int MASK_MIN_TASK_LAYER = 0x0000ffff;
+
+        private final WindowProcessController mOwner;
+        boolean mChanged;
+
+        /**
+         * The higher 16 bits are the activity states, and the lower 16 bits are the task layer
+         * rank. This field is written by window manager and read by activity manager.
+         */
+        volatile int mActivityStateFlags = MASK_MIN_TASK_LAYER;
+
+        OomScoreReferenceState(WindowProcessController owner) {
+            super(owner.mAtm);
+            mOwner = owner;
+        }
+
+        @Override
+        public void execute() {
+            mOwner.computeOomScoreReferenceStateIfNeeded();
+        }
+    }
+
     public interface ComputeOomAdjCallback {
         void onVisibleActivity();
         void onPausedActivity();
@@ -998,64 +1022,102 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         void onOtherActivity();
     }
 
+    /**
+     * Returns the minimum task layer rank. It should only be called if {@link #hasActivities}
+     * returns {@code true}.
+     */
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-    public int computeOomAdjFromActivities(int minTaskLayer, ComputeOomAdjCallback callback) {
+    public int computeOomAdjFromActivities(ComputeOomAdjCallback callback) {
+        final int flags = mOomRefState.mActivityStateFlags;
+        if ((flags & OomScoreReferenceState.FLAG_IS_VISIBLE) != 0) {
+            callback.onVisibleActivity();
+        } else if ((flags & OomScoreReferenceState.FLAG_IS_PAUSING) != 0) {
+            callback.onPausedActivity();
+        } else if ((flags & OomScoreReferenceState.FLAG_IS_STOPPING) != 0) {
+            callback.onStoppingActivity(
+                    (flags & OomScoreReferenceState.FLAG_IS_STOPPING_FINISHING) != 0);
+        } else {
+            callback.onOtherActivity();
+        }
+        return flags & OomScoreReferenceState.MASK_MIN_TASK_LAYER;
+    }
+
+    void computeOomScoreReferenceStateIfNeeded() {
+        if (!mOomRefState.mChanged) {
+            return;
+        }
+        mOomRefState.mChanged = false;
+
         // Since there could be more than one activities in a process record, we don't need to
         // compute the OomAdj with each of them, just need to find out the activity with the
         // "best" state, the order would be visible, pausing, stopping...
         Task.ActivityState best = DESTROYED;
         boolean finishing = true;
         boolean visible = false;
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            final int activitiesSize = mActivities.size();
-            for (int j = 0; j < activitiesSize; j++) {
-                final ActivityRecord r = mActivities.get(j);
-                if (r.app != this) {
-                    Log.e(TAG, "Found activity " + r + " in proc activity list using " + r.app
-                            + " instead of expected " + this);
-                    if (r.app == null || (r.app.mUid == mUid)) {
-                        // Only fix things up when they look sane
-                        r.setProcess(this);
-                    } else {
-                        continue;
-                    }
-                }
-                if (r.mVisibleRequested) {
-                    final Task task = r.getTask();
-                    if (task != null && minTaskLayer > 0) {
-                        final int layer = task.mLayerRank;
-                        if (layer >= 0 && minTaskLayer > layer) {
-                            minTaskLayer = layer;
-                        }
-                    }
-                    visible = true;
-                    // continue the loop, in case there are multiple visible activities in
-                    // this process, we'd find out the one with the minimal layer, thus it'll
-                    // get a higher adj score.
+        int minTaskLayer = Integer.MAX_VALUE;
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.app != this) {
+                Slog.e(TAG, "Found activity " + r + " in proc activity list using " + r.app
+                        + " instead of expected " + this);
+                if (r.app == null || (r.app.mUid == mUid)) {
+                    // Only fix things up when they look valid.
+                    r.setProcess(this);
                 } else {
-                    if (best != PAUSING && best != PAUSED) {
-                        if (r.isState(PAUSING, PAUSED)) {
-                            best = PAUSING;
-                        } else if (r.isState(STOPPING)) {
-                            best = STOPPING;
-                            // Not "finishing" if any of activity isn't finishing.
-                            finishing &= r.finishing;
-                        }
-                    }
+                    continue;
                 }
             }
-        }
-        if (visible) {
-            callback.onVisibleActivity();
-        } else if (best == PAUSING) {
-            callback.onPausedActivity();
-        } else if (best == STOPPING) {
-            callback.onStoppingActivity(finishing);
-        } else {
-            callback.onOtherActivity();
-        }
+            if (r.mVisibleRequested) {
+                final Task task = r.getTask();
+                if (task != null && minTaskLayer > 0) {
+                    final int layer = task.mLayerRank;
+                    if (layer >= 0 && minTaskLayer > layer) {
+                        minTaskLayer = layer;
+                    }
+                }
+                visible = true;
+                // continue the loop, in case there are multiple visible activities in
+                // this process, we'd find out the one with the minimal layer, thus it'll
+                // get a higher adj score.
+            } else if (best != PAUSING && best != PAUSED) {
+                if (r.isState(PAUSING, PAUSED)) {
+                    best = PAUSING;
+                } else if (r.isState(STOPPING)) {
+                    best = STOPPING;
+                    // Not "finishing" if any of activity isn't finishing.
+                    finishing &= r.finishing;
+                }
+            }
 
-        return minTaskLayer;
+            int stateFlags = minTaskLayer & OomScoreReferenceState.MASK_MIN_TASK_LAYER;
+            if (visible) {
+                stateFlags |= OomScoreReferenceState.FLAG_IS_VISIBLE;
+            } else if (best == PAUSING) {
+                stateFlags |= OomScoreReferenceState.FLAG_IS_PAUSING;
+            } else if (best == STOPPING) {
+                stateFlags |= OomScoreReferenceState.FLAG_IS_STOPPING;
+                if (finishing) {
+                    stateFlags |= OomScoreReferenceState.FLAG_IS_STOPPING_FINISHING;
+                }
+            }
+            mOomRefState.mActivityStateFlags = stateFlags;
+        }
+    }
+
+    void invalidateOomScoreReferenceState(boolean computeNow) {
+        mOomRefState.mChanged = true;
+        if (computeNow) {
+            computeOomScoreReferenceStateIfNeeded();
+            return;
+        }
+        mOomRefState.scheduleIfNeeded();
+    }
+
+    /** Called when the process has some oom related changes and it is going to update oom-adj. */
+    private void prepareOomAdjustment() {
+        mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
+        // The task layer may not change but the activity state in the same task may change.
+        computeOomScoreReferenceStateIfNeeded();
     }
 
     public int computeRelaunchReason() {
@@ -1098,7 +1160,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
         }
         if (updateOomAdj) {
-            mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
+            prepareOomAdjustment();
         }
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
@@ -1161,7 +1223,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (topProcessState == ActivityManager.PROCESS_STATE_TOP) {
             mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
         }
-        mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
+        prepareOomAdjustment();
         // Posting the message at the front of queue so WM lock isn't held when we call into AM,
         // and the process state of starting activity can be updated quicker which will give it a
         // higher scheduling group.
