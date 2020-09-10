@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.splitscreen
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.NonRotationTestBase
@@ -43,6 +44,7 @@ import org.junit.runners.Parameterized
  * Test open app to split screen.
  * To run this test: `atest FlickerTests:SplitScreenToLauncherTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
